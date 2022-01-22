@@ -1,0 +1,56 @@
+name: muzakri
+description: A new Flutter project.
+
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # audioplayers: ^0.19.1
+  cached_network_image: ^3.1.0
+  cupertino_icons: ^1.0.2
+  dio: ^4.0.0
+  # excel: 2.0.0-null-safety-3
+  file_picker: ^3.0.3
+  flutter_bloc: ^7.1.0
+  flutter_svg: ^0.22.0
+  http: ^0.13.3
+
+  # Audio Packages
+  # just_audio_background:
+  audio_video_progress_bar:
+  audio_session:
+  audio_service:
+  just_audio:
+  rxdart:
+  # audio_service: ^0.18.0-beta.0
+  # audio_session: ^0.1.6
+  # flutter_tts:
+
+  provider: ^5.0.0
+
+  # Test audioplayers
+  # audioplayers:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints:
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/
+    - assets/Book.xlsx
+
+  fonts:
+    - family: TheSans
+      fonts:
+        - asset: assets/fonts/TheSansPlain.otf
