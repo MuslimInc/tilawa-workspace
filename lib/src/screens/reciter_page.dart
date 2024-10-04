@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:muzakri/player/play_page.dart';
+import 'package:muzakri/src/widgets/common.dart';
 import 'package:muzakri/src/widgets/control_player.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -23,20 +24,22 @@ class ReciterPage extends StatefulWidget {
   State<ReciterPage> createState() => _ReciterPageState();
 }
 
-class _ReciterPageState extends State<ReciterPage> {
-  AudioPlayer? _audioPlayer;
+class _ReciterPageState extends State<ReciterPage> with WidgetsBindingObserver {
+  late AudioPlayer _player;
 
-  late AudioSource _playlist;
+  late AudioSource _audioSource;
 
   @override
   void initState() {
     super.initState();
 
-    _playlist = ConcatenatingAudioSource(
+    _player = AudioPlayer();
+    ambiguate(WidgetsBinding.instance)!.addObserver(this);
+    _audioSource = ConcatenatingAudioSource(
       children: List.generate(widget.urlList.length, (index) {
         final String singleSurahUrl =
             "${widget.server}/${widget.urlList[index].toString().padLeft(3, '0')}.mp3";
-        // print('I am quranlist: $singleSurahUrl end!');
+        // print('I am quran list: $singleSurahUrl end!');
 
         return AudioSource.uri(
           Uri.parse(singleSurahUrl),
@@ -51,7 +54,6 @@ class _ReciterPageState extends State<ReciterPage> {
         );
       }),
     );
-    _audioPlayer = AudioPlayer();
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.black,
     ));
@@ -60,7 +62,9 @@ class _ReciterPageState extends State<ReciterPage> {
 
   @override
   void dispose() {
+    ambiguate(WidgetsBinding.instance)?.removeObserver(this);
     // _audioPlayer!.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -68,17 +72,17 @@ class _ReciterPageState extends State<ReciterPage> {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
     // Listen to errors during playback.
-    _audioPlayer!.playbackEventStream.listen((event) {},
+    _player.playbackEventStream.listen((event) {},
         onError: (Object e, StackTrace stackTrace) {
       print('A stream error occurred: $e');
     });
     try {
-      bool isPlaying = _audioPlayer!.playerState.playing;
+      bool isPlaying = _player.playerState.playing;
       print('isPlaying: $isPlaying end');
       if (!isPlaying) {
-        _audioPlayer!.setAudioSource(_playlist);
+        _player.setAudioSource(_audioSource);
       } else {
-        print('I am _audioPlayer: $_audioPlayer end');
+        print('I am _audioPlayer: $_player end');
       }
     } on PlatformException catch (e) {
       print('I am error ${e.toString()} end');
@@ -92,9 +96,9 @@ class _ReciterPageState extends State<ReciterPage> {
 
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        _audioPlayer!.positionStream,
-        _audioPlayer!.bufferedPositionStream,
-        _audioPlayer!.durationStream,
+        _player.positionStream,
+        _player.bufferedPositionStream,
+        _player.durationStream,
         (position, bufferedPosition, duration) =>
             PositionData(position, bufferedPosition, duration ?? Duration.zero),
       );

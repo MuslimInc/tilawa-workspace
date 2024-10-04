@@ -37,8 +37,8 @@ class _CustomPlayerButtonState extends State<CustomPlayerButton> {
       child: ElevatedButton(
         onPressed: widget.onTap,
         style: ElevatedButton.styleFrom(
-          primary: const Color(0xFF313130),
-          // primary: color.withOpacity(0.04),
+          backgroundColor: const Color(0xFF313130),
+          // backgroundColor: color.withOpacity(0.04),
           elevation: 0.0,
           shadowColor: Colors.transparent,
         ),

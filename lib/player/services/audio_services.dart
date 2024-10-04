@@ -155,12 +155,12 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   Future<void> startService({bool withPipeline = true}) async {
     if (withPipeline) {
-      final AudioPipeline _pipeline = AudioPipeline(
+      final AudioPipeline pipeline = AudioPipeline(
         androidAudioEffects: [
           _equalizer,
         ],
       );
-      _player = AudioPlayer(audioPipeline: _pipeline);
+      _player = AudioPlayer(audioPipeline: pipeline);
     } else {
       _player = AudioPlayer();
     }

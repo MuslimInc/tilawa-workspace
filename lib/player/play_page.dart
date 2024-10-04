@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:muzakri/main.dart';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:muzakri/main.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../common.dart';
@@ -89,7 +90,7 @@ class _PlayScreenState extends State<PlayPage> {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Theme.of(context).colorScheme.secondary,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                   ),
                   onPressed: () {
                     Navigator.pop(context);
@@ -101,7 +102,7 @@ class _PlayScreenState extends State<PlayPage> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                   ),
                   onPressed: () {
@@ -307,7 +308,8 @@ class NowPlayingStream extends StatelessWidget {
                         child: SizedBox.expand(
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              primary: Theme.of(context).iconTheme.color,
+                              foregroundColor:
+                                  Theme.of(context).iconTheme.color,
                               backgroundColor: Colors.transparent,
                               elevation: 0.0,
                             ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/player/play_page.dart';
-import 'package:muzakri/src/screens/quran_list.dart';
 import 'package:muzakri/src/screens/reciter_page.dart';
 import 'package:provider/provider.dart';
 

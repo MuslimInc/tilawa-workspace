@@ -120,7 +120,7 @@ class _SaavnHomePageState extends State<SaavnHomePage> {
                                         fontSize: 11,
                                         color: Theme.of(context)
                                             .textTheme
-                                            .caption!
+                                            .bodyLarge!
                                             .color),
                                   ),
                                 ],

@@ -10,6 +10,7 @@ class SeekBar extends StatefulWidget {
   final ValueChanged<Duration>? onChangeEnd;
 
   const SeekBar({
+    super.key,
     required this.duration,
     required this.position,
     required this.bufferedPosition,
@@ -18,10 +19,10 @@ class SeekBar extends StatefulWidget {
   });
 
   @override
-  _SeekBarState createState() => _SeekBarState();
+  SeekBarState createState() => SeekBarState();
 }
 
-class _SeekBarState extends State<SeekBar> {
+class SeekBarState extends State<SeekBar> {
   double? _dragValue;
   late SliderThemeData _sliderThemeData;
 
@@ -100,7 +101,7 @@ class _SeekBarState extends State<SeekBar> {
                       .firstMatch("$_remaining")
                       ?.group(1) ??
                   '$_remaining',
-              style: Theme.of(context).textTheme.caption),
+              style: Theme.of(context).textTheme.bodySmall),
         ),
       ],
     );
@@ -145,6 +146,8 @@ void showSliderDialog({
   required double min,
   required double max,
   String valueSuffix = '',
+  // TODO: Replace these two by ValueStream.
+  required double value,
   required Stream<double> stream,
   required ValueChanged<double> onChanged,
 }) {
@@ -167,7 +170,7 @@ void showSliderDialog({
                 divisions: divisions,
                 min: min,
                 max: max,
-                value: snapshot.data ?? 1.0,
+                value: snapshot.data ?? value,
                 onChanged: onChanged,
               ),
             ],
@@ -177,3 +180,5 @@ void showSliderDialog({
     ),
   );
 }
+
+T? ambiguate<T>(T? value) => value;

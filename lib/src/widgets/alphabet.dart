@@ -33,7 +33,7 @@ class AlphabetListScrollView extends StatefulWidget {
   final List<AlphabetScrollListHeader> headerWidgetList;
 
   const AlphabetListScrollView(
-      {Key? key,
+      {super.key,
       required this.strList,
       this.itemBuilder,
       this.highlightTextStyle = const TextStyle(color: Colors.red),
@@ -41,8 +41,7 @@ class AlphabetListScrollView extends StatefulWidget {
       this.showPreview = false,
       this.headerWidgetList = const [],
       required this.indexedHeight,
-      this.keyboardUsage = false})
-      : super(key: key);
+      this.keyboardUsage = false});
 
   @override
   _AlphabetListScrollViewState createState() => _AlphabetListScrollViewState();
@@ -111,7 +110,7 @@ class _AlphabetListScrollViewState extends State<AlphabetListScrollView> {
   @override
   void initState() {
     _initList();
-    WidgetsBinding.instance!.addPostFrameCallback(_afterLayout);
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
     super.initState();
     _updateStrList();
     _initScrollCallback();
@@ -383,6 +382,8 @@ class _AlphabetListScrollViewState extends State<AlphabetListScrollView> {
             },
             highlightTextStyle: widget.highlightTextStyle,
             normalTextStyle: widget.normalTextStyle,
+            child: SizedBox(),
+            callback: (p0, p1) {},
           ),
         ],
       ),
@@ -394,10 +395,10 @@ typedef AlphabetCallback = Function(int, String);
 typedef DoubleCallback = Function(double);
 
 class _AlphabetListScollView extends StatefulWidget {
-  final AlphabetCallback? callback;
+  final AlphabetCallback callback;
   final DoubleCallback? positionCallback;
   final List<String>? strList;
-  final Widget? child;
+  final Widget child;
   final int? selectedIndex;
   final GlobalKey? insideKey;
   final TextStyle highlightTextStyle;
@@ -407,10 +408,7 @@ class _AlphabetListScollView extends StatefulWidget {
   final bool? keyboardUsage;
 
   const _AlphabetListScollView({
-    Key? key,
-    this.callback,
     this.strList,
-    this.child,
     this.selectedIndex,
     this.positionCallback,
     this.insideKey,
@@ -419,7 +417,9 @@ class _AlphabetListScollView extends StatefulWidget {
     this.specialHeader = false,
     this.specialList = const [],
     this.keyboardUsage,
-  }) : super(key: key);
+    required this.callback,
+    required this.child,
+  });
 
   @override
   _AlphabetListScollViewState createState() => _AlphabetListScollViewState();
