@@ -21,6 +21,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   flutter_svg: ^2.0.10+1
   http: ^1.2.2
+  get_it: ^8.0.0
 
   # Audio Packages
   # just_audio_background:
