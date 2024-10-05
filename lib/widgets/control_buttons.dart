@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:muzakri/audio_player_handler.dart';
-import 'package:muzakri/common.dart';
+import 'package:muzakri/helpers/show_slider_dialog.dart';
 import 'package:muzakri/queue_state.dart';
 
 class ControlButtons extends StatelessWidget {

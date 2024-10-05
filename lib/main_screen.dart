@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:muzakri/common.dart';
-import 'package:muzakri/control_buttons.dart';
 import 'package:muzakri/di_container.dart';
+import 'package:muzakri/position_data.dart';
 import 'package:muzakri/queue_state.dart';
+import 'package:muzakri/widgets/seek_bar.dart';
+import 'package:muzakri/widgets/control_buttons.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MainScreen extends StatelessWidget {
