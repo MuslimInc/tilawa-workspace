@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:muzakri/di_container.dart';
-import 'package:muzakri/main_screen.dart';
+import 'package:muzakri/screens/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
