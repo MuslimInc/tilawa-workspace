@@ -2,22 +2,31 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/di_container.dart';
 import 'package:muzakri/position_data.dart';
 import 'package:muzakri/queue_state.dart';
-import 'package:muzakri/widgets/seek_bar.dart';
 import 'package:muzakri/widgets/control_buttons.dart';
+import 'package:muzakri/widgets/seek_bar.dart';
 import 'package:rxdart/rxdart.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
   Stream<Duration> get _bufferedPositionStream =>
       globalAudioHandler.playbackState
           .map((state) => state.bufferedPosition)
           .distinct();
+
   Stream<Duration?> get _durationStream =>
       globalAudioHandler.mediaItem.map((item) => item?.duration).distinct();
+
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
           AudioService.position,
@@ -27,14 +36,29 @@ class MainScreen extends StatelessWidget {
               position, bufferedPosition, duration ?? Duration.zero));
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        final audioHandler = getIt<AudioPlayerHandlerImpl>();
+        await audioHandler.playArtistPlaylist('إبراهيم الأخضر');
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Muzakri"),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
+            SizedBox(
+              height: 100.h,
               child: StreamBuilder<MediaItem?>(
                 stream: globalAudioHandler.mediaItem,
                 builder: (context, snapshot) {
@@ -135,45 +159,31 @@ class MainScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(
-              height: 240.0,
+            Expanded(
               child: StreamBuilder<QueueState>(
                 stream: globalAudioHandler.queueState,
                 builder: (context, snapshot) {
                   final queueState = snapshot.data ?? QueueState.empty;
                   final queue = queueState.queue;
-                  return ReorderableListView(
-                    onReorder: (int oldIndex, int newIndex) {
-                      if (oldIndex < newIndex) newIndex--;
-                      globalAudioHandler.moveQueueItem(oldIndex, newIndex);
+                  return ListView.separated(
+                    itemCount: queue.length,
+                    separatorBuilder: (context, index) {
+                      return const Divider();
                     },
-                    children: [
-                      for (var i = 0; i < queue.length; i++)
-                        Dismissible(
-                          key: ValueKey(queue[i].id),
-                          background: Container(
-                            color: Colors.redAccent,
-                            alignment: Alignment.centerRight,
-                            child: const Padding(
-                              padding: EdgeInsets.only(right: 8.0),
-                              child: Icon(Icons.delete, color: Colors.white),
-                            ),
-                          ),
-                          onDismissed: (dismissDirection) {
-                            globalAudioHandler.removeQueueItemAt(i);
-                          },
-                          child: Material(
-                            color: i == queueState.queueIndex
-                                ? Colors.grey.shade300
-                                : null,
-                            child: ListTile(
-                              title: Text(queue[i].title),
-                              onTap: () =>
-                                  globalAudioHandler.skipToQueueItem(i),
-                            ),
-                          ),
+                    itemBuilder: (context, index) {
+                      final mediaItem = queue[index];
+
+                      return Material(
+                        color: index == queueState.queueIndex
+                            ? Colors.grey.shade300
+                            : null,
+                        child: ListTile(
+                          title: Text(mediaItem.title),
+                          onTap: () =>
+                              globalAudioHandler.skipToQueueItem(index),
                         ),
-                    ],
+                      );
+                    },
                   );
                 },
               ),

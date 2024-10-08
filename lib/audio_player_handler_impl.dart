@@ -1,18 +1,27 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/media_library.dart';
 import 'package:muzakri/queue_state.dart';
+import 'package:muzakri/reciter_model.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AudioPlayerHandlerImpl extends BaseAudioHandler
     with SeekHandler
     implements AudioPlayerHandler {
+  AudioPlayerHandlerImpl({
+    required this.newList,
+  }) {
+    _init();
+  }
   final BehaviorSubject<List<MediaItem>> _recentSubject =
       BehaviorSubject.seeded(<MediaItem>[]);
+  final List<MediaItem> newList;
   final _mediaLibrary = MediaLibrary();
   final _player = AudioPlayer();
   final _playlist = ConcatenatingAudioSource(children: []);
@@ -94,10 +103,6 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     await _player.setVolume(volume);
   }
 
-  AudioPlayerHandlerImpl() {
-    _init();
-  }
-
   Future<void> _init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
@@ -106,7 +111,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       playbackState.add(playbackState.value.copyWith(speed: speed));
     });
 
-    await updateQueue(_mediaLibrary.items[MediaLibrary.albumsRootId]!);
+    await updateQueue(newList);
 
     mediaItem
         .whereType<MediaItem>()
@@ -157,15 +162,21 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       mediaItems.map(_itemToSource).toList();
 
   @override
+  @override
   Future<List<MediaItem>> getChildren(String parentMediaId,
       [Map<String, dynamic>? options]) async {
-    switch (parentMediaId) {
-      case AudioService.recentRootId:
-        return _recentSubject.value;
-      default:
-        return _mediaLibrary.items[parentMediaId]!;
-    }
+    return _mediaLibrary.items[parentMediaId] ?? [];
   }
+  // Future<List<MediaItem>> getChildren(String parentMediaId,
+  //     [Map<String, dynamic>? options]) async {
+  //   switch (parentMediaId) {
+  //     case AudioService.recentRootId:
+  //       return _recentSubject.value;
+  //     default:
+  //       // return newList[parentMediaId]!;
+  //       return super.getChildren(parentMediaId, options);
+  //   }
+  // }
 
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
@@ -176,9 +187,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
             ? stream.shareValueSeeded(<String, dynamic>{})
             : stream.shareValue();
       default:
-        return Stream.value(_mediaLibrary.items[parentMediaId])
-            .map((_) => <String, dynamic>{})
-            .shareValue();
+        // return Stream.value(_mediaLibrary.items[parentMediaId])
+        //     .map((_) => <String, dynamic>{})
+        //     .shareValue();
+        return super.subscribeToChildren(parentMediaId);
     }
   }
 
@@ -282,5 +294,142 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       speed: _player.speed,
       queueIndex: queueIndex,
     ));
+  }
+
+  // Future<List<MediaItem>?> getReciters() async {
+  //   final baseUrl = "https://mp3quran.net/api/v3/reciters";
+  //   try {
+  //     final response = await Dio().get(baseUrl);
+
+  //     if (response.statusCode == 200) {
+  //       final map = response.data as Map<String, dynamic>;
+
+  //       // Log the raw data
+  //       log(map.toString());
+
+  //       // Parse the JSON into the RecitersModel
+  //       final recitersModel = RecitersModel.fromJson(map);
+
+  //       // Convert Reciters to MediaItems (if needed)
+  //       final mediaItems = recitersModel.reciters.map((reciter) {
+  //         return MediaItem(
+  //           id: reciter.id.toString(),
+  //           title: reciter.name,
+  //           album: reciter.moshaf.isNotEmpty
+  //               ? reciter.moshaf.first.name
+  //               : '', // Example of using the first moshaf name
+  //           artist: reciter.name,
+  //           // Add other MediaItem properties as needed
+  //         );
+  //       }).toList();
+
+  //       return mediaItems;
+  //     } else {
+  //       log('Error: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     log('Exception: $e');
+  //   }
+  //   return null;
+  // }
+
+  Future<List<MediaItem>?> getReciters() async {
+    final baseUrl = "https://mp3quran.net/api/v3/reciters";
+
+    try {
+      final response = await Dio().get(baseUrl);
+
+      if (response.statusCode == 200) {
+        final map = response.data as Map<String, dynamic>;
+
+        // Log the raw data
+        log(map.toString());
+
+        // Parse the JSON into the RecitersModel
+        final recitersModel = RecitersModel.fromJson(map);
+
+        // Convert Reciters to MediaItems (if needed)
+        final mediaItems = <MediaItem>[];
+
+        // Iterate through each reciter and generate MediaItems for their surahs
+        for (var reciter in recitersModel.reciters) {
+          for (var moshaf in reciter.moshaf) {
+            // Split the surah_list into individual surah IDs
+            final surahList = moshaf.surahList.split(',');
+
+            // Create MediaItem for each surah
+            for (var surahId in surahList) {
+              final formattedSurahId =
+                  surahId.padLeft(3, '0'); // Make sure surah ID is like '001'
+              final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
+
+              mediaItems.add(MediaItem(
+                id: mediaItemId,
+                title: '${surahId.surahName} $formattedSurahId',
+                album: moshaf.name,
+                artist: reciter.name,
+                // Add other MediaItem properties as needed
+              ));
+            }
+          }
+        }
+
+        return mediaItems;
+      } else {
+        log('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Exception: $e');
+    }
+    return null;
+  }
+
+  // Future<void> playArtistPlaylist(String artistId) async {
+  //   final reciters = await getReciters();
+  //   log("reciters: $reciters #");
+  //   final artistPlaylist = _mediaLibrary.items[artistId];
+  //   if (artistPlaylist != null) {
+  //     await updateQueue(artistPlaylist);
+  //     await skipToQueueItem(0);
+  //     await play();
+  //   }
+  // }
+
+  Future<void> playArtistPlaylist(String artistId) async {
+    // Fetch the reciters list from getReciters method
+    final reciters = await getReciters();
+
+    if (reciters != null) {
+      // Log the reciters for debugging purposes
+      log("reciters: $reciters #");
+
+      // Filter the reciters list to find the media items belonging to the artist with the provided artistId
+      final artistPlaylist =
+          reciters.where((item) => item.artist == artistId).toList();
+
+      if (artistPlaylist.isNotEmpty) {
+        // Update the queue with the artist's playlist
+        await updateQueue(artistPlaylist);
+
+        // Skip to the first item in the queue
+        await skipToQueueItem(0);
+
+        // Start playing the playlist
+        await play();
+      } else {
+        log('No playlist found for artist with id: $artistId');
+      }
+    } else {
+      log('No reciters found.');
+    }
+  }
+}
+
+extension SurahNameX on String {
+  String get surahName {
+    final arabic = "سورة $this";
+    final english = "Surah $this";
+
+    return '$arabic $this';
   }
 }
