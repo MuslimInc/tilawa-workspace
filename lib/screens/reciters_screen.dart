@@ -4,6 +4,7 @@ import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/di_container.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/widgets/app_with_bottom_player.dart';
+import 'package:muzakri/widgets/arabic_alphabet_scrollbar.dart';
 import 'package:rxdart/rxdart.dart';
 
 class RecitersScreen extends StatefulWidget {
@@ -18,7 +19,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   String _searchQuery = '';
+  String? _selectedLetter;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey<ReciterAlphabetScrollbarState> _alphabetScrollbarKey =
+      GlobalKey<ReciterAlphabetScrollbarState>();
 
   @override
   void initState() {
@@ -29,6 +34,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -65,12 +71,43 @@ class _RecitersScreenState extends State<RecitersScreen> {
   }
 
   List<Reciter> get _filteredReciters {
-    if (_searchQuery.isEmpty) return _reciters;
+    List<Reciter> filtered = _reciters;
 
-    return _reciters.where((reciter) {
-      return reciter.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          reciter.letter.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((reciter) {
+        return reciter.name.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            reciter.letter.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // Filter by selected letter
+    if (_selectedLetter != null) {
+      filtered = filtered.where((reciter) {
+        return reciter.letter == _selectedLetter;
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  void _onLetterSelected(String letter) {
+    setState(() {
+      _selectedLetter = letter;
+      // Clear search when letter is selected
+      _searchQuery = '';
+      _searchController.clear();
+    });
+  }
+
+  void _clearLetterFilter() {
+    setState(() {
+      _selectedLetter = null;
+    });
+    // Also clear the selection in the alphabet scrollbar
+    _alphabetScrollbarKey.currentState?.clearSelection();
   }
 
   @override
@@ -93,131 +130,175 @@ class _RecitersScreenState extends State<RecitersScreen> {
         ),
         body: Column(
           children: [
-            // Welcome section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                    Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+            // Search bar and letter filter
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.library_music,
-                    size: 48,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Welcome to Muzakri',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                  // Letter filter indicator
+                  if (_selectedLetter != null)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.filter_alt,
+                            color: Theme.of(context).primaryColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Filtered by letter: ',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            _selectedLetter!,
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: _clearLetterFilter,
+                            color: Theme.of(context).primaryColor,
+                            iconSize: 20,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Choose a reciter to start listening to the Holy Quran',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                  // Search field
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search reciters...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                        // Clear letter filter when searching
+                        if (value.isNotEmpty) {
+                          _selectedLetter = null;
+                        }
+                      });
+                    },
                   ),
                 ],
               ),
             ),
 
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search reciters...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              ),
-            ),
-
             // Content
             Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Loading reciters...'),
-                        ],
-                      ),
-                    )
-                  : _errorMessage != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error, size: 64, color: Colors.red),
-                          const SizedBox(height: 16),
-                          Text(_errorMessage!),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _loadReciters,
-                            child: const Text('Retry'),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Main content
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 16),
+                                Text('Loading reciters...'),
+                              ],
+                            ),
+                          )
+                        : _errorMessage != null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.error, size: 64, color: Colors.red),
+                                const SizedBox(height: 16),
+                                Text(_errorMessage!),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: _loadReciters,
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : _filteredReciters.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search_off,
+                                  size: 64,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _searchQuery.isEmpty
+                                      ? 'No reciters found'
+                                      : 'No reciters match your search',
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            itemCount: _filteredReciters.length,
+                            itemBuilder: (context, index) {
+                              final reciter = _filteredReciters[index];
+                              return _buildReciterCard(reciter);
+                            },
                           ),
-                        ],
-                      ),
-                    )
-                  : _filteredReciters.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.search_off, size: 64, color: Colors.grey),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchQuery.isEmpty
-                                ? 'No reciters found'
-                                : 'No reciters match your search',
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _filteredReciters.length,
-                      itemBuilder: (context, index) {
-                        final reciter = _filteredReciters[index];
-                        return _buildReciterCard(reciter);
-                      },
+                  ),
+                  // Arabic alphabet scrollbar
+                  if (!_isLoading &&
+                      _errorMessage == null &&
+                      _reciters.isNotEmpty &&
+                      _searchQuery.isEmpty)
+                    ReciterAlphabetScrollbar(
+                      key: _alphabetScrollbarKey,
+                      reciters:
+                          _reciters, // Use full list for alphabet generation
+                      scrollController: _scrollController,
+                      onLetterSelected: _onLetterSelected,
                     ),
+                ],
+              ),
             ),
           ],
         ),
