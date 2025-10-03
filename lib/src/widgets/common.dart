@@ -30,9 +30,7 @@ class SeekBarState extends State<SeekBar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _sliderThemeData = SliderTheme.of(context).copyWith(
-      trackHeight: 2.0,
-    );
+    _sliderThemeData = SliderTheme.of(context).copyWith(trackHeight: 2.0);
   }
 
   @override
@@ -49,8 +47,10 @@ class SeekBarState extends State<SeekBar> {
             child: Slider(
               min: 0.0,
               max: widget.duration.inMilliseconds.toDouble(),
-              value: min(widget.bufferedPosition.inMilliseconds.toDouble(),
-                  widget.duration.inMilliseconds.toDouble()),
+              value: min(
+                widget.bufferedPosition.inMilliseconds.toDouble(),
+                widget.duration.inMilliseconds.toDouble(),
+              ),
               onChanged: (value) {
                 setState(() {
                   _dragValue = value;
@@ -75,8 +75,10 @@ class SeekBarState extends State<SeekBar> {
           child: Slider(
             min: 0.0,
             max: widget.duration.inMilliseconds.toDouble(),
-            value: min(_dragValue ?? widget.position.inMilliseconds.toDouble(),
-                widget.duration.inMilliseconds.toDouble()),
+            value: min(
+              _dragValue ?? widget.position.inMilliseconds.toDouble(),
+              widget.duration.inMilliseconds.toDouble(),
+            ),
             onChanged: (value) {
               setState(() {
                 _dragValue = value;
@@ -97,11 +99,12 @@ class SeekBarState extends State<SeekBar> {
           right: 16.0,
           bottom: 0.0,
           child: Text(
-              RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
-                      .firstMatch("$_remaining")
-                      ?.group(1) ??
-                  '$_remaining',
-              style: Theme.of(context).textTheme.bodySmall),
+            RegExp(
+                  r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$',
+                ).firstMatch("$_remaining")?.group(1) ??
+                '$_remaining',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ),
       ],
     );
@@ -161,11 +164,14 @@ void showSliderDialog({
           height: 100.0,
           child: Column(
             children: [
-              Text('${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
-                  style: const TextStyle(
-                      fontFamily: 'Fixed',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24.0)),
+              Text(
+                '${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
+                style: const TextStyle(
+                  fontFamily: 'Fixed',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24.0,
+                ),
+              ),
               Slider(
                 divisions: divisions,
                 min: min,

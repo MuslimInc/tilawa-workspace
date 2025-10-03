@@ -22,7 +22,7 @@ class QuranList extends StatefulWidget {
   final String reciterName;
 
   @override
-  _QuranListState createState() => _QuranListState();
+  State<QuranList> createState() => _QuranListState();
 }
 
 class _QuranListState extends State<QuranList> {
@@ -47,7 +47,8 @@ class _QuranListState extends State<QuranList> {
         reciterss = Reciter.fromJson(reciter);
         if (reciterss.id == id) {
           print(
-              'Reciter info: ${reciterss.name}, reciterss.server: ${reciterss.server} end');
+            'Reciter info: ${reciterss.name}, reciterss.server: ${reciterss.server} end',
+          );
         }
       }
       // List<Reciter> allReciters = recievedData.map((data) {
@@ -74,9 +75,7 @@ class _QuranListState extends State<QuranList> {
           title: const Text(
             // widget.title.toString(),
             'widget.title.toString()',
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
-            ),
+            style: TextStyle(fontWeight: FontWeight.normal),
           ),
         ),
         body: ListView.builder(
@@ -88,8 +87,10 @@ class _QuranListState extends State<QuranList> {
             // print("Mr: ${widget.server}/00${widget.listSuras[index]}.mp3");
 
             return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.5),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 5.5,
+              ),
               child: CustomPlayerButton(
                 onTap: () => Navigator.push(
                   context,

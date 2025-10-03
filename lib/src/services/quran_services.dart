@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class QuranServices {
-  get allReciters => getAllReciters();
+  Future<Map<String, dynamic>> get allReciters => getAllReciters();
   Future<Map<String, dynamic>> getAllReciters() async {
     var baseUrl = Uri.parse('http://mp3quran.net/api/_arabic.json');
     var response = await http.get(baseUrl);

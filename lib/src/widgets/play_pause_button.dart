@@ -7,20 +7,13 @@ class PlayPauseButton extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
   @override
-  _PlayPauseButtonState createState() => _PlayPauseButtonState();
+  State<PlayPauseButton> createState() => _PlayPauseButtonState();
 }
 
 class _PlayPauseButtonState extends State<PlayPauseButton> {
-  Icon playIcon = const Icon(
-    Icons.play_arrow,
-    color: Colors.white,
-    size: 40,
-  );
+  Icon playIcon = const Icon(Icons.play_arrow, color: Colors.white, size: 40);
 
-  Icon pauseIcon = const Icon(
-    Icons.pause,
-    color: Colors.white,
-  );
+  Icon pauseIcon = const Icon(Icons.pause, color: Colors.white);
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +22,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
     // print('audioFile: ${widget.audioPlayer.hasPrevious} endState');
     if (processingState == ProcessingState.loading ||
         processingState == ProcessingState.buffering) {
-      return IconButton(
-        icon: playIcon,
-        iconSize: 64.0,
-        onPressed: () {},
-      );
+      return IconButton(icon: playIcon, iconSize: 64.0, onPressed: () {});
     } else if (widget.audioPlayer.playing != true) {
       return IconButton(
         icon: playIcon,
@@ -56,7 +45,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         child: playIcon,
         onPressed: () => widget.audioPlayer.seek(
           Duration.zero,
-          index: widget.audioPlayer.effectiveIndices!.first,
+          index: widget.audioPlayer.effectiveIndices.first,
         ),
       );
     } else {
@@ -65,7 +54,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         iconSize: 64.0,
         onPressed: () => widget.audioPlayer.seek(
           Duration.zero,
-          index: widget.audioPlayer.effectiveIndices!.first,
+          index: widget.audioPlayer.effectiveIndices.first,
         ),
       );
     }

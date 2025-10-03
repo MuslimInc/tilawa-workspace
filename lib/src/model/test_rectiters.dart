@@ -19,15 +19,16 @@ class RecitersModel extends ChangeNotifier {
 
   List<dynamic> get getRecitersName => recitersNames;
 
-// GET ALL RECITERS FROM MP3 QURAN API
+  // GET ALL RECITERS FROM MP3 QURAN API
   Future<List<Reciter>> getAllReciters() async {
     var response = await http.get(baseUrl);
     counter = reciters.length;
     if (response.statusCode == 200) {
       final recitersData = await jsonDecode(response.body);
       List<dynamic> recievedData = recitersData['reciters'];
-      List<Reciter> allReciters =
-          recievedData.map((data) => Reciter.fromJson(data)).toList();
+      List<Reciter> allReciters = recievedData
+          .map((data) => Reciter.fromJson(data))
+          .toList();
 
       // Will return a list of reciters...
       return allReciters;
@@ -37,7 +38,7 @@ class RecitersModel extends ChangeNotifier {
   }
   // End - GET ALL RECITERS
 
-// GET ALL RECITERS FROM MP3 QURAN API
+  // GET ALL RECITERS FROM MP3 QURAN API
   Future<Map> getAllData() async {
     var response = await http.get(baseUrl);
     counter = reciters.length;
@@ -86,7 +87,7 @@ class RecitersModel extends ChangeNotifier {
     return data['name'];
   }
 
-  get allRecitersCount => getAllRecitersCount();
+  Future<int> get allRecitersCount => getAllRecitersCount();
 
   // Get repeated name
   List<String> get repeatedNames => _dupicatedNames;

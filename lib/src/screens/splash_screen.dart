@@ -16,10 +16,7 @@ class SplashScreen extends StatelessWidget {
             const Text(
               'مذكري',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 40.0,
-                color: Color(0xFFFEDF99),
-              ),
+              style: TextStyle(fontSize: 40.0, color: Color(0xFFFEDF99)),
             ),
           ],
         ),

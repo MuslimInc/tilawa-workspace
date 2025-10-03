@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'play_online.dart';
 
 class PlayerPage extends StatelessWidget {
-  const PlayerPage({
-    required this.surah,
-    required this.reciterName,
-  });
+  const PlayerPage({required this.surah, required this.reciterName});
   final String surah;
   final String reciterName;
 

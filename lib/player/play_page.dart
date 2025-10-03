@@ -12,7 +12,7 @@ import '../common.dart';
 
 class PlayPage extends StatefulWidget {
   @override
-  _PlayScreenState createState() => _PlayScreenState();
+  State<PlayPage> createState() => _PlayScreenState();
 }
 
 class _PlayScreenState extends State<PlayPage> {
@@ -20,71 +20,73 @@ class _PlayScreenState extends State<PlayPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: StreamBuilder<MediaItem?>(
-          stream: globalAudioHandler.mediaItem,
-          builder: (context, snapshot) {
-            final MediaItem? mediaItem = snapshot.data;
-            if (mediaItem == null) {
-              return Container(
-                width: 200,
-                height: 500,
-                color: Colors.blue,
-              );
-            }
-            return Scaffold(
-              // appBar: AppBar(),
-              backgroundColor: Colors.green,
-              body: Builder(builder: (BuildContext context) {
+        stream: globalAudioHandler.mediaItem,
+        builder: (context, snapshot) {
+          final MediaItem? mediaItem = snapshot.data;
+          if (mediaItem == null) {
+            return Container(width: 200, height: 500, color: Colors.blue);
+          }
+          return Scaffold(
+            // appBar: AppBar(),
+            backgroundColor: Colors.green,
+            body: Builder(
+              builder: (BuildContext context) {
                 // scaffoldContext = context;
-                return LayoutBuilder(builder:
-                    (BuildContext context, BoxConstraints constraints) {
-                  return NameNControls(
-                    mediaItem,
-                    offline: true,
-                  );
-                });
-              }),
+                return LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return NameNControls(mediaItem, offline: true);
+                  },
+                );
+              },
+            ),
 
-              // }
-            );
-            // );
-          }),
+            // }
+          );
+          // );
+        },
+      ),
     );
   }
 
   Future<dynamic> setTimer(
-      BuildContext context, BuildContext? scaffoldContext) {
+    BuildContext context,
+    BuildContext? scaffoldContext,
+  ) {
     return showDialog(
       context: context,
       builder: (context) {
         return SimpleDialog(
           title: Center(
-              child: Text(
-            'Select a Duration',
-            style: TextStyle(
+            child: Text(
+              'Select a Duration',
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.secondary),
-          )),
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ),
           children: [
             Center(
-                child: SizedBox(
-              height: 200,
-              width: 200,
-              child: CupertinoTheme(
-                data: CupertinoThemeData(
-                  primaryColor: Theme.of(context).colorScheme.secondary,
-                  textTheme: CupertinoTextThemeData(
-                    dateTimePickerTextStyle: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.secondary,
+              child: SizedBox(
+                height: 200,
+                width: 200,
+                child: CupertinoTheme(
+                  data: CupertinoThemeData(
+                    primaryColor: Theme.of(context).colorScheme.secondary,
+                    textTheme: CupertinoTextThemeData(
+                      dateTimePickerTextStyle: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
                     ),
                   ),
-                ),
-                child: CupertinoTimerPicker(
-                  mode: CupertinoTimerPickerMode.hm,
-                  onTimerDurationChanged: (value) {},
+                  child: CupertinoTimerPicker(
+                    mode: CupertinoTimerPickerMode.hm,
+                    onTimerDurationChanged: (value) {},
+                  ),
                 ),
               ),
-            )),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -97,9 +99,7 @@ class _PlayScreenState extends State<PlayPage> {
                   },
                   child: const Text('Cancel'),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10),
                 TextButton(
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -110,9 +110,7 @@ class _PlayScreenState extends State<PlayPage> {
                   },
                   child: const Text('Ok'),
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
+                const SizedBox(width: 20),
               ],
             ),
           ],
@@ -138,8 +136,12 @@ class PositionData {
 }
 
 class QueueState {
-  static const QueueState empty =
-      QueueState([], 0, [], AudioServiceRepeatMode.none);
+  static const QueueState empty = QueueState(
+    [],
+    0,
+    [],
+    AudioServiceRepeatMode.none,
+  );
 
   final List<MediaItem> queue;
   final int? queueIndex;
@@ -147,7 +149,11 @@ class QueueState {
   final AudioServiceRepeatMode repeatMode;
 
   const QueueState(
-      this.queue, this.queueIndex, this.shuffleIndices, this.repeatMode);
+    this.queue,
+    this.queueIndex,
+    this.shuffleIndices,
+    this.repeatMode,
+  );
 
   bool get hasPrevious =>
       repeatMode != AudioServiceRepeatMode.none || (queueIndex ?? 0) > 0;
@@ -164,116 +170,121 @@ class ControlButt extends StatelessWidget {
   final bool shuffle;
   final bool miniplayer;
 
-  const ControlButt(this.controlAudioHandler,
-      {this.shuffle = false, this.miniplayer = false});
+  const ControlButt(
+    this.controlAudioHandler, {
+    this.shuffle = false,
+    this.miniplayer = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamBuilder<QueueState>(
-            stream: controlAudioHandler.queueState,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        StreamBuilder<QueueState>(
+          stream: controlAudioHandler.queueState,
+          builder: (context, snapshot) {
+            final queueState = snapshot.data ?? QueueState.empty;
+            return IconButton(
+              icon: const Icon(Icons.skip_previous_rounded),
+              iconSize: miniplayer ? 24.0 : 45.0,
+              tooltip: 'Skip Previous',
+              onPressed: queueState.hasPrevious
+                  ? globalAudioHandler.skipToPrevious
+                  : null,
+            );
+          },
+        ),
+        SizedBox(
+          height: miniplayer ? 40.0 : 65.0,
+          width: miniplayer ? 40.0 : 65.0,
+          child: StreamBuilder<PlaybackState>(
+            stream: controlAudioHandler.playbackState,
             builder: (context, snapshot) {
-              final queueState = snapshot.data ?? QueueState.empty;
-              return IconButton(
-                icon: const Icon(Icons.skip_previous_rounded),
-                iconSize: miniplayer ? 24.0 : 45.0,
-                tooltip: 'Skip Previous',
-                onPressed: queueState.hasPrevious
-                    ? globalAudioHandler.skipToPrevious
-                    : null,
-              );
-            },
-          ),
-          SizedBox(
-            height: miniplayer ? 40.0 : 65.0,
-            width: miniplayer ? 40.0 : 65.0,
-            child: StreamBuilder<PlaybackState>(
-                stream: controlAudioHandler.playbackState,
-                builder: (context, snapshot) {
-                  final playbackState = snapshot.data;
-                  final processingState = playbackState?.processingState;
-                  final playing = playbackState?.playing ?? false;
-                  return Stack(
-                    children: [
-                      if (processingState == AudioProcessingState.loading ||
-                          processingState == AudioProcessingState.buffering)
-                        Center(
-                          child: SizedBox(
-                            height: miniplayer ? 40.0 : 65.0,
-                            width: miniplayer ? 40.0 : 65.0,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.secondary),
-                            ),
+              final playbackState = snapshot.data;
+              final processingState = playbackState?.processingState;
+              final playing = playbackState?.playing ?? false;
+              return Stack(
+                children: [
+                  if (processingState == AudioProcessingState.loading ||
+                      processingState == AudioProcessingState.buffering)
+                    Center(
+                      child: SizedBox(
+                        height: miniplayer ? 40.0 : 65.0,
+                        width: miniplayer ? 40.0 : 65.0,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.secondary,
                           ),
                         ),
-                      if (miniplayer)
-                        Center(
-                            child: playing
-                                ? IconButton(
-                                    tooltip: 'Pause',
-                                    onPressed: globalAudioHandler.pause,
-                                    icon: const Icon(
-                                      Icons.pause_rounded,
-                                    ),
-                                  )
-                                : IconButton(
-                                    tooltip: 'Play',
-                                    onPressed: controlAudioHandler.play,
-                                    icon: const Icon(
-                                      Icons.play_arrow_rounded,
-                                    ),
-                                  ))
-                      else
-                        Center(
-                          child: SizedBox(
-                              height: 59,
-                              width: 59,
-                              child: Center(
-                                child: playing
-                                    ? FloatingActionButton(
-                                        elevation: 10,
-                                        tooltip: 'Pause',
-                                        onPressed: globalAudioHandler.pause,
-                                        child: const Icon(
-                                          Icons.pause_rounded,
-                                          size: 40.0,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : FloatingActionButton(
-                                        elevation: 10,
-                                        tooltip: 'Play',
-                                        onPressed: controlAudioHandler.play,
-                                        child: const Icon(
-                                          Icons.play_arrow_rounded,
-                                          size: 40.0,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                              )),
+                      ),
+                    ),
+                  if (miniplayer)
+                    Center(
+                      child: playing
+                          ? IconButton(
+                              tooltip: 'Pause',
+                              onPressed: globalAudioHandler.pause,
+                              icon: const Icon(Icons.pause_rounded),
+                            )
+                          : IconButton(
+                              tooltip: 'Play',
+                              onPressed: controlAudioHandler.play,
+                              icon: const Icon(Icons.play_arrow_rounded),
+                            ),
+                    )
+                  else
+                    Center(
+                      child: SizedBox(
+                        height: 59,
+                        width: 59,
+                        child: Center(
+                          child: playing
+                              ? FloatingActionButton(
+                                  elevation: 10,
+                                  tooltip: 'Pause',
+                                  onPressed: globalAudioHandler.pause,
+                                  child: const Icon(
+                                    Icons.pause_rounded,
+                                    size: 40.0,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : FloatingActionButton(
+                                  elevation: 10,
+                                  tooltip: 'Play',
+                                  onPressed: controlAudioHandler.play,
+                                  child: const Icon(
+                                    Icons.play_arrow_rounded,
+                                    size: 40.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
-                    ],
-                  );
-                }),
-          ),
-          StreamBuilder<QueueState>(
-            stream: controlAudioHandler.queueState,
-            builder: (context, snapshot) {
-              final queueState = snapshot.data ?? QueueState.empty;
-              return IconButton(
-                icon: const Icon(Icons.skip_next_rounded),
-                iconSize: miniplayer ? 24.0 : 45.0,
-                tooltip: 'Skip Next',
-                onPressed:
-                    queueState.hasNext ? globalAudioHandler.skipToNext : null,
+                      ),
+                    ),
+                ],
               );
             },
           ),
-        ]);
+        ),
+        StreamBuilder<QueueState>(
+          stream: controlAudioHandler.queueState,
+          builder: (context, snapshot) {
+            final queueState = snapshot.data ?? QueueState.empty;
+            return IconButton(
+              icon: const Icon(Icons.skip_next_rounded),
+              iconSize: miniplayer ? 24.0 : 45.0,
+              tooltip: 'Skip Next',
+              onPressed: queueState.hasNext
+                  ? globalAudioHandler.skipToNext
+                  : null,
+            );
+          },
+        ),
+      ],
+    );
   }
 }
 
@@ -294,176 +305,174 @@ class NowPlayingStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueueState>(
-        stream: audioHandlers.queueState,
-        builder: (context, snapshot) {
-          final queueState = snapshot.data ?? QueueState.empty;
-          final queue = queueState.queue;
-          return ReorderableListView.builder(
-              header: hideHeader
-                  ? null
-                  : SizedBox(
-                      key: const Key('head'),
-                      height: 50,
-                      child: Center(
-                        child: SizedBox.expand(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor:
-                                  Theme.of(context).iconTheme.color,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0.0,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text(
-                              'Now Playing',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                              ),
-                            ),
+      stream: audioHandlers.queueState,
+      builder: (context, snapshot) {
+        final queueState = snapshot.data ?? QueueState.empty;
+        final queue = queueState.queue;
+        return ReorderableListView.builder(
+          header: hideHeader
+              ? null
+              : SizedBox(
+                  key: const Key('head'),
+                  height: 50,
+                  child: Center(
+                    child: SizedBox.expand(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Theme.of(context).iconTheme.color,
+                          backgroundColor: Colors.transparent,
+                          elevation: 0.0,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          'Now Playing',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
                           ),
                         ),
                       ),
                     ),
-              onReorder: (int oldIndex, int newIndex) {
-                if (oldIndex < newIndex) {
-                  newIndex--;
-                }
-                audioHandlers.moveQueueItem(oldIndex, newIndex);
+                  ),
+                ),
+          onReorder: (int oldIndex, int newIndex) {
+            if (oldIndex < newIndex) {
+              newIndex--;
+            }
+            audioHandlers.moveQueueItem(oldIndex, newIndex);
+          },
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 10),
+          shrinkWrap: true,
+          itemCount: queue.length,
+          itemBuilder: (context, index) {
+            return Dismissible(
+              key: ValueKey(queue[index].id),
+              direction: index == queueState.queueIndex
+                  ? DismissDirection.none
+                  : DismissDirection.horizontal,
+              onDismissed: (dir) {
+                audioHandlers.removeQueueItemAt(index);
               },
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 10),
-              shrinkWrap: true,
-              itemCount: queue.length,
-              itemBuilder: (context, index) {
-                return Dismissible(
-                  key: ValueKey(queue[index].id),
-                  direction: index == queueState.queueIndex
-                      ? DismissDirection.none
-                      : DismissDirection.horizontal,
-                  onDismissed: (dir) {
-                    audioHandlers.removeQueueItemAt(index);
-                  },
-                  child: ListTileTheme(
-                    selectedColor: Theme.of(context).colorScheme.secondary,
-                    child: ListTile(
-                      contentPadding:
-                          const EdgeInsets.only(left: 16.0, right: 10.0),
-                      selected: index == queueState.queueIndex,
-                      trailing: index == queueState.queueIndex
-                          ? IconButton(
-                              icon: const Icon(
-                                Icons.bar_chart_rounded,
-                              ),
-                              tooltip: 'Playing',
-                              onPressed: () {},
-                            )
-                          : queue[index]
-                                  .extras!['url']
-                                  .toString()
-                                  .startsWith('http')
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    // DownloadButton(icon: 'download', data: {
-                                    //   'id': queue[index].id.toString(),
-                                    //   'artist': queue[index].artist.toString(),
-                                    //   'album': queue[index].album.toString(),
-                                    //   'image': queue[index].artUri.toString(),
-                                    //   'duration': queue[index]
-                                    //       .duration!
-                                    //       .inSeconds
-                                    //       .toString(),
-                                    //   'title': queue[index].title.toString(),
-                                    //   'url': queue[index]
-                                    //       .extras?['url']
-                                    //       .toString(),
-                                    //   'year': queue[index]
-                                    //       .extras?['year']
-                                    //       .toString(),
-                                    //   'language': queue[index]
-                                    //       .extras?['language']
-                                    //       .toString(),
-                                    //   'genre': queue[index].genre?.toString(),
-                                    //   '320kbps':
-                                    //       queue[index].extras?['320kbps'],
-                                    //   'has_lyrics':
-                                    //       queue[index].extras?['has_lyrics'],
-                                    //   'release_date':
-                                    //       queue[index].extras?['release_date'],
-                                    //   'album_id':
-                                    //       queue[index].extras?['album_id'],
-                                    //   'subtitle':
-                                    //       queue[index].extras?['subtitle']
-                                    // })
-                                  ],
+              child: ListTileTheme(
+                selectedColor: Theme.of(context).colorScheme.secondary,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.only(
+                    left: 16.0,
+                    right: 10.0,
+                  ),
+                  selected: index == queueState.queueIndex,
+                  trailing: index == queueState.queueIndex
+                      ? IconButton(
+                          icon: const Icon(Icons.bar_chart_rounded),
+                          tooltip: 'Playing',
+                          onPressed: () {},
+                        )
+                      : queue[index].extras!['url'].toString().startsWith(
+                          'http',
+                        )
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            // DownloadButton(icon: 'download', data: {
+                            //   'id': queue[index].id.toString(),
+                            //   'artist': queue[index].artist.toString(),
+                            //   'album': queue[index].album.toString(),
+                            //   'image': queue[index].artUri.toString(),
+                            //   'duration': queue[index]
+                            //       .duration!
+                            //       .inSeconds
+                            //       .toString(),
+                            //   'title': queue[index].title.toString(),
+                            //   'url': queue[index]
+                            //       .extras?['url']
+                            //       .toString(),
+                            //   'year': queue[index]
+                            //       .extras?['year']
+                            //       .toString(),
+                            //   'language': queue[index]
+                            //       .extras?['language']
+                            //       .toString(),
+                            //   'genre': queue[index].genre?.toString(),
+                            //   '320kbps':
+                            //       queue[index].extras?['320kbps'],
+                            //   'has_lyrics':
+                            //       queue[index].extras?['has_lyrics'],
+                            //   'release_date':
+                            //       queue[index].extras?['release_date'],
+                            //   'album_id':
+                            //       queue[index].extras?['album_id'],
+                            //   'subtitle':
+                            //       queue[index].extras?['subtitle']
+                            // })
+                          ],
+                        )
+                      : const SizedBox(),
+                  leading: Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: (queue[index].artUri == null)
+                        ? const SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: Image(image: AssetImage('assets/cover.jpg')),
+                          )
+                        : SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child:
+                                queue[index].artUri.toString().startsWith(
+                                  'file:',
                                 )
-                              : const SizedBox(),
-                      leading: Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(7.0),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: (queue[index].artUri == null)
-                            ? const SizedBox(
-                                height: 50.0,
-                                width: 50.0,
-                                child: Image(
-                                  image: AssetImage('assets/cover.jpg'),
-                                ),
-                              )
-                            : SizedBox(
-                                height: 50.0,
-                                width: 50.0,
-                                child: queue[index]
-                                        .artUri
-                                        .toString()
-                                        .startsWith('file:')
-                                    ? Image(
-                                        fit: BoxFit.cover,
-                                        image: FileImage(File(
-                                            queue[index].artUri!.toFilePath())))
-                                    : CachedNetworkImage(
-                                        fit: BoxFit.cover,
-                                        errorWidget:
-                                            (BuildContext context, _, __) =>
-                                                const Image(
+                                ? Image(
+                                    fit: BoxFit.cover,
+                                    image: FileImage(
+                                      File(queue[index].artUri!.toFilePath()),
+                                    ),
+                                  )
+                                : CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    errorWidget: (BuildContext context, _, _) =>
+                                        const Image(
                                           image: AssetImage('assets/cover.jpg'),
                                         ),
-                                        placeholder:
-                                            (BuildContext context, _) =>
-                                                const Image(
+                                    placeholder: (BuildContext context, _) =>
+                                        const Image(
                                           image: AssetImage('assets/cover.jpg'),
                                         ),
-                                        imageUrl:
-                                            queue[index].artUri.toString(),
-                                      ),
-                              ),
-                      ),
-                      title: Text(
-                        queue[index].title,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontWeight: index == queueState.queueIndex
-                                ? FontWeight.w600
-                                : FontWeight.normal),
-                      ),
-                      subtitle: Text(
-                        queue[index].artist!,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () {
-                        audioHandlers.skipToQueueItem(index);
-                      },
+                                    imageUrl: queue[index].artUri.toString(),
+                                  ),
+                          ),
+                  ),
+                  title: Text(
+                    queue[index].title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: index == queueState.queueIndex
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
-                );
-              });
-        });
+                  subtitle: Text(
+                    queue[index].artist!,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () {
+                    audioHandlers.skipToQueueItem(index);
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
 
@@ -785,19 +794,20 @@ class NameNControls extends StatelessWidget {
 
   const NameNControls(this.mediaItem, {this.offline = false});
 
-  Stream<Duration> get _bufferedPositionStream =>
-      globalAudioHandler.playbackState
-          .map((state) => state.bufferedPosition)
-          .distinct();
+  Stream<Duration> get _bufferedPositionStream => globalAudioHandler
+      .playbackState
+      .map((state) => state.bufferedPosition)
+      .distinct();
   Stream<Duration?> get _durationStream =>
       globalAudioHandler.mediaItem.map((item) => item?.duration).distinct();
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-          AudioService.position,
-          _bufferedPositionStream,
-          _durationStream,
-          (position, bufferedPosition, duration) => PositionData(
-              position, bufferedPosition, duration ?? Duration.zero));
+        AudioService.position,
+        _bufferedPositionStream,
+        _durationStream,
+        (position, bufferedPosition, duration) =>
+            PositionData(position, bufferedPosition, duration ?? Duration.zero),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -830,7 +840,9 @@ class NameNControls extends StatelessWidget {
                     mediaItem.artist ?? 'Unknown',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w500),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -843,9 +855,13 @@ class NameNControls extends StatelessWidget {
         StreamBuilder<PositionData>(
           stream: _positionDataStream,
           builder: (context, snapshot) {
-            final positionData = snapshot.data ??
-                PositionData(Duration.zero, Duration.zero,
-                    mediaItem.duration ?? Duration.zero);
+            final positionData =
+                snapshot.data ??
+                PositionData(
+                  Duration.zero,
+                  Duration.zero,
+                  mediaItem.duration ?? Duration.zero,
+                );
             return SeekBar(
               duration: positionData.duration,
               position: positionData.position,
@@ -868,24 +884,28 @@ class NameNControls extends StatelessWidget {
                   const SizedBox(height: 6.0),
                   StreamBuilder<bool>(
                     stream: globalAudioHandler.playbackState
-                        .map((state) =>
-                            state.shuffleMode == AudioServiceShuffleMode.all)
+                        .map(
+                          (state) =>
+                              state.shuffleMode == AudioServiceShuffleMode.all,
+                        )
                         .distinct(),
                     builder: (context, snapshot) {
                       final shuffleModeEnabled = snapshot.data ?? false;
                       return IconButton(
                         icon: shuffleModeEnabled
-                            ? Icon(Icons.shuffle,
-                                color: Theme.of(context).colorScheme.secondary)
-                            : const Icon(
+                            ? Icon(
                                 Icons.shuffle,
-                              ),
+                                color: Theme.of(context).colorScheme.secondary,
+                              )
+                            : const Icon(Icons.shuffle),
                         tooltip: 'Shuffle!!!',
                         onPressed: () async {
                           final enable = !shuffleModeEnabled;
-                          await globalAudioHandler.setShuffleMode(enable
-                              ? AudioServiceShuffleMode.all
-                              : AudioServiceShuffleMode.none);
+                          await globalAudioHandler.setShuffleMode(
+                            enable
+                                ? AudioServiceShuffleMode.all
+                                : AudioServiceShuffleMode.none,
+                          );
                         },
                       );
                     },
@@ -905,13 +925,15 @@ class NameNControls extends StatelessWidget {
                           snapshot.data ?? AudioServiceRepeatMode.none;
                       const texts = ['None', 'All', 'One'];
                       final icons = [
-                        const Icon(
+                        const Icon(Icons.repeat_rounded),
+                        Icon(
                           Icons.repeat_rounded,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
-                        Icon(Icons.repeat_rounded,
-                            color: Theme.of(context).colorScheme.secondary),
-                        Icon(Icons.repeat_one_rounded,
-                            color: Theme.of(context).colorScheme.secondary),
+                        Icon(
+                          Icons.repeat_one_rounded,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                       ];
                       const cycleModes = [
                         AudioServiceRepeatMode.none,
@@ -923,9 +945,10 @@ class NameNControls extends StatelessWidget {
                         icon: icons[index],
                         tooltip: 'Repeat ${texts[(index + 1) % texts.length]}',
                         onPressed: () {
-                          globalAudioHandler.setRepeatMode(cycleModes[
-                              (cycleModes.indexOf(repeatMode) + 1) %
-                                  cycleModes.length]);
+                          globalAudioHandler.setRepeatMode(
+                            cycleModes[(cycleModes.indexOf(repeatMode) + 1) %
+                                cycleModes.length],
+                          );
                         },
                       );
                     },

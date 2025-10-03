@@ -26,7 +26,7 @@ class PlayOnline extends StatefulWidget {
   final String reciterName;
 
   @override
-  _PlayOnlineState createState() => _PlayOnlineState();
+  State<PlayOnline> createState() => _PlayOnlineState();
 }
 
 class _PlayOnlineState extends State<PlayOnline> {
@@ -45,13 +45,13 @@ class _PlayOnlineState extends State<PlayOnline> {
           padding: const EdgeInsets.symmetric(vertical: 30),
           child: Container(
             decoration: const BoxDecoration(
-                // gradient: LinearGradient(
-                //   colors: [
-                //     Colors.pink.shade800,
-                //     Colors.purple.shade900,
-                //   ],
-                // ),
-                ),
+              // gradient: LinearGradient(
+              //   colors: [
+              //     Colors.pink.shade800,
+              //     Colors.purple.shade900,
+              //   ],
+              // ),
+            ),
             child: Column(
               // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -59,7 +59,9 @@ class _PlayOnlineState extends State<PlayOnline> {
                 // _BackButton(),
                 const SizedBox(height: 30),
                 _SurahDetails(
-                    surahTitle: widget.surahTitle, rewaya: widget.rewaya),
+                  surahTitle: widget.surahTitle,
+                  rewaya: widget.rewaya,
+                ),
                 const SizedBox(height: 30),
                 _PlayerWidget(
                   urlAudio: widget.singleSurahUrl,
@@ -76,10 +78,7 @@ class _PlayOnlineState extends State<PlayOnline> {
 }
 
 class _SurahDetails extends StatelessWidget {
-  const _SurahDetails({
-    required this.surahTitle,
-    required this.rewaya,
-  });
+  const _SurahDetails({required this.surahTitle, required this.rewaya});
   final String surahTitle;
   final String rewaya;
 
@@ -92,26 +91,18 @@ class _SurahDetails extends StatelessWidget {
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           // color: Color(0xFF323777).withOpacity(0.39),
-          borderRadius: BorderRadius.all(
-            Radius.circular(7.0),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(7.0)),
         ),
         child: Column(
           children: [
             Text(
               surahTitle.toString(),
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
               rewaya.toString(),
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
           ],
         ),
@@ -121,10 +112,7 @@ class _SurahDetails extends StatelessWidget {
 }
 
 class _PlayerWidget extends StatefulWidget {
-  const _PlayerWidget({
-    required this.urlAudio,
-    required this.reciterName,
-  });
+  const _PlayerWidget({required this.urlAudio, required this.reciterName});
   final String urlAudio;
 
   final String reciterName;
@@ -135,9 +123,7 @@ class _PlayerWidget extends StatefulWidget {
 class __PlayerWidgetState extends State<_PlayerWidget> {
   AudioPlayer justPlayer = AudioPlayer();
 
-  List<AudioPlayer> audioPlayers = [
-    AudioPlayer(),
-  ];
+  List<AudioPlayer> audioPlayers = [AudioPlayer()];
 
   @override
   void initState() {
@@ -193,7 +179,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
     // }
   }
 
-  initAudio() async {
+  Future<void> initAudio() async {
     try {
       if (justPlayer.playing) {
         print('I am playinnnng!');
@@ -234,10 +220,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         decoration: const BoxDecoration(
           // color: Color(0xFF292927),
-
-          borderRadius: BorderRadius.all(
-            Radius.circular(7),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(7)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -250,9 +233,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                 fontSize: 30.0,
               ),
             ),
-            const SizedBox(
-              height: 70.0,
-            ),
+            const SizedBox(height: 70.0),
             const SizedBox(height: 50),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -265,10 +246,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                       color: Color(0xFF323746),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.skip_next,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.skip_next, color: Colors.white),
                   ),
                   // Container(
                   //   child: StreamBuilder(
@@ -301,9 +279,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                           audioPlayer: justPlayer,
                         );
                       } else {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
                     },
                   ),
@@ -313,10 +289,7 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                       color: Color(0xFF323746),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.skip_previous,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.skip_previous, color: Colors.white),
                   ),
                 ],
               ),
@@ -335,12 +308,12 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                     total: positionData.duration,
                     onSeek: justPlayer.seek,
                     timeLabelPadding: 17.0,
-                    timeLabelTextStyle: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    timeLabelTextStyle: const TextStyle(color: Colors.white),
                     progressBarColor: const Color(0xFF355AA2),
                     baseBarColor: const Color(0xFF323746),
-                    bufferedBarColor: const Color(0xFF323746).withOpacity(0.7),
+                    bufferedBarColor: const Color(
+                      0xFF323746,
+                    ).withValues(alpha: 0.7),
                     thumbColor: Colors.white,
                     barHeight: 2.5,
                     thumbRadius: 5.0,
@@ -352,12 +325,12 @@ class __PlayerWidgetState extends State<_PlayerWidget> {
                   buffered: const Duration(seconds: 0),
                   total: const Duration(seconds: 0),
                   timeLabelPadding: 17.0,
-                  timeLabelTextStyle: const TextStyle(
-                    color: Colors.white,
-                  ),
+                  timeLabelTextStyle: const TextStyle(color: Colors.white),
                   progressBarColor: const Color(0xFF355AA2),
                   baseBarColor: const Color(0xFF323746),
-                  bufferedBarColor: const Color(0xFF323746).withOpacity(0.7),
+                  bufferedBarColor: const Color(
+                    0xFF323746,
+                  ).withValues(alpha: 0.7),
                   thumbColor: Colors.white,
                   barHeight: 2.5,
                   thumbRadius: 5.0,

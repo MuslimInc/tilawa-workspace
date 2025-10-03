@@ -12,10 +12,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../main.dart';
 
 class ReciterPage extends StatefulWidget {
-  const ReciterPage({
-    required this.urlList,
-    required this.server,
-  });
+  const ReciterPage({required this.urlList, required this.server});
 
   final List<String> urlList;
   final String server;
@@ -35,28 +32,20 @@ class _ReciterPageState extends State<ReciterPage> with WidgetsBindingObserver {
 
     _player = AudioPlayer();
     ambiguate(WidgetsBinding.instance)!.addObserver(this);
-    _audioSource = ConcatenatingAudioSource(
-      children: List.generate(widget.urlList.length, (index) {
-        final String singleSurahUrl =
-            "${widget.server}/${widget.urlList[index].toString().padLeft(3, '0')}.mp3";
-        // print('I am quran list: $singleSurahUrl end!');
-
-        return AudioSource.uri(
-          Uri.parse(singleSurahUrl),
-          tag: MediaItem(
-            id: "789",
-            // album: widget.urlList[index].toString(),
-            album: 'https://server8.mp3quran.net/ahmad_huth/001.mp3',
-            // title: "${widget.urlList[index].toString()} سورة",
-            title: "الفاااااتحة",
-            duration: const Duration(milliseconds: 60000),
-          ),
-        );
-      }),
+    _audioSource = AudioSource.uri(
+      Uri.parse(
+        "${widget.server}/${widget.urlList[0].toString().padLeft(3, '0')}.mp3",
+      ),
+      tag: MediaItem(
+        id: "789",
+        album: 'https://server8.mp3quran.net/ahmad_huth/001.mp3',
+        title: "الفاااااتحة",
+        duration: const Duration(milliseconds: 60000),
+      ),
     );
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.black,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.black),
+    );
     _init();
   }
 
@@ -72,15 +61,17 @@ class _ReciterPageState extends State<ReciterPage> with WidgetsBindingObserver {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
     // Listen to errors during playback.
-    _player.playbackEventStream.listen((event) {},
-        onError: (Object e, StackTrace stackTrace) {
-      print('A stream error occurred: $e');
-    });
+    _player.playbackEventStream.listen(
+      (event) {},
+      onError: (Object e, StackTrace stackTrace) {
+        print('A stream error occurred: $e');
+      },
+    );
     try {
       bool isPlaying = _player.playerState.playing;
       print('isPlaying: $isPlaying end');
       if (!isPlaying) {
-        _player.setAudioSource(_audioSource);
+        _player.setAudioSources([_audioSource]);
       } else {
         print('I am _audioPlayer: $_player end');
       }
@@ -246,80 +237,4 @@ class PositionData {
   final Duration duration;
 
   PositionData(this.position, this.bufferedPosition, this.duration);
-}
-
-class _ControlButtons extends StatelessWidget {
-  final AudioPlayerHandler audioHandler;
-
-  const _ControlButtons(this.audioHandler);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.volume_up),
-          onPressed: () {},
-        ),
-        StreamBuilder<QueueState>(
-          stream: audioHandler.queueState,
-          builder: (context, snapshot) {
-            final queueState = snapshot.data ?? QueueState.empty;
-            return IconButton(
-              icon: const Icon(Icons.skip_previous),
-              onPressed:
-                  queueState.hasPrevious ? audioHandler.skipToPrevious : null,
-            );
-          },
-        ),
-        StreamBuilder<PlaybackState>(
-          stream: audioHandler.playbackState,
-          builder: (context, snapshot) {
-            final playbackState = snapshot.data;
-            final processingState = playbackState?.processingState;
-            final playing = playbackState?.playing;
-            if (processingState == AudioProcessingState.loading ||
-                processingState == AudioProcessingState.buffering) {
-              return const IconButton(
-                icon: Icon(Icons.play_arrow),
-                iconSize: 64.0,
-                onPressed: null,
-              );
-            } else if (playing != true) {
-              return IconButton(
-                icon: const Icon(Icons.play_arrow),
-                iconSize: 64.0,
-                onPressed: audioHandler.play,
-              );
-            } else {
-              return IconButton(
-                icon: const Icon(Icons.pause),
-                iconSize: 64.0,
-                onPressed: audioHandler.pause,
-              );
-            }
-          },
-        ),
-        StreamBuilder<QueueState>(
-          stream: audioHandler.queueState,
-          builder: (context, snapshot) {
-            final queueState = snapshot.data ?? QueueState.empty;
-            return IconButton(
-              icon: const Icon(Icons.skip_next),
-              onPressed: queueState.hasNext ? audioHandler.skipToNext : null,
-            );
-          },
-        ),
-        StreamBuilder<double>(
-          stream: audioHandler.speed,
-          builder: (context, snapshot) => IconButton(
-            icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            onPressed: () {},
-          ),
-        ),
-      ],
-    );
-  }
 }

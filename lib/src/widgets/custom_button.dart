@@ -19,7 +19,7 @@ class CustomButton extends StatelessWidget {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           // backgroundColor: Color(0xFF003038),
-          backgroundColor: color.withOpacity(0.1),
+          backgroundColor: color.withValues(alpha: 0.1),
           elevation: 0.0,
           shadowColor: Colors.transparent,
         ),

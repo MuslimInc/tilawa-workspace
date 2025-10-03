@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 class CustomPageRoute extends PageRouteBuilder {
   final Widget child;
-  CustomPageRoute({
-    required this.child,
-  }) : super(
-          // transitionDuration: Duration(seconds: 1),
-          pageBuilder: (context, animation, secondaryAnimation) => child,
-        );
+  CustomPageRoute({required this.child})
+    : super(
+        // transitionDuration: Duration(seconds: 1),
+        pageBuilder: (context, animation, secondaryAnimation) => child,
+      );
 
   @override
   Widget buildTransitions(
@@ -20,15 +19,8 @@ class CustomPageRoute extends PageRouteBuilder {
     var end = Offset.zero;
     var curve = Curves.ease;
 
-    var tween = Tween(begin: begin, end: end).chain(
-      CurveTween(
-        curve: curve,
-      ),
-    );
-    var curvedAnimation = CurvedAnimation(
-      parent: animation,
-      curve: curve,
-    );
+    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    var curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
     return SlideTransition(
       position: tween.animate(curvedAnimation),
       child: child,

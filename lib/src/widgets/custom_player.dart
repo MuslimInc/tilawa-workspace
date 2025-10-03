@@ -15,7 +15,7 @@ class CustomPlayerButton extends StatefulWidget {
   final String urlAudio;
 
   @override
-  _CustomPlayerButtonState createState() => _CustomPlayerButtonState();
+  State<CustomPlayerButton> createState() => _CustomPlayerButtonState();
 }
 
 class _CustomPlayerButtonState extends State<CustomPlayerButton> {
@@ -46,9 +46,7 @@ class _CustomPlayerButtonState extends State<CustomPlayerButton> {
           children: [
             Text(
               widget.index.toString(),
-              style: TextStyle(
-                color: Colors.orange.shade400,
-              ),
+              style: TextStyle(color: Colors.orange.shade400),
             ),
             const SizedBox(width: 10),
             Text(
@@ -62,6 +60,7 @@ class _CustomPlayerButtonState extends State<CustomPlayerButton> {
               ),
             ),
             const Spacer(),
+
             // TextButton(
             //   onPressed: () => _pageManager.play(),
             //   style: TextButton.styleFrom(
@@ -76,11 +75,7 @@ class _CustomPlayerButtonState extends State<CustomPlayerButton> {
             //     color: Colors.white,
             //   ),
             // ),
-
-            const Icon(
-              Icons.play_arrow,
-              color: Colors.white,
-            ),
+            const Icon(Icons.play_arrow, color: Colors.white),
           ],
         ),
       ),

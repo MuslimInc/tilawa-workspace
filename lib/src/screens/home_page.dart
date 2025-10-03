@@ -9,7 +9,7 @@ import 'splash_screen.dart';
 
 class HomePage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -20,11 +20,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     Timer(const Duration(milliseconds: 2000), () {
-      Navigator.of(context).pushAndRemoveUntil(
-          CustomPageRoute(
-            child: Home(),
-          ),
-          (route) => false);
+      Navigator.of(
+        context,
+      ).pushAndRemoveUntil(CustomPageRoute(child: Home()), (route) => false);
     });
   }
 

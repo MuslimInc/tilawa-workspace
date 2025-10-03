@@ -31,9 +31,7 @@ Future<void> main() async {
         // ChangeNotifierProvider(
         //   create: (context) => PageManager(),
         // ),
-        ChangeNotifierProvider(
-          create: (context) => RecitersModel(),
-        ),
+        ChangeNotifierProvider(create: (context) => RecitersModel()),
       ],
       child: MyApp(),
     ),
@@ -43,7 +41,7 @@ Future<void> main() async {
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -68,9 +66,7 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1E1F23),
           elevation: 0.0,
-          titleTextStyle: TextStyle(
-            fontWeight: FontWeight.normal,
-          ),
+          titleTextStyle: TextStyle(fontWeight: FontWeight.normal),
         ),
       ),
       localizationsDelegates: const [
@@ -78,9 +74,7 @@ class _MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ar', ''),
-      ],
+      supportedLocales: const [Locale('ar', '')],
       home: HomePage(),
     );
   }
