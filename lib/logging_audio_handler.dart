@@ -29,7 +29,6 @@ class LoggingAudioHandler extends CompositeAudioHandler {
     });
   }
 
-  // TODO: Use logger. Use different log levels.
   // ignore: avoid_print
   void _log(String s) => print('----- LOG: $s');
 
