@@ -7,22 +7,7 @@ final getIt = GetIt.instance;
 final AudioPlayerHandler globalAudioHandler = getIt<AudioPlayerHandler>();
 
 Future<void> initDI() async {
-  final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(
-    newList: [
-      MediaItem(
-        id: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-        title: 'Song 1333333333',
-      ),
-      MediaItem(
-        id: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-        title: 'Song 25555555555',
-      ),
-      MediaItem(
-        id: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-        title: 'Song 3555343434',
-      ),
-    ],
-  );
+  final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(newList: []);
 
   getIt.registerSingleton<AudioPlayerHandlerImpl>(audioPlayerHandlerImpl);
   final audioHandler = await AudioService.init(

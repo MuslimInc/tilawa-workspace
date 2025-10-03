@@ -40,8 +40,10 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   }
 
   @override
-  Future<void> prepareFromMediaId(String mediaId,
-      [Map<String, dynamic>? extras]) {
+  Future<void> prepareFromMediaId(
+    String mediaId, [
+    Map<String, dynamic>? extras,
+  ]) {
     _log('prepareFromMediaId($mediaId, $extras)');
     return super.prepareFromMediaId(mediaId, extras);
   }
@@ -227,8 +229,10 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   }
 
   @override
-  Future<dynamic> customAction(String name,
-      [Map<String, dynamic>? extras]) async {
+  Future<dynamic> customAction(
+    String name, [
+    Map<String, dynamic>? extras,
+  ]) async {
     _log('customAction($name, extras)');
     final dynamic result = await super.customAction(name, extras);
     _log('customAction -> $result');
@@ -248,8 +252,10 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   }
 
   @override
-  Future<List<MediaItem>> getChildren(String parentMediaId,
-      [Map<String, dynamic>? options]) async {
+  Future<List<MediaItem>> getChildren(
+    String parentMediaId, [
+    Map<String, dynamic>? options,
+  ]) async {
     _log('getChildren($parentMediaId, $options)');
     final result = await super.getChildren(parentMediaId, options);
     _log('getChildren -> $result');
@@ -275,8 +281,10 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   }
 
   @override
-  Future<List<MediaItem>> search(String query,
-      [Map<String, dynamic>? extras]) async {
+  Future<List<MediaItem>> search(
+    String query, [
+    Map<String, dynamic>? extras,
+  ]) async {
     _log('search($query, $extras)');
     final result = await super.search(query, extras);
     _log('search -> $result');

@@ -6,16 +6,11 @@ class PlaylistsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Playlists"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text("Playlists"), centerTitle: true),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(
-            child: Text("Playlists Screen"),
-          ),
+          Center(child: Text("Playlists Screen")),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);

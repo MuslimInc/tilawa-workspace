@@ -1,8 +1,12 @@
 import 'package:audio_service/audio_service.dart';
 
 class QueueState {
-  static const QueueState empty =
-      QueueState([], 0, [], AudioServiceRepeatMode.none);
+  static const QueueState empty = QueueState(
+    [],
+    0,
+    [],
+    AudioServiceRepeatMode.none,
+  );
 
   final List<MediaItem> queue;
   final int? queueIndex;
@@ -10,7 +14,11 @@ class QueueState {
   final AudioServiceRepeatMode repeatMode;
 
   const QueueState(
-      this.queue, this.queueIndex, this.shuffleIndices, this.repeatMode);
+    this.queue,
+    this.queueIndex,
+    this.shuffleIndices,
+    this.repeatMode,
+  );
 
   bool get hasPrevious =>
       repeatMode != AudioServiceRepeatMode.none || (queueIndex ?? 0) > 0;

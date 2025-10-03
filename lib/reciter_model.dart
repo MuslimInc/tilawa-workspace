@@ -30,8 +30,14 @@ class Mosahf extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, server, surahTotal, moshafType, surahList];
+  List<Object?> get props => [
+    id,
+    name,
+    server,
+    surahTotal,
+    moshafType,
+    surahList,
+  ];
 }
 
 // Model for Reciter

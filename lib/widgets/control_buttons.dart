@@ -35,8 +35,9 @@ class ControlButtons extends StatelessWidget {
             final queueState = snapshot.data ?? QueueState.empty;
             return IconButton(
               icon: const Icon(Icons.skip_previous),
-              onPressed:
-                  queueState.hasPrevious ? audioHandler.skipToPrevious : null,
+              onPressed: queueState.hasPrevious
+                  ? audioHandler.skipToPrevious
+                  : null,
             );
           },
         ),
@@ -82,8 +83,10 @@ class ControlButtons extends StatelessWidget {
         StreamBuilder<double>(
           stream: audioHandler.speed,
           builder: (context, snapshot) => IconButton(
-            icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            icon: Text(
+              "${snapshot.data?.toStringAsFixed(1)}x",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             onPressed: () {
               showSliderDialog(
                 context: context,

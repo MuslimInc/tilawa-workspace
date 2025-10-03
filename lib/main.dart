@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/di_container.dart';
-import 'package:muzakri/screens/main_screen.dart';
+import 'package:muzakri/screens/reciters_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,9 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       child: MaterialApp(
-        title: 'Audio Service Demo',
+        title: 'Muzakri',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: const MainScreen(),
+        home: const RecitersScreen(),
       ),
     );
   }
