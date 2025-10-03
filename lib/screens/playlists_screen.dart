@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PlaylistsScreen extends StatelessWidget {
   const PlaylistsScreen({super.key});
@@ -13,7 +14,7 @@ class PlaylistsScreen extends StatelessWidget {
           Center(child: Text("Playlists Screen")),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              context.pop();
             },
             child: Text("Back"),
           ),
