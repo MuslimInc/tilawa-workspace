@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/di_container.dart';
-import 'package:muzakri/screens/reciters_screen.dart';
+import 'package:muzakri/router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +18,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Muzakri',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: const RecitersScreen(),
+        routerConfig: AppRouter.router,
       ),
     );
   }

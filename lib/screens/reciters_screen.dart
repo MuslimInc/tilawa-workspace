@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/di_container.dart';
 import 'package:muzakri/reciter_model.dart';
@@ -337,11 +338,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
         ),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReciterDetailsScreen(reciter: reciter),
-            ),
+          context.pushNamed(
+            'reciterDetails',
+            pathParameters: {'reciterId': reciter.id.toString()},
+            extra: reciter,
           );
         },
       ),
