@@ -5,7 +5,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.5.3 <4.0.0"
+  sdk: "3.9.2"
 
 dependencies:
   flutter:
@@ -17,8 +17,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
   # excel: 2.0.0-null-safety-3
-  file_picker: ^8.1.2
-  flutter_bloc: ^8.1.6
+  file_picker: ^10.3.3
+  flutter_bloc: ^9.1.1
   flutter_svg: ^2.0.10+1
   http: ^1.2.2
   get_it: ^8.0.0
@@ -27,9 +27,9 @@ dependencies:
   # Audio Packages
   # just_audio_background:
   audio_video_progress_bar: ^2.0.3
-  audio_session: ^0.1.21
+  audio_session: ^0.2.2
   audio_service: ^0.18.15
-  just_audio: ^0.9.41
+  just_audio: ^0.10.5
   rxdart: ^0.28.0
 
   provider: ^6.1.2
@@ -38,7 +38,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 flutter:
   uses-material-design: true
 
