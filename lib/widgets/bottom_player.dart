@@ -137,6 +137,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                 child: Material(
                   elevation: 8,
                   child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       boxShadow: [
