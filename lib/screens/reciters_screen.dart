@@ -405,11 +405,27 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     )
                   : _surahList.isEmpty
                   ? const Center(child: Text('No surahs available'))
-                  : ListView.builder(
-                      itemCount: _surahList.length,
-                      itemBuilder: (context, index) {
-                        final surah = _surahList[index];
-                        return _buildSurahCard(surah, index);
+                  : StreamBuilder<MediaItem?>(
+                      stream: globalAudioHandler.mediaItem,
+                      builder: (context, snapshot) {
+                        final hasAudio = snapshot.data != null;
+                        // Calculate dynamic padding based on screen size and bottom player visibility
+                        final screenHeight = MediaQuery.of(context).size.height;
+                        final bottomPadding = hasAudio
+                            ? (screenHeight * 0.14).clamp(
+                                80.0,
+                                150.0,
+                              ) // 12% of screen height, min 80px, max 120px
+                            : 0.0;
+
+                        return ListView.builder(
+                          padding: EdgeInsets.only(bottom: bottomPadding),
+                          itemCount: _surahList.length,
+                          itemBuilder: (context, index) {
+                            final surah = _surahList[index];
+                            return _buildSurahCard(surah, index);
+                          },
+                        );
                       },
                     ),
             ),
