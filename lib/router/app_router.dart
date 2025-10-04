@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/screens/playlists_screen.dart';
+import 'package:muzakri/screens/reciter_details_screen.dart';
 import 'package:muzakri/screens/reciters_screen.dart';
 
 class AppRouter {
