@@ -8,38 +8,45 @@ void showSliderDialog({
   required double max,
   String valueSuffix = '',
   required double value,
-  required Stream<double> stream,
   required ValueChanged<double> onChanged,
 }) {
   showDialog<void>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title, textAlign: TextAlign.center),
-      content: StreamBuilder<double>(
-        stream: stream,
-        builder: (context, snapshot) => SizedBox(
-          height: 100.0,
-          child: Column(
-            children: [
-              Text(
-                '${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
-                style: const TextStyle(
-                  fontFamily: 'Fixed',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        double currentValue = value;
+
+        return AlertDialog(
+          title: Text(title, textAlign: TextAlign.center),
+          content: SizedBox(
+            height: 100.0,
+            child: Column(
+              children: [
+                Text(
+                  '${currentValue.toStringAsFixed(1)}$valueSuffix',
+                  style: const TextStyle(
+                    fontFamily: 'Fixed',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24.0,
+                  ),
                 ),
-              ),
-              Slider(
-                divisions: divisions,
-                min: min,
-                max: max,
-                value: snapshot.data ?? value,
-                onChanged: onChanged,
-              ),
-            ],
+                Slider(
+                  divisions: divisions,
+                  min: min,
+                  max: max,
+                  value: currentValue,
+                  onChanged: (newValue) {
+                    setState(() {
+                      currentValue = newValue;
+                    });
+                    onChanged(newValue);
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     ),
   );
 }

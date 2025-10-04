@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
 import 'package:muzakri/di_container.dart';
@@ -12,7 +13,6 @@ import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/widgets/app_with_bottom_player.dart';
 import 'package:muzakri/widgets/arabic_alphabet_scrollbar.dart';
 import 'package:muzakri/widgets/language_switcher.dart';
-import 'package:rxdart/rxdart.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -422,10 +422,12 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         )
                       : state is ReciterDetailsLoaded && state.surahList.isEmpty
                       ? const Center(child: Text('No surahs available'))
-                      : StreamBuilder<MediaItem?>(
-                          stream: globalAudioHandler.mediaItem,
-                          builder: (context, snapshot) {
-                            final hasAudio = snapshot.data != null;
+                      : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                          builder: (context, audioState) {
+                            final hasAudio =
+                                audioState.status ==
+                                    AudioPlayerStatus.success &&
+                                audioState.mediaItem != null;
                             // Calculate dynamic padding based on screen size and bottom player visibility
                             final screenHeight = MediaQuery.of(
                               context,
@@ -469,20 +471,56 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     int index,
     ReciterDetailsLoaded state,
   ) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream:
-          Rx.combineLatest2<MediaItem?, PlaybackState, Map<String, dynamic>>(
-            globalAudioHandler.mediaItem,
-            globalAudioHandler.playbackState,
-            (mediaItem, playbackState) => {
-              'mediaItem': mediaItem,
-              'playbackState': playbackState,
-            },
-          ),
-      builder: (context, snapshot) {
-        final data = snapshot.data;
-        final currentMediaItem = data?['mediaItem'] as MediaItem?;
-        final playbackState = data?['playbackState'] as PlaybackState?;
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+      builder: (context, audioState) {
+        if (audioState.status != AudioPlayerStatus.success) {
+          // Return basic card without highlighting
+          var roundedRectangleBorder = RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          );
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            shape: roundedRectangleBorder,
+            elevation: 0,
+            child: ListTile(
+              shape: roundedRectangleBorder,
+              leading: CircleAvatar(
+                backgroundColor: Colors.grey.shade300,
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              title: Text(
+                surah.title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                surah.artist ?? '',
+                style: const TextStyle(color: Colors.grey),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.play_arrow),
+                onPressed: () {
+                  // Play surah logic here
+                },
+              ),
+              onTap: () {
+                // Play surah logic here
+              },
+            ),
+          );
+        }
+
+        final currentMediaItem = audioState.mediaItem;
+        final playbackState = audioState.playbackState;
         // Highlight if the surah is selected (clicked) or currently playing
         final isSelected = state.selectedSurahId == surah.id;
         final isCurrentlyPlaying =
@@ -537,9 +575,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     ),
                     onPressed: () {
                       if (playbackState?.playing == true) {
-                        globalAudioHandler.pause();
+                        context.read<AudioPlayerBloc>().add(
+                          const AudioPlayerEvent.pauseAudio(),
+                        );
                       } else {
-                        globalAudioHandler.play();
+                        context.read<AudioPlayerBloc>().add(
+                          const AudioPlayerEvent.playAudio(),
+                        );
                       }
                     },
                   )
@@ -553,9 +595,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               if (isCurrentlyPlaying) {
                 // Toggle play/pause if this is the current surah
                 if (playbackState?.playing == true) {
-                  globalAudioHandler.pause();
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.pauseAudio(),
+                  );
                 } else {
-                  globalAudioHandler.play();
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.playAudio(),
+                  );
                 }
               } else {
                 // Play this surah

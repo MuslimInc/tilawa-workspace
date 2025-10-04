@@ -3,12 +3,12 @@ import 'package:get_it/get_it.dart';
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/bloc/localization/localization_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
 
 final getIt = GetIt.instance;
-final AudioPlayerHandler globalAudioHandler = getIt<AudioPlayerHandler>();
 
 Future<void> initDI() async {
   final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(newList: []);
@@ -30,4 +30,7 @@ Future<void> initDI() async {
   getIt.registerFactory<RecitersBloc>(() => RecitersBloc());
   getIt.registerFactory<ReciterDetailsBloc>(() => ReciterDetailsBloc());
   getIt.registerFactory<AlphabetScrollbarBloc>(() => AlphabetScrollbarBloc());
+  getIt.registerFactory<AudioPlayerBloc>(
+    () => AudioPlayerBloc(audioHandler: audioHandler),
+  );
 }

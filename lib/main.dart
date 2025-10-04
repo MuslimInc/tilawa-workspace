@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/bloc/localization/localization_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
@@ -14,6 +15,8 @@ import 'package:muzakri/router/app_router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initDI();
+
+  // Bloc.observer = AppBlocObserver();
 
   runApp(const MyApp());
 }
@@ -38,6 +41,9 @@ class MyApp extends StatelessWidget {
           BlocProvider<AlphabetScrollbarBloc>(
             create: (context) => getIt<AlphabetScrollbarBloc>(),
           ),
+          BlocProvider<AudioPlayerBloc>(
+            create: (context) => getIt<AudioPlayerBloc>(),
+          ),
         ],
         child: BlocBuilder<LocalizationBloc, LocalizationState>(
           builder: (context, state) {
@@ -54,5 +60,25 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class AppBlocObserver extends BlocObserver {
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    super.onEvent(bloc, event);
+    print('[BlocObserver] onEvent: $event');
+  }
+
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    super.onTransition(bloc, transition);
+    print('[BlocObserver] onTransition: $transition');
+  }
+
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    super.onError(bloc, error, stackTrace);
+    print('[BlocObserver] onError: $error');
   }
 }

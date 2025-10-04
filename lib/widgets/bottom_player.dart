@@ -1,11 +1,9 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/position_data.dart';
-import 'package:muzakri/queue_state.dart';
-import 'package:rxdart/rxdart.dart';
 
 class BottomPlayer extends StatefulWidget {
   final bool isVisible;
@@ -22,46 +20,6 @@ class _BottomPlayerState extends State<BottomPlayer>
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
 
-  Stream<Duration> get _bufferedPositionStream => globalAudioHandler
-      .playbackState
-      .map((state) => state.bufferedPosition)
-      .distinct();
-
-  Stream<Duration?> get _durationStream =>
-      globalAudioHandler.mediaItem.map((item) => item?.duration).distinct();
-
-  Stream<PositionData> get _positionDataStream =>
-      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        AudioService.position,
-        _bufferedPositionStream,
-        _durationStream,
-        (position, bufferedPosition, duration) => PositionData(
-          position: position,
-          bufferedPosition: bufferedPosition,
-          duration: duration ?? Duration.zero,
-        ),
-      );
-
-  Stream<Map<String, dynamic>> get _combinedStream =>
-      Rx.combineLatest4<
-        MediaItem?,
-        PlaybackState,
-        PositionData,
-        QueueState,
-        Map<String, dynamic>
-      >(
-        globalAudioHandler.mediaItem,
-        globalAudioHandler.playbackState,
-        _positionDataStream,
-        globalAudioHandler.queueState,
-        (mediaItem, playbackState, positionData, queueState) => {
-          'mediaItem': mediaItem,
-          'playbackState': playbackState,
-          'positionData': positionData,
-          'queueState': queueState,
-        },
-      );
-
   @override
   void initState() {
     super.initState();
@@ -76,6 +34,11 @@ class _BottomPlayerState extends State<BottomPlayer>
     if (widget.isVisible) {
       _animationController.forward();
     }
+
+    // Initialize the AudioPlayerBloc
+    context.read<AudioPlayerBloc>().add(
+      const AudioPlayerEvent.loadAudioPlayerData(),
+    );
   }
 
   @override
@@ -98,20 +61,16 @@ class _BottomPlayerState extends State<BottomPlayer>
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: _combinedStream,
-      builder: (context, snapshot) {
-        final data = snapshot.data;
-        final mediaItem = data?['mediaItem'] as MediaItem?;
-        final playbackState = data?['playbackState'] as PlaybackState?;
-        final positionData = data?['positionData'] as PositionData?;
-        final queueState = data?['queueState'] as QueueState?;
-
-        if (mediaItem == null) {
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+      builder: (context, state) {
+        if (state.status != AudioPlayerStatus.success) {
           return const SizedBox.shrink();
         }
 
-        final isPlaying = playbackState?.playing ?? false;
+        final mediaItem = state.mediaItem!;
+        final positionData = state.positionData;
+
+        final isPlaying = state.isPlaying;
         final position =
             positionData ??
             PositionData(
@@ -121,10 +80,8 @@ class _BottomPlayerState extends State<BottomPlayer>
             );
 
         // Check if next/previous buttons should be enabled
-        final currentIndex = playbackState?.queueIndex ?? 0;
-        final queueLength = queueState?.queue.length ?? 0;
-        final canGoNext = currentIndex < queueLength - 1;
-        final canGoPrevious = currentIndex > 0;
+        final canGoNext = state.canGoNext;
+        final canGoPrevious = state.canGoPrevious;
 
         return AnimatedBuilder(
           animation: _slideAnimation,
@@ -260,8 +217,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                                     size: 20,
                                   ),
                                   onPressed: canGoPrevious
-                                      ? () =>
-                                            globalAudioHandler.skipToPrevious()
+                                      ? () => context.read<AudioPlayerBloc>().add(
+                                          const AudioPlayerEvent.skipToPrevious(),
+                                        )
                                       : null,
                                 ),
 
@@ -281,9 +239,13 @@ class _BottomPlayerState extends State<BottomPlayer>
                                     ),
                                     onPressed: () {
                                       if (isPlaying) {
-                                        globalAudioHandler.pause();
+                                        context.read<AudioPlayerBloc>().add(
+                                          const AudioPlayerEvent.pauseAudio(),
+                                        );
                                       } else {
-                                        globalAudioHandler.play();
+                                        context.read<AudioPlayerBloc>().add(
+                                          const AudioPlayerEvent.playAudio(),
+                                        );
                                       }
                                     },
                                   ),
@@ -296,7 +258,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                                     size: 20,
                                   ),
                                   onPressed: canGoNext
-                                      ? () => globalAudioHandler.skipToNext()
+                                      ? () => context.read<AudioPlayerBloc>().add(
+                                          const AudioPlayerEvent.skipToNext(),
+                                        )
                                       : null,
                                 ),
                               ],
