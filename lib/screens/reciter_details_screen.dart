@@ -330,6 +330,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
       final audioHandler = getIt<AudioPlayerHandlerImpl>();
 
+      // Validate surah data
+      if (surah.id.isEmpty) {
+        throw Exception('Invalid surah: missing ID');
+      }
+
       // Find the index of the selected surah in the full list
       final surahIndex = state.surahList.indexWhere(
         (item) => item.id == surah.id,
@@ -363,13 +368,15 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         await audioHandler.skipToQueueItem(0);
         await audioHandler.play();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('_playSurah error: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error playing surah: $e'),
+            content: Text('Error playing surah: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
