@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:muzakri/di_container.dart';
 import 'package:muzakri/widgets/bottom_player.dart';
+import 'package:muzakri/widgets/expanded_player_screen.dart';
 
 class AppWithBottomPlayer extends StatelessWidget {
   final Widget child;

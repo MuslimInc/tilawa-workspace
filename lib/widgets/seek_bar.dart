@@ -45,89 +45,68 @@ class SeekBarState extends State<SeekBar> {
       _dragValue = null;
     }
 
-    final isRTL = Directionality.of(context) == TextDirection.rtl;
-
-    return Directionality(
-      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-      child: Stack(
-        children: [
-          SliderTheme(
-            data: _sliderThemeData.copyWith(
-              thumbShape: HiddenThumbComponentShape(),
-              activeTrackColor: Colors.blue.shade100,
-              inactiveTrackColor: Colors.grey.shade300,
-            ),
-            child: ExcludeSemantics(
-              child: Slider(
-                min: 0.0,
-                max: widget.duration.inMilliseconds.toDouble(),
-                value: min(
-                  widget.bufferedPosition.inMilliseconds.toDouble(),
-                  widget.duration.inMilliseconds.toDouble(),
+    return Column(
+      children: [
+        // Progress bar
+        Container(
+          height: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Buffered progress background
+              SliderTheme(
+                data: _sliderThemeData.copyWith(
+                  thumbShape: HiddenThumbComponentShape(),
+                  activeTrackColor: Colors.blue.shade100,
+                  inactiveTrackColor: Colors.grey.shade300,
                 ),
-                onChanged: (value) {},
+                child: ExcludeSemantics(
+                  child: Slider(
+                    min: 0.0,
+                    max: widget.duration.inMilliseconds.toDouble(),
+                    value: min(
+                      widget.bufferedPosition.inMilliseconds.toDouble(),
+                      widget.duration.inMilliseconds.toDouble(),
+                    ),
+                    onChanged: (value) {},
+                  ),
+                ),
               ),
-            ),
+              // Current progress
+              SliderTheme(
+                data: _sliderThemeData.copyWith(
+                  inactiveTrackColor: Colors.transparent,
+                ),
+                child: Slider(
+                  min: 0.0,
+                  max: widget.duration.inMilliseconds.toDouble(),
+                  value: value,
+                  onChanged: (value) {
+                    if (!_dragging) {
+                      _dragging = true;
+                    }
+                    setState(() {
+                      _dragValue = value;
+                    });
+                    if (widget.onChanged != null) {
+                      widget.onChanged!(Duration(milliseconds: value.round()));
+                    }
+                  },
+                  onChangeEnd: (value) {
+                    if (widget.onChangeEnd != null) {
+                      widget.onChangeEnd!(
+                        Duration(milliseconds: value.round()),
+                      );
+                    }
+                    _dragging = false;
+                  },
+                ),
+              ),
+            ],
           ),
-          SliderTheme(
-            data: _sliderThemeData.copyWith(
-              inactiveTrackColor: Colors.transparent,
-            ),
-            child: Slider(
-              min: 0.0,
-              max: widget.duration.inMilliseconds.toDouble(),
-              value: value,
-              onChanged: (value) {
-                if (!_dragging) {
-                  _dragging = true;
-                }
-                setState(() {
-                  _dragValue = value;
-                });
-                if (widget.onChanged != null) {
-                  widget.onChanged!(Duration(milliseconds: value.round()));
-                }
-              },
-              onChangeEnd: (value) {
-                if (widget.onChangeEnd != null) {
-                  widget.onChangeEnd!(Duration(milliseconds: value.round()));
-                }
-                _dragging = false;
-              },
-            ),
-          ),
-          // Time display - positioned based on text direction
-          Positioned(
-            right: isRTL ? null : 16.0,
-            left: isRTL ? 16.0 : null,
-            bottom: 0.0,
-            child: Text(
-              RegExp(
-                    r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$',
-                  ).firstMatch("$_remaining")?.group(1) ??
-                  '$_remaining',
-              style: Theme.of(context).textTheme.bodySmall,
-              textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-            ),
-          ),
-          // Current position display - positioned on the opposite side
-          Positioned(
-            right: isRTL ? 16.0 : null,
-            left: isRTL ? null : 16.0,
-            bottom: 0.0,
-            child: Text(
-              RegExp(
-                    r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$',
-                  ).firstMatch("${widget.position}")?.group(1) ??
-                  '${widget.position}',
-              style: Theme.of(context).textTheme.bodySmall,
-              textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
-
-  Duration get _remaining => widget.duration - widget.position;
 }
