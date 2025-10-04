@@ -7,9 +7,11 @@ import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
 import 'package:muzakri/di_container.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/widgets/app_with_bottom_player.dart';
 import 'package:muzakri/widgets/arabic_alphabet_scrollbar.dart';
+import 'package:muzakri/widgets/language_switcher.dart';
 import 'package:rxdart/rxdart.dart';
 
 class RecitersScreen extends StatefulWidget {
@@ -52,7 +54,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
       builder: (context, state) {
         return AppWithBottomPlayer(
           child: Scaffold(
-            appBar: AppBar(title: const Text('Quran Reciters')),
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.reciters),
+              actions: const [LanguageSwitcher(), SizedBox(width: 8)],
+            ),
             body: Column(
               children: [
                 // Search bar and letter filter
@@ -90,7 +95,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Filtered by letter: ',
+                                AppLocalizations.of(context)!.filteredByLetter,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w500,
@@ -118,7 +123,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search reciters...',
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchReciters,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon:
                               (state is RecitersLoaded &&
@@ -155,13 +162,17 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       // Main content
                       Expanded(
                         child: state is RecitersLoading
-                            ? const Center(
+                            ? Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text('Loading reciters...'),
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.loadingReciters,
+                                    ),
                                   ],
                                 ),
                               )
@@ -184,7 +195,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                           const LoadReciters(),
                                         );
                                       },
-                                      child: const Text('Retry'),
+                                      child: Text(
+                                        AppLocalizations.of(context)!.retry,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -203,8 +216,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     const SizedBox(height: 16),
                                     Text(
                                       state.searchQuery.isEmpty
-                                          ? 'No reciters found'
-                                          : 'No reciters match your search',
+                                          ? AppLocalizations.of(
+                                              context,
+                                            )!.noRecitersFound
+                                          : AppLocalizations.of(
+                                              context,
+                                            )!.noRecitersMatchSearch,
                                     ),
                                   ],
                                 ),
@@ -326,33 +343,45 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               children: [
                 // Moshaf selector
                 if (widget.reciter.moshaf.length > 1)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: DropdownButtonFormField<Mosahf>(
-                      initialValue: state is ReciterDetailsLoaded
+                  Builder(
+                    builder: (context) {
+                      // Remove duplicates and get unique moshaf list
+                      final uniqueMoshaf = widget.reciter.moshaf
+                          .toSet()
+                          .toList();
+                      final selectedMoshaf = state is ReciterDetailsLoaded
                           ? state.selectedMoshaf
-                          : widget.reciter.moshaf.first,
-                      decoration: const InputDecoration(
-                        labelText: 'Select Recitation',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: widget.reciter.moshaf.map((moshaf) {
-                        return DropdownMenuItem<Mosahf>(
-                          value: moshaf,
-                          child: Text(moshaf.name),
-                        );
-                      }).toList(),
-                      onChanged: (Mosahf? moshaf) {
-                        if (moshaf != null) {
-                          context.read<ReciterDetailsBloc>().add(
-                            LoadSurahList(
-                              reciter: widget.reciter,
-                              moshaf: moshaf,
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                          : uniqueMoshaf.first;
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        child: DropdownButtonFormField<Mosahf>(
+                          initialValue: uniqueMoshaf.contains(selectedMoshaf)
+                              ? selectedMoshaf
+                              : uniqueMoshaf.first,
+                          decoration: const InputDecoration(
+                            labelText: 'Select Recitation',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: uniqueMoshaf.map((moshaf) {
+                            return DropdownMenuItem<Mosahf>(
+                              value: moshaf,
+                              child: Text(moshaf.name),
+                            );
+                          }).toList(),
+                          onChanged: (Mosahf? moshaf) {
+                            if (moshaf != null) {
+                              context.read<ReciterDetailsBloc>().add(
+                                LoadSurahList(
+                                  reciter: widget.reciter,
+                                  moshaf: moshaf,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
                   ),
 
                 // Content
@@ -402,10 +431,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                               context,
                             ).size.height;
                             final bottomPadding = hasAudio
-                                ? (screenHeight * 0.14).clamp(
+                                ? (screenHeight * 0.20).clamp(
                                     80.0,
-                                    150.0,
-                                  ) // 12% of screen height, min 80px, max 120px
+                                    200.0,
+                                  ) // 20% of screen height, min 80px, max 200px
                                 : 0.0;
 
                             return state is ReciterDetailsLoaded

@@ -1,7 +1,12 @@
-class PositionData {
-  final Duration position;
-  final Duration bufferedPosition;
-  final Duration duration;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  PositionData(this.position, this.bufferedPosition, this.duration);
+part 'position_data.freezed.dart';
+
+@freezed
+abstract class PositionData with _$PositionData {
+  const factory PositionData({
+    required Duration position,
+    required Duration bufferedPosition,
+    required Duration duration,
+  }) = _PositionData;
 }

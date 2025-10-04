@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/bloc/localization/localization_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
 import 'package:muzakri/di_container.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 
 Future<void> main() async {
@@ -24,6 +26,9 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<LocalizationBloc>(
+            create: (context) => getIt<LocalizationBloc>(),
+          ),
           BlocProvider<RecitersBloc>(
             create: (context) => getIt<RecitersBloc>(),
           ),
@@ -34,10 +39,18 @@ class MyApp extends StatelessWidget {
             create: (context) => getIt<AlphabetScrollbarBloc>(),
           ),
         ],
-        child: MaterialApp.router(
-          title: 'Muzakri',
-          theme: ThemeData(primarySwatch: Colors.blue),
-          routerConfig: AppRouter.router,
+        child: BlocBuilder<LocalizationBloc, LocalizationState>(
+          builder: (context, state) {
+            return MaterialApp.router(
+              title: 'Muzakri',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(primarySwatch: Colors.blue),
+              routerConfig: AppRouter.router,
+              locale: state.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+            );
+          },
         ),
       ),
     );

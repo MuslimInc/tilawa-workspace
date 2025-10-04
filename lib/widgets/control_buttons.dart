@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/helpers/show_slider_dialog.dart';
@@ -34,7 +35,7 @@ class ControlButtons extends StatelessWidget {
           builder: (context, snapshot) {
             final queueState = snapshot.data ?? QueueState.empty;
             return IconButton(
-              icon: const Icon(Icons.skip_previous),
+              icon: const Icon(FluentIcons.arrow_left_24_regular),
               onPressed: queueState.hasPrevious
                   ? audioHandler.skipToPrevious
                   : null,
@@ -57,13 +58,13 @@ class ControlButtons extends StatelessWidget {
               );
             } else if (playing != true) {
               return IconButton(
-                icon: const Icon(Icons.play_arrow),
+                icon: const Icon(FluentIcons.play_24_regular),
                 iconSize: 64.0,
                 onPressed: audioHandler.play,
               );
             } else {
               return IconButton(
-                icon: const Icon(Icons.pause),
+                icon: const Icon(FluentIcons.pause_24_regular),
                 iconSize: 64.0,
                 onPressed: audioHandler.pause,
               );
@@ -75,7 +76,7 @@ class ControlButtons extends StatelessWidget {
           builder: (context, snapshot) {
             final queueState = snapshot.data ?? QueueState.empty;
             return IconButton(
-              icon: const Icon(Icons.skip_next),
+              icon: const Icon(FluentIcons.arrow_right_24_regular),
               onPressed: queueState.hasNext ? audioHandler.skipToNext : null,
             );
           },

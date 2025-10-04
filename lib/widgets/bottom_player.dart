@@ -1,7 +1,9 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/di_container.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/position_data.dart';
 import 'package:muzakri/queue_state.dart';
 import 'package:muzakri/widgets/control_buttons.dart';
@@ -36,8 +38,11 @@ class _BottomPlayerState extends State<BottomPlayer>
         AudioService.position,
         _bufferedPositionStream,
         _durationStream,
-        (position, bufferedPosition, duration) =>
-            PositionData(position, bufferedPosition, duration ?? Duration.zero),
+        (position, bufferedPosition, duration) => PositionData(
+          position: position,
+          bufferedPosition: bufferedPosition,
+          duration: duration ?? Duration.zero,
+        ),
       );
 
   Stream<Map<String, dynamic>> get _combinedStream =>
@@ -119,7 +124,11 @@ class _BottomPlayerState extends State<BottomPlayer>
         final isPlaying = playbackState?.playing ?? false;
         final position =
             positionData ??
-            PositionData(Duration.zero, Duration.zero, Duration.zero);
+            PositionData(
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration.zero,
+            );
 
         // Check if next/previous buttons should be enabled
         final currentIndex = playbackState?.queueIndex ?? 0;
@@ -301,7 +310,9 @@ class _BottomPlayerState extends State<BottomPlayer>
 
                                 // Previous button
                                 IconButton(
-                                  icon: const Icon(Icons.skip_previous),
+                                  icon: const Icon(
+                                    FluentIcons.arrow_left_24_regular,
+                                  ),
                                   onPressed: canGoPrevious
                                       ? () =>
                                             globalAudioHandler.skipToPrevious()
@@ -311,7 +322,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                                 // Play/Pause button
                                 IconButton(
                                   icon: Icon(
-                                    isPlaying ? Icons.pause : Icons.play_arrow,
+                                    isPlaying
+                                        ? FluentIcons.pause_24_regular
+                                        : FluentIcons.play_24_regular,
                                     color: Theme.of(context).primaryColor,
                                     size: 32,
                                   ),
@@ -326,7 +339,9 @@ class _BottomPlayerState extends State<BottomPlayer>
 
                                 // Next button
                                 IconButton(
-                                  icon: const Icon(Icons.skip_next),
+                                  icon: const Icon(
+                                    FluentIcons.arrow_right_24_regular,
+                                  ),
                                   onPressed: canGoNext
                                       ? () => globalAudioHandler.skipToNext()
                                       : null,
@@ -369,8 +384,11 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen> {
         AudioService.position,
         _bufferedPositionStream,
         _durationStream,
-        (position, bufferedPosition, duration) =>
-            PositionData(position, bufferedPosition, duration ?? Duration.zero),
+        (position, bufferedPosition, duration) => PositionData(
+          position: position,
+          bufferedPosition: bufferedPosition,
+          duration: duration ?? Duration.zero,
+        ),
       );
 
   @override
@@ -379,10 +397,10 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(FluentIcons.arrow_down_24_regular),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Now Playing'),
+        title: Text(AppLocalizations.of(context)!.currentPlaying),
         centerTitle: true,
       ),
       body: StreamBuilder<MediaItem?>(
@@ -422,14 +440,14 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
-                                      Icons.music_note,
+                                      FluentIcons.music_note_1_20_regular,
                                       color: Theme.of(context).primaryColor,
                                       size: 100,
                                     );
                                   },
                                 )
                               : Icon(
-                                  Icons.music_note,
+                                  FluentIcons.music_note_1_20_regular,
                                   color: Theme.of(context).primaryColor,
                                   size: 100,
                                 ),
@@ -482,9 +500,9 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen> {
                     final positionData =
                         snapshot.data ??
                         PositionData(
-                          Duration.zero,
-                          Duration.zero,
-                          Duration.zero,
+                          position: Duration.zero,
+                          bufferedPosition: Duration.zero,
+                          duration: Duration.zero,
                         );
                     return SeekBar(
                       duration: positionData.duration,
