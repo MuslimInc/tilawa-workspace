@@ -140,7 +140,7 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
-  /// Error message
+  /// Error label
   ///
   /// In en, this message translates to:
   /// **'Error'**
@@ -211,6 +211,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Position'**
   String get position;
+
+  /// Downloads section title
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloads;
+
+  /// Playlists section title
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get playlists;
+
+  /// No downloads message
+  ///
+  /// In en, this message translates to:
+  /// **'No downloads yet'**
+  String get noDownloadsYet;
+
+  /// Downloading status
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get downloading;
+
+  /// Downloaded status
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get downloaded;
+
+  /// Download button text
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Delete all button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All'**
+  String get deleteAll;
+
+  /// Clear all downloads dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Downloads'**
+  String get clearAllDownloads;
+
+  /// Clear all downloads confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all downloaded surahs? This action cannot be undone.'**
+  String get clearAllDownloadsMessage;
+
+  /// Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Play all button text
+  ///
+  /// In en, this message translates to:
+  /// **'Play All'**
+  String get playAll;
+
+  /// Pause all button text
+  ///
+  /// In en, this message translates to:
+  /// **'Pause All'**
+  String get pauseAll;
+
+  /// Playing status
+  ///
+  /// In en, this message translates to:
+  /// **'Playing'**
+  String get playing;
+
+  /// Pending status
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// Cancelled status
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// Completed status
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// Download progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Download Progress'**
+  String get downloadProgress;
+
+  /// File size label
+  ///
+  /// In en, this message translates to:
+  /// **'File Size'**
+  String get fileSize;
+
+  /// Downloaded size label
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded Size'**
+  String get downloadedSize;
+
+  /// Playlists screen content
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists Screen'**
+  String get playlistsScreen;
+
+  /// Back button text
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No playlists message
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get noPlaylistsYet;
+
+  /// Create playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create Playlist'**
+  String get createPlaylist;
+
+  /// Download status checked message
+  ///
+  /// In en, this message translates to:
+  /// **'Download status checked'**
+  String get downloadStatusChecked;
+
+  /// File validation completed message
+  ///
+  /// In en, this message translates to:
+  /// **'File validation completed'**
+  String get fileValidationCompleted;
+
+  /// Valid downloads loaded message
+  ///
+  /// In en, this message translates to:
+  /// **'Valid downloads loaded'**
+  String get validDownloadsLoaded;
+
+  /// Playback initiated message
+  ///
+  /// In en, this message translates to:
+  /// **'Playback initiated'**
+  String get playbackInitiated;
 }
 
 class _AppLocalizationsDelegate

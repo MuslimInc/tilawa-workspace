@@ -28,7 +28,7 @@ dependencies:
   # just_audio_background:
   audio_video_progress_bar: ^2.0.3
   audio_session: ^0.2.2
-  audio_service: ^0.18.15
+  audio_service: ^0.18.18
   just_audio: ^0.10.5
   rxdart: ^0.28.0
 
@@ -41,6 +41,8 @@ dependencies:
   fluentui_system_icons: ^1.1.273
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
+  path: ^1.9.1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

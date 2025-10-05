@@ -8,7 +8,8 @@ import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/bloc/localization/localization_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 
@@ -30,19 +31,21 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<LocalizationBloc>(
-            create: (context) => getIt<LocalizationBloc>(),
+            create: (context) => sl<LocalizationBloc>(),
           ),
-          BlocProvider<RecitersBloc>(
-            create: (context) => getIt<RecitersBloc>(),
-          ),
+          BlocProvider<RecitersBloc>(create: (context) => sl<RecitersBloc>()),
           BlocProvider<ReciterDetailsBloc>(
-            create: (context) => getIt<ReciterDetailsBloc>(),
+            create: (context) => sl<ReciterDetailsBloc>(),
           ),
           BlocProvider<AlphabetScrollbarBloc>(
-            create: (context) => getIt<AlphabetScrollbarBloc>(),
+            create: (context) => sl<AlphabetScrollbarBloc>(),
           ),
           BlocProvider<AudioPlayerBloc>(
-            create: (context) => getIt<AudioPlayerBloc>(),
+            create: (context) => sl<AudioPlayerBloc>(),
+          ),
+          BlocProvider<DownloadsBloc>(
+            create: (context) =>
+                sl<DownloadsBloc>()..add(const LoadDownloads()),
           ),
         ],
         child: BlocBuilder<LocalizationBloc, LocalizationState>(

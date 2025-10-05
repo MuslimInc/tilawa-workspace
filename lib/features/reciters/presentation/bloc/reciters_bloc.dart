@@ -16,7 +16,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
        _getRecitersByLetter = getRecitersByLetter,
        super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
-    on<SearchReciters>(_onSearchReciters);
+    on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearSearch>(_onClearSearch);
     on<ClearLetterFilter>(_onClearLetterFilter);
@@ -43,7 +43,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   }
 
   Future<void> _onSearchReciters(
-    SearchReciters event,
+    SearchRecitersEvent event,
     Emitter<RecitersState> emit,
   ) async {
     if (state is! RecitersLoaded) return;

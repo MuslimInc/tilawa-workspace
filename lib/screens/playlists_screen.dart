@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 
 class PlaylistsScreen extends StatelessWidget {
   const PlaylistsScreen({super.key});
@@ -7,16 +7,20 @@ class PlaylistsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Playlists"), centerTitle: true),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.playlists),
+        centerTitle: true,
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(child: Text("Playlists Screen")),
+          Center(child: Text(AppLocalizations.of(context)!.noPlaylistsYet)),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              context.pop();
+              // TODO: Implement create playlist functionality
             },
-            child: Text("Back"),
+            child: Text(AppLocalizations.of(context)!.createPlaylist),
           ),
         ],
       ),

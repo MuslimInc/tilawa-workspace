@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciters_event.dart';
@@ -10,7 +10,7 @@ part 'reciters_state.dart';
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc() : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
-    on<SearchReciters>(_onSearchReciters);
+    on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<ClearSearch>(_onClearSearch);
@@ -23,7 +23,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
       final recitersData = await audioHandler.getRecitersData();
 
       if (recitersData != null) {
@@ -41,7 +41,10 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     }
   }
 
-  void _onSearchReciters(SearchReciters event, Emitter<RecitersState> emit) {
+  void _onSearchReciters(
+    SearchRecitersEvent event,
+    Emitter<RecitersState> emit,
+  ) {
     if (state is! RecitersLoaded) return;
 
     final currentState = state as RecitersLoaded;

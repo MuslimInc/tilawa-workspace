@@ -30,9 +30,9 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
     });
 
     if (index != -1) {
-      // Scroll to the item
+      // Scroll to the top of the list when a letter is selected
       scrollController.animateTo(
-        index * 72.0, // Approximate height of each item (Card + margin)
+        0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );

@@ -11,10 +11,10 @@ class LoadReciters extends RecitersEvent {
   const LoadReciters();
 }
 
-class SearchReciters extends RecitersEvent {
+class SearchRecitersEvent extends RecitersEvent {
   final String query;
 
-  const SearchReciters(this.query);
+  const SearchRecitersEvent(this.query);
 
   @override
   List<Object?> get props => [query];

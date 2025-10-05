@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
 import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
-import 'package:muzakri/widgets/app_with_bottom_player.dart';
+import 'package:muzakri/widgets/bottom_player.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   final Reciter reciter;
@@ -31,144 +36,124 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
       builder: (context, state) {
-        return AppWithBottomPlayer(
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.reciter.name),
-              actions: [
-                if (state is ReciterDetailsLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.reciter.name),
+            actions: [
+              if (state is ReciterDetailsLoading)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // Moshaf selector
-                if (widget.reciter.moshaf.length > 1)
-                  Builder(
-                    builder: (context) {
-                      // Remove duplicates and get unique moshaf list
-                      final uniqueMoshaf = widget.reciter.moshaf
-                          .toSet()
-                          .toList();
-                      final selectedMoshaf = state is ReciterDetailsLoaded
-                          ? state.selectedMoshaf
-                          : uniqueMoshaf.first;
-
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        child: DropdownButtonFormField<Mosahf>(
-                          initialValue: uniqueMoshaf.contains(selectedMoshaf)
-                              ? selectedMoshaf
-                              : uniqueMoshaf.first,
-                          decoration: const InputDecoration(
-                            labelText: 'Select Recitation',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: uniqueMoshaf.map((moshaf) {
-                            return DropdownMenuItem<Mosahf>(
-                              value: moshaf,
-                              child: Text(moshaf.name),
-                            );
-                          }).toList(),
-                          onChanged: (Mosahf? moshaf) {
-                            if (moshaf != null) {
-                              context.read<ReciterDetailsBloc>().add(
-                                LoadSurahList(
-                                  reciter: widget.reciter,
-                                  moshaf: moshaf,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-
-                // Content
-                Expanded(
-                  child: state is ReciterDetailsLoading
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Loading surah list...'),
-                            ],
-                          ),
-                        )
-                      : state is ReciterDetailsError
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.error, size: 64, color: Colors.red),
-                              const SizedBox(height: 16),
-                              Text(state.message),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<ReciterDetailsBloc>().add(
-                                    LoadSurahList(
-                                      reciter: widget.reciter,
-                                      moshaf: widget.reciter.moshaf.first,
-                                    ),
-                                  );
-                                },
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : state is ReciterDetailsLoaded && state.surahList.isEmpty
-                      ? const Center(child: Text('No surahs available'))
-                      : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                          builder: (context, audioState) {
-                            final hasAudio =
-                                audioState.status ==
-                                    AudioPlayerStatus.success &&
-                                audioState.mediaItem != null;
-                            // Calculate dynamic padding based on screen size and bottom player visibility
-                            final screenHeight = MediaQuery.of(
-                              context,
-                            ).size.height;
-                            final bottomPadding = hasAudio
-                                ? (screenHeight * 0.20).clamp(
-                                    80.0,
-                                    200.0,
-                                  ) // 20% of screen height, min 80px, max 200px
-                                : 0.0;
-
-                            return state is ReciterDetailsLoaded
-                                ? ListView.builder(
-                                    padding: EdgeInsets.only(
-                                      bottom: bottomPadding,
-                                    ),
-                                    itemCount: state.surahList.length,
-                                    itemBuilder: (context, index) {
-                                      final surah = state.surahList[index];
-                                      return _buildSurahCard(
-                                        surah,
-                                        index,
-                                        state,
-                                      );
-                                    },
-                                  )
-                                : const SizedBox.shrink();
-                          },
-                        ),
                 ),
-              ],
-            ),
+            ],
           ),
+          body: Column(
+            children: [
+              // Moshaf selector
+              if (widget.reciter.moshaf.length > 1)
+                Builder(
+                  builder: (context) {
+                    // Remove duplicates and get unique moshaf list
+                    final uniqueMoshaf = widget.reciter.moshaf.toSet().toList();
+                    final selectedMoshaf = state is ReciterDetailsLoaded
+                        ? state.selectedMoshaf
+                        : uniqueMoshaf.first;
+
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: DropdownButtonFormField<Mosahf>(
+                        initialValue: uniqueMoshaf.contains(selectedMoshaf)
+                            ? selectedMoshaf
+                            : uniqueMoshaf.first,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Recitation',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: uniqueMoshaf.map((moshaf) {
+                          return DropdownMenuItem<Mosahf>(
+                            value: moshaf,
+                            child: Text(moshaf.name),
+                          );
+                        }).toList(),
+                        onChanged: (Mosahf? moshaf) {
+                          if (moshaf != null) {
+                            context.read<ReciterDetailsBloc>().add(
+                              LoadSurahList(
+                                reciter: widget.reciter,
+                                moshaf: moshaf,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+
+              // Content
+              Expanded(
+                child: state is ReciterDetailsLoading
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Loading surah list...'),
+                          ],
+                        ),
+                      )
+                    : state is ReciterDetailsError
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error, size: 64, color: Colors.red),
+                            const SizedBox(height: 16),
+                            Text(state.message),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.read<ReciterDetailsBloc>().add(
+                                  LoadSurahList(
+                                    reciter: widget.reciter,
+                                    moshaf: widget.reciter.moshaf.first,
+                                  ),
+                                );
+                              },
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : state is ReciterDetailsLoaded && state.surahList.isEmpty
+                    ? Center(
+                        child: Text(
+                          AppLocalizations.of(context)!.noSurahsAvailable,
+                        ),
+                      )
+                    : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                        builder: (context, audioState) {
+                          return state is ReciterDetailsLoaded
+                              ? ListView.builder(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  itemCount: state.surahList.length,
+                                  itemBuilder: (context, index) {
+                                    final surah = state.surahList[index];
+                                    return _buildSurahCard(surah, index, state);
+                                  },
+                                )
+                              : const SizedBox.shrink();
+                        },
+                      ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: BottomPlayer(),
         );
       },
     );
@@ -272,32 +257,61 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 color: isCurrentlyPlaying ? Colors.purple[600] : null,
               ),
             ),
-            trailing: isCurrentlyPlaying
-                ? IconButton(
-                    icon: Icon(
-                      playbackState?.playing == true
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.purple,
-                    ),
-                    onPressed: () {
-                      if (playbackState?.playing == true) {
-                        context.read<AudioPlayerBloc>().add(
-                          const AudioPlayerEvent.pauseAudio(),
-                        );
-                      } else {
-                        context.read<AudioPlayerBloc>().add(
-                          const AudioPlayerEvent.playAudio(),
-                        );
-                      }
-                    },
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.play_arrow),
-                    onPressed: () {
-                      _playSurah(surah, state);
-                    },
-                  ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Download status indicator
+                FutureBuilder<bool>(
+                  future: _isSurahDownloaded(surah),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data == true) {
+                      return const Icon(
+                        Icons.download_done,
+                        color: Colors.green,
+                        size: 20,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                const SizedBox(width: 4),
+                // Download button
+                DownloadButton(
+                  surahId: surah.id,
+                  surahTitle: surah.title,
+                  reciterName: widget.reciter.name,
+                  url: surah.id,
+                ),
+                const SizedBox(width: 8),
+                // Play button
+                isCurrentlyPlaying
+                    ? IconButton(
+                        icon: Icon(
+                          playbackState?.playing == true
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.purple,
+                        ),
+                        onPressed: () {
+                          if (playbackState?.playing == true) {
+                            context.read<AudioPlayerBloc>().add(
+                              const AudioPlayerEvent.pauseAudio(),
+                            );
+                          } else {
+                            context.read<AudioPlayerBloc>().add(
+                              const AudioPlayerEvent.playAudio(),
+                            );
+                          }
+                        },
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.play_arrow),
+                        onPressed: () {
+                          _playSurah(surah, state);
+                        },
+                      ),
+              ],
+            ),
             onTap: () {
               if (isCurrentlyPlaying) {
                 // Toggle play/pause if this is the current surah
@@ -321,12 +335,94 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
+  /// Check if a surah is downloaded and get its file path
+  Future<String?> _getDownloadedFilePath(MediaItem surah) async {
+    try {
+      final downloadsRepository = sl<DownloadsRepository>();
+      // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
+      final surahId = surah.title.split(' ').first;
+      final filePath = await downloadsRepository.getDownloadedFilePath(
+        surahId,
+        widget.reciter.name,
+      );
+
+      if (filePath != null) {
+        // Validate that the file actually exists
+        final file = File(filePath);
+        if (await file.exists()) {
+          print('_getDownloadedFilePath: file exists at $filePath');
+          return filePath;
+        } else {
+          print('_getDownloadedFilePath: file does not exist at $filePath');
+          return null;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('Error checking downloaded file: $e');
+      return null;
+    }
+  }
+
+  /// Check if a surah is downloaded
+  Future<bool> _isSurahDownloaded(MediaItem surah) async {
+    try {
+      final downloadsRepository = sl<DownloadsRepository>();
+      // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
+      final surahId = surah.title.split(' ').first;
+      return await downloadsRepository.isSurahDownloaded(
+        surahId,
+        widget.reciter.name,
+      );
+    } catch (e) {
+      print('Error checking if surah is downloaded: $e');
+      return false;
+    }
+  }
+
+  /// Create a MediaItem with local file path for downloaded surahs
+  MediaItem _createLocalMediaItem(MediaItem originalSurah, String filePath) {
+    try {
+      // Convert file path to proper file:// URI
+      final fileUri = Uri.file(filePath).toString();
+
+      print('_createLocalMediaItem: original file path: $filePath');
+      print('_createLocalMediaItem: file URI: $fileUri');
+
+      return MediaItem(
+        id: fileUri, // Use file URI as ID for local files
+        title: originalSurah.title,
+        artist: originalSurah.artist,
+        album: originalSurah.album,
+        duration: originalSurah.duration,
+        artUri: originalSurah.artUri,
+        extras: {
+          ...?originalSurah.extras,
+          'isDownloaded': true,
+          'originalId': originalSurah.id, // Keep original ID for reference
+          'localFilePath': filePath, // Keep original file path for reference
+        },
+      );
+    } catch (e) {
+      print('_createLocalMediaItem error: $e');
+      print('_createLocalMediaItem: falling back to original surah');
+      // Fallback to original surah if file URI creation fails
+      return originalSurah;
+    }
+  }
+
   Future<void> _playSurah(MediaItem surah, ReciterDetailsLoaded state) async {
     try {
-      // Set the selected surah immediately for instant highlighting
-      context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
+      // Check if the surah is downloaded
+      final downloadedFilePath = await _getDownloadedFilePath(surah);
 
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
+      // Set the selected surah immediately for instant highlighting
+      if (mounted) {
+        context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
+      }
+
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
 
       // Validate surah data
       if (surah.id.isEmpty) {
@@ -341,30 +437,87 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       print(
         '_playSurah: selected surah=${surah.title}, index=$surahIndex, total surahs=${state.surahList.length}',
       );
+      print('_playSurah: downloaded file path: $downloadedFilePath');
+
+      if (downloadedFilePath != null) {
+        final fileUri = Uri.file(downloadedFilePath).toString();
+        print('_playSurah: file URI: $fileUri');
+      }
 
       if (surahIndex != -1) {
-        // Update queue with the entire surah list
+        // Create a list of surahs, using downloaded files when available
+        final List<MediaItem> surahListWithDownloads = [];
+        for (int i = 0; i < state.surahList.length; i++) {
+          final currentSurah = state.surahList[i];
+          if (i == surahIndex && downloadedFilePath != null) {
+            // Use downloaded file for the selected surah
+            surahListWithDownloads.add(
+              _createLocalMediaItem(currentSurah, downloadedFilePath),
+            );
+          } else {
+            // Check if this surah is also downloaded
+            final otherDownloadedPath = await _getDownloadedFilePath(
+              currentSurah,
+            );
+            if (otherDownloadedPath != null) {
+              surahListWithDownloads.add(
+                _createLocalMediaItem(currentSurah, otherDownloadedPath),
+              );
+            } else {
+              surahListWithDownloads.add(currentSurah);
+            }
+          }
+        }
+
+        // Update queue with the surah list (with downloaded files where available)
         print(
-          '_playSurah: updating queue with ${state.surahList.length} surahs',
+          '_playSurah: updating queue with ${surahListWithDownloads.length} surahs',
         );
-        await audioHandler.updateQueue(state.surahList);
 
-        // Ensure we're paused before seeking to prevent unwanted playback
-        await audioHandler.pause();
+        try {
+          await audioHandler.updateQueue(surahListWithDownloads);
 
-        // Skip to the selected surah
-        print('_playSurah: skipping to surah at index $surahIndex');
-        await audioHandler.skipToQueueItem(surahIndex);
+          // Ensure we're paused before seeking to prevent unwanted playback
+          await audioHandler.pause();
 
-        // Now start playing the selected surah
-        await audioHandler.play();
+          // Skip to the selected surah
+          print('_playSurah: skipping to surah at index $surahIndex');
+          await audioHandler.skipToQueueItem(surahIndex);
+
+          // Now start playing the selected surah
+          await audioHandler.play();
+        } catch (e) {
+          print(
+            '_playSurah: error playing with downloaded files, falling back to streaming',
+          );
+          // Fallback to original surah list if downloaded files fail
+          await audioHandler.updateQueue(state.surahList);
+          await audioHandler.pause();
+          await audioHandler.skipToQueueItem(surahIndex);
+          await audioHandler.play();
+        }
       } else {
         // Fallback: just play the single surah
         print('_playSurah: surah not found in list, playing single surah');
-        await audioHandler.updateQueue([surah]);
-        await audioHandler.pause();
-        await audioHandler.skipToQueueItem(0);
-        await audioHandler.play();
+        final surahToPlay = downloadedFilePath != null
+            ? _createLocalMediaItem(surah, downloadedFilePath)
+            : surah;
+
+        try {
+          await audioHandler.updateQueue([surahToPlay]);
+          await audioHandler.pause();
+          await audioHandler.skipToQueueItem(0);
+          await audioHandler.play();
+        } catch (e) {
+          print(
+            '_playSurah: error playing single downloaded surah, falling back to streaming',
+          );
+          // Fallback to original surah if downloaded file fails
+          await audioHandler.updateQueue([surah]);
+          await audioHandler.pause();
+          await audioHandler.skipToQueueItem(0);
+          await audioHandler.play();
+        }
       }
     } catch (e, stackTrace) {
       print('_playSurah error: $e');

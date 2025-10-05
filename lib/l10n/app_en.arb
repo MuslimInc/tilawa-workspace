@@ -75,5 +75,125 @@
     "position": "Position",
     "@position": {
         "description": "Position label"
+    },
+    "downloads": "Downloads",
+    "@downloads": {
+        "description": "Downloads section title"
+    },
+    "playlists": "Playlists",
+    "@playlists": {
+        "description": "Playlists section title"
+    },
+    "noDownloadsYet": "No downloads yet",
+    "@noDownloadsYet": {
+        "description": "No downloads message"
+    },
+    "downloading": "Downloading",
+    "@downloading": {
+        "description": "Downloading status"
+    },
+    "downloaded": "Downloaded",
+    "@downloaded": {
+        "description": "Downloaded status"
+    },
+    "download": "Download",
+    "@download": {
+        "description": "Download button text"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Delete button text"
+    },
+    "deleteAll": "Delete All",
+    "@deleteAll": {
+        "description": "Delete all button text"
+    },
+    "clearAllDownloads": "Clear All Downloads",
+    "@clearAllDownloads": {
+        "description": "Clear all downloads dialog title"
+    },
+    "clearAllDownloadsMessage": "Are you sure you want to delete all downloaded surahs? This action cannot be undone.",
+    "@clearAllDownloadsMessage": {
+        "description": "Clear all downloads confirmation message"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "playAll": "Play All",
+    "@playAll": {
+        "description": "Play all button text"
+    },
+    "pauseAll": "Pause All",
+    "@pauseAll": {
+        "description": "Pause all button text"
+    },
+    "playing": "Playing",
+    "@playing": {
+        "description": "Playing status"
+    },
+    "pending": "Pending",
+    "@pending": {
+        "description": "Pending status"
+    },
+    "cancelled": "Cancelled",
+    "@cancelled": {
+        "description": "Cancelled status"
+    },
+    "completed": "Completed",
+    "@completed": {
+        "description": "Completed status"
+    },
+    "downloadProgress": "Download Progress",
+    "@downloadProgress": {
+        "description": "Download progress label"
+    },
+    "fileSize": "File Size",
+    "@fileSize": {
+        "description": "File size label"
+    },
+    "downloadedSize": "Downloaded Size",
+    "@downloadedSize": {
+        "description": "Downloaded size label"
+    },
+    "playlistsScreen": "Playlists Screen",
+    "@playlistsScreen": {
+        "description": "Playlists screen content"
+    },
+    "back": "Back",
+    "@back": {
+        "description": "Back button text"
+    },
+    "noPlaylistsYet": "No playlists yet",
+    "@noPlaylistsYet": {
+        "description": "No playlists message"
+    },
+    "createPlaylist": "Create Playlist",
+    "@createPlaylist": {
+        "description": "Create playlist button text"
+    },
+    "retry": "Retry",
+    "@retry": {
+        "description": "Retry button text"
+    },
+    "downloadStatusChecked": "Download status checked",
+    "@downloadStatusChecked": {
+        "description": "Download status checked message"
+    },
+    "fileValidationCompleted": "File validation completed",
+    "@fileValidationCompleted": {
+        "description": "File validation completed message"
+    },
+    "validDownloadsLoaded": "Valid downloads loaded",
+    "@validDownloadsLoaded": {
+        "description": "Valid downloads loaded message"
+    },
+    "playbackInitiated": "Playback initiated",
+    "@playbackInitiated": {
+        "description": "Playback initiated message"
+    },
+    "error": "Error",
+    "@error": {
+        "description": "Error label"
     }
 }
