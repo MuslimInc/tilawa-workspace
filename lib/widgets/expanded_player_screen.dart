@@ -48,37 +48,95 @@ class ExpandedPlayerScreen extends StatelessWidget {
 
           return Column(
             children: [
-              // Album art
+              // Album art with Hero animation
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(40),
                   child: Center(
                     child: Hero(
-                      tag: 'album_art',
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: mediaItem.artUri != null
-                              ? Image.network(
-                                  mediaItem.artUri.toString(),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
+                      tag: 'audio_player',
+                      flightShuttleBuilder:
+                          (
+                            flightContext,
+                            animation,
+                            flightDirection,
+                            fromHeroContext,
+                            toHeroContext,
+                          ) {
+                            return Material(
+                              color: Colors.transparent,
+                              child: AnimatedBuilder(
+                                animation: animation,
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: 1.0 + (animation.value * 0.1),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2 * animation.value,
+                                            ),
+                                            blurRadius: 20 * animation.value,
+                                            offset: Offset(
+                                              0,
+                                              10 * animation.value,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      child: fromHeroContext.widget,
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: mediaItem.artUri != null
+                                ? Image.network(
+                                    mediaItem.artUri.toString(),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.1),
+                                        child: Icon(
+                                          FluentIcons.music_note_1_20_regular,
+                                          color: Theme.of(context).primaryColor,
+                                          size: 100,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1),
+                                    child: Icon(
                                       FluentIcons.music_note_1_20_regular,
                                       color: Theme.of(context).primaryColor,
                                       size: 100,
-                                    );
-                                  },
-                                )
-                              : Icon(
-                                  FluentIcons.music_note_1_20_regular,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 100,
-                                ),
+                                    ),
+                                  ),
+                          ),
                         ),
                       ),
                     ),

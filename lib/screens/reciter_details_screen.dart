@@ -231,9 +231,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         final playbackState = audioState.playbackState;
         // Highlight if the surah is selected (clicked) or currently playing
         // final isSelected = state.selectedSurahId == surah.id;
-        final isCurrentlyPlaying =
-            currentMediaItem?.id == surah.id &&
-            (playbackState?.playing ?? false);
+        final isCurrentlyPlaying = currentMediaItem?.id == surah.id;
 
         var roundedRectangleBorder = RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

@@ -24,19 +24,26 @@ class AppWithBottomPlayer extends StatelessWidget {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
         return Scaffold(
+          // body: child,
+          // bottomNavigationBar: state.hasMediaItem
+          //     ? BottomPlayer(
+          //         isVisible: state.hasMediaItem,
+          //         onTap: () => _navigateToExpandedPlayer(context),
+          //       )
+          //     : null,
           body: Stack(
             children: [
               // Main content
               child,
 
               // Bottom player
-              if (state.isPlaying)
+              if (state.hasMediaItem)
                 Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
                   child: BottomPlayer(
-                    isVisible: state.isPlaying,
+                    isVisible: state.hasMediaItem,
                     onTap: () => _navigateToExpandedPlayer(context),
                   ),
                 ),
