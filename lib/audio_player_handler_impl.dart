@@ -540,7 +540,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   /// Get surah list for a specific moshaf
-  Future<List<MediaItem>?> getSurahListForMoshaf(Mosahf moshaf) async {
+  Future<List<MediaItem>?> getSurahListForMoshaf(
+    Mosahf moshaf, {
+    String? reciterName,
+  }) async {
     try {
       final surahList = moshaf.surahList.split(',');
       final mediaItems = <MediaItem>[];
@@ -556,7 +559,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
             id: mediaItemId,
             title: '$formattedSurahId - $surahName',
             album: moshaf.name,
-            artist: '', // Will be set by the calling screen
+            artist: reciterName ?? '', // Set reciter name if provided
             duration: const Duration(minutes: 5), // Default duration
           ),
         );

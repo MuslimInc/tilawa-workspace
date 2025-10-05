@@ -54,7 +54,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(
       currentState.copyWith(
         searchQuery: event.query,
-        selectedLetter: null,
+        clearSelectedLetter: true,
         filteredReciters: filteredReciters,
       ),
     );
@@ -94,7 +94,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
     emit(
       currentState.copyWith(
-        selectedLetter: null,
+        clearSelectedLetter: true,
         filteredReciters: filteredReciters,
       ),
     );

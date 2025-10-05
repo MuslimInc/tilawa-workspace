@@ -24,7 +24,10 @@ class ReciterDetailsBloc
 
     try {
       final audioHandler = getIt<AudioPlayerHandlerImpl>();
-      final surahList = await audioHandler.getSurahListForMoshaf(event.moshaf);
+      final surahList = await audioHandler.getSurahListForMoshaf(
+        event.moshaf,
+        reciterName: event.reciter.name,
+      );
 
       if (surahList != null) {
         emit(
