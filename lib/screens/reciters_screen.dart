@@ -138,7 +138,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                         ),
                       ),
                       onChanged: (value) {
-                        context.read<RecitersBloc>().add(SearchReciters(value));
+                        context.read<RecitersBloc>().add(
+                          SearchRecitersEvent(value),
+                        );
                       },
                     ),
                   ],

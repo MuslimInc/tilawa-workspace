@@ -11,8 +11,8 @@ class LoadReciters extends RecitersEvent {
   const LoadReciters();
 }
 
-class SearchReciters extends RecitersEvent {
-  const SearchReciters(this.query);
+class SearchRecitersEvent extends RecitersEvent {
+  const SearchRecitersEvent(this.query);
 
   final String query;
 

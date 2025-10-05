@@ -10,7 +10,7 @@ part 'reciters_state.dart';
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc() : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
-    on<SearchReciters>(_onSearchReciters);
+    on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<ClearSearch>(_onClearSearch);
@@ -41,7 +41,10 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     }
   }
 
-  void _onSearchReciters(SearchReciters event, Emitter<RecitersState> emit) {
+  void _onSearchReciters(
+    SearchRecitersEvent event,
+    Emitter<RecitersState> emit,
+  ) {
     if (state is! RecitersLoaded) return;
 
     final currentState = state as RecitersLoaded;
