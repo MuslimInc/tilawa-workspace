@@ -9,3 +9,10 @@ linter:
     file_names: false
     no_logic_in_create_state: false
     always_require_non_null_named_parameters: false
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    invalid_annotation_target: ignore

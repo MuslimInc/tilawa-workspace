@@ -1,0 +1,79 @@
+{
+    "@@locale": "en",
+    "appTitle": "Muzakri",
+    "@appTitle": {
+        "description": "The title of the application"
+    },
+    "reciters": "Reciters",
+    "@reciters": {
+        "description": "Reciters section title"
+    },
+    "searchReciters": "Search reciters...",
+    "@searchReciters": {
+        "description": "Search reciters placeholder text"
+    },
+    "loadingReciters": "Loading reciters...",
+    "@loadingReciters": {
+        "description": "Loading reciters message"
+    },
+    "noRecitersFound": "No reciters found",
+    "@noRecitersFound": {
+        "description": "No reciters found message"
+    },
+    "noRecitersMatchSearch": "No reciters match your search",
+    "@noRecitersMatchSearch": {
+        "description": "No reciters match search message"
+    },
+    "retry": "Retry",
+    "@retry": {
+        "description": "Retry button text"
+    },
+    "error": "Error",
+    "@error": {
+        "description": "Error message"
+    },
+    "filteredByLetter": "Filtered by letter:",
+    "@filteredByLetter": {
+        "description": "Filtered by letter indicator"
+    },
+    "selectRecitation": "Select Recitation",
+    "@selectRecitation": {
+        "description": "Select recitation dropdown label"
+    },
+    "loadingSurahList": "Loading surah list...",
+    "@loadingSurahList": {
+        "description": "Loading surah list message"
+    },
+    "noSurahsAvailable": "No surahs available",
+    "@noSurahsAvailable": {
+        "description": "No surahs available message"
+    },
+    "play": "Play",
+    "@play": {
+        "description": "Play button text"
+    },
+    "pause": "Pause",
+    "@pause": {
+        "description": "Pause button text"
+    },
+    "next": "Next",
+    "@next": {
+        "description": "Next button text"
+    },
+    "previous": "Previous",
+    "@previous": {
+        "description": "Previous button text"
+    },
+    "currentPlaying": "Now Playing",
+    "@currentPlaying": {
+        "description": "Current playing indicator"
+    },
+    "duration": "Duration",
+    "@duration": {
+        "description": "Duration label"
+    },
+    "position": "Position",
+    "@position": {
+        "description": "Position label"
+    }
+}

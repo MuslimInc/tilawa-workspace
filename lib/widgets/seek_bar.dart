@@ -44,67 +44,69 @@ class SeekBarState extends State<SeekBar> {
     if (_dragValue != null && !_dragging) {
       _dragValue = null;
     }
-    return Stack(
+
+    return Column(
       children: [
-        SliderTheme(
-          data: _sliderThemeData.copyWith(
-            thumbShape: HiddenThumbComponentShape(),
-            activeTrackColor: Colors.blue.shade100,
-            inactiveTrackColor: Colors.grey.shade300,
-          ),
-          child: ExcludeSemantics(
-            child: Slider(
-              min: 0.0,
-              max: widget.duration.inMilliseconds.toDouble(),
-              value: min(
-                widget.bufferedPosition.inMilliseconds.toDouble(),
-                widget.duration.inMilliseconds.toDouble(),
+        // Progress bar
+        Container(
+          height: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Buffered progress background
+              SliderTheme(
+                data: _sliderThemeData.copyWith(
+                  thumbShape: HiddenThumbComponentShape(),
+                  activeTrackColor: Colors.blue.shade100,
+                  inactiveTrackColor: Colors.grey.shade300,
+                ),
+                child: ExcludeSemantics(
+                  child: Slider(
+                    min: 0.0,
+                    max: widget.duration.inMilliseconds.toDouble(),
+                    value: min(
+                      widget.bufferedPosition.inMilliseconds.toDouble(),
+                      widget.duration.inMilliseconds.toDouble(),
+                    ),
+                    onChanged: (value) {},
+                  ),
+                ),
               ),
-              onChanged: (value) {},
-            ),
-          ),
-        ),
-        SliderTheme(
-          data: _sliderThemeData.copyWith(
-            inactiveTrackColor: Colors.transparent,
-          ),
-          child: Slider(
-            min: 0.0,
-            max: widget.duration.inMilliseconds.toDouble(),
-            value: value,
-            onChanged: (value) {
-              if (!_dragging) {
-                _dragging = true;
-              }
-              setState(() {
-                _dragValue = value;
-              });
-              if (widget.onChanged != null) {
-                widget.onChanged!(Duration(milliseconds: value.round()));
-              }
-            },
-            onChangeEnd: (value) {
-              if (widget.onChangeEnd != null) {
-                widget.onChangeEnd!(Duration(milliseconds: value.round()));
-              }
-              _dragging = false;
-            },
-          ),
-        ),
-        Positioned(
-          right: 16.0,
-          bottom: 0.0,
-          child: Text(
-            RegExp(
-                  r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$',
-                ).firstMatch("$_remaining")?.group(1) ??
-                '$_remaining',
-            style: Theme.of(context).textTheme.bodySmall,
+              // Current progress
+              SliderTheme(
+                data: _sliderThemeData.copyWith(
+                  inactiveTrackColor: Colors.transparent,
+                ),
+                child: Slider(
+                  min: 0.0,
+                  max: widget.duration.inMilliseconds.toDouble(),
+                  value: value,
+                  onChanged: (value) {
+                    if (!_dragging) {
+                      _dragging = true;
+                    }
+                    setState(() {
+                      _dragValue = value;
+                    });
+                    if (widget.onChanged != null) {
+                      widget.onChanged!(Duration(milliseconds: value.round()));
+                    }
+                  },
+                  onChangeEnd: (value) {
+                    if (widget.onChangeEnd != null) {
+                      widget.onChangeEnd!(
+                        Duration(milliseconds: value.round()),
+                      );
+                    }
+                    _dragging = false;
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
-
-  Duration get _remaining => widget.duration - widget.position;
 }

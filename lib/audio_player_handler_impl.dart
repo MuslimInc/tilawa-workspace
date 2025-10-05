@@ -81,12 +81,13 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         playbackState,
         _player.shuffleIndicesStream.whereType<List<int>>(),
         (queue, playbackState, shuffleIndices) => QueueState(
-          queue,
-          playbackState.queueIndex,
-          playbackState.shuffleMode == AudioServiceShuffleMode.all
+          queue: queue,
+          queueIndex: playbackState.queueIndex,
+          shuffleIndices:
+              playbackState.shuffleMode == AudioServiceShuffleMode.all
               ? shuffleIndices
               : null,
-          playbackState.repeatMode,
+          repeatMode: playbackState.repeatMode,
         ),
       ).where(
         (state) =>

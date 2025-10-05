@@ -1,23 +1,24 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class QueueState {
+part 'queue_state.freezed.dart';
+
+@freezed
+abstract class QueueState with _$QueueState {
+  const factory QueueState({
+    required List<MediaItem> queue,
+    required int? queueIndex,
+    required List<int>? shuffleIndices,
+    required AudioServiceRepeatMode repeatMode,
+  }) = _QueueState;
+
+  const QueueState._();
+
   static const QueueState empty = QueueState(
-    [],
-    0,
-    [],
-    AudioServiceRepeatMode.none,
-  );
-
-  final List<MediaItem> queue;
-  final int? queueIndex;
-  final List<int>? shuffleIndices;
-  final AudioServiceRepeatMode repeatMode;
-
-  const QueueState(
-    this.queue,
-    this.queueIndex,
-    this.shuffleIndices,
-    this.repeatMode,
+    queue: [],
+    queueIndex: 0,
+    shuffleIndices: [],
+    repeatMode: AudioServiceRepeatMode.none,
   );
 
   bool get hasPrevious =>

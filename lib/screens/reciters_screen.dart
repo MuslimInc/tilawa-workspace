@@ -1,16 +1,13 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
 import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/widgets/app_with_bottom_player.dart';
 import 'package:muzakri/widgets/arabic_alphabet_scrollbar.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:muzakri/widgets/language_switcher.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -52,7 +49,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
       builder: (context, state) {
         return AppWithBottomPlayer(
           child: Scaffold(
-            appBar: AppBar(title: const Text('Quran Reciters')),
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.reciters),
+              actions: const [LanguageSwitcher(), SizedBox(width: 8)],
+            ),
             body: Column(
               children: [
                 // Search bar and letter filter
@@ -90,7 +90,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Filtered by letter: ',
+                                AppLocalizations.of(context)!.filteredByLetter,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w500,
@@ -118,7 +118,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search reciters...',
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.searchReciters,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon:
                               (state is RecitersLoaded &&
@@ -155,13 +157,17 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       // Main content
                       Expanded(
                         child: state is RecitersLoading
-                            ? const Center(
+                            ? Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text('Loading reciters...'),
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.loadingReciters,
+                                    ),
                                   ],
                                 ),
                               )
@@ -184,7 +190,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                           const LoadReciters(),
                                         );
                                       },
-                                      child: const Text('Retry'),
+                                      child: Text(
+                                        AppLocalizations.of(context)!.retry,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -203,8 +211,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     const SizedBox(height: 16),
                                     Text(
                                       state.searchQuery.isEmpty
-                                          ? 'No reciters found'
-                                          : 'No reciters match your search',
+                                          ? AppLocalizations.of(
+                                              context,
+                                            )!.noRecitersFound
+                                          : AppLocalizations.of(
+                                              context,
+                                            )!.noRecitersMatchSearch,
                                     ),
                                   ],
                                 ),
@@ -280,315 +292,5 @@ class _RecitersScreenState extends State<RecitersScreen> {
         },
       ),
     );
-  }
-}
-
-class ReciterDetailsScreen extends StatefulWidget {
-  final Reciter reciter;
-
-  const ReciterDetailsScreen({super.key, required this.reciter});
-
-  @override
-  State<ReciterDetailsScreen> createState() => _ReciterDetailsScreenState();
-}
-
-class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    final selectedMoshaf = widget.reciter.moshaf.first;
-    context.read<ReciterDetailsBloc>().add(
-      LoadSurahList(reciter: widget.reciter, moshaf: selectedMoshaf),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-      builder: (context, state) {
-        return AppWithBottomPlayer(
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.reciter.name),
-              actions: [
-                if (state is ReciterDetailsLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // Moshaf selector
-                if (widget.reciter.moshaf.length > 1)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: DropdownButtonFormField<Mosahf>(
-                      initialValue: state is ReciterDetailsLoaded
-                          ? state.selectedMoshaf
-                          : widget.reciter.moshaf.first,
-                      decoration: const InputDecoration(
-                        labelText: 'Select Recitation',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: widget.reciter.moshaf.map((moshaf) {
-                        return DropdownMenuItem<Mosahf>(
-                          value: moshaf,
-                          child: Text(moshaf.name),
-                        );
-                      }).toList(),
-                      onChanged: (Mosahf? moshaf) {
-                        if (moshaf != null) {
-                          context.read<ReciterDetailsBloc>().add(
-                            LoadSurahList(
-                              reciter: widget.reciter,
-                              moshaf: moshaf,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-
-                // Content
-                Expanded(
-                  child: state is ReciterDetailsLoading
-                      ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Loading surah list...'),
-                            ],
-                          ),
-                        )
-                      : state is ReciterDetailsError
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.error, size: 64, color: Colors.red),
-                              const SizedBox(height: 16),
-                              Text(state.message),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<ReciterDetailsBloc>().add(
-                                    LoadSurahList(
-                                      reciter: widget.reciter,
-                                      moshaf: widget.reciter.moshaf.first,
-                                    ),
-                                  );
-                                },
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : state is ReciterDetailsLoaded && state.surahList.isEmpty
-                      ? const Center(child: Text('No surahs available'))
-                      : StreamBuilder<MediaItem?>(
-                          stream: globalAudioHandler.mediaItem,
-                          builder: (context, snapshot) {
-                            final hasAudio = snapshot.data != null;
-                            // Calculate dynamic padding based on screen size and bottom player visibility
-                            final screenHeight = MediaQuery.of(
-                              context,
-                            ).size.height;
-                            final bottomPadding = hasAudio
-                                ? (screenHeight * 0.14).clamp(
-                                    80.0,
-                                    150.0,
-                                  ) // 12% of screen height, min 80px, max 120px
-                                : 0.0;
-
-                            return state is ReciterDetailsLoaded
-                                ? ListView.builder(
-                                    padding: EdgeInsets.only(
-                                      bottom: bottomPadding,
-                                    ),
-                                    itemCount: state.surahList.length,
-                                    itemBuilder: (context, index) {
-                                      final surah = state.surahList[index];
-                                      return _buildSurahCard(
-                                        surah,
-                                        index,
-                                        state,
-                                      );
-                                    },
-                                  )
-                                : const SizedBox.shrink();
-                          },
-                        ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSurahCard(
-    MediaItem surah,
-    int index,
-    ReciterDetailsLoaded state,
-  ) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream:
-          Rx.combineLatest2<MediaItem?, PlaybackState, Map<String, dynamic>>(
-            globalAudioHandler.mediaItem,
-            globalAudioHandler.playbackState,
-            (mediaItem, playbackState) => {
-              'mediaItem': mediaItem,
-              'playbackState': playbackState,
-            },
-          ),
-      builder: (context, snapshot) {
-        final data = snapshot.data;
-        final currentMediaItem = data?['mediaItem'] as MediaItem?;
-        final playbackState = data?['playbackState'] as PlaybackState?;
-        // Highlight if the surah is selected (clicked) or currently playing
-        final isSelected = state.selectedSurahId == surah.id;
-        final isCurrentlyPlaying =
-            currentMediaItem?.id == surah.id &&
-            (playbackState?.playing ?? false);
-        final shouldHighlight = isSelected || isCurrentlyPlaying;
-
-        var roundedRectangleBorder = RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        );
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          color: shouldHighlight ? Colors.purple.withValues(alpha: 0.1) : null,
-          shape: roundedRectangleBorder,
-          elevation: 0,
-          child: ListTile(
-            shape: roundedRectangleBorder,
-            leading: CircleAvatar(
-              backgroundColor: shouldHighlight
-                  ? Colors.purple
-                  : Theme.of(context).primaryColor,
-              child: shouldHighlight
-                  ? const Icon(Icons.music_note, color: Colors.white, size: 20)
-                  : Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-            title: Text(
-              surah.title,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: shouldHighlight ? Colors.purple[800] : null,
-              ),
-            ),
-            subtitle: Text(
-              surah.album ?? '',
-              style: TextStyle(
-                color: shouldHighlight ? Colors.purple[600] : null,
-              ),
-            ),
-            trailing: isCurrentlyPlaying
-                ? IconButton(
-                    icon: Icon(
-                      playbackState?.playing == true
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.purple,
-                    ),
-                    onPressed: () {
-                      if (playbackState?.playing == true) {
-                        globalAudioHandler.pause();
-                      } else {
-                        globalAudioHandler.play();
-                      }
-                    },
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.play_arrow),
-                    onPressed: () {
-                      _playSurah(surah, state);
-                    },
-                  ),
-            onTap: () {
-              if (isCurrentlyPlaying) {
-                // Toggle play/pause if this is the current surah
-                if (playbackState?.playing == true) {
-                  globalAudioHandler.pause();
-                } else {
-                  globalAudioHandler.play();
-                }
-              } else {
-                // Play this surah
-                _playSurah(surah, state);
-              }
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _playSurah(MediaItem surah, ReciterDetailsLoaded state) async {
-    try {
-      // Set the selected surah immediately for instant highlighting
-      context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
-
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
-
-      // Find the index of the selected surah in the full list
-      final surahIndex = state.surahList.indexWhere(
-        (item) => item.id == surah.id,
-      );
-
-      print(
-        '_playSurah: selected surah=${surah.title}, index=$surahIndex, total surahs=${state.surahList.length}',
-      );
-
-      if (surahIndex != -1) {
-        // Update queue with the entire surah list
-        print(
-          '_playSurah: updating queue with ${state.surahList.length} surahs',
-        );
-        await audioHandler.updateQueue(state.surahList);
-
-        // Ensure we're paused before seeking to prevent unwanted playback
-        await audioHandler.pause();
-
-        // Skip to the selected surah
-        print('_playSurah: skipping to surah at index $surahIndex');
-        await audioHandler.skipToQueueItem(surahIndex);
-
-        // Now start playing the selected surah
-        await audioHandler.play();
-      } else {
-        // Fallback: just play the single surah
-        print('_playSurah: surah not found in list, playing single surah');
-        await audioHandler.updateQueue([surah]);
-        await audioHandler.pause();
-        await audioHandler.skipToQueueItem(0);
-        await audioHandler.play();
-      }
-    } catch (e) {
-      print('_playSurah error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error playing surah: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }

@@ -1,0 +1,79 @@
+{
+    "@@locale": "ar",
+    "appTitle": "مزكري",
+    "@appTitle": {
+        "description": "The title of the application"
+    },
+    "reciters": "القراء",
+    "@reciters": {
+        "description": "Reciters section title"
+    },
+    "searchReciters": "البحث عن القراء...",
+    "@searchReciters": {
+        "description": "Search reciters placeholder text"
+    },
+    "loadingReciters": "جاري تحميل القراء...",
+    "@loadingReciters": {
+        "description": "Loading reciters message"
+    },
+    "noRecitersFound": "لم يتم العثور على قراء",
+    "@noRecitersFound": {
+        "description": "No reciters found message"
+    },
+    "noRecitersMatchSearch": "لا يوجد قراء يطابقون البحث",
+    "@noRecitersMatchSearch": {
+        "description": "No reciters match search message"
+    },
+    "retry": "إعادة المحاولة",
+    "@retry": {
+        "description": "Retry button text"
+    },
+    "error": "خطأ",
+    "@error": {
+        "description": "Error message"
+    },
+    "filteredByLetter": "مفلتر بالحرف:",
+    "@filteredByLetter": {
+        "description": "Filtered by letter indicator"
+    },
+    "selectRecitation": "اختر الرواية",
+    "@selectRecitation": {
+        "description": "Select recitation dropdown label"
+    },
+    "loadingSurahList": "جاري تحميل قائمة السور...",
+    "@loadingSurahList": {
+        "description": "Loading surah list message"
+    },
+    "noSurahsAvailable": "لا توجد سور متاحة",
+    "@noSurahsAvailable": {
+        "description": "No surahs available message"
+    },
+    "play": "تشغيل",
+    "@play": {
+        "description": "Play button text"
+    },
+    "pause": "إيقاف",
+    "@pause": {
+        "description": "Pause button text"
+    },
+    "next": "التالي",
+    "@next": {
+        "description": "Next button text"
+    },
+    "previous": "السابق",
+    "@previous": {
+        "description": "Previous button text"
+    },
+    "currentPlaying": "جاري التشغيل",
+    "@currentPlaying": {
+        "description": "Current playing indicator"
+    },
+    "duration": "المدة",
+    "@duration": {
+        "description": "Duration label"
+    },
+    "position": "الموضع",
+    "@position": {
+        "description": "Position label"
+    }
+}
