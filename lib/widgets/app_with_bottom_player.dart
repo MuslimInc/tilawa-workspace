@@ -33,17 +33,24 @@ class AppWithBottomPlayer extends StatelessWidget {
           //     : null,
           body: Stack(
             children: [
-              // Main content
-              child,
+              // Main content with padding for bottom player
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: state.hasMediaItem
+                      ? 80.0
+                      : 0.0, // Add padding when player is visible
+                ),
+                child: child,
+              ),
 
               // Bottom player
               if (state.hasMediaItem)
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 0,
+                  bottom:
+                      kBottomNavigationBarHeight, // Account for bottom nav bar
                   child: BottomPlayer(
-                    isVisible: state.hasMediaItem,
                     onTap: () => _navigateToExpandedPlayer(context),
                   ),
                 ),

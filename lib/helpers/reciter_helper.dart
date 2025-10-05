@@ -1,13 +1,13 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
 import 'package:muzakri/reciter_model.dart';
 
 class ReciterHelper {
   /// Extract reciter information from a MediaItem
   static Future<Reciter?> getReciterFromMediaItem(MediaItem mediaItem) async {
     try {
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
       final reciters = await audioHandler.getRecitersData();
 
       if (reciters == null) return null;

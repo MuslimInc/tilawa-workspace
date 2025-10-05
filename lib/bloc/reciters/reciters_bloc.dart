@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciters_event.dart';
@@ -23,7 +23,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
       final recitersData = await audioHandler.getRecitersData();
 
       if (recitersData != null) {

@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/di_container.dart';
+import 'package:muzakri/core/di/injection_container.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciter_details_event.dart';
@@ -23,7 +23,7 @@ class ReciterDetailsBloc
     emit(const ReciterDetailsLoading());
 
     try {
-      final audioHandler = getIt<AudioPlayerHandlerImpl>();
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
       final surahList = await audioHandler.getSurahListForMoshaf(
         event.moshaf,
         reciterName: event.reciter.name,

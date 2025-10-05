@@ -75,5 +75,125 @@
     "position": "الموضع",
     "@position": {
         "description": "Position label"
+    },
+    "downloads": "التحميلات",
+    "@downloads": {
+        "description": "Downloads section title"
+    },
+    "playlists": "قوائم التشغيل",
+    "@playlists": {
+        "description": "Playlists section title"
+    },
+    "noDownloadsYet": "لا توجد تحميلات بعد",
+    "@noDownloadsYet": {
+        "description": "No downloads message"
+    },
+    "downloading": "جاري التحميل",
+    "@downloading": {
+        "description": "Downloading status"
+    },
+    "downloaded": "تم التحميل",
+    "@downloaded": {
+        "description": "Downloaded status"
+    },
+    "download": "تحميل",
+    "@download": {
+        "description": "Download button text"
+    },
+    "delete": "حذف",
+    "@delete": {
+        "description": "Delete button text"
+    },
+    "deleteAll": "حذف الكل",
+    "@deleteAll": {
+        "description": "Delete all button text"
+    },
+    "clearAllDownloads": "مسح جميع التحميلات",
+    "@clearAllDownloads": {
+        "description": "Clear all downloads dialog title"
+    },
+    "clearAllDownloadsMessage": "هل أنت متأكد من حذف جميع السور المحملة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "@clearAllDownloadsMessage": {
+        "description": "Clear all downloads confirmation message"
+    },
+    "cancel": "إلغاء",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "playAll": "تشغيل الكل",
+    "@playAll": {
+        "description": "Play all button text"
+    },
+    "pauseAll": "إيقاف الكل",
+    "@pauseAll": {
+        "description": "Pause all button text"
+    },
+    "playing": "جاري التشغيل",
+    "@playing": {
+        "description": "Playing status"
+    },
+    "pending": "في الانتظار",
+    "@pending": {
+        "description": "Pending status"
+    },
+    "cancelled": "ملغي",
+    "@cancelled": {
+        "description": "Cancelled status"
+    },
+    "completed": "مكتمل",
+    "@completed": {
+        "description": "Completed status"
+    },
+    "downloadProgress": "تقدم التحميل",
+    "@downloadProgress": {
+        "description": "Download progress label"
+    },
+    "fileSize": "حجم الملف",
+    "@fileSize": {
+        "description": "File size label"
+    },
+    "downloadedSize": "الحجم المحمل",
+    "@downloadedSize": {
+        "description": "Downloaded size label"
+    },
+    "playlistsScreen": "شاشة قوائم التشغيل",
+    "@playlistsScreen": {
+        "description": "Playlists screen content"
+    },
+    "back": "رجوع",
+    "@back": {
+        "description": "Back button text"
+    },
+    "noPlaylistsYet": "لا توجد قوائم تشغيل بعد",
+    "@noPlaylistsYet": {
+        "description": "No playlists message"
+    },
+    "createPlaylist": "إنشاء قائمة تشغيل",
+    "@createPlaylist": {
+        "description": "Create playlist button text"
+    },
+    "retry": "إعادة المحاولة",
+    "@retry": {
+        "description": "Retry button text"
+    },
+    "downloadStatusChecked": "تم فحص حالة التحميل",
+    "@downloadStatusChecked": {
+        "description": "Download status checked message"
+    },
+    "fileValidationCompleted": "تم التحقق من صحة الملف",
+    "@fileValidationCompleted": {
+        "description": "File validation completed message"
+    },
+    "validDownloadsLoaded": "تم تحميل التحميلات الصحيحة",
+    "@validDownloadsLoaded": {
+        "description": "Valid downloads loaded message"
+    },
+    "playbackInitiated": "تم بدء التشغيل",
+    "@playbackInitiated": {
+        "description": "Playback initiated message"
+    },
+    "error": "خطأ",
+    "@error": {
+        "description": "Error label"
     }
 }

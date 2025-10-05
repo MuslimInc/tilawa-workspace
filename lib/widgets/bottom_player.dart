@@ -9,10 +9,9 @@ import 'package:muzakri/position_data.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
 
 class BottomPlayer extends StatefulWidget {
-  final bool isVisible;
   final VoidCallback? onTap;
 
-  const BottomPlayer({super.key, this.isVisible = true, this.onTap});
+  const BottomPlayer({super.key, this.onTap});
 
   @override
   State<BottomPlayer> createState() => _BottomPlayerState();
@@ -38,18 +37,15 @@ class _BottomPlayerState extends State<BottomPlayer> {
   Widget build(BuildContext context) {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
+        final mediaItem = state.mediaItem;
+        if (mediaItem == null) {
+          return const SizedBox.shrink();
+        }
         if (state.status != AudioPlayerStatus.success) {
           return const SizedBox.shrink();
         }
 
-        final mediaItem = state.mediaItem!;
         final positionData = state.positionData;
-
-        // Debug logging
-        print('BottomPlayer: MediaItem artist: "${mediaItem.artist}"');
-        print(
-          'BottomPlayer: Has reciter info: ${ReciterHelper.hasReciterInfo(mediaItem)}',
-        );
 
         final isPlaying = state.isPlaying;
         final position =

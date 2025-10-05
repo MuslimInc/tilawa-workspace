@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/reciter_model.dart';
-import 'package:muzakri/screens/playlists_screen.dart';
+import 'package:muzakri/screens/main_screen.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
-import 'package:muzakri/screens/reciters_screen.dart';
 
 class AppRouter {
-  static const String reciters = '/';
+  static const String home = '/';
   static const String reciterDetails = '/reciter/:reciterId';
-  static const String playlists = '/playlists';
 
   static final GoRouter router = GoRouter(
-    initialLocation: reciters,
+    initialLocation: home,
     debugLogDiagnostics: true,
     redirect: (context, state) {
       // Add any global redirects here if needed
@@ -19,9 +17,9 @@ class AppRouter {
     },
     routes: [
       GoRoute(
-        path: reciters,
-        name: 'reciters',
-        builder: (context, state) => const RecitersScreen(),
+        path: home,
+        name: 'home',
+        builder: (context, state) => const MainScreen(),
       ),
       GoRoute(
         path: reciterDetails,
@@ -30,16 +28,11 @@ class AppRouter {
           // We need to get the reciter from the state or pass it through extra
           final reciter = state.extra as Reciter?;
           if (reciter == null) {
-            // Fallback: return to reciters screen if no reciter data
-            return const RecitersScreen();
+            // Fallback: return to main screen if no reciter data
+            return const MainScreen();
           }
           return ReciterDetailsScreen(reciter: reciter);
         },
-      ),
-      GoRoute(
-        path: playlists,
-        name: 'playlists',
-        builder: (context, state) => const PlaylistsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -52,7 +45,7 @@ class AppRouter {
             Text('Page not found: ${state.uri}'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go(reciters),
+              onPressed: () => context.go(home),
               child: const Text('Go Home'),
             ),
           ],
