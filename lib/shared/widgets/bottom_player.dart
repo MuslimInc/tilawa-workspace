@@ -3,7 +3,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/helpers/reciter_helper.dart';
 import 'package:muzakri/position_data.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';

@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+part of 'reciters_bloc.dart';
 
 abstract class RecitersEvent extends Equatable {
   const RecitersEvent();
@@ -12,27 +12,27 @@ class LoadReciters extends RecitersEvent {
 }
 
 class SearchRecitersEvent extends RecitersEvent {
-  const SearchRecitersEvent(this.query);
-
   final String query;
+
+  const SearchRecitersEvent(this.query);
 
   @override
   List<Object?> get props => [query];
 }
 
 class FilterByLetter extends RecitersEvent {
-  const FilterByLetter(this.letter);
-
   final String letter;
+
+  const FilterByLetter(this.letter);
 
   @override
   List<Object?> get props => [letter];
 }
 
-class ClearSearch extends RecitersEvent {
-  const ClearSearch();
-}
-
 class ClearLetterFilter extends RecitersEvent {
   const ClearLetterFilter();
+}
+
+class ClearSearch extends RecitersEvent {
+  const ClearSearch();
 }

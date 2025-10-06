@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
+import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
-import 'package:muzakri/widgets/arabic_alphabet_scrollbar.dart';
-import 'package:muzakri/widgets/language_switcher.dart';
+import 'package:muzakri/shared/widgets/language_switcher.dart';
+import 'package:muzakri/shared/widgets/arabic_alphabet_scrollbar.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});

@@ -1,30 +1,20 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/reciters/domain/usecases/get_reciters.dart';
-import 'package:muzakri/features/reciters/domain/usecases/get_reciters_by_letter.dart';
-import 'package:muzakri/features/reciters/domain/usecases/search_reciters.dart'
-    as search_usecase;
-import 'package:muzakri/features/reciters/presentation/bloc/reciters_event.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciters_state.dart';
+import 'package:muzakri/audio_player_handler_impl.dart';
+import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/reciter_model.dart';
+
+part 'reciters_event.dart';
+part 'reciters_state.dart';
 
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
-  RecitersBloc({
-    required GetReciters getReciters,
-    required search_usecase.SearchReciters searchReciters,
-    required GetRecitersByLetter getRecitersByLetter,
-  }) : _getReciters = getReciters,
-       _searchReciters = searchReciters,
-       _getRecitersByLetter = getRecitersByLetter,
-       super(const RecitersInitial()) {
+  RecitersBloc() : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
-    on<ClearSearch>(_onClearSearch);
     on<ClearLetterFilter>(_onClearLetterFilter);
+    on<ClearSearch>(_onClearSearch);
   }
-
-  final GetReciters _getReciters;
-  final search_usecase.SearchReciters _searchReciters;
-  final GetRecitersByLetter _getRecitersByLetter;
 
   Future<void> _onLoadReciters(
     LoadReciters event,
@@ -32,81 +22,62 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   ) async {
     emit(const RecitersLoading());
 
-    final result = await _getReciters();
+    try {
+      final audioHandler = sl<AudioPlayerHandlerImpl>();
+      final recitersData = await audioHandler.getRecitersData();
 
-    result.fold(
-      (failure) =>
-          emit(RecitersError(failure.message ?? 'Failed to load reciters')),
-      (reciters) =>
-          emit(RecitersLoaded(reciters: reciters, filteredReciters: reciters)),
-    );
+      if (recitersData != null) {
+        emit(
+          RecitersLoaded(
+            reciters: recitersData,
+            filteredReciters: recitersData,
+          ),
+        );
+      } else {
+        emit(const RecitersError('Failed to load reciters'));
+      }
+    } catch (e) {
+      emit(RecitersError('Error loading reciters: $e'));
+    }
   }
 
-  Future<void> _onSearchReciters(
+  void _onSearchReciters(
     SearchRecitersEvent event,
     Emitter<RecitersState> emit,
-  ) async {
+  ) {
     if (state is! RecitersLoaded) return;
 
     final currentState = state as RecitersLoaded;
+    final filteredReciters = _filterReciters(
+      currentState.reciters,
+      event.query,
+      null, // Clear letter filter when searching
+    );
 
-    if (event.query.isEmpty) {
-      emit(
-        currentState.copyWith(
-          searchQuery: '',
-          filteredReciters: currentState.reciters,
-          selectedLetter: null,
-        ),
-      );
-      return;
-    }
-
-    final result = await _searchReciters(event.query);
-
-    result.fold(
-      (failure) => emit(RecitersError(failure.message ?? 'Search failed')),
-      (filteredReciters) => emit(
-        currentState.copyWith(
-          searchQuery: event.query,
-          filteredReciters: filteredReciters,
-          selectedLetter: null,
-        ),
+    emit(
+      currentState.copyWith(
+        searchQuery: event.query,
+        clearSelectedLetter: true,
+        filteredReciters: filteredReciters,
       ),
     );
   }
 
-  Future<void> _onFilterByLetter(
-    FilterByLetter event,
-    Emitter<RecitersState> emit,
-  ) async {
+  void _onFilterByLetter(FilterByLetter event, Emitter<RecitersState> emit) {
     if (state is! RecitersLoaded) return;
 
     final currentState = state as RecitersLoaded;
-
-    final result = await _getRecitersByLetter(event.letter);
-
-    result.fold(
-      (failure) => emit(RecitersError(failure.message ?? 'Filter failed')),
-      (filteredReciters) => emit(
-        currentState.copyWith(
-          searchQuery: '',
-          filteredReciters: filteredReciters,
-          selectedLetter: event.letter,
-        ),
-      ),
+    final filteredReciters = _filterReciters(
+      currentState.reciters,
+      '', // Clear search when filtering by letter
+      event.letter,
     );
-  }
-
-  void _onClearSearch(ClearSearch event, Emitter<RecitersState> emit) {
-    if (state is! RecitersLoaded) return;
-
-    final currentState = state as RecitersLoaded;
 
     emit(
       currentState.copyWith(
         searchQuery: '',
-        filteredReciters: currentState.reciters,
-        selectedLetter: null,
+        selectedLetter: event.letter,
+        filteredReciters: filteredReciters,
       ),
     );
   }
@@ -118,13 +89,60 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     if (state is! RecitersLoaded) return;
 
     final currentState = state as RecitersLoaded;
+    final filteredReciters = _filterReciters(
+      currentState.reciters,
+      currentState.searchQuery,
+      null,
+    );
+
+    emit(
+      currentState.copyWith(
+        clearSelectedLetter: true,
+        filteredReciters: filteredReciters,
+      ),
+    );
+  }
+
+  void _onClearSearch(ClearSearch event, Emitter<RecitersState> emit) {
+    if (state is! RecitersLoaded) return;
+
+    final currentState = state as RecitersLoaded;
+    final filteredReciters = _filterReciters(
+      currentState.reciters,
+      '',
+      currentState.selectedLetter,
+    );
 
     emit(
       currentState.copyWith(
         searchQuery: '',
-        filteredReciters: currentState.reciters,
-        selectedLetter: null,
+        filteredReciters: filteredReciters,
       ),
     );
+  }
+
+  List<Reciter> _filterReciters(
+    List<Reciter> reciters,
+    String searchQuery,
+    String? selectedLetter,
+  ) {
+    List<Reciter> filtered = reciters;
+
+    // Filter by search query
+    if (searchQuery.isNotEmpty) {
+      filtered = filtered.where((reciter) {
+        return reciter.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            reciter.letter.toLowerCase().contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // Filter by selected letter
+    if (selectedLetter != null) {
+      filtered = filtered.where((reciter) {
+        return reciter.letter == selectedLetter;
+      }).toList();
+    }
+
+    return filtered;
   }
 }

@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:muzakri/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
-import 'package:muzakri/bloc/localization/localization_bloc.dart';
-import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
-import 'package:muzakri/bloc/reciters/reciters_bloc.dart';
 import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 

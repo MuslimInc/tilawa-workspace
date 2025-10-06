@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/screens/playlists_screen.dart';
 import 'package:muzakri/screens/reciters_screen.dart';
-import 'package:muzakri/widgets/bottom_player.dart';
-import 'package:muzakri/widgets/expanded_player_screen.dart';
+import 'package:muzakri/shared/widgets/bottom_player.dart';
+import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

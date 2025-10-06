@@ -4,14 +4,14 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
-import 'package:muzakri/bloc/reciter_details/reciter_details_bloc.dart';
 import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
+import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
-import 'package:muzakri/widgets/bottom_player.dart';
+import 'package:muzakri/shared/widgets/bottom_player.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   final Reciter reciter;

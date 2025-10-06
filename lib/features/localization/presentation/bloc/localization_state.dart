@@ -1,48 +1,9 @@
-import 'package:equatable/equatable.dart';
+part of 'localization_bloc.dart';
 
-abstract class LocalizationState extends Equatable {
-  const LocalizationState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class LocalizationInitial extends LocalizationState {
-  const LocalizationInitial();
-}
-
-class LocalizationLoading extends LocalizationState {
-  const LocalizationLoading();
-}
-
-class LocalizationLoaded extends LocalizationState {
-  const LocalizationLoaded({
-    required this.currentLanguage,
-    required this.supportedLanguages,
-  });
-
-  final String currentLanguage;
-  final List<String> supportedLanguages;
-
-  LocalizationLoaded copyWith({
-    String? currentLanguage,
-    List<String>? supportedLanguages,
-  }) {
-    return LocalizationLoaded(
-      currentLanguage: currentLanguage ?? this.currentLanguage,
-      supportedLanguages: supportedLanguages ?? this.supportedLanguages,
-    );
-  }
+final class LocalizationState extends Equatable {
+  const LocalizationState({required this.locale});
+  final Locale locale;
 
   @override
-  List<Object?> get props => [currentLanguage, supportedLanguages];
-}
-
-class LocalizationError extends LocalizationState {
-  const LocalizationError(this.message);
-
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [locale];
 }

@@ -1,11 +1,11 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/bloc/audio_player/audio_player_bloc.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/position_data.dart';
-import 'package:muzakri/widgets/control_buttons.dart';
-import 'package:muzakri/widgets/seek_bar.dart';
+import 'package:muzakri/shared/widgets/control_buttons.dart';
+import 'package:muzakri/shared/widgets/seek_bar.dart';
 
 class ExpandedPlayerScreen extends StatelessWidget {
   const ExpandedPlayerScreen({super.key});

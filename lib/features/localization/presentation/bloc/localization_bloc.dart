@@ -1,59 +1,50 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/localization/domain/usecases/get_current_language.dart';
-import 'package:muzakri/features/localization/domain/usecases/set_language.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_event.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+part 'localization_event.dart';
+part 'localization_state.dart';
 
 class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
-  LocalizationBloc({
-    required GetCurrentLanguage getCurrentLanguage,
-    required SetLanguage setLanguage,
-  }) : _getCurrentLanguage = getCurrentLanguage,
-       _setLanguage = setLanguage,
-       super(const LocalizationInitial()) {
-    on<LoadLocalization>(_onLoadLocalization);
+  static const String _languageKey = 'selected_language';
+
+  LocalizationBloc() : super(const LocalizationState(locale: Locale('ar'))) {
+    on<LoadLanguage>(_onLoadLanguage);
     on<ChangeLanguage>(_onChangeLanguage);
   }
 
-  final GetCurrentLanguage _getCurrentLanguage;
-  final SetLanguage _setLanguage;
-
-  Future<void> _onLoadLocalization(
-    LoadLocalization event,
+  Future<void> _onLoadLanguage(
+    LoadLanguage event,
     Emitter<LocalizationState> emit,
   ) async {
-    emit(const LocalizationLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final languageCode =
+          prefs.getString(_languageKey) ?? 'ar'; // Default to Arabic
 
-    final result = await _getCurrentLanguage();
+      final locale = Locale(languageCode);
 
-    result.fold(
-      (failure) =>
-          emit(LocalizationError(failure.message ?? 'Failed to load language')),
-      (language) => emit(
-        LocalizationLoaded(
-          currentLanguage: language,
-          supportedLanguages: const ['en', 'ar'],
-        ),
-      ),
-    );
+      emit(LocalizationState(locale: locale));
+    } catch (e) {
+      // Fallback to Arabic if there's an error
+      const locale = Locale('ar');
+      emit(const LocalizationState(locale: locale));
+    }
   }
 
   Future<void> _onChangeLanguage(
     ChangeLanguage event,
     Emitter<LocalizationState> emit,
   ) async {
-    final result = await _setLanguage(event.languageCode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_languageKey, event.locale.languageCode);
 
-    result.fold(
-      (failure) => emit(
-        LocalizationError(failure.message ?? 'Failed to change language'),
-      ),
-      (_) {
-        if (state is LocalizationLoaded) {
-          final currentState = state as LocalizationLoaded;
-          emit(currentState.copyWith(currentLanguage: event.languageCode));
-        }
-      },
-    );
+      emit(LocalizationState(locale: event.locale));
+    } catch (e) {
+      // If saving fails, still emit the new state
+      emit(LocalizationState(locale: event.locale));
+    }
   }
 }

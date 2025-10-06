@@ -1,5 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:muzakri/core/entities/reciter.dart';
+part of 'reciters_bloc.dart';
 
 abstract class RecitersState extends Equatable {
   const RecitersState();
@@ -17,31 +16,17 @@ class RecitersLoading extends RecitersState {
 }
 
 class RecitersLoaded extends RecitersState {
+  final List<Reciter> reciters;
+  final List<Reciter> filteredReciters;
+  final String searchQuery;
+  final String? selectedLetter;
+
   const RecitersLoaded({
     required this.reciters,
     required this.filteredReciters,
     this.searchQuery = '',
     this.selectedLetter,
   });
-
-  final List<ReciterEntity> reciters;
-  final List<ReciterEntity> filteredReciters;
-  final String searchQuery;
-  final String? selectedLetter;
-
-  RecitersLoaded copyWith({
-    List<ReciterEntity>? reciters,
-    List<ReciterEntity>? filteredReciters,
-    String? searchQuery,
-    String? selectedLetter,
-  }) {
-    return RecitersLoaded(
-      reciters: reciters ?? this.reciters,
-      filteredReciters: filteredReciters ?? this.filteredReciters,
-      searchQuery: searchQuery ?? this.searchQuery,
-      selectedLetter: selectedLetter ?? this.selectedLetter,
-    );
-  }
 
   @override
   List<Object?> get props => [
@@ -50,12 +35,29 @@ class RecitersLoaded extends RecitersState {
     searchQuery,
     selectedLetter,
   ];
+
+  RecitersLoaded copyWith({
+    List<Reciter>? reciters,
+    List<Reciter>? filteredReciters,
+    String? searchQuery,
+    String? selectedLetter,
+    bool clearSelectedLetter = false,
+  }) {
+    return RecitersLoaded(
+      reciters: reciters ?? this.reciters,
+      filteredReciters: filteredReciters ?? this.filteredReciters,
+      searchQuery: searchQuery ?? this.searchQuery,
+      selectedLetter: clearSelectedLetter
+          ? null
+          : (selectedLetter ?? this.selectedLetter),
+    );
+  }
 }
 
 class RecitersError extends RecitersState {
-  const RecitersError(this.message);
-
   final String message;
+
+  const RecitersError(this.message);
 
   @override
   List<Object?> get props => [message];

@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+part of 'localization_bloc.dart';
 
 abstract class LocalizationEvent extends Equatable {
   const LocalizationEvent();
@@ -7,15 +7,15 @@ abstract class LocalizationEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadLocalization extends LocalizationEvent {
-  const LoadLocalization();
-}
-
 class ChangeLanguage extends LocalizationEvent {
-  const ChangeLanguage(this.languageCode);
+  final Locale locale;
 
-  final String languageCode;
+  const ChangeLanguage(this.locale);
 
   @override
-  List<Object?> get props => [languageCode];
+  List<Object?> get props => [locale];
+}
+
+class LoadLanguage extends LocalizationEvent {
+  const LoadLanguage();
 }
