@@ -149,4 +149,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playbackInitiated => 'Playback initiated';
+
+  @override
+  String get settings => 'Settings';
 }

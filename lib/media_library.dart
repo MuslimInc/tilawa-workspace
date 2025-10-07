@@ -46,38 +46,5 @@
 import 'package:audio_service/audio_service.dart';
 
 class MediaLibrary {
-  final Map<String, List<MediaItem>> items = {
-    'artist1': [
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 1111 artist1',
-      ),
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri20181123-episode.mp3',
-        title: 'Song 22222 artist1',
-      ),
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 3 artist1',
-      ),
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 4 artist1',
-      ),
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 5 artist1',
-      ),
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 6 artist1',
-      ),
-    ],
-    'artist2': [
-      MediaItem(
-        id: 'https://s3.amazonaws.com/scifri-segments/scifri202011274.mp3',
-        title: 'Song 2',
-      ),
-    ],
-  };
+  final Map<String, List<MediaItem>> items = {};
 }

@@ -5,12 +5,12 @@ import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_blo
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
+import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 import 'package:muzakri/screens/playlists_screen.dart';
 import 'package:muzakri/screens/reciters_screen.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
-import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -26,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
     const RecitersScreen(),
     const DownloadsScreen(),
     const PlaylistsScreen(),
+    const SettingsScreen(),
   ];
 
   @override
@@ -65,9 +66,7 @@ class _MainScreenState extends State<MainScreen> {
                 if (state.hasMediaItem)
                   Container(
                     color: Theme.of(context).scaffoldBackgroundColor,
-                    child: BottomPlayer(
-                      onTap: () => _navigateToExpandedPlayer(context),
-                    ),
+                    child: BottomPlayer(),
                   ),
               ],
             ),
@@ -95,20 +94,15 @@ class _MainScreenState extends State<MainScreen> {
                   activeIcon: const Icon(Icons.playlist_play),
                   label: AppLocalizations.of(context)?.playlists ?? 'Playlists',
                 ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.settings),
+                  activeIcon: const Icon(Icons.settings),
+                  label: AppLocalizations.of(context)?.settings ?? 'Settings',
+                ),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _navigateToExpandedPlayer(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ExpandedPlayerScreen(),
-        fullscreenDialog: true,
       ),
     );
   }

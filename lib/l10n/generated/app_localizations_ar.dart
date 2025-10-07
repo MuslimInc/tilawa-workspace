@@ -149,4 +149,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playbackInitiated => 'تم بدء التشغيل';
+
+  @override
+  String get settings => 'الإعدادات';
 }

@@ -238,23 +238,12 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   @override
-  @override
   Future<List<MediaItem>> getChildren(
     String parentMediaId, [
     Map<String, dynamic>? options,
   ]) async {
     return _mediaLibrary.items[parentMediaId] ?? [];
   }
-  // Future<List<MediaItem>> getChildren(String parentMediaId,
-  //     [Map<String, dynamic>? options]) async {
-  //   switch (parentMediaId) {
-  //     case AudioService.recentRootId:
-  //       return _recentSubject.value;
-  //     default:
-  //       // return newList[parentMediaId]!;
-  //       return super.getChildren(parentMediaId, options);
-  //   }
-  // }
 
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {

@@ -4,7 +4,8 @@ class GoogleSignInConfig {
   // 1. Go to Firebase Console -> Project Settings -> General
   // 2. Scroll down to "Your apps" section
   // 3. Find your web app and copy the "Web client ID"
-  static const String serverClientId = 'YOUR_SERVER_CLIENT_ID_HERE';
+  static const String serverClientId =
+      '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com';
 
   // For development, you can use a placeholder
   // For production, make sure to use the actual server client ID

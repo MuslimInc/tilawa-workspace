@@ -34,6 +34,7 @@ import 'package:muzakri/features/premium/domain/repositories/premium_repository.
 import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -110,6 +111,7 @@ Future<void> initDI() async {
 
   // Blocs
   sl.registerFactory<LocalizationBloc>(() => LocalizationBloc());
+  sl.registerFactory<ThemeCubit>(() => ThemeCubit(prefs: sl()));
   sl.registerFactory<RecitersBloc>(() => RecitersBloc());
   sl.registerFactory<ReciterDetailsBloc>(() => ReciterDetailsBloc());
   sl.registerFactory<AlphabetScrollbarBloc>(() => AlphabetScrollbarBloc());
