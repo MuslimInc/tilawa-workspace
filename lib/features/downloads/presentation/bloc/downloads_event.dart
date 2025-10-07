@@ -39,4 +39,6 @@ sealed class DownloadsEvent with _$DownloadsEvent {
 
   const factory DownloadsEvent.playAllDownloads({required String reciterName}) =
       PlayAllDownloadsEvent;
+
+  const factory DownloadsEvent.checkPremiumAccess() = CheckPremiumAccessEvent;
 }

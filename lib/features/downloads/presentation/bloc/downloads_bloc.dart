@@ -10,6 +10,7 @@ import 'package:muzakri/features/downloads/domain/repositories/downloads_reposit
 import 'package:muzakri/features/downloads/domain/usecases/delete_download.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_surah.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter.dart';
+import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
 
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
@@ -20,6 +21,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   final DownloadSurah _downloadSurah;
   final DeleteDownload _deleteDownload;
   final DownloadsRepository _downloadsRepository;
+  final PremiumRepository _premiumRepository;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
@@ -28,10 +30,12 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     required DownloadSurah downloadSurah,
     required DeleteDownload deleteDownload,
     required DownloadsRepository downloadsRepository,
+    required PremiumRepository premiumRepository,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
        _downloadsRepository = downloadsRepository,
+       _premiumRepository = premiumRepository,
        super(const DownloadsState.initial()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -43,6 +47,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     on<GetValidCompletedDownloadsEvent>(_onGetValidCompletedDownloads);
     on<PlayDownloadedSurahEvent>(_onPlayDownloadedSurah);
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
+    on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
 
     // Listen to download progress
     _listenToProgress();
@@ -91,6 +96,18 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     DownloadSurahEvent event,
     Emitter<DownloadsState> emit,
   ) async {
+    // Check premium access before allowing download
+    final canDownload = await _premiumRepository.canDownload();
+    if (!canDownload) {
+      emit(
+        const DownloadsState.premiumRequired(
+          message:
+              'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+        ),
+      );
+      return;
+    }
+
     final result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
@@ -282,6 +299,25 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       );
     } catch (e) {
       emit(DownloadsState.error('Error playing downloads: $e'));
+    }
+  }
+
+  Future<void> _onCheckPremiumAccess(
+    CheckPremiumAccessEvent event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    try {
+      final canDownload = await _premiumRepository.canDownload();
+      if (!canDownload) {
+        emit(
+          const DownloadsState.premiumRequired(
+            message:
+                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(DownloadsState.error('Failed to check premium access: $e'));
     }
   }
 }

@@ -130,6 +130,9 @@ class DownloadsScreen extends StatelessWidget {
               playbackInitiated: (message) => Center(
                 child: Text(AppLocalizations.of(context)!.playbackInitiated),
               ),
+              premiumRequired: (String message) {
+                return Center(child: Text(message));
+              },
             );
           },
         ),

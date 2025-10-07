@@ -1,21 +1,36 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initDI();
+
+  // Initialize Firebase data
+  try {
+    final firebaseInitService = sl<FirebaseInitializationService>();
+    await firebaseInitService.initializeFirebaseData();
+  } catch (e) {
+    print('Warning: Could not initialize Firebase data: $e');
+  }
 
   // Bloc.observer = AppBlocObserver();
 
@@ -46,6 +61,14 @@ class MyApp extends StatelessWidget {
           BlocProvider<DownloadsBloc>(
             create: (context) =>
                 sl<DownloadsBloc>()..add(const LoadDownloads()),
+          ),
+          BlocProvider<PremiumBloc>(create: (context) => sl<PremiumBloc>()),
+          BlocProvider<AuthBloc>(
+            create: (context) {
+              final authBloc = sl<AuthBloc>();
+              authBloc.add(const CheckAuthStatusEvent());
+              return authBloc;
+            },
           ),
         ],
         child: BlocBuilder<LocalizationBloc, LocalizationState>(

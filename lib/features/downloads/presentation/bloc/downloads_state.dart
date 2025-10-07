@@ -30,4 +30,7 @@ sealed class DownloadsState with _$DownloadsState {
 
   const factory DownloadsState.playbackInitiated({required String message}) =
       PlaybackInitiated;
+
+  const factory DownloadsState.premiumRequired({required String message}) =
+      PremiumRequired;
 }

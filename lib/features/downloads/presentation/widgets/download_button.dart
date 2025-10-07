@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/router/app_router.dart';
 
 class DownloadButton extends StatefulWidget {
   const DownloadButton({
@@ -51,6 +54,9 @@ class _DownloadButtonState extends State<DownloadButton> {
             _isDownloaded = state.isDownloaded;
             _isChecking = false;
           });
+        } else if (state is PremiumRequired) {
+          // Show premium upgrade dialog
+          _showPremiumUpgradeDialog(context, state.message);
         }
       },
       child: _isChecking
@@ -87,6 +93,19 @@ class _DownloadButtonState extends State<DownloadButton> {
       SnackBar(
         content: Text('Downloading ${widget.surahTitle}...'),
         duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showPremiumUpgradeDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => PremiumUpgradeDialog(
+        title: 'Premium Required',
+        message: message,
+        onUpgrade: () {
+          context.push(AppRouter.premium);
+        },
       ),
     );
   }

@@ -1,12 +1,21 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:dio/dio.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 // Audio Service
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
+import 'package:muzakri/core/services/firebase_initialization_service.dart';
 // Blocs
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
+import 'package:muzakri/features/auth/domain/usecases/get_current_user.dart';
+import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
+import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 // Features - Downloads
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
@@ -17,6 +26,12 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:muzakri/features/premium/data/datasources/premium_local_datasource.dart';
+import 'package:muzakri/features/premium/data/datasources/premium_remote_datasource.dart';
+import 'package:muzakri/features/premium/data/repositories/premium_repository_impl.dart';
+import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,18 +54,47 @@ Future<void> initDI() async {
   sl.registerSingleton<AudioPlayerHandler>(audioHandler);
 
   // External dependencies
-  sl.registerLazySingleton(() => Dio());
+  sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => GoogleSignIn.instance);
   final sharedPrefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPrefs);
+
+  // Auth
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(firebaseAuth: sl(), googleSignIn: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<DownloadsLocalDataSource>(
     () => DownloadsLocalDataSourceImpl(),
   );
 
+  // Premium data sources
+  sl.registerLazySingleton<PremiumLocalDataSource>(
+    () => PremiumLocalDataSourceImpl(prefs: sl()),
+  );
+  sl.registerLazySingleton<PremiumRemoteDataSource>(
+    () => PremiumRemoteDataSourceImpl(firestore: sl(), auth: sl()),
+  );
+
   // Repositories
   sl.registerLazySingleton<DownloadsRepository>(
-    () => DownloadsRepositoryImpl(localDataSource: sl(), dio: sl()),
+    () => DownloadsRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Premium repository
+  sl.registerLazySingleton<PremiumRepository>(
+    () => PremiumRepositoryImpl(localDataSource: sl(), remoteDataSource: sl()),
+  );
+
+  // Firebase services
+  sl.registerLazySingleton(() => SubscriptionPlansService(firestore: sl()));
+  sl.registerLazySingleton(
+    () => FirebaseInitializationService(
+      firestore: sl(),
+      subscriptionPlansService: sl(),
+    ),
   );
 
   // Use cases
@@ -58,6 +102,11 @@ Future<void> initDI() async {
   sl.registerLazySingleton(() => DownloadSurah(sl()));
   sl.registerLazySingleton(() => DeleteDownload(sl()));
   sl.registerLazySingleton(() => CheckSurahDownloaded(sl()));
+
+  // Auth use cases
+  sl.registerLazySingleton(() => SignInWithGoogle(sl()));
+  sl.registerLazySingleton(() => SignOut(sl()));
+  sl.registerLazySingleton(() => GetCurrentUser(sl()));
 
   // Blocs
   sl.registerFactory<LocalizationBloc>(() => LocalizationBloc());
@@ -73,6 +122,15 @@ Future<void> initDI() async {
       downloadSurah: sl(),
       deleteDownload: sl(),
       downloadsRepository: sl(),
+      premiumRepository: sl(),
     ),
+  );
+
+  // Premium BLoC
+  sl.registerFactory(() => PremiumBloc(premiumRepository: sl()));
+
+  // Auth BLoC
+  sl.registerFactory(
+    () => AuthBloc(signInWithGoogle: sl(), signOut: sl(), getCurrentUser: sl()),
   );
 }

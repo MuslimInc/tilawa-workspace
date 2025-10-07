@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muzakri/features/auth/presentation/screens/login_screen.dart';
+import 'package:muzakri/features/premium/presentation/screens/premium_screen.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/screens/main_screen.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
@@ -7,12 +9,14 @@ import 'package:muzakri/screens/reciter_details_screen.dart';
 class AppRouter {
   static const String home = '/';
   static const String reciterDetails = '/reciter/:reciterId';
+  static const String premium = '/premium';
+  static const String login = '/login';
 
   static final GoRouter router = GoRouter(
     initialLocation: home,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // Add any global redirects here if needed
+      // For now, we'll handle auth redirects in the UI
       return null;
     },
     routes: [
@@ -33,6 +37,16 @@ class AppRouter {
           }
           return ReciterDetailsScreen(reciter: reciter);
         },
+      ),
+      GoRoute(
+        path: premium,
+        name: 'premium',
+        builder: (context, state) => const PremiumScreen(),
+      ),
+      GoRoute(
+        path: login,
+        name: 'login',
+        builder: (context, state) => const LoginScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
