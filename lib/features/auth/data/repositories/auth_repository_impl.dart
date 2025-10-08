@@ -25,10 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult> signInWithGoogle() async {
     try {
-      // Initialize Google Sign-In first
-      await _googleSignIn.initialize();
-
-      // Trigger the authentication flow
+      // Trigger the authentication flow (Google Sign-In auto-initializes)
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
       // Obtain the auth details from the request

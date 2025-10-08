@@ -40,26 +40,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 final sl = GetIt.instance;
 
 Future<void> initDI() async {
-  // Audio Service initialization
-  final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(newList: []);
-  sl.registerSingleton<AudioPlayerHandlerImpl>(audioPlayerHandlerImpl);
-
-  final audioHandler = await AudioService.init(
-    builder: () => sl<AudioPlayerHandlerImpl>(),
-    config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
-      androidNotificationChannelName: 'Audio playback',
-      androidNotificationOngoing: true,
-    ),
-  );
-  sl.registerSingleton<AudioPlayerHandler>(audioHandler);
-
-  // External dependencies
+  // External dependencies - initialize these first as they're needed by others
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
   sl.registerLazySingleton(() => FirebaseAuth.instance);
+  
+  // Configure Google Sign-In with proper settings
   sl.registerLazySingleton(() => GoogleSignIn.instance);
+  
   final sharedPrefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPrefs);
+
+  // Audio Service initialization - defer this to avoid blocking startup
+  _initializeAudioServiceAsync();
 
   // Auth
   sl.registerLazySingleton<AuthRepository>(
@@ -135,4 +127,26 @@ Future<void> initDI() async {
   sl.registerFactory(
     () => AuthBloc(signInWithGoogle: sl(), signOut: sl(), getCurrentUser: sl()),
   );
+}
+
+/// Initialize audio service asynchronously to avoid blocking main thread
+void _initializeAudioServiceAsync() {
+  Future.microtask(() async {
+    try {
+      final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(newList: []);
+      sl.registerSingleton<AudioPlayerHandlerImpl>(audioPlayerHandlerImpl);
+
+      final audioHandler = await AudioService.init(
+        builder: () => sl<AudioPlayerHandlerImpl>(),
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
+          androidNotificationChannelName: 'Audio playback',
+          androidNotificationOngoing: true,
+        ),
+      );
+      sl.registerSingleton<AudioPlayerHandler>(audioHandler);
+    } catch (e) {
+      print('Warning: Could not initialize audio service: $e');
+    }
+  });
 }

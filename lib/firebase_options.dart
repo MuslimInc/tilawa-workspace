@@ -55,6 +55,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId:
+        '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
