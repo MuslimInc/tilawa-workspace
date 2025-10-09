@@ -225,11 +225,35 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   }
 
   void _onSetVolume(SetVolume event, Emitter<AudioPlayerState> emit) {
+    print('Bloc received setVolume event: ${event.volume}');
     _audioHandler.setVolume(event.volume);
+    emit(
+      state.copyWith(
+        status: AudioPlayerStatus.success,
+        mediaItem: state.mediaItem,
+        playbackState: state.playbackState,
+        positionData: state.positionData,
+        queueState: state.queueState,
+        volume: event.volume,
+        speed: state.speed,
+      ),
+    );
+    print('Bloc emitted new state with volume: ${event.volume}');
   }
 
   void _onSetSpeed(SetSpeed event, Emitter<AudioPlayerState> emit) {
     _audioHandler.setSpeed(event.speed);
+    emit(
+      state.copyWith(
+        status: AudioPlayerStatus.success,
+        mediaItem: state.mediaItem,
+        playbackState: state.playbackState,
+        positionData: state.positionData,
+        queueState: state.queueState,
+        volume: state.volume,
+        speed: event.speed,
+      ),
+    );
   }
 
   void _onSkipToQueueItem(

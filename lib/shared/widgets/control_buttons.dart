@@ -30,6 +30,7 @@ class ControlButtons extends StatelessWidget {
                   max: 1.0,
                   value: volume,
                   onChanged: (newVolume) {
+                    print('Volume changed to: $newVolume');
                     context.read<AudioPlayerBloc>().add(
                       AudioPlayerEvent.setVolume(newVolume),
                     );
