@@ -43,10 +43,10 @@ Future<void> initDI() async {
   // External dependencies - initialize these first as they're needed by others
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
   sl.registerLazySingleton(() => FirebaseAuth.instance);
-  
+
   // Configure Google Sign-In with proper settings
   sl.registerLazySingleton(() => GoogleSignIn.instance);
-  
+
   final sharedPrefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPrefs);
 
