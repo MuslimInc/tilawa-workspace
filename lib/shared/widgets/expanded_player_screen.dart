@@ -24,11 +24,6 @@ class ExpandedPlayerScreen extends StatelessWidget {
       ),
       body: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
-          // Debug logging
-          print(
-            'ExpandedPlayerScreen - Status: ${state.status}, MediaItem: ${state.mediaItem?.title}',
-          );
-
           if (state.status != AudioPlayerStatus.success ||
               state.mediaItem == null) {
             return Center(

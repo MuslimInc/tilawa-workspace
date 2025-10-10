@@ -6,7 +6,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:muzakri/audio_player_handler.dart';
-import 'package:muzakri/media_library.dart';
 import 'package:muzakri/queue_state.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:rxdart/rxdart.dart';
@@ -20,7 +19,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final BehaviorSubject<List<MediaItem>> _recentSubject =
       BehaviorSubject.seeded(<MediaItem>[]);
   final List<MediaItem> newList;
-  final _mediaLibrary = MediaLibrary();
+  final _items = <String, List<MediaItem>>{};
   final _player = AudioPlayer();
   final List<AudioSource> _playlist = [];
   @override
@@ -242,7 +241,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     String parentMediaId, [
     Map<String, dynamic>? options,
   ]) async {
-    return _mediaLibrary.items[parentMediaId] ?? [];
+    return _items[parentMediaId] ?? [];
   }
 
   @override
