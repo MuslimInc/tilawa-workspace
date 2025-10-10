@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeState extends Equatable {
@@ -11,13 +12,12 @@ class ThemeState extends Equatable {
   List<Object?> get props => [mode];
 }
 
+@injectable
 class ThemeCubit extends Cubit<ThemeState> {
   static const String _themeKey = 'app_theme_mode';
   final SharedPreferences _prefs;
 
-  ThemeCubit({required SharedPreferences prefs})
-    : _prefs = prefs,
-      super(const ThemeState(ThemeMode.system)) {
+  ThemeCubit(this._prefs) : super(const ThemeState(ThemeMode.system)) {
     _load();
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
@@ -24,25 +24,29 @@ class AppProviders {
   /// - Maintain consistency across the app
   static List<BlocProvider> get providers => [
     // Core app providers
-    BlocProvider<ThemeCubit>(create: (context) => sl<ThemeCubit>()),
-    BlocProvider<LocalizationBloc>(create: (context) => sl<LocalizationBloc>()),
+    BlocProvider<ThemeCubit>(create: (context) => getIt<ThemeCubit>()),
+    BlocProvider<LocalizationBloc>(
+      create: (context) => getIt<LocalizationBloc>(),
+    ),
 
     // Feature providers
-    BlocProvider<RecitersBloc>(create: (context) => sl<RecitersBloc>()),
+    BlocProvider<RecitersBloc>(create: (context) => getIt<RecitersBloc>()),
     BlocProvider<ReciterDetailsBloc>(
-      create: (context) => sl<ReciterDetailsBloc>(),
+      create: (context) => getIt<ReciterDetailsBloc>(),
     ),
     BlocProvider<AlphabetScrollbarBloc>(
-      create: (context) => sl<AlphabetScrollbarBloc>(),
+      create: (context) => getIt<AlphabetScrollbarBloc>(),
     ),
-    BlocProvider<AudioPlayerBloc>(create: (context) => sl<AudioPlayerBloc>()),
-    BlocProvider<DownloadsBloc>(create: (context) => sl<DownloadsBloc>()),
-    BlocProvider<PremiumBloc>(create: (context) => sl<PremiumBloc>()),
+    BlocProvider<AudioPlayerBloc>(
+      create: (context) => getIt<AudioPlayerBloc>(),
+    ),
+    BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
+    BlocProvider<PremiumBloc>(create: (context) => getIt<PremiumBloc>()),
 
     // Auth provider with initialization
     BlocProvider<AuthBloc>(
       create: (context) {
-        final authBloc = sl<AuthBloc>();
+        final authBloc = getIt<AuthBloc>();
         authBloc.add(const CheckAuthStatusEvent());
         return authBloc;
       },

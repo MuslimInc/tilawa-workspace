@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:injectable/injectable.dart';
+import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
@@ -16,12 +16,14 @@ part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
 part 'downloads_state.dart';
 
+@injectable
 class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   final GetDownloadsByReciter _getDownloadsByReciter;
   final DownloadSurah _downloadSurah;
   final DeleteDownload _deleteDownload;
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
+  final AudioPlayerHandler _audioPlayerHandler;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
@@ -31,11 +33,13 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     required DeleteDownload deleteDownload,
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
+    required AudioPlayerHandler audioPlayerHandler,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
        _downloadsRepository = downloadsRepository,
        _premiumRepository = premiumRepository,
+       _audioPlayerHandler = audioPlayerHandler,
        super(const DownloadsState.initial()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -252,12 +256,11 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       final mediaItem = _downloadsRepository.createMediaItemFromDownload(
         download,
       );
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
 
-      await audioHandler.updateQueue([mediaItem]);
-      await audioHandler.pause();
-      await audioHandler.skipToQueueItem(0);
-      await audioHandler.play();
+      await _audioPlayerHandler.updateQueue([mediaItem]);
+      await _audioPlayerHandler.pause();
+      await _audioPlayerHandler.skipToQueueItem(0);
+      await _audioPlayerHandler.play();
 
       emit(
         DownloadsState.playbackInitiated(message: 'Playing ${download.title}'),
@@ -284,12 +287,11 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       final mediaItems = _downloadsRepository.createMediaItemsFromDownloads(
         validDownloads,
       );
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
 
-      await audioHandler.updateQueue(mediaItems);
-      await audioHandler.pause();
-      await audioHandler.skipToQueueItem(0);
-      await audioHandler.play();
+      await _audioPlayerHandler.updateQueue(mediaItems);
+      await _audioPlayerHandler.pause();
+      await _audioPlayerHandler.skipToQueueItem(0);
+      await _audioPlayerHandler.play();
 
       emit(
         DownloadsState.playbackInitiated(

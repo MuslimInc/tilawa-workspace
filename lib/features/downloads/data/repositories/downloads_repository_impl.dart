@@ -1,14 +1,16 @@
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:path/path.dart' as path;
 
+@LazySingleton(as: DownloadsRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
-  const DownloadsRepositoryImpl({required this.localDataSource});
+  const DownloadsRepositoryImpl(this.localDataSource);
 
   final DownloadsLocalDataSource localDataSource;
 

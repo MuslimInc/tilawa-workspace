@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/firebase_options.dart';
 
 /// Command-line tool to initialize Firebase data
 /// Run this with: dart lib/core/utils/firebase_data_initializer.dart
@@ -13,7 +14,9 @@ Future<void> main() async {
 
   try {
     // Initialize Firebase
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     print('✅ Firebase initialized');
 
     // Create services

@@ -1,18 +1,16 @@
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/premium/data/datasources/premium_local_datasource.dart';
 import 'package:muzakri/features/premium/data/datasources/premium_remote_datasource.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
 
+@LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
   final PremiumLocalDataSource _localDataSource;
   final PremiumRemoteDataSource _remoteDataSource;
 
-  PremiumRepositoryImpl({
-    required PremiumLocalDataSource localDataSource,
-    required PremiumRemoteDataSource remoteDataSource,
-  }) : _localDataSource = localDataSource,
-       _remoteDataSource = remoteDataSource;
+  PremiumRepositoryImpl(this._localDataSource, this._remoteDataSource);
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {

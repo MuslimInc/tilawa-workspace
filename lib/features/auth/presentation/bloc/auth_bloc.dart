@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
 import 'package:muzakri/features/auth/domain/usecases/get_current_user.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google.dart';
@@ -6,19 +7,14 @@ import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 
+@injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInWithGoogle _signInWithGoogle;
   final SignOut _signOut;
   final GetCurrentUser _getCurrentUser;
 
-  AuthBloc({
-    required SignInWithGoogle signInWithGoogle,
-    required SignOut signOut,
-    required GetCurrentUser getCurrentUser,
-  }) : _signInWithGoogle = signInWithGoogle,
-       _signOut = signOut,
-       _getCurrentUser = getCurrentUser,
-       super(const AuthState.initial()) {
+  AuthBloc(this._signInWithGoogle, this._signOut, this._getCurrentUser)
+    : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);

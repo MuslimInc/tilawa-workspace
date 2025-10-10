@@ -1,18 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
 import 'package:muzakri/features/auth/domain/entities/user.dart';
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
 
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
-  AuthRepositoryImpl({
-    required firebase_auth.FirebaseAuth firebaseAuth,
-    required GoogleSignIn googleSignIn,
-  }) : _firebaseAuth = firebaseAuth,
-       _googleSignIn = googleSignIn;
+  AuthRepositoryImpl(this._firebaseAuth, this._googleSignIn);
 
   @override
   Stream<User?> get authStateChanges {

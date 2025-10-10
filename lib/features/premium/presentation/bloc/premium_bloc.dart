@@ -1,14 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_event.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
 
+@injectable
 class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
   final PremiumRepository _premiumRepository;
 
-  PremiumBloc({required PremiumRepository premiumRepository})
-    : _premiumRepository = premiumRepository,
-      super(const PremiumState.initial()) {
+  PremiumBloc(this._premiumRepository) : super(const PremiumState.initial()) {
     on<LoadPremiumStatus>(_onLoadPremiumStatus);
     on<PurchaseSubscription>(_onPurchaseSubscription);
     on<CancelSubscription>(_onCancelSubscription);

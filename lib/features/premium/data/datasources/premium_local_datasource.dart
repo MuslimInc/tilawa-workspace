@@ -1,6 +1,8 @@
+import 'dart:convert';
+
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 abstract class PremiumLocalDataSource {
   Future<PremiumStatus> getPremiumStatus();
@@ -8,13 +10,13 @@ abstract class PremiumLocalDataSource {
   Future<void> clearPremiumStatus();
 }
 
+@LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   static const String _premiumStatusKey = 'premium_status';
 
   final SharedPreferences _prefs;
 
-  PremiumLocalDataSourceImpl({required SharedPreferences prefs})
-    : _prefs = prefs;
+  PremiumLocalDataSourceImpl(this._prefs);
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {

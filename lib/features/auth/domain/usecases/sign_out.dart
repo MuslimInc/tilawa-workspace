@@ -1,5 +1,7 @@
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
 
+@injectable
 class SignOut {
   final AuthRepository _repository;
 

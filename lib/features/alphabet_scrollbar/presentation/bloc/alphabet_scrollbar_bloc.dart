@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 part 'alphabet_scrollbar_event.dart';
 part 'alphabet_scrollbar_state.dart';
 
+@injectable
 class AlphabetScrollbarBloc
     extends Bloc<AlphabetScrollbarEvent, AlphabetScrollbarState> {
   AlphabetScrollbarBloc() : super(const AlphabetScrollbarInitial()) {

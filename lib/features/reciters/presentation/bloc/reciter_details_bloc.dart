@@ -1,16 +1,20 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:injectable/injectable.dart';
+import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciter_details_event.dart';
 part 'reciter_details_state.dart';
 
+@injectable
 class ReciterDetailsBloc
     extends Bloc<ReciterDetailsEvent, ReciterDetailsState> {
-  ReciterDetailsBloc() : super(const ReciterDetailsInitial()) {
+  final AudioPlayerHandler _audioHandler;
+
+  ReciterDetailsBloc(this._audioHandler)
+    : super(const ReciterDetailsInitial()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
     on<SelectSurah>(_onSelectSurah);
@@ -23,8 +27,7 @@ class ReciterDetailsBloc
     emit(const ReciterDetailsLoading());
 
     try {
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
-      final surahList = await audioHandler.getSurahListForMoshaf(
+      final surahList = await _audioHandler.getSurahListForMoshaf(
         event.moshaf,
         reciterName: event.reciter.name,
       );

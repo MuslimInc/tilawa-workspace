@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
 
@@ -12,15 +13,12 @@ abstract class PremiumRemoteDataSource {
   Future<bool> restoreSubscription();
 }
 
+@LazySingleton(as: PremiumRemoteDataSource)
 class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  PremiumRemoteDataSourceImpl({
-    required FirebaseFirestore firestore,
-    required FirebaseAuth auth,
-  }) : _firestore = firestore,
-       _auth = auth;
+  PremiumRemoteDataSourceImpl(this._firestore, this._auth);
 
   @override
   Future<PremiumStatus?> getPremiumStatus() async {

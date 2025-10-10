@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 
+@injectable
 class GetDownloadsByReciter {
   const GetDownloadsByReciter(this._repository);
 

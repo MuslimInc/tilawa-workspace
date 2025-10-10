@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 
+@injectable
 class CheckSurahDownloaded {
   const CheckSurahDownloaded(this._repository);
 

@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
@@ -338,7 +338,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   /// Check if a surah is downloaded and get its file path
   Future<String?> _getDownloadedFilePath(MediaItem surah) async {
     try {
-      final downloadsRepository = sl<DownloadsRepository>();
+      final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
       final surahId = surah.title.split(' ').first;
       final filePath = await downloadsRepository.getDownloadedFilePath(
@@ -368,7 +368,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   /// Check if a surah is downloaded
   Future<bool> _isSurahDownloaded(MediaItem surah) async {
     try {
-      final downloadsRepository = sl<DownloadsRepository>();
+      final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
       final surahId = surah.title.split(' ').first;
       return await downloadsRepository.isSurahDownloaded(
@@ -422,7 +422,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
       }
 
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
+      final audioHandler = getIt<AudioPlayerHandler>();
 
       // Validate surah data
       if (surah.id.isEmpty) {

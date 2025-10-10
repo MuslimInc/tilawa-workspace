@@ -13,7 +13,7 @@ import 'package:rxdart/rxdart.dart';
 class AudioPlayerHandlerImpl extends BaseAudioHandler
     with SeekHandler
     implements AudioPlayerHandler {
-  AudioPlayerHandlerImpl({required this.newList}) {
+  AudioPlayerHandlerImpl(this.newList) {
     _init();
   }
   final BehaviorSubject<List<MediaItem>> _recentSubject =
@@ -224,6 +224,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   /// Clears the audio player state and resets loading flags
+  @override
   Future<void> clearAudioState() async {
     try {
       _isLoadingAudio = false;
@@ -436,6 +437,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   //   return null;
   // }
 
+  @override
   Future<List<MediaItem>?> getReciters() async {
     // Return cached data if available
     if (_cachedReciters != null) {
@@ -508,6 +510,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   /// Get raw reciters data for the RecitersScreen
+  @override
   Future<List<Reciter>?> getRecitersData() async {
     final baseUrl = "https://mp3quran.net/api/v3/reciters";
 
@@ -528,6 +531,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   /// Get surah list for a specific moshaf
+  @override
   Future<List<MediaItem>?> getSurahListForMoshaf(
     Mosahf moshaf, {
     String? reciterName,
@@ -693,6 +697,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   //   }
   // }
 
+  @override
   Future<void> playArtistPlaylist(String artistId) async {
     try {
       // Prevent multiple simultaneous calls for the same artist
