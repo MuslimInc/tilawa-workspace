@@ -6,6 +6,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/queue_state.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:rxdart/rxdart.dart';
@@ -13,12 +14,13 @@ import 'package:rxdart/rxdart.dart';
 class AudioPlayerHandlerImpl extends BaseAudioHandler
     with SeekHandler
     implements AudioPlayerHandler {
-  AudioPlayerHandlerImpl(this.newList) {
+  AudioPlayerHandlerImpl(this.newList, this._analyticsService) {
     _init();
   }
   final BehaviorSubject<List<MediaItem>> _recentSubject =
       BehaviorSubject.seeded(<MediaItem>[]);
   final List<MediaItem> newList;
+  final AnalyticsService _analyticsService;
   final _items = <String, List<MediaItem>>{};
   final _player = AudioPlayer();
   final List<AudioSource> _playlist = [];
@@ -347,17 +349,47 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() async {
+    await _player.play();
+    // Log analytics event
+    final currentItem = mediaItem.valueOrNull;
+    if (currentItem != null) {
+      await _analyticsService.logAudioPlay(
+        currentItem.id,
+        audioName: currentItem.title,
+        artist: currentItem.artist,
+      );
+    }
+  }
 
   @override
-  Future<void> pause() => _player.pause();
+  Future<void> pause() async {
+    await _player.pause();
+    // Log analytics event
+    final currentItem = mediaItem.valueOrNull;
+    if (currentItem != null) {
+      await _analyticsService.logAudioPause(currentItem.id);
+    }
+  }
 
   @override
-  Future<void> seek(Duration position) => _player.seek(position);
+  Future<void> seek(Duration position) async {
+    await _player.seek(position);
+    // Log analytics event
+    final currentItem = mediaItem.valueOrNull;
+    if (currentItem != null) {
+      await _analyticsService.logAudioSeek(currentItem.id, position.inSeconds);
+    }
+  }
 
   @override
   Future<void> stop() async {
     await _player.stop();
+    // Log analytics event
+    final currentItem = mediaItem.valueOrNull;
+    if (currentItem != null) {
+      await _analyticsService.logAudioStop(currentItem.id);
+    }
     await playbackState.firstWhere(
       (state) => state.processingState == AudioProcessingState.idle,
     );

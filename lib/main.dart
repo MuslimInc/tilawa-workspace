@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:muzakri/app_bloc_observer.dart';
 import 'package:muzakri/core/di/injection.dart';
+import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/quran_player_app.dart';
@@ -19,6 +20,9 @@ Future<void> main() async {
 
   // Initialize Google Sign-In with server client ID
   await _initializeGoogleSignIn();
+
+  // Initialize Analytics
+  await _initializeAnalytics();
 
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
@@ -38,6 +42,17 @@ Future<void> _initializeGoogleSignIn() async {
     );
   } catch (e) {
     print('Warning: Could not initialize Google Sign-In: $e');
+  }
+}
+
+/// Initialize Analytics
+Future<void> _initializeAnalytics() async {
+  try {
+    final analyticsInitService = getIt<AnalyticsInitializationService>();
+    await analyticsInitService.initialize();
+    print('Analytics initialized successfully');
+  } catch (e) {
+    print('Analytics initialization error: $e');
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 // No FirebaseAuth dependency required here
+import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
 
 class SubscriptionPlansService {
@@ -117,8 +118,8 @@ class SubscriptionPlansService {
         id: 'monthly_basic',
         name: 'Monthly Basic',
         description: 'Access to all premium features for one month',
-        price: 4.99,
-        currency: 'USD',
+        price: 150.0,
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.monthly,
         durationInDays: 30,
         features: [
@@ -136,8 +137,8 @@ class SubscriptionPlansService {
         id: 'monthly_premium',
         name: 'Monthly Premium',
         description: 'Best value monthly plan with all features',
-        price: 7.99,
-        currency: 'USD',
+        price: 240.0,
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.monthly,
         durationInDays: 30,
         features: [
@@ -155,8 +156,8 @@ class SubscriptionPlansService {
         id: 'yearly_basic',
         name: 'Yearly Basic',
         description: 'Save 20% with yearly subscription',
-        price: 47.99,
-        currency: 'USD',
+        price: 1440.0,
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.yearly,
         durationInDays: 365,
         features: [
@@ -172,8 +173,8 @@ class SubscriptionPlansService {
         id: 'yearly_premium',
         name: 'Yearly Premium',
         description: 'Best value - Save 30% with yearly premium',
-        price: 67.99,
-        currency: 'USD',
+        price: 2040.0,
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.yearly,
         durationInDays: 365,
         features: [
@@ -190,10 +191,10 @@ class SubscriptionPlansService {
         id: 'lifetime',
         name: 'Lifetime Access',
         description: 'One-time payment for lifetime access',
-        price: 99.99,
-        currency: 'USD',
+        price: 3000.0,
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.lifetime,
-        durationInDays: 36500, // ~100 years
+        durationInDays: 36500,
         features: [
           'Everything in Premium',
           'Lifetime access',

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
@@ -24,6 +25,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
   final AudioPlayerHandler _audioPlayerHandler;
+  final AnalyticsService _analyticsService;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
@@ -34,12 +36,14 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
     required AudioPlayerHandler audioPlayerHandler,
+    required AnalyticsService analyticsService,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
        _downloadsRepository = downloadsRepository,
        _premiumRepository = premiumRepository,
        _audioPlayerHandler = audioPlayerHandler,
+       _analyticsService = analyticsService,
        super(const DownloadsState.initial()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -148,6 +152,12 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       ),
     );
 
+    // Log analytics event for download start
+    await _analyticsService.logDownloadStart(
+      downloadId,
+      fileName: '${event.surahTitle}_${event.reciterName}',
+    );
+
     final result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
@@ -156,10 +166,27 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     );
 
     result.fold(
-      (failure) => emit(
-        DownloadsState.error(failure.message ?? 'Failed to download surah'),
-      ),
+      (failure) {
+        // Log analytics event for download failure
+        _analyticsService.logEvent(
+          'download_failed',
+          parameters: {
+            'download_id': downloadId,
+            'surah_id': event.surahId,
+            'reciter_name': event.reciterName,
+            'error': failure.message ?? 'Unknown error',
+          },
+        );
+        emit(
+          DownloadsState.error(failure.message ?? 'Failed to download surah'),
+        );
+      },
       (_) {
+        // Log analytics event for download completion
+        _analyticsService.logDownloadComplete(
+          downloadId,
+          fileName: '${event.surahTitle}_${event.reciterName}',
+        );
         // Reload downloads after successful download
         add(const LoadDownloads());
       },
