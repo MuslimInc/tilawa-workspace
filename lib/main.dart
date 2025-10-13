@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:muzakri/app_bloc_observer.dart';
 import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
+import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/quran_player_app.dart';
@@ -17,6 +18,9 @@ Future<void> main() async {
   // Initialize Firebase first, then DI
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await configureDependencies();
+
+  // Initialize Crashlytics first (handles error reporting)
+  await _initializeCrashlytics();
 
   // Initialize Google Sign-In with server client ID
   await _initializeGoogleSignIn();
@@ -42,6 +46,17 @@ Future<void> _initializeGoogleSignIn() async {
     );
   } catch (e) {
     print('Warning: Could not initialize Google Sign-In: $e');
+  }
+}
+
+/// Initialize Crashlytics
+Future<void> _initializeCrashlytics() async {
+  try {
+    final crashlyticsService = getIt<CrashlyticsService>();
+    await crashlyticsService.initialize();
+    print('Crashlytics initialized successfully');
+  } catch (e) {
+    print('Crashlytics initialization error: $e');
   }
 }
 

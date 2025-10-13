@@ -2,14 +2,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
+import 'package:muzakri/core/services/crashlytics_service.dart';
 
 /// Service to initialize analytics with user data and app settings
 @Singleton()
 class AnalyticsInitializationService {
-  AnalyticsInitializationService(this._analyticsService, this._auth);
+  AnalyticsInitializationService(
+    this._analyticsService,
+    this._auth,
+    this._crashlyticsService,
+  );
 
   final AnalyticsService _analyticsService;
   final FirebaseAuth _auth;
+  final CrashlyticsService _crashlyticsService;
 
   /// Initialize analytics with user data
   Future<void> initialize() async {
@@ -18,6 +24,7 @@ class AnalyticsInitializationService {
       final user = _auth.currentUser;
       if (user != null) {
         await _analyticsService.setUserId(user.uid);
+        await _crashlyticsService.setUserId(user.uid);
 
         // Set user properties
         await _analyticsService.setUserProperty('user_type', 'authenticated');
@@ -27,9 +34,19 @@ class AnalyticsInitializationService {
               ? user.providerData.first.providerId
               : 'unknown',
         );
+
+        // Set Crashlytics custom keys
+        await _crashlyticsService.setCustomKeys({
+          'user_type': 'authenticated',
+          'sign_in_method': user.providerData.isNotEmpty
+              ? user.providerData.first.providerId
+              : 'unknown',
+        });
       } else {
         await _analyticsService.setUserId(null);
+        await _crashlyticsService.setUserId('');
         await _analyticsService.setUserProperty('user_type', 'anonymous');
+        await _crashlyticsService.setCustomKey('user_type', 'anonymous');
       }
 
       // Log app start event
@@ -40,6 +57,9 @@ class AnalyticsInitializationService {
           ...CurrencyConfig.getAnalyticsParams(),
         },
       );
+
+      // Set Crashlytics breadcrumb
+      await _crashlyticsService.setBreadcrumb('App started');
 
       print('Analytics initialized successfully');
     } catch (e) {

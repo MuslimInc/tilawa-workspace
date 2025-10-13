@@ -13,6 +13,7 @@ import 'package:audio_service/audio_service.dart' as _i87;
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
@@ -21,6 +22,7 @@ import 'package:muzakri/core/di/external_dependencies_module.dart' as _i348;
 import 'package:muzakri/core/services/analytics_initialization_service.dart'
     as _i528;
 import 'package:muzakri/core/services/analytics_service.dart' as _i557;
+import 'package:muzakri/core/services/crashlytics_service.dart' as _i235;
 import 'package:muzakri/core/services/firebase_initialization_service.dart'
     as _i197;
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
@@ -46,8 +48,12 @@ import 'package:muzakri/features/downloads/domain/repositories/downloads_reposit
     as _i775;
 import 'package:muzakri/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart'
     as _i732;
+import 'package:muzakri/features/downloads/domain/usecases/clear_all_downloads_use_case.dart'
+    as _i917;
 import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart'
     as _i602;
+import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart'
+    as _i242;
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart'
     as _i251;
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart'
@@ -133,6 +139,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i398.FirebaseAnalytics>(
       () => externalDependenciesModule.firebaseAnalytics,
     );
+    gh.singleton<_i141.FirebaseCrashlytics>(
+      () => externalDependenciesModule.firebaseCrashlytics,
+    );
     await gh.singletonAsync<_i460.SharedPreferences>(
       () => externalDependenciesModule.sharedPreferences,
       preResolve: true,
@@ -150,6 +159,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i413.LocalizationBloc>(
       () => _i413.LocalizationBloc(gh<_i460.SharedPreferences>()),
+    );
+    gh.singleton<_i235.CrashlyticsService>(
+      () =>
+          _i235.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
     );
     gh.lazySingleton<_i811.DownloadsLocalDataSource>(
       () => _i811.DownloadsLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
@@ -185,12 +198,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i922.SignInWithGoogleUseCase>(
       () => _i922.SignInWithGoogleUseCase(gh<_i538.AuthRepository>()),
     );
-    gh.singleton<_i528.AnalyticsInitializationService>(
-      () => _i528.AnalyticsInitializationService(
-        gh<_i557.AnalyticsService>(),
-        gh<_i59.FirebaseAuth>(),
-      ),
-    );
     gh.lazySingleton<_i775.DownloadsRepository>(
       () => _i486.DownloadsRepositoryImpl(gh<_i811.DownloadsLocalDataSource>()),
     );
@@ -222,6 +229,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i732.CheckSurahDownloadedUseCase>(
       () => _i732.CheckSurahDownloadedUseCase(gh<_i775.DownloadsRepository>()),
     );
+    gh.singleton<_i917.ClearAllDownloadsUseCase>(
+      () => _i917.ClearAllDownloadsUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
+      () =>
+          _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i528.AnalyticsInitializationService>(
+      () => _i528.AnalyticsInitializationService(
+        gh<_i557.AnalyticsService>(),
+        gh<_i59.FirebaseAuth>(),
+        gh<_i235.CrashlyticsService>(),
+      ),
+    );
     await gh.singletonAsync<_i320.AudioPlayerHandler>(
       () => externalDependenciesModule.audioPlayerHandler(
         gh<List<_i87.MediaItem>>(),
@@ -249,6 +270,19 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i29.GetPremiumStatusUseCase>(
       () => _i29.GetPremiumStatusUseCase(gh<_i872.PremiumRepository>()),
+    );
+    gh.factory<_i811.DownloadsBloc>(
+      () => _i811.DownloadsBloc(
+        getDownloadsByReciter: gh<_i748.GetDownloadsByReciterUseCase>(),
+        downloadSurah: gh<_i251.DownloadSurahUseCase>(),
+        deleteDownload: gh<_i602.DeleteDownloadUseCase>(),
+        deleteReciterDownloads: gh<_i242.DeleteReciterDownloadsUseCase>(),
+        clearAllDownloads: gh<_i917.ClearAllDownloadsUseCase>(),
+        downloadsRepository: gh<_i775.DownloadsRepository>(),
+        premiumRepository: gh<_i872.PremiumRepository>(),
+        audioPlayerHandler: gh<_i320.AudioPlayerHandler>(),
+        analyticsService: gh<_i557.AnalyticsService>(),
+      ),
     );
     gh.factory<_i864.RecitersBloc>(
       () => _i864.RecitersBloc(gh<_i320.AudioPlayerHandler>()),
@@ -278,17 +312,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i319.UpdateSurahDownloadProgressUseCase>(
       () =>
           _i319.UpdateSurahDownloadProgressUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.factory<_i811.DownloadsBloc>(
-      () => _i811.DownloadsBloc(
-        getDownloadsByReciter: gh<_i748.GetDownloadsByReciterUseCase>(),
-        downloadSurah: gh<_i251.DownloadSurahUseCase>(),
-        deleteDownload: gh<_i602.DeleteDownloadUseCase>(),
-        downloadsRepository: gh<_i775.DownloadsRepository>(),
-        premiumRepository: gh<_i872.PremiumRepository>(),
-        audioPlayerHandler: gh<_i320.AudioPlayerHandler>(),
-        analyticsService: gh<_i557.AnalyticsService>(),
-      ),
     );
     gh.factory<_i595.SurahBloc>(
       () => _i595.SurahBloc(

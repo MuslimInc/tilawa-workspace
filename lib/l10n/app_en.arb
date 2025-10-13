@@ -24,14 +24,6 @@
     "@noRecitersMatchSearch": {
         "description": "No reciters match search message"
     },
-    "retry": "Retry",
-    "@retry": {
-        "description": "Retry button text"
-    },
-    "error": "Error",
-    "@error": {
-        "description": "Error message"
-    },
     "filteredByLetter": "Filtered by letter:",
     "@filteredByLetter": {
         "description": "Filtered by letter indicator"

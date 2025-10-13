@@ -27,12 +27,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecitersMatchSearch => 'No reciters match your search';
 
   @override
-  String get retry => 'Retry';
-
-  @override
-  String get error => 'Error';
-
-  @override
   String get filteredByLetter => 'Filtered by letter:';
 
   @override
@@ -139,6 +133,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createPlaylist => 'Create Playlist';
 
   @override
+  String get retry => 'Retry';
+
+  @override
   String get downloadStatusChecked => 'Download status checked';
 
   @override
@@ -149,6 +146,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playbackInitiated => 'Playback initiated';
+
+  @override
+  String get error => 'Error';
 
   @override
   String get settings => 'Settings';

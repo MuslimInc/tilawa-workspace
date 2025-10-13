@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
@@ -24,6 +25,9 @@ abstract class ExternalDependenciesModule {
 
   @singleton
   FirebaseAnalytics get firebaseAnalytics => FirebaseAnalytics.instance;
+
+  @singleton
+  FirebaseCrashlytics get firebaseCrashlytics => FirebaseCrashlytics.instance;
 
   @preResolve
   @singleton

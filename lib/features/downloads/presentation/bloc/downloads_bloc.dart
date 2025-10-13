@@ -8,7 +8,9 @@ import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
@@ -22,6 +24,8 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   final GetDownloadsByReciterUseCase _getDownloadsByReciter;
   final DownloadSurahUseCase _downloadSurah;
   final DeleteDownloadUseCase _deleteDownload;
+  final DeleteReciterDownloadsUseCase _deleteReciterDownloads;
+  final ClearAllDownloadsUseCase _clearAllDownloads;
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
   final AudioPlayerHandler _audioPlayerHandler;
@@ -33,6 +37,8 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     required GetDownloadsByReciterUseCase getDownloadsByReciter,
     required DownloadSurahUseCase downloadSurah,
     required DeleteDownloadUseCase deleteDownload,
+    required DeleteReciterDownloadsUseCase deleteReciterDownloads,
+    required ClearAllDownloadsUseCase clearAllDownloads,
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
     required AudioPlayerHandler audioPlayerHandler,
@@ -40,6 +46,8 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
+       _deleteReciterDownloads = deleteReciterDownloads,
+       _clearAllDownloads = clearAllDownloads,
        _downloadsRepository = downloadsRepository,
        _premiumRepository = premiumRepository,
        _audioPlayerHandler = audioPlayerHandler,
@@ -213,18 +221,53 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     DeleteReciterDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    // This would need to be implemented in the repository
-    // For now, we'll just reload
-    add(const LoadDownloads());
+    emit(const DownloadsState.loading());
+
+    final result = await _deleteReciterDownloads(event.reciterName);
+    result.fold(
+      (failure) => emit(
+        DownloadsState.error(
+          failure.message ?? 'Failed to delete reciter downloads',
+        ),
+      ),
+      (_) {
+        // Log analytics event for delete reciter downloads
+        _analyticsService.logEvent(
+          'delete_reciter_downloads',
+          parameters: {
+            'reciter_name': event.reciterName,
+            'action': 'delete_reciter_downloads',
+          },
+        );
+        // Reload downloads after successful deletion
+        add(const LoadDownloads());
+      },
+    );
   }
 
   Future<void> _onClearAllDownloads(
     ClearAllDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    // This would need to be implemented in the repository
-    // For now, we'll just reload
-    add(const LoadDownloads());
+    emit(const DownloadsState.loading());
+
+    final result = await _clearAllDownloads();
+    result.fold(
+      (failure) => emit(
+        DownloadsState.error(
+          failure.message ?? 'Failed to clear all downloads',
+        ),
+      ),
+      (_) {
+        // Log analytics event for clear all downloads
+        _analyticsService.logEvent(
+          'clear_all_downloads',
+          parameters: {'action': 'clear_all_downloads'},
+        );
+        // Reload downloads after successful clearing
+        add(const LoadDownloads());
+      },
+    );
   }
 
   Future<void> _onCheckSurahDownloaded(

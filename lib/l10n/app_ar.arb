@@ -172,10 +172,6 @@
     "@createPlaylist": {
         "description": "Create playlist button text"
     },
-    "retry": "إعادة المحاولة",
-    "@retry": {
-        "description": "Retry button text"
-    },
     "downloadStatusChecked": "تم فحص حالة التحميل",
     "@downloadStatusChecked": {
         "description": "Download status checked message"
@@ -191,10 +187,6 @@
     "playbackInitiated": "تم بدء التشغيل",
     "@playbackInitiated": {
         "description": "Playback initiated message"
-    },
-    "error": "خطأ",
-    "@error": {
-        "description": "Error label"
     },
     "settings": "الإعدادات",
     "@settings": {

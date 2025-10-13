@@ -134,18 +134,6 @@ abstract class AppLocalizations {
   /// **'No reciters match your search'**
   String get noRecitersMatchSearch;
 
-  /// Retry button text
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get retry;
-
-  /// Error label
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get error;
-
   /// Filtered by letter indicator
   ///
   /// In en, this message translates to:
@@ -356,6 +344,12 @@ abstract class AppLocalizations {
   /// **'Create Playlist'**
   String get createPlaylist;
 
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
   /// Download status checked message
   ///
   /// In en, this message translates to:
@@ -379,6 +373,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Playback initiated'**
   String get playbackInitiated;
+
+  /// Error label
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
 
   /// Settings section title
   ///

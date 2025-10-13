@@ -27,12 +27,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noRecitersMatchSearch => 'لا يوجد قراء يطابقون البحث';
 
   @override
-  String get retry => 'إعادة المحاولة';
-
-  @override
-  String get error => 'خطأ';
-
-  @override
   String get filteredByLetter => 'مفلتر بالحرف:';
 
   @override
@@ -139,6 +133,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createPlaylist => 'إنشاء قائمة تشغيل';
 
   @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
   String get downloadStatusChecked => 'تم فحص حالة التحميل';
 
   @override
@@ -149,6 +146,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playbackInitiated => 'تم بدء التشغيل';
+
+  @override
+  String get error => 'خطأ';
 
   @override
   String get settings => 'الإعدادات';
