@@ -4,15 +4,20 @@ import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 
-@injectable
-class DeleteDownload {
-  const DeleteDownload(this._repository);
+@Singleton()
+class DownloadSurahUseCase {
+  const DownloadSurahUseCase(this._repository);
 
   final DownloadsRepository _repository;
 
-  ResultFuture<void> call(String downloadId) async {
+  ResultFuture<void> call({
+    required String surahId,
+    required String surahTitle,
+    required String reciterName,
+    required String url,
+  }) async {
     try {
-      await _repository.deleteDownload(downloadId);
+      await _repository.startDownload(surahId, surahTitle, reciterName, url);
       return const Right(null);
     } catch (e) {
       return Left(AudioFailure(e.toString()));

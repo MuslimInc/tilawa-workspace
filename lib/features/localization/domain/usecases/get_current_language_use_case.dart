@@ -1,8 +1,8 @@
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart';
 
-class GetCurrentLanguage {
-  const GetCurrentLanguage(this._repository);
+class GetCurrentLanguageUseCase {
+  const GetCurrentLanguageUseCase(this._repository);
 
   final LocalizationRepository _repository;
 

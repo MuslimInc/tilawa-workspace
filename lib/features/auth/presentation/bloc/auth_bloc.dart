@@ -1,17 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
-import 'package:muzakri/features/auth/domain/usecases/get_current_user.dart';
-import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google.dart';
+import 'package:muzakri/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 
 @injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final SignInWithGoogle _signInWithGoogle;
+  final SignInWithGoogleUseCase _signInWithGoogle;
   final SignOut _signOut;
-  final GetCurrentUser _getCurrentUser;
+  final GetCurrentUserUseCase _getCurrentUser;
 
   AuthBloc(this._signInWithGoogle, this._signOut, this._getCurrentUser)
     : super(const AuthState.initial()) {

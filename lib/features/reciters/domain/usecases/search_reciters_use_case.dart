@@ -3,8 +3,8 @@ import 'package:muzakri/core/entities/reciter.dart';
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
 
-class SearchReciters {
-  const SearchReciters(this._repository);
+class SearchRecitersUseCase {
+  const SearchRecitersUseCase(this._repository);
 
   final RecitersRepository _repository;
 

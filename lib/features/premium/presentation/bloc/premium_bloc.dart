@@ -1,14 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/features/premium/domain/usecases/cancel_subscription_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/check_feature_access_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/get_available_plans_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/get_premium_status_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/purchase_subscription_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/restore_subscription_use_case.dart';
+import 'package:muzakri/features/premium/domain/usecases/start_trial_use_case.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_event.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
 
 @injectable
 class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
-  final PremiumRepository _premiumRepository;
+  final GetPremiumStatusUseCase _getPremiumStatus;
+  final PurchaseSubscriptionUseCase _purchaseSubscription;
+  final CancelSubscriptionUseCase _cancelSubscription;
+  final RestoreSubscriptionUseCase _restoreSubscription;
+  final StartTrialUseCase _startTrial;
+  final GetAvailablePlansUseCase _getAvailablePlans;
+  final CheckFeatureAccessUseCase _checkFeatureAccess;
 
-  PremiumBloc(this._premiumRepository) : super(const PremiumState.initial()) {
+  PremiumBloc(
+    this._getPremiumStatus,
+    this._purchaseSubscription,
+    this._cancelSubscription,
+    this._restoreSubscription,
+    this._startTrial,
+    this._getAvailablePlans,
+    this._checkFeatureAccess,
+  ) : super(const PremiumState.initial()) {
     on<LoadPremiumStatus>(_onLoadPremiumStatus);
     on<PurchaseSubscription>(_onPurchaseSubscription);
     on<CancelSubscription>(_onCancelSubscription);
@@ -26,15 +46,12 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final status = await _premiumRepository.getPremiumStatus();
-      final plans = await _premiumRepository.getAvailablePlans();
-      final canDownload = await _premiumRepository.canDownload();
-
+      final result = await _getPremiumStatus();
       emit(
         PremiumState.loaded(
-          status: status,
-          availablePlans: plans,
-          canDownload: canDownload,
+          status: result.status,
+          availablePlans: result.plans,
+          canDownload: result.canDownload,
         ),
       );
     } catch (e) {
@@ -49,9 +66,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _premiumRepository.purchaseSubscription(
-        event.planId,
-      );
+      final success = await _purchaseSubscription(event.planId);
 
       if (success) {
         emit(
@@ -80,7 +95,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _premiumRepository.cancelSubscription();
+      final success = await _cancelSubscription();
 
       if (success) {
         emit(
@@ -109,7 +124,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _premiumRepository.restoreSubscription();
+      final success = await _restoreSubscription();
 
       if (success) {
         emit(
@@ -138,9 +153,9 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final isEligible = await _premiumRepository.isTrialEligible();
+      final result = await _startTrial();
 
-      if (!isEligible) {
+      if (!result.isEligible) {
         emit(
           const PremiumState.trialNotEligible(
             message:
@@ -150,9 +165,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
         return;
       }
 
-      final success = await _premiumRepository.startTrial();
-
-      if (success) {
+      if (result.success) {
         emit(
           const PremiumState.trialStarted(
             message: '7-day trial started! Enjoy premium features.',
@@ -177,7 +190,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     Emitter<PremiumState> emit,
   ) async {
     try {
-      final plans = await _premiumRepository.getAvailablePlans();
+      final plans = await _getAvailablePlans();
 
       if (state is PremiumLoaded) {
         final currentState = state as PremiumLoaded;
@@ -193,9 +206,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     Emitter<PremiumState> emit,
   ) async {
     try {
-      final canAccess = await _premiumRepository.canAccessFeature(
-        event.featureName,
-      );
+      final canAccess = await _checkFeatureAccess(event.featureName);
 
       if (!canAccess && event.featureName == 'download') {
         // Show premium upgrade prompt

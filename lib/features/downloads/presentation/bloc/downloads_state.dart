@@ -33,4 +33,10 @@ sealed class DownloadsState with _$DownloadsState {
 
   const factory DownloadsState.premiumRequired({required String message}) =
       PremiumRequired;
+
+  const factory DownloadsState.downloadStarted({
+    required String surahId,
+    required String surahTitle,
+    required String reciterName,
+  }) = DownloadStarted;
 }

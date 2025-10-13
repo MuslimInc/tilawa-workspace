@@ -71,6 +71,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 ),
               );
             },
+            downloadStarted: (surahId, surahTitle, reciterName) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Downloading $surahTitle by $reciterName...'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
           );
         },
         child: BlocBuilder<DownloadsBloc, DownloadsState>(
@@ -165,6 +173,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               premiumRequired: (String message) {
                 return Center(child: Text(message));
               },
+              downloadStarted: (surahId, surahTitle, reciterName) => Center(
+                child: Text('Downloading $surahTitle by $reciterName...'),
+              ),
             );
           },
         ),

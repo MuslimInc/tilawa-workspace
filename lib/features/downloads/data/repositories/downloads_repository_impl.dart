@@ -106,7 +106,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final filePath = path.join(downloadsDir, fileName);
 
     final downloadItem = DownloadItem(
-      id: '${surahId}_${reciterName}_${DateTime.now().millisecondsSinceEpoch}',
+      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
       title: surahTitle,
       url: url,
       filePath: filePath,

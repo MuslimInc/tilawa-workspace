@@ -2,11 +2,11 @@ import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/user.dart';
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
 
-@injectable
-class GetCurrentUser {
+@Singleton()
+class GetCurrentUserUseCase {
   final AuthRepository _repository;
 
-  GetCurrentUser(this._repository);
+  GetCurrentUserUseCase(this._repository);
 
   User? call() {
     return _repository.currentUser;

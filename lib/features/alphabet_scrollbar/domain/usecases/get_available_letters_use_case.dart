@@ -1,8 +1,8 @@
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/alphabet_scrollbar/domain/repositories/alphabet_scrollbar_repository.dart';
 
-class GetAvailableLetters {
-  const GetAvailableLetters(this._repository);
+class GetAvailableLettersUseCase {
+  const GetAvailableLettersUseCase(this._repository);
 
   final AlphabetScrollbarRepository _repository;
 

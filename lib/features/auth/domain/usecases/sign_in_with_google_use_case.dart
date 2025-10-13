@@ -2,11 +2,11 @@ import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
 
-@injectable
-class SignInWithGoogle {
+@Singleton()
+class SignInWithGoogleUseCase {
   final AuthRepository _repository;
 
-  SignInWithGoogle(this._repository);
+  SignInWithGoogleUseCase(this._repository);
 
   Future<AuthResult> call() async {
     return await _repository.signInWithGoogle();

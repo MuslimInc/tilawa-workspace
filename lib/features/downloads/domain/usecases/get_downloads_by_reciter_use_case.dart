@@ -4,9 +4,9 @@ import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 
-@injectable
-class GetDownloadsByReciter {
-  const GetDownloadsByReciter(this._repository);
+@Singleton()
+class GetDownloadsByReciterUseCase {
+  const GetDownloadsByReciterUseCase(this._repository);
 
   final DownloadsRepository _repository;
 

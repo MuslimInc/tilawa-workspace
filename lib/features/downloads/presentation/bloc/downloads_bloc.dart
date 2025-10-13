@@ -7,9 +7,9 @@ import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/delete_download.dart';
-import 'package:muzakri/features/downloads/domain/usecases/download_surah.dart';
-import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter.dart';
+import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
 
 part 'downloads_bloc.freezed.dart';
@@ -18,9 +18,9 @@ part 'downloads_state.dart';
 
 @injectable
 class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
-  final GetDownloadsByReciter _getDownloadsByReciter;
-  final DownloadSurah _downloadSurah;
-  final DeleteDownload _deleteDownload;
+  final GetDownloadsByReciterUseCase _getDownloadsByReciter;
+  final DownloadSurahUseCase _downloadSurah;
+  final DeleteDownloadUseCase _deleteDownload;
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
   final AudioPlayerHandler _audioPlayerHandler;
@@ -28,9 +28,9 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
   DownloadsBloc({
-    required GetDownloadsByReciter getDownloadsByReciter,
-    required DownloadSurah downloadSurah,
-    required DeleteDownload deleteDownload,
+    required GetDownloadsByReciterUseCase getDownloadsByReciter,
+    required DownloadSurahUseCase downloadSurah,
+    required DeleteDownloadUseCase deleteDownload,
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
     required AudioPlayerHandler audioPlayerHandler,
@@ -111,6 +111,42 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       );
       return;
     }
+
+    // Check if surah is already downloaded
+    final isAlreadyDownloaded = await _downloadsRepository.isSurahDownloaded(
+      event.surahId,
+      event.reciterName,
+    );
+
+    if (isAlreadyDownloaded) {
+      emit(
+        DownloadsState.error(
+          'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
+        ),
+      );
+      return;
+    }
+
+    // Check if download is currently in progress
+    final downloadId =
+        '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
+    if (DownloadService.isDownloadActive(downloadId)) {
+      emit(
+        DownloadsState.error(
+          'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
+        ),
+      );
+      return;
+    }
+
+    // Emit download started state
+    emit(
+      DownloadsState.downloadStarted(
+        surahId: event.surahId,
+        surahTitle: event.surahTitle,
+        reciterName: event.reciterName,
+      ),
+    );
 
     final result = await _downloadSurah(
       surahId: event.surahId,
