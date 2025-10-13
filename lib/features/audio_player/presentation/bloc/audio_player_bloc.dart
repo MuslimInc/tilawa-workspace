@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/position_data.dart';
 import 'package:muzakri/queue_state.dart';
@@ -10,12 +11,12 @@ part 'audio_player_bloc.freezed.dart';
 part 'audio_player_event.dart';
 part 'audio_player_state.dart';
 
+@injectable
 class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   final AudioPlayerHandler _audioHandler;
 
-  AudioPlayerBloc({required AudioPlayerHandler audioHandler})
-    : _audioHandler = audioHandler,
-      super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
+  AudioPlayerBloc(this._audioHandler)
+    : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<LoadAudioPlayerData>(_onLoadAudioPlayerData);
     on<UpdateMediaItem>(_onUpdateMediaItem);
@@ -225,11 +226,35 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   }
 
   void _onSetVolume(SetVolume event, Emitter<AudioPlayerState> emit) {
+    print('Bloc received setVolume event: ${event.volume}');
     _audioHandler.setVolume(event.volume);
+    emit(
+      state.copyWith(
+        status: AudioPlayerStatus.success,
+        mediaItem: state.mediaItem,
+        playbackState: state.playbackState,
+        positionData: state.positionData,
+        queueState: state.queueState,
+        volume: event.volume,
+        speed: state.speed,
+      ),
+    );
+    print('Bloc emitted new state with volume: ${event.volume}');
   }
 
   void _onSetSpeed(SetSpeed event, Emitter<AudioPlayerState> emit) {
     _audioHandler.setSpeed(event.speed);
+    emit(
+      state.copyWith(
+        status: AudioPlayerStatus.success,
+        mediaItem: state.mediaItem,
+        playbackState: state.playbackState,
+        positionData: state.positionData,
+        queueState: state.queueState,
+        volume: state.volume,
+        speed: event.speed,
+      ),
+    );
   }
 
   void _onSkipToQueueItem(

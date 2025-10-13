@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:muzakri/features/surah/domain/entities/surah.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
@@ -69,9 +70,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         initialValue: uniqueMoshaf.contains(selectedMoshaf)
                             ? selectedMoshaf
                             : uniqueMoshaf.first,
-                        decoration: const InputDecoration(
-                          labelText: 'Select Recitation',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.selectRecitation,
+                          border: const OutlineInputBorder(),
                         ),
                         items: uniqueMoshaf.map((moshaf) {
                           return DropdownMenuItem<Mosahf>(
@@ -159,11 +162,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
-  Widget _buildSurahCard(
-    MediaItem surah,
-    int index,
-    ReciterDetailsLoaded state,
-  ) {
+  Widget _buildSurahCard(Surah surah, int index, ReciterDetailsLoaded state) {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, audioState) {
         if (audioState.status != AudioPlayerStatus.success) {
@@ -188,13 +187,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 ),
               ),
               title: Text(
-                surah.title,
+                surah.name,
                 style: const TextStyle(fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text(
-                surah.artist ?? '',
+                surah.reciterName,
                 style: const TextStyle(color: Colors.grey),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -245,14 +244,14 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     ),
             ),
             title: Text(
-              surah.title,
+              surah.name,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 color: isCurrentlyPlaying ? Colors.purple[800] : null,
               ),
             ),
             subtitle: Text(
-              surah.album ?? '',
+              surah.reciterName,
               style: TextStyle(
                 color: isCurrentlyPlaying ? Colors.purple[600] : null,
               ),
@@ -278,9 +277,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 // Download button
                 DownloadButton(
                   surahId: surah.id,
-                  surahTitle: surah.title,
+                  surahTitle: surah.name,
                   reciterName: widget.reciter.name,
-                  url: surah.id,
+                  url: surah.url,
                 ),
                 const SizedBox(width: 8),
                 // Play button
@@ -336,11 +335,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Check if a surah is downloaded and get its file path
-  Future<String?> _getDownloadedFilePath(MediaItem surah) async {
+  Future<String?> _getDownloadedFilePath(Surah surah) async {
     try {
-      final downloadsRepository = sl<DownloadsRepository>();
+      final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
-      final surahId = surah.title.split(' ').first;
+      final surahId = surah.name.split(' ').first;
       final filePath = await downloadsRepository.getDownloadedFilePath(
         surahId,
         widget.reciter.name,
@@ -366,11 +365,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Check if a surah is downloaded
-  Future<bool> _isSurahDownloaded(MediaItem surah) async {
+  Future<bool> _isSurahDownloaded(Surah surah) async {
     try {
-      final downloadsRepository = sl<DownloadsRepository>();
+      final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
-      final surahId = surah.title.split(' ').first;
+      final surahId = surah.name.split(' ').first;
       return await downloadsRepository.isSurahDownloaded(
         surahId,
         widget.reciter.name,
@@ -382,7 +381,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Create a MediaItem with local file path for downloaded surahs
-  MediaItem _createLocalMediaItem(MediaItem originalSurah, String filePath) {
+  MediaItem _createLocalMediaItem(Surah originalSurah, String filePath) {
     try {
       // Convert file path to proper file:// URI
       final fileUri = Uri.file(filePath).toString();
@@ -392,13 +391,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
       return MediaItem(
         id: fileUri, // Use file URI as ID for local files
-        title: originalSurah.title,
-        artist: originalSurah.artist,
-        album: originalSurah.album,
-        duration: originalSurah.duration,
-        artUri: originalSurah.artUri,
+        title: originalSurah.name,
+        artist: originalSurah.reciterName,
+        album: originalSurah.reciterName,
+        duration: originalSurah.mediaItem.duration,
+        artUri: originalSurah.mediaItem.artUri,
         extras: {
-          ...?originalSurah.extras,
+          ...?originalSurah.mediaItem.extras,
           'isDownloaded': true,
           'originalId': originalSurah.id, // Keep original ID for reference
           'localFilePath': filePath, // Keep original file path for reference
@@ -408,11 +407,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       print('_createLocalMediaItem error: $e');
       print('_createLocalMediaItem: falling back to original surah');
       // Fallback to original surah if file URI creation fails
-      return originalSurah;
+      return originalSurah.mediaItem;
     }
   }
 
-  Future<void> _playSurah(MediaItem surah, ReciterDetailsLoaded state) async {
+  Future<void> _playSurah(Surah surah, ReciterDetailsLoaded state) async {
     try {
       // Check if the surah is downloaded
       final downloadedFilePath = await _getDownloadedFilePath(surah);
@@ -422,7 +421,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
       }
 
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
+      final audioHandler = getIt<AudioPlayerHandler>();
 
       // Validate surah data
       if (surah.id.isEmpty) {
@@ -435,7 +434,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       );
 
       print(
-        '_playSurah: selected surah=${surah.title}, index=$surahIndex, total surahs=${state.surahList.length}',
+        '_playSurah: selected surah=${surah.name}, index=$surahIndex, total surahs=${state.surahList.length}',
       );
       print('_playSurah: downloaded file path: $downloadedFilePath');
 
@@ -464,7 +463,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 _createLocalMediaItem(currentSurah, otherDownloadedPath),
               );
             } else {
-              surahListWithDownloads.add(currentSurah);
+              surahListWithDownloads.add(currentSurah.mediaItem);
             }
           }
         }
@@ -491,7 +490,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             '_playSurah: error playing with downloaded files, falling back to streaming',
           );
           // Fallback to original surah list if downloaded files fail
-          await audioHandler.updateQueue(state.surahList);
+          await audioHandler.updateQueue(
+            state.surahList.map((s) => s.mediaItem).toList(),
+          );
           await audioHandler.pause();
           await audioHandler.skipToQueueItem(surahIndex);
           await audioHandler.play();
@@ -501,7 +502,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         print('_playSurah: surah not found in list, playing single surah');
         final surahToPlay = downloadedFilePath != null
             ? _createLocalMediaItem(surah, downloadedFilePath)
-            : surah;
+            : surah.mediaItem;
 
         try {
           await audioHandler.updateQueue([surahToPlay]);
@@ -513,7 +514,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             '_playSurah: error playing single downloaded surah, falling back to streaming',
           );
           // Fallback to original surah if downloaded file fails
-          await audioHandler.updateQueue([surah]);
+          await audioHandler.updateQueue([surah.mediaItem]);
           await audioHandler.pause();
           await audioHandler.skipToQueueItem(0);
           await audioHandler.play();

@@ -34,3 +34,16 @@ class SelectSurah extends ReciterDetailsEvent {
   @override
   List<Object?> get props => [surahId];
 }
+
+class RefreshSurahDownloadStatus extends ReciterDetailsEvent {
+  final String surahId;
+  final String reciterName;
+
+  const RefreshSurahDownloadStatus({
+    required this.surahId,
+    required this.reciterName,
+  });
+
+  @override
+  List<Object?> get props => [surahId, reciterName];
+}

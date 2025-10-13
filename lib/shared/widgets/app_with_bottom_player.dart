@@ -2,22 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
-import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
 
 class AppWithBottomPlayer extends StatelessWidget {
   final Widget child;
 
   const AppWithBottomPlayer({super.key, required this.child});
-
-  void _navigateToExpandedPlayer(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ExpandedPlayerScreen(),
-        fullscreenDialog: true,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +39,7 @@ class AppWithBottomPlayer extends StatelessWidget {
                   right: 0,
                   bottom:
                       kBottomNavigationBarHeight, // Account for bottom nav bar
-                  child: BottomPlayer(
-                    onTap: () => _navigateToExpandedPlayer(context),
-                  ),
+                  child: BottomPlayer(),
                 ),
             ],
           ),

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "181575856185",
+    "project_id": "quran-playera-app",
+    "storage_bucket": "quran-playera-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181575856185:android:70e2d3035b9d23a3381de8",
+        "android_client_info": {
+          "package_name": "com.example.muzakri"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGJQ04bgIRkijYOhJdgl4wdhPTB99XFUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

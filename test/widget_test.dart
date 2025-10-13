@@ -7,12 +7,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/main.dart';
+import 'package:muzakri/quran_player_app.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(QuranPlayerApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

@@ -195,5 +195,9 @@
     "error": "Error",
     "@error": {
         "description": "Error label"
+    },
+    "settings": "Settings",
+    "@settings": {
+        "description": "Settings section title"
     }
 }

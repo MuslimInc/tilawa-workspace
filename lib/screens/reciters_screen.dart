@@ -5,8 +5,8 @@ import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_s
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
-import 'package:muzakri/shared/widgets/language_switcher.dart';
 import 'package:muzakri/shared/widgets/arabic_alphabet_scrollbar.dart';
+import 'package:muzakri/shared/widgets/language_switcher.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -22,7 +22,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<RecitersBloc>().add(const LoadReciters());
+    // Load reciters asynchronously to avoid blocking UI
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RecitersBloc>().add(const LoadReciters());
+    });
   }
 
   @override

@@ -4,8 +4,22 @@ import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart
 import 'package:muzakri/features/downloads/presentation/widgets/reciter_downloads_section.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 
-class DownloadsScreen extends StatelessWidget {
+class DownloadsScreen extends StatefulWidget {
   const DownloadsScreen({super.key});
+
+  @override
+  State<DownloadsScreen> createState() => _DownloadsScreenState();
+}
+
+class _DownloadsScreenState extends State<DownloadsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load downloads only when the screen is first displayed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DownloadsBloc>().add(const LoadDownloads());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,22 +38,48 @@ class DownloadsScreen extends StatelessWidget {
       body: BlocListener<DownloadsBloc, DownloadsState>(
         listener: (context, state) {
           // Handle states that should show snackbars or other UI feedback
-          if (state is PlaybackInitiated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          } else if (state is DownloadsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
+          state.when(
+            initial: () {},
+            loading: () {},
+            loaded: (_) {},
+            error: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            },
+            surahDownloadStatus: (_, _, _) {},
+            fileValidationResult: (_, _) {},
+            validDownloadsLoaded: (_, _) {},
+            playbackInitiated: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            premiumRequired: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Colors.orange,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            },
+            downloadStarted: (surahId, surahTitle, reciterName) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Downloading $surahTitle by $reciterName...'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+          );
         },
         child: BlocBuilder<DownloadsBloc, DownloadsState>(
           builder: (context, state) {
@@ -129,6 +169,12 @@ class DownloadsScreen extends StatelessWidget {
               ),
               playbackInitiated: (message) => Center(
                 child: Text(AppLocalizations.of(context)!.playbackInitiated),
+              ),
+              premiumRequired: (String message) {
+                return Center(child: Text(message));
+              },
+              downloadStarted: (surahId, surahTitle, reciterName) => Center(
+                child: Text('Downloading $surahTitle by $reciterName...'),
               ),
             );
           },

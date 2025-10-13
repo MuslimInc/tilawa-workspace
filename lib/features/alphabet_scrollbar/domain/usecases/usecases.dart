@@ -1,1 +1,1 @@
-export 'get_available_letters.dart';
+export 'get_available_letters_use_case.dart';

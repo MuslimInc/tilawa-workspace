@@ -2,36 +2,44 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:injectable/injectable.dart';
+import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/delete_download.dart';
-import 'package:muzakri/features/downloads/domain/usecases/download_surah.dart';
-import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter.dart';
+import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
+import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
 
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
 part 'downloads_state.dart';
 
+@injectable
 class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
-  final GetDownloadsByReciter _getDownloadsByReciter;
-  final DownloadSurah _downloadSurah;
-  final DeleteDownload _deleteDownload;
+  final GetDownloadsByReciterUseCase _getDownloadsByReciter;
+  final DownloadSurahUseCase _downloadSurah;
+  final DeleteDownloadUseCase _deleteDownload;
   final DownloadsRepository _downloadsRepository;
+  final PremiumRepository _premiumRepository;
+  final AudioPlayerHandler _audioPlayerHandler;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
   DownloadsBloc({
-    required GetDownloadsByReciter getDownloadsByReciter,
-    required DownloadSurah downloadSurah,
-    required DeleteDownload deleteDownload,
+    required GetDownloadsByReciterUseCase getDownloadsByReciter,
+    required DownloadSurahUseCase downloadSurah,
+    required DeleteDownloadUseCase deleteDownload,
     required DownloadsRepository downloadsRepository,
+    required PremiumRepository premiumRepository,
+    required AudioPlayerHandler audioPlayerHandler,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
        _downloadsRepository = downloadsRepository,
+       _premiumRepository = premiumRepository,
+       _audioPlayerHandler = audioPlayerHandler,
        super(const DownloadsState.initial()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -43,6 +51,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     on<GetValidCompletedDownloadsEvent>(_onGetValidCompletedDownloads);
     on<PlayDownloadedSurahEvent>(_onPlayDownloadedSurah);
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
+    on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
 
     // Listen to download progress
     _listenToProgress();
@@ -91,6 +100,54 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     DownloadSurahEvent event,
     Emitter<DownloadsState> emit,
   ) async {
+    // Check premium access before allowing download
+    final canDownload = await _premiumRepository.canDownload();
+    if (!canDownload) {
+      emit(
+        const DownloadsState.premiumRequired(
+          message:
+              'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+        ),
+      );
+      return;
+    }
+
+    // Check if surah is already downloaded
+    final isAlreadyDownloaded = await _downloadsRepository.isSurahDownloaded(
+      event.surahId,
+      event.reciterName,
+    );
+
+    if (isAlreadyDownloaded) {
+      emit(
+        DownloadsState.error(
+          'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
+        ),
+      );
+      return;
+    }
+
+    // Check if download is currently in progress
+    final downloadId =
+        '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
+    if (DownloadService.isDownloadActive(downloadId)) {
+      emit(
+        DownloadsState.error(
+          'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
+        ),
+      );
+      return;
+    }
+
+    // Emit download started state
+    emit(
+      DownloadsState.downloadStarted(
+        surahId: event.surahId,
+        surahTitle: event.surahTitle,
+        reciterName: event.reciterName,
+      ),
+    );
+
     final result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
@@ -235,12 +292,11 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       final mediaItem = _downloadsRepository.createMediaItemFromDownload(
         download,
       );
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
 
-      await audioHandler.updateQueue([mediaItem]);
-      await audioHandler.pause();
-      await audioHandler.skipToQueueItem(0);
-      await audioHandler.play();
+      await _audioPlayerHandler.updateQueue([mediaItem]);
+      await _audioPlayerHandler.pause();
+      await _audioPlayerHandler.skipToQueueItem(0);
+      await _audioPlayerHandler.play();
 
       emit(
         DownloadsState.playbackInitiated(message: 'Playing ${download.title}'),
@@ -267,12 +323,11 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       final mediaItems = _downloadsRepository.createMediaItemsFromDownloads(
         validDownloads,
       );
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
 
-      await audioHandler.updateQueue(mediaItems);
-      await audioHandler.pause();
-      await audioHandler.skipToQueueItem(0);
-      await audioHandler.play();
+      await _audioPlayerHandler.updateQueue(mediaItems);
+      await _audioPlayerHandler.pause();
+      await _audioPlayerHandler.skipToQueueItem(0);
+      await _audioPlayerHandler.play();
 
       emit(
         DownloadsState.playbackInitiated(
@@ -282,6 +337,25 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       );
     } catch (e) {
       emit(DownloadsState.error('Error playing downloads: $e'));
+    }
+  }
+
+  Future<void> _onCheckPremiumAccess(
+    CheckPremiumAccessEvent event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    try {
+      final canDownload = await _premiumRepository.canDownload();
+      if (!canDownload) {
+        emit(
+          const DownloadsState.premiumRequired(
+            message:
+                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(DownloadsState.error('Failed to check premium access: $e'));
     }
   }
 }

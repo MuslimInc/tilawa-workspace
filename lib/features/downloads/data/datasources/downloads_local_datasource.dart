@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,13 +18,17 @@ abstract class DownloadsLocalDataSource {
   Future<void> deleteFile(String filePath);
 }
 
+@LazySingleton(as: DownloadsLocalDataSource)
 class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
   static const String _downloadsKey = 'downloads';
 
+  final SharedPreferences _prefs;
+
+  DownloadsLocalDataSourceImpl(this._prefs);
+
   @override
   Future<List<DownloadItem>> getDownloads() async {
-    final prefs = await SharedPreferences.getInstance();
-    final downloadsJson = prefs.getStringList(_downloadsKey) ?? [];
+    final downloadsJson = _prefs.getStringList(_downloadsKey) ?? [];
 
     return downloadsJson.map((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;
@@ -33,11 +38,10 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<void> saveDownloads(List<DownloadItem> downloads) async {
-    final prefs = await SharedPreferences.getInstance();
     final downloadsJson = downloads
         .map((download) => jsonEncode(download.toJson()))
         .toList();
-    await prefs.setStringList(_downloadsKey, downloadsJson);
+    await _prefs.setStringList(_downloadsKey, downloadsJson);
   }
 
   @override
@@ -66,8 +70,7 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<void> clearAllDownloads() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_downloadsKey);
+    await _prefs.remove(_downloadsKey);
   }
 
   @override

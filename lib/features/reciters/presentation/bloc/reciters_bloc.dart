@@ -1,14 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/audio_player_handler_impl.dart';
-import 'package:muzakri/core/di/injection_container.dart';
+import 'package:injectable/injectable.dart';
+import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';
 
+@injectable
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
-  RecitersBloc() : super(const RecitersInitial()) {
+  final AudioPlayerHandler _audioHandler;
+
+  RecitersBloc(this._audioHandler) : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
@@ -23,8 +26,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      final audioHandler = sl<AudioPlayerHandlerImpl>();
-      final recitersData = await audioHandler.getRecitersData();
+      final recitersData = await _audioHandler.getRecitersData();
 
       if (recitersData != null) {
         emit(

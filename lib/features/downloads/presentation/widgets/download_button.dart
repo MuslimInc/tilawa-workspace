@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/router/app_router.dart';
 
 class DownloadButton extends StatefulWidget {
   const DownloadButton({
@@ -24,6 +27,7 @@ class DownloadButton extends StatefulWidget {
 class _DownloadButtonState extends State<DownloadButton> {
   bool _isDownloaded = false;
   bool _isChecking = true;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -40,6 +44,8 @@ class _DownloadButtonState extends State<DownloadButton> {
     );
   }
 
+  bool get _canDownload => !_isDownloaded && !_isDownloading && !_isChecking;
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<DownloadsBloc, DownloadsState>(
@@ -51,28 +57,64 @@ class _DownloadButtonState extends State<DownloadButton> {
             _isDownloaded = state.isDownloaded;
             _isChecking = false;
           });
+        } else if (state is DownloadStarted &&
+            state.surahId == widget.surahId &&
+            state.reciterName == widget.reciterName) {
+          setState(() {
+            _isDownloading = true;
+          });
+        } else if (state is DownloadsLoaded) {
+          // Refresh download status when downloads are loaded
+          _checkIfDownloaded();
+        } else if (state is DownloadsError) {
+          // Check if this error is related to our download
+          if (state.message.contains(widget.surahTitle) &&
+              state.message.contains(widget.reciterName)) {
+            setState(() {
+              _isDownloading = false;
+            });
+          }
+        } else if (state is PremiumRequired) {
+          // Show premium upgrade dialog
+          _showPremiumUpgradeDialog(context, state.message);
         }
       },
-      child: _isChecking
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : IconButton(
-              icon: Icon(
-                _isDownloaded ? Icons.download_done : Icons.download,
-                color: _isDownloaded ? Colors.green : null,
-              ),
-              tooltip: _isDownloaded
-                  ? AppLocalizations.of(context)!.downloaded
-                  : AppLocalizations.of(context)!.download,
-              onPressed: _isDownloaded ? null : _downloadSurah,
-            ),
+      child: _buildButton(),
+    );
+  }
+
+  Widget _buildButton() {
+    if (_isChecking) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    // Hide the button completely if already downloaded
+    if (_isDownloaded) {
+      return const SizedBox.shrink();
+    }
+
+    if (_isDownloading) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    return IconButton(
+      icon: const Icon(Icons.download),
+      tooltip: AppLocalizations.of(context)!.download,
+      onPressed: _canDownload ? _downloadSurah : null,
     );
   }
 
   void _downloadSurah() {
+    if (!_canDownload) return;
+
     context.read<DownloadsBloc>().add(
       DownloadSurahEvent(
         surahId: widget.surahId,
@@ -87,6 +129,19 @@ class _DownloadButtonState extends State<DownloadButton> {
       SnackBar(
         content: Text('Downloading ${widget.surahTitle}...'),
         duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showPremiumUpgradeDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => PremiumUpgradeDialog(
+        title: 'Premium Required',
+        message: message,
+        onUpgrade: () {
+          context.push(AppRouter.premium);
+        },
       ),
     );
   }
