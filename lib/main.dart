@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:muzakri/app_bloc_observer.dart';
 import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
@@ -11,6 +12,8 @@ import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/quran_player_app.dart';
+
+final logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
