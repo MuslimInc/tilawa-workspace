@@ -11,22 +11,50 @@ class DownloadsScreen extends StatefulWidget {
   State<DownloadsScreen> createState() => _DownloadsScreenState();
 }
 
-class _DownloadsScreenState extends State<DownloadsScreen> {
+class _DownloadsScreenState extends State<DownloadsScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    // Load downloads only when the screen is first displayed
+    // Load downloads when the screen is first displayed
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DownloadsBloc>().add(const LoadDownloads());
+      _loadDownloads();
     });
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload downloads each time the screen becomes visible
+    // This happens when user switches to downloads tab from bottom navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDownloads();
+    });
+  }
+
+  void _loadDownloads() {
+    // Always load downloads - no conditions
+    print('DownloadsScreen: Loading downloads...');
+    context.read<DownloadsBloc>().add(const LoadDownloads());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.downloads),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _loadDownloads();
+            },
+            tooltip: 'Refresh Downloads',
+          ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
             onPressed: () {

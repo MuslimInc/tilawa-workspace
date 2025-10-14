@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/auth/presentation/screens/login_screen.dart';
+import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
 import 'package:muzakri/features/premium/presentation/screens/premium_screen.dart';
 import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/reciter_model.dart';
@@ -15,6 +16,7 @@ class AppRouter {
   static const String premium = '/premium';
   static const String login = '/login';
   static const String settings = '/settings';
+  static const String downloads = '/downloads';
 
   static final GoRouter router = GoRouter(
     initialLocation: home,
@@ -61,6 +63,11 @@ class AppRouter {
         path: login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: downloads,
+        name: 'downloads',
+        builder: (context, state) => const DownloadsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

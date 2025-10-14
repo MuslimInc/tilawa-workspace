@@ -124,11 +124,17 @@ class _DownloadButtonState extends State<DownloadButton> {
       ),
     );
 
-    // Show success message
+    // Show success message with View Downloads action
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Downloading ${widget.surahTitle}...'),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: AppLocalizations.of(context)!.viewDownloads,
+          onPressed: () {
+            context.push(AppRouter.downloads);
+          },
+        ),
       ),
     );
   }

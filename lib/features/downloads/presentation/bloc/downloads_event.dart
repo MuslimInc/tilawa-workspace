@@ -41,4 +41,7 @@ sealed class DownloadsEvent with _$DownloadsEvent {
       PlayAllDownloadsEvent;
 
   const factory DownloadsEvent.checkPremiumAccess() = CheckPremiumAccessEvent;
+
+  const factory DownloadsEvent.retryDownload({required String downloadId}) =
+      RetryDownloadEvent;
 }

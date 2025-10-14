@@ -191,5 +191,17 @@
     "settings": "الإعدادات",
     "@settings": {
         "description": "Settings section title"
+    },
+    "retryDownload": "إعادة تحميل",
+    "@retryDownload": {
+        "description": "Retry download button text"
+    },
+    "retryDownloadTooltip": "إعادة تحميل",
+    "@retryDownloadTooltip": {
+        "description": "Retry download button tooltip"
+    },
+    "viewDownloads": "عرض التحميلات",
+    "@viewDownloads": {
+        "description": "View downloads action text"
     }
 }

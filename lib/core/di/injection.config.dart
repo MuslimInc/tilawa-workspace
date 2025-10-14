@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format width=80
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -217,6 +217,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i797.SurahRepository>(
       () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
     );
+    gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
+      () =>
+          _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
+    );
     gh.singleton<_i251.DownloadSurahUseCase>(
       () => _i251.DownloadSurahUseCase(gh<_i775.DownloadsRepository>()),
     );
@@ -231,10 +235,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i917.ClearAllDownloadsUseCase>(
       () => _i917.ClearAllDownloadsUseCase(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
-      () =>
-          _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
     );
     gh.singleton<_i528.AnalyticsInitializationService>(
       () => _i528.AnalyticsInitializationService(

@@ -191,5 +191,17 @@
     "settings": "Settings",
     "@settings": {
         "description": "Settings section title"
+    },
+    "retryDownload": "Retry Download",
+    "@retryDownload": {
+        "description": "Retry download button text"
+    },
+    "retryDownloadTooltip": "Retry Download",
+    "@retryDownloadTooltip": {
+        "description": "Retry download button tooltip"
+    },
+    "viewDownloads": "View Downloads",
+    "@viewDownloads": {
+        "description": "View downloads action text"
     }
 }

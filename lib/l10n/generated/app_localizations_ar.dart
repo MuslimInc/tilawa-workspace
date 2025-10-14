@@ -152,4 +152,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings => 'الإعدادات';
+
+  @override
+  String get retryDownload => 'إعادة تحميل';
+
+  @override
+  String get retryDownloadTooltip => 'إعادة تحميل';
+
+  @override
+  String get viewDownloads => 'عرض التحميلات';
 }

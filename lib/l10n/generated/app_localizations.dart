@@ -385,6 +385,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// Retry download button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Download'**
+  String get retryDownload;
+
+  /// Retry download button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Download'**
+  String get retryDownloadTooltip;
+
+  /// View downloads action text
+  ///
+  /// In en, this message translates to:
+  /// **'View Downloads'**
+  String get viewDownloads;
 }
 
 class _AppLocalizationsDelegate

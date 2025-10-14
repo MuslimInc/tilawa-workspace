@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
+import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
 import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
@@ -76,6 +77,9 @@ class _MainScreenState extends State<MainScreen> {
                 setState(() {
                   _currentIndex = index;
                 });
+                if (index == 1) {
+                  context.read<DownloadsBloc>().add(const LoadDownloads());
+                }
               },
               type: BottomNavigationBarType.fixed,
               items: [

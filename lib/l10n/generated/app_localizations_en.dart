@@ -152,4 +152,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get retryDownload => 'Retry Download';
+
+  @override
+  String get retryDownloadTooltip => 'Retry Download';
+
+  @override
+  String get viewDownloads => 'View Downloads';
 }

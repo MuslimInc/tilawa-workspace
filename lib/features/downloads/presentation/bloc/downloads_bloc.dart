@@ -64,6 +64,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     on<PlayDownloadedSurahEvent>(_onPlayDownloadedSurah);
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
     on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
+    on<RetryDownloadEvent>(_onRetryDownload);
 
     // Listen to download progress
     _listenToProgress();
@@ -100,11 +101,12 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     emit(const DownloadsState.loading());
 
     final result = await _getDownloadsByReciter();
-    result.fold(
-      (failure) => emit(
+    print('result: ${result.getOrElse(() => {})}');
+    await result.fold(
+      (failure) async => emit(
         DownloadsState.error(failure.message ?? 'Failed to load downloads'),
       ),
-      (downloads) => emit(DownloadsState.loaded(downloads)),
+      (downloads) async => emit(DownloadsState.loaded(downloads)),
     );
   }
 
@@ -426,6 +428,101 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       }
     } catch (e) {
       emit(DownloadsState.error('Failed to check premium access: $e'));
+    }
+  }
+
+  Future<void> _onRetryDownload(
+    RetryDownloadEvent event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    try {
+      // Get the failed download item
+      final downloadItem = await _downloadsRepository.getDownloadItem(
+        event.downloadId,
+      );
+      if (downloadItem == null) {
+        emit(DownloadsState.error('Download not found'));
+        return;
+      }
+
+      if (downloadItem.status != DownloadStatus.failed) {
+        emit(DownloadsState.error('Only failed downloads can be retried'));
+        return;
+      }
+
+      // Check premium access before allowing retry
+      final canDownload = await _premiumRepository.canDownload();
+      if (!canDownload) {
+        emit(
+          const DownloadsState.premiumRequired(
+            message:
+                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          ),
+        );
+        return;
+      }
+
+      // Check if download is currently in progress
+      if (DownloadService.isDownloadActive(event.downloadId)) {
+        emit(
+          DownloadsState.error(
+            'Download "${downloadItem.title}" is already being downloaded',
+          ),
+        );
+        return;
+      }
+
+      // Emit download started state
+      emit(
+        DownloadsState.downloadStarted(
+          surahId: downloadItem.id.split(
+            '_',
+          )[0], // Extract surah ID from download ID
+          surahTitle: downloadItem.title,
+          reciterName: downloadItem.reciterName,
+        ),
+      );
+
+      // Log analytics event for retry
+      await _analyticsService.logEvent(
+        'download_retry',
+        parameters: {
+          'download_id': event.downloadId,
+          'surah_title': downloadItem.title,
+          'reciter_name': downloadItem.reciterName,
+        },
+      );
+
+      // Retry the download using the repository method
+      try {
+        await _downloadsRepository.retryDownload(event.downloadId);
+
+        // Log analytics event for retry success
+        _analyticsService.logEvent(
+          'download_retry_success',
+          parameters: {
+            'download_id': event.downloadId,
+            'surah_title': downloadItem.title,
+            'reciter_name': downloadItem.reciterName,
+          },
+        );
+        // Reload downloads after successful retry
+        add(const LoadDownloads());
+      } catch (e) {
+        // Log analytics event for retry failure
+        _analyticsService.logEvent(
+          'download_retry_failed',
+          parameters: {
+            'download_id': event.downloadId,
+            'surah_title': downloadItem.title,
+            'reciter_name': downloadItem.reciterName,
+            'error': e.toString(),
+          },
+        );
+        emit(DownloadsState.error('Failed to retry download: $e'));
+      }
+    } catch (e) {
+      emit(DownloadsState.error('Failed to retry download: $e'));
     }
   }
 }

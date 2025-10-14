@@ -279,4 +279,35 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads) {
     return downloads.map(createMediaItemFromDownload).toList();
   }
+
+  @override
+  Future<void> retryDownload(String downloadId) async {
+    // Get the existing download item
+    final downloadItem = await getDownloadItem(downloadId);
+    if (downloadItem == null) {
+      throw Exception('Download not found');
+    }
+
+    if (downloadItem.status != DownloadStatus.failed) {
+      throw Exception('Only failed downloads can be retried');
+    }
+
+    // Reset the download status to pending
+    final updatedDownload = downloadItem.copyWith(
+      status: DownloadStatus.pending,
+      progress: 0.0,
+      downloadedSize: 0,
+      fileSize: 0,
+    );
+    await updateDownload(updatedDownload);
+
+    // Start the download again using the existing file path
+    await DownloadService.startDownload(
+      id: downloadItem.id,
+      url: downloadItem.url,
+      filePath: downloadItem.filePath,
+      title: downloadItem.title,
+      reciterName: downloadItem.reciterName,
+    );
+  }
 }

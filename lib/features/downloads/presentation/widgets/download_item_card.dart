@@ -65,6 +65,13 @@ class DownloadItemCard extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Retry button (only for failed downloads)
+              if (download.status == DownloadStatus.failed)
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.blue),
+                  onPressed: () => _handleRetryDownload(context),
+                  tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
+                ),
               // Play/Pause button (only for completed downloads)
               if (download.status == DownloadStatus.completed)
                 BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
@@ -227,6 +234,13 @@ class DownloadItemCard extends StatelessWidget {
   void _playDownloadedSurah(BuildContext context) {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.playDownloadedSurah(downloadId: download.id),
+    );
+  }
+
+  /// Handle retry download button press
+  void _handleRetryDownload(BuildContext context) {
+    context.read<DownloadsBloc>().add(
+      DownloadsEvent.retryDownload(downloadId: download.id),
     );
   }
 
