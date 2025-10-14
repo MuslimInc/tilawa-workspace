@@ -110,7 +110,6 @@ void main() {
       const testSurahId = '001';
       const testSurahTitle = 'Al-Fatiha';
       const testReciterName = 'Abdul Rahman Al-Sudais';
-      const testUrl = 'https://example.com/audio.mp3';
 
       blocTest<DownloadsBloc, DownloadsState>(
         'emits [downloadStarted, loaded] when download is successful',
@@ -154,7 +153,6 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
-            url: testUrl,
           ),
         ),
         expect: () => [
@@ -181,7 +179,6 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
-            url: testUrl,
           ),
         ),
         expect: () => [
@@ -208,7 +205,6 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
-            url: testUrl,
           ),
         ),
         expect: () => [
@@ -257,7 +253,6 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
-            url: testUrl,
           ),
         ),
         expect: () => [
@@ -298,7 +293,6 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
-            url: testUrl,
           ),
         ),
         expect: () => [

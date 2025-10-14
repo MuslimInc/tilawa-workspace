@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/presentation/bloc/surah_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
@@ -11,7 +11,7 @@ import 'package:muzakri/router/app_router.dart';
 class SurahDownloadButton extends StatefulWidget {
   const SurahDownloadButton({super.key, required this.surah});
 
-  final Surah surah;
+  final SurahEntity surah;
 
   @override
   State<SurahDownloadButton> createState() => _SurahDownloadButtonState();
@@ -77,7 +77,7 @@ class _SurahDownloadButtonState extends State<SurahDownloadButton> {
       child: BlocBuilder<SurahBloc, SurahState>(
         builder: (context, state) {
           // Get the current surah state
-          Surah currentSurah = widget.surah;
+          SurahEntity currentSurah = widget.surah;
 
           if (state is SurahUpdated && state.surah.id == widget.surah.id) {
             currentSurah = state.surah;
@@ -89,7 +89,7 @@ class _SurahDownloadButtonState extends State<SurahDownloadButton> {
     );
   }
 
-  Widget _buildButton(Surah surah) {
+  Widget _buildButton(SurahEntity surah) {
     // Hide the button completely if already downloaded
     if (surah.isDownloaded) {
       return const SizedBox.shrink();
@@ -120,13 +120,12 @@ class _SurahDownloadButtonState extends State<SurahDownloadButton> {
     );
   }
 
-  void _downloadSurah(Surah surah) {
+  void _downloadSurah(SurahEntity surah) {
     context.read<DownloadsBloc>().add(
       DownloadSurahEvent(
         surahId: surah.id,
         surahTitle: surah.name,
         reciterName: surah.reciterName,
-        url: surah.url,
       ),
     );
 

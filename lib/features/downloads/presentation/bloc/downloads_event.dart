@@ -8,7 +8,6 @@ sealed class DownloadsEvent with _$DownloadsEvent {
     required String surahId,
     required String surahTitle,
     required String reciterName,
-    required String url,
   }) = DownloadSurahEvent;
 
   const factory DownloadsEvent.deleteDownload({required String downloadId}) =

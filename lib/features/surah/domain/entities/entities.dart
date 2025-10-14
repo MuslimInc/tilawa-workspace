@@ -1,1 +1,1 @@
-export 'surah.dart';
+export 'surah_entity.dart';

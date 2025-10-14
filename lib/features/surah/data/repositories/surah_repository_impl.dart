@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
 
 @LazySingleton(as: SurahRepository)
@@ -10,14 +10,14 @@ class SurahRepositoryImpl implements SurahRepository {
   final DownloadsRepository _downloadsRepository;
 
   // In-memory cache for surahs
-  final Map<String, Surah> _surahCache = {};
+  final Map<String, SurahEntity> _surahCache = {};
 
   String _getCacheKey(String surahId, String reciterName) {
     return '${surahId}_$reciterName';
   }
 
   @override
-  Future<List<Surah>> getSurahsForReciter(String reciterName) async {
+  Future<List<SurahEntity>> getSurahsForReciter(String reciterName) async {
     // This would typically fetch from a data source
     // For now, return empty list - this should be implemented based on your data source
     return [];
@@ -76,25 +76,25 @@ class SurahRepositoryImpl implements SurahRepository {
   }
 
   @override
-  Future<Surah?> getSurah(String surahId, String reciterName) async {
+  Future<SurahEntity?> getSurah(String surahId, String reciterName) async {
     final cacheKey = _getCacheKey(surahId, reciterName);
     return _surahCache[cacheKey];
   }
 
   @override
-  Future<void> updateSurah(Surah surah) async {
+  Future<void> updateSurah(SurahEntity surah) async {
     final cacheKey = _getCacheKey(surah.id, surah.reciterName);
     _surahCache[cacheKey] = surah;
   }
 
   /// Add surah to cache (useful when creating surahs from external data)
-  void addSurahToCache(Surah surah) {
+  void addSurahToCache(SurahEntity surah) {
     final cacheKey = _getCacheKey(surah.id, surah.reciterName);
     _surahCache[cacheKey] = surah;
   }
 
   /// Get all cached surahs
-  List<Surah> getAllCachedSurahs() {
+  List<SurahEntity> getAllCachedSurahs() {
     return _surahCache.values.toList();
   }
 

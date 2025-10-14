@@ -12,13 +12,11 @@ class DownloadButton extends StatefulWidget {
     required this.surahId,
     required this.surahTitle,
     required this.reciterName,
-    required this.url,
   });
 
   final String surahId;
   final String surahTitle;
   final String reciterName;
-  final String url;
 
   @override
   State<DownloadButton> createState() => _DownloadButtonState();
@@ -65,7 +63,7 @@ class _DownloadButtonState extends State<DownloadButton> {
           });
         } else if (state is DownloadsLoaded) {
           // Refresh download status when downloads are loaded
-          // _checkIfDownloaded();
+          _checkIfDownloaded();
         } else if (state is DownloadsError) {
           // Check if this error is related to our download
           if (state.message.contains(widget.surahTitle) &&
@@ -73,6 +71,8 @@ class _DownloadButtonState extends State<DownloadButton> {
             setState(() {
               _isDownloading = false;
             });
+            // Refresh download status to check if it was actually completed
+            _checkIfDownloaded();
           }
         } else if (state is PremiumRequired) {
           // Show premium upgrade dialog
@@ -92,17 +92,9 @@ class _DownloadButtonState extends State<DownloadButton> {
       );
     }
 
-    // Hide the button completely if already downloaded
-    if (_isDownloaded) {
+    // Hide the button completely if already downloaded or currently downloading
+    if (_isDownloaded || _isDownloading) {
       return const SizedBox.shrink();
-    }
-
-    if (_isDownloading) {
-      return const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
     }
 
     return IconButton(
@@ -120,7 +112,6 @@ class _DownloadButtonState extends State<DownloadButton> {
         surahId: widget.surahId,
         surahTitle: widget.surahTitle,
         reciterName: widget.reciterName,
-        url: widget.url,
       ),
     );
 
