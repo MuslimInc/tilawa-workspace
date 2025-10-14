@@ -317,5 +317,43 @@
     "surahs": "سور",
     "@surahs": {
         "description": "Surahs count text"
+    },
+    "signIn": "تسجيل الدخول",
+    "@signIn": {
+        "description": "Sign in button text"
+    },
+    "welcomeToMuzakri": "مرحباً بك في مزكري",
+    "@welcomeToMuzakri": {
+        "description": "Welcome message on login screen"
+    },
+    "signInWithGoogleDescription": "سجل الدخول بحساب جوجل للمتابعة",
+    "@signInWithGoogleDescription": {
+        "description": "Description text for Google sign in"
+    },
+    "signingIn": "جاري تسجيل الدخول...",
+    "@signingIn": {
+        "description": "Signing in progress text"
+    },
+    "continueWithGoogle": "المتابعة مع جوجل",
+    "@continueWithGoogle": {
+        "description": "Continue with Google button text"
+    },
+    "googleSignInNotConfigured": "تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.",
+    "@googleSignInNotConfigured": {
+        "description": "Google Sign-In configuration error message"
+    },
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "@networkError": {
+        "description": "Network error message"
+    },
+    "recitationsAvailable": "{count} رواية متاحة",
+    "@recitationsAvailable": {
+        "description": "Number of recitations available for a reciter",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "The number of recitations available"
+            }
+        }
     }
 }

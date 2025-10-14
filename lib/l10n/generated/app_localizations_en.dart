@@ -237,4 +237,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get surahs => 'surahs';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get welcomeToMuzakri => 'Welcome to Muzakri';
+
+  @override
+  String get signInWithGoogleDescription =>
+      'Sign in with your Google account to continue';
+
+  @override
+  String get signingIn => 'Signing in...';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get googleSignInNotConfigured =>
+      'Google Sign-In not configured. Please contact support.';
+
+  @override
+  String get networkError => 'Network error. Please check your connection.';
+
+  @override
+  String recitationsAvailable(int count) {
+    return '$count recitation(s) available';
+  }
 }

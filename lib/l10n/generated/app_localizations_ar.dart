@@ -237,4 +237,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get surahs => 'سور';
+
+  @override
+  String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get welcomeToMuzakri => 'مرحباً بك في مزكري';
+
+  @override
+  String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
+
+  @override
+  String get signingIn => 'جاري تسجيل الدخول...';
+
+  @override
+  String get continueWithGoogle => 'المتابعة مع جوجل';
+
+  @override
+  String get googleSignInNotConfigured =>
+      'تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.';
+
+  @override
+  String get networkError => 'خطأ في الشبكة. يرجى التحقق من اتصالك.';
+
+  @override
+  String recitationsAvailable(int count) {
+    return '$count رواية متاحة';
+  }
 }

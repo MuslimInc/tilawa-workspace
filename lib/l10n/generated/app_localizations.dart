@@ -541,6 +541,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'surahs'**
   String get surahs;
+
+  /// Sign in button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signIn;
+
+  /// Welcome message on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Muzakri'**
+  String get welcomeToMuzakri;
+
+  /// Description text for Google sign in
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your Google account to continue'**
+  String get signInWithGoogleDescription;
+
+  /// Signing in progress text
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get signingIn;
+
+  /// Continue with Google button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// Google Sign-In configuration error message
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In not configured. Please contact support.'**
+  String get googleSignInNotConfigured;
+
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection.'**
+  String get networkError;
+
+  /// Number of recitations available for a reciter
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recitation(s) available'**
+  String recitationsAvailable(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -317,5 +317,43 @@
     "surahs": "surahs",
     "@surahs": {
         "description": "Surahs count text"
+    },
+    "signIn": "Sign in",
+    "@signIn": {
+        "description": "Sign in button text"
+    },
+    "welcomeToMuzakri": "Welcome to Muzakri",
+    "@welcomeToMuzakri": {
+        "description": "Welcome message on login screen"
+    },
+    "signInWithGoogleDescription": "Sign in with your Google account to continue",
+    "@signInWithGoogleDescription": {
+        "description": "Description text for Google sign in"
+    },
+    "signingIn": "Signing in...",
+    "@signingIn": {
+        "description": "Signing in progress text"
+    },
+    "continueWithGoogle": "Continue with Google",
+    "@continueWithGoogle": {
+        "description": "Continue with Google button text"
+    },
+    "googleSignInNotConfigured": "Google Sign-In not configured. Please contact support.",
+    "@googleSignInNotConfigured": {
+        "description": "Google Sign-In configuration error message"
+    },
+    "networkError": "Network error. Please check your connection.",
+    "@networkError": {
+        "description": "Network error message"
+    },
+    "recitationsAvailable": "{count} recitation(s) available",
+    "@recitationsAvailable": {
+        "description": "Number of recitations available for a reciter",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "The number of recitations available"
+            }
+        }
     }
 }
