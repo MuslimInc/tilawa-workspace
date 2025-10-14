@@ -172,7 +172,6 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       surahId: event.surahId,
       surahTitle: event.surahTitle,
       reciterName: event.reciterName,
-      url: event.url,
     );
 
     result.fold(

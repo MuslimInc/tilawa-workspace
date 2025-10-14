@@ -22,7 +22,6 @@ void main() {
       const testSurahId = '001';
       const testSurahTitle = 'Al-Fatiha';
       const testReciterName = 'Abdul Rahman Al-Sudais';
-      const testUrl = 'https://example.com/audio.mp3';
 
       test('should create download item and start download service', () async {
         // Arrange
@@ -37,7 +36,6 @@ void main() {
           testSurahId,
           testSurahTitle,
           testReciterName,
-          testUrl,
         );
 
         // Assert
@@ -59,7 +57,6 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
-            testUrl,
           ),
           throwsException,
         );
@@ -81,7 +78,6 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
-            testUrl,
           ),
           throwsException,
         );

@@ -128,14 +128,12 @@ class MockDownloadsRepository extends _i1.Mock
     String? surahId,
     String? surahTitle,
     String? reciterName,
-    String? url,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#startDownload, [
               surahId,
               surahTitle,
               reciterName,
-              url,
             ]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),

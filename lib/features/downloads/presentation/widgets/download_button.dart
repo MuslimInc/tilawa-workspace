@@ -65,7 +65,7 @@ class _DownloadButtonState extends State<DownloadButton> {
           });
         } else if (state is DownloadsLoaded) {
           // Refresh download status when downloads are loaded
-          _checkIfDownloaded();
+          // _checkIfDownloaded();
         } else if (state is DownloadsError) {
           // Check if this error is related to our download
           if (state.message.contains(widget.surahTitle) &&

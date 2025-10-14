@@ -34,7 +34,6 @@ abstract class DownloadsRepository {
     String surahId,
     String surahTitle,
     String reciterName,
-    String url,
   );
 
   /// Pause a download

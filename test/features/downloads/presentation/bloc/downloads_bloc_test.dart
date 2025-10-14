@@ -126,7 +126,6 @@ void main() {
               surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
-              url: anyNamed('url'),
             ),
           ).thenAnswer((_) async => const Right(null));
           when(
@@ -233,7 +232,6 @@ void main() {
               surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
-              url: anyNamed('url'),
             ),
           ).thenAnswer((_) async => const Left(AudioFailure('Network error')));
           when(
@@ -286,7 +284,6 @@ void main() {
               surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
-              url: anyNamed('url'),
             ),
           ).thenAnswer((_) async => const Right(null));
           when(

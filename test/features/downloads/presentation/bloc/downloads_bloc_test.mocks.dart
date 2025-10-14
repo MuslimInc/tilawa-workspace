@@ -119,14 +119,12 @@ class MockDownloadSurahUseCase extends _i1.Mock
     required String? surahId,
     required String? surahTitle,
     required String? reciterName,
-    required String? url,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#call, [], {
               #surahId: surahId,
               #surahTitle: surahTitle,
               #reciterName: reciterName,
-              #url: url,
             }),
             returnValue: _i8.Future<_i2.Either<_i9.Failure, void>>.value(
               _FakeEither_0<_i9.Failure, void>(
@@ -135,7 +133,6 @@ class MockDownloadSurahUseCase extends _i1.Mock
                   #surahId: surahId,
                   #surahTitle: surahTitle,
                   #reciterName: reciterName,
-                  #url: url,
                 }),
               ),
             ),
@@ -309,14 +306,12 @@ class MockDownloadsRepository extends _i1.Mock
     String? surahId,
     String? surahTitle,
     String? reciterName,
-    String? url,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#startDownload, [
               surahId,
               surahTitle,
               reciterName,
-              url,
             ]),
             returnValue: _i8.Future<void>.value(),
             returnValueForMissingStub: _i8.Future<void>.value(),

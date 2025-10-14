@@ -22,22 +22,20 @@ void main() {
     const testSurahId = '001';
     const testSurahTitle = 'Al-Fatiha';
     const testReciterName = 'Abdul Rahman Al-Sudais';
-    const testUrl = 'https://example.com/audio.mp3';
 
     test(
       'should return Right(null) when download starts successfully',
       () async {
         // Arrange
-        when(
-          mockRepository.startDownload(any, any, any, any),
-        ).thenAnswer((_) async {});
+        when(mockRepository.startDownload(any, any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final result = await useCase(
           surahId: testSurahId,
           surahTitle: testSurahTitle,
           reciterName: testReciterName,
-          url: testUrl,
         );
 
         // Assert
@@ -47,7 +45,6 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
-            testUrl,
           ),
         ).called(1);
       },
@@ -59,7 +56,7 @@ void main() {
         // Arrange
         const errorMessage = 'Network error';
         when(
-          mockRepository.startDownload(any, any, any, any),
+          mockRepository.startDownload(any, any, any),
         ).thenThrow(Exception(errorMessage));
 
         // Act
@@ -67,7 +64,6 @@ void main() {
           surahId: testSurahId,
           surahTitle: testSurahTitle,
           reciterName: testReciterName,
-          url: testUrl,
         );
 
         // Assert
@@ -81,7 +77,6 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
-            testUrl,
           ),
         ).called(1);
       },
@@ -90,7 +85,7 @@ void main() {
     test('should handle empty surah ID', () async {
       // Arrange
       when(
-        mockRepository.startDownload(any, any, any, any),
+        mockRepository.startDownload(any, any, any),
       ).thenThrow(Exception('Invalid surah ID'));
 
       // Act
@@ -98,7 +93,6 @@ void main() {
         surahId: '',
         surahTitle: testSurahTitle,
         reciterName: testReciterName,
-        url: testUrl,
       );
 
       // Assert
@@ -111,9 +105,8 @@ void main() {
 
     test('should handle invalid URL', () async {
       // Arrange
-      const invalidUrl = 'not-a-valid-url';
       when(
-        mockRepository.startDownload(any, any, any, any),
+        mockRepository.startDownload(any, any, any),
       ).thenThrow(Exception('Invalid URL format'));
 
       // Act
@@ -121,7 +114,6 @@ void main() {
         surahId: testSurahId,
         surahTitle: testSurahTitle,
         reciterName: testReciterName,
-        url: invalidUrl,
       );
 
       // Assert
@@ -135,7 +127,7 @@ void main() {
     test('should handle network timeout', () async {
       // Arrange
       when(
-        mockRepository.startDownload(any, any, any, any),
+        mockRepository.startDownload(any, any, any),
       ).thenThrow(Exception('Connection timeout'));
 
       // Act
@@ -143,7 +135,6 @@ void main() {
         surahId: testSurahId,
         surahTitle: testSurahTitle,
         reciterName: testReciterName,
-        url: testUrl,
       );
 
       // Assert
@@ -157,7 +148,7 @@ void main() {
     test('should handle file system errors', () async {
       // Arrange
       when(
-        mockRepository.startDownload(any, any, any, any),
+        mockRepository.startDownload(any, any, any),
       ).thenThrow(Exception('Permission denied'));
 
       // Act
@@ -165,7 +156,6 @@ void main() {
         surahId: testSurahId,
         surahTitle: testSurahTitle,
         reciterName: testReciterName,
-        url: testUrl,
       );
 
       // Assert
