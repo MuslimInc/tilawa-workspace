@@ -850,17 +850,19 @@ class MockAudioPlayerHandler extends _i1.Mock
           as _i8.Future<void>);
 
   @override
-  _i8.Future<List<_i3.MediaItem>?> getReciters() =>
+  _i8.Future<List<_i3.MediaItem>?> getReciters({String? languageCode}) =>
       (super.noSuchMethod(
-            Invocation.method(#getReciters, []),
+            Invocation.method(#getReciters, [], {#languageCode: languageCode}),
             returnValue: _i8.Future<List<_i3.MediaItem>?>.value(),
           )
           as _i8.Future<List<_i3.MediaItem>?>);
 
   @override
-  _i8.Future<List<_i19.Reciter>?> getRecitersData() =>
+  _i8.Future<List<_i19.Reciter>?> getRecitersData({String? languageCode}) =>
       (super.noSuchMethod(
-            Invocation.method(#getRecitersData, []),
+            Invocation.method(#getRecitersData, [], {
+              #languageCode: languageCode,
+            }),
             returnValue: _i8.Future<List<_i19.Reciter>?>.value(),
           )
           as _i8.Future<List<_i19.Reciter>?>);

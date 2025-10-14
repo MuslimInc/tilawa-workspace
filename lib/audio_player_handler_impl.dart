@@ -6,6 +6,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/queue_state.dart';
 import 'package:muzakri/reciter_model.dart';
@@ -470,7 +471,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   // }
 
   @override
-  Future<List<MediaItem>?> getReciters() async {
+  Future<List<MediaItem>?> getReciters({String? languageCode}) async {
     // Return cached data if available
     if (_cachedReciters != null) {
       return _cachedReciters;
@@ -486,7 +487,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     }
 
     _isLoadingReciters = true;
-    final baseUrl = "https://mp3quran.net/api/v3/reciters";
+    final languageParam = _convertLanguageCode(languageCode);
+    final baseUrl =
+        "https://mp3quran.net/api/v3/reciters?language=$languageParam";
 
     try {
       final response = await Dio().get(baseUrl);
@@ -543,8 +546,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   /// Get raw reciters data for the RecitersScreen
   @override
-  Future<List<Reciter>?> getRecitersData() async {
-    final baseUrl = "https://mp3quran.net/api/v3/reciters";
+  Future<List<Reciter>?> getRecitersData({String? languageCode}) async {
+    final languageParam = _convertLanguageCode(languageCode);
+    final baseUrl =
+        "https://mp3quran.net/api/v3/reciters?language=$languageParam";
 
     try {
       final response = await Dio().get(baseUrl);
@@ -594,6 +599,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       log('Exception getting surah list: $e');
       return null;
     }
+  }
+
+  /// Convert app language code to API language code
+  String _convertLanguageCode(String? languageCode) {
+    return LanguageConfig.convertToApiLanguageCode(languageCode);
   }
 
   /// Get Arabic surah name by surah number

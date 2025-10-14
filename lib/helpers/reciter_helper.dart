@@ -5,10 +5,15 @@ import 'package:muzakri/reciter_model.dart';
 
 class ReciterHelper {
   /// Extract reciter information from a MediaItem
-  static Future<Reciter?> getReciterFromMediaItem(MediaItem mediaItem) async {
+  static Future<Reciter?> getReciterFromMediaItem(
+    MediaItem mediaItem, {
+    String? languageCode,
+  }) async {
     try {
       final audioHandler = getIt<AudioPlayerHandler>();
-      final reciters = await audioHandler.getRecitersData();
+      final reciters = await audioHandler.getRecitersData(
+        languageCode: languageCode,
+      );
 
       if (reciters == null) return null;
 

@@ -52,8 +52,8 @@ abstract class AudioPlayerHandler implements AudioHandler {
   Future<void> clearAudioState();
 
   // Reciter and surah management
-  Future<List<MediaItem>?> getReciters();
-  Future<List<Reciter>?> getRecitersData();
+  Future<List<MediaItem>?> getReciters({String? languageCode});
+  Future<List<Reciter>?> getRecitersData({String? languageCode});
   Future<List<MediaItem>?> getSurahListForMoshaf(
     Mosahf moshaf, {
     String? reciterName,
