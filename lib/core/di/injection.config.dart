@@ -227,6 +227,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i906.PremiumRemoteDataSource>(),
       ),
     );
+    await gh.singletonAsync<_i320.AudioPlayerHandler>(
+      () => externalDependenciesModule.audioPlayerHandler(
+        gh<List<_i87.MediaItem>>(),
+        gh<_i557.AnalyticsService>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+      preResolve: true,
+    );
     gh.factory<_i253.AuthBloc>(
       () => _i253.AuthBloc(
         gh<_i922.SignInWithGoogleUseCase>(),
@@ -263,12 +271,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i235.CrashlyticsService>(),
       ),
     );
-    await gh.singletonAsync<_i320.AudioPlayerHandler>(
-      () => externalDependenciesModule.audioPlayerHandler(
-        gh<List<_i87.MediaItem>>(),
-        gh<_i557.AnalyticsService>(),
+    gh.factory<_i864.RecitersBloc>(
+      () => _i864.RecitersBloc(
+        gh<_i320.AudioPlayerHandler>(),
+        gh<_i724.GetCurrentLanguageUseCase>(),
       ),
-      preResolve: true,
     );
     gh.singleton<_i509.StartTrialUseCase>(
       () => _i509.StartTrialUseCase(gh<_i872.PremiumRepository>()),
@@ -349,12 +356,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i415.GetAvailablePlansUseCase>(),
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_i864.RecitersBloc>(
-      () => _i864.RecitersBloc(
-        gh<_i320.AudioPlayerHandler>(),
-        gh<_i724.GetCurrentLanguageUseCase>(),
       ),
     );
     gh.factory<_i447.ReciterDetailsBloc>(

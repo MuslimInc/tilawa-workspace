@@ -67,6 +67,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       child: DropdownButtonFormField<Mosahf>(
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          color: Colors.black,
+                        ),
                         initialValue: uniqueMoshaf.contains(selectedMoshaf)
                             ? selectedMoshaf
                             : uniqueMoshaf.first,
@@ -79,7 +83,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         items: uniqueMoshaf.map((moshaf) {
                           return DropdownMenuItem<Mosahf>(
                             value: moshaf,
-                            child: Text(moshaf.name),
+                            child: Text(
+                              moshaf.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (Mosahf? moshaf) {

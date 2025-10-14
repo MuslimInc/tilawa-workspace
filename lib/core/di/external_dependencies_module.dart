@@ -56,12 +56,14 @@ abstract class ExternalDependenciesModule {
   Future<AudioPlayerHandler> audioPlayerHandler(
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
+    SharedPreferences prefs,
   ) async {
     try {
       print('Initializing audio service...');
       final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(
         mediaItems,
         analyticsService,
+        prefs,
       );
 
       final audioHandler = await AudioService.init(
@@ -77,7 +79,11 @@ abstract class ExternalDependenciesModule {
     } catch (e) {
       print('Warning: Could not initialize audio service: $e');
       // Register a fallback handler to prevent crashes
-      final fallbackHandler = AudioPlayerHandlerImpl([], analyticsService);
+      final fallbackHandler = AudioPlayerHandlerImpl(
+        [],
+        analyticsService,
+        prefs,
+      );
       print('Fallback AudioPlayerHandler registered');
       return fallbackHandler;
     }
