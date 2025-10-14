@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:muzakri/reciter_model.dart';
 
 part 'reciters_event.dart';
@@ -10,13 +11,16 @@ part 'reciters_state.dart';
 @injectable
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   final AudioPlayerHandler _audioHandler;
+  final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
 
-  RecitersBloc(this._audioHandler) : super(const RecitersInitial()) {
+  RecitersBloc(this._audioHandler, this._getCurrentLanguageUseCase)
+    : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<ClearSearch>(_onClearSearch);
+    on<LanguageChanged>(_onLanguageChanged);
   }
 
   Future<void> _onLoadReciters(
@@ -26,7 +30,16 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      final recitersData = await _audioHandler.getRecitersData();
+      // Get current language code
+      final languageResult = await _getCurrentLanguageUseCase();
+      final languageCode = languageResult.fold(
+        (failure) => 'eng', // Default to English on failure
+        (language) => language,
+      );
+
+      final recitersData = await _audioHandler.getRecitersData(
+        languageCode: languageCode,
+      );
 
       if (recitersData != null) {
         emit(
@@ -146,5 +159,15 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     }
 
     return filtered;
+  }
+
+  Future<void> _onLanguageChanged(
+    LanguageChanged event,
+    Emitter<RecitersState> emit,
+  ) async {
+    // If we have loaded reciters, refetch them with the new language
+    if (state is RecitersLoaded) {
+      await _onLoadReciters(const LoadReciters(), emit);
+    }
   }
 }
