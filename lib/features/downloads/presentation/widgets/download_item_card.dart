@@ -131,20 +131,17 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   String _getStatusText(BuildContext context) {
-    switch (download.status) {
-      case DownloadStatus.completed:
-        return AppLocalizations.of(context)!.completed;
-      case DownloadStatus.downloading:
-        return '${AppLocalizations.of(context)!.downloading} ${(download.progress * 100).toInt()}%';
-      case DownloadStatus.failed:
-        return AppLocalizations.of(context)!.error;
-      case DownloadStatus.paused:
-        return AppLocalizations.of(context)!.pause;
-      case DownloadStatus.cancelled:
-        return AppLocalizations.of(context)!.cancelled;
-      case DownloadStatus.pending:
-        return AppLocalizations.of(context)!.pending;
-    }
+    final progress = (download.progress * 100).toInt();
+    final downloading =
+        "${AppLocalizations.of(context)!.downloading} $progress%";
+    return switch (download.status) {
+      DownloadStatus.pending => AppLocalizations.of(context)!.pending,
+      DownloadStatus.downloading => downloading,
+      DownloadStatus.completed => AppLocalizations.of(context)!.completed,
+      DownloadStatus.failed => AppLocalizations.of(context)!.error,
+      DownloadStatus.paused => AppLocalizations.of(context)!.pause,
+      DownloadStatus.cancelled => AppLocalizations.of(context)!.cancelled,
+    };
   }
 
   Color _getStatusColor() {
