@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class LocalizationLocalDataSource {
@@ -6,26 +8,25 @@ abstract class LocalizationLocalDataSource {
   Future<List<String>> getSupportedLanguages();
 }
 
+@LazySingleton(as: LocalizationLocalDataSource)
 class LocalizationLocalDataSourceImpl implements LocalizationLocalDataSource {
   const LocalizationLocalDataSourceImpl(this._prefs);
 
   final SharedPreferences _prefs;
 
-  static const String _languageKey = 'selected_language';
-  static const List<String> _supportedLanguages = ['en', 'ar'];
-
   @override
   Future<String> getCurrentLanguage() async {
-    return _prefs.getString(_languageKey) ?? 'en';
+    return _prefs.getString(LanguageConfig.languageKey) ??
+        LanguageConfig.getDefaultLanguageCode();
   }
 
   @override
   Future<void> setLanguage(String languageCode) async {
-    await _prefs.setString(_languageKey, languageCode);
+    await _prefs.setString(LanguageConfig.languageKey, languageCode);
   }
 
   @override
   Future<List<String>> getSupportedLanguages() async {
-    return _supportedLanguages;
+    return LanguageConfig.getSupportedLanguageCodes();
   }
 }

@@ -60,6 +60,14 @@ import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reci
     as _i748;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i811;
+import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart'
+    as _i322;
+import 'package:muzakri/features/localization/data/repositories/localization_repository_impl.dart'
+    as _i319;
+import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart'
+    as _i870;
+import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart'
+    as _i724;
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart'
     as _i413;
 import 'package:muzakri/features/premium/data/datasources/premium_local_datasource.dart'
@@ -167,6 +175,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i811.DownloadsLocalDataSource>(
       () => _i811.DownloadsLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i322.LocalizationLocalDataSource>(
+      () =>
+          _i322.LocalizationLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i919.PremiumLocalDataSource>(
       () => _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
@@ -188,8 +200,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i812.SubscriptionPlansService>(),
       ),
     );
+    gh.lazySingleton<_i870.LocalizationRepository>(
+      () => _i319.LocalizationRepositoryImpl(
+        gh<_i322.LocalizationLocalDataSource>(),
+      ),
+    );
     gh.singleton<_i557.AnalyticsService>(
       () => _i557.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.singleton<_i724.GetCurrentLanguageUseCase>(
+      () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
     );
     gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
     gh.singleton<_i778.GetCurrentUserUseCase>(
@@ -284,9 +304,6 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i557.AnalyticsService>(),
       ),
     );
-    gh.factory<_i864.RecitersBloc>(
-      () => _i864.RecitersBloc(gh<_i320.AudioPlayerHandler>()),
-    );
     gh.factory<_i965.AudioPlayerBloc>(
       () => _i965.AudioPlayerBloc(gh<_i320.AudioPlayerHandler>()),
     );
@@ -332,6 +349,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i415.GetAvailablePlansUseCase>(),
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i864.RecitersBloc>(
+      () => _i864.RecitersBloc(
+        gh<_i320.AudioPlayerHandler>(),
+        gh<_i724.GetCurrentLanguageUseCase>(),
       ),
     );
     gh.factory<_i447.ReciterDetailsBloc>(

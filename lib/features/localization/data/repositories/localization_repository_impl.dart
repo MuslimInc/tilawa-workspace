@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/utils/typedefs.dart';
 import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart';
 import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart';
 
+@LazySingleton(as: LocalizationRepository)
 class LocalizationRepositoryImpl implements LocalizationRepository {
   const LocalizationRepositoryImpl(this._localDataSource);
 
