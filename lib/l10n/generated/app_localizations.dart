@@ -403,6 +403,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Downloads'**
   String get viewDownloads;
+
+  /// Premium section title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premium;
+
+  /// Premium features section title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Features'**
+  String get premiumFeatures;
+
+  /// Unlimited downloads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Downloads'**
+  String get unlimitedDownloads;
+
+  /// Offline mode feature
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode'**
+  String get offlineMode;
+
+  /// High quality audio feature
+  ///
+  /// In en, this message translates to:
+  /// **'High Quality Audio'**
+  String get highQualityAudio;
+
+  /// Ad-free experience feature
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-Free Experience'**
+  String get adFreeExperience;
+
+  /// Priority support feature
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Support'**
+  String get prioritySupport;
+
+  /// Exclusive content feature
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive Content'**
+  String get exclusiveContent;
+
+  /// Choose your plan section title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Plan'**
+  String get chooseYourPlan;
+
+  /// Maybe later button text
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get maybeLater;
+
+  /// Upgrade now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Now'**
+  String get upgradeNow;
+
+  /// Continue button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Premium required dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Required'**
+  String get premiumRequired;
+
+  /// Premium required message
+  ///
+  /// In en, this message translates to:
+  /// **'This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!'**
+  String get premiumRequiredMessage;
+
+  /// Language setting
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// Arabic language option
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get arabic;
+
+  /// English language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// Refresh downloads tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Downloads'**
+  String get refreshDownloads;
+
+  /// Download progress message
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {surahTitle} by {reciterName}...'**
+  String downloadingSurah(String surahTitle, String reciterName);
+
+  /// Delete download dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Download'**
+  String get deleteDownload;
+
+  /// Delete download confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"?'**
+  String deleteDownloadConfirmation(String title);
+
+  /// Delete all downloads confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all downloads for {reciterName}?'**
+  String deleteAllDownloadsConfirmation(String reciterName);
+
+  /// Surahs count text
+  ///
+  /// In en, this message translates to:
+  /// **'surahs'**
+  String get surahs;
 }
 
 class _AppLocalizationsDelegate

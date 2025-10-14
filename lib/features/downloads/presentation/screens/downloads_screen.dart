@@ -53,7 +53,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             onPressed: () {
               _loadDownloads();
             },
-            tooltip: 'Refresh Downloads',
+            tooltip: AppLocalizations.of(context)!.refreshDownloads,
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
@@ -102,7 +102,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             downloadStarted: (surahId, surahTitle, reciterName) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Downloading $surahTitle by $reciterName...'),
+                  content: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.downloadingSurah(surahTitle, reciterName),
+                  ),
                   duration: const Duration(seconds: 2),
                 ),
               );
@@ -202,7 +206,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                 return Center(child: Text(message));
               },
               downloadStarted: (surahId, surahTitle, reciterName) => Center(
-                child: Text('Downloading $surahTitle by $reciterName...'),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.downloadingSurah(surahTitle, reciterName),
+                ),
               ),
             );
           },

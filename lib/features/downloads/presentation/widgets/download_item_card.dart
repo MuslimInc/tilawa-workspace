@@ -88,8 +88,8 @@ class DownloadItemCard extends StatelessWidget {
                       tooltip:
                           isCurrentlyPlaying &&
                               audioState.playbackState?.playing == true
-                          ? 'Pause'
-                          : 'Play',
+                          ? AppLocalizations.of(context)!.pause
+                          : AppLocalizations.of(context)!.play,
                     );
                   },
                 ),
@@ -101,13 +101,13 @@ class DownloadItemCard extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete'),
+                        const Icon(Icons.delete, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.delete),
                       ],
                     ),
                   ),
@@ -181,12 +181,16 @@ class DownloadItemCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Download'),
-        content: Text('Are you sure you want to delete "${download.title}"?'),
+        title: Text(AppLocalizations.of(context)!.deleteDownload),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.deleteDownloadConfirmation(download.title),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -194,7 +198,7 @@ class DownloadItemCard extends StatelessWidget {
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

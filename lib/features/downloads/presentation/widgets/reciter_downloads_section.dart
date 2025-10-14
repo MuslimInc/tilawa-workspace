@@ -38,7 +38,9 @@ class ReciterDownloadsSection extends StatelessWidget {
             reciterName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          subtitle: Text('${downloads.length} surahs'),
+          subtitle: Text(
+            '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+          ),
           leading: CircleAvatar(
             backgroundColor: Theme.of(
               context,
@@ -121,12 +123,14 @@ class ReciterDownloadsSection extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteAll),
         content: Text(
-          'Are you sure you want to delete all downloads for $reciterName?',
+          AppLocalizations.of(
+            context,
+          )!.deleteAllDownloadsConfirmation(reciterName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {

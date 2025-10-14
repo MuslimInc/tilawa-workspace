@@ -203,5 +203,119 @@
     "viewDownloads": "عرض التحميلات",
     "@viewDownloads": {
         "description": "View downloads action text"
+    },
+    "premium": "بريميوم",
+    "@premium": {
+        "description": "Premium section title"
+    },
+    "premiumFeatures": "ميزات بريميوم",
+    "@premiumFeatures": {
+        "description": "Premium features section title"
+    },
+    "unlimitedDownloads": "تحميلات غير محدودة",
+    "@unlimitedDownloads": {
+        "description": "Unlimited downloads feature"
+    },
+    "offlineMode": "الوضع غير المتصل",
+    "@offlineMode": {
+        "description": "Offline mode feature"
+    },
+    "highQualityAudio": "صوت عالي الجودة",
+    "@highQualityAudio": {
+        "description": "High quality audio feature"
+    },
+    "adFreeExperience": "تجربة خالية من الإعلانات",
+    "@adFreeExperience": {
+        "description": "Ad-free experience feature"
+    },
+    "prioritySupport": "دعم ذو أولوية",
+    "@prioritySupport": {
+        "description": "Priority support feature"
+    },
+    "exclusiveContent": "محتوى حصري",
+    "@exclusiveContent": {
+        "description": "Exclusive content feature"
+    },
+    "chooseYourPlan": "اختر خطتك",
+    "@chooseYourPlan": {
+        "description": "Choose your plan section title"
+    },
+    "maybeLater": "ربما لاحقاً",
+    "@maybeLater": {
+        "description": "Maybe later button text"
+    },
+    "upgradeNow": "ترقية الآن",
+    "@upgradeNow": {
+        "description": "Upgrade now button text"
+    },
+    "continueButton": "متابعة",
+    "@continueButton": {
+        "description": "Continue button text"
+    },
+    "premiumRequired": "بريميوم مطلوب",
+    "@premiumRequired": {
+        "description": "Premium required dialog title"
+    },
+    "premiumRequiredMessage": "هذه الميزة تتطلب اشتراك بريميوم. قم بالترقية لفتح التحميلات غير المحدودة والمزيد!",
+    "@premiumRequiredMessage": {
+        "description": "Premium required message"
+    },
+    "language": "اللغة",
+    "@language": {
+        "description": "Language setting"
+    },
+    "arabic": "العربية",
+    "@arabic": {
+        "description": "Arabic language option"
+    },
+    "english": "الإنجليزية",
+    "@english": {
+        "description": "English language option"
+    },
+    "refreshDownloads": "تحديث التحميلات",
+    "@refreshDownloads": {
+        "description": "Refresh downloads tooltip"
+    },
+    "downloadingSurah": "جاري تحميل {surahTitle} بصوت {reciterName}...",
+    "@downloadingSurah": {
+        "description": "Download progress message",
+        "placeholders": {
+            "surahTitle": {
+                "type": "String",
+                "description": "The title of the surah being downloaded"
+            },
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "deleteDownload": "حذف التحميل",
+    "@deleteDownload": {
+        "description": "Delete download dialog title"
+    },
+    "deleteDownloadConfirmation": "هل أنت متأكد من حذف \"{title}\"؟",
+    "@deleteDownloadConfirmation": {
+        "description": "Delete download confirmation message",
+        "placeholders": {
+            "title": {
+                "type": "String",
+                "description": "The title of the download to delete"
+            }
+        }
+    },
+    "deleteAllDownloadsConfirmation": "هل أنت متأكد من حذف جميع التحميلات لـ {reciterName}؟",
+    "@deleteAllDownloadsConfirmation": {
+        "description": "Delete all downloads confirmation message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "surahs": "سور",
+    "@surahs": {
+        "description": "Surahs count text"
     }
 }

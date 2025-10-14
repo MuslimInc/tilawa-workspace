@@ -161,4 +161,80 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewDownloads => 'عرض التحميلات';
+
+  @override
+  String get premium => 'بريميوم';
+
+  @override
+  String get premiumFeatures => 'ميزات بريميوم';
+
+  @override
+  String get unlimitedDownloads => 'تحميلات غير محدودة';
+
+  @override
+  String get offlineMode => 'الوضع غير المتصل';
+
+  @override
+  String get highQualityAudio => 'صوت عالي الجودة';
+
+  @override
+  String get adFreeExperience => 'تجربة خالية من الإعلانات';
+
+  @override
+  String get prioritySupport => 'دعم ذو أولوية';
+
+  @override
+  String get exclusiveContent => 'محتوى حصري';
+
+  @override
+  String get chooseYourPlan => 'اختر خطتك';
+
+  @override
+  String get maybeLater => 'ربما لاحقاً';
+
+  @override
+  String get upgradeNow => 'ترقية الآن';
+
+  @override
+  String get continueButton => 'متابعة';
+
+  @override
+  String get premiumRequired => 'بريميوم مطلوب';
+
+  @override
+  String get premiumRequiredMessage =>
+      'هذه الميزة تتطلب اشتراك بريميوم. قم بالترقية لفتح التحميلات غير المحدودة والمزيد!';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get english => 'الإنجليزية';
+
+  @override
+  String get refreshDownloads => 'تحديث التحميلات';
+
+  @override
+  String downloadingSurah(String surahTitle, String reciterName) {
+    return 'جاري تحميل $surahTitle بصوت $reciterName...';
+  }
+
+  @override
+  String get deleteDownload => 'حذف التحميل';
+
+  @override
+  String deleteDownloadConfirmation(String title) {
+    return 'هل أنت متأكد من حذف \"$title\"؟';
+  }
+
+  @override
+  String deleteAllDownloadsConfirmation(String reciterName) {
+    return 'هل أنت متأكد من حذف جميع التحميلات لـ $reciterName؟';
+  }
+
+  @override
+  String get surahs => 'سور';
 }

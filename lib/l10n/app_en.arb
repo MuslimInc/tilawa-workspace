@@ -203,5 +203,119 @@
     "viewDownloads": "View Downloads",
     "@viewDownloads": {
         "description": "View downloads action text"
+    },
+    "premium": "Premium",
+    "@premium": {
+        "description": "Premium section title"
+    },
+    "premiumFeatures": "Premium Features",
+    "@premiumFeatures": {
+        "description": "Premium features section title"
+    },
+    "unlimitedDownloads": "Unlimited Downloads",
+    "@unlimitedDownloads": {
+        "description": "Unlimited downloads feature"
+    },
+    "offlineMode": "Offline Mode",
+    "@offlineMode": {
+        "description": "Offline mode feature"
+    },
+    "highQualityAudio": "High Quality Audio",
+    "@highQualityAudio": {
+        "description": "High quality audio feature"
+    },
+    "adFreeExperience": "Ad-Free Experience",
+    "@adFreeExperience": {
+        "description": "Ad-free experience feature"
+    },
+    "prioritySupport": "Priority Support",
+    "@prioritySupport": {
+        "description": "Priority support feature"
+    },
+    "exclusiveContent": "Exclusive Content",
+    "@exclusiveContent": {
+        "description": "Exclusive content feature"
+    },
+    "chooseYourPlan": "Choose Your Plan",
+    "@chooseYourPlan": {
+        "description": "Choose your plan section title"
+    },
+    "maybeLater": "Maybe Later",
+    "@maybeLater": {
+        "description": "Maybe later button text"
+    },
+    "upgradeNow": "Upgrade Now",
+    "@upgradeNow": {
+        "description": "Upgrade now button text"
+    },
+    "continueButton": "Continue",
+    "@continueButton": {
+        "description": "Continue button text"
+    },
+    "premiumRequired": "Premium Required",
+    "@premiumRequired": {
+        "description": "Premium required dialog title"
+    },
+    "premiumRequiredMessage": "This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!",
+    "@premiumRequiredMessage": {
+        "description": "Premium required message"
+    },
+    "language": "Language",
+    "@language": {
+        "description": "Language setting"
+    },
+    "arabic": "Arabic",
+    "@arabic": {
+        "description": "Arabic language option"
+    },
+    "english": "English",
+    "@english": {
+        "description": "English language option"
+    },
+    "refreshDownloads": "Refresh Downloads",
+    "@refreshDownloads": {
+        "description": "Refresh downloads tooltip"
+    },
+    "downloadingSurah": "Downloading {surahTitle} by {reciterName}...",
+    "@downloadingSurah": {
+        "description": "Download progress message",
+        "placeholders": {
+            "surahTitle": {
+                "type": "String",
+                "description": "The title of the surah being downloaded"
+            },
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "deleteDownload": "Delete Download",
+    "@deleteDownload": {
+        "description": "Delete download dialog title"
+    },
+    "deleteDownloadConfirmation": "Are you sure you want to delete \"{title}\"?",
+    "@deleteDownloadConfirmation": {
+        "description": "Delete download confirmation message",
+        "placeholders": {
+            "title": {
+                "type": "String",
+                "description": "The title of the download to delete"
+            }
+        }
+    },
+    "deleteAllDownloadsConfirmation": "Are you sure you want to delete all downloads for {reciterName}?",
+    "@deleteAllDownloadsConfirmation": {
+        "description": "Delete all downloads confirmation message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "surahs": "surahs",
+    "@surahs": {
+        "description": "Surahs count text"
     }
 }

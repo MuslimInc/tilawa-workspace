@@ -161,4 +161,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewDownloads => 'View Downloads';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get premiumFeatures => 'Premium Features';
+
+  @override
+  String get unlimitedDownloads => 'Unlimited Downloads';
+
+  @override
+  String get offlineMode => 'Offline Mode';
+
+  @override
+  String get highQualityAudio => 'High Quality Audio';
+
+  @override
+  String get adFreeExperience => 'Ad-Free Experience';
+
+  @override
+  String get prioritySupport => 'Priority Support';
+
+  @override
+  String get exclusiveContent => 'Exclusive Content';
+
+  @override
+  String get chooseYourPlan => 'Choose Your Plan';
+
+  @override
+  String get maybeLater => 'Maybe Later';
+
+  @override
+  String get upgradeNow => 'Upgrade Now';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get premiumRequired => 'Premium Required';
+
+  @override
+  String get premiumRequiredMessage =>
+      'This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get arabic => 'Arabic';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get refreshDownloads => 'Refresh Downloads';
+
+  @override
+  String downloadingSurah(String surahTitle, String reciterName) {
+    return 'Downloading $surahTitle by $reciterName...';
+  }
+
+  @override
+  String get deleteDownload => 'Delete Download';
+
+  @override
+  String deleteDownloadConfirmation(String title) {
+    return 'Are you sure you want to delete \"$title\"?';
+  }
+
+  @override
+  String deleteAllDownloadsConfirmation(String reciterName) {
+    return 'Are you sure you want to delete all downloads for $reciterName?';
+  }
+
+  @override
+  String get surahs => 'surahs';
 }
