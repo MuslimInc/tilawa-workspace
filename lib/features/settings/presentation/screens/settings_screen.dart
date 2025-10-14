@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
@@ -58,17 +59,20 @@ class SettingsScreen extends StatelessWidget {
                 return ListTile(
                   title: const Text('Language'),
                   subtitle: Text(
-                    state.locale.languageCode == 'ar' ? 'Arabic' : 'English',
+                    state.locale.languageCode ==
+                            LanguageConfig.defaultLanguageCode
+                        ? 'Arabic'
+                        : 'English',
                   ),
                   trailing: DropdownButton<Locale>(
                     value: state.locale,
                     underline: const SizedBox(),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
-                        value: Locale('ar'),
-                        child: Text('العربية'),
+                        value: Locale(LanguageConfig.defaultLanguageCode),
+                        child: const Text('العربية'),
                       ),
-                      DropdownMenuItem(
+                      const DropdownMenuItem(
                         value: Locale('en'),
                         child: Text('English'),
                       ),
