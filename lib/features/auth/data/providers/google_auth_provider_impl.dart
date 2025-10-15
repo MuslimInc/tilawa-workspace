@@ -23,7 +23,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   @override
   Future<AuthResult> signIn() async {
     try {
-      // Trigger the authentication flow (Google Sign-In auto-initializes)
+      // Trigger the authentication flow
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
       // Obtain the auth details from the request
