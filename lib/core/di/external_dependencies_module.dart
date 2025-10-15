@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -22,6 +23,9 @@ abstract class ExternalDependenciesModule {
 
   @singleton
   GoogleSignIn get googleSignIn => GoogleSignIn.instance;
+
+  @singleton
+  CredentialManager get credentialManager => CredentialManager();
 
   @singleton
   FirebaseAnalytics get firebaseAnalytics => FirebaseAnalytics.instance;

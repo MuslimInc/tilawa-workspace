@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user.dart';
+part of 'user_entity.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_User _$UserFromJson(Map<String, dynamic> json) => _User(
+_UserEntity _$UserEntityFromJson(Map<String, dynamic> json) => _UserEntity(
   id: json['id'] as String,
   email: json['email'] as String,
   displayName: json['displayName'] as String,
@@ -14,10 +14,11 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
-Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
-  'id': instance.id,
-  'email': instance.email,
-  'displayName': instance.displayName,
-  'photoUrl': instance.photoUrl,
-  'createdAt': instance.createdAt.toIso8601String(),
-};
+Map<String, dynamic> _$UserEntityToJson(_UserEntity instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'email': instance.email,
+      'displayName': instance.displayName,
+      'photoUrl': instance.photoUrl,
+      'createdAt': instance.createdAt.toIso8601String(),
+    };

@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 import 'package:muzakri/app_bloc_observer.dart';
 import 'package:muzakri/core/di/injection.dart';
@@ -25,8 +25,8 @@ Future<void> main() async {
   // Initialize Crashlytics first (handles error reporting)
   await _initializeCrashlytics();
 
-  // Initialize Google Sign-In with server client ID
-  await _initializeGoogleSignIn();
+  // Initialize Credential Manager
+  await _initializeCredentialManager();
 
   // Initialize Analytics
   await _initializeAnalytics();
@@ -39,16 +39,18 @@ Future<void> main() async {
   runApp(const QuranPlayerApp());
 }
 
-/// Initialize Google Sign-In with server client ID
-Future<void> _initializeGoogleSignIn() async {
+/// Initialize Credential Manager with Google Client ID
+Future<void> _initializeCredentialManager() async {
   try {
-    final googleSignIn = getIt<GoogleSignIn>();
-    await googleSignIn.initialize(
-      serverClientId:
+    final credentialManager = getIt<CredentialManager>();
+    await credentialManager.init(
+      preferImmediatelyAvailableCredentials: true,
+      googleClientId:
           '181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com',
     );
+    print('Credential Manager initialized successfully');
   } catch (e) {
-    print('Warning: Could not initialize Google Sign-In: $e');
+    print('Warning: Could not initialize Credential Manager: $e');
   }
 }
 

@@ -155,7 +155,7 @@ return cancelled(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( User user)?  success,TResult Function( String message,  String? code)?  failure,TResult Function()?  cancelled,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( UserEntity user)?  success,TResult Function( String message,  String? code)?  failure,TResult Function()?  cancelled,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AuthSuccess() when success != null:
 return success(_that.user);case AuthFailure() when failure != null:
@@ -178,7 +178,7 @@ return cancelled();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( User user)  success,required TResult Function( String message,  String? code)  failure,required TResult Function()  cancelled,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( UserEntity user)  success,required TResult Function( String message,  String? code)  failure,required TResult Function()  cancelled,}) {final _that = this;
 switch (_that) {
 case AuthSuccess():
 return success(_that.user);case AuthFailure():
@@ -200,7 +200,7 @@ return cancelled();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( User user)?  success,TResult? Function( String message,  String? code)?  failure,TResult? Function()?  cancelled,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( UserEntity user)?  success,TResult? Function( String message,  String? code)?  failure,TResult? Function()?  cancelled,}) {final _that = this;
 switch (_that) {
 case AuthSuccess() when success != null:
 return success(_that.user);case AuthFailure() when failure != null:
@@ -220,7 +220,7 @@ class AuthSuccess implements AuthResult {
   const AuthSuccess({required this.user, final  String? $type}): $type = $type ?? 'success';
   factory AuthSuccess.fromJson(Map<String, dynamic> json) => _$AuthSuccessFromJson(json);
 
- final  User user;
+ final  UserEntity user;
 
 @JsonKey(name: 'runtimeType')
 final String $type;
@@ -259,11 +259,11 @@ abstract mixin class $AuthSuccessCopyWith<$Res> implements $AuthResultCopyWith<$
   factory $AuthSuccessCopyWith(AuthSuccess value, $Res Function(AuthSuccess) _then) = _$AuthSuccessCopyWithImpl;
 @useResult
 $Res call({
- User user
+ UserEntity user
 });
 
 
-$UserCopyWith<$Res> get user;
+$UserEntityCopyWith<$Res> get user;
 
 }
 /// @nodoc
@@ -279,7 +279,7 @@ class _$AuthSuccessCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? user = null,}) {
   return _then(AuthSuccess(
 user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as User,
+as UserEntity,
   ));
 }
 
@@ -287,9 +287,9 @@ as User,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$UserCopyWith<$Res> get user {
+$UserEntityCopyWith<$Res> get user {
   
-  return $UserCopyWith<$Res>(_self.user, (value) {
+  return $UserEntityCopyWith<$Res>(_self.user, (value) {
     return _then(_self.copyWith(user: value));
   });
 }

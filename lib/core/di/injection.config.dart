@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:audio_service/audio_service.dart' as _i87;
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
+import 'package:credential_manager/credential_manager.dart' as _i614;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
@@ -29,6 +30,12 @@ import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_s
     as _i203;
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart'
     as _i965;
+import 'package:muzakri/features/auth/data/providers/auth_provider_factory.dart'
+    as _i167;
+import 'package:muzakri/features/auth/data/providers/credential_manager_auth_provider.dart'
+    as _i892;
+import 'package:muzakri/features/auth/data/providers/google_auth_provider_impl.dart'
+    as _i719;
 import 'package:muzakri/features/auth/data/repositories/auth_repository_impl.dart'
     as _i494;
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart'
@@ -144,6 +151,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i116.GoogleSignIn>(
       () => externalDependenciesModule.googleSignIn,
     );
+    gh.singleton<_i614.CredentialManager>(
+      () => externalDependenciesModule.credentialManager,
+    );
     gh.singleton<_i398.FirebaseAnalytics>(
       () => externalDependenciesModule.firebaseAnalytics,
     );
@@ -156,6 +166,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
+    );
+    gh.lazySingleton<_i892.CredentialManagerAuthProvider>(
+      () => _i892.CredentialManagerAuthProvider(
+        gh<_i59.FirebaseAuth>(),
+        gh<_i614.CredentialManager>(),
+      ),
     );
     gh.singleton<_i812.SubscriptionPlansService>(
       () => externalDependenciesModule.subscriptionPlansService(
@@ -182,12 +198,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i919.PremiumLocalDataSource>(
       () => _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
-    gh.lazySingleton<_i538.AuthRepository>(
-      () => _i494.AuthRepositoryImpl(
-        gh<_i59.FirebaseAuth>(),
-        gh<_i116.GoogleSignIn>(),
-      ),
-    );
     gh.lazySingleton<_i906.PremiumRemoteDataSource>(
       () => _i906.PremiumRemoteDataSourceImpl(
         gh<_i974.FirebaseFirestore>(),
@@ -200,9 +210,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i812.SubscriptionPlansService>(),
       ),
     );
+    gh.lazySingleton<_i719.GoogleAuthProviderImpl>(
+      () => _i719.GoogleAuthProviderImpl(
+        gh<_i59.FirebaseAuth>(),
+        gh<_i116.GoogleSignIn>(),
+      ),
+    );
     gh.lazySingleton<_i870.LocalizationRepository>(
       () => _i319.LocalizationRepositoryImpl(
         gh<_i322.LocalizationLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i167.AuthProviderFactory>(
+      () => _i167.AuthProviderFactory(
+        gh<_i59.FirebaseAuth>(),
+        gh<_i116.GoogleSignIn>(),
+        gh<_i614.CredentialManager>(),
       ),
     );
     gh.singleton<_i557.AnalyticsService>(
@@ -210,13 +233,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i724.GetCurrentLanguageUseCase>(
       () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
-    );
-    gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
-    gh.singleton<_i778.GetCurrentUserUseCase>(
-      () => _i778.GetCurrentUserUseCase(gh<_i538.AuthRepository>()),
-    );
-    gh.singleton<_i922.SignInWithGoogleUseCase>(
-      () => _i922.SignInWithGoogleUseCase(gh<_i538.AuthRepository>()),
     );
     gh.lazySingleton<_i775.DownloadsRepository>(
       () => _i486.DownloadsRepositoryImpl(gh<_i811.DownloadsLocalDataSource>()),
@@ -234,13 +250,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
       preResolve: true,
-    );
-    gh.factory<_i253.AuthBloc>(
-      () => _i253.AuthBloc(
-        gh<_i922.SignInWithGoogleUseCase>(),
-        gh<_i95.SignOut>(),
-        gh<_i778.GetCurrentUserUseCase>(),
-      ),
     );
     gh.lazySingleton<_i797.SurahRepository>(
       () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
@@ -270,6 +279,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i59.FirebaseAuth>(),
         gh<_i235.CrashlyticsService>(),
       ),
+    );
+    gh.lazySingleton<_i538.AuthRepository>(
+      () => _i494.AuthRepositoryImpl(gh<_i167.AuthProviderFactory>()),
     );
     gh.factory<_i864.RecitersBloc>(
       () => _i864.RecitersBloc(
@@ -314,6 +326,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i965.AudioPlayerBloc>(
       () => _i965.AudioPlayerBloc(gh<_i320.AudioPlayerHandler>()),
     );
+    gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
+    gh.singleton<_i778.GetCurrentUserUseCase>(
+      () => _i778.GetCurrentUserUseCase(gh<_i538.AuthRepository>()),
+    );
+    gh.singleton<_i922.SignInWithGoogleUseCase>(
+      () => _i922.SignInWithGoogleUseCase(gh<_i538.AuthRepository>()),
+    );
     gh.singleton<_i641.UpdateSurahDownloadStatusUseCase>(
       () => _i641.UpdateSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
     );
@@ -336,6 +355,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i319.UpdateSurahDownloadProgressUseCase>(
       () =>
           _i319.UpdateSurahDownloadProgressUseCase(gh<_i797.SurahRepository>()),
+    );
+    gh.factory<_i253.AuthBloc>(
+      () => _i253.AuthBloc(
+        gh<_i922.SignInWithGoogleUseCase>(),
+        gh<_i95.SignOut>(),
+        gh<_i778.GetCurrentUserUseCase>(),
+      ),
     );
     gh.factory<_i595.SurahBloc>(
       () => _i595.SurahBloc(
