@@ -34,6 +34,10 @@ class ReciterDownloadsSection extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
         child: ExpansionTile(
+          expandedCrossAxisAlignment: CrossAxisAlignment.start,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text(
             reciterName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -102,16 +106,28 @@ class ReciterDownloadsSection extends StatelessWidget {
               ),
             ],
           ),
-          children: downloads.map((download) {
-            return DownloadItemCard(
-              download: download,
-              onDelete: () {
-                context.read<DownloadsBloc>().add(
-                  DeleteDownloadEvent(downloadId: download.id),
-                );
-              },
-            );
-          }).toList(),
+          children: [
+            if (downloads.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 20),
+                child: Text(
+                  '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+            ...downloads.map((download) {
+              return DownloadItemCard(
+                download: download,
+                onDelete: () {
+                  context.read<DownloadsBloc>().add(
+                    DeleteDownloadEvent(downloadId: download.id),
+                  );
+                },
+              );
+            }),
+          ],
         ),
       ),
     );

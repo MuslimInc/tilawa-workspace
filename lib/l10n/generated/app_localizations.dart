@@ -589,6 +589,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} recitation(s) available'**
   String recitationsAvailable(int count);
+
+  /// Loading surahs for a specific reciter message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading {reciterName} surahs...'**
+  String loadingReciterSurahs(String reciterName);
 }
 
 class _AppLocalizationsDelegate

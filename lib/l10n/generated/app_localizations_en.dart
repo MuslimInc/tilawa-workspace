@@ -265,4 +265,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String recitationsAvailable(int count) {
     return '$count recitation(s) available';
   }
+
+  @override
+  String loadingReciterSurahs(String reciterName) {
+    return 'Loading $reciterName surahs...';
+  }
 }

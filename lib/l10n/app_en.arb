@@ -355,5 +355,15 @@
                 "description": "The number of recitations available"
             }
         }
+    },
+    "loadingReciterSurahs": "Loading {reciterName} surahs...",
+    "@loadingReciterSurahs": {
+        "description": "Loading surahs for a specific reciter message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
     }
 }

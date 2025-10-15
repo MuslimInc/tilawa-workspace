@@ -107,13 +107,17 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               // Content
               Expanded(
                 child: state is ReciterDetailsLoading
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Loading surah list...'),
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.loadingReciterSurahs(widget.reciter.name),
+                            ),
                           ],
                         ),
                       )

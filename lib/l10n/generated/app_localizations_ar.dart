@@ -264,4 +264,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String recitationsAvailable(int count) {
     return '$count رواية متاحة';
   }
+
+  @override
+  String loadingReciterSurahs(String reciterName) {
+    return 'جاري تحميل سور $reciterName...';
+  }
 }
