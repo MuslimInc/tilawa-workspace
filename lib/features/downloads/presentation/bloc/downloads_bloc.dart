@@ -82,9 +82,6 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
         progress.downloadedSize,
         progress.fileSize,
       );
-
-      // Reload downloads to reflect the updated progress
-      add(const LoadDownloads());
     });
   }
 
