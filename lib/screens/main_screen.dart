@@ -6,11 +6,11 @@ import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
+import 'package:muzakri/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router.dart';
 import 'package:muzakri/screens/playlists_screen.dart';
-import 'package:muzakri/screens/reciters_screen.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
 
 class MainScreen extends StatefulWidget {
@@ -78,7 +78,9 @@ class _MainScreenState extends State<MainScreen> {
                   _currentIndex = index;
                 });
                 if (index == 1) {
-                  context.read<DownloadsBloc>().add(const LoadDownloads());
+                  context.read<DownloadsBloc>().add(
+                    const DownloadsEvent.loadDownloads(),
+                  );
                 }
               },
               type: BottomNavigationBarType.fixed,

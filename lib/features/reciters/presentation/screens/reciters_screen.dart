@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:muzakri/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/shared/widgets/arabic_alphabet_scrollbar.dart';
 import 'package:muzakri/shared/widgets/language_switcher.dart';
 
@@ -63,7 +62,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
             body: Column(
               children: [
                 // Search bar and letter filter
-                Padding(
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
@@ -125,6 +128,16 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerLowest,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           hintText: AppLocalizations.of(
                             context,
                           )!.searchReciters,
@@ -145,9 +158,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   },
                                 )
                               : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                         ),
                         onChanged: (value) {
                           context.read<RecitersBloc>().add(
@@ -232,12 +242,18 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 ),
                               )
                             : state is RecitersLoaded
-                            ? ListView.builder(
+                            ? ListView.separated(
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 12),
                                 controller: _scrollController,
                                 itemCount: state.filteredReciters.length,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
                                 itemBuilder: (context, index) {
                                   final reciter = state.filteredReciters[index];
-                                  return _buildReciterCard(context, reciter);
+                                  return ReciterCard(reciter: reciter);
                                 },
                               )
                             : const SizedBox.shrink(),
@@ -257,51 +273,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 ),
               ],
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildReciterCard(BuildContext context, Reciter reciter) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor,
-          child: Text(
-            reciter.letter,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        title: Text(
-          reciter.name,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(
-                context,
-              )!.recitationsAvailable(reciter.moshaf.length),
-            ),
-            if (reciter.moshaf.isNotEmpty)
-              Text(
-                reciter.moshaf.first.name,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-          ],
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: () {
-          context.pushNamed(
-            'reciterDetails',
-            pathParameters: {'reciterId': reciter.id.toString()},
-            extra: reciter,
           );
         },
       ),
