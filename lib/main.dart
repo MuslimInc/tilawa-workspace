@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
-import 'package:muzakri/app_bloc_observer.dart';
 import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
@@ -34,7 +32,7 @@ Future<void> main() async {
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
 
-  Bloc.observer = AppBlocObserver();
+  // Bloc.observer = AppBlocObserver();
 
   runApp(const QuranPlayerApp());
 }
