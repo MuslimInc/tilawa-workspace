@@ -27,16 +27,16 @@ class ThemeCubit extends Cubit<ThemeState> {
   static const String _schemeKey = 'app_theme_scheme';
   static const String _useSystemThemeKey = 'app_use_system_theme';
 
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   ThemeCubit(this._prefs) : super(const ThemeState(mode: ThemeMode.system)) {
     _load();
   }
 
-  void _load() {
-    final themeValue = _prefs.getString(_themeKey);
-    final schemeValue = _prefs.getString(_schemeKey);
-    final useSystemTheme = _prefs.getBool(_useSystemThemeKey) ?? true;
+  Future<void> _load() async {
+    final themeValue = await _prefs.getString(_themeKey);
+    final schemeValue = await _prefs.getString(_schemeKey);
+    final useSystemTheme = await _prefs.getBool(_useSystemThemeKey) ?? true;
 
     final mode = switch (themeValue) {
       'light' => ThemeMode.light,

@@ -12,7 +12,7 @@ class LanguageConfig {
   /// Supported language codes in order of preference
   static const List<String> supportedLanguageCodes = ['ar', 'en'];
 
-  /// Language key for SharedPreferences
+  /// Language key for final SharedPreferencesAsync _prefs
   static const String languageKey = 'selected_language';
 
   /// Convert app language code to API language code

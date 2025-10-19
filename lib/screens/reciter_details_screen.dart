@@ -185,44 +185,39 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           var roundedRectangleBorder = RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           );
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          return ListTile(
             shape: roundedRectangleBorder,
-            elevation: 0,
-            child: ListTile(
-              shape: roundedRectangleBorder,
-              leading: CircleAvatar(
-                backgroundColor: Colors.grey.shade300,
-                child: Text(
-                  '${index + 1}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+            leading: CircleAvatar(
+              backgroundColor: Colors.grey.shade300,
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              title: Text(
-                surah.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                surah.reciterName,
-                style: const TextStyle(color: Colors.grey),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.play_arrow),
-                onPressed: () {
-                  // Play surah logic here
-                },
-              ),
-              onTap: () {
+            ),
+            title: Text(
+              surah.name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              surah.reciterName,
+              style: const TextStyle(color: Colors.grey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.play_arrow),
+              onPressed: () {
                 // Play surah logic here
               },
             ),
+            onTap: () {
+              // Play surah logic here
+            },
           );
         }
 

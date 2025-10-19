@@ -23,7 +23,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       BehaviorSubject.seeded(<MediaItem>[]);
   final List<MediaItem> newList;
   final AnalyticsService _analyticsService;
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
   final _items = <String, List<MediaItem>>{};
   final _player = AudioPlayer();
   final List<AudioSource> _playlist = [];
@@ -583,7 +583,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         final surahNumber = int.parse(surahId);
         final formattedSurahId = surahId.padLeft(3, '0');
         final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
-        final surahName = _getSurahName(surahNumber);
+        final surahName = await _getSurahName(surahNumber);
 
         mediaItems.add(
           MediaItem(
@@ -609,9 +609,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   /// Get surah name by surah number based on selected language
-  String _getSurahName(int surahNumber) {
+  Future<String> _getSurahName(int surahNumber) async {
     final currentLanguage =
-        _prefs.getString(LanguageConfig.languageKey) ??
+        await _prefs.getString(LanguageConfig.languageKey) ??
         LanguageConfig.getDefaultLanguageCode();
 
     if (currentLanguage == 'en') {

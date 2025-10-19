@@ -3,6 +3,7 @@ export 'audio_player/audio_player.dart';
 export 'auth/auth.dart';
 export 'downloads/downloads.dart';
 export 'localization/localization.dart';
+export 'playlists/playlists.dart';
 export 'premium/premium.dart';
 export 'reciters/reciters.dart';
 export 'settings/settings.dart';

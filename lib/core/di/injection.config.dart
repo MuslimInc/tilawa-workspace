@@ -77,6 +77,32 @@ import 'package:muzakri/features/localization/domain/usecases/get_current_langua
     as _i724;
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart'
     as _i413;
+import 'package:muzakri/features/playlists/data/datasources/playlists_local_datasource.dart'
+    as _i906;
+import 'package:muzakri/features/playlists/data/repositories/playlists_repository_impl.dart'
+    as _i452;
+import 'package:muzakri/features/playlists/domain/repositories/playlists_repository.dart'
+    as _i908;
+import 'package:muzakri/features/playlists/domain/usecases/add_item_to_playlist_use_case.dart'
+    as _i749;
+import 'package:muzakri/features/playlists/domain/usecases/create_playlist_use_case.dart'
+    as _i491;
+import 'package:muzakri/features/playlists/domain/usecases/delete_playlist_use_case.dart'
+    as _i328;
+import 'package:muzakri/features/playlists/domain/usecases/get_all_playlists_use_case.dart'
+    as _i153;
+import 'package:muzakri/features/playlists/domain/usecases/remove_item_from_playlist_use_case.dart'
+    as _i608;
+import 'package:muzakri/features/playlists/domain/usecases/search_playlists_use_case.dart'
+    as _i693;
+import 'package:muzakri/features/playlists/domain/usecases/toggle_favorite_playlist_use_case.dart'
+    as _i372;
+import 'package:muzakri/features/playlists/domain/usecases/update_playlist_use_case.dart'
+    as _i748;
+import 'package:muzakri/features/playlists/domain/usecases/usecases.dart'
+    as _i813;
+import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart'
+    as _i559;
 import 'package:muzakri/features/premium/data/datasources/premium_local_datasource.dart'
     as _i919;
 import 'package:muzakri/features/premium/data/datasources/premium_remote_datasource.dart'
@@ -160,9 +186,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i141.FirebaseCrashlytics>(
       () => externalDependenciesModule.firebaseCrashlytics,
     );
-    await gh.singletonAsync<_i460.SharedPreferences>(
+    gh.singleton<_i460.SharedPreferencesAsync>(
       () => externalDependenciesModule.sharedPreferences,
-      preResolve: true,
     );
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
@@ -179,24 +204,33 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.factory<_i52.ThemeCubit>(
-      () => _i52.ThemeCubit(gh<_i460.SharedPreferences>()),
+      () => _i52.ThemeCubit(gh<_i460.SharedPreferencesAsync>()),
     );
     gh.factory<_i413.LocalizationBloc>(
-      () => _i413.LocalizationBloc(gh<_i460.SharedPreferences>()),
+      () => _i413.LocalizationBloc(gh<_i460.SharedPreferencesAsync>()),
     );
     gh.singleton<_i235.CrashlyticsService>(
       () =>
           _i235.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
     );
     gh.lazySingleton<_i811.DownloadsLocalDataSource>(
-      () => _i811.DownloadsLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+      () => _i811.DownloadsLocalDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
     );
     gh.lazySingleton<_i322.LocalizationLocalDataSource>(
-      () =>
-          _i322.LocalizationLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+      () => _i322.LocalizationLocalDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
     );
     gh.lazySingleton<_i919.PremiumLocalDataSource>(
-      () => _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+      () =>
+          _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
+    );
+    gh.lazySingleton<_i906.PlaylistsLocalDataSource>(
+      () => _i906.PlaylistsLocalDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
     );
     gh.lazySingleton<_i906.PremiumRemoteDataSource>(
       () => _i906.PremiumRemoteDataSourceImpl(
@@ -234,6 +268,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i724.GetCurrentLanguageUseCase>(
       () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
     );
+    await gh.singletonAsync<_i320.AudioPlayerHandler>(
+      () => externalDependenciesModule.audioPlayerHandler(
+        gh<List<_i87.MediaItem>>(),
+        gh<_i557.AnalyticsService>(),
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
+      preResolve: true,
+    );
+    gh.lazySingleton<_i908.PlaylistsRepository>(
+      () => _i452.PlaylistsRepositoryImpl(gh<_i906.PlaylistsLocalDataSource>()),
+    );
     gh.lazySingleton<_i775.DownloadsRepository>(
       () => _i486.DownloadsRepositoryImpl(gh<_i811.DownloadsLocalDataSource>()),
     );
@@ -242,14 +287,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i919.PremiumLocalDataSource>(),
         gh<_i906.PremiumRemoteDataSource>(),
       ),
-    );
-    await gh.singletonAsync<_i320.AudioPlayerHandler>(
-      () => externalDependenciesModule.audioPlayerHandler(
-        gh<List<_i87.MediaItem>>(),
-        gh<_i557.AnalyticsService>(),
-        gh<_i460.SharedPreferences>(),
-      ),
-      preResolve: true,
     );
     gh.lazySingleton<_i797.SurahRepository>(
       () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
@@ -273,6 +310,32 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i917.ClearAllDownloadsUseCase>(
       () => _i917.ClearAllDownloadsUseCase(gh<_i775.DownloadsRepository>()),
     );
+    gh.singleton<_i749.AddItemToPlaylistUseCase>(
+      () => _i749.AddItemToPlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i153.GetAllPlaylistsUseCase>(
+      () => _i153.GetAllPlaylistsUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i372.ToggleFavoritePlaylistUseCase>(
+      () =>
+          _i372.ToggleFavoritePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i328.DeletePlaylistUseCase>(
+      () => _i328.DeletePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i748.UpdatePlaylistUseCase>(
+      () => _i748.UpdatePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i693.SearchPlaylistsUseCase>(
+      () => _i693.SearchPlaylistsUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i608.RemoveItemFromPlaylistUseCase>(
+      () =>
+          _i608.RemoveItemFromPlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
+    gh.singleton<_i491.CreatePlaylistUseCase>(
+      () => _i491.CreatePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
+    );
     gh.singleton<_i528.AnalyticsInitializationService>(
       () => _i528.AnalyticsInitializationService(
         gh<_i557.AnalyticsService>(),
@@ -287,6 +350,20 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i864.RecitersBloc(
         gh<_i320.AudioPlayerHandler>(),
         gh<_i724.GetCurrentLanguageUseCase>(),
+      ),
+    );
+    gh.factory<_i559.PlaylistsBloc>(
+      () => _i559.PlaylistsBloc(
+        getAllPlaylistsUseCase: gh<_i813.GetAllPlaylistsUseCase>(),
+        createPlaylistUseCase: gh<_i813.CreatePlaylistUseCase>(),
+        updatePlaylistUseCase: gh<_i813.UpdatePlaylistUseCase>(),
+        deletePlaylistUseCase: gh<_i813.DeletePlaylistUseCase>(),
+        addItemToPlaylistUseCase: gh<_i813.AddItemToPlaylistUseCase>(),
+        removeItemFromPlaylistUseCase:
+            gh<_i813.RemoveItemFromPlaylistUseCase>(),
+        searchPlaylistsUseCase: gh<_i813.SearchPlaylistsUseCase>(),
+        toggleFavoritePlaylistUseCase:
+            gh<_i813.ToggleFavoritePlaylistUseCase>(),
       ),
     );
     gh.singleton<_i509.StartTrialUseCase>(

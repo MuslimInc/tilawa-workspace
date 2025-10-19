@@ -33,10 +33,8 @@ abstract class ExternalDependenciesModule {
   @singleton
   FirebaseCrashlytics get firebaseCrashlytics => FirebaseCrashlytics.instance;
 
-  @preResolve
   @singleton
-  Future<SharedPreferences> get sharedPreferences =>
-      SharedPreferences.getInstance();
+  SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();
 
   @singleton
   SubscriptionPlansService subscriptionPlansService(
@@ -60,7 +58,7 @@ abstract class ExternalDependenciesModule {
   Future<AudioPlayerHandler> audioPlayerHandler(
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
-    SharedPreferences prefs,
+    SharedPreferencesAsync prefs,
   ) async {
     try {
       print('Initializing audio service...');
