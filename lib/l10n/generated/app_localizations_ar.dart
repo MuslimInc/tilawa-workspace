@@ -196,6 +196,127 @@ class AppLocalizationsAr extends AppLocalizations {
   String get upgradeNow => 'ترقية الآن';
 
   @override
+  String get playlistName => 'اسم قائمة التشغيل';
+
+  @override
+  String get playlistDescription => 'وصف قائمة التشغيل';
+
+  @override
+  String get playlistNameHint => 'أدخل اسم قائمة التشغيل';
+
+  @override
+  String get playlistDescriptionHint => 'أدخل وصف قائمة التشغيل';
+
+  @override
+  String get createNewPlaylist => 'إنشاء قائمة تشغيل جديدة';
+
+  @override
+  String get editPlaylist => 'تعديل قائمة التشغيل';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get playlistCreated => 'تم إنشاء قائمة التشغيل بنجاح';
+
+  @override
+  String get playlistUpdated => 'تم تحديث قائمة التشغيل بنجاح';
+
+  @override
+  String get playlistDeleted => 'تم حذف قائمة التشغيل بنجاح';
+
+  @override
+  String get deletePlaylist => 'حذف قائمة التشغيل';
+
+  @override
+  String get deletePlaylistMessage =>
+      'هل أنت متأكد من أنك تريد حذف قائمة التشغيل هذه؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get addToPlaylist => 'إضافة إلى قائمة التشغيل';
+
+  @override
+  String get removeFromPlaylist => 'إزالة من قائمة التشغيل';
+
+  @override
+  String get playlistItems => 'عناصر قائمة التشغيل';
+
+  @override
+  String get playlistDuration => 'المدة';
+
+  @override
+  String get playlistItemCount => 'العناصر';
+
+  @override
+  String get searchPlaylists => 'البحث في قوائم التشغيل';
+
+  @override
+  String get favorites => 'المفضلة';
+
+  @override
+  String get recent => 'الأحدث';
+
+  @override
+  String get public => 'عام';
+
+  @override
+  String get private => 'خاص';
+
+  @override
+  String get makePublic => 'جعل عام';
+
+  @override
+  String get makePrivate => 'جعل خاص';
+
+  @override
+  String get duplicatePlaylist => 'نسخ قائمة التشغيل';
+
+  @override
+  String get duplicatePlaylistName => 'اسم قائمة التشغيل المنسوخة';
+
+  @override
+  String get enterDuplicateName => 'أدخل اسم قائمة التشغيل المنسوخة';
+
+  @override
+  String get playlistNameExists => 'قائمة تشغيل بهذا الاسم موجودة بالفعل';
+
+  @override
+  String get playlistNameRequired => 'اسم قائمة التشغيل مطلوب';
+
+  @override
+  String get playlistDescriptionRequired => 'وصف قائمة التشغيل مطلوب';
+
+  @override
+  String get playlistNotFound => 'قائمة التشغيل غير موجودة';
+
+  @override
+  String get itemAlreadyInPlaylist => 'العنصر موجود بالفعل في قائمة التشغيل';
+
+  @override
+  String get playlistEmpty => 'قائمة التشغيل هذه فارغة';
+
+  @override
+  String get playPlaylist => 'تشغيل قائمة التشغيل';
+
+  @override
+  String get shufflePlaylist => 'تشغيل عشوائي لقائمة التشغيل';
+
+  @override
+  String get playlistStats => 'إحصائيات قائمة التشغيل';
+
+  @override
+  String get totalDuration => 'المدة الإجمالية';
+
+  @override
+  String get totalItems => 'إجمالي العناصر';
+
+  @override
+  String get createdOn => 'تم الإنشاء في';
+
+  @override
+  String get lastUpdated => 'آخر تحديث';
+
+  @override
   String get continueButton => 'متابعة';
 
   @override
@@ -269,4 +390,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String loadingReciterSurahs(String reciterName) {
     return 'جاري تحميل سور $reciterName...';
   }
+
+  @override
+  String get addToFavorites => 'إضافة إلى المفضلة';
+
+  @override
+  String get createFirstPlaylistMessage =>
+      'أنشئ قائمة التشغيل الأولى لتنظيم السور المفضلة لديك';
+
+  @override
+  String get addedToFavorites => 'تمت الإضافة إلى المفضلة';
+
+  @override
+  String get removedFromFavorites => 'تمت الإزالة من المفضلة';
+
+  @override
+  String get editPlaylistComingSoon => 'ميزة تعديل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get playlistDetailsComingSoon =>
+      'شاشة تفاصيل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get playPlaylistComingSoon => 'ميزة تشغيل قائمة التشغيل قادمة قريباً';
 }

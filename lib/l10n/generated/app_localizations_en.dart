@@ -196,6 +196,127 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upgradeNow => 'Upgrade Now';
 
   @override
+  String get playlistName => 'Playlist Name';
+
+  @override
+  String get playlistDescription => 'Playlist Description';
+
+  @override
+  String get playlistNameHint => 'Enter playlist name';
+
+  @override
+  String get playlistDescriptionHint => 'Enter playlist description';
+
+  @override
+  String get createNewPlaylist => 'Create New Playlist';
+
+  @override
+  String get editPlaylist => 'Edit Playlist';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get playlistCreated => 'Playlist created successfully';
+
+  @override
+  String get playlistUpdated => 'Playlist updated successfully';
+
+  @override
+  String get playlistDeleted => 'Playlist deleted successfully';
+
+  @override
+  String get deletePlaylist => 'Delete Playlist';
+
+  @override
+  String get deletePlaylistMessage =>
+      'Are you sure you want to delete this playlist? This action cannot be undone.';
+
+  @override
+  String get addToPlaylist => 'Add to Playlist';
+
+  @override
+  String get removeFromPlaylist => 'Remove from Playlist';
+
+  @override
+  String get playlistItems => 'Playlist Items';
+
+  @override
+  String get playlistDuration => 'Duration';
+
+  @override
+  String get playlistItemCount => 'Items';
+
+  @override
+  String get searchPlaylists => 'Search Playlists';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get public => 'Public';
+
+  @override
+  String get private => 'Private';
+
+  @override
+  String get makePublic => 'Make Public';
+
+  @override
+  String get makePrivate => 'Make Private';
+
+  @override
+  String get duplicatePlaylist => 'Duplicate Playlist';
+
+  @override
+  String get duplicatePlaylistName => 'Duplicate Playlist Name';
+
+  @override
+  String get enterDuplicateName => 'Enter name for duplicate playlist';
+
+  @override
+  String get playlistNameExists => 'A playlist with this name already exists';
+
+  @override
+  String get playlistNameRequired => 'Playlist name is required';
+
+  @override
+  String get playlistDescriptionRequired => 'Playlist description is required';
+
+  @override
+  String get playlistNotFound => 'Playlist not found';
+
+  @override
+  String get itemAlreadyInPlaylist => 'Item is already in this playlist';
+
+  @override
+  String get playlistEmpty => 'This playlist is empty';
+
+  @override
+  String get playPlaylist => 'Play Playlist';
+
+  @override
+  String get shufflePlaylist => 'Shuffle Playlist';
+
+  @override
+  String get playlistStats => 'Playlist Statistics';
+
+  @override
+  String get totalDuration => 'Total Duration';
+
+  @override
+  String get totalItems => 'Total Items';
+
+  @override
+  String get createdOn => 'Created On';
+
+  @override
+  String get lastUpdated => 'Last Updated';
+
+  @override
   String get continueButton => 'Continue';
 
   @override
@@ -270,4 +391,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String loadingReciterSurahs(String reciterName) {
     return 'Loading $reciterName surahs...';
   }
+
+  @override
+  String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get createFirstPlaylistMessage =>
+      'Create your first playlist to organize your favorite surahs';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get editPlaylistComingSoon =>
+      'Edit playlist functionality coming soon';
+
+  @override
+  String get playlistDetailsComingSoon => 'Playlist details screen coming soon';
+
+  @override
+  String get playPlaylistComingSoon =>
+      'Play playlist functionality coming soon';
 }
