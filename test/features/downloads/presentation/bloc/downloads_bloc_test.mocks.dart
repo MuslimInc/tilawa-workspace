@@ -11,6 +11,8 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:muzakri/audio_player_handler.dart' as _i17;
 import 'package:muzakri/core/errors/failures.dart' as _i9;
 import 'package:muzakri/core/services/analytics_service.dart' as _i20;
+import 'package:muzakri/features/downloads/data/services/download_service.dart'
+    as _i21;
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
     as _i10;
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart'
@@ -1408,4 +1410,13 @@ class MockAnalyticsService extends _i1.Mock implements _i20.AnalyticsService {
             returnValueForMissingStub: _i8.Future<void>.value(),
           )
           as _i8.Future<void>);
+}
+
+/// A class which mocks [DownloadService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadService extends _i1.Mock implements _i21.DownloadService {
+  MockDownloadService() {
+    _i1.throwOnMissingStub(this);
+  }
 }
