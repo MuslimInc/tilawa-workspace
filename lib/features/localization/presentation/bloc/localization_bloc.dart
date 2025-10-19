@@ -10,7 +10,7 @@ part 'localization_state.dart';
 
 @injectable
 class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   LocalizationBloc(this._prefs)
     : super(
@@ -26,7 +26,7 @@ class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
   ) async {
     try {
       final languageCode =
-          _prefs.getString(LanguageConfig.languageKey) ??
+          await _prefs.getString(LanguageConfig.languageKey) ??
           LanguageConfig.getDefaultLanguageCode();
 
       final locale = Locale(languageCode);

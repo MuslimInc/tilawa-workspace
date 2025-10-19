@@ -12,11 +12,11 @@ abstract class LocalizationLocalDataSource {
 class LocalizationLocalDataSourceImpl implements LocalizationLocalDataSource {
   const LocalizationLocalDataSourceImpl(this._prefs);
 
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   @override
   Future<String> getCurrentLanguage() async {
-    return _prefs.getString(LanguageConfig.languageKey) ??
+    return await _prefs.getString(LanguageConfig.languageKey) ??
         LanguageConfig.getDefaultLanguageCode();
   }
 
