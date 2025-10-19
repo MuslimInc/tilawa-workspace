@@ -23,13 +23,12 @@ void main() {
     const testSurahTitle = 'Al-Fatiha';
     const testReciterName = 'Abdul Rahman Al-Sudais';
 
-    test(
-      'should return Right(null) when download starts successfully',
-      () async {
+    group('call', () {
+      test('should return Right(null) when download is successful', () async {
         // Arrange
-        when(mockRepository.startDownload(any, any, any)).thenAnswer((_) async {
-          return;
-        });
+        when(
+          mockRepository.startDownload(any, any, any),
+        ).thenAnswer((_) async {});
 
         // Act
         final result = await useCase(
@@ -47,31 +46,80 @@ void main() {
             testReciterName,
           ),
         ).called(1);
-      },
-    );
+        verifyNoMoreInteractions(mockRepository);
+      });
 
-    test(
-      'should return Left(AudioFailure) when repository throws exception',
-      () async {
+      test(
+        'should return Left(AudioFailure) when repository throws exception',
+        () async {
+          // Arrange
+          const errorMessage = 'Network error';
+          when(
+            mockRepository.startDownload(any, any, any),
+          ).thenThrow(Exception(errorMessage));
+
+          // Act
+          final result = await useCase(
+            surahId: testSurahId,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+          );
+
+          // Assert
+          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          verify(
+            mockRepository.startDownload(
+              testSurahId,
+              testSurahTitle,
+              testReciterName,
+            ),
+          ).called(1);
+          verifyNoMoreInteractions(mockRepository);
+        },
+      );
+
+      test(
+        'should return Left(AudioFailure) when repository throws generic exception',
+        () async {
+          // Arrange
+          when(
+            mockRepository.startDownload(any, any, any),
+          ).thenThrow('Generic error');
+
+          // Act
+          final result = await useCase(
+            surahId: testSurahId,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+          );
+
+          // Assert
+          expect(result, const Left(AudioFailure('Generic error')));
+          verify(
+            mockRepository.startDownload(
+              testSurahId,
+              testSurahTitle,
+              testReciterName,
+            ),
+          ).called(1);
+          verifyNoMoreInteractions(mockRepository);
+        },
+      );
+
+      test('should call repository with correct parameters', () async {
         // Arrange
-        const errorMessage = 'Network error';
         when(
           mockRepository.startDownload(any, any, any),
-        ).thenThrow(Exception(errorMessage));
+        ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(
+        await useCase(
           surahId: testSurahId,
           surahTitle: testSurahTitle,
           reciterName: testReciterName,
         );
 
         // Assert
-        expect(result, isA<Left<Failure, void>>());
-        result.fold((failure) {
-          expect(failure, isA<AudioFailure>());
-          expect(failure.message, contains(errorMessage));
-        }, (_) => fail('Should return failure'));
         verify(
           mockRepository.startDownload(
             testSurahId,
@@ -79,91 +127,56 @@ void main() {
             testReciterName,
           ),
         ).called(1);
-      },
-    );
+        verifyNoMoreInteractions(mockRepository);
+      });
 
-    test('should handle empty surah ID', () async {
-      // Arrange
-      when(
-        mockRepository.startDownload(any, any, any),
-      ).thenThrow(Exception('Invalid surah ID'));
+      test('should handle empty strings as parameters', () async {
+        // Arrange
+        when(
+          mockRepository.startDownload(any, any, any),
+        ).thenAnswer((_) async {});
 
-      // Act
-      final result = await useCase(
-        surahId: '',
-        surahTitle: testSurahTitle,
-        reciterName: testReciterName,
-      );
+        // Act
+        final result = await useCase(
+          surahId: '',
+          surahTitle: '',
+          reciterName: '',
+        );
 
-      // Assert
-      expect(result, isA<Left<Failure, void>>());
-      result.fold((failure) {
-        expect(failure, isA<AudioFailure>());
-        expect(failure.message, contains('Invalid surah ID'));
-      }, (_) => fail('Should return failure'));
-    });
+        // Assert
+        expect(result, const Right(null));
+        verify(mockRepository.startDownload('', '', '')).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      });
 
-    test('should handle invalid URL', () async {
-      // Arrange
-      when(
-        mockRepository.startDownload(any, any, any),
-      ).thenThrow(Exception('Invalid URL format'));
+      test('should handle special characters in parameters', () async {
+        // Arrange
+        const specialSurahId = '001-الفاتحة';
+        const specialSurahTitle = 'Al-Fatiha (الفاتحة)';
+        const specialReciterName = 'عبد الرحمن السديس';
 
-      // Act
-      final result = await useCase(
-        surahId: testSurahId,
-        surahTitle: testSurahTitle,
-        reciterName: testReciterName,
-      );
+        when(
+          mockRepository.startDownload(any, any, any),
+        ).thenAnswer((_) async {});
 
-      // Assert
-      expect(result, isA<Left<Failure, void>>());
-      result.fold((failure) {
-        expect(failure, isA<AudioFailure>());
-        expect(failure.message, contains('Invalid URL format'));
-      }, (_) => fail('Should return failure'));
-    });
+        // Act
+        final result = await useCase(
+          surahId: specialSurahId,
+          surahTitle: specialSurahTitle,
+          reciterName: specialReciterName,
+        );
 
-    test('should handle network timeout', () async {
-      // Arrange
-      when(
-        mockRepository.startDownload(any, any, any),
-      ).thenThrow(Exception('Connection timeout'));
-
-      // Act
-      final result = await useCase(
-        surahId: testSurahId,
-        surahTitle: testSurahTitle,
-        reciterName: testReciterName,
-      );
-
-      // Assert
-      expect(result, isA<Left<Failure, void>>());
-      result.fold((failure) {
-        expect(failure, isA<AudioFailure>());
-        expect(failure.message, contains('Connection timeout'));
-      }, (_) => fail('Should return failure'));
-    });
-
-    test('should handle file system errors', () async {
-      // Arrange
-      when(
-        mockRepository.startDownload(any, any, any),
-      ).thenThrow(Exception('Permission denied'));
-
-      // Act
-      final result = await useCase(
-        surahId: testSurahId,
-        surahTitle: testSurahTitle,
-        reciterName: testReciterName,
-      );
-
-      // Assert
-      expect(result, isA<Left<Failure, void>>());
-      result.fold((failure) {
-        expect(failure, isA<AudioFailure>());
-        expect(failure.message, contains('Permission denied'));
-      }, (_) => fail('Should return failure'));
+        // Assert
+        expect(result, const Right(null));
+        verify(
+          mockRepository.startDownload(
+            specialSurahId,
+            specialSurahTitle,
+            specialReciterName,
+          ),
+        ).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      });
     });
   });
 }
