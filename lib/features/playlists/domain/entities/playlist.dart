@@ -26,16 +26,16 @@ class Playlist extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        createdAt,
-        updatedAt,
-        items,
-        coverImageUrl,
-        isPublic,
-        isFavorite,
-      ];
+    id,
+    name,
+    description,
+    createdAt,
+    updatedAt,
+    items,
+    coverImageUrl,
+    isPublic,
+    isFavorite,
+  ];
 
   Playlist copyWith({
     String? id,
@@ -93,10 +93,7 @@ class Playlist extends Equatable {
 
   /// Get total duration of all items in the playlist
   Duration get totalDuration {
-    return items.fold(
-      Duration.zero,
-      (total, item) => total + item.duration,
-    );
+    return items.fold(Duration.zero, (total, item) => total + item.duration);
   }
 
   /// Get total number of items in the playlist
@@ -143,18 +140,18 @@ class PlaylistItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        artist,
-        url,
-        duration,
-        addedAt,
-        artUri,
-        album,
-        genre,
-        filePath,
-        isDownloaded,
-      ];
+    id,
+    title,
+    artist,
+    url,
+    duration,
+    addedAt,
+    artUri,
+    album,
+    genre,
+    filePath,
+    isDownloaded,
+  ];
 
   PlaylistItem copyWith({
     String? id,
@@ -208,7 +205,9 @@ class PlaylistItem extends Equatable {
       url: json['url'] as String,
       duration: Duration(milliseconds: json['duration'] as int),
       addedAt: DateTime.parse(json['addedAt'] as String),
-      artUri: json['artUri'] != null ? Uri.parse(json['artUri'] as String) : null,
+      artUri: json['artUri'] != null
+          ? Uri.parse(json['artUri'] as String)
+          : null,
       album: json['album'] as String?,
       genre: json['genre'] as String?,
       filePath: json['filePath'] as String?,

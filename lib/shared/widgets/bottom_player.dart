@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,9 @@ class BottomPlayer extends StatefulWidget {
 }
 
 class _BottomPlayerState extends State<BottomPlayer> {
+  int? _currentReciterId;
+  String? _currentReciterName;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +46,12 @@ class _BottomPlayerState extends State<BottomPlayer> {
         }
         if (state.status != AudioPlayerStatus.success) {
           return const SizedBox.shrink();
+        }
+
+        // Load reciter ID if it's not cached or if the reciter name changed
+        if (_currentReciterId == null ||
+            _currentReciterName != mediaItem.artist) {
+          _loadReciterId(mediaItem);
         }
 
         final positionData = state.positionData;
@@ -89,13 +99,15 @@ class _BottomPlayerState extends State<BottomPlayer> {
                         if (ReciterHelper.hasReciterInfo(mediaItem) &&
                             !isCurrentRouteAlreadyViewing(context)) ...[
                           ViewReciterButton(mediaItem: mediaItem),
-                          SizedBox(height: 4.h),
                         ],
 
                         // Progress bar - Real time
                         Container(
                           height: 4,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(2),
                             child: LinearProgressIndicator(
@@ -273,30 +285,54 @@ class _BottomPlayerState extends State<BottomPlayer> {
     );
   }
 
+  /// Load reciter ID asynchronously and cache it
+  void _loadReciterId(MediaItem mediaItem) {
+    if (mediaItem.artist == null) return;
+
+    _currentReciterName = mediaItem.artist;
+
+    // Load reciter ID asynchronously
+    ReciterHelper.getReciterFromMediaItem(mediaItem).then((reciter) {
+      if (mounted && reciter != null) {
+        setState(() {
+          _currentReciterId = reciter.id;
+        });
+      }
+    });
+  }
+
   /// Check if the current route is already viewing the reciter's details
   bool isCurrentRouteAlreadyViewing(BuildContext context) {
-    final currentLocation = GoRouterState.of(context).uri.toString();
-    final mediaItem = context.read<AudioPlayerBloc>().state.mediaItem;
+    try {
+      final currentLocation = GoRouterState.of(context).uri.toString();
 
-    if (mediaItem == null) return false;
+      // Check if current route matches the reciter details route pattern: /reciter/:reciterId
+      if (currentLocation.contains('/reciter/')) {
+        // Extract the reciter ID from the current path
+        final pathSegments = currentLocation.split('/');
+        final reciterIndex = pathSegments.indexOf('reciter');
 
-    // Extract reciter name from mediaItem
-    final reciterName = mediaItem.artist;
-    if (reciterName == null) return false;
+        if (reciterIndex != -1 && reciterIndex + 1 < pathSegments.length) {
+          final currentReciterId = pathSegments[reciterIndex + 1];
 
-    // Check if current route matches the reciter details route pattern: /reciter/:reciterId
-    if (currentLocation.contains('/reciter/')) {
-      // Extract the reciter ID from the current path
-      final pathSegments = currentLocation.split('/');
-      final reciterIndex = pathSegments.indexOf('reciter');
+          // Compare with cached reciter ID if available
+          if (_currentReciterId != null) {
+            return currentReciterId == _currentReciterId.toString();
+          }
 
-      if (reciterIndex != -1 && reciterIndex + 1 < pathSegments.length) {
-        /// Compare the reciter id with the current reciter name
-        final reciterId = pathSegments[reciterIndex + 1];
-        return reciterId.toLowerCase() == reciterName.toLowerCase();
+          // Fallback to name-based comparison if ID is not available yet
+          final reciterName = _currentReciterName;
+          if (reciterName != null) {
+            return currentReciterId.toLowerCase() ==
+                reciterName.toLowerCase().replaceAll(' ', '-');
+          }
+        }
       }
-    }
 
-    return false;
+      return false;
+    } catch (e) {
+      // If GoRouterState is not available, return false to show the button
+      return false;
+    }
   }
 }

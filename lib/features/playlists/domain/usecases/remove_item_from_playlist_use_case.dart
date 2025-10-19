@@ -15,7 +15,10 @@ class RemoveItemFromPlaylistUseCase {
     required String itemId,
   }) async {
     try {
-      final playlist = await _repository.removeItemFromPlaylist(playlistId, itemId);
+      final playlist = await _repository.removeItemFromPlaylist(
+        playlistId,
+        itemId,
+      );
       return Right(playlist);
     } catch (e) {
       return Left(AudioFailure(e.toString()));
