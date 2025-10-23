@@ -55,7 +55,7 @@ extension DownloadsEventPatterns on DownloadsEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadDownloads value)?  loadDownloads,TResult Function( DownloadSurahEvent value)?  downloadSurah,TResult Function( DeleteDownloadEvent value)?  deleteDownload,TResult Function( DeleteReciterDownloads value)?  deleteReciterDownloads,TResult Function( ClearAllDownloads value)?  clearAllDownloads,TResult Function( CheckSurahDownloadedEvent value)?  checkSurahDownloaded,TResult Function( ValidateDownloadedFileEvent value)?  validateDownloadedFile,TResult Function( GetValidCompletedDownloadsEvent value)?  getValidCompletedDownloads,TResult Function( PlayDownloadedSurahEvent value)?  playDownloadedSurah,TResult Function( PlayAllDownloadsEvent value)?  playAllDownloads,TResult Function( CheckPremiumAccessEvent value)?  checkPremiumAccess,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadDownloads value)?  loadDownloads,TResult Function( DownloadSurahEvent value)?  downloadSurah,TResult Function( DeleteDownloadEvent value)?  deleteDownload,TResult Function( DeleteReciterDownloads value)?  deleteReciterDownloads,TResult Function( ClearAllDownloads value)?  clearAllDownloads,TResult Function( CheckSurahDownloadedEvent value)?  checkSurahDownloaded,TResult Function( ValidateDownloadedFileEvent value)?  validateDownloadedFile,TResult Function( GetValidCompletedDownloadsEvent value)?  getValidCompletedDownloads,TResult Function( PlayDownloadedSurahEvent value)?  playDownloadedSurah,TResult Function( PlayAllDownloadsEvent value)?  playAllDownloads,TResult Function( CheckPremiumAccessEvent value)?  checkPremiumAccess,TResult Function( RetryDownloadEvent value)?  retryDownload,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
@@ -69,7 +69,8 @@ return validateDownloadedFile(_that);case GetValidCompletedDownloadsEvent() when
 return getValidCompletedDownloads(_that);case PlayDownloadedSurahEvent() when playDownloadedSurah != null:
 return playDownloadedSurah(_that);case PlayAllDownloadsEvent() when playAllDownloads != null:
 return playAllDownloads(_that);case CheckPremiumAccessEvent() when checkPremiumAccess != null:
-return checkPremiumAccess(_that);case _:
+return checkPremiumAccess(_that);case RetryDownloadEvent() when retryDownload != null:
+return retryDownload(_that);case _:
   return orElse();
 
 }
@@ -87,7 +88,7 @@ return checkPremiumAccess(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadDownloads value)  loadDownloads,required TResult Function( DownloadSurahEvent value)  downloadSurah,required TResult Function( DeleteDownloadEvent value)  deleteDownload,required TResult Function( DeleteReciterDownloads value)  deleteReciterDownloads,required TResult Function( ClearAllDownloads value)  clearAllDownloads,required TResult Function( CheckSurahDownloadedEvent value)  checkSurahDownloaded,required TResult Function( ValidateDownloadedFileEvent value)  validateDownloadedFile,required TResult Function( GetValidCompletedDownloadsEvent value)  getValidCompletedDownloads,required TResult Function( PlayDownloadedSurahEvent value)  playDownloadedSurah,required TResult Function( PlayAllDownloadsEvent value)  playAllDownloads,required TResult Function( CheckPremiumAccessEvent value)  checkPremiumAccess,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadDownloads value)  loadDownloads,required TResult Function( DownloadSurahEvent value)  downloadSurah,required TResult Function( DeleteDownloadEvent value)  deleteDownload,required TResult Function( DeleteReciterDownloads value)  deleteReciterDownloads,required TResult Function( ClearAllDownloads value)  clearAllDownloads,required TResult Function( CheckSurahDownloadedEvent value)  checkSurahDownloaded,required TResult Function( ValidateDownloadedFileEvent value)  validateDownloadedFile,required TResult Function( GetValidCompletedDownloadsEvent value)  getValidCompletedDownloads,required TResult Function( PlayDownloadedSurahEvent value)  playDownloadedSurah,required TResult Function( PlayAllDownloadsEvent value)  playAllDownloads,required TResult Function( CheckPremiumAccessEvent value)  checkPremiumAccess,required TResult Function( RetryDownloadEvent value)  retryDownload,}){
 final _that = this;
 switch (_that) {
 case LoadDownloads():
@@ -101,7 +102,8 @@ return validateDownloadedFile(_that);case GetValidCompletedDownloadsEvent():
 return getValidCompletedDownloads(_that);case PlayDownloadedSurahEvent():
 return playDownloadedSurah(_that);case PlayAllDownloadsEvent():
 return playAllDownloads(_that);case CheckPremiumAccessEvent():
-return checkPremiumAccess(_that);}
+return checkPremiumAccess(_that);case RetryDownloadEvent():
+return retryDownload(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -115,7 +117,7 @@ return checkPremiumAccess(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadDownloads value)?  loadDownloads,TResult? Function( DownloadSurahEvent value)?  downloadSurah,TResult? Function( DeleteDownloadEvent value)?  deleteDownload,TResult? Function( DeleteReciterDownloads value)?  deleteReciterDownloads,TResult? Function( ClearAllDownloads value)?  clearAllDownloads,TResult? Function( CheckSurahDownloadedEvent value)?  checkSurahDownloaded,TResult? Function( ValidateDownloadedFileEvent value)?  validateDownloadedFile,TResult? Function( GetValidCompletedDownloadsEvent value)?  getValidCompletedDownloads,TResult? Function( PlayDownloadedSurahEvent value)?  playDownloadedSurah,TResult? Function( PlayAllDownloadsEvent value)?  playAllDownloads,TResult? Function( CheckPremiumAccessEvent value)?  checkPremiumAccess,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadDownloads value)?  loadDownloads,TResult? Function( DownloadSurahEvent value)?  downloadSurah,TResult? Function( DeleteDownloadEvent value)?  deleteDownload,TResult? Function( DeleteReciterDownloads value)?  deleteReciterDownloads,TResult? Function( ClearAllDownloads value)?  clearAllDownloads,TResult? Function( CheckSurahDownloadedEvent value)?  checkSurahDownloaded,TResult? Function( ValidateDownloadedFileEvent value)?  validateDownloadedFile,TResult? Function( GetValidCompletedDownloadsEvent value)?  getValidCompletedDownloads,TResult? Function( PlayDownloadedSurahEvent value)?  playDownloadedSurah,TResult? Function( PlayAllDownloadsEvent value)?  playAllDownloads,TResult? Function( CheckPremiumAccessEvent value)?  checkPremiumAccess,TResult? Function( RetryDownloadEvent value)?  retryDownload,}){
 final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
@@ -129,7 +131,8 @@ return validateDownloadedFile(_that);case GetValidCompletedDownloadsEvent() when
 return getValidCompletedDownloads(_that);case PlayDownloadedSurahEvent() when playDownloadedSurah != null:
 return playDownloadedSurah(_that);case PlayAllDownloadsEvent() when playAllDownloads != null:
 return playAllDownloads(_that);case CheckPremiumAccessEvent() when checkPremiumAccess != null:
-return checkPremiumAccess(_that);case _:
+return checkPremiumAccess(_that);case RetryDownloadEvent() when retryDownload != null:
+return retryDownload(_that);case _:
   return null;
 
 }
@@ -146,11 +149,11 @@ return checkPremiumAccess(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadDownloads,TResult Function( String surahId,  String surahTitle,  String reciterName,  String url)?  downloadSurah,TResult Function( String downloadId)?  deleteDownload,TResult Function( String reciterName)?  deleteReciterDownloads,TResult Function()?  clearAllDownloads,TResult Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult Function( String downloadId)?  validateDownloadedFile,TResult Function( String reciterName)?  getValidCompletedDownloads,TResult Function( String downloadId)?  playDownloadedSurah,TResult Function( String reciterName)?  playAllDownloads,TResult Function()?  checkPremiumAccess,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadDownloads,TResult Function( String surahId,  String surahTitle,  String reciterName)?  downloadSurah,TResult Function( String downloadId)?  deleteDownload,TResult Function( String reciterName)?  deleteReciterDownloads,TResult Function()?  clearAllDownloads,TResult Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult Function( String downloadId)?  validateDownloadedFile,TResult Function( String reciterName)?  getValidCompletedDownloads,TResult Function( String downloadId)?  playDownloadedSurah,TResult Function( String reciterName)?  playAllDownloads,TResult Function()?  checkPremiumAccess,TResult Function( String downloadId)?  retryDownload,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
 return loadDownloads();case DownloadSurahEvent() when downloadSurah != null:
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.url);case DeleteDownloadEvent() when deleteDownload != null:
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent() when deleteDownload != null:
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads() when deleteReciterDownloads != null:
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads() when clearAllDownloads != null:
 return clearAllDownloads();case CheckSurahDownloadedEvent() when checkSurahDownloaded != null:
@@ -159,7 +162,8 @@ return validateDownloadedFile(_that.downloadId);case GetValidCompletedDownloadsE
 return getValidCompletedDownloads(_that.reciterName);case PlayDownloadedSurahEvent() when playDownloadedSurah != null:
 return playDownloadedSurah(_that.downloadId);case PlayAllDownloadsEvent() when playAllDownloads != null:
 return playAllDownloads(_that.reciterName);case CheckPremiumAccessEvent() when checkPremiumAccess != null:
-return checkPremiumAccess();case _:
+return checkPremiumAccess();case RetryDownloadEvent() when retryDownload != null:
+return retryDownload(_that.downloadId);case _:
   return orElse();
 
 }
@@ -177,11 +181,11 @@ return checkPremiumAccess();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadDownloads,required TResult Function( String surahId,  String surahTitle,  String reciterName,  String url)  downloadSurah,required TResult Function( String downloadId)  deleteDownload,required TResult Function( String reciterName)  deleteReciterDownloads,required TResult Function()  clearAllDownloads,required TResult Function( String surahId,  String reciterName)  checkSurahDownloaded,required TResult Function( String downloadId)  validateDownloadedFile,required TResult Function( String reciterName)  getValidCompletedDownloads,required TResult Function( String downloadId)  playDownloadedSurah,required TResult Function( String reciterName)  playAllDownloads,required TResult Function()  checkPremiumAccess,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadDownloads,required TResult Function( String surahId,  String surahTitle,  String reciterName)  downloadSurah,required TResult Function( String downloadId)  deleteDownload,required TResult Function( String reciterName)  deleteReciterDownloads,required TResult Function()  clearAllDownloads,required TResult Function( String surahId,  String reciterName)  checkSurahDownloaded,required TResult Function( String downloadId)  validateDownloadedFile,required TResult Function( String reciterName)  getValidCompletedDownloads,required TResult Function( String downloadId)  playDownloadedSurah,required TResult Function( String reciterName)  playAllDownloads,required TResult Function()  checkPremiumAccess,required TResult Function( String downloadId)  retryDownload,}) {final _that = this;
 switch (_that) {
 case LoadDownloads():
 return loadDownloads();case DownloadSurahEvent():
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.url);case DeleteDownloadEvent():
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent():
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads():
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads():
 return clearAllDownloads();case CheckSurahDownloadedEvent():
@@ -190,7 +194,8 @@ return validateDownloadedFile(_that.downloadId);case GetValidCompletedDownloadsE
 return getValidCompletedDownloads(_that.reciterName);case PlayDownloadedSurahEvent():
 return playDownloadedSurah(_that.downloadId);case PlayAllDownloadsEvent():
 return playAllDownloads(_that.reciterName);case CheckPremiumAccessEvent():
-return checkPremiumAccess();}
+return checkPremiumAccess();case RetryDownloadEvent():
+return retryDownload(_that.downloadId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -204,11 +209,11 @@ return checkPremiumAccess();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadDownloads,TResult? Function( String surahId,  String surahTitle,  String reciterName,  String url)?  downloadSurah,TResult? Function( String downloadId)?  deleteDownload,TResult? Function( String reciterName)?  deleteReciterDownloads,TResult? Function()?  clearAllDownloads,TResult? Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult? Function( String downloadId)?  validateDownloadedFile,TResult? Function( String reciterName)?  getValidCompletedDownloads,TResult? Function( String downloadId)?  playDownloadedSurah,TResult? Function( String reciterName)?  playAllDownloads,TResult? Function()?  checkPremiumAccess,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadDownloads,TResult? Function( String surahId,  String surahTitle,  String reciterName)?  downloadSurah,TResult? Function( String downloadId)?  deleteDownload,TResult? Function( String reciterName)?  deleteReciterDownloads,TResult? Function()?  clearAllDownloads,TResult? Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult? Function( String downloadId)?  validateDownloadedFile,TResult? Function( String reciterName)?  getValidCompletedDownloads,TResult? Function( String downloadId)?  playDownloadedSurah,TResult? Function( String reciterName)?  playAllDownloads,TResult? Function()?  checkPremiumAccess,TResult? Function( String downloadId)?  retryDownload,}) {final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
 return loadDownloads();case DownloadSurahEvent() when downloadSurah != null:
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.url);case DeleteDownloadEvent() when deleteDownload != null:
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent() when deleteDownload != null:
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads() when deleteReciterDownloads != null:
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads() when clearAllDownloads != null:
 return clearAllDownloads();case CheckSurahDownloadedEvent() when checkSurahDownloaded != null:
@@ -217,7 +222,8 @@ return validateDownloadedFile(_that.downloadId);case GetValidCompletedDownloadsE
 return getValidCompletedDownloads(_that.reciterName);case PlayDownloadedSurahEvent() when playDownloadedSurah != null:
 return playDownloadedSurah(_that.downloadId);case PlayAllDownloadsEvent() when playAllDownloads != null:
 return playAllDownloads(_that.reciterName);case CheckPremiumAccessEvent() when checkPremiumAccess != null:
-return checkPremiumAccess();case _:
+return checkPremiumAccess();case RetryDownloadEvent() when retryDownload != null:
+return retryDownload(_that.downloadId);case _:
   return null;
 
 }
@@ -261,13 +267,12 @@ String toString() {
 
 
 class DownloadSurahEvent implements DownloadsEvent {
-  const DownloadSurahEvent({required this.surahId, required this.surahTitle, required this.reciterName, required this.url});
+  const DownloadSurahEvent({required this.surahId, required this.surahTitle, required this.reciterName});
   
 
  final  String surahId;
  final  String surahTitle;
  final  String reciterName;
- final  String url;
 
 /// Create a copy of DownloadsEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -279,16 +284,16 @@ $DownloadSurahEventCopyWith<DownloadSurahEvent> get copyWith => _$DownloadSurahE
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadSurahEvent&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahTitle, surahTitle) || other.surahTitle == surahTitle)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName)&&(identical(other.url, url) || other.url == url));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadSurahEvent&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahTitle, surahTitle) || other.surahTitle == surahTitle)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,surahId,surahTitle,reciterName,url);
+int get hashCode => Object.hash(runtimeType,surahId,surahTitle,reciterName);
 
 @override
 String toString() {
-  return 'DownloadsEvent.downloadSurah(surahId: $surahId, surahTitle: $surahTitle, reciterName: $reciterName, url: $url)';
+  return 'DownloadsEvent.downloadSurah(surahId: $surahId, surahTitle: $surahTitle, reciterName: $reciterName)';
 }
 
 
@@ -299,7 +304,7 @@ abstract mixin class $DownloadSurahEventCopyWith<$Res> implements $DownloadsEven
   factory $DownloadSurahEventCopyWith(DownloadSurahEvent value, $Res Function(DownloadSurahEvent) _then) = _$DownloadSurahEventCopyWithImpl;
 @useResult
 $Res call({
- String surahId, String surahTitle, String reciterName, String url
+ String surahId, String surahTitle, String reciterName
 });
 
 
@@ -316,12 +321,11 @@ class _$DownloadSurahEventCopyWithImpl<$Res>
 
 /// Create a copy of DownloadsEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? surahTitle = null,Object? reciterName = null,Object? url = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? surahTitle = null,Object? reciterName = null,}) {
   return _then(DownloadSurahEvent(
 surahId: null == surahId ? _self.surahId : surahId // ignore: cast_nullable_to_non_nullable
 as String,surahTitle: null == surahTitle ? _self.surahTitle : surahTitle // ignore: cast_nullable_to_non_nullable
 as String,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
-as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -856,6 +860,72 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class RetryDownloadEvent implements DownloadsEvent {
+  const RetryDownloadEvent({required this.downloadId});
+  
+
+ final  String downloadId;
+
+/// Create a copy of DownloadsEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RetryDownloadEventCopyWith<RetryDownloadEvent> get copyWith => _$RetryDownloadEventCopyWithImpl<RetryDownloadEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RetryDownloadEvent&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,downloadId);
+
+@override
+String toString() {
+  return 'DownloadsEvent.retryDownload(downloadId: $downloadId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RetryDownloadEventCopyWith<$Res> implements $DownloadsEventCopyWith<$Res> {
+  factory $RetryDownloadEventCopyWith(RetryDownloadEvent value, $Res Function(RetryDownloadEvent) _then) = _$RetryDownloadEventCopyWithImpl;
+@useResult
+$Res call({
+ String downloadId
+});
+
+
+
+
+}
+/// @nodoc
+class _$RetryDownloadEventCopyWithImpl<$Res>
+    implements $RetryDownloadEventCopyWith<$Res> {
+  _$RetryDownloadEventCopyWithImpl(this._self, this._then);
+
+  final RetryDownloadEvent _self;
+  final $Res Function(RetryDownloadEvent) _then;
+
+/// Create a copy of DownloadsEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? downloadId = null,}) {
+  return _then(RetryDownloadEvent(
+downloadId: null == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$DownloadsState {

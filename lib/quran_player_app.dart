@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,8 +22,38 @@ class QuranPlayerApp extends StatelessWidget {
                 return MaterialApp.router(
                   title: 'Muzakri',
                   debugShowCheckedModeBanner: false,
-                  theme: ThemeData(primarySwatch: Colors.blue),
-                  darkTheme: ThemeData.dark(),
+                  theme: FlexThemeData.light(
+                    scheme: themeState.scheme,
+                    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                    blendLevel: 7,
+                    appBarStyle: FlexAppBarStyle.primary,
+                    appBarOpacity: 0.95,
+                    appBarElevation: 0,
+                    transparentStatusBar: true,
+                    tabBarStyle: FlexTabBarStyle.forAppBar,
+                    tooltipsMatchBackground: true,
+                    swapColors: false,
+                    lightIsWhite: false,
+                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                    useMaterial3: true,
+                    useMaterial3ErrorColors: true,
+                  ),
+                  darkTheme: FlexThemeData.dark(
+                    scheme: themeState.scheme,
+                    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                    blendLevel: 13,
+                    appBarStyle: FlexAppBarStyle.background,
+                    appBarOpacity: 0.90,
+                    appBarElevation: 0,
+                    transparentStatusBar: true,
+                    tabBarStyle: FlexTabBarStyle.forAppBar,
+                    tooltipsMatchBackground: true,
+                    swapColors: false,
+                    darkIsTrueBlack: false,
+                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                    useMaterial3: true,
+                    useMaterial3ErrorColors: true,
+                  ),
                   themeMode: themeState.mode,
                   routerConfig: AppRouter.router,
                   locale: locState.locale,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 
 class LanguageSwitcher extends StatelessWidget {
@@ -19,18 +20,21 @@ class LanguageSwitcher extends StatelessWidget {
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem<Locale>(
-                value: const Locale('ar'),
+                value: Locale(LanguageConfig.defaultLanguageCode),
                 child: Row(
                   children: [
                     Text(
                       'العربية',
                       style: TextStyle(
-                        fontWeight: currentLocale.languageCode == 'ar'
+                        fontWeight:
+                            currentLocale.languageCode ==
+                                LanguageConfig.defaultLanguageCode
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
                     ),
-                    if (currentLocale.languageCode == 'ar')
+                    if (currentLocale.languageCode ==
+                        LanguageConfig.defaultLanguageCode)
                       const Icon(Icons.check, color: Colors.blue),
                   ],
                 ),

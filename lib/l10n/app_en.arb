@@ -24,14 +24,6 @@
     "@noRecitersMatchSearch": {
         "description": "No reciters match search message"
     },
-    "retry": "Retry",
-    "@retry": {
-        "description": "Retry button text"
-    },
-    "error": "Error",
-    "@error": {
-        "description": "Error message"
-    },
     "filteredByLetter": "Filtered by letter:",
     "@filteredByLetter": {
         "description": "Filtered by letter indicator"
@@ -199,5 +191,367 @@
     "settings": "Settings",
     "@settings": {
         "description": "Settings section title"
+    },
+    "retryDownload": "Retry Download",
+    "@retryDownload": {
+        "description": "Retry download button text"
+    },
+    "retryDownloadTooltip": "Retry Download",
+    "@retryDownloadTooltip": {
+        "description": "Retry download button tooltip"
+    },
+    "viewDownloads": "View Downloads",
+    "@viewDownloads": {
+        "description": "View downloads action text"
+    },
+    "premium": "Premium",
+    "@premium": {
+        "description": "Premium section title"
+    },
+    "premiumFeatures": "Premium Features",
+    "@premiumFeatures": {
+        "description": "Premium features section title"
+    },
+    "unlimitedDownloads": "Unlimited Downloads",
+    "@unlimitedDownloads": {
+        "description": "Unlimited downloads feature"
+    },
+    "offlineMode": "Offline Mode",
+    "@offlineMode": {
+        "description": "Offline mode feature"
+    },
+    "highQualityAudio": "High Quality Audio",
+    "@highQualityAudio": {
+        "description": "High quality audio feature"
+    },
+    "adFreeExperience": "Ad-Free Experience",
+    "@adFreeExperience": {
+        "description": "Ad-free experience feature"
+    },
+    "prioritySupport": "Priority Support",
+    "@prioritySupport": {
+        "description": "Priority support feature"
+    },
+    "exclusiveContent": "Exclusive Content",
+    "@exclusiveContent": {
+        "description": "Exclusive content feature"
+    },
+    "chooseYourPlan": "Choose Your Plan",
+    "@chooseYourPlan": {
+        "description": "Choose your plan section title"
+    },
+    "maybeLater": "Maybe Later",
+    "@maybeLater": {
+        "description": "Maybe later button text"
+    },
+    "upgradeNow": "Upgrade Now",
+    "@upgradeNow": {
+        "description": "Upgrade now button text"
+    },
+    "playlistName": "Playlist Name",
+    "@playlistName": {
+        "description": "Playlist name label"
+    },
+    "playlistDescription": "Playlist Description",
+    "@playlistDescription": {
+        "description": "Playlist description label"
+    },
+    "playlistNameHint": "Enter playlist name",
+    "@playlistNameHint": {
+        "description": "Playlist name hint text"
+    },
+    "playlistDescriptionHint": "Enter playlist description",
+    "@playlistDescriptionHint": {
+        "description": "Playlist description hint text"
+    },
+    "createNewPlaylist": "Create New Playlist",
+    "@createNewPlaylist": {
+        "description": "Create new playlist dialog title"
+    },
+    "editPlaylist": "Edit Playlist",
+    "@editPlaylist": {
+        "description": "Edit playlist dialog title"
+    },
+    "save": "Save",
+    "@save": {
+        "description": "Save button text"
+    },
+    "playlistCreated": "Playlist created successfully",
+    "@playlistCreated": {
+        "description": "Playlist created success message"
+    },
+    "playlistUpdated": "Playlist updated successfully",
+    "@playlistUpdated": {
+        "description": "Playlist updated success message"
+    },
+    "playlistDeleted": "Playlist deleted successfully",
+    "@playlistDeleted": {
+        "description": "Playlist deleted success message"
+    },
+    "deletePlaylist": "Delete Playlist",
+    "@deletePlaylist": {
+        "description": "Delete playlist dialog title"
+    },
+    "deletePlaylistMessage": "Are you sure you want to delete this playlist? This action cannot be undone.",
+    "@deletePlaylistMessage": {
+        "description": "Delete playlist confirmation message"
+    },
+    "addToPlaylist": "Add to Playlist",
+    "@addToPlaylist": {
+        "description": "Add to playlist button text"
+    },
+    "removeFromPlaylist": "Remove from Playlist",
+    "@removeFromPlaylist": {
+        "description": "Remove from playlist button text"
+    },
+    "playlistItems": "Playlist Items",
+    "@playlistItems": {
+        "description": "Playlist items label"
+    },
+    "playlistDuration": "Duration",
+    "@playlistDuration": {
+        "description": "Playlist duration label"
+    },
+    "playlistItemCount": "Items",
+    "@playlistItemCount": {
+        "description": "Playlist item count label"
+    },
+    "searchPlaylists": "Search Playlists",
+    "@searchPlaylists": {
+        "description": "Search playlists hint text"
+    },
+    "favorites": "Favorites",
+    "@favorites": {
+        "description": "Favorites section title"
+    },
+    "recent": "Recent",
+    "@recent": {
+        "description": "Recent section title"
+    },
+    "public": "Public",
+    "@public": {
+        "description": "Public visibility label"
+    },
+    "private": "Private",
+    "@private": {
+        "description": "Private visibility label"
+    },
+    "makePublic": "Make Public",
+    "@makePublic": {
+        "description": "Make public button text"
+    },
+    "makePrivate": "Make Private",
+    "@makePrivate": {
+        "description": "Make private button text"
+    },
+    "duplicatePlaylist": "Duplicate Playlist",
+    "@duplicatePlaylist": {
+        "description": "Duplicate playlist button text"
+    },
+    "duplicatePlaylistName": "Duplicate Playlist Name",
+    "@duplicatePlaylistName": {
+        "description": "Duplicate playlist name dialog title"
+    },
+    "enterDuplicateName": "Enter name for duplicate playlist",
+    "@enterDuplicateName": {
+        "description": "Enter duplicate name hint text"
+    },
+    "playlistNameExists": "A playlist with this name already exists",
+    "@playlistNameExists": {
+        "description": "Playlist name exists error message"
+    },
+    "playlistNameRequired": "Playlist name is required",
+    "@playlistNameRequired": {
+        "description": "Playlist name required error message"
+    },
+    "playlistDescriptionRequired": "Playlist description is required",
+    "@playlistDescriptionRequired": {
+        "description": "Playlist description required error message"
+    },
+    "playlistNotFound": "Playlist not found",
+    "@playlistNotFound": {
+        "description": "Playlist not found error message"
+    },
+    "itemAlreadyInPlaylist": "Item is already in this playlist",
+    "@itemAlreadyInPlaylist": {
+        "description": "Item already in playlist error message"
+    },
+    "playlistEmpty": "This playlist is empty",
+    "@playlistEmpty": {
+        "description": "Empty playlist message"
+    },
+    "playPlaylist": "Play Playlist",
+    "@playPlaylist": {
+        "description": "Play playlist button text"
+    },
+    "shufflePlaylist": "Shuffle Playlist",
+    "@shufflePlaylist": {
+        "description": "Shuffle playlist button text"
+    },
+    "playlistStats": "Playlist Statistics",
+    "@playlistStats": {
+        "description": "Playlist statistics title"
+    },
+    "totalDuration": "Total Duration",
+    "@totalDuration": {
+        "description": "Total duration label"
+    },
+    "totalItems": "Total Items",
+    "@totalItems": {
+        "description": "Total items label"
+    },
+    "createdOn": "Created On",
+    "@createdOn": {
+        "description": "Created on label"
+    },
+    "lastUpdated": "Last Updated",
+    "@lastUpdated": {
+        "description": "Last updated label"
+    },
+    "continueButton": "Continue",
+    "@continueButton": {
+        "description": "Continue button text"
+    },
+    "premiumRequired": "Premium Required",
+    "@premiumRequired": {
+        "description": "Premium required dialog title"
+    },
+    "premiumRequiredMessage": "This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!",
+    "@premiumRequiredMessage": {
+        "description": "Premium required message"
+    },
+    "language": "Language",
+    "@language": {
+        "description": "Language setting"
+    },
+    "arabic": "Arabic",
+    "@arabic": {
+        "description": "Arabic language option"
+    },
+    "english": "English",
+    "@english": {
+        "description": "English language option"
+    },
+    "refreshDownloads": "Refresh Downloads",
+    "@refreshDownloads": {
+        "description": "Refresh downloads tooltip"
+    },
+    "downloadingSurah": "Downloading {surahTitle} by {reciterName}...",
+    "@downloadingSurah": {
+        "description": "Download progress message",
+        "placeholders": {
+            "surahTitle": {
+                "type": "String",
+                "description": "The title of the surah being downloaded"
+            },
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "deleteDownload": "Delete Download",
+    "@deleteDownload": {
+        "description": "Delete download dialog title"
+    },
+    "deleteDownloadConfirmation": "Are you sure you want to delete \"{title}\"?",
+    "@deleteDownloadConfirmation": {
+        "description": "Delete download confirmation message",
+        "placeholders": {
+            "title": {
+                "type": "String",
+                "description": "The title of the download to delete"
+            }
+        }
+    },
+    "deleteAllDownloadsConfirmation": "Are you sure you want to delete all downloads for {reciterName}?",
+    "@deleteAllDownloadsConfirmation": {
+        "description": "Delete all downloads confirmation message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "surahs": "surahs",
+    "@surahs": {
+        "description": "Surahs count text"
+    },
+    "signIn": "Sign in",
+    "@signIn": {
+        "description": "Sign in button text"
+    },
+    "welcomeToMuzakri": "Welcome to Muzakri",
+    "@welcomeToMuzakri": {
+        "description": "Welcome message on login screen"
+    },
+    "signInWithGoogleDescription": "Sign in with your Google account to continue",
+    "@signInWithGoogleDescription": {
+        "description": "Description text for Google sign in"
+    },
+    "signingIn": "Signing in...",
+    "@signingIn": {
+        "description": "Signing in progress text"
+    },
+    "continueWithGoogle": "Continue with Google",
+    "@continueWithGoogle": {
+        "description": "Continue with Google button text"
+    },
+    "googleSignInNotConfigured": "Google Sign-In not configured. Please contact support.",
+    "@googleSignInNotConfigured": {
+        "description": "Google Sign-In configuration error message"
+    },
+    "networkError": "Network error. Please check your connection.",
+    "@networkError": {
+        "description": "Network error message"
+    },
+    "recitationsAvailable": "{count} recitation(s) available",
+    "@recitationsAvailable": {
+        "description": "Number of recitations available for a reciter",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "The number of recitations available"
+            }
+        }
+    },
+    "loadingReciterSurahs": "Loading {reciterName} surahs...",
+    "@loadingReciterSurahs": {
+        "description": "Loading surahs for a specific reciter message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "addToFavorites": "Add to Favorites",
+    "@addToFavorites": {
+        "description": "Add to favorites button text"
+    },
+    "createFirstPlaylistMessage": "Create your first playlist to organize your favorite surahs",
+    "@createFirstPlaylistMessage": {
+        "description": "Message shown when no playlists exist"
+    },
+    "addedToFavorites": "Added to favorites",
+    "@addedToFavorites": {
+        "description": "Added to favorites success message"
+    },
+    "removedFromFavorites": "Removed from favorites",
+    "@removedFromFavorites": {
+        "description": "Removed from favorites success message"
+    },
+    "editPlaylistComingSoon": "Edit playlist functionality coming soon",
+    "@editPlaylistComingSoon": {
+        "description": "Edit playlist coming soon message"
+    },
+    "playlistDetailsComingSoon": "Playlist details screen coming soon",
+    "@playlistDetailsComingSoon": {
+        "description": "Playlist details coming soon message"
+    },
+    "playPlaylistComingSoon": "Play playlist functionality coming soon",
+    "@playPlaylistComingSoon": {
+        "description": "Play playlist coming soon message"
     }
 }

@@ -34,11 +34,17 @@ class ReciterDownloadsSection extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
         child: ExpansionTile(
+          expandedCrossAxisAlignment: CrossAxisAlignment.start,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text(
             reciterName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          subtitle: Text('${downloads.length} surahs'),
+          subtitle: Text(
+            '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+          ),
           leading: CircleAvatar(
             backgroundColor: Theme.of(
               context,
@@ -100,16 +106,28 @@ class ReciterDownloadsSection extends StatelessWidget {
               ),
             ],
           ),
-          children: downloads.map((download) {
-            return DownloadItemCard(
-              download: download,
-              onDelete: () {
-                context.read<DownloadsBloc>().add(
-                  DeleteDownloadEvent(downloadId: download.id),
-                );
-              },
-            );
-          }).toList(),
+          children: [
+            if (downloads.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 20),
+                child: Text(
+                  '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+            ...downloads.map((download) {
+              return DownloadItemCard(
+                download: download,
+                onDelete: () {
+                  context.read<DownloadsBloc>().add(
+                    DeleteDownloadEvent(downloadId: download.id),
+                  );
+                },
+              );
+            }),
+          ],
         ),
       ),
     );
@@ -121,12 +139,14 @@ class ReciterDownloadsSection extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteAll),
         content: Text(
-          'Are you sure you want to delete all downloads for $reciterName?',
+          AppLocalizations.of(
+            context,
+          )!.deleteAllDownloadsConfirmation(reciterName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {

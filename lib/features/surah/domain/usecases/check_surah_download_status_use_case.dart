@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
 
 @Singleton()
@@ -8,7 +8,7 @@ class CheckSurahDownloadStatusUseCase {
 
   final SurahRepository _surahRepository;
 
-  Future<Surah?> call({
+  Future<SurahEntity?> call({
     required String surahId,
     required String reciterName,
   }) async {

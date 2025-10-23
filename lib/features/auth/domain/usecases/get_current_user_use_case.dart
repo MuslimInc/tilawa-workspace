@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/auth/domain/entities/user.dart';
+import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
 import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
 
 @Singleton()
@@ -8,7 +8,7 @@ class GetCurrentUserUseCase {
 
   GetCurrentUserUseCase(this._repository);
 
-  User? call() {
+  UserEntity? call() {
     return _repository.currentUser;
   }
 }

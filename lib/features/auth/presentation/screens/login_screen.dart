@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
+import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -11,7 +12,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign in')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.signIn)),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           state.when(
@@ -19,16 +20,17 @@ class LoginScreen extends StatelessWidget {
             loading: () {},
             authenticated: (user) {
               // Navigate to home screen on successful login
-              context.go('/');
+              const HomeRoute().go(context);
             },
             unauthenticated: () {},
             error: (message) {
               String displayMessage = message;
               if (message.contains('clientConfigurationError')) {
-                displayMessage =
-                    'Google Sign-In not configured. Please contact support.';
+                displayMessage = AppLocalizations.of(
+                  context,
+                )!.googleSignInNotConfigured;
               } else if (message.contains('network_error')) {
-                displayMessage = 'Network error. Please check your connection.';
+                displayMessage = AppLocalizations.of(context)!.networkError;
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -47,15 +49,18 @@ class LoginScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Welcome to Muzakri',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)!.welcomeToMuzakri,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Sign in with your Google account to continue',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                Text(
+                  AppLocalizations.of(context)!.signInWithGoogleDescription,
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -73,8 +78,8 @@ class LoginScreen extends StatelessWidget {
                         )
                       : const Icon(Icons.login),
                   label: state is AuthLoading
-                      ? const Text('Signing in...')
-                      : const Text('Continue with Google'),
+                      ? Text(AppLocalizations.of(context)!.signingIn)
+                      : Text(AppLocalizations.of(context)!.continueWithGoogle),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,

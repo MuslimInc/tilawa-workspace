@@ -1,5 +1,11 @@
 export 'alphabet_scrollbar/alphabet_scrollbar.dart';
 export 'audio_player/audio_player.dart';
+export 'auth/auth.dart';
 export 'downloads/downloads.dart';
 export 'localization/localization.dart';
+export 'playlists/playlists.dart';
+export 'premium/premium.dart';
 export 'reciters/reciters.dart';
+export 'settings/settings.dart';
+export 'surah/surah.dart';
+export 'theme/theme.dart';

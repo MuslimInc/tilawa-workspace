@@ -34,7 +34,6 @@ abstract class DownloadsRepository {
     String surahId,
     String surahTitle,
     String reciterName,
-    String url,
   );
 
   /// Pause a download
@@ -69,6 +68,9 @@ abstract class DownloadsRepository {
 
   /// Get valid completed downloads for a reciter
   Future<List<DownloadItem>> getValidCompletedDownloads(String reciterName);
+
+  /// Retry a failed download
+  Future<void> retryDownload(String downloadId);
 
   /// Create MediaItems from multiple downloads
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads);

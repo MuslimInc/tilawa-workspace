@@ -22,13 +22,13 @@ abstract class DownloadsLocalDataSource {
 class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
   static const String _downloadsKey = 'downloads';
 
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   DownloadsLocalDataSourceImpl(this._prefs);
 
   @override
   Future<List<DownloadItem>> getDownloads() async {
-    final downloadsJson = _prefs.getStringList(_downloadsKey) ?? [];
+    final downloadsJson = await _prefs.getStringList(_downloadsKey) ?? [];
 
     return downloadsJson.map((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;

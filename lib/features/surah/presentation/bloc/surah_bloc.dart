@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/usecases/check_surah_download_status_use_case.dart';
 import 'package:muzakri/features/surah/domain/usecases/get_surahs_for_reciter_use_case.dart';
 import 'package:muzakri/features/surah/domain/usecases/refresh_surah_status_use_case.dart';

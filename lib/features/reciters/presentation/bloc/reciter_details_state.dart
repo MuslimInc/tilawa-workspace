@@ -16,7 +16,7 @@ class ReciterDetailsLoading extends ReciterDetailsState {
 }
 
 class ReciterDetailsLoaded extends ReciterDetailsState {
-  final List<Surah> surahList;
+  final List<SurahEntity> surahList;
   final Mosahf selectedMoshaf;
   final String? selectedSurahId;
 
@@ -30,7 +30,7 @@ class ReciterDetailsLoaded extends ReciterDetailsState {
   List<Object?> get props => [surahList, selectedMoshaf, selectedSurahId];
 
   ReciterDetailsLoaded copyWith({
-    List<Surah>? surahList,
+    List<SurahEntity>? surahList,
     Mosahf? selectedMoshaf,
     String? selectedSurahId,
   }) {

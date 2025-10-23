@@ -7,11 +7,12 @@ sealed class SurahState with _$SurahState {
   const factory SurahState.loading() = SurahLoading;
 
   const factory SurahState.loaded({
-    required List<Surah> surahs,
+    required List<SurahEntity> surahs,
     required String reciterName,
   }) = SurahLoaded;
 
   const factory SurahState.error(String message) = SurahError;
 
-  const factory SurahState.surahUpdated({required Surah surah}) = SurahUpdated;
+  const factory SurahState.surahUpdated({required SurahEntity surah}) =
+      SurahUpdated;
 }

@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
 
 @Singleton()
@@ -9,7 +9,7 @@ class RefreshSurahStatusUseCase {
 
   final SurahRepository _surahRepository;
 
-  Future<Surah?> call({
+  Future<SurahEntity?> call({
     required String surahId,
     required String reciterName,
   }) async {
@@ -27,7 +27,7 @@ class RefreshSurahStatusUseCase {
         artist: reciterName,
         extras: {'nameAr': '', 'url': ''},
       );
-      surah = Surah(mediaItem: mediaItem, isDownloaded: isDownloaded);
+      surah = SurahEntity(mediaItem: mediaItem, isDownloaded: isDownloaded);
     } else {
       surah = surah.copyWith(isDownloaded: isDownloaded);
     }

@@ -172,10 +172,6 @@
     "@createPlaylist": {
         "description": "Create playlist button text"
     },
-    "retry": "إعادة المحاولة",
-    "@retry": {
-        "description": "Retry button text"
-    },
     "downloadStatusChecked": "تم فحص حالة التحميل",
     "@downloadStatusChecked": {
         "description": "Download status checked message"
@@ -192,12 +188,370 @@
     "@playbackInitiated": {
         "description": "Playback initiated message"
     },
-    "error": "خطأ",
-    "@error": {
-        "description": "Error label"
-    },
     "settings": "الإعدادات",
     "@settings": {
         "description": "Settings section title"
+    },
+    "retryDownload": "إعادة تحميل",
+    "@retryDownload": {
+        "description": "Retry download button text"
+    },
+    "retryDownloadTooltip": "إعادة تحميل",
+    "@retryDownloadTooltip": {
+        "description": "Retry download button tooltip"
+    },
+    "viewDownloads": "عرض التحميلات",
+    "@viewDownloads": {
+        "description": "View downloads action text"
+    },
+    "premium": "بريميوم",
+    "@premium": {
+        "description": "Premium section title"
+    },
+    "premiumFeatures": "ميزات بريميوم",
+    "@premiumFeatures": {
+        "description": "Premium features section title"
+    },
+    "unlimitedDownloads": "تحميلات غير محدودة",
+    "@unlimitedDownloads": {
+        "description": "Unlimited downloads feature"
+    },
+    "offlineMode": "الوضع غير المتصل",
+    "@offlineMode": {
+        "description": "Offline mode feature"
+    },
+    "highQualityAudio": "صوت عالي الجودة",
+    "@highQualityAudio": {
+        "description": "High quality audio feature"
+    },
+    "adFreeExperience": "تجربة خالية من الإعلانات",
+    "@adFreeExperience": {
+        "description": "Ad-free experience feature"
+    },
+    "prioritySupport": "دعم ذو أولوية",
+    "@prioritySupport": {
+        "description": "Priority support feature"
+    },
+    "exclusiveContent": "محتوى حصري",
+    "@exclusiveContent": {
+        "description": "Exclusive content feature"
+    },
+    "chooseYourPlan": "اختر خطتك",
+    "@chooseYourPlan": {
+        "description": "Choose your plan section title"
+    },
+    "maybeLater": "ربما لاحقاً",
+    "@maybeLater": {
+        "description": "Maybe later button text"
+    },
+    "upgradeNow": "ترقية الآن",
+    "@upgradeNow": {
+        "description": "Upgrade now button text"
+    },
+    "playlistName": "اسم قائمة التشغيل",
+    "@playlistName": {
+        "description": "Playlist name label"
+    },
+    "playlistDescription": "وصف قائمة التشغيل",
+    "@playlistDescription": {
+        "description": "Playlist description label"
+    },
+    "playlistNameHint": "أدخل اسم قائمة التشغيل",
+    "@playlistNameHint": {
+        "description": "Playlist name hint text"
+    },
+    "playlistDescriptionHint": "أدخل وصف قائمة التشغيل",
+    "@playlistDescriptionHint": {
+        "description": "Playlist description hint text"
+    },
+    "createNewPlaylist": "إنشاء قائمة تشغيل جديدة",
+    "@createNewPlaylist": {
+        "description": "Create new playlist dialog title"
+    },
+    "editPlaylist": "تعديل قائمة التشغيل",
+    "@editPlaylist": {
+        "description": "Edit playlist dialog title"
+    },
+    "save": "حفظ",
+    "@save": {
+        "description": "Save button text"
+    },
+    "playlistCreated": "تم إنشاء قائمة التشغيل بنجاح",
+    "@playlistCreated": {
+        "description": "Playlist created success message"
+    },
+    "playlistUpdated": "تم تحديث قائمة التشغيل بنجاح",
+    "@playlistUpdated": {
+        "description": "Playlist updated success message"
+    },
+    "playlistDeleted": "تم حذف قائمة التشغيل بنجاح",
+    "@playlistDeleted": {
+        "description": "Playlist deleted success message"
+    },
+    "deletePlaylist": "حذف قائمة التشغيل",
+    "@deletePlaylist": {
+        "description": "Delete playlist dialog title"
+    },
+    "deletePlaylistMessage": "هل أنت متأكد من أنك تريد حذف قائمة التشغيل هذه؟ لا يمكن التراجع عن هذا الإجراء.",
+    "@deletePlaylistMessage": {
+        "description": "Delete playlist confirmation message"
+    },
+    "addToPlaylist": "إضافة إلى قائمة التشغيل",
+    "@addToPlaylist": {
+        "description": "Add to playlist button text"
+    },
+    "removeFromPlaylist": "إزالة من قائمة التشغيل",
+    "@removeFromPlaylist": {
+        "description": "Remove from playlist button text"
+    },
+    "playlistItems": "عناصر قائمة التشغيل",
+    "@playlistItems": {
+        "description": "Playlist items label"
+    },
+    "playlistDuration": "المدة",
+    "@playlistDuration": {
+        "description": "Playlist duration label"
+    },
+    "playlistItemCount": "العناصر",
+    "@playlistItemCount": {
+        "description": "Playlist item count label"
+    },
+    "searchPlaylists": "البحث في قوائم التشغيل",
+    "@searchPlaylists": {
+        "description": "Search playlists hint text"
+    },
+    "favorites": "المفضلة",
+    "@favorites": {
+        "description": "Favorites section title"
+    },
+    "recent": "الأحدث",
+    "@recent": {
+        "description": "Recent section title"
+    },
+    "public": "عام",
+    "@public": {
+        "description": "Public visibility label"
+    },
+    "private": "خاص",
+    "@private": {
+        "description": "Private visibility label"
+    },
+    "makePublic": "جعل عام",
+    "@makePublic": {
+        "description": "Make public button text"
+    },
+    "makePrivate": "جعل خاص",
+    "@makePrivate": {
+        "description": "Make private button text"
+    },
+    "duplicatePlaylist": "نسخ قائمة التشغيل",
+    "@duplicatePlaylist": {
+        "description": "Duplicate playlist button text"
+    },
+    "duplicatePlaylistName": "اسم قائمة التشغيل المنسوخة",
+    "@duplicatePlaylistName": {
+        "description": "Duplicate playlist name dialog title"
+    },
+    "enterDuplicateName": "أدخل اسم قائمة التشغيل المنسوخة",
+    "@enterDuplicateName": {
+        "description": "Enter duplicate name hint text"
+    },
+    "playlistNameExists": "قائمة تشغيل بهذا الاسم موجودة بالفعل",
+    "@playlistNameExists": {
+        "description": "Playlist name exists error message"
+    },
+    "playlistNameRequired": "اسم قائمة التشغيل مطلوب",
+    "@playlistNameRequired": {
+        "description": "Playlist name required error message"
+    },
+    "playlistDescriptionRequired": "وصف قائمة التشغيل مطلوب",
+    "@playlistDescriptionRequired": {
+        "description": "Playlist description required error message"
+    },
+    "playlistNotFound": "قائمة التشغيل غير موجودة",
+    "@playlistNotFound": {
+        "description": "Playlist not found error message"
+    },
+    "itemAlreadyInPlaylist": "العنصر موجود بالفعل في قائمة التشغيل",
+    "@itemAlreadyInPlaylist": {
+        "description": "Item already in playlist error message"
+    },
+    "playlistEmpty": "قائمة التشغيل هذه فارغة",
+    "@playlistEmpty": {
+        "description": "Empty playlist message"
+    },
+    "playPlaylist": "تشغيل قائمة التشغيل",
+    "@playPlaylist": {
+        "description": "Play playlist button text"
+    },
+    "shufflePlaylist": "تشغيل عشوائي لقائمة التشغيل",
+    "@shufflePlaylist": {
+        "description": "Shuffle playlist button text"
+    },
+    "playlistStats": "إحصائيات قائمة التشغيل",
+    "@playlistStats": {
+        "description": "Playlist statistics title"
+    },
+    "totalDuration": "المدة الإجمالية",
+    "@totalDuration": {
+        "description": "Total duration label"
+    },
+    "totalItems": "إجمالي العناصر",
+    "@totalItems": {
+        "description": "Total items label"
+    },
+    "createdOn": "تم الإنشاء في",
+    "@createdOn": {
+        "description": "Created on label"
+    },
+    "lastUpdated": "آخر تحديث",
+    "@lastUpdated": {
+        "description": "Last updated label"
+    },
+    "continueButton": "متابعة",
+    "@continueButton": {
+        "description": "Continue button text"
+    },
+    "premiumRequired": "بريميوم مطلوب",
+    "@premiumRequired": {
+        "description": "Premium required dialog title"
+    },
+    "premiumRequiredMessage": "هذه الميزة تتطلب اشتراك بريميوم. قم بالترقية لفتح التحميلات غير المحدودة والمزيد!",
+    "@premiumRequiredMessage": {
+        "description": "Premium required message"
+    },
+    "language": "اللغة",
+    "@language": {
+        "description": "Language setting"
+    },
+    "arabic": "العربية",
+    "@arabic": {
+        "description": "Arabic language option"
+    },
+    "english": "الإنجليزية",
+    "@english": {
+        "description": "English language option"
+    },
+    "refreshDownloads": "تحديث التحميلات",
+    "@refreshDownloads": {
+        "description": "Refresh downloads tooltip"
+    },
+    "downloadingSurah": "جاري تحميل {surahTitle} بصوت {reciterName}...",
+    "@downloadingSurah": {
+        "description": "Download progress message",
+        "placeholders": {
+            "surahTitle": {
+                "type": "String",
+                "description": "The title of the surah being downloaded"
+            },
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "deleteDownload": "حذف التحميل",
+    "@deleteDownload": {
+        "description": "Delete download dialog title"
+    },
+    "deleteDownloadConfirmation": "هل أنت متأكد من حذف \"{title}\"؟",
+    "@deleteDownloadConfirmation": {
+        "description": "Delete download confirmation message",
+        "placeholders": {
+            "title": {
+                "type": "String",
+                "description": "The title of the download to delete"
+            }
+        }
+    },
+    "deleteAllDownloadsConfirmation": "هل أنت متأكد من حذف جميع التحميلات لـ {reciterName}؟",
+    "@deleteAllDownloadsConfirmation": {
+        "description": "Delete all downloads confirmation message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "surahs": "سور",
+    "@surahs": {
+        "description": "Surahs count text"
+    },
+    "signIn": "تسجيل الدخول",
+    "@signIn": {
+        "description": "Sign in button text"
+    },
+    "welcomeToMuzakri": "مرحباً بك في مزكري",
+    "@welcomeToMuzakri": {
+        "description": "Welcome message on login screen"
+    },
+    "signInWithGoogleDescription": "سجل الدخول بحساب جوجل للمتابعة",
+    "@signInWithGoogleDescription": {
+        "description": "Description text for Google sign in"
+    },
+    "signingIn": "جاري تسجيل الدخول...",
+    "@signingIn": {
+        "description": "Signing in progress text"
+    },
+    "continueWithGoogle": "المتابعة مع جوجل",
+    "@continueWithGoogle": {
+        "description": "Continue with Google button text"
+    },
+    "googleSignInNotConfigured": "تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.",
+    "@googleSignInNotConfigured": {
+        "description": "Google Sign-In configuration error message"
+    },
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "@networkError": {
+        "description": "Network error message"
+    },
+    "recitationsAvailable": "{count} رواية متاحة",
+    "@recitationsAvailable": {
+        "description": "Number of recitations available for a reciter",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "The number of recitations available"
+            }
+        }
+    },
+    "loadingReciterSurahs": "جاري تحميل سور {reciterName}...",
+    "@loadingReciterSurahs": {
+        "description": "Loading surahs for a specific reciter message",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "addToFavorites": "إضافة إلى المفضلة",
+    "@addToFavorites": {
+        "description": "Add to favorites button text"
+    },
+    "createFirstPlaylistMessage": "أنشئ قائمة التشغيل الأولى لتنظيم السور المفضلة لديك",
+    "@createFirstPlaylistMessage": {
+        "description": "Message shown when no playlists exist"
+    },
+    "addedToFavorites": "تمت الإضافة إلى المفضلة",
+    "@addedToFavorites": {
+        "description": "Added to favorites success message"
+    },
+    "removedFromFavorites": "تمت الإزالة من المفضلة",
+    "@removedFromFavorites": {
+        "description": "Removed from favorites success message"
+    },
+    "editPlaylistComingSoon": "ميزة تعديل قائمة التشغيل قادمة قريباً",
+    "@editPlaylistComingSoon": {
+        "description": "Edit playlist coming soon message"
+    },
+    "playlistDetailsComingSoon": "شاشة تفاصيل قائمة التشغيل قادمة قريباً",
+    "@playlistDetailsComingSoon": {
+        "description": "Playlist details coming soon message"
+    },
+    "playPlaylistComingSoon": "ميزة تشغيل قائمة التشغيل قادمة قريباً",
+    "@playPlaylistComingSoon": {
+        "description": "Play playlist coming soon message"
     }
 }

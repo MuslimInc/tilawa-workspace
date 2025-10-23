@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:muzakri/helpers/reciter_helper.dart';
-import 'package:muzakri/screens/reciter_details_screen.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class ViewReciterButton extends StatelessWidget {
   const ViewReciterButton({super.key, required this.mediaItem});
@@ -17,12 +17,11 @@ class ViewReciterButton extends StatelessWidget {
       try {
         final reciter = await ReciterHelper.getReciterFromMediaItem(mediaItem);
         if (reciter != null && context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReciterDetailsScreen(reciter: reciter),
-            ),
-          );
+          // Use GoRouter to navigate to reciter details
+          ReciterDetailsRoute(
+            reciterId: reciter.id.toString(),
+            reciter: reciter,
+          ).go(context);
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

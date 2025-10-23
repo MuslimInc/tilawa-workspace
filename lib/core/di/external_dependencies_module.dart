@@ -1,10 +1,14 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:credential_manager/credential_manager.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/audio_player_handler_impl.dart';
+import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,10 +24,17 @@ abstract class ExternalDependenciesModule {
   @singleton
   GoogleSignIn get googleSignIn => GoogleSignIn.instance;
 
-  @preResolve
   @singleton
-  Future<SharedPreferences> get sharedPreferences =>
-      SharedPreferences.getInstance();
+  CredentialManager get credentialManager => CredentialManager();
+
+  @singleton
+  FirebaseAnalytics get firebaseAnalytics => FirebaseAnalytics.instance;
+
+  @singleton
+  FirebaseCrashlytics get firebaseCrashlytics => FirebaseCrashlytics.instance;
+
+  @singleton
+  SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();
 
   @singleton
   SubscriptionPlansService subscriptionPlansService(
@@ -46,10 +57,16 @@ abstract class ExternalDependenciesModule {
   @singleton
   Future<AudioPlayerHandler> audioPlayerHandler(
     List<MediaItem> mediaItems,
+    AnalyticsService analyticsService,
+    SharedPreferencesAsync prefs,
   ) async {
     try {
       print('Initializing audio service...');
-      final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(mediaItems);
+      final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(
+        mediaItems,
+        analyticsService,
+        prefs,
+      );
 
       final audioHandler = await AudioService.init(
         builder: () => audioPlayerHandlerImpl,
@@ -64,7 +81,11 @@ abstract class ExternalDependenciesModule {
     } catch (e) {
       print('Warning: Could not initialize audio service: $e');
       // Register a fallback handler to prevent crashes
-      final fallbackHandler = AudioPlayerHandlerImpl([]);
+      final fallbackHandler = AudioPlayerHandlerImpl(
+        [],
+        analyticsService,
+        prefs,
+      );
       print('Fallback AudioPlayerHandler registered');
       return fallbackHandler;
     }

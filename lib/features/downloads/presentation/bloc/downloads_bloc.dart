@@ -4,10 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/audio_player_handler.dart';
+import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
@@ -21,9 +24,12 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
   final GetDownloadsByReciterUseCase _getDownloadsByReciter;
   final DownloadSurahUseCase _downloadSurah;
   final DeleteDownloadUseCase _deleteDownload;
+  final DeleteReciterDownloadsUseCase _deleteReciterDownloads;
+  final ClearAllDownloadsUseCase _clearAllDownloads;
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
   final AudioPlayerHandler _audioPlayerHandler;
+  final AnalyticsService _analyticsService;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
@@ -31,15 +37,21 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     required GetDownloadsByReciterUseCase getDownloadsByReciter,
     required DownloadSurahUseCase downloadSurah,
     required DeleteDownloadUseCase deleteDownload,
+    required DeleteReciterDownloadsUseCase deleteReciterDownloads,
+    required ClearAllDownloadsUseCase clearAllDownloads,
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
     required AudioPlayerHandler audioPlayerHandler,
+    required AnalyticsService analyticsService,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
+       _deleteReciterDownloads = deleteReciterDownloads,
+       _clearAllDownloads = clearAllDownloads,
        _downloadsRepository = downloadsRepository,
        _premiumRepository = premiumRepository,
        _audioPlayerHandler = audioPlayerHandler,
+       _analyticsService = analyticsService,
        super(const DownloadsState.initial()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -52,6 +64,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     on<PlayDownloadedSurahEvent>(_onPlayDownloadedSurah);
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
     on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
+    on<RetryDownloadEvent>(_onRetryDownload);
 
     // Listen to download progress
     _listenToProgress();
@@ -69,9 +82,6 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
         progress.downloadedSize,
         progress.fileSize,
       );
-
-      // Reload downloads to reflect the updated progress
-      add(const LoadDownloads());
     });
   }
 
@@ -88,11 +98,12 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     emit(const DownloadsState.loading());
 
     final result = await _getDownloadsByReciter();
-    result.fold(
-      (failure) => emit(
+    print('result: ${result.getOrElse(() => {})}');
+    await result.fold(
+      (failure) async => emit(
         DownloadsState.error(failure.message ?? 'Failed to load downloads'),
       ),
-      (downloads) => emit(DownloadsState.loaded(downloads)),
+      (downloads) async => emit(DownloadsState.loaded(downloads)),
     );
   }
 
@@ -148,18 +159,40 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       ),
     );
 
+    // Log analytics event for download start
+    await _analyticsService.logDownloadStart(
+      downloadId,
+      fileName: '${event.surahTitle}_${event.reciterName}',
+    );
+
     final result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
       reciterName: event.reciterName,
-      url: event.url,
     );
 
     result.fold(
-      (failure) => emit(
-        DownloadsState.error(failure.message ?? 'Failed to download surah'),
-      ),
+      (failure) {
+        // Log analytics event for download failure
+        _analyticsService.logEvent(
+          'download_failed',
+          parameters: {
+            'download_id': downloadId,
+            'surah_id': event.surahId,
+            'reciter_name': event.reciterName,
+            'error': failure.message ?? 'Unknown error',
+          },
+        );
+        emit(
+          DownloadsState.error(failure.message ?? 'Failed to download surah'),
+        );
+      },
       (_) {
+        // Log analytics event for download completion
+        _analyticsService.logDownloadComplete(
+          downloadId,
+          fileName: '${event.surahTitle}_${event.reciterName}',
+        );
         // Reload downloads after successful download
         add(const LoadDownloads());
       },
@@ -186,18 +219,53 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     DeleteReciterDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    // This would need to be implemented in the repository
-    // For now, we'll just reload
-    add(const LoadDownloads());
+    emit(const DownloadsState.loading());
+
+    final result = await _deleteReciterDownloads(event.reciterName);
+    result.fold(
+      (failure) => emit(
+        DownloadsState.error(
+          failure.message ?? 'Failed to delete reciter downloads',
+        ),
+      ),
+      (_) {
+        // Log analytics event for delete reciter downloads
+        _analyticsService.logEvent(
+          'delete_reciter_downloads',
+          parameters: {
+            'reciter_name': event.reciterName,
+            'action': 'delete_reciter_downloads',
+          },
+        );
+        // Reload downloads after successful deletion
+        add(const LoadDownloads());
+      },
+    );
   }
 
   Future<void> _onClearAllDownloads(
     ClearAllDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    // This would need to be implemented in the repository
-    // For now, we'll just reload
-    add(const LoadDownloads());
+    emit(const DownloadsState.loading());
+
+    final result = await _clearAllDownloads();
+    result.fold(
+      (failure) => emit(
+        DownloadsState.error(
+          failure.message ?? 'Failed to clear all downloads',
+        ),
+      ),
+      (_) {
+        // Log analytics event for clear all downloads
+        _analyticsService.logEvent(
+          'clear_all_downloads',
+          parameters: {'action': 'clear_all_downloads'},
+        );
+        // Reload downloads after successful clearing
+        add(const LoadDownloads());
+      },
+    );
   }
 
   Future<void> _onCheckSurahDownloaded(
@@ -356,6 +424,101 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       }
     } catch (e) {
       emit(DownloadsState.error('Failed to check premium access: $e'));
+    }
+  }
+
+  Future<void> _onRetryDownload(
+    RetryDownloadEvent event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    try {
+      // Get the failed download item
+      final downloadItem = await _downloadsRepository.getDownloadItem(
+        event.downloadId,
+      );
+      if (downloadItem == null) {
+        emit(DownloadsState.error('Download not found'));
+        return;
+      }
+
+      if (downloadItem.status != DownloadStatus.failed) {
+        emit(DownloadsState.error('Only failed downloads can be retried'));
+        return;
+      }
+
+      // Check premium access before allowing retry
+      final canDownload = await _premiumRepository.canDownload();
+      if (!canDownload) {
+        emit(
+          const DownloadsState.premiumRequired(
+            message:
+                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          ),
+        );
+        return;
+      }
+
+      // Check if download is currently in progress
+      if (DownloadService.isDownloadActive(event.downloadId)) {
+        emit(
+          DownloadsState.error(
+            'Download "${downloadItem.title}" is already being downloaded',
+          ),
+        );
+        return;
+      }
+
+      // Emit download started state
+      emit(
+        DownloadsState.downloadStarted(
+          surahId: downloadItem.id.split(
+            '_',
+          )[0], // Extract surah ID from download ID
+          surahTitle: downloadItem.title,
+          reciterName: downloadItem.reciterName,
+        ),
+      );
+
+      // Log analytics event for retry
+      await _analyticsService.logEvent(
+        'download_retry',
+        parameters: {
+          'download_id': event.downloadId,
+          'surah_title': downloadItem.title,
+          'reciter_name': downloadItem.reciterName,
+        },
+      );
+
+      // Retry the download using the repository method
+      try {
+        await _downloadsRepository.retryDownload(event.downloadId);
+
+        // Log analytics event for retry success
+        _analyticsService.logEvent(
+          'download_retry_success',
+          parameters: {
+            'download_id': event.downloadId,
+            'surah_title': downloadItem.title,
+            'reciter_name': downloadItem.reciterName,
+          },
+        );
+        // Reload downloads after successful retry
+        add(const LoadDownloads());
+      } catch (e) {
+        // Log analytics event for retry failure
+        _analyticsService.logEvent(
+          'download_retry_failed',
+          parameters: {
+            'download_id': event.downloadId,
+            'surah_title': downloadItem.title,
+            'reciter_name': downloadItem.reciterName,
+            'error': e.toString(),
+          },
+        );
+        emit(DownloadsState.error('Failed to retry download: $e'));
+      }
+    } catch (e) {
+      emit(DownloadsState.error('Failed to retry download: $e'));
     }
   }
 }

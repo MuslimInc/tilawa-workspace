@@ -56,5 +56,18 @@
 	<string>This app needs access to your music library to play audio content.</string>
 	<key>AVAudioSessionCategoryPlayback</key>
 	<true/>
+	<key>GIDClientID</key>
+	<string>181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>REVERSED_CLIENT_ID</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

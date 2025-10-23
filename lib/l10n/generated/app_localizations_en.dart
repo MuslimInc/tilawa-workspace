@@ -27,12 +27,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecitersMatchSearch => 'No reciters match your search';
 
   @override
-  String get retry => 'Retry';
-
-  @override
-  String get error => 'Error';
-
-  @override
   String get filteredByLetter => 'Filtered by letter:';
 
   @override
@@ -139,6 +133,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createPlaylist => 'Create Playlist';
 
   @override
+  String get retry => 'Retry';
+
+  @override
   String get downloadStatusChecked => 'Download status checked';
 
   @override
@@ -151,5 +148,271 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playbackInitiated => 'Playback initiated';
 
   @override
+  String get error => 'Error';
+
+  @override
   String get settings => 'Settings';
+
+  @override
+  String get retryDownload => 'Retry Download';
+
+  @override
+  String get retryDownloadTooltip => 'Retry Download';
+
+  @override
+  String get viewDownloads => 'View Downloads';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get premiumFeatures => 'Premium Features';
+
+  @override
+  String get unlimitedDownloads => 'Unlimited Downloads';
+
+  @override
+  String get offlineMode => 'Offline Mode';
+
+  @override
+  String get highQualityAudio => 'High Quality Audio';
+
+  @override
+  String get adFreeExperience => 'Ad-Free Experience';
+
+  @override
+  String get prioritySupport => 'Priority Support';
+
+  @override
+  String get exclusiveContent => 'Exclusive Content';
+
+  @override
+  String get chooseYourPlan => 'Choose Your Plan';
+
+  @override
+  String get maybeLater => 'Maybe Later';
+
+  @override
+  String get upgradeNow => 'Upgrade Now';
+
+  @override
+  String get playlistName => 'Playlist Name';
+
+  @override
+  String get playlistDescription => 'Playlist Description';
+
+  @override
+  String get playlistNameHint => 'Enter playlist name';
+
+  @override
+  String get playlistDescriptionHint => 'Enter playlist description';
+
+  @override
+  String get createNewPlaylist => 'Create New Playlist';
+
+  @override
+  String get editPlaylist => 'Edit Playlist';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get playlistCreated => 'Playlist created successfully';
+
+  @override
+  String get playlistUpdated => 'Playlist updated successfully';
+
+  @override
+  String get playlistDeleted => 'Playlist deleted successfully';
+
+  @override
+  String get deletePlaylist => 'Delete Playlist';
+
+  @override
+  String get deletePlaylistMessage =>
+      'Are you sure you want to delete this playlist? This action cannot be undone.';
+
+  @override
+  String get addToPlaylist => 'Add to Playlist';
+
+  @override
+  String get removeFromPlaylist => 'Remove from Playlist';
+
+  @override
+  String get playlistItems => 'Playlist Items';
+
+  @override
+  String get playlistDuration => 'Duration';
+
+  @override
+  String get playlistItemCount => 'Items';
+
+  @override
+  String get searchPlaylists => 'Search Playlists';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get public => 'Public';
+
+  @override
+  String get private => 'Private';
+
+  @override
+  String get makePublic => 'Make Public';
+
+  @override
+  String get makePrivate => 'Make Private';
+
+  @override
+  String get duplicatePlaylist => 'Duplicate Playlist';
+
+  @override
+  String get duplicatePlaylistName => 'Duplicate Playlist Name';
+
+  @override
+  String get enterDuplicateName => 'Enter name for duplicate playlist';
+
+  @override
+  String get playlistNameExists => 'A playlist with this name already exists';
+
+  @override
+  String get playlistNameRequired => 'Playlist name is required';
+
+  @override
+  String get playlistDescriptionRequired => 'Playlist description is required';
+
+  @override
+  String get playlistNotFound => 'Playlist not found';
+
+  @override
+  String get itemAlreadyInPlaylist => 'Item is already in this playlist';
+
+  @override
+  String get playlistEmpty => 'This playlist is empty';
+
+  @override
+  String get playPlaylist => 'Play Playlist';
+
+  @override
+  String get shufflePlaylist => 'Shuffle Playlist';
+
+  @override
+  String get playlistStats => 'Playlist Statistics';
+
+  @override
+  String get totalDuration => 'Total Duration';
+
+  @override
+  String get totalItems => 'Total Items';
+
+  @override
+  String get createdOn => 'Created On';
+
+  @override
+  String get lastUpdated => 'Last Updated';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get premiumRequired => 'Premium Required';
+
+  @override
+  String get premiumRequiredMessage =>
+      'This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get arabic => 'Arabic';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get refreshDownloads => 'Refresh Downloads';
+
+  @override
+  String downloadingSurah(String surahTitle, String reciterName) {
+    return 'Downloading $surahTitle by $reciterName...';
+  }
+
+  @override
+  String get deleteDownload => 'Delete Download';
+
+  @override
+  String deleteDownloadConfirmation(String title) {
+    return 'Are you sure you want to delete \"$title\"?';
+  }
+
+  @override
+  String deleteAllDownloadsConfirmation(String reciterName) {
+    return 'Are you sure you want to delete all downloads for $reciterName?';
+  }
+
+  @override
+  String get surahs => 'surahs';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get welcomeToMuzakri => 'Welcome to Muzakri';
+
+  @override
+  String get signInWithGoogleDescription =>
+      'Sign in with your Google account to continue';
+
+  @override
+  String get signingIn => 'Signing in...';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get googleSignInNotConfigured =>
+      'Google Sign-In not configured. Please contact support.';
+
+  @override
+  String get networkError => 'Network error. Please check your connection.';
+
+  @override
+  String recitationsAvailable(int count) {
+    return '$count recitation(s) available';
+  }
+
+  @override
+  String loadingReciterSurahs(String reciterName) {
+    return 'Loading $reciterName surahs...';
+  }
+
+  @override
+  String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get createFirstPlaylistMessage =>
+      'Create your first playlist to organize your favorite surahs';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get editPlaylistComingSoon =>
+      'Edit playlist functionality coming soon';
+
+  @override
+  String get playlistDetailsComingSoon => 'Playlist details screen coming soon';
+
+  @override
+  String get playPlaylistComingSoon =>
+      'Play playlist functionality coming soon';
 }

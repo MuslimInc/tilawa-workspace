@@ -7,7 +7,7 @@ part of 'auth_result.dart';
 // **************************************************************************
 
 AuthSuccess _$AuthSuccessFromJson(Map<String, dynamic> json) => AuthSuccess(
-  user: User.fromJson(json['user'] as Map<String, dynamic>),
+  user: UserEntity.fromJson(json['user'] as Map<String, dynamic>),
   $type: json['runtimeType'] as String?,
 );
 

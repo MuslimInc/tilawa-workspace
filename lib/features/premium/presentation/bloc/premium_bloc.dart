@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/core/config/currency_config.dart';
+import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/premium/domain/usecases/cancel_subscription_use_case.dart';
 import 'package:muzakri/features/premium/domain/usecases/check_feature_access_use_case.dart';
 import 'package:muzakri/features/premium/domain/usecases/get_available_plans_use_case.dart';
@@ -19,6 +21,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
   final StartTrialUseCase _startTrial;
   final GetAvailablePlansUseCase _getAvailablePlans;
   final CheckFeatureAccessUseCase _checkFeatureAccess;
+  final AnalyticsService _analyticsService;
 
   PremiumBloc(
     this._getPremiumStatus,
@@ -28,6 +31,7 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     this._startTrial,
     this._getAvailablePlans,
     this._checkFeatureAccess,
+    this._analyticsService,
   ) : super(const PremiumState.initial()) {
     on<LoadPremiumStatus>(_onLoadPremiumStatus);
     on<PurchaseSubscription>(_onPurchaseSubscription);
@@ -69,6 +73,13 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
       final success = await _purchaseSubscription(event.planId);
 
       if (success) {
+        // Log analytics event for successful purchase
+        await _analyticsService.logPurchase(
+          'subscription_${event.planId}',
+          itemId: event.planId,
+          currency: CurrencyConfig.currencyCode,
+        );
+
         emit(
           PremiumState.purchaseSuccess(
             message: 'Subscription purchased successfully!',
@@ -77,6 +88,15 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
         // Reload status after successful purchase
         add(const LoadPremiumStatus());
       } else {
+        // Log analytics event for failed purchase
+        await _analyticsService.logEvent(
+          'purchase_failed',
+          parameters: {
+            'plan_id': event.planId,
+            'reason': 'purchase_subscription_returned_false',
+          },
+        );
+
         emit(
           const PremiumState.purchaseFailed(
             message: 'Failed to purchase subscription. Please try again.',
@@ -84,6 +104,12 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
         );
       }
     } catch (e) {
+      // Log analytics event for purchase error
+      await _analyticsService.logEvent(
+        'purchase_error',
+        parameters: {'plan_id': event.planId, 'error': e.toString()},
+      );
+
       emit(PremiumState.purchaseFailed(message: 'Purchase failed: $e'));
     }
   }

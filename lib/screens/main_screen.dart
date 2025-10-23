@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
+import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
+import 'package:muzakri/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router.dart';
+import 'package:muzakri/router/app_router_config.dart';
 import 'package:muzakri/screens/playlists_screen.dart';
-import 'package:muzakri/screens/reciters_screen.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
 
 class MainScreen extends StatefulWidget {
@@ -41,14 +41,14 @@ class _MainScreenState extends State<MainScreen> {
           },
           unauthenticated: () {
             // Redirect to login if not authenticated
-            context.go(AppRouter.login);
+            const LoginRoute().go(context);
           },
           error: (message) {
             // Show error and redirect to login
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(message), backgroundColor: Colors.red),
             );
-            context.go(AppRouter.login);
+            const LoginRoute().go(context);
           },
         );
       },
@@ -76,6 +76,11 @@ class _MainScreenState extends State<MainScreen> {
                 setState(() {
                   _currentIndex = index;
                 });
+                if (index == 1) {
+                  context.read<DownloadsBloc>().add(
+                    const DownloadsEvent.loadDownloads(),
+                  );
+                }
               },
               type: BottomNavigationBarType.fixed,
               items: [

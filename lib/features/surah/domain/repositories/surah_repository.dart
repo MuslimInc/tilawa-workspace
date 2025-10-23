@@ -1,8 +1,8 @@
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 
 abstract class SurahRepository {
   /// Get all surahs for a specific reciter
-  Future<List<Surah>> getSurahsForReciter(String reciterName);
+  Future<List<SurahEntity>> getSurahsForReciter(String reciterName);
 
   /// Update surah download status
   Future<void> updateSurahDownloadStatus(
@@ -24,8 +24,8 @@ abstract class SurahRepository {
   Future<bool> isSurahDownloaded(String surahId, String reciterName);
 
   /// Get surah by ID and reciter
-  Future<Surah?> getSurah(String surahId, String reciterName);
+  Future<SurahEntity?> getSurah(String surahId, String reciterName);
 
   /// Update surah
-  Future<void> updateSurah(Surah surah);
+  Future<void> updateSurah(SurahEntity surah);
 }

@@ -7,6 +7,7 @@ import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
@@ -41,6 +42,7 @@ class AppProviders {
       create: (context) => getIt<AudioPlayerBloc>(),
     ),
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
+    BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),
     BlocProvider<PremiumBloc>(create: (context) => getIt<PremiumBloc>()),
 
     // Auth provider with initialization

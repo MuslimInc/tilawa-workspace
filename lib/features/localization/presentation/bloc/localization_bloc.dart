@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'localization_event.dart';
@@ -9,11 +10,12 @@ part 'localization_state.dart';
 
 @injectable
 class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
-  static const String _languageKey = 'selected_language';
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   LocalizationBloc(this._prefs)
-    : super(const LocalizationState(locale: Locale('ar'))) {
+    : super(
+        LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+      ) {
     on<LoadLanguage>(_onLoadLanguage);
     on<ChangeLanguage>(_onChangeLanguage);
   }
@@ -24,15 +26,16 @@ class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
   ) async {
     try {
       final languageCode =
-          _prefs.getString(_languageKey) ?? 'ar'; // Default to Arabic
+          await _prefs.getString(LanguageConfig.languageKey) ??
+          LanguageConfig.getDefaultLanguageCode();
 
       final locale = Locale(languageCode);
 
       emit(LocalizationState(locale: locale));
     } catch (e) {
-      // Fallback to Arabic if there's an error
-      const locale = Locale('ar');
-      emit(const LocalizationState(locale: locale));
+      // Fallback to default language if there's an error
+      final locale = Locale(LanguageConfig.getDefaultLanguageCode());
+      emit(LocalizationState(locale: locale));
     }
   }
 
@@ -41,7 +44,10 @@ class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
     Emitter<LocalizationState> emit,
   ) async {
     try {
-      await _prefs.setString(_languageKey, event.locale.languageCode);
+      await _prefs.setString(
+        LanguageConfig.languageKey,
+        event.locale.languageCode,
+      );
 
       emit(LocalizationState(locale: event.locale));
     } catch (e) {

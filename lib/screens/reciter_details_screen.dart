@@ -9,7 +9,7 @@ import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_blo
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
@@ -67,6 +67,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       child: DropdownButtonFormField<Mosahf>(
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          color: Colors.black,
+                        ),
                         initialValue: uniqueMoshaf.contains(selectedMoshaf)
                             ? selectedMoshaf
                             : uniqueMoshaf.first,
@@ -79,7 +83,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         items: uniqueMoshaf.map((moshaf) {
                           return DropdownMenuItem<Mosahf>(
                             value: moshaf,
-                            child: Text(moshaf.name),
+                            child: Text(
+                              moshaf.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (Mosahf? moshaf) {
@@ -100,13 +107,17 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               // Content
               Expanded(
                 child: state is ReciterDetailsLoading
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Loading surah list...'),
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.loadingReciterSurahs(widget.reciter.name),
+                            ),
                           ],
                         ),
                       )
@@ -162,7 +173,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
-  Widget _buildSurahCard(Surah surah, int index, ReciterDetailsLoaded state) {
+  Widget _buildSurahCard(
+    SurahEntity surah,
+    int index,
+    ReciterDetailsLoaded state,
+  ) {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, audioState) {
         if (audioState.status != AudioPlayerStatus.success) {
@@ -170,44 +185,39 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           var roundedRectangleBorder = RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           );
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          return ListTile(
             shape: roundedRectangleBorder,
-            elevation: 0,
-            child: ListTile(
-              shape: roundedRectangleBorder,
-              leading: CircleAvatar(
-                backgroundColor: Colors.grey.shade300,
-                child: Text(
-                  '${index + 1}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+            leading: CircleAvatar(
+              backgroundColor: Colors.grey.shade300,
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              title: Text(
-                surah.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                surah.reciterName,
-                style: const TextStyle(color: Colors.grey),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.play_arrow),
-                onPressed: () {
-                  // Play surah logic here
-                },
-              ),
-              onTap: () {
+            ),
+            title: Text(
+              surah.name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              surah.reciterName,
+              style: const TextStyle(color: Colors.grey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.play_arrow),
+              onPressed: () {
                 // Play surah logic here
               },
             ),
+            onTap: () {
+              // Play surah logic here
+            },
           );
         }
 
@@ -279,7 +289,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                   surahId: surah.id,
                   surahTitle: surah.name,
                   reciterName: widget.reciter.name,
-                  url: surah.url,
                 ),
                 const SizedBox(width: 8),
                 // Play button
@@ -335,7 +344,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Check if a surah is downloaded and get its file path
-  Future<String?> _getDownloadedFilePath(Surah surah) async {
+  Future<String?> _getDownloadedFilePath(SurahEntity surah) async {
     try {
       final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
@@ -365,7 +374,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Check if a surah is downloaded
-  Future<bool> _isSurahDownloaded(Surah surah) async {
+  Future<bool> _isSurahDownloaded(SurahEntity surah) async {
     try {
       final downloadsRepository = getIt<DownloadsRepository>();
       // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
@@ -381,7 +390,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   /// Create a MediaItem with local file path for downloaded surahs
-  MediaItem _createLocalMediaItem(Surah originalSurah, String filePath) {
+  MediaItem _createLocalMediaItem(SurahEntity originalSurah, String filePath) {
     try {
       // Convert file path to proper file:// URI
       final fileUri = Uri.file(filePath).toString();
@@ -411,7 +420,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     }
   }
 
-  Future<void> _playSurah(Surah surah, ReciterDetailsLoaded state) async {
+  Future<void> _playSurah(SurahEntity surah, ReciterDetailsLoaded state) async {
     try {
       // Check if the surah is downloaded
       final downloadedFilePath = await _getDownloadedFilePath(surah);

@@ -1,0 +1,225 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'app_router_config.dart';
+
+// **************************************************************************
+// GoRouterGenerator
+// **************************************************************************
+
+List<RouteBase> get $appRoutes => [
+  $homeRoute,
+  $reciterDetailsRoute,
+  $expandedPlayerRoute,
+  $premiumRoute,
+  $settingsRoute,
+  $loginRoute,
+  $downloadsRoute,
+  $errorRoute,
+];
+
+RouteBase get $homeRoute =>
+    GoRouteData.$route(path: '/', factory: $HomeRoute._fromState);
+
+mixin $HomeRoute on GoRouteData {
+  static HomeRoute _fromState(GoRouterState state) => const HomeRoute();
+
+  @override
+  String get location => GoRouteData.$location('/');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $reciterDetailsRoute => GoRouteData.$route(
+  path: '/reciter/:reciterId',
+  factory: $ReciterDetailsRoute._fromState,
+);
+
+mixin $ReciterDetailsRoute on GoRouteData {
+  static ReciterDetailsRoute _fromState(GoRouterState state) =>
+      ReciterDetailsRoute(
+        reciterId: state.pathParameters['reciterId']!,
+        reciter: (String json0) {
+          return Reciter.fromJson(jsonDecode(json0) as Map<String, dynamic>);
+        }(state.uri.queryParameters['reciter']!),
+      );
+
+  ReciterDetailsRoute get _self => this as ReciterDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/reciter/${Uri.encodeComponent(_self.reciterId)}',
+    queryParams: {'reciter': jsonEncode(_self.reciter.toJson())},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $expandedPlayerRoute => GoRouteData.$route(
+  path: '/expandedPlayer',
+  factory: $ExpandedPlayerRoute._fromState,
+);
+
+mixin $ExpandedPlayerRoute on GoRouteData {
+  static ExpandedPlayerRoute _fromState(GoRouterState state) =>
+      const ExpandedPlayerRoute();
+
+  @override
+  String get location => GoRouteData.$location('/expandedPlayer');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $premiumRoute =>
+    GoRouteData.$route(path: '/premium', factory: $PremiumRoute._fromState);
+
+mixin $PremiumRoute on GoRouteData {
+  static PremiumRoute _fromState(GoRouterState state) => const PremiumRoute();
+
+  @override
+  String get location => GoRouteData.$location('/premium');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $settingsRoute =>
+    GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState);
+
+mixin $SettingsRoute on GoRouteData {
+  static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $loginRoute =>
+    GoRouteData.$route(path: '/login', factory: $LoginRoute._fromState);
+
+mixin $LoginRoute on GoRouteData {
+  static LoginRoute _fromState(GoRouterState state) => const LoginRoute();
+
+  @override
+  String get location => GoRouteData.$location('/login');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $downloadsRoute =>
+    GoRouteData.$route(path: '/downloads', factory: $DownloadsRoute._fromState);
+
+mixin $DownloadsRoute on GoRouteData {
+  static DownloadsRoute _fromState(GoRouterState state) =>
+      const DownloadsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/downloads');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $errorRoute =>
+    GoRouteData.$route(path: '/error', factory: $ErrorRoute._fromState);
+
+mixin $ErrorRoute on GoRouteData {
+  static ErrorRoute _fromState(GoRouterState state) =>
+      ErrorRoute(error: state.uri.queryParameters['error']);
+
+  ErrorRoute get _self => this as ErrorRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/error',
+    queryParams: {if (_self.error != null) 'error': _self.error},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}

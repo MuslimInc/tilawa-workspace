@@ -27,12 +27,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noRecitersMatchSearch => 'لا يوجد قراء يطابقون البحث';
 
   @override
-  String get retry => 'إعادة المحاولة';
-
-  @override
-  String get error => 'خطأ';
-
-  @override
   String get filteredByLetter => 'مفلتر بالحرف:';
 
   @override
@@ -139,6 +133,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createPlaylist => 'إنشاء قائمة تشغيل';
 
   @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
   String get downloadStatusChecked => 'تم فحص حالة التحميل';
 
   @override
@@ -151,5 +148,269 @@ class AppLocalizationsAr extends AppLocalizations {
   String get playbackInitiated => 'تم بدء التشغيل';
 
   @override
+  String get error => 'خطأ';
+
+  @override
   String get settings => 'الإعدادات';
+
+  @override
+  String get retryDownload => 'إعادة تحميل';
+
+  @override
+  String get retryDownloadTooltip => 'إعادة تحميل';
+
+  @override
+  String get viewDownloads => 'عرض التحميلات';
+
+  @override
+  String get premium => 'بريميوم';
+
+  @override
+  String get premiumFeatures => 'ميزات بريميوم';
+
+  @override
+  String get unlimitedDownloads => 'تحميلات غير محدودة';
+
+  @override
+  String get offlineMode => 'الوضع غير المتصل';
+
+  @override
+  String get highQualityAudio => 'صوت عالي الجودة';
+
+  @override
+  String get adFreeExperience => 'تجربة خالية من الإعلانات';
+
+  @override
+  String get prioritySupport => 'دعم ذو أولوية';
+
+  @override
+  String get exclusiveContent => 'محتوى حصري';
+
+  @override
+  String get chooseYourPlan => 'اختر خطتك';
+
+  @override
+  String get maybeLater => 'ربما لاحقاً';
+
+  @override
+  String get upgradeNow => 'ترقية الآن';
+
+  @override
+  String get playlistName => 'اسم قائمة التشغيل';
+
+  @override
+  String get playlistDescription => 'وصف قائمة التشغيل';
+
+  @override
+  String get playlistNameHint => 'أدخل اسم قائمة التشغيل';
+
+  @override
+  String get playlistDescriptionHint => 'أدخل وصف قائمة التشغيل';
+
+  @override
+  String get createNewPlaylist => 'إنشاء قائمة تشغيل جديدة';
+
+  @override
+  String get editPlaylist => 'تعديل قائمة التشغيل';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get playlistCreated => 'تم إنشاء قائمة التشغيل بنجاح';
+
+  @override
+  String get playlistUpdated => 'تم تحديث قائمة التشغيل بنجاح';
+
+  @override
+  String get playlistDeleted => 'تم حذف قائمة التشغيل بنجاح';
+
+  @override
+  String get deletePlaylist => 'حذف قائمة التشغيل';
+
+  @override
+  String get deletePlaylistMessage =>
+      'هل أنت متأكد من أنك تريد حذف قائمة التشغيل هذه؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get addToPlaylist => 'إضافة إلى قائمة التشغيل';
+
+  @override
+  String get removeFromPlaylist => 'إزالة من قائمة التشغيل';
+
+  @override
+  String get playlistItems => 'عناصر قائمة التشغيل';
+
+  @override
+  String get playlistDuration => 'المدة';
+
+  @override
+  String get playlistItemCount => 'العناصر';
+
+  @override
+  String get searchPlaylists => 'البحث في قوائم التشغيل';
+
+  @override
+  String get favorites => 'المفضلة';
+
+  @override
+  String get recent => 'الأحدث';
+
+  @override
+  String get public => 'عام';
+
+  @override
+  String get private => 'خاص';
+
+  @override
+  String get makePublic => 'جعل عام';
+
+  @override
+  String get makePrivate => 'جعل خاص';
+
+  @override
+  String get duplicatePlaylist => 'نسخ قائمة التشغيل';
+
+  @override
+  String get duplicatePlaylistName => 'اسم قائمة التشغيل المنسوخة';
+
+  @override
+  String get enterDuplicateName => 'أدخل اسم قائمة التشغيل المنسوخة';
+
+  @override
+  String get playlistNameExists => 'قائمة تشغيل بهذا الاسم موجودة بالفعل';
+
+  @override
+  String get playlistNameRequired => 'اسم قائمة التشغيل مطلوب';
+
+  @override
+  String get playlistDescriptionRequired => 'وصف قائمة التشغيل مطلوب';
+
+  @override
+  String get playlistNotFound => 'قائمة التشغيل غير موجودة';
+
+  @override
+  String get itemAlreadyInPlaylist => 'العنصر موجود بالفعل في قائمة التشغيل';
+
+  @override
+  String get playlistEmpty => 'قائمة التشغيل هذه فارغة';
+
+  @override
+  String get playPlaylist => 'تشغيل قائمة التشغيل';
+
+  @override
+  String get shufflePlaylist => 'تشغيل عشوائي لقائمة التشغيل';
+
+  @override
+  String get playlistStats => 'إحصائيات قائمة التشغيل';
+
+  @override
+  String get totalDuration => 'المدة الإجمالية';
+
+  @override
+  String get totalItems => 'إجمالي العناصر';
+
+  @override
+  String get createdOn => 'تم الإنشاء في';
+
+  @override
+  String get lastUpdated => 'آخر تحديث';
+
+  @override
+  String get continueButton => 'متابعة';
+
+  @override
+  String get premiumRequired => 'بريميوم مطلوب';
+
+  @override
+  String get premiumRequiredMessage =>
+      'هذه الميزة تتطلب اشتراك بريميوم. قم بالترقية لفتح التحميلات غير المحدودة والمزيد!';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get english => 'الإنجليزية';
+
+  @override
+  String get refreshDownloads => 'تحديث التحميلات';
+
+  @override
+  String downloadingSurah(String surahTitle, String reciterName) {
+    return 'جاري تحميل $surahTitle بصوت $reciterName...';
+  }
+
+  @override
+  String get deleteDownload => 'حذف التحميل';
+
+  @override
+  String deleteDownloadConfirmation(String title) {
+    return 'هل أنت متأكد من حذف \"$title\"؟';
+  }
+
+  @override
+  String deleteAllDownloadsConfirmation(String reciterName) {
+    return 'هل أنت متأكد من حذف جميع التحميلات لـ $reciterName؟';
+  }
+
+  @override
+  String get surahs => 'سور';
+
+  @override
+  String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get welcomeToMuzakri => 'مرحباً بك في مزكري';
+
+  @override
+  String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
+
+  @override
+  String get signingIn => 'جاري تسجيل الدخول...';
+
+  @override
+  String get continueWithGoogle => 'المتابعة مع جوجل';
+
+  @override
+  String get googleSignInNotConfigured =>
+      'تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.';
+
+  @override
+  String get networkError => 'خطأ في الشبكة. يرجى التحقق من اتصالك.';
+
+  @override
+  String recitationsAvailable(int count) {
+    return '$count رواية متاحة';
+  }
+
+  @override
+  String loadingReciterSurahs(String reciterName) {
+    return 'جاري تحميل سور $reciterName...';
+  }
+
+  @override
+  String get addToFavorites => 'إضافة إلى المفضلة';
+
+  @override
+  String get createFirstPlaylistMessage =>
+      'أنشئ قائمة التشغيل الأولى لتنظيم السور المفضلة لديك';
+
+  @override
+  String get addedToFavorites => 'تمت الإضافة إلى المفضلة';
+
+  @override
+  String get removedFromFavorites => 'تمت الإزالة من المفضلة';
+
+  @override
+  String get editPlaylistComingSoon => 'ميزة تعديل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get playlistDetailsComingSoon =>
+      'شاشة تفاصيل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get playPlaylistComingSoon => 'ميزة تشغيل قائمة التشغيل قادمة قريباً';
 }

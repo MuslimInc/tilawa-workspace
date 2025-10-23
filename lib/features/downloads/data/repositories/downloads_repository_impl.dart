@@ -6,6 +6,7 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/main.dart';
 import 'package:path/path.dart' as path;
 
 @LazySingleton(as: DownloadsRepository)
@@ -99,16 +100,58 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     String surahId,
     String surahTitle,
     String reciterName,
-    String url,
   ) async {
+    // Validate inputs early to avoid creating invalid download entries
+    // Note: in our app, surahId is the actual download URL
+    final trimmedUrl = surahId.trim();
+    if (trimmedUrl.isEmpty) {
+      logger.e(
+        '[DownloadsRepositoryImpl] startDownload: empty URL for surahId=$surahId reciter="$reciterName"',
+      );
+      throw ArgumentError('Download URL is empty');
+    }
+
     final downloadsDir = await localDataSource.getDownloadsDirectory();
-    final fileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
-    final filePath = path.join(downloadsDir, fileName);
+
+    // Use URL as the stable download id to avoid mixing in reciter/surah incorrectly
+    String downloadId = trimmedUrl;
+
+    // Build a safe filename from the URL; fallback to surahId + reciter if needed
+    String safeFileName;
+    try {
+      final parsed = Uri.parse(trimmedUrl);
+      final lastSegment = parsed.pathSegments.isNotEmpty
+          ? parsed.pathSegments.last
+          : '';
+      if (lastSegment.isNotEmpty) {
+        final ext = path.extension(lastSegment).toLowerCase();
+        final baseName = ext.isNotEmpty
+            ? lastSegment.substring(0, lastSegment.length - ext.length)
+            : lastSegment;
+        // Allow common audio extensions; default to .mp3
+        const allowed = ['.mp3', '.m4a', '.aac', '.wav', '.ogg'];
+        final ensuredExt = allowed.contains(ext)
+            ? ext
+            : (ext.isEmpty ? '.mp3' : ext);
+        safeFileName = '$baseName$ensuredExt';
+      } else {
+        safeFileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
+      }
+    } catch (_) {
+      safeFileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
+    }
+
+    // Final guard to ensure we have an extension
+    if (path.extension(safeFileName).isEmpty) {
+      safeFileName = '$safeFileName.mp3';
+    }
+
+    final filePath = path.join(downloadsDir, safeFileName);
 
     final downloadItem = DownloadItem(
-      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
+      id: downloadId,
       title: surahTitle,
-      url: url,
+      url: trimmedUrl,
       filePath: filePath,
       reciterName: reciterName,
       status: DownloadStatus.pending,
@@ -120,10 +163,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     await addDownload(downloadItem);
 
+    logger.d(
+      '[DownloadsRepositoryImpl] startDownload: id=$downloadId fileName=$safeFileName path=$filePath',
+    );
+
     // Start the download in background isolate
     await DownloadService.startDownload(
-      id: downloadItem.id,
-      url: url,
+      id: downloadId,
+      url: trimmedUrl,
       filePath: filePath,
       title: surahTitle,
       reciterName: reciterName,
@@ -278,5 +325,36 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads) {
     return downloads.map(createMediaItemFromDownload).toList();
+  }
+
+  @override
+  Future<void> retryDownload(String downloadId) async {
+    // Get the existing download item
+    final downloadItem = await getDownloadItem(downloadId);
+    if (downloadItem == null) {
+      throw Exception('Download not found');
+    }
+
+    if (downloadItem.status != DownloadStatus.failed) {
+      throw Exception('Only failed downloads can be retried');
+    }
+
+    // Reset the download status to pending
+    final updatedDownload = downloadItem.copyWith(
+      status: DownloadStatus.pending,
+      progress: 0.0,
+      downloadedSize: 0,
+      fileSize: 0,
+    );
+    await updateDownload(updatedDownload);
+
+    // Start the download again using the existing file path
+    await DownloadService.startDownload(
+      id: downloadItem.id,
+      url: downloadItem.url,
+      filePath: downloadItem.filePath,
+      title: downloadItem.title,
+      reciterName: downloadItem.reciterName,
+    );
   }
 }

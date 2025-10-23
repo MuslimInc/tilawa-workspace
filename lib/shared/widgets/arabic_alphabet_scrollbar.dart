@@ -51,7 +51,7 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
 
   void _onPanUpdate(DragUpdateDetails details, BuildContext context) {
     final currentState = context.read<AlphabetScrollbarBloc>().state;
-    if (currentState is! AlphabetScrollbarLoaded || !currentState.isDragging) {
+    if (!currentState.isDragging) {
       return;
     }
 
@@ -79,9 +79,7 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AlphabetScrollbarBloc, AlphabetScrollbarState>(
       builder: (context, state) {
-        final selectedLetter = state is AlphabetScrollbarLoaded
-            ? state.selectedLetter
-            : null;
+        final selectedLetter = state.selectedLetter;
 
         return Container(
           width: 40,

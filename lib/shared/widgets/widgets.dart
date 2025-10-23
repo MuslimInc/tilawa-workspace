@@ -5,3 +5,4 @@ export 'control_buttons.dart';
 export 'expanded_player_screen.dart';
 export 'language_switcher.dart';
 export 'seek_bar.dart';
+export 'view_reciter_button.dart';

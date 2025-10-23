@@ -36,3 +36,7 @@ class ClearLetterFilter extends RecitersEvent {
 class ClearSearch extends RecitersEvent {
   const ClearSearch();
 }
+
+class LanguageChanged extends RecitersEvent {
+  const LanguageChanged();
+}

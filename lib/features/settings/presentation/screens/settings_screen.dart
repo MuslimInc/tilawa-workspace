@@ -1,5 +1,7 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muzakri/core/config/language_config.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
@@ -35,15 +37,45 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Theme
+          // Theme Mode
           Card(
             child: BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, state) {
-                final isDark = state.mode == ThemeMode.dark;
-                return SwitchListTile(
-                  title: const Text('Dark Theme'),
-                  value: isDark,
-                  onChanged: (v) => context.read<ThemeCubit>().toggleDark(v),
+                return ExpansionTile(
+                  title: const Text('Theme'),
+                  children: [
+                    // Theme Mode Selection
+                    RadioListTile<ThemeMode>(
+                      title: const Text('System'),
+                      value: ThemeMode.system,
+                      groupValue: state.mode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          context.read<ThemeCubit>().setMode(value);
+                        }
+                      },
+                    ),
+                    RadioListTile<ThemeMode>(
+                      title: const Text('Light'),
+                      value: ThemeMode.light,
+                      groupValue: state.mode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          context.read<ThemeCubit>().setMode(value);
+                        }
+                      },
+                    ),
+                    RadioListTile<ThemeMode>(
+                      title: const Text('Dark'),
+                      value: ThemeMode.dark,
+                      groupValue: state.mode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          context.read<ThemeCubit>().setMode(value);
+                        }
+                      },
+                    ),
+                  ],
                 );
               },
             ),
@@ -58,17 +90,20 @@ class SettingsScreen extends StatelessWidget {
                 return ListTile(
                   title: const Text('Language'),
                   subtitle: Text(
-                    state.locale.languageCode == 'ar' ? 'Arabic' : 'English',
+                    state.locale.languageCode ==
+                            LanguageConfig.defaultLanguageCode
+                        ? 'Arabic'
+                        : 'English',
                   ),
                   trailing: DropdownButton<Locale>(
                     value: state.locale,
                     underline: const SizedBox(),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
-                        value: Locale('ar'),
-                        child: Text('العربية'),
+                        value: Locale(LanguageConfig.defaultLanguageCode),
+                        child: const Text('العربية'),
                       ),
-                      DropdownMenuItem(
+                      const DropdownMenuItem(
                         value: Locale('en'),
                         child: Text('English'),
                       ),

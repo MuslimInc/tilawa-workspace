@@ -134,18 +134,6 @@ abstract class AppLocalizations {
   /// **'No reciters match your search'**
   String get noRecitersMatchSearch;
 
-  /// Retry button text
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get retry;
-
-  /// Error label
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get error;
-
   /// Filtered by letter indicator
   ///
   /// In en, this message translates to:
@@ -356,6 +344,12 @@ abstract class AppLocalizations {
   /// **'Create Playlist'**
   String get createPlaylist;
 
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
   /// Download status checked message
   ///
   /// In en, this message translates to:
@@ -380,11 +374,509 @@ abstract class AppLocalizations {
   /// **'Playback initiated'**
   String get playbackInitiated;
 
+  /// Error label
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
   /// Settings section title
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// Retry download button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Download'**
+  String get retryDownload;
+
+  /// Retry download button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Download'**
+  String get retryDownloadTooltip;
+
+  /// View downloads action text
+  ///
+  /// In en, this message translates to:
+  /// **'View Downloads'**
+  String get viewDownloads;
+
+  /// Premium section title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premium;
+
+  /// Premium features section title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Features'**
+  String get premiumFeatures;
+
+  /// Unlimited downloads feature
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Downloads'**
+  String get unlimitedDownloads;
+
+  /// Offline mode feature
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode'**
+  String get offlineMode;
+
+  /// High quality audio feature
+  ///
+  /// In en, this message translates to:
+  /// **'High Quality Audio'**
+  String get highQualityAudio;
+
+  /// Ad-free experience feature
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-Free Experience'**
+  String get adFreeExperience;
+
+  /// Priority support feature
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Support'**
+  String get prioritySupport;
+
+  /// Exclusive content feature
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive Content'**
+  String get exclusiveContent;
+
+  /// Choose your plan section title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Plan'**
+  String get chooseYourPlan;
+
+  /// Maybe later button text
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get maybeLater;
+
+  /// Upgrade now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Now'**
+  String get upgradeNow;
+
+  /// Playlist name label
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Name'**
+  String get playlistName;
+
+  /// Playlist description label
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Description'**
+  String get playlistDescription;
+
+  /// Playlist name hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter playlist name'**
+  String get playlistNameHint;
+
+  /// Playlist description hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter playlist description'**
+  String get playlistDescriptionHint;
+
+  /// Create new playlist dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Playlist'**
+  String get createNewPlaylist;
+
+  /// Edit playlist dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Playlist'**
+  String get editPlaylist;
+
+  /// Save button text
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Playlist created success message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist created successfully'**
+  String get playlistCreated;
+
+  /// Playlist updated success message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist updated successfully'**
+  String get playlistUpdated;
+
+  /// Playlist deleted success message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist deleted successfully'**
+  String get playlistDeleted;
+
+  /// Delete playlist dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Playlist'**
+  String get deletePlaylist;
+
+  /// Delete playlist confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this playlist? This action cannot be undone.'**
+  String get deletePlaylistMessage;
+
+  /// Add to playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Playlist'**
+  String get addToPlaylist;
+
+  /// Remove from playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Playlist'**
+  String get removeFromPlaylist;
+
+  /// Playlist items label
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Items'**
+  String get playlistItems;
+
+  /// Playlist duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get playlistDuration;
+
+  /// Playlist item count label
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get playlistItemCount;
+
+  /// Search playlists hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search Playlists'**
+  String get searchPlaylists;
+
+  /// Favorites section title
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favorites;
+
+  /// Recent section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// Public visibility label
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get public;
+
+  /// Private visibility label
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get private;
+
+  /// Make public button text
+  ///
+  /// In en, this message translates to:
+  /// **'Make Public'**
+  String get makePublic;
+
+  /// Make private button text
+  ///
+  /// In en, this message translates to:
+  /// **'Make Private'**
+  String get makePrivate;
+
+  /// Duplicate playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Playlist'**
+  String get duplicatePlaylist;
+
+  /// Duplicate playlist name dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Playlist Name'**
+  String get duplicatePlaylistName;
+
+  /// Enter duplicate name hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name for duplicate playlist'**
+  String get enterDuplicateName;
+
+  /// Playlist name exists error message
+  ///
+  /// In en, this message translates to:
+  /// **'A playlist with this name already exists'**
+  String get playlistNameExists;
+
+  /// Playlist name required error message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name is required'**
+  String get playlistNameRequired;
+
+  /// Playlist description required error message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist description is required'**
+  String get playlistDescriptionRequired;
+
+  /// Playlist not found error message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist not found'**
+  String get playlistNotFound;
+
+  /// Item already in playlist error message
+  ///
+  /// In en, this message translates to:
+  /// **'Item is already in this playlist'**
+  String get itemAlreadyInPlaylist;
+
+  /// Empty playlist message
+  ///
+  /// In en, this message translates to:
+  /// **'This playlist is empty'**
+  String get playlistEmpty;
+
+  /// Play playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Play Playlist'**
+  String get playPlaylist;
+
+  /// Shuffle playlist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle Playlist'**
+  String get shufflePlaylist;
+
+  /// Playlist statistics title
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Statistics'**
+  String get playlistStats;
+
+  /// Total duration label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Duration'**
+  String get totalDuration;
+
+  /// Total items label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Items'**
+  String get totalItems;
+
+  /// Created on label
+  ///
+  /// In en, this message translates to:
+  /// **'Created On'**
+  String get createdOn;
+
+  /// Last updated label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get lastUpdated;
+
+  /// Continue button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Premium required dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Required'**
+  String get premiumRequired;
+
+  /// Premium required message
+  ///
+  /// In en, this message translates to:
+  /// **'This feature requires a premium subscription. Upgrade to unlock unlimited downloads and more!'**
+  String get premiumRequiredMessage;
+
+  /// Language setting
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// Arabic language option
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get arabic;
+
+  /// English language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// Refresh downloads tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Downloads'**
+  String get refreshDownloads;
+
+  /// Download progress message
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {surahTitle} by {reciterName}...'**
+  String downloadingSurah(String surahTitle, String reciterName);
+
+  /// Delete download dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Download'**
+  String get deleteDownload;
+
+  /// Delete download confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"?'**
+  String deleteDownloadConfirmation(String title);
+
+  /// Delete all downloads confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all downloads for {reciterName}?'**
+  String deleteAllDownloadsConfirmation(String reciterName);
+
+  /// Surahs count text
+  ///
+  /// In en, this message translates to:
+  /// **'surahs'**
+  String get surahs;
+
+  /// Sign in button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signIn;
+
+  /// Welcome message on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Muzakri'**
+  String get welcomeToMuzakri;
+
+  /// Description text for Google sign in
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your Google account to continue'**
+  String get signInWithGoogleDescription;
+
+  /// Signing in progress text
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get signingIn;
+
+  /// Continue with Google button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// Google Sign-In configuration error message
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In not configured. Please contact support.'**
+  String get googleSignInNotConfigured;
+
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection.'**
+  String get networkError;
+
+  /// Number of recitations available for a reciter
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recitation(s) available'**
+  String recitationsAvailable(int count);
+
+  /// Loading surahs for a specific reciter message
+  ///
+  /// In en, this message translates to:
+  /// **'Loading {reciterName} surahs...'**
+  String loadingReciterSurahs(String reciterName);
+
+  /// Add to favorites button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Favorites'**
+  String get addToFavorites;
+
+  /// Message shown when no playlists exist
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first playlist to organize your favorite surahs'**
+  String get createFirstPlaylistMessage;
+
+  /// Added to favorites success message
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// Removed from favorites success message
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// Edit playlist coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Edit playlist functionality coming soon'**
+  String get editPlaylistComingSoon;
+
+  /// Playlist details coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist details screen coming soon'**
+  String get playlistDetailsComingSoon;
+
+  /// Play playlist coming soon message
+  ///
+  /// In en, this message translates to:
+  /// **'Play playlist functionality coming soon'**
+  String get playPlaylistComingSoon;
 }
 
 class _AppLocalizationsDelegate

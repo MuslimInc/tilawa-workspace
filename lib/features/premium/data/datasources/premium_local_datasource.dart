@@ -14,26 +14,13 @@ abstract class PremiumLocalDataSource {
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   static const String _premiumStatusKey = 'premium_status';
 
-  final SharedPreferences _prefs;
+  final SharedPreferencesAsync _prefs;
 
   PremiumLocalDataSourceImpl(this._prefs);
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {
-    final statusJson = _prefs.getString(_premiumStatusKey);
-
-    if (statusJson == null) {
-      // Return default free status
-      return const PremiumStatus(
-        isPremium: false,
-        subscriptionStartDate: null,
-        subscriptionEndDate: null,
-        subscriptionType: null,
-        isTrialUsed: false,
-        trialStartDate: null,
-        trialEndDate: null,
-      );
-    }
+    final statusJson = await _prefs.getString(_premiumStatusKey) ?? '';
 
     try {
       final statusMap = jsonDecode(statusJson) as Map<String, dynamic>;

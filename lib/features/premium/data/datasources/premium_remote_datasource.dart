@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
 
@@ -213,7 +214,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
         name: 'Monthly Premium',
         description: 'Full access to all premium features',
         price: 4.99,
-        currency: 'USD',
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.monthly,
         durationInDays: 30,
         features: [
@@ -230,7 +231,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
         name: 'Yearly Premium',
         description: 'Best value - Save 50%',
         price: 29.99,
-        currency: 'USD',
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.yearly,
         durationInDays: 365,
         features: [
@@ -248,7 +249,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
         name: 'Lifetime Premium',
         description: 'One-time payment, lifetime access',
         price: 99.99,
-        currency: 'USD',
+        currency: CurrencyConfig.currencyCode,
         type: SubscriptionType.lifetime,
         durationInDays: 36500,
         features: [

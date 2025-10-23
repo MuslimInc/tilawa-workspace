@@ -30,84 +30,88 @@ class DownloadItemCard extends StatelessWidget {
           _showErrorSnackBar(context, state.message);
         }
       },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: ListTile(
-          leading: _buildStatusIcon(),
-          title: Text(
-            download.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (download.status == DownloadStatus.downloading)
-                LinearProgressIndicator(
-                  value: download.progress,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
-                  ),
+      child: ListTile(
+        leading: _buildStatusIcon(),
+        title: Text(
+          download.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (download.status == DownloadStatus.downloading)
+              LinearProgressIndicator(
+                value: download.progress,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).primaryColor,
                 ),
-              const SizedBox(height: 4),
+              ),
+            const SizedBox(height: 4),
+            Text(
+              _getStatusText(context),
+              style: TextStyle(color: _getStatusColor(), fontSize: 12),
+            ),
+            if (download.fileSize > 0)
               Text(
-                _getStatusText(context),
-                style: TextStyle(color: _getStatusColor(), fontSize: 12),
+                '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              if (download.fileSize > 0)
-                Text(
-                  '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Play/Pause button (only for completed downloads)
-              if (download.status == DownloadStatus.completed)
-                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                  builder: (context, audioState) {
-                    final isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
-                    return IconButton(
-                      icon: Icon(
-                        isCurrentlyPlaying &&
-                                audioState.playbackState?.playing == true
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                      ),
-                      onPressed: () => _handlePlayPause(context, audioState),
-                      tooltip:
-                          isCurrentlyPlaying &&
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Retry button (only for failed downloads)
+            if (download.status == DownloadStatus.failed)
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.blue),
+                onPressed: () => _handleRetryDownload(context),
+                tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
+              ),
+            // Play/Pause button (only for completed downloads)
+            if (download.status == DownloadStatus.completed)
+              BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                builder: (context, audioState) {
+                  final isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
+                  return IconButton(
+                    icon: Icon(
+                      isCurrentlyPlaying &&
                               audioState.playbackState?.playing == true
-                          ? 'Pause'
-                          : 'Play',
-                    );
-                  },
-                ),
-              // Menu button
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    _showDeleteDialog(context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete'),
-                      ],
+                          ? Icons.pause
+                          : Icons.play_arrow,
                     ),
-                  ),
-                ],
+                    onPressed: () => _handlePlayPause(context, audioState),
+                    tooltip:
+                        isCurrentlyPlaying &&
+                            audioState.playbackState?.playing == true
+                        ? AppLocalizations.of(context)!.pause
+                        : AppLocalizations.of(context)!.play,
+                  );
+                },
               ),
-            ],
-          ),
+            // Menu button
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _showDeleteDialog(context);
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.delete, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)!.delete),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -131,20 +135,17 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   String _getStatusText(BuildContext context) {
-    switch (download.status) {
-      case DownloadStatus.completed:
-        return AppLocalizations.of(context)!.completed;
-      case DownloadStatus.downloading:
-        return '${AppLocalizations.of(context)!.downloading} ${(download.progress * 100).toInt()}%';
-      case DownloadStatus.failed:
-        return AppLocalizations.of(context)!.error;
-      case DownloadStatus.paused:
-        return AppLocalizations.of(context)!.pause;
-      case DownloadStatus.cancelled:
-        return AppLocalizations.of(context)!.cancelled;
-      case DownloadStatus.pending:
-        return AppLocalizations.of(context)!.pending;
-    }
+    final progress = (download.progress * 100).toInt();
+    final downloading =
+        "${AppLocalizations.of(context)!.downloading} $progress%";
+    return switch (download.status) {
+      DownloadStatus.pending => AppLocalizations.of(context)!.pending,
+      DownloadStatus.downloading => downloading,
+      DownloadStatus.completed => AppLocalizations.of(context)!.completed,
+      DownloadStatus.failed => AppLocalizations.of(context)!.error,
+      DownloadStatus.paused => AppLocalizations.of(context)!.pause,
+      DownloadStatus.cancelled => AppLocalizations.of(context)!.cancelled,
+    };
   }
 
   Color _getStatusColor() {
@@ -177,12 +178,16 @@ class DownloadItemCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Download'),
-        content: Text('Are you sure you want to delete "${download.title}"?'),
+        title: Text(AppLocalizations.of(context)!.deleteDownload),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.deleteDownloadConfirmation(download.title),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -190,7 +195,7 @@ class DownloadItemCard extends StatelessWidget {
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -230,6 +235,13 @@ class DownloadItemCard extends StatelessWidget {
   void _playDownloadedSurah(BuildContext context) {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.playDownloadedSurah(downloadId: download.id),
+    );
+  }
+
+  /// Handle retry download button press
+  void _handleRetryDownload(BuildContext context) {
+    context.read<DownloadsBloc>().add(
+      DownloadsEvent.retryDownload(downloadId: download.id),
     );
   }
 

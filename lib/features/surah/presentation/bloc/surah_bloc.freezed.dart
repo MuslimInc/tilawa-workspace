@@ -683,7 +683,7 @@ return surahUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<Surah> surahs,  String reciterName)?  loaded,TResult Function( String message)?  error,TResult Function( Surah surah)?  surahUpdated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<SurahEntity> surahs,  String reciterName)?  loaded,TResult Function( String message)?  error,TResult Function( SurahEntity surah)?  surahUpdated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SurahInitial() when initial != null:
 return initial();case SurahLoading() when loading != null:
@@ -708,7 +708,7 @@ return surahUpdated(_that.surah);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<Surah> surahs,  String reciterName)  loaded,required TResult Function( String message)  error,required TResult Function( Surah surah)  surahUpdated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<SurahEntity> surahs,  String reciterName)  loaded,required TResult Function( String message)  error,required TResult Function( SurahEntity surah)  surahUpdated,}) {final _that = this;
 switch (_that) {
 case SurahInitial():
 return initial();case SurahLoading():
@@ -729,7 +729,7 @@ return surahUpdated(_that.surah);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<Surah> surahs,  String reciterName)?  loaded,TResult? Function( String message)?  error,TResult? Function( Surah surah)?  surahUpdated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<SurahEntity> surahs,  String reciterName)?  loaded,TResult? Function( String message)?  error,TResult? Function( SurahEntity surah)?  surahUpdated,}) {final _that = this;
 switch (_that) {
 case SurahInitial() when initial != null:
 return initial();case SurahLoading() when loading != null:
@@ -812,11 +812,11 @@ String toString() {
 
 
 class SurahLoaded implements SurahState {
-  const SurahLoaded({required final  List<Surah> surahs, required this.reciterName}): _surahs = surahs;
+  const SurahLoaded({required final  List<SurahEntity> surahs, required this.reciterName}): _surahs = surahs;
   
 
- final  List<Surah> _surahs;
- List<Surah> get surahs {
+ final  List<SurahEntity> _surahs;
+ List<SurahEntity> get surahs {
   if (_surahs is EqualUnmodifiableListView) return _surahs;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_surahs);
@@ -854,7 +854,7 @@ abstract mixin class $SurahLoadedCopyWith<$Res> implements $SurahStateCopyWith<$
   factory $SurahLoadedCopyWith(SurahLoaded value, $Res Function(SurahLoaded) _then) = _$SurahLoadedCopyWithImpl;
 @useResult
 $Res call({
- List<Surah> surahs, String reciterName
+ List<SurahEntity> surahs, String reciterName
 });
 
 
@@ -874,7 +874,7 @@ class _$SurahLoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? surahs = null,Object? reciterName = null,}) {
   return _then(SurahLoaded(
 surahs: null == surahs ? _self._surahs : surahs // ignore: cast_nullable_to_non_nullable
-as List<Surah>,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
+as List<SurahEntity>,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -955,7 +955,7 @@ class SurahUpdated implements SurahState {
   const SurahUpdated({required this.surah});
   
 
- final  Surah surah;
+ final  SurahEntity surah;
 
 /// Create a copy of SurahState
 /// with the given fields replaced by the non-null parameter values.
@@ -987,11 +987,11 @@ abstract mixin class $SurahUpdatedCopyWith<$Res> implements $SurahStateCopyWith<
   factory $SurahUpdatedCopyWith(SurahUpdated value, $Res Function(SurahUpdated) _then) = _$SurahUpdatedCopyWithImpl;
 @useResult
 $Res call({
- Surah surah
+ SurahEntity surah
 });
 
 
-
+$SurahEntityCopyWith<$Res> get surah;
 
 }
 /// @nodoc
@@ -1007,11 +1007,20 @@ class _$SurahUpdatedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? surah = null,}) {
   return _then(SurahUpdated(
 surah: null == surah ? _self.surah : surah // ignore: cast_nullable_to_non_nullable
-as Surah,
+as SurahEntity,
   ));
 }
 
-
+/// Create a copy of SurahState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SurahEntityCopyWith<$Res> get surah {
+  
+  return $SurahEntityCopyWith<$Res>(_self.surah, (value) {
+    return _then(_self.copyWith(surah: value));
+  });
+}
 }
 
 // dart format on

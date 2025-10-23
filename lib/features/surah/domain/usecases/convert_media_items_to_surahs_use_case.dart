@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah.dart';
+import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/mappers/surah_mapper.dart';
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
 
@@ -10,8 +10,8 @@ class ConvertMediaItemsToSurahsUseCase {
 
   final SurahRepository _surahRepository;
 
-  Future<List<Surah>> call(List<MediaItem> mediaItems) async {
-    final surahList = <Surah>[];
+  Future<List<SurahEntity>> call(List<MediaItem> mediaItems) async {
+    final surahList = <SurahEntity>[];
 
     for (final mediaItem in mediaItems) {
       // Convert MediaItem to Surah

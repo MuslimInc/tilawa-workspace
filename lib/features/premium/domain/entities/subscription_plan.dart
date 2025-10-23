@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:muzakri/core/config/currency_config.dart';
 
 part 'subscription_plan.freezed.dart';
 part 'subscription_plan.g.dart';
@@ -27,7 +28,7 @@ abstract class SubscriptionPlan with _$SubscriptionPlan {
 
 extension SubscriptionPlanExtension on SubscriptionPlan {
   String get formattedPrice {
-    return '$currency ${price.toStringAsFixed(2)}';
+    return CurrencyConfig.getCurrencyDisplay(price);
   }
 
   String get durationText {
