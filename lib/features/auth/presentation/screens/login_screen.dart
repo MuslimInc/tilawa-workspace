@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -20,7 +20,7 @@ class LoginScreen extends StatelessWidget {
             loading: () {},
             authenticated: (user) {
               // Navigate to home screen on successful login
-              context.go('/');
+              const HomeRoute().go(context);
             },
             unauthenticated: () {},
             error: (message) {

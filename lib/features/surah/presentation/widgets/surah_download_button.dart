@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/presentation/bloc/surah_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class SurahDownloadButton extends StatefulWidget {
   const SurahDownloadButton({super.key, required this.surah});
@@ -145,7 +144,7 @@ class _SurahDownloadButtonState extends State<SurahDownloadButton> {
         title: 'Premium Required',
         message: message,
         onUpgrade: () {
-          context.push(AppRouter.premium);
+          const PremiumRoute().go(context);
         },
       ),
     );

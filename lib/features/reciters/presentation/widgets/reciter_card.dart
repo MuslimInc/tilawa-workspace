@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/reciter_model.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class ReciterCard extends StatelessWidget {
   final Reciter reciter;
@@ -44,11 +44,10 @@ class ReciterCard extends StatelessWidget {
       ),
       trailing: const Icon(Icons.arrow_forward_ios),
       onTap: () {
-        context.pushNamed(
-          'reciterDetails',
-          pathParameters: {'reciterId': reciter.id.toString()},
-          extra: reciter,
-        );
+        ReciterDetailsRoute(
+          reciter: reciter,
+          reciterId: reciter.id.toString(),
+        ).go(context);
       },
     );
   }

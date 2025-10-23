@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router.dart';
+import 'package:muzakri/router/app_router_config.dart';
 
 class DownloadButton extends StatelessWidget {
   const DownloadButton({
@@ -43,7 +42,7 @@ class DownloadButton extends StatelessWidget {
           action: SnackBarAction(
             label: AppLocalizations.of(context)!.viewDownloads,
             onPressed: () {
-              context.push(AppRouter.downloads);
+              const DownloadsRoute().go(context);
             },
           ),
         ),
@@ -78,7 +77,7 @@ class DownloadButton extends StatelessWidget {
           title: 'Premium Required',
           message: message,
           onUpgrade: () {
-            context.push(AppRouter.premium);
+            const PremiumRoute().go(context);
           },
         ),
       );
