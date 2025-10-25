@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
@@ -14,6 +13,7 @@ import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downlo
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';

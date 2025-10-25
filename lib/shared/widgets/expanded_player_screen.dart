@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/position_data.dart';
+import 'package:muzakri/shared/models/position_data.dart';
 import 'package:muzakri/shared/widgets/control_buttons.dart';
 import 'package:muzakri/shared/widgets/seek_bar.dart';
 

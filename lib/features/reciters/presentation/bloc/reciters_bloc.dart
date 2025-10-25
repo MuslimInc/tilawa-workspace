@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
-import 'package:muzakri/reciter_model.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/models/reciter_model.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';

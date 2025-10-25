@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/helpers/show_slider_dialog.dart';
-import 'package:muzakri/queue_state.dart';
+import 'package:muzakri/shared/models/queue_state.dart';
 
 class ControlButtons extends StatelessWidget {
   const ControlButtons({super.key});

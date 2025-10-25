@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/reciter_model.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/models/reciter_model.dart';
 
 class ReciterHelper {
   /// Extract reciter information from a MediaItem

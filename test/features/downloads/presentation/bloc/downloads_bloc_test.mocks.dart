@@ -8,7 +8,6 @@ import 'dart:async' as _i8;
 import 'package:audio_service/audio_service.dart' as _i3;
 import 'package:dartz/dartz.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:muzakri/audio_player_handler.dart' as _i17;
 import 'package:muzakri/core/errors/failures.dart' as _i9;
 import 'package:muzakri/core/services/analytics_service.dart' as _i20;
 import 'package:muzakri/features/downloads/data/services/download_service.dart'
@@ -33,8 +32,9 @@ import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart'
     as _i5;
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart'
     as _i16;
-import 'package:muzakri/queue_state.dart' as _i18;
-import 'package:muzakri/reciter_model.dart' as _i19;
+import 'package:muzakri/shared/audio/audio_player_handler.dart' as _i17;
+import 'package:muzakri/shared/models/queue_state.dart' as _i18;
+import 'package:muzakri/shared/models/reciter_model.dart' as _i19;
 import 'package:rxdart/rxdart.dart' as _i6;
 
 // ignore_for_file: type=lint

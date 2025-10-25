@@ -4,7 +4,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -17,6 +16,7 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import 'downloads_bloc_test.mocks.dart';
 

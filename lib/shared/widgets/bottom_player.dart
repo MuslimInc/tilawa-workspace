@@ -6,8 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/helpers/reciter_helper.dart';
-import 'package:muzakri/position_data.dart';
 import 'package:muzakri/router/app_router_config.dart';
+import 'package:muzakri/shared/models/position_data.dart';
 import 'package:muzakri/shared/widgets/view_reciter_button.dart';
 
 class BottomPlayer extends StatefulWidget {

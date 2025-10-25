@@ -4,11 +4,11 @@ import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
-import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/quran_player_app.dart';
 
 final logger = Logger();

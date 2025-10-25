@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/audio_player_handler.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
 import 'package:muzakri/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
-import 'package:muzakri/reciter_model.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/models/reciter_model.dart';
 
 part 'reciter_details_event.dart';
 part 'reciter_details_state.dart';

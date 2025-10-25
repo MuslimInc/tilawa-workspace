@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/reciter_model.dart';
+import 'package:muzakri/shared/models/reciter_model.dart';
 
 class ArabicAlphabetScrollbar extends StatelessWidget {
   final List<String> letters;

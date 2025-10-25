@@ -2,9 +2,9 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/audio_player_handler.dart';
-import 'package:muzakri/position_data.dart';
-import 'package:muzakri/queue_state.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/models/position_data.dart';
+import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'audio_player_bloc.freezed.dart';
