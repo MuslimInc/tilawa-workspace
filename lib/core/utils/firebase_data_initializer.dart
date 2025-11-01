@@ -5,19 +5,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/main.dart';
 
 /// Command-line tool to initialize Firebase data
 /// Run this with: dart lib/core/utils/firebase_data_initializer.dart
 Future<void> main() async {
-  print('🔥 Firebase Data Initializer');
-  print('============================');
+  logger.d('🔥 Firebase Data Initializer');
+  logger.d('============================');
 
   try {
     // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('✅ Firebase initialized');
+    logger.d('✅ Firebase initialized');
 
     // Create services
     final firestore = FirebaseFirestore.instance;
@@ -34,14 +35,14 @@ Future<void> main() async {
 
     // Show statistics
     final stats = await initializationService.getFirebaseDataStats();
-    print('\n📊 Firebase Data Statistics:');
-    print('Subscription Plans: ${stats['subscription_plans']}');
-    print('Users: ${stats['users']}');
+    logger.d('\n📊 Firebase Data Statistics:');
+    logger.d('Subscription Plans: ${stats['subscription_plans']}');
+    logger.d('Users: ${stats['users']}');
 
-    print('\n✅ Firebase data initialization completed successfully!');
-    print('You can now view your data in the Firebase Console.');
+    logger.d('\n✅ Firebase data initialization completed successfully!');
+    logger.d('You can now view your data in the Firebase Console.');
   } catch (e) {
-    print('❌ Error initializing Firebase data: $e');
+    logger.d('❌ Error initializing Firebase data: $e');
     exit(1);
   }
 }

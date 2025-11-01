@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
+import 'package:muzakri/main.dart';
 
 /// Service to initialize analytics with user data and app settings
 @Singleton()
@@ -61,9 +62,9 @@ class AnalyticsInitializationService {
       // Set Crashlytics breadcrumb
       await _crashlyticsService.setBreadcrumb('App started');
 
-      print('Analytics initialized successfully');
+      logger.d('Analytics initialized successfully');
     } catch (e) {
-      print('Analytics initialization error: $e');
+      logger.d('Analytics initialization error: $e');
     }
   }
 
@@ -88,7 +89,7 @@ class AnalyticsInitializationService {
         );
       }
     } catch (e) {
-      print('Analytics sign in error: $e');
+      logger.d('Analytics sign in error: $e');
     }
   }
 
@@ -101,7 +102,7 @@ class AnalyticsInitializationService {
 
       await _analyticsService.logEvent('user_sign_out');
     } catch (e) {
-      print('Analytics sign out error: $e');
+      logger.d('Analytics sign out error: $e');
     }
   }
 
@@ -113,7 +114,7 @@ class AnalyticsInitializationService {
         screenClass: screenClass,
       );
     } catch (e) {
-      print('Analytics screen view error: $e');
+      logger.d('Analytics screen view error: $e');
     }
   }
 }

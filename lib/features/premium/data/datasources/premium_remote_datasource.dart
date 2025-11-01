@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
+import 'package:muzakri/main.dart';
 
 abstract class PremiumRemoteDataSource {
   Future<PremiumStatus?> getPremiumStatus();
@@ -39,7 +40,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
       }
       return null;
     } catch (e) {
-      print('Error fetching premium status from Firebase: $e');
+      logger.d('Error fetching premium status from Firebase: $e');
       return null;
     }
   }
@@ -57,7 +58,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
           .doc('status')
           .set(status.toJson());
     } catch (e) {
-      print('Error updating premium status on Firebase: $e');
+      logger.d('Error updating premium status on Firebase: $e');
       rethrow;
     }
   }
@@ -74,7 +75,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
           .map((doc) => SubscriptionPlan.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('Error fetching plans from Firebase: $e');
+      logger.d('Error fetching plans from Firebase: $e');
       // Return default plans if Firebase fails
       return _getDefaultPlans();
     }
@@ -112,7 +113,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
       await updatePremiumStatus(status);
       return true;
     } catch (e) {
-      print('Error purchasing subscription: $e');
+      logger.d('Error purchasing subscription: $e');
       return false;
     }
   }
@@ -145,7 +146,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
       return true;
     } catch (e) {
-      print('Error canceling subscription: $e');
+      logger.d('Error canceling subscription: $e');
       return false;
     }
   }
@@ -187,7 +188,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
       return false;
     } catch (e) {
-      print('Error restoring subscription: $e');
+      logger.d('Error restoring subscription: $e');
       return false;
     }
   }

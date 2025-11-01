@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/core/entities/reciter.dart' as entity;
 import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:muzakri/shared/models/reciter_model.dart';
 
 part 'reciters_event.dart';
@@ -10,10 +11,10 @@ part 'reciters_state.dart';
 
 @injectable
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
-  final AudioPlayerHandler _audioHandler;
   final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
+  final GetRecitersUseCase _getRecitersUseCase;
 
-  RecitersBloc(this._audioHandler, this._getCurrentLanguageUseCase)
+  RecitersBloc(this._getCurrentLanguageUseCase, this._getRecitersUseCase)
     : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
@@ -23,6 +24,25 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     on<LanguageChanged>(_onLanguageChanged);
   }
 
+  Reciter _mapEntityToModel(entity.ReciterEntity e) => Reciter(
+    id: e.id,
+    name: e.name,
+    letter: e.letter,
+    date: e.date,
+    moshaf: e.moshaf
+        .map(
+          (m) => Mosahf(
+            id: m.id,
+            name: m.name,
+            server: m.server,
+            surahTotal: m.surahTotal,
+            moshafType: m.moshafType,
+            surahList: m.surahList,
+          ),
+        )
+        .toList(),
+  );
+
   Future<void> _onLoadReciters(
     LoadReciters event,
     Emitter<RecitersState> emit,
@@ -30,15 +50,11 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      // Get current language code
-      final languageResult = await _getCurrentLanguageUseCase();
-      final languageCode = languageResult.fold(
-        (failure) => 'eng', // Default to English on failure
-        (language) => language,
-      );
-
-      final recitersData = await _audioHandler.getRecitersData(
-        languageCode: languageCode,
+      // Prefer domain use case to fetch once and share data
+      final result = await _getRecitersUseCase();
+      final recitersData = result.fold<List<Reciter>?>(
+        (_) => null,
+        (entities) => entities.map(_mapEntityToModel).toList(),
       );
 
       if (recitersData != null) {

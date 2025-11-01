@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/position_data.dart';
 import 'package:muzakri/shared/models/queue_state.dart';
@@ -226,7 +227,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   }
 
   void _onSetVolume(SetVolume event, Emitter<AudioPlayerState> emit) {
-    print('Bloc received setVolume event: ${event.volume}');
+    logger.d('Bloc received setVolume event: ${event.volume}');
     _audioHandler.setVolume(event.volume);
     emit(
       state.copyWith(
@@ -239,7 +240,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
         speed: state.speed,
       ),
     );
-    print('Bloc emitted new state with volume: ${event.volume}');
+    logger.d('Bloc emitted new state with volume: ${event.volume}');
   }
 
   void _onSetSpeed(SetSpeed event, Emitter<AudioPlayerState> emit) {

@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:muzakri/main.dart';
 import 'package:rxdart/rxdart.dart';
 
 class LoggingAudioHandler extends CompositeAudioHandler {
@@ -30,7 +31,7 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   }
 
   // ignore: avoid_print
-  void _log(String s) => print('----- LOG: $s');
+  void _log(String s) => logger.d('----- LOG: $s');
 
   @override
   Future<void> prepare() {

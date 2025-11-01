@@ -12,6 +12,7 @@
 import 'package:audio_service/audio_service.dart' as _i87;
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:credential_manager/credential_manager.dart' as _i614;
+import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
@@ -128,6 +129,14 @@ import 'package:muzakri/features/premium/domain/usecases/start_trial_use_case.da
     as _i509;
 import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart'
     as _i504;
+import 'package:muzakri/features/reciters/data/datasources/reciters_remote_datasource.dart'
+    as _i4;
+import 'package:muzakri/features/reciters/data/repositories/reciters_repository_impl.dart'
+    as _i124;
+import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart'
+    as _i619;
+import 'package:muzakri/features/reciters/domain/usecases/get_reciters_use_case.dart'
+    as _i785;
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i447;
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart'
@@ -189,6 +198,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i460.SharedPreferencesAsync>(
       () => externalDependenciesModule.sharedPreferences,
     );
+    gh.singleton<_i361.Dio>(() => externalDependenciesModule.dioClient());
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
     );
@@ -208,6 +218,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i413.LocalizationBloc>(
       () => _i413.LocalizationBloc(gh<_i460.SharedPreferencesAsync>()),
+    );
+    gh.lazySingleton<_i4.RecitersRemoteDataSource>(
+      () => _i4.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
     gh.singleton<_i235.CrashlyticsService>(
       () =>
@@ -250,6 +263,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.GoogleSignIn>(),
       ),
     );
+    gh.lazySingleton<_i619.RecitersRepository>(
+      () => _i124.RecitersRepositoryImpl(gh<_i4.RecitersRemoteDataSource>()),
+    );
     gh.lazySingleton<_i870.LocalizationRepository>(
       () => _i319.LocalizationRepositoryImpl(
         gh<_i322.LocalizationLocalDataSource>(),
@@ -264,6 +280,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i557.AnalyticsService>(
       () => _i557.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.singleton<_i785.GetRecitersUseCase>(
+      () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),
     );
     gh.singleton<_i724.GetCurrentLanguageUseCase>(
       () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
@@ -288,17 +307,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i906.PremiumRemoteDataSource>(),
       ),
     );
+    gh.factory<_i864.RecitersBloc>(
+      () => _i864.RecitersBloc(
+        gh<_i724.GetCurrentLanguageUseCase>(),
+        gh<_i785.GetRecitersUseCase>(),
+      ),
+    );
     gh.factory<_i965.AudioPlayerBloc>(
       () => _i965.AudioPlayerBloc(gh<_i622.AudioPlayerHandler>()),
     );
     gh.lazySingleton<_i797.SurahRepository>(
       () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
-    );
-    gh.factory<_i864.RecitersBloc>(
-      () => _i864.RecitersBloc(
-        gh<_i622.AudioPlayerHandler>(),
-        gh<_i724.GetCurrentLanguageUseCase>(),
-      ),
     );
     gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
       () =>

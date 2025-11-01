@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/main.dart';
 
 /// Abstract interface for analytics service
 abstract class AnalyticsService {
@@ -82,34 +83,25 @@ class FirebaseAnalyticsService implements AnalyticsService {
       await _analytics.logEvent(name: name, parameters: parameters);
     } catch (e) {
       // Log error but don't throw to avoid breaking app functionality
-      print('Analytics error: $e');
+      logger.d('Analytics error: $e');
     }
   }
 
   @override
   Future<void> logLogin({String? loginMethod}) async {
-    await logEvent(
-      'login',
-      parameters: {if (loginMethod != null) 'method': loginMethod},
-    );
+    await logEvent('login', parameters: {'method': ?loginMethod});
   }
 
   @override
   Future<void> logSignUp({String? signUpMethod}) async {
-    await logEvent(
-      'sign_up',
-      parameters: {if (signUpMethod != null) 'method': signUpMethod},
-    );
+    await logEvent('sign_up', parameters: {'method': ?signUpMethod});
   }
 
   @override
   Future<void> logScreenView(String screenName, {String? screenClass}) async {
     await logEvent(
       'screen_view',
-      parameters: {
-        'screen_name': screenName,
-        if (screenClass != null) 'screen_class': screenClass,
-      },
+      parameters: {'screen_name': screenName, 'screen_class': ?screenClass},
     );
   }
 
@@ -123,8 +115,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'audio_play',
       parameters: {
         'audio_id': audioId,
-        if (audioName != null) 'audio_name': audioName,
-        if (artist != null) 'artist': artist,
+        'audio_name': ?audioName,
+        'artist': ?artist,
       },
     );
   }
@@ -157,8 +149,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'download_start',
       parameters: {
         'download_id': downloadId,
-        if (fileName != null) 'file_name': fileName,
-        if (fileSize != null) 'file_size': fileSize,
+        'file_name': ?fileName,
+        'file_size': ?fileSize,
       },
     );
   }
@@ -173,8 +165,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'download_complete',
       parameters: {
         'download_id': downloadId,
-        if (fileName != null) 'file_name': fileName,
-        if (fileSize != null) 'file_size': fileSize,
+        'file_name': ?fileName,
+        'file_size': ?fileSize,
       },
     );
   }
@@ -183,10 +175,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> logDownloadCancel(String downloadId, {String? fileName}) async {
     await logEvent(
       'download_cancel',
-      parameters: {
-        'download_id': downloadId,
-        if (fileName != null) 'file_name': fileName,
-      },
+      parameters: {'download_id': downloadId, 'file_name': ?fileName},
     );
   }
 
@@ -201,9 +190,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'purchase',
       parameters: {
         'transaction_id': transactionId,
-        if (value != null) 'value': value,
-        if (currency != null) 'currency': currency,
-        if (itemId != null) 'item_id': itemId,
+        'value': ?value,
+        'currency': ?currency,
+        'item_id': ?itemId,
       },
     );
   }
@@ -219,9 +208,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'subscription_start',
       parameters: {
         'subscription_id': subscriptionId,
-        if (planId != null) 'plan_id': planId,
-        if (value != null) 'value': value,
-        if (currency != null) 'currency': currency,
+        'plan_id': ?planId,
+        'value': ?value,
+        'currency': ?currency,
       },
     );
   }
@@ -233,10 +222,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }) async {
     await logEvent(
       'subscription_cancel',
-      parameters: {
-        'subscription_id': subscriptionId,
-        if (planId != null) 'plan_id': planId,
-      },
+      parameters: {'subscription_id': subscriptionId, 'plan_id': ?planId},
     );
   }
 
@@ -244,10 +230,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> logSearch(String searchTerm, {int? resultCount}) async {
     await logEvent(
       'search',
-      parameters: {
-        'search_term': searchTerm,
-        if (resultCount != null) 'result_count': resultCount,
-      },
+      parameters: {'search_term': searchTerm, 'result_count': ?resultCount},
     );
   }
 
@@ -255,10 +238,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> logShare(String contentType, {String? itemId}) async {
     await logEvent(
       'share',
-      parameters: {
-        'content_type': contentType,
-        if (itemId != null) 'item_id': itemId,
-      },
+      parameters: {'content_type': contentType, 'item_id': ?itemId},
     );
   }
 
@@ -266,10 +246,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> logFavorite(String itemId, {String? itemType}) async {
     await logEvent(
       'favorite',
-      parameters: {
-        'item_id': itemId,
-        if (itemType != null) 'item_type': itemType,
-      },
+      parameters: {'item_id': itemId, 'item_type': ?itemType},
     );
   }
 
@@ -279,8 +256,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'rating',
       parameters: {
         'rating': rating,
-        if (itemId != null) 'item_id': itemId,
-        if (itemType != null) 'item_type': itemType,
+        'item_id': ?itemId,
+        'item_type': ?itemType,
       },
     );
   }
@@ -290,7 +267,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _analytics.setUserId(id: userId);
     } catch (e) {
-      print('Analytics setUserId error: $e');
+      logger.d('Analytics setUserId error: $e');
     }
   }
 
@@ -299,7 +276,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _analytics.setUserProperty(name: name, value: value);
     } catch (e) {
-      print('Analytics setUserProperty error: $e');
+      logger.d('Analytics setUserProperty error: $e');
     }
   }
 
@@ -308,7 +285,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     try {
       await _analytics.resetAnalyticsData();
     } catch (e) {
-      print('Analytics reset error: $e');
+      logger.d('Analytics reset error: $e');
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/reciter_downloads_section.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/main.dart';
 
 class DownloadsScreen extends StatefulWidget {
   const DownloadsScreen({super.key});
@@ -37,7 +38,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   void _loadDownloads() {
     // Always load downloads - no conditions
-    print('DownloadsScreen: Loading downloads...');
+    logger.d('DownloadsScreen: Loading downloads...');
     context.read<DownloadsBloc>().add(const LoadDownloads());
   }
 

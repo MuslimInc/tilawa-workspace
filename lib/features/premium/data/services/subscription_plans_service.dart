@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // No FirebaseAuth dependency required here
 import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
+import 'package:muzakri/main.dart';
 
 class SubscriptionPlansService {
   final FirebaseFirestore _firestore;
@@ -22,11 +23,11 @@ class SubscriptionPlansService {
             .set(plan.toJson());
       }
 
-      print(
+      logger.d(
         '✅ Successfully added ${plans.length} subscription plans to Firestore',
       );
     } catch (e) {
-      print('❌ Error adding subscription plans: $e');
+      logger.d('❌ Error adding subscription plans: $e');
       rethrow;
     }
   }
@@ -43,7 +44,7 @@ class SubscriptionPlansService {
           .map((doc) => SubscriptionPlan.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('❌ Error fetching subscription plans: $e');
+      logger.d('❌ Error fetching subscription plans: $e');
       return _getDefaultSubscriptionPlans(); // Fallback to default plans
     }
   }
@@ -70,9 +71,9 @@ class SubscriptionPlansService {
           .doc('status')
           .set(premiumStatus);
 
-      print('✅ Created premium status for user: $userId');
+      logger.d('✅ Created premium status for user: $userId');
     } catch (e) {
-      print('❌ Error creating user premium status: $e');
+      logger.d('❌ Error creating user premium status: $e');
       rethrow;
     }
   }
@@ -104,9 +105,9 @@ class SubscriptionPlansService {
           .collection('purchases')
           .add(purchaseRecord);
 
-      print('✅ Created purchase record for user: $userId');
+      logger.d('✅ Created purchase record for user: $userId');
     } catch (e) {
-      print('❌ Error creating purchase record: $e');
+      logger.d('❌ Error creating purchase record: $e');
       rethrow;
     }
   }

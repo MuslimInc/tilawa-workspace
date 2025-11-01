@@ -1,6 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:muzakri/main.dart';
 
 /// Centralized service for Firebase Crashlytics functionality
 abstract class CrashlyticsService {
@@ -70,9 +71,9 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
         return true;
       };
 
-      print('Crashlytics initialized successfully');
+      logger.d('Crashlytics initialized successfully');
     } catch (e) {
-      print('Crashlytics initialization error: $e');
+      logger.d('Crashlytics initialization error: $e');
     }
   }
 
@@ -91,7 +92,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
         fatal: fatal,
       );
     } catch (e) {
-      print('Crashlytics recordError failed: $e');
+      logger.d('Crashlytics recordError failed: $e');
     }
   }
 
@@ -103,7 +104,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.recordFlutterFatalError(details);
     } catch (e) {
-      print('Crashlytics recordFlutterError failed: $e');
+      logger.d('Crashlytics recordFlutterError failed: $e');
     }
   }
 
@@ -112,7 +113,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.setUserIdentifier(userId);
     } catch (e) {
-      print('Crashlytics setUserId failed: $e');
+      logger.d('Crashlytics setUserId failed: $e');
     }
   }
 
@@ -121,7 +122,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.setCustomKey(key, value);
     } catch (e) {
-      print('Crashlytics setCustomKey failed: $e');
+      logger.d('Crashlytics setCustomKey failed: $e');
     }
   }
 
@@ -132,7 +133,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
         await _crashlytics.setCustomKey(entry.key, entry.value);
       }
     } catch (e) {
-      print('Crashlytics setCustomKeys failed: $e');
+      logger.d('Crashlytics setCustomKeys failed: $e');
     }
   }
 
@@ -141,7 +142,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.log(message);
     } catch (e) {
-      print('Crashlytics log failed: $e');
+      logger.d('Crashlytics log failed: $e');
     }
   }
 
@@ -150,7 +151,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       return _crashlytics.isCrashlyticsCollectionEnabled;
     } catch (e) {
-      print('Crashlytics isCrashlyticsCollectionEnabled failed: $e');
+      logger.d('Crashlytics isCrashlyticsCollectionEnabled failed: $e');
       return false;
     }
   }
@@ -160,7 +161,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.setCrashlyticsCollectionEnabled(enabled);
     } catch (e) {
-      print('Crashlytics setCrashlyticsCollectionEnabled failed: $e');
+      logger.d('Crashlytics setCrashlyticsCollectionEnabled failed: $e');
     }
   }
 
@@ -169,7 +170,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       _crashlytics.crash();
     } catch (e) {
-      print('Crashlytics crash failed: $e');
+      logger.d('Crashlytics crash failed: $e');
     }
   }
 
@@ -178,7 +179,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     try {
       await _crashlytics.log('Breadcrumb: $message');
     } catch (e) {
-      print('Crashlytics setBreadcrumb failed: $e');
+      logger.d('Crashlytics setBreadcrumb failed: $e');
     }
   }
 }

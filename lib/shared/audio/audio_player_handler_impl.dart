@@ -5,8 +5,11 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:muzakri/core/config/api_config.dart';
 import 'package:muzakri/core/config/language_config.dart';
+import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:muzakri/shared/models/reciter_model.dart';
@@ -35,6 +38,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   // Caching and pagination
   List<MediaItem>? _cachedReciters;
+  List<Reciter>? _cachedRecitersData;
+  String? _cachedRecitersLanguage;
+  final Map<String, Future<List<Reciter>>> _inFlightReciters = {};
   final Map<String, List<MediaItem>> _artistPlaylists = {};
   bool _isLoadingReciters = false;
 
@@ -314,28 +320,30 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   @override
   Future<void> skipToNext() async {
     final currentIndex = _player.currentIndex;
-    print(
+    logger.d(
       'skipToNext: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
     if (currentIndex != null && currentIndex < _playlist.length - 1) {
-      print('skipToNext: moving to index ${currentIndex + 1}');
+      logger.d('skipToNext: moving to index ${currentIndex + 1}');
       await skipToQueueItem(currentIndex + 1);
     } else {
-      print('skipToNext: cannot skip - at end of playlist or no current index');
+      logger.d(
+        'skipToNext: cannot skip - at end of playlist or no current index',
+      );
     }
   }
 
   @override
   Future<void> skipToPrevious() async {
     final currentIndex = _player.currentIndex;
-    print(
+    logger.d(
       'skipToPrevious: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
     if (currentIndex != null && currentIndex > 0) {
-      print('skipToPrevious: moving to index ${currentIndex - 1}');
+      logger.d('skipToPrevious: moving to index ${currentIndex - 1}');
       await skipToQueueItem(currentIndex - 1);
     } else {
-      print(
+      logger.d(
         'skipToPrevious: cannot skip - at beginning of playlist or no current index',
       );
     }
@@ -435,43 +443,6 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     );
   }
 
-  // Future<List<MediaItem>?> getReciters() async {
-  //   final baseUrl = "https://mp3quran.net/api/v3/reciters";
-  //   try {
-  //     final response = await Dio().get(baseUrl);
-
-  //     if (response.statusCode == 200) {
-  //       final map = response.data as Map<String, dynamic>;
-
-  //       // Log the raw data
-  //       log(map.toString());
-
-  //       // Parse the JSON into the RecitersModel
-  //       final recitersModel = RecitersModel.fromJson(map);
-
-  //       // Convert Reciters to MediaItems (if needed)
-  //       final mediaItems = recitersModel.reciters.map((reciter) {
-  //         return MediaItem(
-  //           id: reciter.id.toString(),
-  //           title: reciter.name,
-  //           album: reciter.moshaf.isNotEmpty
-  //               ? reciter.moshaf.first.name
-  //               : '', // Example of using the first moshaf name
-  //           artist: reciter.name,
-  //           // Add other MediaItem properties as needed
-  //         );
-  //       }).toList();
-
-  //       return mediaItems;
-  //     } else {
-  //       log('Error: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     log('Exception: $e');
-  //   }
-  //   return null;
-  // }
-
   @override
   Future<List<MediaItem>?> getReciters({String? languageCode}) async {
     // Return cached data if available
@@ -490,54 +461,43 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
     _isLoadingReciters = true;
     final languageParam = _convertLanguageCode(languageCode);
-    final baseUrl =
-        "https://mp3quran.net/api/v3/reciters?language=$languageParam";
 
     try {
-      final response = await Dio().get(baseUrl);
+      final reciters = await _fetchReciters(languageParam);
 
-      if (response.statusCode == 200) {
-        final map = response.data as Map<String, dynamic>;
+      // Convert Reciters to MediaItems (if needed)
+      final mediaItems = <MediaItem>[];
 
-        // Parse the JSON into the RecitersModel
-        final recitersModel = RecitersModel.fromJson(map);
+      // Iterate through each reciter and generate MediaItems for their surahs
+      for (var reciter in reciters) {
+        for (var moshaf in reciter.moshaf) {
+          // Split the surah_list into individual surah IDs
+          final surahList = moshaf.surahList.split(',');
 
-        // Convert Reciters to MediaItems (if needed)
-        final mediaItems = <MediaItem>[];
+          // Create MediaItem for each surah
+          for (var surahId in surahList) {
+            final formattedSurahId = surahId.padLeft(
+              3,
+              '0',
+            ); // Make sure surah ID is like '001'
+            final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
 
-        // Iterate through each reciter and generate MediaItems for their surahs
-        for (var reciter in recitersModel.reciters) {
-          for (var moshaf in reciter.moshaf) {
-            // Split the surah_list into individual surah IDs
-            final surahList = moshaf.surahList.split(',');
-
-            // Create MediaItem for each surah
-            for (var surahId in surahList) {
-              final formattedSurahId = surahId.padLeft(
-                3,
-                '0',
-              ); // Make sure surah ID is like '001'
-              final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
-
-              mediaItems.add(
-                MediaItem(
-                  id: mediaItemId,
-                  title: '${surahId.surahName} $formattedSurahId',
-                  album: moshaf.name,
-                  artist: reciter.name,
-                  // Add other MediaItem properties as needed
-                ),
-              );
-            }
+            mediaItems.add(
+              MediaItem(
+                id: mediaItemId,
+                title: '${surahId.surahName} $formattedSurahId',
+                album: moshaf.name,
+                artist: reciter.name,
+                // Add other MediaItem properties as needed
+              ),
+            );
           }
         }
-
-        // Cache the results
-        _cachedReciters = mediaItems;
-        return mediaItems;
-      } else {
-        log('Error: ${response.statusCode}');
       }
+
+      // Cache the results
+      _cachedReciters = mediaItems;
+      return mediaItems;
     } catch (e) {
       log('Exception: $e');
     } finally {
@@ -550,23 +510,49 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   @override
   Future<List<Reciter>?> getRecitersData({String? languageCode}) async {
     final languageParam = _convertLanguageCode(languageCode);
-    final baseUrl =
-        "https://mp3quran.net/api/v3/reciters?language=$languageParam";
 
+    // Serve from cache when available for the same language
+    if (_cachedRecitersData != null &&
+        _cachedRecitersLanguage == languageParam) {
+      return _cachedRecitersData;
+    }
     try {
-      final response = await Dio().get(baseUrl);
-
-      if (response.statusCode == 200) {
-        final map = response.data as Map<String, dynamic>;
-        final recitersModel = RecitersModel.fromJson(map);
-        return recitersModel.reciters;
-      } else {
-        log('Error getting reciters data: ${response.statusCode}');
-      }
+      final reciters = await _fetchReciters(languageParam);
+      return reciters;
     } catch (e) {
       log('Exception getting reciters data: $e');
+      return null;
     }
-    return null;
+  }
+
+  Future<List<Reciter>> _fetchReciters(String languageParam) async {
+    if (_cachedRecitersData != null &&
+        _cachedRecitersLanguage == languageParam) {
+      return _cachedRecitersData!;
+    }
+    final existing = _inFlightReciters[languageParam];
+    if (existing != null) return await existing;
+
+    final future = (() async {
+      final baseUrl = ApiConfig.reciters(language: languageParam);
+      final response = await getIt<Dio>().get(baseUrl);
+      if (response.statusCode != 200) {
+        throw StateError('Bad status: ${response.statusCode}');
+      }
+      final map = response.data as Map<String, dynamic>;
+      final recitersModel = RecitersModel.fromJson(map);
+      _cachedRecitersData = recitersModel.reciters;
+      _cachedRecitersLanguage = languageParam;
+      return recitersModel.reciters;
+    })();
+
+    _inFlightReciters[languageParam] = future;
+    try {
+      final reciters = await future;
+      return reciters;
+    } finally {
+      _inFlightReciters.remove(languageParam);
+    }
   }
 
   /// Get surah list for a specific moshaf

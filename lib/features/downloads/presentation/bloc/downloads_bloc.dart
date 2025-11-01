@@ -13,6 +13,7 @@ import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downlo
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 part 'downloads_bloc.freezed.dart';
@@ -98,7 +99,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     emit(const DownloadsState.loading());
 
     final result = await _getDownloadsByReciter();
-    print('result: ${result.getOrElse(() => {})}');
+    logger.d('result: ${result.getOrElse(() => {})}');
     await result.fold(
       (failure) async => emit(
         DownloadsState.error(failure.message ?? 'Failed to load downloads'),

@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:muzakri/core/di/injection.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/reciter_model.dart';
 
@@ -26,7 +27,7 @@ class ReciterHelper {
             orElse: () => throw StateError('Reciter not found'),
           );
         } catch (e) {
-          print('Reciter not found by name: $reciterName');
+          logger.d('Reciter not found by name: $reciterName');
         }
       }
 
@@ -35,16 +36,16 @@ class ReciterHelper {
       for (final reciter in reciters) {
         for (final moshaf in reciter.moshaf) {
           if (mediaItem.id.contains(moshaf.server)) {
-            print('Found reciter by server match: ${reciter.name}');
+            logger.d('Found reciter by server match: ${reciter.name}');
             return reciter;
           }
         }
       }
 
-      print('No reciter found for MediaItem: ${mediaItem.id}');
+      logger.d('No reciter found for MediaItem: ${mediaItem.id}');
       return null;
     } catch (e) {
-      print('Error getting reciter from media item: $e');
+      logger.d('Error getting reciter from media item: $e');
       return null;
     }
   }

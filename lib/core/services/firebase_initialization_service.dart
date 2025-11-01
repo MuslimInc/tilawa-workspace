@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/main.dart';
 
 class FirebaseInitializationService {
   final FirebaseFirestore _firestore;
@@ -14,7 +15,7 @@ class FirebaseInitializationService {
   /// Initialize Firebase with default data
   Future<void> initializeFirebaseData() async {
     try {
-      print('🚀 Initializing Firebase data...');
+      logger.d('🚀 Initializing Firebase data...');
 
       // Check if subscription plans already exist
       final plansSnapshot = await _firestore
@@ -23,18 +24,18 @@ class FirebaseInitializationService {
           .get();
 
       if (plansSnapshot.docs.isEmpty) {
-        print('📋 Adding subscription plans to Firestore...');
+        logger.d('📋 Adding subscription plans to Firestore...');
         await _subscriptionPlansService.addDefaultSubscriptionPlans();
       } else {
-        print('✅ Subscription plans already exist in Firestore');
+        logger.d('✅ Subscription plans already exist in Firestore');
       }
 
       // Create sample users if needed (for testing)
       await _createSampleUsers();
 
-      print('✅ Firebase initialization completed successfully');
+      logger.d('✅ Firebase initialization completed successfully');
     } catch (e) {
-      print('❌ Error initializing Firebase data: $e');
+      logger.d('❌ Error initializing Firebase data: $e');
       rethrow;
     }
   }
@@ -43,14 +44,14 @@ class FirebaseInitializationService {
   Future<void> _createSampleUsers() async {
     try {
       // This is just for demonstration - in production, users would be created through authentication
-      print('👥 Creating sample user data structure...');
+      logger.d('👥 Creating sample user data structure...');
 
       // You can add sample user data here if needed
       // For now, we'll just ensure the collections exist
 
-      print('✅ Sample user data structure ready');
+      logger.d('✅ Sample user data structure ready');
     } catch (e) {
-      print('❌ Error creating sample users: $e');
+      logger.d('❌ Error creating sample users: $e');
     }
   }
 
@@ -67,7 +68,7 @@ class FirebaseInitializationService {
         'users': usersSnapshot.docs.length,
       };
     } catch (e) {
-      print('❌ Error getting Firebase stats: $e');
+      logger.d('❌ Error getting Firebase stats: $e');
       return {'subscription_plans': 0, 'users': 0};
     }
   }
@@ -75,7 +76,7 @@ class FirebaseInitializationService {
   /// Clear all Firebase data (use with caution!)
   Future<void> clearAllFirebaseData() async {
     try {
-      print('⚠️  Clearing all Firebase data...');
+      logger.d('⚠️  Clearing all Firebase data...');
 
       // Delete subscription plans
       final plansSnapshot = await _firestore
@@ -91,9 +92,9 @@ class FirebaseInitializationService {
         await doc.reference.delete();
       }
 
-      print('✅ All Firebase data cleared');
+      logger.d('✅ All Firebase data cleared');
     } catch (e) {
-      print('❌ Error clearing Firebase data: $e');
+      logger.d('❌ Error clearing Firebase data: $e');
       rethrow;
     }
   }

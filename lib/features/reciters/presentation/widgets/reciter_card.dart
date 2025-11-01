@@ -47,7 +47,7 @@ class ReciterCard extends StatelessWidget {
         ReciterDetailsRoute(
           reciter: reciter,
           reciterId: reciter.id.toString(),
-        ).go(context);
+        ).push(context);
       },
     );
   }

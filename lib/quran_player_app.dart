@@ -13,59 +13,63 @@ class QuranPlayerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      child: AppProviders.create(
-        child: BlocBuilder<LocalizationBloc, LocalizationState>(
-          builder: (context, locState) {
-            return BlocBuilder<ThemeCubit, ThemeState>(
-              builder: (context, themeState) {
-                return MaterialApp.router(
-                  title: 'Muzakri',
-                  debugShowCheckedModeBanner: false,
-                  theme: FlexThemeData.light(
-                    scheme: themeState.scheme,
-                    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-                    blendLevel: 7,
-                    appBarStyle: FlexAppBarStyle.primary,
-                    appBarOpacity: 0.95,
-                    appBarElevation: 0,
-                    transparentStatusBar: true,
-                    tabBarStyle: FlexTabBarStyle.forAppBar,
-                    tooltipsMatchBackground: true,
-                    swapColors: false,
-                    lightIsWhite: false,
-                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                    useMaterial3: true,
-                    useMaterial3ErrorColors: true,
-                  ),
-                  darkTheme: FlexThemeData.dark(
-                    scheme: themeState.scheme,
-                    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-                    blendLevel: 13,
-                    appBarStyle: FlexAppBarStyle.background,
-                    appBarOpacity: 0.90,
-                    appBarElevation: 0,
-                    transparentStatusBar: true,
-                    tabBarStyle: FlexTabBarStyle.forAppBar,
-                    tooltipsMatchBackground: true,
-                    swapColors: false,
-                    darkIsTrueBlack: false,
-                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                    useMaterial3: true,
-                    useMaterial3ErrorColors: true,
-                  ),
-                  themeMode: themeState.mode,
-                  routerConfig: AppRouter.router,
-                  locale: locState.locale,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates:
-                      AppLocalizations.localizationsDelegates,
-                );
-              },
+    return ScreenUtilInit(child: AppProviders.create(child: _PlayerApp()));
+  }
+}
+
+class _PlayerApp extends StatelessWidget {
+  const _PlayerApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LocalizationBloc, LocalizationState>(
+      builder: (context, locState) {
+        return BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            return MaterialApp.router(
+              title: 'Muzakri',
+              debugShowCheckedModeBanner: false,
+              theme: FlexThemeData.light(
+                scheme: themeState.scheme,
+                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                blendLevel: 7,
+                appBarStyle: FlexAppBarStyle.primary,
+                appBarOpacity: 0.95,
+                appBarElevation: 0,
+                transparentStatusBar: true,
+                tabBarStyle: FlexTabBarStyle.forAppBar,
+                tooltipsMatchBackground: true,
+                swapColors: false,
+                lightIsWhite: false,
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+                useMaterial3ErrorColors: true,
+              ),
+              darkTheme: FlexThemeData.dark(
+                scheme: themeState.scheme,
+                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                blendLevel: 13,
+                appBarStyle: FlexAppBarStyle.background,
+                appBarOpacity: 0.90,
+                appBarElevation: 0,
+                transparentStatusBar: true,
+                tabBarStyle: FlexTabBarStyle.forAppBar,
+                tooltipsMatchBackground: true,
+                swapColors: false,
+                darkIsTrueBlack: false,
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+                useMaterial3ErrorColors: true,
+              ),
+              themeMode: themeState.mode,
+              routerConfig: AppRouter.router,
+              locale: locState.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
             );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }

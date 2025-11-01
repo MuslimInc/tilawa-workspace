@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
+import 'package:muzakri/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class PremiumLocalDataSource {
@@ -26,7 +27,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
       final statusMap = jsonDecode(statusJson) as Map<String, dynamic>;
       return PremiumStatus.fromJson(statusMap);
     } catch (e) {
-      print('Error parsing premium status: $e');
+      logger.d('Error parsing premium status: $e');
       // Return default free status
       return const PremiumStatus(
         isPremium: false,
@@ -46,7 +47,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
       final statusJson = jsonEncode(status.toJson());
       await _prefs.setString(_premiumStatusKey, statusJson);
     } catch (e) {
-      print('Error saving premium status: $e');
+      logger.d('Error saving premium status: $e');
     }
   }
 

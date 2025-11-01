@@ -10,6 +10,7 @@ import 'package:muzakri/features/downloads/presentation/widgets/download_button.
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/reciter_model.dart';
 import 'package:muzakri/shared/widgets/bottom_player.dart';
@@ -358,17 +359,17 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         // Validate that the file actually exists
         final file = File(filePath);
         if (await file.exists()) {
-          print('_getDownloadedFilePath: file exists at $filePath');
+          logger.d('_getDownloadedFilePath: file exists at $filePath');
           return filePath;
         } else {
-          print('_getDownloadedFilePath: file does not exist at $filePath');
+          logger.d('_getDownloadedFilePath: file does not exist at $filePath');
           return null;
         }
       }
 
       return null;
     } catch (e) {
-      print('Error checking downloaded file: $e');
+      logger.d('Error checking downloaded file: $e');
       return null;
     }
   }
@@ -384,7 +385,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         widget.reciter.name,
       );
     } catch (e) {
-      print('Error checking if surah is downloaded: $e');
+      logger.d('Error checking if surah is downloaded: $e');
       return false;
     }
   }
@@ -395,8 +396,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       // Convert file path to proper file:// URI
       final fileUri = Uri.file(filePath).toString();
 
-      print('_createLocalMediaItem: original file path: $filePath');
-      print('_createLocalMediaItem: file URI: $fileUri');
+      logger.d('_createLocalMediaItem: original file path: $filePath');
+      logger.d('_createLocalMediaItem: file URI: $fileUri');
 
       return MediaItem(
         id: fileUri, // Use file URI as ID for local files
@@ -413,8 +414,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         },
       );
     } catch (e) {
-      print('_createLocalMediaItem error: $e');
-      print('_createLocalMediaItem: falling back to original surah');
+      logger.d('_createLocalMediaItem error: $e');
+      logger.d('_createLocalMediaItem: falling back to original surah');
       // Fallback to original surah if file URI creation fails
       return originalSurah.mediaItem;
     }
@@ -442,14 +443,14 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         (item) => item.id == surah.id,
       );
 
-      print(
+      logger.d(
         '_playSurah: selected surah=${surah.name}, index=$surahIndex, total surahs=${state.surahList.length}',
       );
-      print('_playSurah: downloaded file path: $downloadedFilePath');
+      logger.d('_playSurah: downloaded file path: $downloadedFilePath');
 
       if (downloadedFilePath != null) {
         final fileUri = Uri.file(downloadedFilePath).toString();
-        print('_playSurah: file URI: $fileUri');
+        logger.d('_playSurah: file URI: $fileUri');
       }
 
       if (surahIndex != -1) {
@@ -478,7 +479,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         }
 
         // Update queue with the surah list (with downloaded files where available)
-        print(
+        logger.d(
           '_playSurah: updating queue with ${surahListWithDownloads.length} surahs',
         );
 
@@ -489,13 +490,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           await audioHandler.pause();
 
           // Skip to the selected surah
-          print('_playSurah: skipping to surah at index $surahIndex');
+          logger.d('_playSurah: skipping to surah at index $surahIndex');
           await audioHandler.skipToQueueItem(surahIndex);
 
           // Now start playing the selected surah
           await audioHandler.play();
         } catch (e) {
-          print(
+          logger.d(
             '_playSurah: error playing with downloaded files, falling back to streaming',
           );
           // Fallback to original surah list if downloaded files fail
@@ -508,7 +509,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         }
       } else {
         // Fallback: just play the single surah
-        print('_playSurah: surah not found in list, playing single surah');
+        logger.d('_playSurah: surah not found in list, playing single surah');
         final surahToPlay = downloadedFilePath != null
             ? _createLocalMediaItem(surah, downloadedFilePath)
             : surah.mediaItem;
@@ -519,7 +520,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           await audioHandler.skipToQueueItem(0);
           await audioHandler.play();
         } catch (e) {
-          print(
+          logger.d(
             '_playSurah: error playing single downloaded surah, falling back to streaming',
           );
           // Fallback to original surah if downloaded file fails
@@ -530,8 +531,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         }
       }
     } catch (e, stackTrace) {
-      print('_playSurah error: $e');
-      print('Stack trace: $stackTrace');
+      logger.d('_playSurah error: $e');
+      logger.d('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

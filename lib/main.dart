@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/di/injection.dart';
+import 'package:muzakri/core/observers/app_bloc_observer.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
@@ -32,7 +34,7 @@ Future<void> main() async {
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
 
-  // Bloc.observer = AppBlocObserver();
+  Bloc.observer = AppBlocObserver();
 
   runApp(const QuranPlayerApp());
 }
@@ -46,9 +48,9 @@ Future<void> _initializeCredentialManager() async {
       googleClientId:
           '181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com',
     );
-    print('Credential Manager initialized successfully');
+    logger.d('Credential Manager initialized successfully');
   } catch (e) {
-    print('Warning: Could not initialize Credential Manager: $e');
+    logger.d('Warning: Could not initialize Credential Manager: $e');
   }
 }
 
@@ -57,9 +59,9 @@ Future<void> _initializeCrashlytics() async {
   try {
     final crashlyticsService = getIt<CrashlyticsService>();
     await crashlyticsService.initialize();
-    print('Crashlytics initialized successfully');
+    logger.d('Crashlytics initialized successfully');
   } catch (e) {
-    print('Crashlytics initialization error: $e');
+    logger.d('Crashlytics initialization error: $e');
   }
 }
 
@@ -68,9 +70,9 @@ Future<void> _initializeAnalytics() async {
   try {
     final analyticsInitService = getIt<AnalyticsInitializationService>();
     await analyticsInitService.initialize();
-    print('Analytics initialized successfully');
+    logger.d('Analytics initialized successfully');
   } catch (e) {
-    print('Analytics initialization error: $e');
+    logger.d('Analytics initialization error: $e');
   }
 }
 
@@ -81,7 +83,7 @@ void _initializeFirebaseDataAsync() {
       final firebaseInitService = getIt<FirebaseInitializationService>();
       await firebaseInitService.initializeFirebaseData();
     } catch (e) {
-      print('Warning: Could not initialize Firebase data: $e');
+      logger.d('Warning: Could not initialize Firebase data: $e');
     }
   });
 }

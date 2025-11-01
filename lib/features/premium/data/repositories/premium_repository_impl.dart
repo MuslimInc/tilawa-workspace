@@ -5,6 +5,7 @@ import 'package:muzakri/features/premium/data/datasources/premium_remote_datasou
 import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
 import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/main.dart';
 
 @LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
@@ -25,7 +26,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
       }
     } catch (e) {
       // If remote fails, use local data
-      print('Remote premium status fetch failed: $e');
+      logger.d('Remote premium status fetch failed: $e');
     }
 
     // Fallback to local data
@@ -39,7 +40,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
     try {
       await _remoteDataSource.updatePremiumStatus(status);
     } catch (e) {
-      print('Failed to sync premium status with remote: $e');
+      logger.d('Failed to sync premium status with remote: $e');
     }
   }
 
@@ -48,7 +49,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
     try {
       return await _remoteDataSource.getAvailablePlans();
     } catch (e) {
-      print('Failed to fetch plans from remote: $e');
+      logger.d('Failed to fetch plans from remote: $e');
       // Return default plans
       return _getDefaultPlans();
     }
@@ -76,7 +77,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
       }
       return result;
     } catch (e) {
-      print('Purchase failed: $e');
+      logger.d('Purchase failed: $e');
       return false;
     }
   }
@@ -96,7 +97,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
       }
       return result;
     } catch (e) {
-      print('Cancel subscription failed: $e');
+      logger.d('Cancel subscription failed: $e');
       return false;
     }
   }
@@ -112,7 +113,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
       }
       return false;
     } catch (e) {
-      print('Restore subscription failed: $e');
+      logger.d('Restore subscription failed: $e');
       return false;
     }
   }
@@ -135,7 +136,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
       await updatePremiumStatus(updatedStatus);
       return true;
     } catch (e) {
-      print('Start trial failed: $e');
+      logger.d('Start trial failed: $e');
       return false;
     }
   }

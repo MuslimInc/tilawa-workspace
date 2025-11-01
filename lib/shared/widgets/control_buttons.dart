@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/helpers/show_slider_dialog.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/models/queue_state.dart';
 
 class ControlButtons extends StatelessWidget {
@@ -30,7 +31,7 @@ class ControlButtons extends StatelessWidget {
                   max: 1.0,
                   value: volume,
                   onChanged: (newVolume) {
-                    print('Volume changed to: $newVolume');
+                    logger.d('Volume changed to: $newVolume');
                     context.read<AudioPlayerBloc>().add(
                       AudioPlayerEvent.setVolume(newVolume),
                     );

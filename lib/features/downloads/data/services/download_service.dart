@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:dio/dio.dart';
+import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/main.dart';
 
@@ -21,12 +22,14 @@ class DownloadService {
     if (_tasks.containsKey(id)) {
       // Already downloading
       // ignore: avoid_print
-      print('[DownloadService] startDownload skipped: id=$id already active');
+      logger.d(
+        '[DownloadService] startDownload skipped: id=$id already active',
+      );
       return;
     }
 
     // ignore: avoid_print
-    print(
+    logger.d(
       '[DownloadService] startDownload: id=$id title="$title" reciter="$reciterName" url=$url path=$filePath',
     );
 
@@ -44,12 +47,16 @@ class DownloadService {
         _globalProgressController.add(message);
         if (message.progress == 0.0 || message.progress == 1.0) {
           // ignore: avoid_print
-          print(
+          logger.d(
             '[DownloadService] progress: id=${message.id} status=${message.status} progress=${message.progress}',
           );
         }
       }
     });
+
+    // Pull headers/options from the shared Dio instance (DI) to keep config consistent
+    final sharedDio = getIt<Dio>();
+    final sharedHeaders = Map<String, dynamic>.from(sharedDio.options.headers);
 
     final isolate = await Isolate.spawn<_DownloadInitMessage>(
       _downloadIsolateEntry,
@@ -60,6 +67,7 @@ class DownloadService {
         title: title,
         reciterName: reciterName,
         sendPort: receivePort.sendPort,
+        headers: sharedHeaders,
       ),
     );
 
@@ -80,7 +88,7 @@ class DownloadService {
     );
 
     // ignore: avoid_print
-    print('[DownloadService] task registered: id=$id');
+    logger.d('[DownloadService] task registered: id=$id');
   }
 
   /// Listen to download progress of a specific download ID
@@ -106,7 +114,7 @@ class DownloadService {
   static Future<void> dispose() async {
     // Cancel all active downloads
     // ignore: avoid_print
-    print(
+    logger.d(
       '[DownloadService] dispose: cancelling ${_tasks.length} active task(s)',
     );
     for (final task in _tasks.values) {
@@ -118,7 +126,7 @@ class DownloadService {
     _tasks.clear();
     await _globalProgressController.close();
     // ignore: avoid_print
-    print('[DownloadService] dispose: done');
+    logger.d('[DownloadService] dispose: done');
   }
 
   /// Cancel a download and clean up its resources
@@ -126,7 +134,7 @@ class DownloadService {
     final task = _tasks.remove(id);
     if (task != null) {
       // ignore: avoid_print
-      print('[DownloadService] cancelDownload: id=$id');
+      logger.d('[DownloadService] cancelDownload: id=$id');
       task.isolate.kill(priority: Isolate.immediate);
       await task.subscription.cancel();
       task.receivePort.close();
@@ -151,7 +159,9 @@ class DownloadService {
         followRedirects: true,
         maxRedirects: 5,
         validateStatus: (status) => status != null && status < 500,
-        headers: {'User-Agent': 'muzakri/1.0 (Flutter; Dart)'},
+        headers: message.headers.isEmpty
+            ? {'User-Agent': 'muzakri/1.0 (Flutter; Dart)'}
+            : message.headers,
       ),
     );
     final cancelToken = CancelToken();
@@ -215,11 +225,11 @@ class DownloadService {
         ),
       );
       // ignore: avoid_print
-      print('[DownloadService Isolate] completed: id=$id');
+      logger.d('[DownloadService Isolate] completed: id=$id');
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.cancel) {
         // ignore: avoid_print
-        print('[DownloadService Isolate] cancelled: id=$id');
+        logger.d('[DownloadService Isolate] cancelled: id=$id');
         sendPort.send(
           DownloadProgress(
             id: id,
@@ -232,12 +242,12 @@ class DownloadService {
       } else {
         if (e is DioException) {
           // ignore: avoid_print
-          print(
+          logger.d(
             '[DownloadService Isolate] DioException: id=$id type=${e.type} status=${e.response?.statusCode} message=${e.message} url=$url',
           );
         } else {
           // ignore: avoid_print
-          print(
+          logger.d(
             '[DownloadService Isolate] Error: id=$id error=${e.toString()}',
           );
         }
@@ -254,7 +264,7 @@ class DownloadService {
     } finally {
       receivePort.close();
       // ignore: avoid_print
-      print('[DownloadService Isolate] closed: id=$id');
+      logger.d('[DownloadService Isolate] closed: id=$id');
     }
   }
 }
@@ -282,6 +292,7 @@ class _DownloadInitMessage {
   final String title;
   final String reciterName;
   final SendPort sendPort;
+  final Map<String, dynamic> headers;
 
   _DownloadInitMessage({
     required this.id,
@@ -290,6 +301,7 @@ class _DownloadInitMessage {
     required this.title,
     required this.reciterName,
     required this.sendPort,
+    required this.headers,
   });
 }
 

@@ -1,3 +1,5 @@
+import 'package:muzakri/main.dart';
+
 class GoogleSignInConfig {
   // TODO: Replace with your actual server client ID from Firebase Console
   // To get this:
@@ -15,7 +17,7 @@ class GoogleSignInConfig {
   // Temporary fallback - this will cause an error but won't crash the app
   static String get effectiveServerClientId {
     if (serverClientId == 'YOUR_SERVER_CLIENT_ID_HERE') {
-      print(
+      logger.d(
         'WARNING: Google Sign-In not configured. Please update GoogleSignInConfig.serverClientId',
       );
       return developmentServerClientId;

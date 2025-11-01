@@ -6,9 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+import 'package:dio/dio.dart';
+import 'package:muzakri/core/config/api_config.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/main.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/audio/audio_player_handler_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +40,22 @@ abstract class ExternalDependenciesModule {
   SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();
 
   @singleton
+  Dio dioClient() => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      followRedirects: true,
+      maxRedirects: 5,
+      validateStatus: (status) => status != null && status < 500,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'muzakri/1.0 (Flutter; Dart)',
+      },
+    ),
+  );
+
+  @singleton
   SubscriptionPlansService subscriptionPlansService(
     FirebaseFirestore firestore,
   ) => SubscriptionPlansService(firestore: firestore);
@@ -61,7 +80,7 @@ abstract class ExternalDependenciesModule {
     SharedPreferencesAsync prefs,
   ) async {
     try {
-      print('Initializing audio service...');
+      logger.d('Initializing audio service...');
       final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(
         mediaItems,
         analyticsService,
@@ -76,17 +95,17 @@ abstract class ExternalDependenciesModule {
           androidNotificationOngoing: true,
         ),
       );
-      print('Audio service initialized successfully');
+      logger.d('Audio service initialized successfully');
       return audioHandler;
     } catch (e) {
-      print('Warning: Could not initialize audio service: $e');
+      logger.d('Warning: Could not initialize audio service: $e');
       // Register a fallback handler to prevent crashes
       final fallbackHandler = AudioPlayerHandlerImpl(
         [],
         analyticsService,
         prefs,
       );
-      print('Fallback AudioPlayerHandler registered');
+      logger.d('Fallback AudioPlayerHandler registered');
       return fallbackHandler;
     }
   }
