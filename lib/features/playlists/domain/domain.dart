@@ -1,3 +1,3 @@
-export 'entities/playlist.dart';
-export 'repositories/playlists_repository.dart';
+export 'entities/entities.dart';
+export 'repositories/repositories.dart';
 export 'usecases/usecases.dart';

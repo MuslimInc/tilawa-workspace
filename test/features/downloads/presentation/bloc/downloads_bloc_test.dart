@@ -18,7 +18,7 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
-import 'package:muzakri/helpers/hydrated_bloc_test_helper.dart';
+import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import 'downloads_bloc_test.mocks.dart';

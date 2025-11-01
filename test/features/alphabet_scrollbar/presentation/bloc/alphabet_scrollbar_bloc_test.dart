@@ -1,7 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/helpers/hydrated_bloc_test_helper.dart';
+import '../../../../helpers/hydrated_bloc_test_helper.dart';
 
 void main() {
   setUpAll(() async {
