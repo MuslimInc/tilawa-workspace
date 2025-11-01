@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
@@ -12,7 +12,7 @@ part 'reciter_details_state.dart';
 
 @injectable
 class ReciterDetailsBloc
-    extends Bloc<ReciterDetailsEvent, ReciterDetailsState> {
+    extends HydratedBloc<ReciterDetailsEvent, ReciterDetailsState> {
   final AudioPlayerHandler _audioHandler;
   final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
@@ -91,5 +91,17 @@ class ReciterDetailsBloc
     } catch (e) {
       // Don't emit error for refresh, just keep current state
     }
+  }
+
+  @override
+  ReciterDetailsState? fromJson(Map<String, dynamic> json) {
+    // Reciter details should be loaded from repository, so we always start with initial state
+    return const ReciterDetailsInitial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(ReciterDetailsState state) {
+    // Don't persist complex reciter details data - will reload from repository
+    return null;
   }
 }

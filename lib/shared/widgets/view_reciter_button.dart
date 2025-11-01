@@ -21,7 +21,7 @@ class ViewReciterButton extends StatelessWidget {
           ReciterDetailsRoute(
             reciterId: reciter.id.toString(),
             reciter: reciter,
-          ).go(context);
+          ).push(context);
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

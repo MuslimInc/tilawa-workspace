@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
@@ -9,6 +11,26 @@ import 'downloads_repository_impl_test.mocks.dart';
 
 @GenerateMocks([DownloadsLocalDataSource])
 void main() {
+  setUpAll(() {
+    // Register Dio in GetIt for DownloadService to use
+    // This prevents "Dio is not registered" errors when DownloadService
+    // tries to access Dio via GetIt
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      getIt.unregister<Dio>();
+    }
+    // Use registerSingleton to ensure it's available immediately
+    getIt.registerSingleton<Dio>(Dio());
+  });
+
+  tearDownAll(() {
+    // Clean up GetIt registration
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      getIt.unregister<Dio>();
+    }
+  });
+
   late DownloadsRepositoryImpl repository;
   late MockDownloadsLocalDataSource mockLocalDataSource;
 

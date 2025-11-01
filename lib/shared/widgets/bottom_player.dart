@@ -87,7 +87,7 @@ class _BottomPlayerState extends State<BottomPlayer> {
                 ],
               ),
               child: InkWell(
-                onTap: () => const ExpandedPlayerRoute().go(context),
+                onTap: () => const ExpandedPlayerRoute().push(context),
                 child: SafeArea(
                   top: false,
                   child: SingleChildScrollView(

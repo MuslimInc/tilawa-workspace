@@ -1,5 +1,5 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/main.dart';
@@ -13,7 +13,7 @@ part 'audio_player_event.dart';
 part 'audio_player_state.dart';
 
 @injectable
-class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
+class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final AudioPlayerHandler _audioHandler;
 
   AudioPlayerBloc(this._audioHandler)
@@ -290,5 +290,28 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
   void _onSetShuffleMode(SetShuffleMode event, Emitter<AudioPlayerState> emit) {
     _audioHandler.setShuffleMode(event.shuffleMode);
+  }
+
+  @override
+  AudioPlayerState? fromJson(Map<String, dynamic> json) {
+    try {
+      final volume = (json['volume'] as num?)?.toDouble() ?? 1.0;
+      final speed = (json['speed'] as num?)?.toDouble() ?? 1.0;
+
+      return AudioPlayerState(
+        status: AudioPlayerStatus.initial,
+        volume: volume,
+        speed: speed,
+      );
+    } catch (e) {
+      return const AudioPlayerState(status: AudioPlayerStatus.initial);
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(AudioPlayerState state) {
+    // Only persist volume and speed settings
+    // MediaItem, PlaybackState, PositionData, and QueueState are ephemeral
+    return {'volume': state.volume, 'speed': state.speed};
   }
 }

@@ -144,7 +144,7 @@ class _SurahDownloadButtonState extends State<SurahDownloadButton> {
         title: 'Premium Required',
         message: message,
         onUpgrade: () {
-          const PremiumRoute().go(context);
+          const PremiumRoute().push(context);
         },
       ),
     );

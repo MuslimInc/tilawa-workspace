@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/currency_config.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
@@ -13,7 +13,7 @@ import 'package:muzakri/features/premium/presentation/bloc/premium_event.dart';
 import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
 
 @injectable
-class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
+class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
   final GetPremiumStatusUseCase _getPremiumStatus;
   final PurchaseSubscriptionUseCase _purchaseSubscription;
   final CancelSubscriptionUseCase _cancelSubscription;
@@ -252,5 +252,21 @@ class PremiumBloc extends Bloc<PremiumEvent, PremiumState> {
     Emitter<PremiumState> emit,
   ) async {
     add(const LoadPremiumStatus());
+  }
+
+  @override
+  PremiumState? fromJson(Map<String, dynamic> json) {
+    // Premium status should be loaded from repository, so we always start with initial state
+    return const PremiumState.initial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(PremiumState state) {
+    // Only persist if in initial state to avoid storing complex premium data
+    if (state is PremiumInitial) {
+      return {'state': 'initial'};
+    }
+    // For other states, don't persist (will reload from repository)
+    return null;
   }
 }

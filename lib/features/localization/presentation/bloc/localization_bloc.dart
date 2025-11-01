@@ -1,18 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/language_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'localization_event.dart';
 part 'localization_state.dart';
 
 @injectable
-class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
-  final SharedPreferencesAsync _prefs;
-
-  LocalizationBloc(this._prefs)
+class LocalizationBloc
+    extends HydratedBloc<LocalizationEvent, LocalizationState> {
+  LocalizationBloc()
     : super(
         LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
       ) {
@@ -20,39 +18,40 @@ class LocalizationBloc extends Bloc<LocalizationEvent, LocalizationState> {
     on<ChangeLanguage>(_onChangeLanguage);
   }
 
+  @override
+  LocalizationState? fromJson(Map<String, dynamic> json) {
+    try {
+      final languageCode = json['languageCode'] as String?;
+      if (languageCode != null) {
+        return LocalizationState(locale: Locale(languageCode));
+      }
+      return LocalizationState(
+        locale: Locale(LanguageConfig.getDefaultLanguageCode()),
+      );
+    } catch (e) {
+      return LocalizationState(
+        locale: Locale(LanguageConfig.getDefaultLanguageCode()),
+      );
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(LocalizationState state) {
+    return {'languageCode': state.locale.languageCode};
+  }
+
   Future<void> _onLoadLanguage(
     LoadLanguage event,
     Emitter<LocalizationState> emit,
   ) async {
-    try {
-      final languageCode =
-          await _prefs.getString(LanguageConfig.languageKey) ??
-          LanguageConfig.getDefaultLanguageCode();
-
-      final locale = Locale(languageCode);
-
-      emit(LocalizationState(locale: locale));
-    } catch (e) {
-      // Fallback to default language if there's an error
-      final locale = Locale(LanguageConfig.getDefaultLanguageCode());
-      emit(LocalizationState(locale: locale));
-    }
+    // State will be loaded from storage automatically
+    // This is kept for backward compatibility if needed
   }
 
   Future<void> _onChangeLanguage(
     ChangeLanguage event,
     Emitter<LocalizationState> emit,
   ) async {
-    try {
-      await _prefs.setString(
-        LanguageConfig.languageKey,
-        event.locale.languageCode,
-      );
-
-      emit(LocalizationState(locale: event.locale));
-    } catch (e) {
-      // If saving fails, still emit the new state
-      emit(LocalizationState(locale: event.locale));
-    }
+    emit(LocalizationState(locale: event.locale));
   }
 }

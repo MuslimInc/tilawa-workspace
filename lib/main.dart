@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/di/injection.dart';
@@ -12,6 +13,7 @@ import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/quran_player_app.dart';
+import 'package:path_provider/path_provider.dart';
 
 final logger = Logger();
 
@@ -21,6 +23,9 @@ Future<void> main() async {
   // Initialize Firebase first, then DI
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await configureDependencies();
+
+  // Initialize HydratedStorage
+  await _initializeHydratedStorage();
 
   // Initialize Crashlytics first (handles error reporting)
   await _initializeCrashlytics();
@@ -37,6 +42,21 @@ Future<void> main() async {
   Bloc.observer = AppBlocObserver();
 
   runApp(const QuranPlayerApp());
+}
+
+/// Initialize HydratedStorage for bloc state persistence
+Future<void> _initializeHydratedStorage() async {
+  try {
+    HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: kIsWeb
+          ? HydratedStorageDirectory.web
+          : HydratedStorageDirectory((await getTemporaryDirectory()).path),
+    );
+
+    logger.d('HydratedStorage initialized successfully');
+  } catch (e) {
+    logger.d('Warning: Could not initialize HydratedStorage: $e');
+  }
 }
 
 /// Initialize Credential Manager with Google Client ID

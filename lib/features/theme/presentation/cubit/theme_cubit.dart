@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/theme/data/theme_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeState extends Equatable {
   final ThemeMode mode;
@@ -22,36 +21,48 @@ class ThemeState extends Equatable {
 }
 
 @injectable
-class ThemeCubit extends Cubit<ThemeState> {
-  static const String _themeKey = 'app_theme_mode';
-  static const String _schemeKey = 'app_theme_scheme';
-  static const String _useSystemThemeKey = 'app_use_system_theme';
+class ThemeCubit extends HydratedCubit<ThemeState> {
+  ThemeCubit() : super(const ThemeState(mode: ThemeMode.system));
 
-  final SharedPreferencesAsync _prefs;
+  @override
+  ThemeState? fromJson(Map<String, dynamic> json) {
+    try {
+      final modeValue = json['mode'] as String?;
+      final schemeValue = json['scheme'] as String?;
+      final useSystemTheme = json['useSystemTheme'] as bool? ?? true;
 
-  ThemeCubit(this._prefs) : super(const ThemeState(mode: ThemeMode.system)) {
-    _load();
+      final mode = switch (modeValue) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+      final scheme = FlexScheme.values.firstWhere(
+        (s) => s.name == schemeValue,
+        orElse: () => FlexScheme.mandyRed,
+      );
+
+      return ThemeState(
+        mode: mode,
+        scheme: scheme,
+        useSystemTheme: useSystemTheme,
+      );
+    } catch (e) {
+      return const ThemeState(mode: ThemeMode.system);
+    }
   }
 
-  Future<void> _load() async {
-    final themeValue = await _prefs.getString(_themeKey);
-    final schemeValue = await _prefs.getString(_schemeKey);
-    final useSystemTheme = await _prefs.getBool(_useSystemThemeKey) ?? true;
-
-    final mode = switch (themeValue) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+  @override
+  Map<String, dynamic>? toJson(ThemeState state) {
+    return {
+      'mode': switch (state.mode) {
+        ThemeMode.light => 'light',
+        ThemeMode.dark => 'dark',
+        ThemeMode.system => 'system',
+      },
+      'scheme': state.scheme.name,
+      'useSystemTheme': state.useSystemTheme,
     };
-
-    final scheme = FlexScheme.values.firstWhere(
-      (s) => s.name == schemeValue,
-      orElse: () => FlexScheme.mandyRed,
-    );
-
-    emit(
-      ThemeState(mode: mode, scheme: scheme, useSystemTheme: useSystemTheme),
-    );
   }
 
   Future<void> setMode(ThemeMode mode) async {
@@ -62,13 +73,6 @@ class ThemeCubit extends Cubit<ThemeState> {
         useSystemTheme: state.useSystemTheme,
       ),
     );
-
-    final value = switch (mode) {
-      ThemeMode.light => 'light',
-      ThemeMode.dark => 'dark',
-      ThemeMode.system => 'system',
-    };
-    await _prefs.setString(_themeKey, value);
   }
 
   Future<void> setScheme(FlexScheme scheme) async {
@@ -79,8 +83,6 @@ class ThemeCubit extends Cubit<ThemeState> {
         useSystemTheme: state.useSystemTheme,
       ),
     );
-
-    await _prefs.setString(_schemeKey, scheme.name);
   }
 
   Future<void> setUseSystemTheme(bool useSystemTheme) async {
@@ -91,8 +93,6 @@ class ThemeCubit extends Cubit<ThemeState> {
         useSystemTheme: useSystemTheme,
       ),
     );
-
-    await _prefs.setBool(_useSystemThemeKey, useSystemTheme);
   }
 
   Future<void> toggleDark(bool enabled) async {

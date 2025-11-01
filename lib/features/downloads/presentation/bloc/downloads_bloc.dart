@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
@@ -21,7 +21,7 @@ part 'downloads_event.dart';
 part 'downloads_state.dart';
 
 @injectable
-class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
+class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final GetDownloadsByReciterUseCase _getDownloadsByReciter;
   final DownloadSurahUseCase _downloadSurah;
   final DeleteDownloadUseCase _deleteDownload;
@@ -521,5 +521,21 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     } catch (e) {
       emit(DownloadsState.error('Failed to retry download: $e'));
     }
+  }
+
+  @override
+  DownloadsState? fromJson(Map<String, dynamic> json) {
+    // Downloads should be loaded from database, so we always start with initial state
+    return const DownloadsState.initial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(DownloadsState state) {
+    // Only persist if in initial state to avoid storing complex download data
+    if (state is DownloadsInitial) {
+      return {'state': 'initial'};
+    }
+    // For other states, don't persist (will reload from database)
+    return null;
   }
 }

@@ -1,9 +1,31 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 
 void main() {
+  setUpAll(() {
+    // Register Dio in GetIt for DownloadService to use
+    // This prevents "Dio is not registered" errors when DownloadService
+    // tries to access Dio via GetIt
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      getIt.unregister<Dio>();
+    }
+    // Use registerSingleton to ensure it's available immediately
+    getIt.registerSingleton<Dio>(Dio());
+  });
+
+  tearDownAll(() {
+    // Clean up GetIt registration
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      getIt.unregister<Dio>();
+    }
+  });
+
   group('DownloadService', () {
     const testId = 'test_download_id';
     const testUrl = 'https://example.com/test.mp3';

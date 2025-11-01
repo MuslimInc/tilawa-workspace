@@ -1,6 +1,7 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
+import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
 import 'package:muzakri/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
@@ -8,7 +9,7 @@ import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 
 @injectable
-class AuthBloc extends Bloc<AuthEvent, AuthState> {
+class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   final SignInWithGoogleUseCase _signInWithGoogle;
   final SignOut _signOut;
   final GetCurrentUserUseCase _getCurrentUser;
@@ -47,5 +48,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else {
       emit(const AuthState.unauthenticated());
     }
+  }
+
+  @override
+  AuthState? fromJson(Map<String, dynamic> json) {
+    try {
+      final stateType = json['state'] as String?;
+      if (stateType == 'authenticated' && json['user'] != null) {
+        final userJson = json['user'] as Map<String, dynamic>;
+        final user = UserEntity(
+          id: userJson['id'] as String,
+          email: userJson['email'] as String,
+          displayName: userJson['displayName'] as String,
+          photoUrl: userJson['photoUrl'] as String?,
+          createdAt: DateTime.parse(userJson['createdAt'] as String),
+        );
+        return AuthState.authenticated(user: user);
+      }
+      return const AuthState.initial();
+    } catch (e) {
+      return const AuthState.initial();
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(AuthState state) {
+    // Only persist if authenticated to maintain session
+    if (state is AuthAuthenticated) {
+      return {
+        'state': 'authenticated',
+        'user': {
+          'id': state.user.id,
+          'email': state.user.email,
+          'displayName': state.user.displayName,
+          'photoUrl': state.user.photoUrl,
+          'createdAt': state.user.createdAt.toIso8601String(),
+        },
+      };
+    }
+    // Don't persist other states - will check auth status on startup
+    return null;
   }
 }

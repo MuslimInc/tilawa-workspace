@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
@@ -9,7 +9,7 @@ part 'playlists_event.dart';
 part 'playlists_state.dart';
 
 @injectable
-class PlaylistsBloc extends Bloc<PlaylistsEvent, PlaylistsState> {
+class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
   final GetAllPlaylistsUseCase _getAllPlaylistsUseCase;
   final CreatePlaylistUseCase _createPlaylistUseCase;
   final UpdatePlaylistUseCase _updatePlaylistUseCase;
@@ -337,5 +337,17 @@ class PlaylistsBloc extends Bloc<PlaylistsEvent, PlaylistsState> {
     Emitter<PlaylistsState> emit,
   ) async {
     add(const LoadPlaylistsEvent());
+  }
+
+  @override
+  PlaylistsState? fromJson(Map<String, dynamic> json) {
+    // Playlists should be loaded from repository, so we always start with initial state
+    return const PlaylistsState.initial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(PlaylistsState state) {
+    // Don't persist complex playlists data - will reload from repository
+    return null;
   }
 }

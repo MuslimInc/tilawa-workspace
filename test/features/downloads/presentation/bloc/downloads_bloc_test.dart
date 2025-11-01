@@ -1,7 +1,9 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/core/errors/failures.dart';
@@ -16,6 +18,7 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/helpers/hydrated_bloc_test_helper.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import 'downloads_bloc_test.mocks.dart';
@@ -33,6 +36,30 @@ import 'downloads_bloc_test.mocks.dart';
   DownloadService,
 ])
 void main() {
+  setUpAll(() async {
+    // Register Dio FIRST before anything else that might use it
+    // This prevents "Dio is not registered" errors when DownloadService
+    // tries to access Dio via GetIt
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      await getIt.unregister<Dio>();
+    }
+    // Use registerSingleton to ensure it's available immediately
+    getIt.registerSingleton<Dio>(Dio());
+
+    await initializeHydratedStorageForTest();
+  });
+
+  tearDownAll(() async {
+    await clearHydratedStorageForTest();
+
+    // Clean up GetIt registration
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<Dio>()) {
+      await getIt.unregister<Dio>();
+    }
+  });
+
   late DownloadsBloc downloadsBloc;
   late MockGetDownloadsByReciterUseCase mockGetDownloadsByReciterUseCase;
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;

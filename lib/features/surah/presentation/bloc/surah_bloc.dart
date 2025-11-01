@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
@@ -15,7 +15,7 @@ part 'surah_event.dart';
 part 'surah_state.dart';
 
 @injectable
-class SurahBloc extends Bloc<SurahEvent, SurahState> {
+class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
   SurahBloc(
     this._getSurahsForReciter,
     this._updateSurahDownloadStatus,
@@ -132,5 +132,17 @@ class SurahBloc extends Bloc<SurahEvent, SurahState> {
     } catch (e) {
       emit(SurahState.error('Failed to refresh surah status: $e'));
     }
+  }
+
+  @override
+  SurahState? fromJson(Map<String, dynamic> json) {
+    // Surah state should be loaded from repository, so we always start with initial state
+    return const SurahState.initial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(SurahState state) {
+    // Don't persist complex surah data - will reload from repository
+    return null;
   }
 }

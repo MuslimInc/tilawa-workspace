@@ -42,7 +42,7 @@ class DownloadButton extends StatelessWidget {
           action: SnackBarAction(
             label: AppLocalizations.of(context)!.viewDownloads,
             onPressed: () {
-              const DownloadsRoute().go(context);
+              const DownloadsRoute().push(context);
             },
           ),
         ),
@@ -77,7 +77,7 @@ class DownloadButton extends StatelessWidget {
           title: 'Premium Required',
           message: message,
           onUpgrade: () {
-            const PremiumRoute().go(context);
+            const PremiumRoute().push(context);
           },
         ),
       );

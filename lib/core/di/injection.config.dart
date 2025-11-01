@@ -177,6 +177,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i203.AlphabetScrollbarBloc>(
       () => _i203.AlphabetScrollbarBloc(),
     );
+    gh.factory<_i52.ThemeCubit>(() => _i52.ThemeCubit());
+    gh.factory<_i413.LocalizationBloc>(() => _i413.LocalizationBloc());
     gh.singleton<_i974.FirebaseFirestore>(
       () => externalDependenciesModule.firestore,
     );
@@ -212,12 +214,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => externalDependenciesModule.subscriptionPlansService(
         gh<_i974.FirebaseFirestore>(),
       ),
-    );
-    gh.factory<_i52.ThemeCubit>(
-      () => _i52.ThemeCubit(gh<_i460.SharedPreferencesAsync>()),
-    );
-    gh.factory<_i413.LocalizationBloc>(
-      () => _i413.LocalizationBloc(gh<_i460.SharedPreferencesAsync>()),
     );
     gh.lazySingleton<_i4.RecitersRemoteDataSource>(
       () => _i4.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/entities/reciter.dart' as entity;
 import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
@@ -10,7 +10,7 @@ part 'reciters_event.dart';
 part 'reciters_state.dart';
 
 @injectable
-class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
+class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
   final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
   final GetRecitersUseCase _getRecitersUseCase;
 
@@ -185,5 +185,17 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     if (state is RecitersLoaded) {
       await _onLoadReciters(const LoadReciters(), emit);
     }
+  }
+
+  @override
+  RecitersState? fromJson(Map<String, dynamic> json) {
+    // Reciters should be loaded from repository, so we always start with initial state
+    return const RecitersInitial();
+  }
+
+  @override
+  Map<String, dynamic>? toJson(RecitersState state) {
+    // Don't persist complex reciters data - will reload from repository
+    return null;
   }
 }
