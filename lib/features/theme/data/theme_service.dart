@@ -6,7 +6,7 @@ class ThemeService {
   /// Get the light theme configuration
   static ThemeData getLightTheme() {
     return FlexThemeData.light(
-      scheme: FlexScheme.mandyRed,
+      scheme: FlexScheme.green,
       surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
       blendLevel: 7,
       appBarStyle: FlexAppBarStyle.primary,
@@ -26,7 +26,7 @@ class ThemeService {
   /// Get the dark theme configuration
   static ThemeData getDarkTheme() {
     return FlexThemeData.dark(
-      scheme: FlexScheme.mandyRed,
+      scheme: FlexScheme.green,
       surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
       blendLevel: 13,
       appBarStyle: FlexAppBarStyle.background,
@@ -45,6 +45,6 @@ class ThemeService {
 
   /// Get available color schemes for the app
   static List<FlexScheme> getAvailableSchemes() {
-    return [FlexScheme.mandyRed];
+    return [FlexScheme.green];
   }
 }

@@ -12,7 +12,7 @@ class ThemeState extends Equatable {
 
   const ThemeState({
     required this.mode,
-    this.scheme = FlexScheme.mandyRed,
+    this.scheme = FlexScheme.green,
     this.useSystemTheme = true,
   });
 
@@ -39,7 +39,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
       final scheme = FlexScheme.values.firstWhere(
         (s) => s.name == schemeValue,
-        orElse: () => FlexScheme.mandyRed,
+        orElse: () => FlexScheme.green,
       );
 
       return ThemeState(
