@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_blo
 import 'package:muzakri/helpers/reciter_helper.dart';
 import 'package:muzakri/router/app_router_config.dart';
 import 'package:muzakri/shared/models/position_data.dart';
+import 'package:muzakri/shared/models/reciter_model.dart';
 import 'package:muzakri/shared/widgets/view_reciter_button.dart';
 
 class BottomPlayer extends StatefulWidget {
@@ -304,31 +307,38 @@ class _BottomPlayerState extends State<BottomPlayer> {
   /// Check if the current route is already viewing the reciter's details
   bool isCurrentRouteAlreadyViewing(BuildContext context) {
     try {
-      final currentLocation = GoRouterState.of(context).uri.toString();
+      final routerState = GoRouterState.of(context);
 
-      // Check if current route matches the reciter details route pattern: /reciter/:reciterId
-      if (currentLocation.contains('/reciter/')) {
-        // Extract the reciter ID from the current path
-        final pathSegments = currentLocation.split('/');
-        final reciterIndex = pathSegments.indexOf('reciter');
+      // Check if we're on the reciter details route by checking path parameters
+      final currentReciterId = routerState.pathParameters['reciterId'];
 
-        if (reciterIndex != -1 && reciterIndex + 1 < pathSegments.length) {
-          final currentReciterId = pathSegments[reciterIndex + 1];
+      if (currentReciterId == null) {
+        // Not on a reciter details route
+        return false;
+      }
 
-          // Compare with cached reciter ID if available
-          if (_currentReciterId != null) {
-            return currentReciterId == _currentReciterId.toString();
-          }
+      // Compare with cached reciter ID if available
+      if (_currentReciterId != null) {
+        return currentReciterId == _currentReciterId.toString();
+      }
 
-          // Fallback to name-based comparison if ID is not available yet
-          final reciterName = _currentReciterName;
-          if (reciterName != null) {
-            return currentReciterId.toLowerCase() ==
-                reciterName.toLowerCase().replaceAll(' ', '-');
-          }
+      // If ID is not cached yet, try to get reciter from query parameters
+      // The route includes the reciter object in query parameters
+      final reciterJson = routerState.uri.queryParameters['reciter'];
+      if (reciterJson != null) {
+        try {
+          final reciter = Reciter.fromJson(
+            jsonDecode(reciterJson) as Map<String, dynamic>,
+          );
+          // Compare by name as fallback
+          return reciter.name == _currentReciterName;
+        } catch (e) {
+          // If parsing fails, fall back to false
+          return false;
         }
       }
 
+      // If we can't determine, return false to show the button
       return false;
     } catch (e) {
       // If GoRouterState is not available, return false to show the button
