@@ -4,14 +4,16 @@ import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
-import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/observers/app_bloc_observer.dart';
 import 'package:muzakri/core/services/analytics_initialization_service.dart';
 import 'package:muzakri/core/services/crashlytics_service.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
+import 'package:muzakri/core/services/notification_permission_service.dart';
+import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/quran_player_app.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -19,6 +21,9 @@ final logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Enable edge-to-edge display (Flutter recommended approach)
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Initialize Firebase first, then DI
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -35,6 +40,9 @@ Future<void> main() async {
 
   // Initialize Analytics
   await _initializeAnalytics();
+
+  // Request notification permission on first launch
+  await _requestNotificationPermission();
 
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
@@ -93,6 +101,18 @@ Future<void> _initializeAnalytics() async {
     logger.d('Analytics initialized successfully');
   } catch (e) {
     logger.d('Analytics initialization error: $e');
+  }
+}
+
+/// Request notification permission on first launch
+Future<void> _requestNotificationPermission() async {
+  try {
+    final notificationPermissionService =
+        getIt<NotificationPermissionService>();
+    await notificationPermissionService.requestPermissionOnFirstLaunch();
+    logger.d('Notification permission request completed');
+  } catch (e) {
+    logger.d('Warning: Could not request notification permission: $e');
   }
 }
 

@@ -49,6 +49,7 @@
 	<array>
 		<string>audio</string>
 		<string>background-processing</string>
+		<string>fetch</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs access to microphone for audio recording features.</string>

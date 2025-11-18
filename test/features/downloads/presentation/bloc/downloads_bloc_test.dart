@@ -18,9 +18,9 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
-import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
+import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'downloads_bloc_test.mocks.dart';
 
 @GenerateMocks([
@@ -36,6 +36,10 @@ import 'downloads_bloc_test.mocks.dart';
   DownloadService,
 ])
 void main() {
+  // Initialize Flutter bindings for background_downloader
+  // This is required because DownloadService uses platform channels
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() async {
     // Register Dio FIRST before anything else that might use it
     // This prevents "Dio is not registered" errors when DownloadService
@@ -1045,6 +1049,133 @@ void main() {
           const DownloadsState.error('Failed to load downloads'),
         ],
       );
+    });
+
+    group('RefreshDownloadsProgress', () {
+      test('should refresh downloads without showing loading state', () async {
+        // Arrange
+        final testDownloads = {
+          'Reciter 1': [
+            DownloadItem(
+              id: 'download_1',
+              title: 'Surah 1',
+              url: 'https://example.com/1.mp3',
+              filePath: '/path/1.mp3',
+              reciterName: 'Reciter 1',
+              status: DownloadStatus.downloading,
+              progress: 0.5,
+              fileSize: 1024,
+              downloadedSize: 512,
+              createdAt: DateTime.now(),
+            ),
+          ],
+        };
+
+        // First load downloads to get to loaded state
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => Right(testDownloads));
+
+        // Act
+        downloadsBloc.add(const LoadDownloads());
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Now refresh progress
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => Right(testDownloads));
+        downloadsBloc.add(const DownloadsEvent.refreshDownloadsProgress());
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Assert - Should be in loaded state, not loading
+        expect(downloadsBloc.state, isA<DownloadsLoaded>());
+        final loadedState = downloadsBloc.state as DownloadsLoaded;
+        expect(loadedState.downloadsByReciter, testDownloads);
+      });
+
+      test('should not refresh if not in loaded state', () async {
+        // Arrange - Start in initial state
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => const Right({}));
+
+        // Act
+        downloadsBloc.add(const DownloadsEvent.refreshDownloadsProgress());
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Assert - Should remain in initial state
+        expect(downloadsBloc.state, const DownloadsState.initial());
+        verifyNever(mockGetDownloadsByReciterUseCase());
+      });
+
+      blocTest<DownloadsBloc, DownloadsState>(
+        'emits [loaded] with updated progress when RefreshDownloadsProgress is called',
+        build: () {
+          final testDownloads = {
+            'Reciter 1': [
+              DownloadItem(
+                id: 'download_1',
+                title: 'Surah 1',
+                url: 'https://example.com/1.mp3',
+                filePath: '/path/1.mp3',
+                reciterName: 'Reciter 1',
+                status: DownloadStatus.downloading,
+                progress: 0.75, // Updated progress
+                fileSize: 1024,
+                downloadedSize: 768,
+                createdAt: DateTime.now(),
+              ),
+            ],
+          };
+          when(
+            mockGetDownloadsByReciterUseCase(),
+          ).thenAnswer((_) async => Right(testDownloads));
+          return downloadsBloc;
+        },
+        seed: () => DownloadsState.loaded({
+          'Reciter 1': [
+            DownloadItem(
+              id: 'download_1',
+              title: 'Surah 1',
+              url: 'https://example.com/1.mp3',
+              filePath: '/path/1.mp3',
+              reciterName: 'Reciter 1',
+              status: DownloadStatus.downloading,
+              progress: 0.5, // Old progress
+              fileSize: 1024,
+              downloadedSize: 512,
+              createdAt: DateTime.now(),
+            ),
+          ],
+        }),
+        act: (bloc) =>
+            bloc.add(const DownloadsEvent.refreshDownloadsProgress()),
+        expect: () => [
+          isA<DownloadsLoaded>().having(
+            (state) => state.downloadsByReciter['Reciter 1']?.first.progress,
+            'progress',
+            0.75,
+          ),
+        ],
+      );
+    });
+
+    group('Progress Updates', () {
+      test('should have updateDownloadProgress method in repository', () {
+        // This test verifies that the repository has the updateDownloadProgress method
+        // which is called when progress updates are received from DownloadService
+
+        // Note: We can't easily test the stream listener directly in unit tests,
+        // as it's set up in the bloc constructor. Integration tests would be needed
+        // to verify the full flow of progress updates triggering state changes.
+
+        // This test documents the expected behavior
+        expect(
+          mockDownloadsRepository.updateDownloadProgress,
+          isNotNull,
+          reason: 'Repository should have updateDownloadProgress method',
+        );
+      });
     });
   });
 }

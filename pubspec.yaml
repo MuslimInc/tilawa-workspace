@@ -5,7 +5,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: "3.9.2"
+  sdk: ^3.10.0
 
 dependencies:
   flutter:
@@ -44,6 +44,7 @@ dependencies:
   json_annotation: ^4.9.0
   path: ^1.9.1
   path_provider: ^2.1.5
+  background_downloader: ^9.3.0
   cloud_firestore: ^6.0.3
   firebase_auth: ^6.1.1
   firebase_core: ^4.2.0
@@ -54,12 +55,13 @@ dependencies:
   firebase_crashlytics: ^5.0.3
   logger: ^2.6.2
   flex_color_scheme: ^8.3.0
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.7.1
+  build_runner: ^2.10.3
   freezed: ^3.2.3
   json_serializable: ^6.11.1
   injectable_generator: ^2.8.1

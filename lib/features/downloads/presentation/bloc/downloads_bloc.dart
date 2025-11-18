@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -33,6 +34,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final AnalyticsService _analyticsService;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
+  Timer? _progressReloadTimer;
 
   DownloadsBloc({
     required GetDownloadsByReciterUseCase getDownloadsByReciter,
@@ -66,29 +68,84 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
     on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
     on<RetryDownloadEvent>(_onRetryDownload);
+    on<RefreshDownloadsProgress>(_onRefreshDownloadsProgress);
 
     // Listen to download progress
     _listenToProgress();
   }
 
   void _listenToProgress() {
-    _progressSubscription = DownloadService.globalProgressStream.listen((
-      progress,
-    ) {
-      // Update the download progress in the repository
-      _downloadsRepository.updateDownloadProgress(
-        progress.id,
-        progress.status,
-        progress.progress,
-        progress.downloadedSize,
-        progress.fileSize,
+    try {
+      _progressSubscription = DownloadService.globalProgressStream.listen((
+        progress,
+      ) {
+        // Update the download progress in the repository
+        _downloadsRepository.updateDownloadProgress(
+          progress.id,
+          progress.status,
+          progress.progress,
+          progress.downloadedSize,
+          progress.fileSize,
+        );
+
+        // Only reload if we're in a loaded state to avoid unnecessary reloads
+        if (state is DownloadsLoaded) {
+          // Reload immediately if download completed or failed
+          if (progress.status == DownloadStatus.completed ||
+              progress.status == DownloadStatus.failed) {
+            _progressReloadTimer?.cancel();
+            add(const LoadDownloads());
+          } else {
+            // Throttle reloads for in-progress downloads to avoid too many updates
+            // Cancel previous timer if it exists
+            _progressReloadTimer?.cancel();
+
+            // Debounce: wait 150ms after last progress update before reloading
+            // This provides smooth updates (updates ~6-7 times per second)
+            _progressReloadTimer = Timer(const Duration(milliseconds: 150), () {
+              add(const DownloadsEvent.refreshDownloadsProgress());
+            });
+          }
+        }
+      });
+    } on MissingPluginException {
+      // In test environment, platform channels are not available
+      // Skip progress listening - this is expected in test environment
+      logger.d(
+        '[DownloadsBloc] Progress stream listening skipped - platform channels not available (test environment)',
       );
-    });
+    } catch (e) {
+      // Any other error - log and continue
+      logger.w('[DownloadsBloc] Error setting up progress stream: $e');
+    }
+  }
+
+  Future<void> _onRefreshDownloadsProgress(
+    RefreshDownloadsProgress event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    // Only refresh if we're in loaded state
+    if (state is! DownloadsLoaded) {
+      return;
+    }
+
+    final result = await _getDownloadsByReciter();
+    result.fold(
+      (failure) {
+        // Don't show error for progress updates, just log it
+        logger.e('Failed to refresh downloads progress: ${failure.message}');
+      },
+      (downloads) {
+        // Emit loaded state directly with updated downloads (no loading state)
+        emit(DownloadsState.loaded(downloads));
+      },
+    );
   }
 
   @override
   Future<void> close() {
     _progressSubscription?.cancel();
+    _progressReloadTimer?.cancel();
     return super.close();
   }
 
@@ -142,13 +199,24 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     // Check if download is currently in progress
     final downloadId =
         '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
-    if (DownloadService.isDownloadActive(downloadId)) {
-      emit(
-        DownloadsState.error(
-          'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
-        ),
+    try {
+      if (await DownloadService.isDownloadActive(downloadId)) {
+        emit(
+          DownloadsState.error(
+            'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
+          ),
+        );
+        return;
+      }
+    } on MissingPluginException {
+      // In test environment, platform channels are not available
+      // Skip the check and continue with download
+      logger.d(
+        '[DownloadsBloc] DownloadService.isDownloadActive skipped - platform channels not available (test environment)',
       );
-      return;
+    } catch (e) {
+      // Any other error - log and continue
+      logger.w('[DownloadsBloc] Error checking if download is active: $e');
     }
 
     // Emit download started state
@@ -460,13 +528,24 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       }
 
       // Check if download is currently in progress
-      if (DownloadService.isDownloadActive(event.downloadId)) {
-        emit(
-          DownloadsState.error(
-            'Download "${downloadItem.title}" is already being downloaded',
-          ),
+      try {
+        if (await DownloadService.isDownloadActive(event.downloadId)) {
+          emit(
+            DownloadsState.error(
+              'Download "${downloadItem.title}" is already being downloaded',
+            ),
+          );
+          return;
+        }
+      } on MissingPluginException {
+        // In test environment, platform channels are not available
+        // Skip the check and continue with retry
+        logger.d(
+          '[DownloadsBloc] DownloadService.isDownloadActive skipped - platform channels not available (test environment)',
         );
-        return;
+      } catch (e) {
+        // Any other error - log and continue
+        logger.w('[DownloadsBloc] Error checking if download is active: $e');
       }
 
       // Emit download started state

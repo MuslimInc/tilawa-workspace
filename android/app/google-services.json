@@ -15,6 +15,14 @@
       "oauth_client": [
         {
           "client_id": "181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.muzakri",
+            "certificate_hash": "6bb232467039abe3a73bbf3f48ce9a1630c5c337"
+          }
+        },
+        {
+          "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,8 +35,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com",
+              "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.muzakri"
+              }
             }
           ]
         }

@@ -28,10 +28,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -55,8 +52,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
-    androidClientId:
-        '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -65,8 +60,19 @@ class DefaultFirebaseOptions {
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
-    iosClientId:
-        '181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com',
+    androidClientId: '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com',
+    iosClientId: '181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com',
     iosBundleId: 'com.example.muzakri',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
+    appId: '1:181575856185:ios:8b8b3760623dfbb2381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId: '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com',
+    iosClientId: '181575856185-juas6d0562lrjcdtlq66n31141cejifs.apps.googleusercontent.com',
+    iosBundleId: 'com.quran.player.app',
   );
 }

@@ -1,0 +1,23 @@
+# This is a template file for Android app signing configuration.
+# 
+# INSTRUCTIONS:
+# 1. Copy this file to 'key.properties' in the android/ directory
+# 2. Replace the placeholder values with your actual keystore information
+# 3. NEVER commit key.properties or your .keystore/.jks files to version control
+#
+# To create a keystore, run:
+# keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# Then fill in the values below:
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=YOUR_KEY_ALIAS
+storeFile=YOUR_KEYSTORE_FILE_PATH
+
+# Example:
+# storePassword=mySecurePassword123
+# keyPassword=mySecurePassword123
+# keyAlias=upload
+# storeFile=/Users/yourusername/upload-keystore.jks
+

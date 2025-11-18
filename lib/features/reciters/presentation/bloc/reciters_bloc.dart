@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/entities/reciter.dart' as entity;
-import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:muzakri/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:muzakri/shared/models/reciter_model.dart';
 
@@ -11,11 +10,9 @@ part 'reciters_state.dart';
 
 @injectable
 class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
-  final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
   final GetRecitersUseCase _getRecitersUseCase;
 
-  RecitersBloc(this._getCurrentLanguageUseCase, this._getRecitersUseCase)
-    : super(const RecitersInitial()) {
+  RecitersBloc(this._getRecitersUseCase) : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);

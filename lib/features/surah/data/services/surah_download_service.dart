@@ -71,8 +71,11 @@ class SurahDownloadService {
   }
 
   /// Check if a surah download is currently active
-  static bool isDownloadActive(String surahId, String reciterName) {
+  static Future<bool> isDownloadActive(
+    String surahId,
+    String reciterName,
+  ) async {
     final downloadId = '${surahId}_${reciterName.replaceAll(' ', '_')}';
-    return DownloadService.isDownloadActive(downloadId);
+    return await DownloadService.isDownloadActive(downloadId);
   }
 }

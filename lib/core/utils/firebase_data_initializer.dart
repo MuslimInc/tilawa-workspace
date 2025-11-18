@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:muzakri/core/config/firebase_options.dart';
 import 'package:muzakri/core/services/firebase_initialization_service.dart';
 import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
+import 'package:muzakri/firebase_options.dart';
 import 'package:muzakri/main.dart';
 
 /// Command-line tool to initialize Firebase data

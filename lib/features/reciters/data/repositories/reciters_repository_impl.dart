@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/core/entities/reciter.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/utils/typedefs.dart';
@@ -12,18 +11,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @LazySingleton(as: RecitersRepository)
 class RecitersRepositoryImpl implements RecitersRepository {
-  const RecitersRepositoryImpl(this._remoteDataSource);
+  const RecitersRepositoryImpl(this._remoteDataSource, this._prefs);
 
   final RecitersRemoteDataSource _remoteDataSource;
+  final SharedPreferencesAsync _prefs;
 
   @override
   ResultFuture<List<ReciterEntity>> getReciters() async {
     try {
-      final effectiveAppLang =
-          (await getIt<SharedPreferencesAsync>().getString(
-            LanguageConfig.languageKey,
-          )) ??
-          LanguageConfig.defaultLanguageCode;
+      final savedLang = await _prefs.getString(LanguageConfig.languageKey);
+      final effectiveAppLang = savedLang ?? LanguageConfig.defaultLanguageCode;
       final effectiveApiLang = LanguageConfig.convertToApiLanguageCode(
         effectiveAppLang,
       );
@@ -42,9 +39,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
   ResultFuture<List<ReciterEntity>> searchReciters(String query) async {
     try {
       final storedLang =
-          await getIt<SharedPreferencesAsync>().getString(
-            LanguageConfig.languageKey,
-          ) ??
+          await _prefs.getString(LanguageConfig.languageKey) ??
           LanguageConfig.defaultLanguageCode;
       final apiLang = LanguageConfig.convertToApiLanguageCode(storedLang);
       final allReciters = await _remoteDataSource.getReciters(
@@ -67,9 +62,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
   ResultFuture<List<ReciterEntity>> getRecitersByLetter(String letter) async {
     try {
       final storedLang =
-          await getIt<SharedPreferencesAsync>().getString(
-            LanguageConfig.languageKey,
-          ) ??
+          await _prefs.getString(LanguageConfig.languageKey) ??
           LanguageConfig.defaultLanguageCode;
       final apiLang = LanguageConfig.convertToApiLanguageCode(storedLang);
       final allReciters = await _remoteDataSource.getReciters(
