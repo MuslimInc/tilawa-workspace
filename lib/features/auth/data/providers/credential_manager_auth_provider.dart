@@ -65,19 +65,6 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
         code: e.code,
       );
     } on CredentialException catch (e) {
-      // Handle CredentialException - code 204 means "No credentials available"
-      logger.d(
-        '[CredentialManagerAuthProvider] Caught CredentialException: code=${e.code}, message=${e.message}',
-      );
-      if (e.code == 204 ||
-          e.message.contains('No credentials available') ||
-          e.message.contains('Login failed')) {
-        // Treat as cancelled - user needs to sign in again
-        logger.d(
-          '[CredentialManagerAuthProvider] No credentials available (code 204) - treating as cancelled',
-        );
-        return const AuthResult.cancelled();
-      }
       return AuthResult.failure(message: e.message, code: e.code.toString());
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(

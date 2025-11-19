@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/router/app_router_config.dart';
+import 'package:muzakri/shared/widgets/app_toast.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -24,20 +23,10 @@ class LoginScreen extends StatelessWidget {
             },
             unauthenticated: () {},
             error: (message) {
-              String displayMessage = message;
-              if (message.contains('clientConfigurationError')) {
-                displayMessage = AppLocalizations.of(
-                  context,
-                )!.googleSignInNotConfigured;
-              } else if (message.contains('network_error')) {
-                displayMessage = AppLocalizations.of(context)!.networkError;
-              }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(displayMessage),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 5),
-                ),
+              final l10n = AppLocalizations.of(context)!;
+              AppToast.show(
+                context,
+                message: l10n.unableToSignInWithThirdPartyAccount,
               );
             },
           );

@@ -1,3 +1,4 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
@@ -5,8 +6,10 @@ import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
 import 'package:muzakri/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
+
+part 'auth_bloc.freezed.dart';
+part 'auth_event.dart';
+part 'auth_state.dart';
 
 @injectable
 class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {

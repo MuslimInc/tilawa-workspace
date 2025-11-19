@@ -502,6 +502,10 @@
     "@googleSignInNotConfigured": {
         "description": "Google Sign-In configuration error message"
     },
+    "unableToSignInWithThirdPartyAccount": "تعذر تسجيل الدخول باستخدام حساب طرف ثالث",
+    "@unableToSignInWithThirdPartyAccount": {
+        "description": "Error message shown when third-party sign-in fails"
+    },
     "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
     "@networkError": {
         "description": "Network error message"

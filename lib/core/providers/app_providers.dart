@@ -4,7 +4,6 @@ import 'package:muzakri/core/di/injection.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart';

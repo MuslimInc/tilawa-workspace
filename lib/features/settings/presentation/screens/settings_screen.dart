@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muzakri/core/config/language_config.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_event.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_state.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
 

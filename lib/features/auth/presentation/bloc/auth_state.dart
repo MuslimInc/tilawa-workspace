@@ -1,7 +1,4 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
-
-part 'auth_state.freezed.dart';
+part of 'auth_bloc.dart';
 
 @freezed
 abstract class AuthState with _$AuthState {

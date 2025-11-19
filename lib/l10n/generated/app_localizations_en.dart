@@ -380,6 +380,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Google Sign-In not configured. Please contact support.';
 
   @override
+  String get unableToSignInWithThirdPartyAccount =>
+      'Unable to sign in with third-party account';
+
+  @override
   String get networkError => 'Network error. Please check your connection.';
 
   @override

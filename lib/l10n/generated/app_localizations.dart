@@ -818,6 +818,12 @@ abstract class AppLocalizations {
   /// **'Google Sign-In not configured. Please contact support.'**
   String get googleSignInNotConfigured;
 
+  /// Error message shown when third-party sign-in fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to sign in with third-party account'**
+  String get unableToSignInWithThirdPartyAccount;
+
   /// Network error message
   ///
   /// In en, this message translates to:
