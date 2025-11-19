@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/main.dart';
@@ -15,9 +17,31 @@ class DownloadService {
   // Track task statuses from updates
   static final Map<String, TaskStatus> _taskStatuses = {};
 
+  static FileDownloader? _fileDownloaderOverride;
+
+  @visibleForTesting
+  static set fileDownloaderOverride(FileDownloader? value) {
+    _fileDownloaderOverride = value;
+  }
+
+  static FileDownloader _getFileDownloader() {
+    return _fileDownloaderOverride ?? FileDownloader();
+  }
+
   /// Initialize the download service and set up update listeners
   static Future<void> _initialize() async {
-    if (_initialized) return;
+    // Cancel existing subscription if any (important for tests where mocks are replaced)
+    // This ensures the stream subscription uses the current fileDownloader instance
+    if (_initialized && _updatesSubscription != null) {
+      await _updatesSubscription?.cancel();
+      _updatesSubscription = null;
+      _initialized = false;
+    }
+
+    if (_initialized) {
+      // Already initialized and subscription is still active
+      return;
+    }
 
     try {
       // Configure notifications for download progress
@@ -27,24 +51,15 @@ class DownloadService {
       // asynchronously during initialization
       FileDownloader fileDownloader;
       try {
-        fileDownloader = FileDownloader();
+        fileDownloader = _getFileDownloader();
         // Wait a bit to catch any async exceptions from initialization
-        await Future.delayed(Duration.zero);
+        // await Future.delayed(Duration.zero);
       } on MissingPluginException {
         // Exception thrown during FileDownloader() construction
         logger.d(
           '[DownloadService] FileDownloader construction failed - platform channels not available (test environment)',
         );
         rethrow;
-      } catch (e) {
-        // Catch any other exceptions during construction
-        if (e is MissingPluginException) {
-          logger.d(
-            '[DownloadService] FileDownloader construction failed - platform channels not available (test environment)',
-          );
-          rethrow;
-        }
-        throw e;
       }
 
       // Configure notifications - this may also throw if initialization happens here
@@ -64,6 +79,8 @@ class DownloadService {
       }
 
       // Listen to all download updates
+      // Cancel existing subscription if any (for test scenarios)
+      await _updatesSubscription?.cancel();
       try {
         _updatesSubscription = fileDownloader.updates.listen((update) {
           _handleTaskUpdate(update);
@@ -181,7 +198,7 @@ class DownloadService {
     // Note: FileDownloader() may throw MissingPluginException in test environments
     FileDownloader? fileDownloader;
     try {
-      fileDownloader = FileDownloader();
+      fileDownloader = _getFileDownloader();
     } on MissingPluginException {
       // In test environment, re-throw so callers can handle it
       rethrow;
@@ -292,7 +309,7 @@ class DownloadService {
   /// Get all active download task IDs
   static Future<List<String>> get activeDownloadIds async {
     await _initialize();
-    final allTasks = await FileDownloader().allTasks();
+    final allTasks = await _getFileDownloader().allTasks();
     final activeIds = <String>[];
 
     for (final task in allTasks) {
@@ -328,7 +345,7 @@ class DownloadService {
     if (status == null) {
       // If not tracked, check if task exists
       try {
-        final task = await FileDownloader().taskForId(id);
+        final task = await _getFileDownloader().taskForId(id);
         return task != null;
       } on MissingPluginException {
         // In test environment, return false
@@ -359,16 +376,16 @@ class DownloadService {
   static Future<void> cancelDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] cancelDownload: id=$id');
-    await FileDownloader().cancelTaskWithId(id);
+    await _getFileDownloader().cancelTaskWithId(id);
   }
 
   /// Pause a download
   static Future<void> pauseDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] pauseDownload: id=$id');
-    final task = await FileDownloader().taskForId(id);
+    final task = await _getFileDownloader().taskForId(id);
     if (task != null && task is DownloadTask) {
-      await FileDownloader().pause(task);
+      await _getFileDownloader().pause(task);
     }
   }
 
@@ -376,9 +393,9 @@ class DownloadService {
   static Future<void> resumeDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] resumeDownload: id=$id');
-    final task = await FileDownloader().taskForId(id);
+    final task = await _getFileDownloader().taskForId(id);
     if (task != null && task is DownloadTask) {
-      await FileDownloader().resume(task);
+      await _getFileDownloader().resume(task);
     }
   }
 
@@ -388,7 +405,7 @@ class DownloadService {
     final status = _taskStatuses[id];
     if (status == null) {
       // If not tracked, check if task exists
-      final task = await FileDownloader().taskForId(id);
+      final task = await _getFileDownloader().taskForId(id);
       if (task == null) return null;
       // Default to pending if we don't have status yet
       return DownloadStatus.pending;
@@ -399,7 +416,7 @@ class DownloadService {
   /// Get download progress for a specific ID
   static Future<DownloadProgress?> getDownloadProgress(String id) async {
     await _initialize();
-    final task = await FileDownloader().taskForId(id);
+    final task = await _getFileDownloader().taskForId(id);
     if (task == null) return null;
 
     final status = _taskStatuses[id] ?? TaskStatus.notFound;
@@ -481,7 +498,8 @@ class ProgressThrottler {
   }
 }
 
-class DownloadProgress {
+@immutable
+class DownloadProgress extends Equatable {
   final String id;
   final DownloadStatus status;
   final double progress;
@@ -495,4 +513,7 @@ class DownloadProgress {
     required this.downloadedSize,
     required this.fileSize,
   });
+
+  @override
+  List<Object?> get props => [id, status, progress, downloadedSize, fileSize];
 }

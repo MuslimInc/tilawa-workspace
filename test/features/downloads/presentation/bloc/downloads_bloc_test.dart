@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
@@ -41,6 +42,31 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
+    // Register mock method channel handlers
+    const MethodChannel pathProviderChannel = MethodChannel(
+      'plugins.flutter.io/path_provider',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathProviderChannel, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'getApplicationSupportDirectory' ||
+              methodCall.method == 'getApplicationDocumentsDirectory') {
+            return '.';
+          }
+          return null;
+        });
+
+    const MethodChannel backgroundDownloaderChannel = MethodChannel(
+      'com.bbflight.background_downloader',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(backgroundDownloaderChannel, (
+          MethodCall methodCall,
+        ) async {
+          return null;
+        });
+
     // Register Dio FIRST before anything else that might use it
     // This prevents "Dio is not registered" errors when DownloadService
     // tries to access Dio via GetIt
@@ -194,6 +220,7 @@ void main() {
           const DownloadsState.loading(),
           const DownloadsState.loaded({}),
         ],
+        wait: const Duration(milliseconds: 500),
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -289,6 +316,7 @@ void main() {
           ),
           const DownloadsState.error('Network error'),
         ],
+        wait: const Duration(milliseconds: 500),
       );
     });
 
@@ -888,6 +916,7 @@ void main() {
           const DownloadsState.loading(),
           const DownloadsState.loaded({}),
         ],
+        wait: const Duration(milliseconds: 500),
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -974,6 +1003,7 @@ void main() {
             'Failed to retry download: Exception: Retry failed',
           ),
         ],
+        wait: const Duration(milliseconds: 500),
       );
     });
 
@@ -1033,6 +1063,7 @@ void main() {
           const DownloadsState.loading(),
           const DownloadsState.loaded({}),
         ],
+        wait: const Duration(milliseconds: 500),
       );
 
       blocTest<DownloadsBloc, DownloadsState>(

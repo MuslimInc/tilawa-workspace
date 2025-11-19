@@ -17,6 +17,31 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
+    // Register mock method channel handlers
+    const MethodChannel pathProviderChannel = MethodChannel(
+      'plugins.flutter.io/path_provider',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathProviderChannel, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'getApplicationSupportDirectory' ||
+              methodCall.method == 'getApplicationDocumentsDirectory') {
+            return '.';
+          }
+          return null;
+        });
+
+    const MethodChannel backgroundDownloaderChannel = MethodChannel(
+      'com.bbflight.background_downloader',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(backgroundDownloaderChannel, (
+          MethodCall methodCall,
+        ) async {
+          return null;
+        });
+
     // Register Dio in GetIt for DownloadService to use
     // This prevents "Dio is not registered" errors when DownloadService
     // tries to access Dio via GetIt
