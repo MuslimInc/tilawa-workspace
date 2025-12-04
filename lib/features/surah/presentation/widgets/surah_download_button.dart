@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/premium/presentation/widgets/premium_upgrade_dialog.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/presentation/bloc/surah_bloc.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router_config.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../router/app_router_config.dart';
+import '../../../downloads/presentation/bloc/downloads_bloc.dart';
+import '../../../premium/presentation/widgets/premium_upgrade_dialog.dart';
+import '../../domain/entities/surah_entity.dart';
+import '../bloc/surah_bloc.dart';
 
 class SurahDownloadButton extends StatefulWidget {
   const SurahDownloadButton({super.key, required this.surah});

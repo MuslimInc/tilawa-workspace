@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_event.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
-import 'package:muzakri/features/premium/presentation/widgets/subscription_plan_card.dart';
+
+import '../../domain/entities/premium_status.dart';
+import '../../domain/entities/subscription_plan.dart';
+import '../bloc/premium_bloc.dart';
+import '../bloc/premium_event.dart';
+import '../bloc/premium_state.dart';
+import '../widgets/subscription_plan_card.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -85,7 +87,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget _buildLoadedContent(
     BuildContext context,
-    status,
+    PremiumStatus status,
     List<SubscriptionPlan> plans,
     bool canDownload,
   ) {
@@ -114,7 +116,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
     );
   }
 
-  Widget _buildStatusCard(BuildContext context, status, bool canDownload) {
+  Widget _buildStatusCard(
+    BuildContext context,
+    PremiumStatus status,
+    bool canDownload,
+  ) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -174,35 +180,26 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Widget _buildFeaturesSection() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Premium Features',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 12),
-        const _PremiumFeatureItem(
-          icon: Icons.download,
-          text: 'Unlimited Downloads',
-        ),
-        const _PremiumFeatureItem(
-          icon: Icons.offline_bolt,
-          text: 'Offline Mode',
-        ),
-        const _PremiumFeatureItem(
+        SizedBox(height: 12),
+        _PremiumFeatureItem(icon: Icons.download, text: 'Unlimited Downloads'),
+        _PremiumFeatureItem(icon: Icons.offline_bolt, text: 'Offline Mode'),
+        _PremiumFeatureItem(
           icon: Icons.high_quality,
           text: 'High Quality Audio',
         ),
-        const _PremiumFeatureItem(
-          icon: Icons.block,
-          text: 'Ad-Free Experience',
-        ),
-        const _PremiumFeatureItem(
+        _PremiumFeatureItem(icon: Icons.block, text: 'Ad-Free Experience'),
+        _PremiumFeatureItem(
           icon: Icons.support_agent,
           text: 'Priority Support',
         ),
-        const _PremiumFeatureItem(icon: Icons.star, text: 'Exclusive Content'),
+        _PremiumFeatureItem(icon: Icons.star, text: 'Exclusive Content'),
       ],
     );
   }
@@ -330,10 +327,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
 }
 
 class _PremiumFeatureItem extends StatelessWidget {
+  const _PremiumFeatureItem({required this.icon, required this.text});
   final IconData icon;
   final String text;
-
-  const _PremiumFeatureItem({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {

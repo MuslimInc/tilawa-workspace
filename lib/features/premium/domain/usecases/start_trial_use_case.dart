@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import '../repositories/premium_repository.dart';
 
 @Singleton()
 class StartTrialUseCase {
@@ -8,13 +8,13 @@ class StartTrialUseCase {
   final PremiumRepository _premiumRepository;
 
   Future<({bool isEligible, bool success})> call() async {
-    final isEligible = await _premiumRepository.isTrialEligible();
+    final bool isEligible = await _premiumRepository.isTrialEligible();
 
     if (!isEligible) {
       return (isEligible: false, success: false);
     }
 
-    final success = await _premiumRepository.startTrial();
+    final bool success = await _premiumRepository.startTrial();
     return (isEligible: isEligible, success: success);
   }
 }

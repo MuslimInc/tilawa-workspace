@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../domain/entities/playlist.dart';
 
 class PlaylistCard extends StatelessWidget {
   const PlaylistCard({
@@ -22,8 +23,8 @@ class PlaylistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -66,16 +67,12 @@ class PlaylistCard extends StatelessWidget {
                       switch (value) {
                         case 'edit':
                           onEdit();
-                          break;
                         case 'delete':
                           onDelete();
-                          break;
                         case 'favorite':
                           onToggleFavorite();
-                          break;
                         case 'play':
                           onPlay();
-                          break;
                       }
                     },
                     itemBuilder: (context) => [
@@ -192,9 +189,9 @@ class PlaylistCard extends StatelessWidget {
   }
 
   String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
+    final int hours = duration.inHours;
+    final int minutes = duration.inMinutes.remainder(60);
+    final int seconds = duration.inSeconds.remainder(60);
 
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';

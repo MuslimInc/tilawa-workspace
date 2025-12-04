@@ -1,15 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:muzakri/core/widgets/hidden_thumb_component_shape.dart';
+import '../../core/widgets/hidden_thumb_component_shape.dart';
 
 class SeekBar extends StatefulWidget {
-  final Duration duration;
-  final Duration position;
-  final Duration bufferedPosition;
-  final ValueChanged<Duration>? onChanged;
-  final ValueChanged<Duration>? onChangeEnd;
-
   const SeekBar({
     super.key,
     required this.duration,
@@ -18,6 +12,11 @@ class SeekBar extends StatefulWidget {
     this.onChanged,
     this.onChangeEnd,
   });
+  final Duration duration;
+  final Duration position;
+  final Duration bufferedPosition;
+  final ValueChanged<Duration>? onChanged;
+  final ValueChanged<Duration>? onChangeEnd;
 
   @override
   SeekBarState createState() => SeekBarState();
@@ -37,7 +36,7 @@ class SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    final value = min(
+    final double value = min(
       _dragValue ?? widget.position.inMilliseconds.toDouble(),
       widget.duration.inMilliseconds.toDouble(),
     );
@@ -63,7 +62,6 @@ class SeekBarState extends State<SeekBar> {
                 ),
                 child: ExcludeSemantics(
                   child: Slider(
-                    min: 0.0,
                     max: widget.duration.inMilliseconds.toDouble(),
                     value: min(
                       widget.bufferedPosition.inMilliseconds.toDouble(),
@@ -79,7 +77,6 @@ class SeekBarState extends State<SeekBar> {
                   inactiveTrackColor: Colors.transparent,
                 ),
                 child: Slider(
-                  min: 0.0,
                   max: widget.duration.inMilliseconds.toDouble(),
                   value: value,
                   onChanged: (value) {

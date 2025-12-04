@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/core/config/currency_config.dart';
+import '../../../../core/config/currency_config.dart';
 
 part 'subscription_plan.freezed.dart';
 part 'subscription_plan.g.dart';

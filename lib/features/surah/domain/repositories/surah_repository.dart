@@ -1,4 +1,4 @@
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
+import '../entities/surah_entity.dart';
 
 abstract class SurahRepository {
   /// Get all surahs for a specific reciter

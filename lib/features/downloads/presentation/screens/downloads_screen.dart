@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/widgets/reciter_downloads_section.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/main.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../main.dart';
+import '../../domain/entities/download_item.dart';
+import '../bloc/downloads_bloc.dart';
+import '../widgets/reciter_downloads_section.dart';
 
 class DownloadsScreen extends StatefulWidget {
   const DownloadsScreen({super.key});
@@ -96,7 +98,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                 SnackBar(
                   content: Text(message),
                   backgroundColor: Colors.orange,
-                  duration: const Duration(seconds: 4),
                 ),
               );
             },
@@ -127,15 +128,18 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.download_outlined,
                           size: 64,
                           color: Colors.grey,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context)!.noDownloadsYet,
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
@@ -146,10 +150,10 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                   padding: const EdgeInsets.all(16),
                   itemCount: downloadsByReciter.length,
                   itemBuilder: (context, index) {
-                    final reciterName = downloadsByReciter.keys.elementAt(
-                      index,
-                    );
-                    final downloads = downloadsByReciter[reciterName] ?? [];
+                    final String reciterName = downloadsByReciter.keys
+                        .elementAt(index);
+                    final List<DownloadItem> downloads =
+                        downloadsByReciter[reciterName] ?? [];
 
                     return ReciterDownloadsSection(
                       reciterName: reciterName,

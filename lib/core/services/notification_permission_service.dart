@@ -1,24 +1,24 @@
 import 'dart:io';
 
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/main.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../main.dart';
 
 /// Service to handle notification permission requests
 @lazySingleton
 class NotificationPermissionService {
+  NotificationPermissionService(this._prefs);
   static const String _notificationPermissionRequestedKey =
       'notification_permission_requested';
   static const String _isFirstLaunchKey = 'is_first_launch';
 
   final SharedPreferencesAsync _prefs;
 
-  NotificationPermissionService(this._prefs);
-
   /// Check if this is the first time the app is launched
   Future<bool> isFirstLaunch() async {
-    final isFirstLaunch = await _prefs.getBool(_isFirstLaunchKey) ?? true;
+    final bool isFirstLaunch = await _prefs.getBool(_isFirstLaunchKey) ?? true;
     if (isFirstLaunch) {
       // Mark that first launch has been checked
       await _prefs.setBool(_isFirstLaunchKey, false);
@@ -39,7 +39,7 @@ class NotificationPermissionService {
       return true;
     }
 
-    final status = await Permission.notification.status;
+    final PermissionStatus status = await Permission.notification.status;
     return status.isGranted;
   }
 
@@ -54,7 +54,8 @@ class NotificationPermissionService {
 
     try {
       // Check if permission is already granted
-      final currentStatus = await Permission.notification.status;
+      final PermissionStatus currentStatus =
+          await Permission.notification.status;
       if (currentStatus.isGranted) {
         logger.d('[NotificationPermissionService] Permission already granted');
         await _prefs.setBool(_notificationPermissionRequestedKey, true);
@@ -74,7 +75,7 @@ class NotificationPermissionService {
       logger.d(
         '[NotificationPermissionService] Requesting notification permission',
       );
-      final status = await Permission.notification.request();
+      final PermissionStatus status = await Permission.notification.request();
 
       // Mark that permission has been requested
       await _prefs.setBool(_notificationPermissionRequestedKey, true);
@@ -100,7 +101,7 @@ class NotificationPermissionService {
   Future<void> requestPermissionOnFirstLaunch() async {
     try {
       // Check if this is the first launch
-      final firstLaunch = await isFirstLaunch();
+      final bool firstLaunch = await isFirstLaunch();
       if (!firstLaunch) {
         logger.d(
           '[NotificationPermissionService] Not first launch, skipping permission request',
@@ -109,7 +110,7 @@ class NotificationPermissionService {
       }
 
       // Check if permission has already been requested
-      final hasRequested = await hasRequestedPermission();
+      final bool hasRequested = await hasRequestedPermission();
       if (hasRequested) {
         logger.d(
           '[NotificationPermissionService] Permission already requested previously',
@@ -118,7 +119,7 @@ class NotificationPermissionService {
       }
 
       // Check if permission is already granted
-      final isGranted = await isPermissionGranted();
+      final bool isGranted = await isPermissionGranted();
       if (isGranted) {
         logger.d('[NotificationPermissionService] Permission already granted');
         await _prefs.setBool(_notificationPermissionRequestedKey, true);

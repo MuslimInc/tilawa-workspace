@@ -1,21 +1,25 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
+
+import '../../../../core/errors/failures.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../../../main.dart';
+import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../premium/domain/repositories/premium_repository.dart';
+import '../../data/services/download_service.dart';
+import '../../domain/entities/download_item.dart';
+import '../../domain/repositories/downloads_repository.dart';
+import '../../domain/usecases/clear_all_downloads_use_case.dart';
+import '../../domain/usecases/delete_download_use_case.dart';
+import '../../domain/usecases/delete_reciter_downloads_use_case.dart';
+import '../../domain/usecases/download_surah_use_case.dart';
+import '../../domain/usecases/get_downloads_by_reciter_use_case.dart';
 
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
@@ -23,19 +27,6 @@ part 'downloads_state.dart';
 
 @injectable
 class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
-  final GetDownloadsByReciterUseCase _getDownloadsByReciter;
-  final DownloadSurahUseCase _downloadSurah;
-  final DeleteDownloadUseCase _deleteDownload;
-  final DeleteReciterDownloadsUseCase _deleteReciterDownloads;
-  final ClearAllDownloadsUseCase _clearAllDownloads;
-  final DownloadsRepository _downloadsRepository;
-  final PremiumRepository _premiumRepository;
-  final AudioPlayerHandler _audioPlayerHandler;
-  final AnalyticsService _analyticsService;
-
-  StreamSubscription<DownloadProgress>? _progressSubscription;
-  Timer? _progressReloadTimer;
-
   DownloadsBloc({
     required GetDownloadsByReciterUseCase getDownloadsByReciter,
     required DownloadSurahUseCase downloadSurah,
@@ -73,6 +64,18 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     // Listen to download progress
     _listenToProgress();
   }
+  final GetDownloadsByReciterUseCase _getDownloadsByReciter;
+  final DownloadSurahUseCase _downloadSurah;
+  final DeleteDownloadUseCase _deleteDownload;
+  final DeleteReciterDownloadsUseCase _deleteReciterDownloads;
+  final ClearAllDownloadsUseCase _clearAllDownloads;
+  final DownloadsRepository _downloadsRepository;
+  final PremiumRepository _premiumRepository;
+  final AudioPlayerHandler _audioPlayerHandler;
+  final AnalyticsService _analyticsService;
+
+  StreamSubscription<DownloadProgress>? _progressSubscription;
+  Timer? _progressReloadTimer;
 
   void _listenToProgress() {
     try {
@@ -129,7 +132,8 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       return;
     }
 
-    final result = await _getDownloadsByReciter();
+    final Either<Failure, Map<String, List<DownloadItem>>> result =
+        await _getDownloadsByReciter();
     result.fold(
       (failure) {
         // Don't show error for progress updates, just log it
@@ -155,8 +159,8 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     emit(const DownloadsState.loading());
 
-    final result = await _getDownloadsByReciter();
-    logger.d('result: ${result.getOrElse(() => {})}');
+    final Either<Failure, Map<String, List<DownloadItem>>> result =
+        await _getDownloadsByReciter();
     await result.fold(
       (failure) async => emit(
         DownloadsState.error(failure.message ?? 'Failed to load downloads'),
@@ -170,7 +174,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     // Check premium access before allowing download
-    final canDownload = await _premiumRepository.canDownload();
+    final bool canDownload = await _premiumRepository.canDownload();
     if (!canDownload) {
       emit(
         const DownloadsState.premiumRequired(
@@ -182,10 +186,8 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     }
 
     // Check if surah is already downloaded
-    final isAlreadyDownloaded = await _downloadsRepository.isSurahDownloaded(
-      event.surahId,
-      event.reciterName,
-    );
+    final bool isAlreadyDownloaded = await _downloadsRepository
+        .isSurahDownloaded(event.surahId, event.reciterName);
 
     if (isAlreadyDownloaded) {
       emit(
@@ -234,7 +236,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       fileName: '${event.surahTitle}_${event.reciterName}',
     );
 
-    final result = await _downloadSurah(
+    final Either<Failure, void> result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
       reciterName: event.reciterName,
@@ -272,7 +274,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     DeleteDownloadEvent event,
     Emitter<DownloadsState> emit,
   ) async {
-    final result = await _deleteDownload(event.downloadId);
+    final Either<Failure, void> result = await _deleteDownload(
+      event.downloadId,
+    );
     result.fold(
       (failure) => emit(
         DownloadsState.error(failure.message ?? 'Failed to delete download'),
@@ -290,7 +294,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     emit(const DownloadsState.loading());
 
-    final result = await _deleteReciterDownloads(event.reciterName);
+    final Either<Failure, void> result = await _deleteReciterDownloads(
+      event.reciterName,
+    );
     result.fold(
       (failure) => emit(
         DownloadsState.error(
@@ -318,7 +324,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     emit(const DownloadsState.loading());
 
-    final result = await _clearAllDownloads();
+    final Either<Failure, void> result = await _clearAllDownloads();
     result.fold(
       (failure) => emit(
         DownloadsState.error(
@@ -342,7 +348,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final isDownloaded = await _downloadsRepository.isSurahDownloaded(
+      final bool isDownloaded = await _downloadsRepository.isSurahDownloaded(
         event.surahId,
         event.reciterName,
       );
@@ -363,15 +369,15 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final download = await _downloadsRepository.getDownloadItem(
+      final DownloadItem? download = await _downloadsRepository.getDownloadItem(
         event.downloadId,
       );
       if (download == null) {
-        emit(DownloadsState.error('Download not found'));
+        emit(const DownloadsState.error('Download not found'));
         return;
       }
 
-      final isValid = await _downloadsRepository.validateDownloadedFile(
+      final bool isValid = await _downloadsRepository.validateDownloadedFile(
         download,
       );
       emit(
@@ -390,7 +396,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final validDownloads = await _downloadsRepository
+      final List<DownloadItem> validDownloads = await _downloadsRepository
           .getValidCompletedDownloads(event.reciterName);
       emit(
         DownloadsState.validDownloadsLoaded(
@@ -408,27 +414,26 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final download = await _downloadsRepository.getDownloadItem(
+      final DownloadItem? download = await _downloadsRepository.getDownloadItem(
         event.downloadId,
       );
       if (download == null) {
-        emit(DownloadsState.error('Download not found'));
+        emit(const DownloadsState.error('Download not found'));
         return;
       }
 
       // Validate file exists
-      final fileExists = await _downloadsRepository.validateDownloadedFile(
+      final bool fileExists = await _downloadsRepository.validateDownloadedFile(
         download,
       );
       if (!fileExists) {
-        emit(DownloadsState.error('Downloaded file not found'));
+        emit(const DownloadsState.error('Downloaded file not found'));
         return;
       }
 
       // Create MediaItem and play
-      final mediaItem = _downloadsRepository.createMediaItemFromDownload(
-        download,
-      );
+      final MediaItem mediaItem = _downloadsRepository
+          .createMediaItemFromDownload(download);
 
       await _audioPlayerHandler.updateQueue([mediaItem]);
       await _audioPlayerHandler.pause();
@@ -448,18 +453,17 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final validDownloads = await _downloadsRepository
+      final List<DownloadItem> validDownloads = await _downloadsRepository
           .getValidCompletedDownloads(event.reciterName);
 
       if (validDownloads.isEmpty) {
-        emit(DownloadsState.error('No valid downloaded files found'));
+        emit(const DownloadsState.error('No valid downloaded files found'));
         return;
       }
 
       // Create MediaItems and play
-      final mediaItems = _downloadsRepository.createMediaItemsFromDownloads(
-        validDownloads,
-      );
+      final List<MediaItem> mediaItems = _downloadsRepository
+          .createMediaItemsFromDownloads(validDownloads);
 
       await _audioPlayerHandler.updateQueue(mediaItems);
       await _audioPlayerHandler.pause();
@@ -482,7 +486,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     try {
-      final canDownload = await _premiumRepository.canDownload();
+      final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
         emit(
           const DownloadsState.premiumRequired(
@@ -502,21 +506,22 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     try {
       // Get the failed download item
-      final downloadItem = await _downloadsRepository.getDownloadItem(
-        event.downloadId,
-      );
+      final DownloadItem? downloadItem = await _downloadsRepository
+          .getDownloadItem(event.downloadId);
       if (downloadItem == null) {
-        emit(DownloadsState.error('Download not found'));
+        emit(const DownloadsState.error('Download not found'));
         return;
       }
 
       if (downloadItem.status != DownloadStatus.failed) {
-        emit(DownloadsState.error('Only failed downloads can be retried'));
+        emit(
+          const DownloadsState.error('Only failed downloads can be retried'),
+        );
         return;
       }
 
       // Check premium access before allowing retry
-      final canDownload = await _premiumRepository.canDownload();
+      final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
         emit(
           const DownloadsState.premiumRequired(
@@ -574,7 +579,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         await _downloadsRepository.retryDownload(event.downloadId);
 
         // Log analytics event for retry success
-        _analyticsService.logEvent(
+        await _analyticsService.logEvent(
           'download_retry_success',
           parameters: {
             'download_id': event.downloadId,
@@ -586,7 +591,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         add(const LoadDownloads());
       } catch (e) {
         // Log analytics event for retry failure
-        _analyticsService.logEvent(
+        await _analyticsService.logEvent(
           'download_retry_failed',
           parameters: {
             'download_id': event.downloadId,

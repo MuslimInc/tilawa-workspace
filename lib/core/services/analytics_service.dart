@@ -1,6 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/main.dart';
+import '../../main.dart';
 
 /// Abstract interface for analytics service
 abstract class AnalyticsService {

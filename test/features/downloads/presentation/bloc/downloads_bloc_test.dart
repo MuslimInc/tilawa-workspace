@@ -1,7 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -24,6 +25,14 @@ import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'downloads_bloc_test.mocks.dart';
 
+// Provide dummy values for Either types that Mockito can't generate automatically
+@visibleForTesting
+Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
+
+@visibleForTesting
+Either<Failure, Map<String, List<DownloadItem>>>
+provideDummyEitherFailureMapStringListDownloadItem() => const Right({});
+
 @GenerateMocks([
   GetDownloadsByReciterUseCase,
   DownloadSurahUseCase,
@@ -43,7 +52,7 @@ void main() {
 
   setUpAll(() async {
     // Register mock method channel handlers
-    const MethodChannel pathProviderChannel = MethodChannel(
+    const pathProviderChannel = MethodChannel(
       'plugins.flutter.io/path_provider',
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -57,7 +66,7 @@ void main() {
           return null;
         });
 
-    const MethodChannel backgroundDownloaderChannel = MethodChannel(
+    const backgroundDownloaderChannel = MethodChannel(
       'com.bbflight.background_downloader',
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -70,7 +79,7 @@ void main() {
     // Register Dio FIRST before anything else that might use it
     // This prevents "Dio is not registered" errors when DownloadService
     // tries to access Dio via GetIt
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       await getIt.unregister<Dio>();
     }
@@ -84,7 +93,7 @@ void main() {
     await clearHydratedStorageForTest();
 
     // Clean up GetIt registration
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       await getIt.unregister<Dio>();
     }
@@ -102,6 +111,12 @@ void main() {
   late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
+    // Provide dummy values for Either types
+    provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, Map<String, List<DownloadItem>>>>(
+      const Right({}),
+    );
+
     mockGetDownloadsByReciterUseCase = MockGetDownloadsByReciterUseCase();
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
     mockDeleteDownloadUseCase = MockDeleteDownloadUseCase();
@@ -935,7 +950,7 @@ void main() {
       blocTest<DownloadsBloc, DownloadsState>(
         'emits [error] when download is not in failed status',
         build: () {
-          final completedDownload = testDownloadItem.copyWith(
+          final DownloadItem completedDownload = testDownloadItem.copyWith(
             status: DownloadStatus.completed,
           );
           when(
@@ -1071,7 +1086,7 @@ void main() {
         build: () {
           when(
             mockGetDownloadsByReciterUseCase(),
-          ).thenAnswer((_) async => const Left(AudioFailure(null)));
+          ).thenAnswer((_) async => const Left(AudioFailure()));
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const LoadDownloads()),

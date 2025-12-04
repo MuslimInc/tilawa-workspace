@@ -1,5 +1,5 @@
-import 'package:muzakri/core/entities/audio.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
+import '../../../../core/entities/audio.dart';
+import '../../../../core/utils/typedefs.dart';
 
 abstract class AudioPlayerRepository {
   ResultVoid play();

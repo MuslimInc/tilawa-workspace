@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../domain/entities/playlist.dart';
 
 abstract class PlaylistsLocalDataSource {
   Future<List<Playlist>> getAllPlaylists();
@@ -19,16 +20,16 @@ abstract class PlaylistsLocalDataSource {
 
 @LazySingleton(as: PlaylistsLocalDataSource)
 class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
+  PlaylistsLocalDataSourceImpl(this._prefs);
   static const String _playlistsKey = 'playlists';
   static const String _playlistCounterKey = 'playlist_counter';
 
   final SharedPreferencesAsync _prefs;
 
-  PlaylistsLocalDataSourceImpl(this._prefs);
-
   @override
   Future<List<Playlist>> getAllPlaylists() async {
-    final playlistsJson = await _prefs.getStringList(_playlistsKey) ?? [];
+    final List<String> playlistsJson =
+        await _prefs.getStringList(_playlistsKey) ?? [];
 
     return playlistsJson.map((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;
@@ -38,7 +39,7 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
 
   @override
   Future<Playlist?> getPlaylistById(String id) async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
     try {
       return playlists.firstWhere((playlist) => playlist.id == id);
     } catch (e) {
@@ -48,10 +49,10 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
 
   @override
   Future<void> savePlaylist(Playlist playlist) async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
 
     // Check if playlist exists
-    final existingIndex = playlists.indexWhere((p) => p.id == playlist.id);
+    final int existingIndex = playlists.indexWhere((p) => p.id == playlist.id);
 
     if (existingIndex != -1) {
       // Update existing playlist
@@ -66,14 +67,14 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
 
   @override
   Future<void> deletePlaylist(String id) async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
     playlists.removeWhere((playlist) => playlist.id == id);
     await saveAllPlaylists(playlists);
   }
 
   @override
   Future<void> saveAllPlaylists(List<Playlist> playlists) async {
-    final playlistsJson = playlists
+    final List<String> playlistsJson = playlists
         .map((playlist) => jsonEncode(playlist.toJson()))
         .toList();
     await _prefs.setStringList(_playlistsKey, playlistsJson);
@@ -87,7 +88,7 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
 
   @override
   Future<bool> doesPlaylistNameExist(String name, {String? excludeId}) async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
     return playlists.any(
       (playlist) =>
           playlist.name.toLowerCase() == name.toLowerCase() &&
@@ -97,13 +98,13 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
 
   @override
   Future<int> getPlaylistsCount() async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
     return playlists.length;
   }
 
   @override
   Future<int> getTotalItemsCount() async {
-    final playlists = await getAllPlaylists();
+    final List<Playlist> playlists = await getAllPlaylists();
     return playlists.fold<int>(
       0,
       (total, playlist) => total + playlist.itemCount,
@@ -113,8 +114,8 @@ class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
   /// Generate a unique playlist ID
   @override
   Future<String> generatePlaylistId() async {
-    final counter = await _prefs.getInt(_playlistCounterKey) ?? 0;
-    final newCounter = counter + 1;
+    final int counter = await _prefs.getInt(_playlistCounterKey) ?? 0;
+    final int newCounter = counter + 1;
     await _prefs.setInt(_playlistCounterKey, newCounter);
     return 'playlist_$newCounter';
   }

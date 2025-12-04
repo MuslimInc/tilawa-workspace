@@ -1,5 +1,5 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import '../entities/download_item.dart';
 
 abstract class DownloadsRepository {
   /// Get all downloads grouped by reciter

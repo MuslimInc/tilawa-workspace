@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart';
-import 'package:muzakri/features/playlists/presentation/widgets/create_playlist_dialog.dart';
-import 'package:muzakri/features/playlists/presentation/widgets/playlist_card.dart';
-import 'package:muzakri/features/playlists/presentation/widgets/playlist_search_bar.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+
+import '../features/playlists/domain/entities/playlist.dart';
+import '../features/playlists/presentation/bloc/playlists_bloc.dart';
+import '../features/playlists/presentation/widgets/create_playlist_dialog.dart';
+import '../features/playlists/presentation/widgets/playlist_card.dart';
+import '../features/playlists/presentation/widgets/playlist_search_bar.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class PlaylistsScreen extends StatefulWidget {
   const PlaylistsScreen({super.key});
@@ -22,7 +24,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -97,7 +99,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                       : ListView.builder(
                           itemCount: filteredPlaylists.length,
                           itemBuilder: (context, index) {
-                            final playlist = filteredPlaylists[index];
+                            final Playlist playlist = filteredPlaylists[index];
                             return PlaylistCard(
                               playlist: playlist,
                               onTap: () =>
@@ -226,7 +228,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               : ListView.builder(
                   itemCount: playlists.length,
                   itemBuilder: (context, index) {
-                    final playlist = playlists[index];
+                    final Playlist playlist = playlists[index];
                     return PlaylistCard(
                       playlist: playlist,
                       onTap: () =>
@@ -255,16 +257,16 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     );
   }
 
-  void _showEditPlaylistDialog(BuildContext context, dynamic playlist) {
-    // TODO: Implement edit playlist dialog
-    final l10n = AppLocalizations.of(context)!;
+  void _showEditPlaylistDialog(BuildContext context, Playlist playlist) {
+    // TODO(username): Implement edit playlist dialog
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.editPlaylistComingSoon)));
   }
 
   void _showDeletePlaylistDialog(BuildContext context, dynamic playlist) {
-    final l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -280,7 +282,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               context.read<PlaylistsBloc>().add(
-                DeletePlaylistEvent(playlist.id),
+                DeletePlaylistEvent((playlist as Playlist).id),
               );
             },
             style: ElevatedButton.styleFrom(
@@ -294,17 +296,17 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     );
   }
 
-  void _navigateToPlaylistDetails(BuildContext context, dynamic playlist) {
-    // TODO: Implement playlist details screen
-    final l10n = AppLocalizations.of(context)!;
+  void _navigateToPlaylistDetails(BuildContext context, Playlist playlist) {
+    // TODO(username): Implement playlist details screen
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.playlistDetailsComingSoon)));
   }
 
-  void _playPlaylist(BuildContext context, dynamic playlist) {
-    // TODO: Implement play playlist functionality
-    final l10n = AppLocalizations.of(context)!;
+  void _playPlaylist(BuildContext context, Playlist playlist) {
+    // TODO(username): Implement play playlist functionality
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.playPlaylistComingSoon)));

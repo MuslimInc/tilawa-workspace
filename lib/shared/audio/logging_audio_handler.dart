@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/main.dart';
 import 'package:rxdart/rxdart.dart';
+
+import '../../main.dart';
 
 class LoggingAudioHandler extends CompositeAudioHandler {
   LoggingAudioHandler(super.inner) {
@@ -257,7 +258,10 @@ class LoggingAudioHandler extends CompositeAudioHandler {
     Map<String, dynamic>? options,
   ]) async {
     _log('getChildren($parentMediaId, $options)');
-    final result = await super.getChildren(parentMediaId, options);
+    final List<MediaItem> result = await super.getChildren(
+      parentMediaId,
+      options,
+    );
     _log('getChildren -> $result');
     return result;
   }
@@ -265,7 +269,9 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
     _log('subscribeToChildren($parentMediaId)');
-    final result = super.subscribeToChildren(parentMediaId);
+    final ValueStream<Map<String, dynamic>> result = super.subscribeToChildren(
+      parentMediaId,
+    );
     result.listen((options) {
       _log('$parentMediaId children changed with options $options');
     });
@@ -275,7 +281,7 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   @override
   Future<MediaItem?> getMediaItem(String mediaId) async {
     _log('getMediaItem($mediaId)');
-    final result = await super.getMediaItem(mediaId);
+    final MediaItem? result = await super.getMediaItem(mediaId);
     _log('getMediaItem -> $result');
     return result;
   }
@@ -286,7 +292,7 @@ class LoggingAudioHandler extends CompositeAudioHandler {
     Map<String, dynamic>? extras,
   ]) async {
     _log('search($query, $extras)');
-    final result = await super.search(query, extras);
+    final List<MediaItem> result = await super.search(query, extras);
     _log('search -> $result');
     return result;
   }

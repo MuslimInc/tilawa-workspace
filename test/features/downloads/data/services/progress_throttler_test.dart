@@ -17,7 +17,7 @@ void main() {
         const progress = 0.0;
 
         // Act
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: received,
           total: total,
           progress: progress,
@@ -38,7 +38,7 @@ void main() {
         const progress = 1.0;
 
         // Act
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: received,
           total: total,
           progress: progress,
@@ -53,7 +53,7 @@ void main() {
         throttler.recordUpdate(received: 0);
 
         // Act - Progress changes by 1% (10 bytes out of 1000)
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 10,
           total: 1000,
           progress: 0.01,
@@ -68,7 +68,7 @@ void main() {
         throttler.recordUpdate(received: 0);
 
         // Act - Progress changes by 0.5% (5 bytes out of 1000)
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 5,
           total: 1000,
           progress: 0.005,
@@ -89,7 +89,7 @@ void main() {
         // Act - Wait 100ms
         await Future.delayed(const Duration(milliseconds: 110));
 
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 5, // Small change (< 1%)
           total: 1000,
           progress: 0.005,
@@ -108,7 +108,7 @@ void main() {
           // Act - Wait only 50ms
           await Future.delayed(const Duration(milliseconds: 50));
 
-          final shouldSend = throttler.shouldSendUpdate(
+          final bool shouldSend = throttler.shouldSendUpdate(
             received: 5, // Small change (< 1%)
             total: 1000,
             progress: 0.005,
@@ -128,7 +128,7 @@ void main() {
         throttler.recordUpdate(received: 100);
 
         // Verify next update calculation
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 200, // 100 bytes more = 10% of 1000
           total: 1000,
           progress: 0.2,
@@ -144,7 +144,7 @@ void main() {
         const largeTotal = 10000000; // 10MB
 
         // Act - 1% of 10MB = 100KB
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 100000, // 1% of 10MB
           total: largeTotal,
           progress: 0.01,
@@ -161,14 +161,14 @@ void main() {
       test('should handle rapid progress updates with throttling', () async {
         // Arrange
         final updatesSent = <int>[];
-        int received = 0;
+        var received = 0;
         const total = 1000;
 
         // Simulate rapid progress updates (every 10ms with 0.5% increments)
         // This tests time-based throttling since each change is < 1%
-        for (int i = 0; i < 20; i++) {
+        for (var i = 0; i < 20; i++) {
           received += 5; // 0.5% per update (< 1% threshold)
-          final progress = received / total;
+          final double progress = received / total;
 
           if (throttler.shouldSendUpdate(
             received: received,
@@ -183,8 +183,6 @@ void main() {
         }
 
         // Assert
-        print('📊 Updates sent: $updatesSent');
-        print('📊 Total updates: ${updatesSent.length}');
         // Should be throttled - not all 20 updates should be sent
         // Because each change is < 1%, time-based throttling (100ms) applies
         expect(updatesSent.length, greaterThan(1));
@@ -199,7 +197,9 @@ void main() {
     group('shouldSendUpdateUnknownSize', () {
       test('should always send initial update (received == 0)', () {
         // Act
-        final shouldSend = throttler.shouldSendUpdateUnknownSize(received: 0);
+        final bool shouldSend = throttler.shouldSendUpdateUnknownSize(
+          received: 0,
+        );
 
         // Assert
         expect(
@@ -216,7 +216,9 @@ void main() {
         // Act - Wait 100ms
         await Future.delayed(const Duration(milliseconds: 110));
 
-        final shouldSend = throttler.shouldSendUpdateUnknownSize(received: 100);
+        final bool shouldSend = throttler.shouldSendUpdateUnknownSize(
+          received: 100,
+        );
 
         // Assert
         expect(shouldSend, true, reason: 'Update should be sent after 100ms');
@@ -229,7 +231,9 @@ void main() {
         // Act - Wait only 50ms
         await Future.delayed(const Duration(milliseconds: 50));
 
-        final shouldSend = throttler.shouldSendUpdateUnknownSize(received: 100);
+        final bool shouldSend = throttler.shouldSendUpdateUnknownSize(
+          received: 100,
+        );
 
         // Assert
         expect(
@@ -244,8 +248,8 @@ void main() {
         final updatesSent = <int>[];
 
         // Simulate rapid progress updates (every 10ms)
-        for (int i = 0; i < 20; i++) {
-          final received = i * 10;
+        for (var i = 0; i < 20; i++) {
+          final int received = i * 10;
 
           if (throttler.shouldSendUpdateUnknownSize(received: received)) {
             updatesSent.add(received);
@@ -256,8 +260,6 @@ void main() {
         }
 
         // Assert
-        print('📊 Unknown size updates sent: $updatesSent');
-        print('📊 Total updates: ${updatesSent.length}');
         // Should be throttled - not all 20 updates should be sent
         expect(updatesSent.length, greaterThan(1));
         expect(
@@ -274,7 +276,7 @@ void main() {
         throttler.recordUpdate(received: 500);
 
         // Verify state was updated by checking next update
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 600, // 100 bytes more = 10% of 1000
           total: 1000,
           progress: 0.6,
@@ -292,7 +294,7 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 50));
 
         // Verify timestamp was updated - check with small progress change (< 1%)
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 105, // 5 bytes = 0.5% of 1000 (< 1% threshold)
           total: 1000,
           progress: 0.105,
@@ -320,7 +322,7 @@ void main() {
         throttler.reset();
 
         // Assert - After reset, initial update should be allowed
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 0,
           total: 1000,
           progress: 0.0,
@@ -338,7 +340,7 @@ void main() {
         throttler.reset();
 
         // Act
-        final shouldSend = throttler.shouldSendUpdate(
+        final bool shouldSend = throttler.shouldSendUpdate(
           received: 100,
           total: 1000,
           progress: 0.1,
@@ -359,14 +361,12 @@ void main() {
         // Arrange
         final progressUpdates = <Map<String, dynamic>>[];
         const totalBytes = 10000;
-        int receivedBytes = 0;
-
-        print('📥 Simulating download: 0% -> 100%');
+        var receivedBytes = 0;
 
         // Act - Simulate download progress every 10ms
-        for (int i = 0; i <= 100; i++) {
+        for (var i = 0; i <= 100; i++) {
           receivedBytes = (totalBytes * i / 100).round();
-          final progress = receivedBytes / totalBytes;
+          final double progress = receivedBytes / totalBytes;
 
           if (throttler.shouldSendUpdate(
             received: receivedBytes,
@@ -379,22 +379,13 @@ void main() {
               'percentage': (progress * 100).round(),
             });
             throttler.recordUpdate(received: receivedBytes);
-            print(
-              '⏱️  Update ${progressUpdates.length}: ${(progress * 100).toStringAsFixed(1)}% ($receivedBytes/$totalBytes bytes)',
-            );
           }
 
           await Future.delayed(const Duration(milliseconds: 10));
         }
 
         // Assert
-        print('📊 Total progress updates sent: ${progressUpdates.length}');
-        print('📊 Expected without throttling: 101');
-        if (progressUpdates.length < 101) {
-          print(
-            '📊 Throttling efficiency: ${((1 - progressUpdates.length / 101) * 100).toStringAsFixed(1)}% reduction',
-          );
-        }
+        if (progressUpdates.length < 101) {}
 
         // Should have sent updates
         // Note: If progress changes by >= 1% each time, all updates will be sent
@@ -406,7 +397,7 @@ void main() {
         expect(progressUpdates.length, greaterThanOrEqualTo(10));
 
         // Verify progress increases
-        for (int i = 1; i < progressUpdates.length; i++) {
+        for (var i = 1; i < progressUpdates.length; i++) {
           expect(
             progressUpdates[i]['progress'],
             greaterThanOrEqualTo(progressUpdates[i - 1]['progress']),
@@ -426,9 +417,9 @@ void main() {
 
         // Act - Simulate 1% increments (without time delays)
         // Each increment changes progress by exactly 1%, so all should be sent
-        for (int percent = 0; percent <= 100; percent++) {
-          final received = (totalBytes * percent / 100).round();
-          final progress = received / totalBytes;
+        for (var percent = 0; percent <= 100; percent++) {
+          final int received = (totalBytes * percent / 100).round();
+          final double progress = received / totalBytes;
 
           if (throttler.shouldSendUpdate(
             received: received,
@@ -441,7 +432,6 @@ void main() {
         }
 
         // Assert
-        print('📊 Updates sent for 1% increments: $updatesSent');
         // When progress changes by exactly 1% each time, all updates should be sent
         // because the 1% change threshold is met
         expect(
@@ -460,10 +450,10 @@ void main() {
 
         // Act - Simulate 0.1% increments (1/1000 of total) with time delays
         // This tests that time-based throttling works for small progress changes
-        for (int increment = 0; increment <= 1000; increment++) {
-          final received = (totalBytes * increment / 1000)
+        for (var increment = 0; increment <= 1000; increment++) {
+          final int received = (totalBytes * increment / 1000)
               .round(); // 0.1% per increment
-          final progress = received / totalBytes;
+          final double progress = received / totalBytes;
 
           if (throttler.shouldSendUpdate(
             received: received,
@@ -479,8 +469,6 @@ void main() {
         }
 
         // Assert
-        print('📊 Updates sent for 0.1% increments: ${updatesSent.length}');
-        print('📊 Expected without throttling: 1001');
         // When progress changes by 0.1% increments, updates will be sent when:
         // 1. Initial (0%)
         // 2. Every 1% change accumulates (every 10 increments = 1%)

@@ -1,28 +1,22 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/currency_config.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/features/premium/domain/usecases/cancel_subscription_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/check_feature_access_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/get_available_plans_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/get_premium_status_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/purchase_subscription_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/restore_subscription_use_case.dart';
-import 'package:muzakri/features/premium/domain/usecases/start_trial_use_case.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_event.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
+
+import '../../../../core/config/currency_config.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../domain/entities/premium_status.dart';
+import '../../domain/entities/subscription_plan.dart';
+import '../../domain/usecases/cancel_subscription_use_case.dart';
+import '../../domain/usecases/check_feature_access_use_case.dart';
+import '../../domain/usecases/get_available_plans_use_case.dart';
+import '../../domain/usecases/get_premium_status_use_case.dart';
+import '../../domain/usecases/purchase_subscription_use_case.dart';
+import '../../domain/usecases/restore_subscription_use_case.dart';
+import '../../domain/usecases/start_trial_use_case.dart';
+import 'premium_event.dart';
+import 'premium_state.dart';
 
 @injectable
 class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
-  final GetPremiumStatusUseCase _getPremiumStatus;
-  final PurchaseSubscriptionUseCase _purchaseSubscription;
-  final CancelSubscriptionUseCase _cancelSubscription;
-  final RestoreSubscriptionUseCase _restoreSubscription;
-  final StartTrialUseCase _startTrial;
-  final GetAvailablePlansUseCase _getAvailablePlans;
-  final CheckFeatureAccessUseCase _checkFeatureAccess;
-  final AnalyticsService _analyticsService;
-
   PremiumBloc(
     this._getPremiumStatus,
     this._purchaseSubscription,
@@ -42,6 +36,14 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     on<CheckFeatureAccess>(_onCheckFeatureAccess);
     on<RefreshPremiumStatus>(_onRefreshPremiumStatus);
   }
+  final GetPremiumStatusUseCase _getPremiumStatus;
+  final PurchaseSubscriptionUseCase _purchaseSubscription;
+  final CancelSubscriptionUseCase _cancelSubscription;
+  final RestoreSubscriptionUseCase _restoreSubscription;
+  final StartTrialUseCase _startTrial;
+  final GetAvailablePlansUseCase _getAvailablePlans;
+  final CheckFeatureAccessUseCase _checkFeatureAccess;
+  final AnalyticsService _analyticsService;
 
   Future<void> _onLoadPremiumStatus(
     LoadPremiumStatus event,
@@ -50,7 +52,12 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final result = await _getPremiumStatus();
+      final ({
+        bool canDownload,
+        List<SubscriptionPlan> plans,
+        PremiumStatus status,
+      })
+      result = await _getPremiumStatus();
       emit(
         PremiumState.loaded(
           status: result.status,
@@ -70,7 +77,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _purchaseSubscription(event.planId);
+      final bool success = await _purchaseSubscription(event.planId);
 
       if (success) {
         // Log analytics event for successful purchase
@@ -81,7 +88,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
         );
 
         emit(
-          PremiumState.purchaseSuccess(
+          const PremiumState.purchaseSuccess(
             message: 'Subscription purchased successfully!',
           ),
         );
@@ -121,7 +128,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _cancelSubscription();
+      final bool success = await _cancelSubscription();
 
       if (success) {
         emit(
@@ -150,7 +157,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final success = await _restoreSubscription();
+      final bool success = await _restoreSubscription();
 
       if (success) {
         emit(
@@ -179,7 +186,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     emit(const PremiumState.loading());
 
     try {
-      final result = await _startTrial();
+      final ({bool isEligible, bool success}) result = await _startTrial();
 
       if (!result.isEligible) {
         emit(
@@ -216,7 +223,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     Emitter<PremiumState> emit,
   ) async {
     try {
-      final plans = await _getAvailablePlans();
+      final List<SubscriptionPlan> plans = await _getAvailablePlans();
 
       if (state is PremiumLoaded) {
         final currentState = state as PremiumLoaded;
@@ -232,7 +239,7 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     Emitter<PremiumState> emit,
   ) async {
     try {
-      final canAccess = await _checkFeatureAccess(event.featureName);
+      final bool canAccess = await _checkFeatureAccess(event.featureName);
 
       if (!canAccess && event.featureName == 'download') {
         // Show premium upgrade prompt

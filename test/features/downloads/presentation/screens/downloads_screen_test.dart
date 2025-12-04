@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     // Provide dummy value for Mockito
-    provideDummy(DownloadsState.initial());
+    provideDummy(const DownloadsState.initial());
 
     // Create a fresh mock for each test
     mockDownloadsBloc = MockDownloadsBloc();
@@ -122,7 +122,7 @@ void main() {
       await tester.pump();
 
       // Expand the ExpansionTile to see the download items
-      final expansionTile = find.byType(ExpansionTile);
+      final Finder expansionTile = find.byType(ExpansionTile);
       expect(expansionTile, findsOneWidget);
       await tester.tap(expansionTile);
       await tester.pump();
@@ -164,7 +164,7 @@ void main() {
       await tester.pump();
 
       // Expand the ExpansionTile to see the download items
-      final expansionTile = find.byType(ExpansionTile);
+      final Finder expansionTile = find.byType(ExpansionTile);
       expect(expansionTile, findsOneWidget);
       await tester.tap(expansionTile);
       await tester.pump();
@@ -222,15 +222,15 @@ void main() {
       await tester.pump();
 
       // Expand ExpansionTile once
-      final expansionTile = find.byType(ExpansionTile);
+      final Finder expansionTile = find.byType(ExpansionTile);
       expect(expansionTile, findsOneWidget);
       await tester.tap(expansionTile);
       await tester.pump();
       await tester.pump();
 
       // Act & Assert - Simulate progress updates every second
-      for (int second = 0; second <= 5; second++) {
-        final progress = second * 0.2;
+      for (var second = 0; second <= 5; second++) {
+        final double progress = second * 0.2;
         download = download.copyWith(
           progress: progress,
           downloadedSize: (1000 * progress).round(),
@@ -247,7 +247,7 @@ void main() {
         await tester.pump();
 
         // Verify percentage is displayed correctly
-        final expectedPercentage = (progress * 100).round();
+        final int expectedPercentage = (progress * 100).round();
         expect(
           find.textContaining('$expectedPercentage%'),
           findsOneWidget,
@@ -256,11 +256,12 @@ void main() {
 
         // Verify progress bar exists and has correct value
         if (progress < 1.0) {
-          final progressIndicatorFinder = find.byType(LinearProgressIndicator);
+          final Finder progressIndicatorFinder = find.byType(
+            LinearProgressIndicator,
+          );
           if (progressIndicatorFinder.evaluate().isNotEmpty) {
-            final progressIndicator = tester.widget<LinearProgressIndicator>(
-              progressIndicatorFinder,
-            );
+            final LinearProgressIndicator progressIndicator = tester
+                .widget<LinearProgressIndicator>(progressIndicatorFinder);
             expect(
               progressIndicator.value ?? 0.0,
               closeTo(progress, 0.01),
@@ -306,15 +307,15 @@ void main() {
       await tester.pump();
 
       // Expand ExpansionTile once
-      final expansionTile = find.byType(ExpansionTile);
+      final Finder expansionTile = find.byType(ExpansionTile);
       expect(expansionTile, findsOneWidget);
       await tester.tap(expansionTile);
       await tester.pump();
       await tester.pump();
 
       // Act - Simulate 10 seconds of progress
-      for (int second = 0; second <= 10; second++) {
-        final progress = (second / 10).clamp(0.0, 1.0);
+      for (var second = 0; second <= 10; second++) {
+        final double progress = (second / 10).clamp(0.0, 1.0);
         download = download.copyWith(
           progress: progress,
           downloadedSize: (10000 * progress).round(),
@@ -331,16 +332,17 @@ void main() {
         await tester.pump();
 
         // Only check progress bar if it exists (when progress < 1.0)
-        final progressIndicatorFinder = find.byType(LinearProgressIndicator);
+        final Finder progressIndicatorFinder = find.byType(
+          LinearProgressIndicator,
+        );
         if (progress < 1.0 && progressIndicatorFinder.evaluate().isNotEmpty) {
-          final progressIndicator = tester.widget<LinearProgressIndicator>(
-            progressIndicatorFinder,
-          );
+          final LinearProgressIndicator progressIndicator = tester
+              .widget<LinearProgressIndicator>(progressIndicatorFinder);
           progressValues.add(progressIndicator.value ?? 0.0);
         }
 
         // Verify percentage text updates
-        final expectedPercentage = (progress * 100).round();
+        final int expectedPercentage = (progress * 100).round();
         expect(find.textContaining('$expectedPercentage%'), findsOneWidget);
 
         await tester.pump(const Duration(seconds: 1));
@@ -348,7 +350,7 @@ void main() {
 
       // Assert - Progress values should be increasing
       expect(progressValues.length, greaterThan(1));
-      for (int i = 1; i < progressValues.length; i++) {
+      for (var i = 1; i < progressValues.length; i++) {
         expect(
           progressValues[i],
           greaterThan(progressValues[i - 1]),
@@ -392,7 +394,7 @@ void main() {
         await tester.pump();
 
         // Expand the ExpansionTile to see the download items
-        final expansionTile = find.byType(ExpansionTile);
+        final Finder expansionTile = find.byType(ExpansionTile);
         expect(expansionTile, findsOneWidget);
         await tester.tap(expansionTile);
         await tester.pump();
@@ -443,7 +445,7 @@ void main() {
         await tester.pump();
 
         // Expand ExpansionTile once
-        final expansionTile = find.byType(ExpansionTile);
+        final Finder expansionTile = find.byType(ExpansionTile);
         expect(expansionTile, findsOneWidget);
         await tester.tap(expansionTile);
         await tester.pump();
@@ -451,14 +453,12 @@ void main() {
 
         // Verify initial state (0%)
         expect(find.textContaining('0%'), findsOneWidget);
-        print('📥 Download Simulation Started');
-        print('⏱️  Second 0: 0% (0/1000 bytes)');
 
         // Act - Simulate real-time progress updates every second for 5 seconds
         // This simulates DownloadService emitting progress updates through the stream
-        for (int second = 0; second <= 5; second++) {
-          final progress = second * 0.2; // 0%, 20%, 40%, 60%, 80%, 100%
-          final downloadedBytes = (1000 * progress).round();
+        for (var second = 0; second <= 5; second++) {
+          final double progress = second * 0.2; // 0%, 20%, 40%, 60%, 80%, 100%
+          final int downloadedBytes = (1000 * progress).round();
           download = download.copyWith(
             progress: progress,
             downloadedSize: downloadedBytes,
@@ -478,8 +478,10 @@ void main() {
           await tester.pump();
 
           // Verify UI reflects the progress update immediately
-          final expectedPercentage = (progress * 100).round();
-          final percentageText = find.textContaining('$expectedPercentage%');
+          final int expectedPercentage = (progress * 100).round();
+          final Finder percentageText = find.textContaining(
+            '$expectedPercentage%',
+          );
           expect(
             percentageText,
             findsOneWidget,
@@ -489,21 +491,16 @@ void main() {
           displayedPercentages.add(expectedPercentage);
 
           // Print progress update
-          if (second > 0) {
-            print(
-              '⏱️  Second $second: $expectedPercentage% ($downloadedBytes/1000 bytes) - Progress: ${progress.toStringAsFixed(2)}',
-            );
-          }
+          if (second > 0) {}
 
           // Verify progress bar value also updates
           if (progress < 1.0) {
-            final progressIndicatorFinder = find.byType(
+            final Finder progressIndicatorFinder = find.byType(
               LinearProgressIndicator,
             );
             if (progressIndicatorFinder.evaluate().isNotEmpty) {
-              final progressIndicator = tester.widget<LinearProgressIndicator>(
-                progressIndicatorFinder,
-              );
+              final LinearProgressIndicator progressIndicator = tester
+                  .widget<LinearProgressIndicator>(progressIndicatorFinder);
               progressHistory.add(progressIndicator.value ?? 0.0);
               expect(
                 progressIndicator.value ?? 0.0,
@@ -519,15 +516,10 @@ void main() {
           await tester.pump(const Duration(seconds: 1));
         }
 
-        print(
-          '✅ Download Simulation Completed: 0% → 20% → 40% → 60% → 80% → 100%',
-        );
-        print('📊 Final Progress History: $displayedPercentages');
-
         // Assert - Verify real-time updates were reflected correctly
         // Percentages should be increasing: 0, 20, 40, 60, 80, 100
         expect(displayedPercentages, [0, 20, 40, 60, 80, 100]);
-        for (int i = 1; i < displayedPercentages.length; i++) {
+        for (var i = 1; i < displayedPercentages.length; i++) {
           expect(
             displayedPercentages[i],
             greaterThan(displayedPercentages[i - 1]),
@@ -537,7 +529,7 @@ void main() {
 
         // Verify progress bar values also increased over time
         if (progressHistory.length > 1) {
-          for (int i = 1; i < progressHistory.length; i++) {
+          for (var i = 1; i < progressHistory.length; i++) {
             expect(
               progressHistory[i],
               greaterThan(progressHistory[i - 1]),

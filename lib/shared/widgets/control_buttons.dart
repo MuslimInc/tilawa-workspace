@@ -2,10 +2,10 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/helpers/show_slider_dialog.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../helpers/show_slider_dialog.dart';
+import '../../main.dart';
+import '../models/queue_state.dart';
 
 class ControlButtons extends StatelessWidget {
   const ControlButtons({super.key});
@@ -17,7 +17,7 @@ class ControlButtons extends StatelessWidget {
       children: [
         BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
-            final volume = state.status == AudioPlayerStatus.success
+            final double volume = state.status == AudioPlayerStatus.success
                 ? state.volume
                 : 1.0;
             return IconButton(
@@ -25,7 +25,7 @@ class ControlButtons extends StatelessWidget {
               onPressed: () {
                 showSliderDialog(
                   context: context,
-                  title: "Adjust volume",
+                  title: 'Adjust volume',
                   divisions: 10,
                   min: 0.0,
                   max: 1.0,
@@ -44,18 +44,18 @@ class ControlButtons extends StatelessWidget {
         BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
             if (state.status != AudioPlayerStatus.success) {
-              return IconButton(
-                icon: const Icon(FluentIcons.arrow_left_24_regular),
+              return const IconButton(
+                icon: Icon(FluentIcons.arrow_left_24_regular),
                 onPressed: null,
               );
             }
 
-            final queueState = state.queueState ?? QueueState.empty;
+            final QueueState queueState = state.queueState ?? QueueState.empty;
             return IconButton(
-              icon: Icon(FluentIcons.arrow_left_24_regular),
+              icon: const Icon(FluentIcons.arrow_left_24_regular),
               onPressed: () {
                 if (queueState.hasPrevious) {
-                  context.read<AudioPlayerBloc>().add(SkipToPrevious());
+                  context.read<AudioPlayerBloc>().add(const SkipToPrevious());
                 }
               },
             );
@@ -69,15 +69,16 @@ class ControlButtons extends StatelessWidget {
                 iconSize: 64.0,
                 onPressed: () {
                   context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.playAudio(),
+                    const AudioPlayerEvent.playAudio(),
                   );
                 },
               );
             }
 
-            final playbackState = state.playbackState;
-            final processingState = playbackState?.processingState;
-            final playing = playbackState?.playing;
+            final PlaybackState? playbackState = state.playbackState;
+            final AudioProcessingState? processingState =
+                playbackState?.processingState;
+            final bool? playing = playbackState?.playing;
             if (processingState == AudioProcessingState.loading ||
                 processingState == AudioProcessingState.buffering) {
               return Container(
@@ -92,7 +93,7 @@ class ControlButtons extends StatelessWidget {
                 iconSize: 64.0,
                 onPressed: () {
                   context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.playAudio(),
+                    const AudioPlayerEvent.playAudio(),
                   );
                 },
               );
@@ -102,7 +103,7 @@ class ControlButtons extends StatelessWidget {
                 iconSize: 64.0,
                 onPressed: () {
                   context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.pauseAudio(),
+                    const AudioPlayerEvent.pauseAudio(),
                   );
                 },
               );
@@ -112,18 +113,18 @@ class ControlButtons extends StatelessWidget {
         BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
             if (state.status != AudioPlayerStatus.success) {
-              return IconButton(
-                icon: const Icon(FluentIcons.arrow_right_24_regular),
+              return const IconButton(
+                icon: Icon(FluentIcons.arrow_right_24_regular),
                 onPressed: null,
               );
             }
 
-            final queueState = state.queueState ?? QueueState.empty;
+            final QueueState queueState = state.queueState ?? QueueState.empty;
             return IconButton(
               icon: const Icon(FluentIcons.arrow_right_24_regular),
               onPressed: queueState.hasNext
                   ? () {
-                      context.read<AudioPlayerBloc>().add(SkipToNext());
+                      context.read<AudioPlayerBloc>().add(const SkipToNext());
                     }
                   : null,
             );
@@ -131,18 +132,18 @@ class ControlButtons extends StatelessWidget {
         ),
         BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
-            final speed = state.status == AudioPlayerStatus.success
+            final double speed = state.status == AudioPlayerStatus.success
                 ? state.speed
                 : 1.0;
             return IconButton(
               icon: Text(
-                "${speed.toStringAsFixed(1)}x",
+                '${speed.toStringAsFixed(1)}x',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               onPressed: () {
                 showSliderDialog(
                   context: context,
-                  title: "Adjust speed",
+                  title: 'Adjust speed',
                   divisions: 10,
                   min: 0.5,
                   max: 1.5,

@@ -32,22 +32,15 @@ void main() {
         'emits AlphabetScrollbarState with selected letter when state is initial',
         build: () => bloc,
         act: (bloc) => bloc.add(const SelectLetter('أ')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'أ')],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'emits AlphabetScrollbarState with updated letter when state is loaded',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const SelectLetter('ب')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'ب')],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
@@ -65,9 +58,7 @@ void main() {
         'handles empty string letter',
         build: () => bloc,
         act: (bloc) => bloc.add(const SelectLetter('')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: '', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: '')],
       );
     });
 
@@ -75,14 +66,9 @@ void main() {
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'emits AlphabetScrollbarState with null selectedLetter when state is loaded',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const ClearSelection()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState()],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
@@ -91,18 +77,14 @@ void main() {
         seed: () =>
             const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: true),
         act: (bloc) => bloc.add(const ClearSelection()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: true),
-        ],
+        expect: () => [const AlphabetScrollbarState(isDragging: true)],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'does not emit when state is AlphabetScrollbarState',
         build: () => bloc,
         act: (bloc) => bloc.add(const ClearSelection()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState()],
       );
     });
 
@@ -111,18 +93,13 @@ void main() {
         'emits AlphabetScrollbarState with isDragging true when state is initial',
         build: () => bloc,
         act: (bloc) => bloc.add(const StartDragging()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: true),
-        ],
+        expect: () => [const AlphabetScrollbarState(isDragging: true)],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'emits AlphabetScrollbarState with isDragging true when state is loaded',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const StartDragging()),
         expect: () => [
           const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: true),
@@ -154,23 +131,16 @@ void main() {
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'preserves isDragging state when updating drag letter',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const UpdateDragLetter('ب')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'ب')],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'emits when state is initial',
         build: () => bloc,
         act: (bloc) => bloc.add(const UpdateDragLetter('أ')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'أ')],
       );
     });
 
@@ -181,18 +151,13 @@ void main() {
         seed: () =>
             const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: true),
         act: (bloc) => bloc.add(const EndDragging()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'أ')],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'maintains isDragging false when already not dragging',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const EndDragging()),
         expect: () => [],
       );
@@ -201,9 +166,7 @@ void main() {
         'emits when state is initial',
         build: () => bloc,
         act: (bloc) => bloc.add(const EndDragging()),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState()],
       );
     });
 
@@ -219,11 +182,11 @@ void main() {
           bloc.add(const EndDragging());
         },
         expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
+          const AlphabetScrollbarState(selectedLetter: 'أ'),
           const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: true),
           const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: true),
           const AlphabetScrollbarState(selectedLetter: 'ت', isDragging: true),
-          const AlphabetScrollbarState(selectedLetter: 'ت', isDragging: false),
+          const AlphabetScrollbarState(selectedLetter: 'ت'),
         ],
       );
 
@@ -238,11 +201,11 @@ void main() {
           bloc.add(const SelectLetter('ث'));
         },
         expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
-          const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: false),
-          const AlphabetScrollbarState(selectedLetter: 'ت', isDragging: false),
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: false),
-          const AlphabetScrollbarState(selectedLetter: 'ث', isDragging: false),
+          const AlphabetScrollbarState(selectedLetter: 'أ'),
+          const AlphabetScrollbarState(selectedLetter: 'ب'),
+          const AlphabetScrollbarState(selectedLetter: 'ت'),
+          const AlphabetScrollbarState(),
+          const AlphabetScrollbarState(selectedLetter: 'ث'),
         ],
       );
 
@@ -257,11 +220,11 @@ void main() {
           bloc.add(const ClearSelection());
         },
         expect: () => [
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: true),
+          const AlphabetScrollbarState(isDragging: true),
           const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: true),
           const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: true),
-          const AlphabetScrollbarState(selectedLetter: 'ب', isDragging: false),
-          const AlphabetScrollbarState(selectedLetter: null, isDragging: false),
+          const AlphabetScrollbarState(selectedLetter: 'ب'),
+          const AlphabetScrollbarState(),
         ],
       );
     });
@@ -270,23 +233,15 @@ void main() {
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'handles null selectedLetter in loaded state',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: null,
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(),
         act: (bloc) => bloc.add(const SelectLetter('أ')),
-        expect: () => [
-          const AlphabetScrollbarState(selectedLetter: 'أ', isDragging: false),
-        ],
+        expect: () => [const AlphabetScrollbarState(selectedLetter: 'أ')],
       );
 
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'handles same letter selection',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: 'أ',
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(selectedLetter: 'أ'),
         act: (bloc) => bloc.add(const SelectLetter('أ')),
         expect: () => [],
       );
@@ -294,10 +249,7 @@ void main() {
       blocTest<AlphabetScrollbarBloc, AlphabetScrollbarState>(
         'handles clear selection when already null',
         build: () => bloc,
-        seed: () => const AlphabetScrollbarState(
-          selectedLetter: null,
-          isDragging: false,
-        ),
+        seed: () => const AlphabetScrollbarState(),
         act: (bloc) => bloc.add(const ClearSelection()),
         expect: () => [],
       );

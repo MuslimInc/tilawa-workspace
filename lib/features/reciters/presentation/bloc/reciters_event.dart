@@ -12,18 +12,16 @@ class LoadReciters extends RecitersEvent {
 }
 
 class SearchRecitersEvent extends RecitersEvent {
-  final String query;
-
   const SearchRecitersEvent(this.query);
+  final String query;
 
   @override
   List<Object?> get props => [query];
 }
 
 class FilterByLetter extends RecitersEvent {
-  final String letter;
-
   const FilterByLetter(this.letter);
+  final String letter;
 
   @override
   List<Object?> get props => [letter];

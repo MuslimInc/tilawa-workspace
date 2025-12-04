@@ -3,15 +3,16 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i3;
 
-import 'package:dartz/dartz.dart' as _i2;
+import 'package:dartz_plus/src/either.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:muzakri/core/errors/failures.dart' as _i5;
 import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart'
-    as _i3;
+    as _i2;
 import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart'
-    as _i6;
+    as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -28,53 +29,48 @@ import 'package:muzakri/features/localization/domain/usecases/set_language_use_c
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
-  _FakeEither_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
 /// A class which mocks [GetCurrentLanguageUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetCurrentLanguageUseCase extends _i1.Mock
-    implements _i3.GetCurrentLanguageUseCase {
+    implements _i2.GetCurrentLanguageUseCase {
   MockGetCurrentLanguageUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, String>> call() =>
+  _i3.Future<_i4.Either<_i5.Failure, String>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i4.Future<_i2.Either<_i5.Failure, String>>.value(
-              _FakeEither_0<_i5.Failure, String>(
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, String>>.value(
+              _i6.dummyValue<_i4.Either<_i5.Failure, String>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, String>>);
+          as _i3.Future<_i4.Either<_i5.Failure, String>>);
 }
 
 /// A class which mocks [SetLanguageUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSetLanguageUseCase extends _i1.Mock
-    implements _i6.SetLanguageUseCase {
+    implements _i7.SetLanguageUseCase {
   MockSetLanguageUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, void>> call(String? languageCode) =>
+  _i3.Future<_i4.Either<_i5.Failure, void>> call(String? languageCode) =>
       (super.noSuchMethod(
             Invocation.method(#call, [languageCode]),
-            returnValue: _i4.Future<_i2.Either<_i5.Failure, void>>.value(
-              _FakeEither_0<_i5.Failure, void>(
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
+              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
                 this,
                 Invocation.method(#call, [languageCode]),
               ),
             ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, void>>);
+          as _i3.Future<_i4.Either<_i5.Failure, void>>);
 }

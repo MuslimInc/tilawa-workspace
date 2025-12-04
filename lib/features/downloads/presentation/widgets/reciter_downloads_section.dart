@@ -1,10 +1,12 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/widgets/download_item_card.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../domain/entities/download_item.dart';
+import '../bloc/downloads_bloc.dart';
+import 'download_item_card.dart';
 
 class ReciterDownloadsSection extends StatelessWidget {
   const ReciterDownloadsSection({
@@ -64,13 +66,12 @@ class ReciterDownloadsSection extends StatelessWidget {
               if (_hasCompletedDownloads())
                 BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, audioState) {
-                    final isPlayingFromThisReciter = _isPlayingFromThisReciter(
-                      audioState,
-                    );
+                    final bool isPlayingFromThisReciter =
+                        _isPlayingFromThisReciter(audioState);
                     return IconButton(
                       icon: Icon(
                         isPlayingFromThisReciter &&
-                                audioState.playbackState?.playing == true
+                                (audioState.playbackState?.playing ?? false)
                             ? Icons.pause
                             : Icons.play_arrow,
                       ),
@@ -78,7 +79,7 @@ class ReciterDownloadsSection extends StatelessWidget {
                           _handlePlayAllPlayPause(context, audioState),
                       tooltip:
                           isPlayingFromThisReciter &&
-                              audioState.playbackState?.playing == true
+                              (audioState.playbackState?.playing ?? false)
                           ? AppLocalizations.of(context)!.pauseAll
                           : AppLocalizations.of(context)!.playAll,
                     );
@@ -172,8 +173,10 @@ class ReciterDownloadsSection extends StatelessWidget {
 
   /// Check if any download from this reciter is currently playing
   bool _isPlayingFromThisReciter(AudioPlayerState audioState) {
-    final currentMediaItem = audioState.mediaItem;
-    if (currentMediaItem == null) return false;
+    final MediaItem? currentMediaItem = audioState.mediaItem;
+    if (currentMediaItem == null) {
+      return false;
+    }
 
     // Check if the current media item is from this reciter
     return currentMediaItem.artist == reciterName;
@@ -184,11 +187,11 @@ class ReciterDownloadsSection extends StatelessWidget {
     BuildContext context,
     AudioPlayerState audioState,
   ) {
-    final isPlayingFromThisReciter = _isPlayingFromThisReciter(audioState);
+    final bool isPlayingFromThisReciter = _isPlayingFromThisReciter(audioState);
 
     if (isPlayingFromThisReciter) {
       // If playing from this reciter, toggle play/pause
-      if (audioState.playbackState?.playing == true) {
+      if (audioState.playbackState?.playing ?? false) {
         context.read<AudioPlayerBloc>().add(
           const AudioPlayerEvent.pauseAudio(),
         );

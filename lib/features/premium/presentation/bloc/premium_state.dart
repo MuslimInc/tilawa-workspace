@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
+import '../../domain/entities/premium_status.dart';
+import '../../domain/entities/subscription_plan.dart';
 
 part 'premium_state.freezed.dart';
 

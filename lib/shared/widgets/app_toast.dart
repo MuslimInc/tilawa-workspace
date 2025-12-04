@@ -20,17 +20,16 @@ class AppToast {
     _timer?.cancel();
     _currentEntry?.remove();
 
-    final overlay = Overlay.of(context);
+    final OverlayState overlay = Overlay.of(context);
 
     final entry = OverlayEntry(
       builder: (ctx) {
-        final padding = MediaQuery.of(ctx).viewPadding.bottom;
+        final double padding = MediaQuery.of(ctx).viewPadding.bottom;
         return Positioned(
           left: 16,
           right: 16,
           bottom: padding + 32,
           child: IgnorePointer(
-            ignoring: true,
             child: _ToastContent(
               message: message,
               icon: icon,
@@ -72,13 +71,13 @@ class _ToastContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(32),
           boxShadow: const [
             BoxShadow(
               color: Color(0x33000000),
@@ -90,7 +89,6 @@ class _ToastContent extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
-            mainAxisSize: MainAxisSize.max,
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(

@@ -3,18 +3,17 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/theme/data/theme_service.dart';
+import '../../data/theme_service.dart';
 
 class ThemeState extends Equatable {
-  final ThemeMode mode;
-  final FlexScheme scheme;
-  final bool useSystemTheme;
-
   const ThemeState({
     required this.mode,
     this.scheme = FlexScheme.green,
     this.useSystemTheme = true,
   });
+  final ThemeMode mode;
+  final FlexScheme scheme;
+  final bool useSystemTheme;
 
   @override
   List<Object?> get props => [mode, scheme, useSystemTheme];
@@ -29,15 +28,15 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     try {
       final modeValue = json['mode'] as String?;
       final schemeValue = json['scheme'] as String?;
-      final useSystemTheme = json['useSystemTheme'] as bool? ?? true;
+      final bool useSystemTheme = json['useSystemTheme'] as bool? ?? true;
 
-      final mode = switch (modeValue) {
+      final ThemeMode mode = switch (modeValue) {
         'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
         _ => ThemeMode.system,
       };
 
-      final scheme = FlexScheme.values.firstWhere(
+      final FlexScheme scheme = FlexScheme.values.firstWhere(
         (s) => s.name == schemeValue,
         orElse: () => FlexScheme.green,
       );
@@ -108,13 +107,9 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       appBarStyle: FlexAppBarStyle.primary,
       appBarOpacity: 0.95,
       appBarElevation: 0,
-      transparentStatusBar: true,
       tabBarStyle: FlexTabBarStyle.forAppBar,
       tooltipsMatchBackground: true,
-      swapColors: false,
-      lightIsWhite: false,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
       useMaterial3ErrorColors: true,
     );
   }
@@ -128,13 +123,9 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       appBarStyle: FlexAppBarStyle.background,
       appBarOpacity: 0.90,
       appBarElevation: 0,
-      transparentStatusBar: true,
       tabBarStyle: FlexTabBarStyle.forAppBar,
       tooltipsMatchBackground: true,
-      swapColors: false,
-      darkIsTrueBlack: false,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
       useMaterial3ErrorColors: true,
     );
   }

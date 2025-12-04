@@ -1,21 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
-import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
-import 'package:muzakri/features/auth/domain/providers/auth_provider_interface.dart';
+
+import '../../domain/entities/auth_result.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/providers/auth_provider_interface.dart';
 
 @LazySingleton()
 class GoogleAuthProviderImpl implements AuthProviderInterface {
+  GoogleAuthProviderImpl(this._firebaseAuth, this._googleSignIn);
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
-
-  GoogleAuthProviderImpl(this._firebaseAuth, this._googleSignIn);
 
   @override
   Stream<UserEntity?> get authStateChanges {
     return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      if (firebaseUser == null) return null;
+      if (firebaseUser == null) {
+        return null;
+      }
       return _mapFirebaseUserToUser(firebaseUser);
     });
   }
@@ -34,7 +36,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       }
 
       // Create a new credential
-      final credential = GoogleAuthProvider.credential(
+      final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
@@ -42,7 +44,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       final UserCredential userCredential = await _firebaseAuth
           .signInWithCredential(credential);
 
-      final user = _mapFirebaseUserToUser(userCredential.user!);
+      final UserEntity user = _mapFirebaseUserToUser(userCredential.user!);
       return AuthResult.success(user: user);
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
@@ -62,8 +64,10 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
 
   @override
   UserEntity? get currentUser {
-    final firebaseUser = _firebaseAuth.currentUser;
-    if (firebaseUser == null) return null;
+    final User? firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) {
+      return null;
+    }
     return _mapFirebaseUserToUser(firebaseUser);
   }
 

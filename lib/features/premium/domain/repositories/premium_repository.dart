@@ -1,5 +1,5 @@
-import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
+import '../entities/premium_status.dart';
+import '../entities/subscription_plan.dart';
 
 abstract class PremiumRepository {
   // Premium status management

@@ -5,16 +5,17 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:muzakri/core/config/api_config.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../core/config/api_config.dart';
+import '../../core/config/language_config.dart';
+import '../../core/di/injection.dart';
+import '../../core/services/analytics_service.dart';
+import '../../main.dart';
+import '../models/queue_state.dart';
+import '../models/reciter_model.dart';
+import 'audio_player_handler.dart';
 
 class AudioPlayerHandlerImpl extends BaseAudioHandler
     with SeekHandler
@@ -59,10 +60,18 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
             _player.shuffleIndicesStream,
             _player.shuffleModeEnabledStream,
             (sequence, shuffleIndices, shuffleModeEnabled) {
-              if (sequence == null) return [];
-              if (!shuffleModeEnabled) return sequence;
-              if (shuffleIndices == null) return null;
-              if (shuffleIndices.length != sequence.length) return null;
+              if (sequence == null) {
+                return [];
+              }
+              if (!shuffleModeEnabled) {
+                return sequence;
+              }
+              if (shuffleIndices == null) {
+                return null;
+              }
+              if (shuffleIndices.length != sequence.length) {
+                return null;
+              }
               return shuffleIndices.map((i) => sequence[i]).toList();
             },
           )
@@ -73,8 +82,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     bool shuffleModeEnabled,
     List<int>? shuffleIndices,
   ) {
-    final effectiveIndices = _player.effectiveIndices;
-    final shuffleIndicesInv = List.filled(effectiveIndices.length, 0);
+    final List<int> effectiveIndices = _player.effectiveIndices;
+    final List<int> shuffleIndicesInv = List.filled(effectiveIndices.length, 0);
     for (var i = 0; i < effectiveIndices.length; i++) {
       shuffleIndicesInv[effectiveIndices[i]] = i;
     }
@@ -134,7 +143,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   Future<void> _init() async {
-    final session = await AudioSession.instance;
+    final AudioSession session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
 
     speed.debounceTime(const Duration(milliseconds: 250)).listen((speed) {
@@ -161,7 +170,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
           _player.shuffleIndicesStream,
           _player.durationStream,
           (index, queue, shuffleModeEnabled, shuffleIndices, duration) {
-            final queueIndex = getQueueIndex(
+            final int? queueIndex = getQueueIndex(
               index,
               shuffleModeEnabled,
               shuffleIndices,
@@ -186,7 +195,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       }
     });
 
-    _effectiveSequence
+    await _effectiveSequence
         .map(
           (sequence) =>
               sequence.map((source) => _mediaItemExpando[source]!).toList(),
@@ -198,7 +207,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   AudioSource _itemToSource(MediaItem mediaItem) {
-    final audioSource = AudioSource.uri(Uri.parse(mediaItem.id));
+    final UriAudioSource audioSource = AudioSource.uri(Uri.parse(mediaItem.id));
     _mediaItemExpando[audioSource] = mediaItem;
     return audioSource;
   }
@@ -260,7 +269,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
     switch (parentMediaId) {
       case AudioService.recentRootId:
-        final stream = _recentSubject.map((_) => <String, dynamic>{});
+        final Stream<Map<String, dynamic>> stream = _recentSubject.map(
+          (_) => <String, dynamic>{},
+        );
         return _recentSubject.hasValue
             ? stream.shareValueSeeded(<String, dynamic>{})
             : stream.shareValue();
@@ -299,27 +310,27 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   @override
   Future<void> updateMediaItem(MediaItem mediaItem) async {
-    final index = queue.value.indexWhere((item) => item.id == mediaItem.id);
+    final int index = queue.value.indexWhere((item) => item.id == mediaItem.id);
     _mediaItemExpando[_player.sequence[index]] = mediaItem;
   }
 
   @override
   Future<void> removeQueueItem(MediaItem mediaItem) async {
-    final index = queue.value.indexOf(mediaItem);
+    final int index = queue.value.indexOf(mediaItem);
     _playlist.removeAt(index);
     await _safeSetAudioSources(_playlist);
   }
 
   @override
   Future<void> moveQueueItem(int currentIndex, int newIndex) async {
-    final item = _playlist.removeAt(currentIndex);
+    final AudioSource item = _playlist.removeAt(currentIndex);
     _playlist.insert(newIndex, item);
     await _safeSetAudioSources(_playlist);
   }
 
   @override
   Future<void> skipToNext() async {
-    final currentIndex = _player.currentIndex;
+    final int? currentIndex = _player.currentIndex;
     logger.d(
       'skipToNext: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
@@ -335,7 +346,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   @override
   Future<void> skipToPrevious() async {
-    final currentIndex = _player.currentIndex;
+    final int? currentIndex = _player.currentIndex;
     logger.d(
       'skipToPrevious: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
@@ -351,9 +362,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   @override
   Future<void> skipToQueueItem(int index) async {
-    if (index < 0 || index >= _playlist.length) return;
+    if (index < 0 || index >= _playlist.length) {
+      return;
+    }
 
-    _player.seek(
+    await _player.seek(
       Duration.zero,
       index: _player.shuffleModeEnabled ? _player.shuffleIndices[index] : index,
     );
@@ -363,7 +376,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> play() async {
     await _player.play();
     // Log analytics event
-    final currentItem = mediaItem.valueOrNull;
+    final MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioPlay(
         currentItem.id,
@@ -377,7 +390,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> pause() async {
     await _player.pause();
     // Log analytics event
-    final currentItem = mediaItem.valueOrNull;
+    final MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioPause(currentItem.id);
     }
@@ -387,7 +400,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> seek(Duration position) async {
     await _player.seek(position);
     // Log analytics event
-    final currentItem = mediaItem.valueOrNull;
+    final MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioSeek(currentItem.id, position.inSeconds);
     }
@@ -397,7 +410,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> stop() async {
     await _player.stop();
     // Log analytics event
-    final currentItem = mediaItem.valueOrNull;
+    final MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioStop(currentItem.id);
     }
@@ -407,8 +420,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   void _broadcastState(PlaybackEvent event) {
-    final playing = _player.playing;
-    final queueIndex = getQueueIndex(
+    final bool playing = _player.playing;
+    final int? queueIndex = getQueueIndex(
       event.currentIndex,
       _player.shuffleModeEnabled,
       _player.shuffleIndices,
@@ -460,23 +473,23 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     }
 
     _isLoadingReciters = true;
-    final languageParam = _convertLanguageCode(languageCode);
+    final String languageParam = _convertLanguageCode(languageCode);
 
     try {
-      final reciters = await _fetchReciters(languageParam);
+      final List<Reciter> reciters = await _fetchReciters(languageParam);
 
       // Convert Reciters to MediaItems (if needed)
       final mediaItems = <MediaItem>[];
 
       // Iterate through each reciter and generate MediaItems for their surahs
-      for (var reciter in reciters) {
-        for (var moshaf in reciter.moshaf) {
+      for (final reciter in reciters) {
+        for (final Mosahf moshaf in reciter.moshaf) {
           // Split the surah_list into individual surah IDs
-          final surahList = moshaf.surahList.split(',');
+          final List<String> surahList = moshaf.surahList.split(',');
 
           // Create MediaItem for each surah
-          for (var surahId in surahList) {
-            final formattedSurahId = surahId.padLeft(
+          for (final surahId in surahList) {
+            final String formattedSurahId = surahId.padLeft(
               3,
               '0',
             ); // Make sure surah ID is like '001'
@@ -509,7 +522,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   /// Get raw reciters data for the RecitersScreen
   @override
   Future<List<Reciter>?> getRecitersData({String? languageCode}) async {
-    final languageParam = _convertLanguageCode(languageCode);
+    final String languageParam = _convertLanguageCode(languageCode);
 
     // Serve from cache when available for the same language
     if (_cachedRecitersData != null &&
@@ -517,7 +530,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       return _cachedRecitersData;
     }
     try {
-      final reciters = await _fetchReciters(languageParam);
+      final List<Reciter> reciters = await _fetchReciters(languageParam);
       return reciters;
     } catch (e) {
       log('Exception getting reciters data: $e');
@@ -530,12 +543,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         _cachedRecitersLanguage == languageParam) {
       return _cachedRecitersData!;
     }
-    final existing = _inFlightReciters[languageParam];
-    if (existing != null) return await existing;
+    final Future<List<Reciter>>? existing = _inFlightReciters[languageParam];
+    if (existing != null) {
+      return existing;
+    }
 
-    final future = (() async {
-      final baseUrl = ApiConfig.reciters(language: languageParam);
-      final response = await getIt<Dio>().get(baseUrl);
+    final Future<List<Reciter>> future = (() async {
+      final String baseUrl = ApiConfig.reciters(language: languageParam);
+      final Response<dynamic> response = await getIt<Dio>().get(baseUrl);
       if (response.statusCode != 200) {
         throw StateError('Bad status: ${response.statusCode}');
       }
@@ -548,10 +563,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
     _inFlightReciters[languageParam] = future;
     try {
-      final reciters = await future;
+      final List<Reciter> reciters = await future;
       return reciters;
     } finally {
-      _inFlightReciters.remove(languageParam);
+      await _inFlightReciters.remove(languageParam);
     }
   }
 
@@ -562,14 +577,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     String? reciterName,
   }) async {
     try {
-      final surahList = moshaf.surahList.split(',');
+      final List<String> surahList = moshaf.surahList.split(',');
       final mediaItems = <MediaItem>[];
 
-      for (var surahId in surahList) {
-        final surahNumber = int.parse(surahId);
-        final formattedSurahId = surahId.padLeft(3, '0');
+      for (final surahId in surahList) {
+        final int surahNumber = int.parse(surahId);
+        final String formattedSurahId = surahId.padLeft(3, '0');
         final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
-        final surahName = await _getSurahName(surahNumber);
+        final String surahName = await _getSurahName(surahNumber);
 
         mediaItems.add(
           MediaItem(
@@ -596,7 +611,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   /// Get surah name by surah number based on selected language
   Future<String> _getSurahName(int surahNumber) async {
-    final currentLanguage =
+    final String currentLanguage =
         await _prefs.getString(LanguageConfig.languageKey) ??
         LanguageConfig.getDefaultLanguageCode();
 
@@ -737,14 +752,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       3: 'Ali Imran',
       4: 'An-Nisa',
       5: 'Al-Maidah',
-      6: 'Al-An\'am',
-      7: 'Al-A\'raf',
+      6: "Al-An'am",
+      7: "Al-A'raf",
       8: 'Al-Anfal',
       9: 'At-Tawbah',
       10: 'Yunus',
       11: 'Hud',
       12: 'Yusuf',
-      13: 'Ar-Ra\'d',
+      13: "Ar-Ra'd",
       14: 'Ibrahim',
       15: 'Al-Hijr',
       16: 'An-Nahl',
@@ -754,10 +769,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       20: 'Taha',
       21: 'Al-Anbiya',
       22: 'Al-Hajj',
-      23: 'Al-Mu\'minun',
+      23: "Al-Mu'minun",
       24: 'An-Nur',
       25: 'Al-Furqan',
-      26: 'Ash-Shu\'ara',
+      26: "Ash-Shu'ara",
       27: 'An-Naml',
       28: 'Al-Qasas',
       29: 'Al-Ankabut',
@@ -787,13 +802,13 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       53: 'An-Najm',
       54: 'Al-Qamar',
       55: 'Ar-Rahman',
-      56: 'Al-Waqi\'ah',
+      56: "Al-Waqi'ah",
       57: 'Al-Hadid',
       58: 'Al-Mujadilah',
       59: 'Al-Hashr',
       60: 'Al-Mumtahanah',
       61: 'As-Saff',
-      62: 'Al-Jumu\'ah',
+      62: "Al-Jumu'ah",
       63: 'Al-Munafiqun',
       64: 'At-Taghabun',
       65: 'At-Talaq',
@@ -801,7 +816,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       67: 'Al-Mulk',
       68: 'Al-Qalam',
       69: 'Al-Haqqah',
-      70: 'Al-Ma\'arij',
+      70: "Al-Ma'arij",
       71: 'Nuh',
       72: 'Al-Jinn',
       73: 'Al-Muzzammil',
@@ -810,7 +825,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       76: 'Al-Insan',
       77: 'Al-Mursalat',
       78: 'An-Naba',
-      79: 'An-Nazi\'at',
+      79: "An-Nazi'at",
       80: 'Abasa',
       81: 'At-Takwir',
       82: 'Al-Infitar',
@@ -818,7 +833,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       84: 'Al-Inshiqaq',
       85: 'Al-Buruj',
       86: 'At-Tariq',
-      87: 'Al-A\'la',
+      87: "Al-A'la",
       88: 'Al-Ghashiyah',
       89: 'Al-Fajr',
       90: 'Al-Balad',
@@ -832,13 +847,13 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       98: 'Al-Bayyinah',
       99: 'Az-Zalzalah',
       100: 'Al-Adiyat',
-      101: 'Al-Qari\'ah',
+      101: "Al-Qari'ah",
       102: 'At-Takathur',
       103: 'Al-Asr',
       104: 'Al-Humazah',
       105: 'Al-Fil',
       106: 'Quraysh',
-      107: 'Al-Ma\'un',
+      107: "Al-Ma'un",
       108: 'Al-Kawthar',
       109: 'Al-Kafirun',
       110: 'An-Nasr',
@@ -875,7 +890,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
       // Check if we already have this artist's playlist cached
       if (_artistPlaylists.containsKey(artistId)) {
-        final artistPlaylist = _artistPlaylists[artistId]!;
+        final List<MediaItem> artistPlaylist = _artistPlaylists[artistId]!;
         log(
           'Using cached playlist for artist: $artistId (${artistPlaylist.length} items)',
         );
@@ -889,11 +904,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       log('Loading playlist for artist: $artistId');
 
       // Fetch the reciters list from getReciters method
-      final reciters = await getReciters();
+      final List<MediaItem>? reciters = await getReciters();
 
       if (reciters != null) {
         // Filter the reciters list to find the media items belonging to the artist with the provided artistId
-        final artistPlaylist = reciters
+        final List<MediaItem> artistPlaylist = reciters
             .where((item) => item.artist == artistId)
             .toList();
 
@@ -928,7 +943,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
 extension SurahNameX on String {
   String get surahName {
-    final arabic = "سورة $this";
+    final arabic = 'سورة $this';
 
     return '$arabic $this';
   }

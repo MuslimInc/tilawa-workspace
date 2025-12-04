@@ -1,9 +1,11 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../domain/entities/download_item.dart';
+import '../bloc/downloads_bloc.dart';
 
 class DownloadItemCard extends StatelessWidget {
   const DownloadItemCard({
@@ -74,18 +76,20 @@ class DownloadItemCard extends StatelessWidget {
             if (download.status == DownloadStatus.completed)
               BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                 builder: (context, audioState) {
-                  final isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
+                  final bool isCurrentlyPlaying = _isCurrentlyPlaying(
+                    audioState,
+                  );
                   return IconButton(
                     icon: Icon(
                       isCurrentlyPlaying &&
-                              audioState.playbackState?.playing == true
+                              (audioState.playbackState?.playing ?? false)
                           ? Icons.pause
                           : Icons.play_arrow,
                     ),
                     onPressed: () => _handlePlayPause(context, audioState),
                     tooltip:
                         isCurrentlyPlaying &&
-                            audioState.playbackState?.playing == true
+                            (audioState.playbackState?.playing ?? false)
                         ? AppLocalizations.of(context)!.pause
                         : AppLocalizations.of(context)!.play,
                   );
@@ -135,9 +139,9 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   String _getStatusText(BuildContext context) {
-    final progress = (download.progress * 100).toInt();
+    final int progress = (download.progress * 100).toInt();
     final downloading =
-        "${AppLocalizations.of(context)!.downloading} $progress%";
+        '${AppLocalizations.of(context)!.downloading} $progress%';
     return switch (download.status) {
       DownloadStatus.pending => AppLocalizations.of(context)!.pending,
       DownloadStatus.downloading => downloading,
@@ -166,8 +170,12 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024) {
+      return '$bytes B';
+    }
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
     if (bytes < 1024 * 1024 * 1024) {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
@@ -204,8 +212,10 @@ class DownloadItemCard extends StatelessWidget {
 
   /// Check if this download is currently playing
   bool _isCurrentlyPlaying(AudioPlayerState audioState) {
-    final currentMediaItem = audioState.mediaItem;
-    if (currentMediaItem == null) return false;
+    final MediaItem? currentMediaItem = audioState.mediaItem;
+    if (currentMediaItem == null) {
+      return false;
+    }
 
     // Check if the current media item matches this download
     final fileUri = Uri.file(download.filePath).toString();
@@ -214,11 +224,11 @@ class DownloadItemCard extends StatelessWidget {
 
   /// Handle play/pause button press
   void _handlePlayPause(BuildContext context, AudioPlayerState audioState) {
-    final isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
+    final bool isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
 
     if (isCurrentlyPlaying) {
       // If this download is currently playing, toggle play/pause
-      if (audioState.playbackState?.playing == true) {
+      if (audioState.playbackState?.playing ?? false) {
         context.read<AudioPlayerBloc>().add(
           const AudioPlayerEvent.pauseAudio(),
         );

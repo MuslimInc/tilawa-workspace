@@ -1,16 +1,25 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/core/config/language_config.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'localization_bloc_test.mocks.dart';
+
+// Provide dummy values for Either types
+@visibleForTesting
+Either<Failure, String> provideDummyEitherFailureString() =>
+    const Right(LanguageConfig.defaultLanguageCode);
+
+@visibleForTesting
+Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
 
 @GenerateMocks([GetCurrentLanguageUseCase, SetLanguageUseCase])
 void main() {
@@ -28,13 +37,19 @@ void main() {
     late MockSetLanguageUseCase mockSetLanguageUseCase;
 
     setUp(() {
+      // Provide dummy values for Either types
+      provideDummy<Either<Failure, String>>(
+        const Right(LanguageConfig.defaultLanguageCode),
+      );
+      provideDummy<Either<Failure, void>>(const Right(null));
+
       mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
       mockSetLanguageUseCase = MockSetLanguageUseCase();
 
       // Mock GetCurrentLanguageUseCase to return default language
-      when(
-        mockGetCurrentLanguageUseCase(),
-      ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+      when(mockGetCurrentLanguageUseCase()).thenAnswer(
+        (_) async => const Right(LanguageConfig.defaultLanguageCode),
+      );
 
       // Mock SetLanguageUseCase to return success
       when(
@@ -71,9 +86,9 @@ void main() {
           reset(mockSetLanguageUseCase);
 
           // Mock GetCurrentLanguageUseCase to return default language
-          when(
-            mockGetCurrentLanguageUseCase(),
-          ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+          when(mockGetCurrentLanguageUseCase()).thenAnswer(
+            (_) async => const Right(LanguageConfig.defaultLanguageCode),
+          );
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -114,7 +129,7 @@ void main() {
           // Mock GetCurrentLanguageUseCase to return English
           when(
             mockGetCurrentLanguageUseCase(),
-          ).thenAnswer((_) async => Right('en'));
+          ).thenAnswer((_) async => const Right('en'));
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -241,9 +256,9 @@ void main() {
             MockGetCurrentLanguageUseCase();
         final firstMockSetLanguageUseCase = MockSetLanguageUseCase();
 
-        when(
-          firstMockGetCurrentLanguageUseCase(),
-        ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+        when(firstMockGetCurrentLanguageUseCase()).thenAnswer(
+          (_) async => const Right(LanguageConfig.defaultLanguageCode),
+        );
         when(
           firstMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));
@@ -266,7 +281,7 @@ void main() {
 
         when(
           newMockGetCurrentLanguageUseCase(),
-        ).thenAnswer((_) async => Right('en'));
+        ).thenAnswer((_) async => const Right('en'));
         when(
           newMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));

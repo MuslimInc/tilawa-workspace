@@ -8,9 +8,8 @@ abstract class AlphabetScrollbarEvent extends Equatable {
 }
 
 class SelectLetter extends AlphabetScrollbarEvent {
-  final String letter;
-
   const SelectLetter(this.letter);
+  final String letter;
 
   @override
   List<Object?> get props => [letter];
@@ -25,9 +24,8 @@ class StartDragging extends AlphabetScrollbarEvent {
 }
 
 class UpdateDragLetter extends AlphabetScrollbarEvent {
-  final String letter;
-
   const UpdateDragLetter(this.letter);
+  final String letter;
 
   @override
   List<Object?> get props => [letter];

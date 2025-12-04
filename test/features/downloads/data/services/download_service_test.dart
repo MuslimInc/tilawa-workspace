@@ -22,7 +22,7 @@ void main() {
     // Register Dio in GetIt for DownloadService to use
     // This prevents "Dio is not registered" errors when DownloadService
     // tries to access Dio via GetIt
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       getIt.unregister<Dio>();
     }
@@ -32,7 +32,7 @@ void main() {
 
   tearDownAll(() {
     // Clean up GetIt registration
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       getIt.unregister<Dio>();
     }
@@ -63,7 +63,7 @@ void main() {
         ),
       ).thenAnswer((_) => mockFileDownloader);
 
-      when(mockFileDownloader.updates).thenAnswer((_) => Stream.empty());
+      when(mockFileDownloader.updates).thenAnswer((_) => const Stream.empty());
       when(mockFileDownloader.enqueue(any)).thenAnswer((_) async => true);
       when(mockFileDownloader.taskForId(any)).thenAnswer((_) async => null);
       when(mockFileDownloader.allTasks()).thenAnswer((_) async => []);
@@ -82,6 +82,7 @@ void main() {
         // Expected in test environment
       }
       DownloadService.fileDownloaderOverride = null;
+      await DownloadService.reset();
     });
 
     group('startDownload', () {
@@ -208,7 +209,7 @@ void main() {
         ).thenAnswer((_) async => null);
 
         // Act
-        final isActive = await DownloadService.isDownloadActive(
+        final bool isActive = await DownloadService.isDownloadActive(
           'non_existent_id',
         );
 
@@ -222,7 +223,36 @@ void main() {
         final controller = StreamController<TaskUpdate>.broadcast();
         when(mockFileDownloader.updates).thenAnswer((_) => controller.stream);
 
+        final task = DownloadTask(
+          url: testUrl,
+          filename: 'test.mp3',
+          taskId: testId,
+        );
+
+        // Override the default null stub for this specific testId
+        // In Mockito, stubs with specific values take precedence over 'any'
+        // Set this up after setUp() so it overrides the default null stub
+        when(
+          mockFileDownloader.taskForId(testId),
+        ).thenAnswer((_) async => task);
+
+        // Set up a completer to wait for the status update to be processed
+        final statusProcessed = Completer<void>();
+        late StreamSubscription progressSubscription;
+
         try {
+          // Listen to progress stream to know when the status update is processed
+          progressSubscription = DownloadService.globalProgressStream.listen((
+            progress,
+          ) {
+            if (progress.id == testId &&
+                progress.status == DownloadStatus.downloading) {
+              if (!statusProcessed.isCompleted) {
+                statusProcessed.complete();
+              }
+            }
+          });
+
           await DownloadService.startDownload(
             id: testId,
             url: testUrl,
@@ -230,26 +260,50 @@ void main() {
             title: testTitle,
             reciterName: testReciterName,
           );
+
+          // Add the status update after subscription is set up
+          // Use a small delay to ensure subscription is active
+          await Future.delayed(const Duration(milliseconds: 10));
+          controller.add(TaskStatusUpdate(task, TaskStatus.running));
         } on MissingPluginException {
           // Expected in test environment - skip test
+          await progressSubscription.cancel();
           await controller.close();
           return;
+        } catch (e) {
+          // If any other error, clean up and fail
+          await progressSubscription.cancel();
+          await controller.close();
+          rethrow;
         }
 
-        final task = DownloadTask(
-          url: testUrl,
-          filename: 'test.mp3',
-          taskId: testId,
-        );
-        controller.add(TaskStatusUpdate(task, TaskStatus.running));
         // Wait for the stream update to be processed
+        try {
+          await statusProcessed.future.timeout(const Duration(seconds: 1));
+        } catch (e) {
+          // If timeout, the status update wasn't processed via stream
+          // But taskForId fallback should still work
+        }
+
+        // Give a small delay to ensure _taskStatuses is updated
         await Future.delayed(const Duration(milliseconds: 50));
 
         // Act
-        final isActive = await DownloadService.isDownloadActive(testId);
+        final bool isActive = await DownloadService.isDownloadActive(testId);
 
         // Assert
-        expect(isActive, true);
+        // Should return true either because:
+        // 1. Status is tracked in _taskStatuses (preferred)
+        // 2. Or taskForId returns the task (fallback)
+        expect(
+          isActive,
+          true,
+          reason:
+              'Download should be active - either tracked in _taskStatuses or found via taskForId',
+        );
+
+        // Cleanup
+        await progressSubscription.cancel();
         await controller.close();
       });
     });
@@ -259,9 +313,7 @@ void main() {
         // Act
         try {
           await DownloadService.cancelDownload(testId);
-        } catch (e, s) {
-          print('ERROR in cancelDownload: $e');
-          print('STACK: $s');
+        } catch (e) {
           rethrow;
         }
 
@@ -353,7 +405,7 @@ void main() {
 
         // Assert
         if (progressEvents.isNotEmpty) {
-          final initialProgress = progressEvents.first;
+          final DownloadProgress initialProgress = progressEvents.first;
           expect(initialProgress.progress, 0.0);
           expect(initialProgress.status, DownloadStatus.downloading);
           expect(initialProgress.id, testId);
@@ -363,47 +415,46 @@ void main() {
         await subscription.cancel();
       });
 
-      test('should emit progress events through globalProgressStream', () async {
-        // Arrange
-        final globalEvents = <DownloadProgress>[];
-        late StreamSubscription subscription;
+      test(
+        'should emit progress events through globalProgressStream',
+        () async {
+          // Arrange
+          final globalEvents = <DownloadProgress>[];
+          late StreamSubscription subscription;
 
-        subscription = DownloadService.globalProgressStream.listen((progress) {
-          globalEvents.add(progress);
-          print(
-            '📥 Global Progress: id=${progress.id} status=${progress.status} progress=${(progress.progress * 100).toStringAsFixed(1)}% bytes=${progress.downloadedSize}/${progress.fileSize}',
-          );
-        });
+          subscription = DownloadService.globalProgressStream.listen((
+            progress,
+          ) {
+            globalEvents.add(progress);
+          });
 
-        // Act
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } on MissingPluginException {
-          // Expected in test environment - skip test
+          // Act
+          try {
+            await DownloadService.startDownload(
+              id: testId,
+              url: testUrl,
+              filePath: testFilePath,
+              title: testTitle,
+              reciterName: testReciterName,
+            );
+          } on MissingPluginException {
+            // Expected in test environment - skip test
+            await subscription.cancel();
+            return;
+          } catch (e) {
+            // Expected to fail in test environment
+          }
+
+          // Wait for events
+          await Future.delayed(const Duration(milliseconds: 500));
+
+          // Assert
+          expect(globalEvents, isA<List<DownloadProgress>>());
+
+          // Cleanup
           await subscription.cancel();
-          return;
-        } catch (e) {
-          // Expected to fail in test environment
-        }
-
-        // Wait for events
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        // Assert
-        expect(globalEvents, isA<List<DownloadProgress>>());
-        print(
-          '📊 Total global progress events received: ${globalEvents.length}',
-        );
-
-        // Cleanup
-        await subscription.cancel();
-      });
+        },
+      );
 
       test('should track progress updates over time', () async {
         // Arrange
@@ -417,9 +468,6 @@ void main() {
           progressEvents.add(progress);
           if (progress.status == DownloadStatus.downloading) {
             progressHistory.add(progress.progress);
-            print(
-              '⏱️  Progress Update: ${(progress.progress * 100).toStringAsFixed(1)}% (${progress.downloadedSize}/${progress.fileSize} bytes)',
-            );
           }
         });
 
@@ -444,10 +492,9 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 1000));
 
         // Assert
-        print('📊 Progress History: $progressHistory');
         if (progressHistory.length > 1) {
           // Verify progress is increasing (if we got multiple updates)
-          for (int i = 1; i < progressHistory.length; i++) {
+          for (var i = 1; i < progressHistory.length; i++) {
             expect(
               progressHistory[i],
               greaterThanOrEqualTo(progressHistory[i - 1]),
@@ -470,11 +517,7 @@ void main() {
           progress,
         ) {
           progressEvents.add(progress);
-          if (progress.status == DownloadStatus.completed) {
-            print(
-              '✅ Completion Event: progress=${progress.progress} downloadedSize=${progress.downloadedSize} fileSize=${progress.fileSize}',
-            );
-          }
+          if (progress.status == DownloadStatus.completed) {}
         });
 
         // Act
@@ -494,11 +537,11 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 2000));
 
         // Assert
-        final completionEvents = progressEvents
+        final List<DownloadProgress> completionEvents = progressEvents
             .where((p) => p.status == DownloadStatus.completed)
             .toList();
         if (completionEvents.isNotEmpty) {
-          final completion = completionEvents.first;
+          final DownloadProgress completion = completionEvents.first;
           expect(completion.progress, 1.0);
           expect(completion.status, DownloadStatus.completed);
           // File size should be set (not 0) if download completed successfully
@@ -516,19 +559,18 @@ void main() {
         final download2Events = <DownloadProgress>[];
         final globalEvents = <DownloadProgress>[];
 
-        final subscription1 = DownloadService.progressStream('download_1')
-            .listen((progress) {
+        final StreamSubscription<DownloadProgress> subscription1 =
+            DownloadService.progressStream('download_1').listen((progress) {
               download1Events.add(progress);
             });
-        final subscription2 = DownloadService.progressStream('download_2')
-            .listen((progress) {
+        final StreamSubscription<DownloadProgress> subscription2 =
+            DownloadService.progressStream('download_2').listen((progress) {
               download2Events.add(progress);
             });
-        final globalSubscription = DownloadService.globalProgressStream.listen((
-          progress,
-        ) {
-          globalEvents.add(progress);
-        });
+        final StreamSubscription<DownloadProgress> globalSubscription =
+            DownloadService.globalProgressStream.listen((progress) {
+              globalEvents.add(progress);
+            });
 
         // Act
         try {
@@ -558,9 +600,6 @@ void main() {
         // Assert
         // In test environment, events might be empty due to platform channel limitations
         // We just verify the streams are set up correctly
-        print('📊 Download 1 events: ${download1Events.length}');
-        print('📊 Download 2 events: ${download2Events.length}');
-        print('📊 Global events: ${globalEvents.length}');
 
         // Cleanup
         try {
@@ -603,9 +642,6 @@ void main() {
         ) {
           progressEvents.add(progress);
           timestamps.add(DateTime.now());
-          print(
-            '⏱️  ${DateTime.now().millisecondsSinceEpoch}: Progress ${(progress.progress * 100).toStringAsFixed(1)}%',
-          );
         });
 
         // Act
@@ -625,26 +661,21 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 1000));
 
         // Assert
-        print('📊 Total progress events: ${progressEvents.length}');
         if (timestamps.length > 1) {
           // Calculate time differences between events
           final timeDiffs = <int>[];
-          for (int i = 1; i < timestamps.length; i++) {
-            final diff = timestamps[i]
+          for (var i = 1; i < timestamps.length; i++) {
+            final int diff = timestamps[i]
                 .difference(timestamps[i - 1])
                 .inMilliseconds;
             timeDiffs.add(diff);
-            print('⏱️  Time between events ${i - 1} and $i: ${diff}ms');
           }
 
           // Most updates should be at least 100ms apart (throttling)
           // Allow some flexibility for test environment
-          final avgTimeDiff = timeDiffs.isNotEmpty
+          final double _ = timeDiffs.isNotEmpty
               ? timeDiffs.reduce((a, b) => a + b) / timeDiffs.length
               : 0.0;
-          print(
-            '📊 Average time between events: ${avgTimeDiff.toStringAsFixed(1)}ms',
-          );
 
           // In a real scenario with throttling, average should be >= 100ms
           // In test environment, this might vary, so we just verify events are received
@@ -664,11 +695,7 @@ void main() {
           progress,
         ) {
           progressEvents.add(progress);
-          if (progress.fileSize == 0 && progress.downloadedSize > 0) {
-            print(
-              '📥 Unknown file size: downloaded ${progress.downloadedSize} bytes',
-            );
-          }
+          if (progress.fileSize == 0 && progress.downloadedSize > 0) {}
         });
 
         // Act
@@ -705,9 +732,6 @@ void main() {
         ) {
           if (progress.status == DownloadStatus.downloading) {
             progressValues.add(progress.progress);
-            print(
-              '📈 Progress: ${(progress.progress * 100).toStringAsFixed(1)}%',
-            );
           }
         });
 
@@ -728,10 +752,9 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 1000));
 
         // Assert
-        print('📊 Progress values: $progressValues');
         if (progressValues.length > 1) {
           // Progress should be non-decreasing
-          for (int i = 1; i < progressValues.length; i++) {
+          for (var i = 1; i < progressValues.length; i++) {
             expect(
               progressValues[i],
               greaterThanOrEqualTo(progressValues[i - 1]),

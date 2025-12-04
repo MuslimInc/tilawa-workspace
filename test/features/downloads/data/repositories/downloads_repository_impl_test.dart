@@ -18,7 +18,7 @@ void main() {
 
   setUpAll(() {
     // Register mock method channel handlers
-    const MethodChannel pathProviderChannel = MethodChannel(
+    const pathProviderChannel = MethodChannel(
       'plugins.flutter.io/path_provider',
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -32,7 +32,7 @@ void main() {
           return null;
         });
 
-    const MethodChannel backgroundDownloaderChannel = MethodChannel(
+    const backgroundDownloaderChannel = MethodChannel(
       'com.bbflight.background_downloader',
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -45,7 +45,7 @@ void main() {
     // Register Dio in GetIt for DownloadService to use
     // This prevents "Dio is not registered" errors when DownloadService
     // tries to access Dio via GetIt
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       getIt.unregister<Dio>();
     }
@@ -55,7 +55,7 @@ void main() {
 
   tearDownAll(() {
     // Clean up GetIt registration
-    final getIt = GetIt.instance;
+    final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       getIt.unregister<Dio>();
     }
@@ -97,7 +97,7 @@ void main() {
         verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
 
         // Verify that the download item has status 'downloading' (not 'pending')
-        final captured = verify(
+        final List<dynamic> captured = verify(
           mockLocalDataSource.addDownload(captureAny),
         ).captured;
         expect(captured.length, 1);
@@ -214,7 +214,7 @@ void main() {
 
       test('should throw exception when download is not failed', () async {
         // Arrange
-        final completedDownload = testDownloadItem.copyWith(
+        final DownloadItem completedDownload = testDownloadItem.copyWith(
           status: DownloadStatus.completed,
         );
         when(
@@ -266,12 +266,12 @@ void main() {
         // The repository's validateDownloadedFile uses File.exists() directly
         // which is hard to mock, so we test the exception handling path
         // by providing an invalid file path that will cause an exception
-        final invalidDownloadItem = testDownloadItem.copyWith(
+        final DownloadItem invalidDownloadItem = testDownloadItem.copyWith(
           filePath: '/invalid/path/with/special/chars/\x00',
         );
 
         // Act
-        final result = await repository.validateDownloadedFile(
+        final bool result = await repository.validateDownloadedFile(
           invalidDownloadItem,
         );
 
@@ -306,7 +306,7 @@ void main() {
         ).thenAnswer((_) async => true);
 
         // Act
-        final result = await repository.isSurahDownloaded(
+        final bool result = await repository.isSurahDownloaded(
           testSurahId,
           testReciterName,
         );
@@ -324,7 +324,7 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        final result = await repository.isSurahDownloaded(
+        final bool result = await repository.isSurahDownloaded(
           testSurahId,
           testReciterName,
         );
@@ -375,7 +375,7 @@ void main() {
         ).thenAnswer((_) async => true);
 
         // Act
-        final result = await repository.getDownloadedFilePath(
+        final String? result = await repository.getDownloadedFilePath(
           testSurahId,
           testReciterName,
         );
@@ -442,7 +442,8 @@ void main() {
         // Note: DownloadService.getDownloadStatus() and activeDownloadIds
         // will throw MissingPluginException in test environment, but the repository
         // now handles this gracefully and returns downloads without syncing status
-        final result = await repository.getDownloadsByReciter();
+        final Map<String, List<DownloadItem>> result = await repository
+            .getDownloadsByReciter();
 
         // Assert
         // In test environment, status syncing is skipped, so updateDownload
@@ -488,7 +489,8 @@ void main() {
           // Act
           // Note: DownloadService.activeDownloadIds will throw MissingPluginException
           // in test environment, but the repository now handles this gracefully
-          final result = await repository.getDownloadsByReciter();
+          final Map<String, List<DownloadItem>> result = await repository
+              .getDownloadsByReciter();
 
           // Assert
           verify(mockLocalDataSource.getDownloads()).called(1);
@@ -522,13 +524,16 @@ void main() {
         // Act
         // Note: DownloadService.activeDownloadIds will throw MissingPluginException
         // in test environment, but the repository now handles this gracefully
-        final result = await repository.getDownloadsByReciter();
+        final Map<String, List<DownloadItem>> result = await repository
+            .getDownloadsByReciter();
 
         // Assert
         verify(mockLocalDataSource.getDownloads()).called(1);
         expect(result, isA<Map<String, List<DownloadItem>>>());
         // Status should remain as completed since it's not active
-        final downloads = result.values.expand((list) => list).toList();
+        final List<DownloadItem> downloads = result.values
+            .expand((list) => list)
+            .toList();
         expect(downloads.length, 1);
         expect(downloads.first.status, DownloadStatus.completed);
       });
@@ -569,7 +574,7 @@ void main() {
 
         // Assert
         verify(mockLocalDataSource.getDownloads()).called(1);
-        final captured = verify(
+        final List<dynamic> captured = verify(
           mockLocalDataSource.updateDownload(captureAny),
         ).captured;
         final updatedDownload = captured.first as DownloadItem;
@@ -615,7 +620,7 @@ void main() {
         );
 
         // Assert
-        final captured = verify(
+        final List<dynamic> captured = verify(
           mockLocalDataSource.updateDownload(captureAny),
         ).captured;
         final updatedDownload = captured.first as DownloadItem;

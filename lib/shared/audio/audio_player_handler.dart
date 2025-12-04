@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
 import 'package:rxdart/rxdart.dart';
+
+import '../models/queue_state.dart';
+import '../models/reciter_model.dart';
 
 abstract class AudioPlayerHandler implements AudioHandler {
   Stream<QueueState> get queueState;

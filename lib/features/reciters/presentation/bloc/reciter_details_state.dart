@@ -16,15 +16,14 @@ class ReciterDetailsLoading extends ReciterDetailsState {
 }
 
 class ReciterDetailsLoaded extends ReciterDetailsState {
-  final List<SurahEntity> surahList;
-  final Mosahf selectedMoshaf;
-  final String? selectedSurahId;
-
   const ReciterDetailsLoaded({
     required this.surahList,
     required this.selectedMoshaf,
     this.selectedSurahId,
   });
+  final List<SurahEntity> surahList;
+  final Mosahf selectedMoshaf;
+  final String? selectedSurahId;
 
   @override
   List<Object?> get props => [surahList, selectedMoshaf, selectedSurahId];
@@ -43,9 +42,8 @@ class ReciterDetailsLoaded extends ReciterDetailsState {
 }
 
 class ReciterDetailsError extends ReciterDetailsState {
-  final String message;
-
   const ReciterDetailsError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];

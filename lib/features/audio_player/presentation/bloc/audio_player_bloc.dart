@@ -1,12 +1,13 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:rxdart/rxdart.dart';
+
+import '../../../../main.dart';
+import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../../shared/models/position_data.dart';
+import '../../../../shared/models/queue_state.dart';
 
 part 'audio_player_bloc.freezed.dart';
 part 'audio_player_event.dart';
@@ -14,8 +15,6 @@ part 'audio_player_state.dart';
 
 @injectable
 class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
-  final AudioPlayerHandler _audioHandler;
-
   AudioPlayerBloc(this._audioHandler)
     : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
@@ -46,6 +45,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     _setupAudioStreams();
   }
+  final AudioPlayerHandler _audioHandler;
 
   void _setupAudioStreams() {
     // Listen to media item changes
@@ -295,8 +295,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
     try {
-      final volume = (json['volume'] as num?)?.toDouble() ?? 1.0;
-      final speed = (json['speed'] as num?)?.toDouble() ?? 1.0;
+      final double volume = (json['volume'] as num?)?.toDouble() ?? 1.0;
+      final double speed = (json['speed'] as num?)?.toDouble() ?? 1.0;
 
       return AudioPlayerState(
         status: AudioPlayerStatus.initial,

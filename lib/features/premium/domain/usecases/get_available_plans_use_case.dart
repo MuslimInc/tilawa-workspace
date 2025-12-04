@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import '../entities/subscription_plan.dart';
+import '../repositories/premium_repository.dart';
 
 @Singleton()
 class GetAvailablePlansUseCase {
@@ -9,6 +9,6 @@ class GetAvailablePlansUseCase {
   final PremiumRepository _premiumRepository;
 
   Future<List<SubscriptionPlan>> call() async {
-    return await _premiumRepository.getAvailablePlans();
+    return _premiumRepository.getAvailablePlans();
   }
 }

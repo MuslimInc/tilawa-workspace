@@ -1,8 +1,9 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
+
+import '../core/di/injection.dart';
+import '../main.dart';
+import '../shared/audio/audio_player_handler.dart';
+import '../shared/models/reciter_model.dart';
 
 class ReciterHelper {
   /// Extract reciter information from a MediaItem
@@ -11,15 +12,17 @@ class ReciterHelper {
     String? languageCode,
   }) async {
     try {
-      final audioHandler = getIt<AudioPlayerHandler>();
-      final reciters = await audioHandler.getRecitersData(
+      final AudioPlayerHandler audioHandler = getIt<AudioPlayerHandler>();
+      final List<Reciter>? reciters = await audioHandler.getRecitersData(
         languageCode: languageCode,
       );
 
-      if (reciters == null) return null;
+      if (reciters == null) {
+        return null;
+      }
 
       // First try to find by artist field
-      final reciterName = mediaItem.artist;
+      final String? reciterName = mediaItem.artist;
       if (reciterName != null && reciterName.isNotEmpty) {
         try {
           return reciters.firstWhere(
@@ -33,8 +36,8 @@ class ReciterHelper {
 
       // If artist field is empty, try to find by matching the server URL in the MediaItem ID
       // This is a fallback approach for when artist field is not set
-      for (final reciter in reciters) {
-        for (final moshaf in reciter.moshaf) {
+      for (final Reciter reciter in reciters) {
+        for (final Mosahf moshaf in reciter.moshaf) {
           if (mediaItem.id.contains(moshaf.server)) {
             logger.d('Found reciter by server match: ${reciter.name}');
             return reciter;
@@ -52,7 +55,7 @@ class ReciterHelper {
 
   /// Check if a MediaItem has valid reciter information
   static bool hasReciterInfo(MediaItem mediaItem) {
-    final artist = mediaItem.artist;
+    final String? artist = mediaItem.artist;
     if (artist == null || artist.isEmpty) {
       return false;
     }

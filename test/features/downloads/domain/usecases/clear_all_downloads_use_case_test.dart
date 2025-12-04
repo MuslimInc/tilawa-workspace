@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -25,10 +25,13 @@ void main() {
         when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -43,10 +46,13 @@ void main() {
           ).thenThrow(Exception(errorMessage));
 
           // Act
-          final result = await useCase();
+          final Either<Failure, void> result = await useCase();
 
           // Assert
-          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Exception: $errorMessage');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.clearAllDownloads()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -59,10 +65,13 @@ void main() {
           when(mockRepository.clearAllDownloads()).thenThrow('Generic error');
 
           // Act
-          final result = await useCase();
+          final Either<Failure, void> result = await useCase();
 
           // Assert
-          expect(result, const Left(AudioFailure('Generic error')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Generic error');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.clearAllDownloads()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -88,10 +97,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -104,10 +116,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -120,10 +135,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -136,10 +154,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -152,10 +173,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -165,14 +189,23 @@ void main() {
         when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
 
         // Act
-        final result1 = await useCase();
-        final result2 = await useCase();
-        final result3 = await useCase();
+        final Either<Failure, void> result1 = await useCase();
+        final Either<Failure, void> result2 = await useCase();
+        final Either<Failure, void> result3 = await useCase();
 
         // Assert
-        expect(result1, const Right(null));
-        expect(result2, const Right(null));
-        expect(result3, const Right(null));
+        result1.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
+        result2.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
+        result3.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
 
         verify(mockRepository.clearAllDownloads()).called(3);
         verifyNoMoreInteractions(mockRepository);
@@ -183,10 +216,13 @@ void main() {
         when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -196,10 +232,13 @@ void main() {
         when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -212,10 +251,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -228,10 +270,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -244,10 +289,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -259,10 +307,13 @@ void main() {
         ).thenThrow(123); // Non-Exception error
 
         // Act
-        final result = await useCase();
+        final Either<Failure, void> result = await useCase();
 
         // Assert
-        expect(result, const Left(AudioFailure('123')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, '123');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.clearAllDownloads()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });

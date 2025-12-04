@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/main.dart';
 import 'package:path/path.dart' as path;
+
+import '../../../../main.dart';
+import '../../domain/entities/download_item.dart';
+import '../../domain/repositories/downloads_repository.dart';
+import '../datasources/downloads_local_datasource.dart';
+import '../services/download_service.dart';
 
 @LazySingleton(as: DownloadsRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
@@ -18,7 +19,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<Map<String, List<DownloadItem>>> getDownloadsByReciter() async {
-    final downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
 
     // Sync status with active downloads in DownloadService
     // This ensures that downloads that are actively downloading show the correct status
@@ -36,23 +37,21 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       return _groupDownloadsByReciter(downloads);
     } catch (e) {
       // Any other error - log and continue without syncing
-      logger.w(
-        '[DownloadsRepository] Error getting active downloads: $e',
-      );
+      logger.w('[DownloadsRepository] Error getting active downloads: $e');
       return _groupDownloadsByReciter(downloads);
     }
 
     final updatedDownloads = <DownloadItem>[];
-    bool hasChanges = false;
+    var hasChanges = false;
 
     for (final download in downloads) {
-      final isActive = activeDownloadIds.contains(download.id);
+      final bool isActive = activeDownloadIds.contains(download.id);
 
       if (isActive) {
         // If download is active in DownloadService but status is not downloading,
         // update it to downloading
         if (download.status != DownloadStatus.downloading) {
-          final updatedDownload = download.copyWith(
+          final DownloadItem updatedDownload = download.copyWith(
             status: DownloadStatus.downloading,
           );
           updatedDownloads.add(updatedDownload);
@@ -83,7 +82,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         if (backgroundStatus == DownloadStatus.downloading) {
           // Download is still active in background, update status
           if (download.status != DownloadStatus.downloading) {
-            final updatedDownload = download.copyWith(
+            final DownloadItem updatedDownload = download.copyWith(
               status: DownloadStatus.downloading,
             );
             updatedDownloads.add(updatedDownload);
@@ -95,7 +94,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           // Was downloading but not active anymore - check if it completed or failed
           if (backgroundStatus == DownloadStatus.completed) {
             // Download completed in background
-            final updatedDownload = download.copyWith(
+            final DownloadItem updatedDownload = download.copyWith(
               status: DownloadStatus.completed,
               progress: 1.0,
             );
@@ -106,7 +105,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             logger.w(
               '[DownloadsRepository] Download failed in background: id=${download.id} title="${download.title}"',
             );
-            final updatedDownload = download.copyWith(
+            final DownloadItem updatedDownload = download.copyWith(
               status: DownloadStatus.failed,
             );
             updatedDownloads.add(updatedDownload);
@@ -149,13 +148,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<List<DownloadItem>> getDownloadsForReciter(String reciterName) async {
-    final downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
     return downloads.where((d) => d.reciterName == reciterName).toList();
   }
 
   @override
   Future<DownloadItem?> getDownloadItem(String id) async {
-    final downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
     try {
       return downloads.firstWhere((d) => d.id == id);
     } catch (e) {
@@ -175,7 +174,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> deleteDownload(String id) async {
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null &&
         await localDataSource.isFileExists(download.filePath)) {
       await localDataSource.deleteFile(download.filePath);
@@ -185,7 +184,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> deleteDownloadsForReciter(String reciterName) async {
-    final downloads = await getDownloadsForReciter(reciterName);
+    final List<DownloadItem> downloads = await getDownloadsForReciter(
+      reciterName,
+    );
     for (final download in downloads) {
       await deleteDownload(download.id);
     }
@@ -193,7 +194,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> clearAllDownloads() async {
-    final downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final download in downloads) {
       if (await localDataSource.isFileExists(download.filePath)) {
         await localDataSource.deleteFile(download.filePath);
@@ -206,7 +207,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Stream<DownloadItem> getDownloadProgress(String id) async* {
     // This would typically be implemented with a download manager
     // For now, we'll simulate progress updates
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
       yield download;
     }
@@ -220,7 +221,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   ) async {
     // Validate inputs early to avoid creating invalid download entries
     // Note: in our app, surahId is the actual download URL
-    final trimmedUrl = surahId.trim();
+    final String trimmedUrl = surahId.trim();
     if (trimmedUrl.isEmpty) {
       logger.e(
         '[DownloadsRepositoryImpl] startDownload: empty URL for surahId=$surahId reciter="$reciterName"',
@@ -228,21 +229,21 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw ArgumentError('Download URL is empty');
     }
 
-    final downloadsDir = await localDataSource.getDownloadsDirectory();
+    final String downloadsDir = await localDataSource.getDownloadsDirectory();
 
     // Use URL as the stable download id to avoid mixing in reciter/surah incorrectly
-    String downloadId = trimmedUrl;
+    final downloadId = trimmedUrl;
 
     // Build a safe filename from the URL; fallback to surahId + reciter if needed
     String safeFileName;
     try {
-      final parsed = Uri.parse(trimmedUrl);
-      final lastSegment = parsed.pathSegments.isNotEmpty
+      final Uri parsed = Uri.parse(trimmedUrl);
+      final String lastSegment = parsed.pathSegments.isNotEmpty
           ? parsed.pathSegments.last
           : '';
       if (lastSegment.isNotEmpty) {
-        final ext = path.extension(lastSegment).toLowerCase();
-        final baseName = ext.isNotEmpty
+        final String ext = path.extension(lastSegment).toLowerCase();
+        final String baseName = ext.isNotEmpty
             ? lastSegment.substring(0, lastSegment.length - ext.length)
             : lastSegment;
         // Allow common audio extensions; default to .mp3
@@ -263,7 +264,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       safeFileName = '$safeFileName.mp3';
     }
 
-    final filePath = path.join(downloadsDir, safeFileName);
+    final String filePath = path.join(downloadsDir, safeFileName);
 
     // Set status to downloading immediately since we're about to start the download
     final downloadItem = DownloadItem(
@@ -314,9 +315,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> pauseDownload(String id) async {
     // Pause functionality not implemented in new DownloadService
     // Downloads run to completion in individual isolates
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final updatedDownload = download.copyWith(status: DownloadStatus.paused);
+      final DownloadItem updatedDownload = download.copyWith(
+        status: DownloadStatus.paused,
+      );
       await updateDownload(updatedDownload);
     }
   }
@@ -325,9 +328,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> resumeDownload(String id) async {
     // Resume functionality not implemented in new DownloadService
     // Downloads run to completion in individual isolates
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final updatedDownload = download.copyWith(
+      final DownloadItem updatedDownload = download.copyWith(
         status: DownloadStatus.downloading,
       );
       await updateDownload(updatedDownload);
@@ -338,9 +341,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> cancelDownload(String id) async {
     await DownloadService.cancelDownload(id);
 
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final updatedDownload = download.copyWith(
+      final DownloadItem updatedDownload = download.copyWith(
         status: DownloadStatus.cancelled,
       );
       await updateDownload(updatedDownload);
@@ -352,9 +355,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
-    final downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final d in downloads) {
-      final isFileExists = await localDataSource.isFileExists(d.filePath);
+      final bool isFileExists = await localDataSource.isFileExists(d.filePath);
       if (d.reciterName == reciterName &&
           d.title.contains(surahId) &&
           d.status == DownloadStatus.completed &&
@@ -370,8 +373,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     String surahId,
     String reciterName,
   ) async {
-    final downloads = await localDataSource.getDownloads();
-    final download = downloads.firstWhere(
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    final DownloadItem download = downloads.firstWhere(
       (d) =>
           d.reciterName == reciterName &&
           d.title.contains(surahId) &&
@@ -393,9 +396,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     int downloadedSize,
     int fileSize,
   ) async {
-    final download = await getDownloadItem(id);
+    final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final updatedDownload = download.copyWith(
+      final DownloadItem updatedDownload = download.copyWith(
         status: status,
         progress: progress,
         downloadedSize: downloadedSize,
@@ -416,8 +419,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       title: download.title,
       artist: download.reciterName,
       album: 'Downloaded',
-      duration: null, // Duration will be determined by the audio player
-      artUri: null,
       extras: {
         'isDownloaded': true,
         'localFilePath': download.filePath,
@@ -430,7 +431,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<bool> validateDownloadedFile(DownloadItem download) async {
     try {
       final file = File(download.filePath);
-      return await file.exists();
+      return file.existsSync();
     } catch (e) {
       return false;
     }
@@ -440,12 +441,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<List<DownloadItem>> getValidCompletedDownloads(
     String reciterName,
   ) async {
-    final downloads = await getDownloadsForReciter(reciterName);
+    final List<DownloadItem> downloads = await getDownloadsForReciter(
+      reciterName,
+    );
     final validDownloads = <DownloadItem>[];
 
     for (final download in downloads) {
       if (download.status == DownloadStatus.completed) {
-        final fileExists = await validateDownloadedFile(download);
+        final bool fileExists = await validateDownloadedFile(download);
         if (fileExists) {
           validDownloads.add(download);
         }
@@ -463,7 +466,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> retryDownload(String downloadId) async {
     // Get the existing download item
-    final downloadItem = await getDownloadItem(downloadId);
+    final DownloadItem? downloadItem = await getDownloadItem(downloadId);
     if (downloadItem == null) {
       throw Exception('Download not found');
     }
@@ -473,7 +476,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
 
     // Reset the download status to pending
-    final updatedDownload = downloadItem.copyWith(
+    final DownloadItem updatedDownload = downloadItem.copyWith(
       status: DownloadStatus.pending,
       progress: 0.0,
       downloadedSize: 0,

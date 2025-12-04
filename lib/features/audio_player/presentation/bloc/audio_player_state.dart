@@ -16,8 +16,8 @@ abstract class AudioPlayerState with _$AudioPlayerState {
 
   const AudioPlayerState._();
 
-  bool get isPlaying => playbackState?.playing == true;
-  bool get canGoNext => queueState?.hasNext == true;
-  bool get canGoPrevious => queueState?.hasPrevious == true;
+  bool get isPlaying => playbackState?.playing ?? false;
+  bool get canGoNext => queueState?.hasNext ?? false;
+  bool get canGoPrevious => queueState?.hasPrevious ?? false;
   bool get hasMediaItem => mediaItem != null;
 }

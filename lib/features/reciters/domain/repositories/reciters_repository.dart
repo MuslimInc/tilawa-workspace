@@ -1,5 +1,5 @@
-import 'package:muzakri/core/entities/reciter.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
+import '../../../../core/entities/reciter.dart';
+import '../../../../core/utils/typedefs.dart';
 
 abstract class RecitersRepository {
   ResultFuture<List<ReciterEntity>> getReciters();

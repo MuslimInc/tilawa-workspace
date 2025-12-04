@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router_config.dart';
-import 'package:muzakri/shared/widgets/app_toast.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../router/app_router_config.dart';
+import '../../../../shared/widgets/app_toast.dart';
+import '../bloc/auth_bloc.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -23,7 +24,7 @@ class LoginScreen extends StatelessWidget {
             },
             unauthenticated: () {},
             error: (message) {
-              final l10n = AppLocalizations.of(context)!;
+              final AppLocalizations l10n = AppLocalizations.of(context)!;
               AppToast.show(
                 context,
                 message: l10n.unableToSignInWithThirdPartyAccount,
@@ -33,7 +34,7 @@ class LoginScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Padding(
-            padding: .all(16),
+            padding: const .all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,

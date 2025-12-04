@@ -1,11 +1,12 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/widgets/control_buttons.dart';
-import 'package:muzakri/shared/widgets/seek_bar.dart';
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../models/position_data.dart';
+import 'control_buttons.dart';
+import 'seek_bar.dart';
 
 class ExpandedPlayerScreen extends StatelessWidget {
   const ExpandedPlayerScreen({super.key});
@@ -39,7 +40,7 @@ class ExpandedPlayerScreen extends StatelessWidget {
             );
           }
 
-          final mediaItem = state.mediaItem!;
+          final MediaItem mediaItem = state.mediaItem!;
 
           return Column(
             children: [
@@ -109,7 +110,7 @@ class ExpandedPlayerScreen extends StatelessWidget {
                                     mediaItem.artUri.toString(),
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {
-                                      return Container(
+                                      return ColoredBox(
                                         color: Theme.of(
                                           context,
                                         ).primaryColor.withValues(alpha: 0.1),
@@ -121,7 +122,7 @@ class ExpandedPlayerScreen extends StatelessWidget {
                                       );
                                     },
                                   )
-                                : Container(
+                                : ColoredBox(
                                     color: Theme.of(
                                       context,
                                     ).primaryColor.withValues(alpha: 0.1),
@@ -184,9 +185,9 @@ class ExpandedPlayerScreen extends StatelessWidget {
                             return const SizedBox.shrink();
                           }
 
-                          final positionData =
+                          final PositionData positionData =
                               state.positionData ??
-                              PositionData(
+                              const PositionData(
                                 position: Duration.zero,
                                 bufferedPosition: Duration.zero,
                                 duration: Duration.zero,
@@ -254,7 +255,7 @@ class ExpandedPlayerScreen extends StatelessWidget {
                     const SizedBox(height: 40),
 
                     // Controls
-                    ControlButtons(),
+                    const ControlButtons(),
                   ],
                 ),
               ),
@@ -356,8 +357,8 @@ class ExpandedPlayerScreen extends StatelessWidget {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     if (duration.inHours > 0) {
       return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
     } else {

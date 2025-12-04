@@ -1,10 +1,13 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
-import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart';
+
+import '../../../../core/config/language_config.dart';
+import '../../../../core/errors/failures.dart';
+import '../../domain/usecases/get_current_language_use_case.dart';
+import '../../domain/usecases/set_language_use_case.dart';
 
 part 'localization_event.dart';
 part 'localization_state.dart';
@@ -14,7 +17,9 @@ class LocalizationBloc
     extends HydratedBloc<LocalizationEvent, LocalizationState> {
   LocalizationBloc(this._getCurrentLanguageUseCase, this._setLanguageUseCase)
     : super(
-        LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+        const LocalizationState(
+          locale: Locale(LanguageConfig.defaultLanguageCode),
+        ),
       ) {
     on<LoadLanguage>(_onLoadLanguage);
     on<ChangeLanguage>(_onChangeLanguage);
@@ -52,7 +57,7 @@ class LocalizationBloc
     Emitter<LocalizationState> emit,
   ) async {
     // Try to load language from SharedPreferences to sync with other parts of the app
-    final result = await _getCurrentLanguageUseCase();
+    final Either<Failure, String> result = await _getCurrentLanguageUseCase();
     await result.fold(
       (failure) async {
         // If loading fails, ensure SharedPreferences has the current state value

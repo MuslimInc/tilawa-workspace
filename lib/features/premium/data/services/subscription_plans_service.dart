@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 // No FirebaseAuth dependency required here
-import 'package:muzakri/core/config/currency_config.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
-import 'package:muzakri/main.dart';
+import '../../../../core/config/currency_config.dart';
+import '../../../../main.dart';
+import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlansService {
-  final FirebaseFirestore _firestore;
-
   SubscriptionPlansService({required FirebaseFirestore firestore})
     : _firestore = firestore;
+  final FirebaseFirestore _firestore;
 
   /// Add default subscription plans to Firestore
   Future<void> addDefaultSubscriptionPlans() async {
     try {
-      final plans = _getDefaultSubscriptionPlans();
+      final List<SubscriptionPlan> plans = _getDefaultSubscriptionPlans();
 
       // Add each plan to Firestore
       for (final plan in plans) {
@@ -35,7 +35,7 @@ class SubscriptionPlansService {
   /// Get all subscription plans from Firestore
   Future<List<SubscriptionPlan>> getSubscriptionPlans() async {
     try {
-      final snapshot = await _firestore
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('subscription_plans')
           .orderBy('order')
           .get();
@@ -52,7 +52,7 @@ class SubscriptionPlansService {
   /// Create a user's premium status document
   Future<void> createUserPremiumStatus(String userId) async {
     try {
-      final premiumStatus = {
+      final Map<String, Object?> premiumStatus = {
         'isPremium': false,
         'subscriptionStartDate': null,
         'subscriptionEndDate': null,
@@ -88,7 +88,7 @@ class SubscriptionPlansService {
     required String transactionId,
   }) async {
     try {
-      final purchaseRecord = {
+      final Map<String, Object> purchaseRecord = {
         'planId': planId,
         'planName': planName,
         'price': price,
@@ -115,7 +115,7 @@ class SubscriptionPlansService {
   /// Get default subscription plans
   List<SubscriptionPlan> _getDefaultSubscriptionPlans() {
     return [
-      SubscriptionPlan(
+      const SubscriptionPlan(
         id: 'monthly_basic',
         name: 'Monthly Basic',
         description: 'Access to all premium features for one month',
@@ -134,7 +134,7 @@ class SubscriptionPlansService {
         discountPercentage: null,
         order: 1,
       ),
-      SubscriptionPlan(
+      const SubscriptionPlan(
         id: 'monthly_premium',
         name: 'Monthly Premium',
         description: 'Best value monthly plan with all features',
@@ -153,7 +153,7 @@ class SubscriptionPlansService {
         discountPercentage: null,
         order: 2,
       ),
-      SubscriptionPlan(
+      const SubscriptionPlan(
         id: 'yearly_basic',
         name: 'Yearly Basic',
         description: 'Save 20% with yearly subscription',
@@ -170,7 +170,7 @@ class SubscriptionPlansService {
         discountPercentage: 20.0,
         order: 3,
       ),
-      SubscriptionPlan(
+      const SubscriptionPlan(
         id: 'yearly_premium',
         name: 'Yearly Premium',
         description: 'Best value - Save 30% with yearly premium',
@@ -188,7 +188,7 @@ class SubscriptionPlansService {
         discountPercentage: 30.0,
         order: 4,
       ),
-      SubscriptionPlan(
+      const SubscriptionPlan(
         id: 'lifetime',
         name: 'Lifetime Access',
         description: 'One-time payment for lifetime access',

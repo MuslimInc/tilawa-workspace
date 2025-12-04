@@ -1,7 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/main.dart';
+import '../../main.dart';
 
 /// Centralized service for Firebase Crashlytics functionality
 abstract class CrashlyticsService {
@@ -129,7 +129,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   @override
   Future<void> setCustomKeys(Map<String, dynamic> keys) async {
     try {
-      for (final entry in keys.entries) {
+      for (final MapEntry<String, dynamic> entry in keys.entries) {
         await _crashlytics.setCustomKey(entry.key, entry.value);
       }
     } catch (e) {

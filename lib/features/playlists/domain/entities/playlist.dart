@@ -14,6 +14,22 @@ class Playlist extends Equatable {
     this.isFavorite = false,
   });
 
+  factory Playlist.fromJson(Map<String, dynamic> json) {
+    return Playlist(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      items: (json['items'] as List<dynamic>)
+          .map((item) => PlaylistItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      coverImageUrl: json['coverImageUrl'] as String?,
+      isPublic: json['isPublic'] as bool? ?? false,
+      isFavorite: json['isFavorite'] as bool? ?? false,
+    );
+  }
+
   final String id;
   final String name;
   final String description;
@@ -75,22 +91,6 @@ class Playlist extends Equatable {
     };
   }
 
-  factory Playlist.fromJson(Map<String, dynamic> json) {
-    return Playlist(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      items: (json['items'] as List<dynamic>)
-          .map((item) => PlaylistItem.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      coverImageUrl: json['coverImageUrl'] as String?,
-      isPublic: json['isPublic'] as bool? ?? false,
-      isFavorite: json['isFavorite'] as bool? ?? false,
-    );
-  }
-
   /// Get total duration of all items in the playlist
   Duration get totalDuration {
     return items.fold(Duration.zero, (total, item) => total + item.duration);
@@ -125,6 +125,41 @@ class PlaylistItem extends Equatable {
     this.filePath,
     this.isDownloaded = false,
   });
+
+  factory PlaylistItem.fromJson(Map<String, dynamic> json) {
+    return PlaylistItem(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      artist: json['artist'] as String,
+      url: json['url'] as String,
+      duration: Duration(milliseconds: json['duration'] as int),
+      addedAt: DateTime.parse(json['addedAt'] as String),
+      artUri: json['artUri'] != null
+          ? Uri.parse(json['artUri'] as String)
+          : null,
+      album: json['album'] as String?,
+      genre: json['genre'] as String?,
+      filePath: json['filePath'] as String?,
+      isDownloaded: json['isDownloaded'] as bool? ?? false,
+    );
+  }
+
+  /// Create from MediaItem
+  factory PlaylistItem.fromMediaItem(MediaItem mediaItem) {
+    return PlaylistItem(
+      id: mediaItem.id,
+      title: mediaItem.title,
+      artist: mediaItem.artist ?? 'Unknown Artist',
+      url: mediaItem.id, // Use ID as URL for now
+      duration: mediaItem.duration ?? Duration.zero,
+      addedAt: DateTime.now(),
+      artUri: mediaItem.artUri,
+      album: mediaItem.album,
+      filePath: mediaItem.extras?['filePath'] as String?,
+      isDownloaded: mediaItem.extras?['isDownloaded'] as bool? ?? false,
+      genre: mediaItem.extras?['genre'] as String?,
+    );
+  }
 
   final String id;
   final String title;
@@ -197,24 +232,6 @@ class PlaylistItem extends Equatable {
     };
   }
 
-  factory PlaylistItem.fromJson(Map<String, dynamic> json) {
-    return PlaylistItem(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      artist: json['artist'] as String,
-      url: json['url'] as String,
-      duration: Duration(milliseconds: json['duration'] as int),
-      addedAt: DateTime.parse(json['addedAt'] as String),
-      artUri: json['artUri'] != null
-          ? Uri.parse(json['artUri'] as String)
-          : null,
-      album: json['album'] as String?,
-      genre: json['genre'] as String?,
-      filePath: json['filePath'] as String?,
-      isDownloaded: json['isDownloaded'] as bool? ?? false,
-    );
-  }
-
   /// Convert to MediaItem for audio service
   MediaItem toMediaItem() {
     return MediaItem(
@@ -230,23 +247,6 @@ class PlaylistItem extends Equatable {
         'genre': genre,
         'addedAt': addedAt.toIso8601String(),
       },
-    );
-  }
-
-  /// Create from MediaItem
-  factory PlaylistItem.fromMediaItem(MediaItem mediaItem) {
-    return PlaylistItem(
-      id: mediaItem.id,
-      title: mediaItem.title,
-      artist: mediaItem.artist ?? 'Unknown Artist',
-      url: mediaItem.id, // Use ID as URL for now
-      duration: mediaItem.duration ?? Duration.zero,
-      addedAt: DateTime.now(),
-      artUri: mediaItem.artUri,
-      album: mediaItem.album,
-      filePath: mediaItem.extras?['filePath'] as String?,
-      isDownloaded: mediaItem.extras?['isDownloaded'] as bool? ?? false,
-      genre: mediaItem.extras?['genre'] as String?,
     );
   }
 }

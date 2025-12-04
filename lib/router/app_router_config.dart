@@ -2,14 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:muzakri/features/auth/presentation/screens/login_screen.dart';
-import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
-import 'package:muzakri/features/premium/presentation/screens/premium_screen.dart';
-import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
-import 'package:muzakri/screens/main_screen.dart';
-import 'package:muzakri/screens/reciter_details_screen.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
-import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
+
+import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/downloads/presentation/screens/downloads_screen.dart';
+import '../features/premium/presentation/screens/premium_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
+import '../screens/main_screen.dart';
+import '../screens/reciter_details_screen.dart';
+import '../shared/models/reciter_model.dart';
+import '../shared/widgets/expanded_player_screen.dart';
 
 part 'app_router_config.g.dart';
 

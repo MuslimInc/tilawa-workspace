@@ -1,10 +1,12 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
+
+import '../../../../core/config/language_config.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../theme/presentation/cubit/theme_cubit.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
           // User information
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
-              final user = state.maybeWhen(
+              final UserEntity? user = state.maybeWhen(
                 authenticated: (user) => user,
                 orElse: () => null,
               );
@@ -96,12 +98,12 @@ class SettingsScreen extends StatelessWidget {
                   trailing: DropdownButton<Locale>(
                     value: state.locale,
                     underline: const SizedBox(),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
                         value: Locale(LanguageConfig.defaultLanguageCode),
-                        child: const Text('العربية'),
+                        child: Text('العربية'),
                       ),
-                      const DropdownMenuItem(
+                      DropdownMenuItem(
                         value: Locale('en'),
                         child: Text('English'),
                       ),

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
-import 'package:muzakri/features/reciters/presentation/screens/reciters_screen.dart';
-import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router_config.dart';
-import 'package:muzakri/screens/playlists_screen.dart';
-import 'package:muzakri/shared/widgets/bottom_player.dart';
+
+import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../features/auth/presentation/bloc/auth_bloc.dart';
+import '../features/downloads/presentation/bloc/downloads_bloc.dart';
+import '../features/downloads/presentation/screens/downloads_screen.dart';
+import '../features/reciters/presentation/screens/reciters_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../router/app_router_config.dart';
+import '../shared/widgets/bottom_player.dart';
+import 'playlists_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -63,9 +64,9 @@ class _MainScreenState extends State<MainScreen> {
 
                 // Bottom player when audio is playing
                 if (state.hasMediaItem)
-                  Container(
+                  ColoredBox(
                     color: Theme.of(context).scaffoldBackgroundColor,
-                    child: BottomPlayer(),
+                    child: const BottomPlayer(),
                   ),
               ],
             ),

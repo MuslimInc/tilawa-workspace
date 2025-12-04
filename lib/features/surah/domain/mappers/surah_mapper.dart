@@ -1,5 +1,5 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
+import '../entities/surah_entity.dart';
 
 class SurahMapper {
   /// Convert Surah to MediaItem
@@ -51,8 +51,6 @@ class SurahMapper {
       title: name,
       artist: reciterName,
       album: reciterName,
-      duration: null,
-      artUri: null,
       extras: {'nameAr': nameAr, 'url': url},
     );
 

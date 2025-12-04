@@ -5,9 +5,10 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/main.dart';
 import 'package:path/path.dart' as path;
+
+import '../../../../main.dart';
+import '../../domain/entities/download_item.dart';
 
 class DownloadService {
   static final StreamController<DownloadProgress> _globalProgressController =
@@ -16,34 +17,54 @@ class DownloadService {
   static bool _initialized = false;
   // Track task statuses from updates
   static final Map<String, TaskStatus> _taskStatuses = {};
+  // Lock to prevent concurrent initialization
+  static Completer<void>? _initializationCompleter;
+  // Reuse a single FileDownloader instance to avoid stream issues
+  static FileDownloader? _fileDownloaderInstance;
 
   static FileDownloader? _fileDownloaderOverride;
 
   @visibleForTesting
+  static FileDownloader? get fileDownloaderOverride => _fileDownloaderOverride;
+
+  @visibleForTesting
   static set fileDownloaderOverride(FileDownloader? value) {
     _fileDownloaderOverride = value;
+    // Reset instance when override changes
+    _fileDownloaderInstance = null;
   }
 
   static FileDownloader _getFileDownloader() {
-    return _fileDownloaderOverride ?? FileDownloader();
+    if (_fileDownloaderOverride != null) {
+      return _fileDownloaderOverride!;
+    }
+    // Reuse the same instance to avoid stream subscription issues
+    _fileDownloaderInstance ??= FileDownloader();
+    return _fileDownloaderInstance!;
   }
 
   /// Initialize the download service and set up update listeners
   static Future<void> _initialize() async {
-    // Cancel existing subscription if any (important for tests where mocks are replaced)
-    // This ensures the stream subscription uses the current fileDownloader instance
-    if (_initialized && _updatesSubscription != null) {
-      await _updatesSubscription?.cancel();
-      _updatesSubscription = null;
-      _initialized = false;
+    // If initialization is already in progress, wait for it to complete
+    if (_initializationCompleter != null) {
+      return _initializationCompleter!.future;
     }
 
+    // If already initialized, return immediately
     if (_initialized) {
-      // Already initialized and subscription is still active
       return;
     }
 
+    // Create a completer to track this initialization
+    _initializationCompleter = Completer<void>();
+
     try {
+      // Cancel existing subscription if any (important for tests where mocks are replaced)
+      // This ensures the stream subscription uses the current fileDownloader instance
+      if (_updatesSubscription != null) {
+        await _updatesSubscription?.cancel();
+        _updatesSubscription = null;
+      }
       // Configure notifications for download progress
       // This shows a notification with progress bar when app is closed
       // Note: FileDownloader() may throw MissingPluginException in test environments
@@ -65,10 +86,13 @@ class DownloadService {
       // Configure notifications - this may also throw if initialization happens here
       try {
         fileDownloader.configureNotification(
-          running: TaskNotification('Downloading', 'file: {filename}'),
-          complete: TaskNotification('Download Complete', 'file: {filename}'),
-          error: TaskNotification('Download Failed', 'file: {filename}'),
-          paused: TaskNotification('Download Paused', 'file: {filename}'),
+          running: const TaskNotification('Downloading', 'file: {filename}'),
+          complete: const TaskNotification(
+            'Download Complete',
+            'file: {filename}',
+          ),
+          error: const TaskNotification('Download Failed', 'file: {filename}'),
+          paused: const TaskNotification('Download Paused', 'file: {filename}'),
           progressBar: true, // Enable progress bar in notification
         );
       } on MissingPluginException {
@@ -96,6 +120,7 @@ class DownloadService {
       logger.d(
         '[DownloadService] Initialized with background_downloader and notifications',
       );
+      _initializationCompleter?.complete();
     } on MissingPluginException catch (e) {
       // In test environment, platform channels are not available
       // Don't mark as initialized, and re-throw so callers can handle it
@@ -103,6 +128,7 @@ class DownloadService {
       logger.d(
         '[DownloadService] Initialization skipped - platform channels not available (test environment): $e',
       );
+      _initializationCompleter?.completeError(e);
       rethrow;
     } catch (e) {
       // Catch any other exceptions during initialization
@@ -114,17 +140,23 @@ class DownloadService {
         logger.d(
           '[DownloadService] Initialization failed due to platform channels not available (test environment)',
         );
-        throw MissingPluginException(
+        final exception = MissingPluginException(
           'Platform channels not available (test environment)',
         );
+        _initializationCompleter?.completeError(exception);
+        throw exception;
       }
+      _initializationCompleter?.completeError(e);
       rethrow;
+    } finally {
+      // Clear the completer after initialization completes (success or failure)
+      _initializationCompleter = null;
     }
   }
 
   /// Handle task updates from background_downloader
   static void _handleTaskUpdate(TaskUpdate update) {
-    final taskId = update.task.taskId;
+    final String taskId = update.task.taskId;
     DownloadProgress? progress;
 
     if (update is TaskStatusUpdate) {
@@ -138,9 +170,9 @@ class DownloadService {
         fileSize: 0,
       );
     } else if (update is TaskProgressUpdate) {
-      final taskProgress = update.progress;
-      final expectedFileSize = update.expectedFileSize;
-      final receivedBytes = (taskProgress * expectedFileSize).round();
+      final double taskProgress = update.progress;
+      final int expectedFileSize = update.expectedFileSize;
+      final int receivedBytes = (taskProgress * expectedFileSize).round();
 
       progress = DownloadProgress(
         id: taskId,
@@ -203,10 +235,10 @@ class DownloadService {
       // In test environment, re-throw so callers can handle it
       rethrow;
     }
-    final existingTask = await fileDownloader.taskForId(id);
+    final Task? existingTask = await fileDownloader.taskForId(id);
     if (existingTask != null) {
       // Check if task is running or enqueued
-      final status = _taskStatuses[id];
+      final TaskStatus? status = _taskStatuses[id];
       if (status == TaskStatus.running || status == TaskStatus.enqueued) {
         logger.d(
           '[DownloadService] startDownload skipped: id=$id already active',
@@ -218,8 +250,8 @@ class DownloadService {
     // Check if a partial file exists (for resume capability)
     final file = File(filePath);
     final partialFile = File('$filePath.partial');
-    final hasPartialFile = await partialFile.exists();
-    final hasCompleteFile = await file.exists();
+    final bool hasPartialFile = partialFile.existsSync();
+    final bool hasCompleteFile = file.existsSync();
 
     if (hasCompleteFile) {
       logger.d('[DownloadService] File already exists: id=$id path=$filePath');
@@ -238,17 +270,17 @@ class DownloadService {
 
     // Extract directory and filename from filePath
     // background_downloader needs relative path from baseDirectory
-    final filename = path.basename(filePath);
+    final String filename = path.basename(filePath);
 
     // Get the relative directory path from applicationDocuments
     // filePath is typically: /path/to/app/documents/downloads/filename.mp3
     // We need: downloads (relative to applicationDocuments)
-    String relativeDirectory = 'downloads';
-    final dirname = path.dirname(filePath);
+    var relativeDirectory = 'downloads';
+    final String dirname = path.dirname(filePath);
     if (dirname.contains('downloads')) {
       // Extract 'downloads' or the subdirectory after 'downloads'
-      final parts = dirname.split(path.separator);
-      final downloadsIndex = parts.indexWhere((p) => p == 'downloads');
+      final List<String> parts = dirname.split(path.separator);
+      final int downloadsIndex = parts.indexWhere((p) => p == 'downloads');
       if (downloadsIndex != -1 && downloadsIndex < parts.length - 1) {
         relativeDirectory = parts.sublist(downloadsIndex).join(path.separator);
       } else if (downloadsIndex != -1) {
@@ -263,10 +295,8 @@ class DownloadService {
       url: url,
       filename: filename,
       directory: relativeDirectory,
-      baseDirectory: BaseDirectory.applicationDocuments,
       updates: Updates.statusAndProgress,
       retries: 3,
-      requiresWiFi: false,
       allowPause: true,
       taskId: id,
       // Add metadata for notification (as JSON string)
@@ -309,11 +339,11 @@ class DownloadService {
   /// Get all active download task IDs
   static Future<List<String>> get activeDownloadIds async {
     await _initialize();
-    final allTasks = await _getFileDownloader().allTasks();
+    final List<Task> allTasks = await _getFileDownloader().allTasks();
     final activeIds = <String>[];
 
     for (final task in allTasks) {
-      final status = _taskStatuses[task.taskId];
+      final TaskStatus? status = _taskStatuses[task.taskId];
       if (status == TaskStatus.running ||
           status == TaskStatus.enqueued ||
           status == TaskStatus.waitingToRetry) {
@@ -341,11 +371,11 @@ class DownloadService {
       return false;
     }
 
-    final status = _taskStatuses[id];
+    final TaskStatus? status = _taskStatuses[id];
     if (status == null) {
       // If not tracked, check if task exists
       try {
-        final task = await _getFileDownloader().taskForId(id);
+        final Task? task = await _getFileDownloader().taskForId(id);
         return task != null;
       } on MissingPluginException {
         // In test environment, return false
@@ -367,9 +397,25 @@ class DownloadService {
   static Future<void> dispose() async {
     logger.d('[DownloadService] dispose: cleaning up');
     await _updatesSubscription?.cancel();
+    _updatesSubscription = null;
     await _globalProgressController.close();
     _initialized = false;
+    _fileDownloaderInstance = null;
+    _initializationCompleter = null;
     logger.d('[DownloadService] dispose: done');
+  }
+
+  /// Reset static state for testing
+  /// This clears all static variables but keeps the global controller open
+  /// so tests can reuse the service
+  @visibleForTesting
+  static Future<void> reset() async {
+    await _updatesSubscription?.cancel();
+    _updatesSubscription = null;
+    _initialized = false;
+    _fileDownloaderInstance = null;
+    _initializationCompleter = null;
+    _taskStatuses.clear();
   }
 
   /// Cancel a download
@@ -383,7 +429,7 @@ class DownloadService {
   static Future<void> pauseDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] pauseDownload: id=$id');
-    final task = await _getFileDownloader().taskForId(id);
+    final Task? task = await _getFileDownloader().taskForId(id);
     if (task != null && task is DownloadTask) {
       await _getFileDownloader().pause(task);
     }
@@ -393,7 +439,7 @@ class DownloadService {
   static Future<void> resumeDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] resumeDownload: id=$id');
-    final task = await _getFileDownloader().taskForId(id);
+    final Task? task = await _getFileDownloader().taskForId(id);
     if (task != null && task is DownloadTask) {
       await _getFileDownloader().resume(task);
     }
@@ -402,11 +448,13 @@ class DownloadService {
   /// Get download status for a specific ID
   static Future<DownloadStatus?> getDownloadStatus(String id) async {
     await _initialize();
-    final status = _taskStatuses[id];
+    final TaskStatus? status = _taskStatuses[id];
     if (status == null) {
       // If not tracked, check if task exists
-      final task = await _getFileDownloader().taskForId(id);
-      if (task == null) return null;
+      final Task? task = await _getFileDownloader().taskForId(id);
+      if (task == null) {
+        return null;
+      }
       // Default to pending if we don't have status yet
       return DownloadStatus.pending;
     }
@@ -416,16 +464,18 @@ class DownloadService {
   /// Get download progress for a specific ID
   static Future<DownloadProgress?> getDownloadProgress(String id) async {
     await _initialize();
-    final task = await _getFileDownloader().taskForId(id);
-    if (task == null) return null;
+    final Task? task = await _getFileDownloader().taskForId(id);
+    if (task == null) {
+      return null;
+    }
 
-    final status = _taskStatuses[id] ?? TaskStatus.notFound;
+    final TaskStatus status = _taskStatuses[id] ?? TaskStatus.notFound;
 
     // Get progress from task updates if available
     // Note: Real progress comes from TaskProgressUpdate events in the stream
-    double progress = 0.0;
-    int fileSize = 0;
-    int downloadedSize = 0;
+    const progress = 0.0;
+    const fileSize = 0;
+    const downloadedSize = 0;
 
     return DownloadProgress(
       id: id,
@@ -457,15 +507,15 @@ class ProgressThrottler {
     required double progress,
   }) {
     final now = DateTime.now();
-    final timeSinceLastUpdate = _lastProgressUpdateTime != null
+    final Duration timeSinceLastUpdate = _lastProgressUpdateTime != null
         ? now.difference(_lastProgressUpdateTime!)
         : const Duration(seconds: 1);
-    final bytesSinceLastUpdate = received - _lastSentBytes;
-    final progressSinceLastUpdate = total > 0
+    final int bytesSinceLastUpdate = received - _lastSentBytes;
+    final double progressSinceLastUpdate = total > 0
         ? bytesSinceLastUpdate / total
         : 0.0;
 
-    final shouldSend =
+    final bool shouldSend =
         timeSinceLastUpdate.inMilliseconds >= 100 || // At least 100ms
         progressSinceLastUpdate >= 0.01 || // Or 1% change
         received == 0 || // Always send initial
@@ -478,7 +528,7 @@ class ProgressThrottler {
   /// Updates are throttled to at most every 100ms
   bool shouldSendUpdateUnknownSize({required int received}) {
     final now = DateTime.now();
-    final timeSinceLastUpdate = _lastProgressUpdateTime != null
+    final Duration timeSinceLastUpdate = _lastProgressUpdateTime != null
         ? now.difference(_lastProgressUpdateTime!)
         : const Duration(seconds: 1);
 
@@ -500,12 +550,6 @@ class ProgressThrottler {
 
 @immutable
 class DownloadProgress extends Equatable {
-  final String id;
-  final DownloadStatus status;
-  final double progress;
-  final int downloadedSize;
-  final int fileSize;
-
   const DownloadProgress({
     required this.id,
     required this.status,
@@ -513,6 +557,11 @@ class DownloadProgress extends Equatable {
     required this.downloadedSize,
     required this.fileSize,
   });
+  final String id;
+  final DownloadStatus status;
+  final double progress;
+  final int downloadedSize;
+  final int fileSize;
 
   @override
   List<Object?> get props => [id, status, progress, downloadedSize, fileSize];

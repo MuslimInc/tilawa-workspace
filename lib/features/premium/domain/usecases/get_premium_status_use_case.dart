@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import '../entities/premium_status.dart';
+import '../entities/subscription_plan.dart';
+import '../repositories/premium_repository.dart';
 
 @Singleton()
 class GetPremiumStatusUseCase {
@@ -13,9 +13,10 @@ class GetPremiumStatusUseCase {
     ({PremiumStatus status, List<SubscriptionPlan> plans, bool canDownload})
   >
   call() async {
-    final status = await _premiumRepository.getPremiumStatus();
-    final plans = await _premiumRepository.getAvailablePlans();
-    final canDownload = await _premiumRepository.canDownload();
+    final PremiumStatus status = await _premiumRepository.getPremiumStatus();
+    final List<SubscriptionPlan> plans = await _premiumRepository
+        .getAvailablePlans();
+    final bool canDownload = await _premiumRepository.canDownload();
 
     return (status: status, plans: plans, canDownload: canDownload);
   }

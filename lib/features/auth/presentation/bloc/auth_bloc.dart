@@ -1,11 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
-import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
-import 'package:muzakri/features/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:muzakri/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
-import 'package:muzakri/features/auth/domain/usecases/sign_out.dart';
+import '../../domain/entities/auth_result.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/get_current_user_use_case.dart';
+import '../../domain/usecases/sign_in_with_google_use_case.dart';
+import '../../domain/usecases/sign_out.dart';
 
 part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
@@ -13,16 +13,15 @@ part 'auth_state.dart';
 
 @injectable
 class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
-  final SignInWithGoogleUseCase _signInWithGoogle;
-  final SignOut _signOut;
-  final GetCurrentUserUseCase _getCurrentUser;
-
   AuthBloc(this._signInWithGoogle, this._signOut, this._getCurrentUser)
     : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
   }
+  final SignInWithGoogleUseCase _signInWithGoogle;
+  final SignOut _signOut;
+  final GetCurrentUserUseCase _getCurrentUser;
 
   Future<void> _onSignInWithGoogle(
     SignInWithGoogleEvent event,
@@ -30,7 +29,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthState.loading());
 
-    final result = await _signInWithGoogle();
+    final AuthResult result = await _signInWithGoogle();
 
     result.when(
       success: (user) => emit(AuthState.authenticated(user: user)),
@@ -45,7 +44,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   }
 
   void _onCheckAuthStatus(CheckAuthStatusEvent event, Emitter<AuthState> emit) {
-    final user = _getCurrentUser();
+    final UserEntity? user = _getCurrentUser();
     if (user != null) {
       emit(AuthState.authenticated(user: user));
     } else {

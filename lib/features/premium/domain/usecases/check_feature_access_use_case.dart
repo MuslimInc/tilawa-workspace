@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import '../repositories/premium_repository.dart';
 
 @Singleton()
 class CheckFeatureAccessUseCase {
@@ -8,6 +8,6 @@ class CheckFeatureAccessUseCase {
   final PremiumRepository _premiumRepository;
 
   Future<bool> call(String featureName) async {
-    return await _premiumRepository.canAccessFeature(featureName);
+    return _premiumRepository.canAccessFeature(featureName);
   }
 }

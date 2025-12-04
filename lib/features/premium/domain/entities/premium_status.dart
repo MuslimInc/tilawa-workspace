@@ -21,13 +21,19 @@ abstract class PremiumStatus with _$PremiumStatus {
   const PremiumStatus._();
 
   bool get isSubscriptionActive {
-    if (!isPremium) return false;
-    if (subscriptionEndDate == null) return true;
+    if (!isPremium) {
+      return false;
+    }
+    if (subscriptionEndDate == null) {
+      return true;
+    }
     return DateTime.now().isBefore(subscriptionEndDate!);
   }
 
   bool get isTrialActive {
-    if (isTrialUsed || trialEndDate == null) return false;
+    if (isTrialUsed || trialEndDate == null) {
+      return false;
+    }
     return DateTime.now().isBefore(trialEndDate!);
   }
 

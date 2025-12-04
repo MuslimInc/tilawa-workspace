@@ -1,24 +1,24 @@
 import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/playlists/data/datasources/playlists_local_datasource.dart';
-import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
-import 'package:muzakri/features/playlists/domain/repositories/playlists_repository.dart';
+
+import '../../domain/entities/playlist.dart';
+import '../../domain/repositories/playlists_repository.dart';
+import '../datasources/playlists_local_datasource.dart';
 
 @LazySingleton(as: PlaylistsRepository)
 class PlaylistsRepositoryImpl implements PlaylistsRepository {
-  final PlaylistsLocalDataSource _localDataSource;
-
   PlaylistsRepositoryImpl(this._localDataSource);
+  final PlaylistsLocalDataSource _localDataSource;
 
   @override
   Future<List<Playlist>> getAllPlaylists() async {
-    return await _localDataSource.getAllPlaylists();
+    return _localDataSource.getAllPlaylists();
   }
 
   @override
   Future<Playlist?> getPlaylistById(String id) async {
-    return await _localDataSource.getPlaylistById(id);
+    return _localDataSource.getPlaylistById(id);
   }
 
   @override
@@ -29,13 +29,13 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     bool isPublic = false,
   }) async {
     // Check if name already exists
-    final nameExists = await _localDataSource.doesPlaylistNameExist(name);
+    final bool nameExists = await _localDataSource.doesPlaylistNameExist(name);
     if (nameExists) {
       throw Exception('Playlist name already exists');
     }
 
     // Generate unique ID
-    final id = await _localDataSource.generatePlaylistId();
+    final String id = await _localDataSource.generatePlaylistId();
 
     final playlist = Playlist(
       id: id,
@@ -43,7 +43,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
       description: description,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      items: [],
+      items: const [],
       coverImageUrl: coverImageUrl,
       isPublic: isPublic,
     );
@@ -55,7 +55,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
   @override
   Future<Playlist> updatePlaylist(Playlist playlist) async {
     // Check if playlist exists
-    final existingPlaylist = await _localDataSource.getPlaylistById(
+    final Playlist? existingPlaylist = await _localDataSource.getPlaylistById(
       playlist.id,
     );
     if (existingPlaylist == null) {
@@ -63,7 +63,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     }
 
     // Check if name already exists (excluding current playlist)
-    final nameExists = await _localDataSource.doesPlaylistNameExist(
+    final bool nameExists = await _localDataSource.doesPlaylistNameExist(
       playlist.name,
       excludeId: playlist.id,
     );
@@ -71,14 +71,16 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
       throw Exception('Playlist name already exists');
     }
 
-    final updatedPlaylist = playlist.copyWith(updatedAt: DateTime.now());
+    final Playlist updatedPlaylist = playlist.copyWith(
+      updatedAt: DateTime.now(),
+    );
     await _localDataSource.savePlaylist(updatedPlaylist);
     return updatedPlaylist;
   }
 
   @override
   Future<void> deletePlaylist(String id) async {
-    final playlist = await _localDataSource.getPlaylistById(id);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(id);
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
@@ -91,13 +93,15 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     String playlistId,
     PlaylistItem item,
   ) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
 
     // Check if item already exists in playlist
-    final itemExists = playlist.items.any(
+    final bool itemExists = playlist.items.any(
       (existingItem) => existingItem.id == item.id,
     );
     if (itemExists) {
@@ -105,7 +109,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     }
 
     final updatedItems = List<PlaylistItem>.from(playlist.items)..add(item);
-    final updatedPlaylist = playlist.copyWith(
+    final Playlist updatedPlaylist = playlist.copyWith(
       items: updatedItems,
       updatedAt: DateTime.now(),
     );
@@ -119,15 +123,17 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     String playlistId,
     String itemId,
   ) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
 
-    final updatedItems = playlist.items
+    final List<PlaylistItem> updatedItems = playlist.items
         .where((item) => item.id != itemId)
         .toList();
-    final updatedPlaylist = playlist.copyWith(
+    final Playlist updatedPlaylist = playlist.copyWith(
       items: updatedItems,
       updatedAt: DateTime.now(),
     );
@@ -142,7 +148,9 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     int oldIndex,
     int newIndex,
   ) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
@@ -155,10 +163,10 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     }
 
     final updatedItems = List<PlaylistItem>.from(playlist.items);
-    final item = updatedItems.removeAt(oldIndex);
+    final PlaylistItem item = updatedItems.removeAt(oldIndex);
     updatedItems.insert(newIndex, item);
 
-    final updatedPlaylist = playlist.copyWith(
+    final Playlist updatedPlaylist = playlist.copyWith(
       items: updatedItems,
       updatedAt: DateTime.now(),
     );
@@ -173,12 +181,16 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     String itemId,
     PlaylistItem updatedItem,
   ) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
 
-    final itemIndex = playlist.items.indexWhere((item) => item.id == itemId);
+    final int itemIndex = playlist.items.indexWhere(
+      (item) => item.id == itemId,
+    );
     if (itemIndex == -1) {
       throw Exception('Item not found in playlist');
     }
@@ -186,7 +198,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
     final updatedItems = List<PlaylistItem>.from(playlist.items);
     updatedItems[itemIndex] = updatedItem;
 
-    final updatedPlaylist = playlist.copyWith(
+    final Playlist updatedPlaylist = playlist.copyWith(
       items: updatedItems,
       updatedAt: DateTime.now(),
     );
@@ -197,10 +209,12 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<List<Playlist>> searchPlaylists(String query) async {
-    final playlists = await _localDataSource.getAllPlaylists();
-    if (query.isEmpty) return playlists;
+    final List<Playlist> playlists = await _localDataSource.getAllPlaylists();
+    if (query.isEmpty) {
+      return playlists;
+    }
 
-    final lowercaseQuery = query.toLowerCase();
+    final String lowercaseQuery = query.toLowerCase();
     return playlists
         .where(
           (playlist) =>
@@ -212,18 +226,20 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<List<Playlist>> getFavoritePlaylists() async {
-    final playlists = await _localDataSource.getAllPlaylists();
+    final List<Playlist> playlists = await _localDataSource.getAllPlaylists();
     return playlists.where((playlist) => playlist.isFavorite).toList();
   }
 
   @override
   Future<Playlist> toggleFavorite(String playlistId) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
 
-    final updatedPlaylist = playlist.copyWith(
+    final Playlist updatedPlaylist = playlist.copyWith(
       isFavorite: !playlist.isFavorite,
       updatedAt: DateTime.now(),
     );
@@ -234,7 +250,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<List<Playlist>> getPlaylistsByVisibility(bool isPublic) async {
-    final playlists = await _localDataSource.getAllPlaylists();
+    final List<Playlist> playlists = await _localDataSource.getAllPlaylists();
     return playlists
         .where((playlist) => playlist.isPublic == isPublic)
         .toList();
@@ -242,7 +258,7 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<List<Playlist>> getRecentPlaylists() async {
-    final playlists = await _localDataSource.getAllPlaylists();
+    final List<Playlist> playlists = await _localDataSource.getAllPlaylists();
     playlists.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return playlists.take(10).toList();
   }
@@ -254,19 +270,23 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<Playlist> duplicatePlaylist(String playlistId, String newName) async {
-    final originalPlaylist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? originalPlaylist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (originalPlaylist == null) {
       throw Exception('Playlist not found');
     }
 
     // Check if new name already exists
-    final nameExists = await _localDataSource.doesPlaylistNameExist(newName);
+    final bool nameExists = await _localDataSource.doesPlaylistNameExist(
+      newName,
+    );
     if (nameExists) {
       throw Exception('Playlist name already exists');
     }
 
-    final id = await _localDataSource.generatePlaylistId();
-    final duplicatedPlaylist = originalPlaylist.copyWith(
+    final String id = await _localDataSource.generatePlaylistId();
+    final Playlist duplicatedPlaylist = originalPlaylist.copyWith(
       id: id,
       name: newName,
       createdAt: DateTime.now(),
@@ -280,7 +300,9 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<String> exportPlaylist(String playlistId) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
@@ -297,7 +319,9 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<Map<String, dynamic>> getPlaylistStats(String playlistId) async {
-    final playlist = await _localDataSource.getPlaylistById(playlistId);
+    final Playlist? playlist = await _localDataSource.getPlaylistById(
+      playlistId,
+    );
     if (playlist == null) {
       throw Exception('Playlist not found');
     }
@@ -314,19 +338,16 @@ class PlaylistsRepositoryImpl implements PlaylistsRepository {
 
   @override
   Future<bool> doesPlaylistNameExist(String name, {String? excludeId}) async {
-    return await _localDataSource.doesPlaylistNameExist(
-      name,
-      excludeId: excludeId,
-    );
+    return _localDataSource.doesPlaylistNameExist(name, excludeId: excludeId);
   }
 
   @override
   Future<int> getPlaylistsCount() async {
-    return await _localDataSource.getPlaylistsCount();
+    return _localDataSource.getPlaylistsCount();
   }
 
   @override
   Future<int> getTotalItemsCount() async {
-    return await _localDataSource.getTotalItemsCount();
+    return _localDataSource.getTotalItemsCount();
   }
 }

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/router/app_router_config.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../router/app_router_config.dart';
+import '../../../../shared/models/reciter_model.dart';
 
 class ReciterCard extends StatelessWidget {
-  final Reciter reciter;
-
   const ReciterCard({super.key, required this.reciter});
+  final Reciter reciter;
 
   @override
   Widget build(BuildContext context) {

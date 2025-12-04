@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/helpers/reciter_helper.dart';
-import 'package:muzakri/router/app_router_config.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
-import 'package:muzakri/shared/widgets/view_reciter_button.dart';
+
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../helpers/reciter_helper.dart';
+import '../../router/app_router_config.dart';
+import '../models/position_data.dart';
+import '../models/reciter_model.dart';
+import 'view_reciter_button.dart';
 
 class BottomPlayer extends StatefulWidget {
   const BottomPlayer({super.key});
@@ -43,7 +44,7 @@ class _BottomPlayerState extends State<BottomPlayer> {
   Widget build(BuildContext context) {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
-        final mediaItem = state.mediaItem;
+        final MediaItem? mediaItem = state.mediaItem;
         if (mediaItem == null) {
           return const SizedBox.shrink();
         }
@@ -57,20 +58,20 @@ class _BottomPlayerState extends State<BottomPlayer> {
           _loadReciterId(mediaItem);
         }
 
-        final positionData = state.positionData;
+        final PositionData? positionData = state.positionData;
 
-        final isPlaying = state.isPlaying;
-        final position =
+        final bool isPlaying = state.isPlaying;
+        final PositionData position =
             positionData ??
-            PositionData(
+            const PositionData(
               position: Duration.zero,
               bufferedPosition: Duration.zero,
               duration: Duration.zero,
             );
 
         // Check if next/previous buttons should be enabled
-        final canGoNext = state.canGoNext;
-        final canGoPrevious = state.canGoPrevious;
+        final bool canGoNext = state.canGoNext;
+        final bool canGoPrevious = state.canGoPrevious;
 
         return Hero(
           tag: 'audio_player',
@@ -130,10 +131,7 @@ class _BottomPlayerState extends State<BottomPlayer> {
 
                         // Main controls
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
                             children: [
                               // Album art or icon
@@ -290,7 +288,9 @@ class _BottomPlayerState extends State<BottomPlayer> {
 
   /// Load reciter ID asynchronously and cache it
   void _loadReciterId(MediaItem mediaItem) {
-    if (mediaItem.artist == null) return;
+    if (mediaItem.artist == null) {
+      return;
+    }
 
     _currentReciterName = mediaItem.artist;
 
@@ -307,10 +307,10 @@ class _BottomPlayerState extends State<BottomPlayer> {
   /// Check if the current route is already viewing the reciter's details
   bool isCurrentRouteAlreadyViewing(BuildContext context) {
     try {
-      final routerState = GoRouterState.of(context);
+      final GoRouterState routerState = GoRouterState.of(context);
 
       // Check if we're on the reciter details route by checking path parameters
-      final currentReciterId = routerState.pathParameters['reciterId'];
+      final String? currentReciterId = routerState.pathParameters['reciterId'];
 
       if (currentReciterId == null) {
         // Not on a reciter details route
@@ -324,7 +324,7 @@ class _BottomPlayerState extends State<BottomPlayer> {
 
       // If ID is not cached yet, try to get reciter from query parameters
       // The route includes the reciter object in query parameters
-      final reciterJson = routerState.uri.queryParameters['reciter'];
+      final String? reciterJson = routerState.uri.queryParameters['reciter'];
       if (reciterJson != null) {
         try {
           final reciter = Reciter.fromJson(

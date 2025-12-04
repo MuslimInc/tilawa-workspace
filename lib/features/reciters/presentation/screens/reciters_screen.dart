@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/widgets/reciter_card.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/shared/widgets/arabic_alphabet_scrollbar.dart';
-import 'package:muzakri/shared/widgets/language_switcher.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../shared/models/reciter_model.dart';
+import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
+import '../../../../shared/widgets/language_switcher.dart';
+import '../../../alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../bloc/reciters_bloc.dart';
+import '../widgets/reciter_card.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -57,7 +59,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
           return Scaffold(
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.reciters),
-              actions: [const LanguageSwitcher(), const SizedBox(width: 8)],
+              actions: const [LanguageSwitcher(), SizedBox(width: 8)],
             ),
             body: Column(
               children: [
@@ -196,7 +198,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.error,
                                       size: 64,
                                       color: Colors.red,
@@ -223,7 +225,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.search_off,
                                       size: 64,
                                       color: Colors.grey,
@@ -252,7 +254,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   vertical: 8,
                                 ),
                                 itemBuilder: (context, index) {
-                                  final reciter = state.filteredReciters[index];
+                                  final Reciter reciter =
+                                      state.filteredReciters[index];
                                   return ReciterCard(reciter: reciter);
                                 },
                               )

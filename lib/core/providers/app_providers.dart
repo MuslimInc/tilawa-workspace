@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
+
+import '../../features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
+import '../../features/localization/presentation/bloc/localization_bloc.dart';
+import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
+import '../../features/premium/presentation/bloc/premium_bloc.dart';
+import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
+import '../../features/theme/presentation/cubit/theme_cubit.dart';
+import '../di/injection.dart';
 
 /// Centralized configuration for all BlocProviders in the application.
 /// This class provides a single place to manage all state management providers.
@@ -46,11 +47,7 @@ class AppProviders {
 
     // Auth provider with initialization
     BlocProvider<AuthBloc>(
-      create: (context) {
-        final authBloc = getIt<AuthBloc>();
-        authBloc.add(const CheckAuthStatusEvent());
-        return authBloc;
-      },
+      create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
     ),
   ];
 

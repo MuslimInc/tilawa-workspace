@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
+import '../entities/surah_entity.dart';
+import '../repositories/surah_repository.dart';
 
 @Singleton()
 class RefreshSurahStatusUseCase {
@@ -13,12 +13,12 @@ class RefreshSurahStatusUseCase {
     required String surahId,
     required String reciterName,
   }) async {
-    final isDownloaded = await _surahRepository.isSurahDownloaded(
+    final bool isDownloaded = await _surahRepository.isSurahDownloaded(
       surahId,
       reciterName,
     );
 
-    var surah = await _surahRepository.getSurah(surahId, reciterName);
+    SurahEntity? surah = await _surahRepository.getSurah(surahId, reciterName);
     if (surah == null) {
       // Create a basic surah if it doesn't exist
       final mediaItem = MediaItem(

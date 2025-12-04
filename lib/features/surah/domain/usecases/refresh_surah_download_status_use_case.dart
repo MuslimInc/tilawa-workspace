@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
+import '../entities/surah_entity.dart';
+import '../repositories/surah_repository.dart';
 
 @Singleton()
 class RefreshSurahDownloadStatusUseCase {
@@ -14,13 +14,13 @@ class RefreshSurahDownloadStatusUseCase {
     required String reciterName,
   }) async {
     // Check download status
-    final isDownloaded = await _surahRepository.isSurahDownloaded(
+    final bool isDownloaded = await _surahRepository.isSurahDownloaded(
       surahId,
       reciterName,
     );
 
     // Update the surah in the list
-    final updatedSurahList = currentSurahs.map((surah) {
+    final List<SurahEntity> updatedSurahList = currentSurahs.map((surah) {
       if (surah.id == surahId && surah.reciterName == reciterName) {
         return surah.copyWith(isDownloaded: isDownloaded);
       }
@@ -28,7 +28,10 @@ class RefreshSurahDownloadStatusUseCase {
     }).toList();
 
     // Update surah in repository cache
-    final surah = await _surahRepository.getSurah(surahId, reciterName);
+    final SurahEntity? surah = await _surahRepository.getSurah(
+      surahId,
+      reciterName,
+    );
     if (surah != null) {
       await _surahRepository.updateSurah(
         surah.copyWith(isDownloaded: isDownloaded),

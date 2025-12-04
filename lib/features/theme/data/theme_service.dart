@@ -12,13 +12,9 @@ class ThemeService {
       appBarStyle: FlexAppBarStyle.primary,
       appBarOpacity: 0.95,
       appBarElevation: 0,
-      transparentStatusBar: true,
       tabBarStyle: FlexTabBarStyle.forAppBar,
       tooltipsMatchBackground: true,
-      swapColors: false,
-      lightIsWhite: false,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
       useMaterial3ErrorColors: true,
     );
   }
@@ -32,13 +28,9 @@ class ThemeService {
       appBarStyle: FlexAppBarStyle.background,
       appBarOpacity: 0.90,
       appBarElevation: 0,
-      transparentStatusBar: true,
       tabBarStyle: FlexTabBarStyle.forAppBar,
       tooltipsMatchBackground: true,
-      swapColors: false,
-      darkIsTrueBlack: false,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
       useMaterial3ErrorColors: true,
     );
   }

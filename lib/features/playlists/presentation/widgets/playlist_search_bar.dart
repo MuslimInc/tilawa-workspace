@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 
 class PlaylistSearchBar extends StatelessWidget {
   const PlaylistSearchBar({
@@ -15,8 +15,8 @@ class PlaylistSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return Container(
       margin: const EdgeInsets.all(16),
