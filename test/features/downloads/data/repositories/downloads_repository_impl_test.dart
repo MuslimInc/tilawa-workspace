@@ -281,15 +281,17 @@ void main() {
     });
 
     group('isSurahDownloaded', () {
-      const testSurahId = '001';
+      // Note: surahId is the URL in the actual implementation
+      const testSurahId = 'https://example.com/audio.mp3';
       const testReciterName = 'Abdul Rahman Al-Sudais';
 
       test('should return true when surah is downloaded', () async {
         // Arrange
+        // In the actual implementation, downloadId is the URL (surahId)
         final testDownload = DownloadItem(
-          id: '${testSurahId}_${testReciterName.replaceAll(' ', '_')}',
-          title: 'Surah $testSurahId',
-          url: 'https://example.com/audio.mp3',
+          id: testSurahId, // downloadId matches the URL
+          title: 'Surah Al-Fatiha',
+          url: testSurahId,
           filePath: '/test/downloads/test.mp3',
           reciterName: testReciterName,
           status: DownloadStatus.completed,
@@ -349,16 +351,18 @@ void main() {
     });
 
     group('getDownloadedFilePath', () {
-      const testSurahId = '001';
+      // Note: surahId is the URL in the actual implementation
+      const testSurahId = 'https://example.com/audio.mp3';
       const testReciterName = 'Abdul Rahman Al-Sudais';
       const testFilePath = '/path/to/downloaded/file.mp3';
 
       test('should return file path when surah is downloaded', () async {
         // Arrange
+        // In the actual implementation, downloadId is the URL (surahId)
         final testDownload = DownloadItem(
-          id: '${testSurahId}_${testReciterName.replaceAll(' ', '_')}',
-          title: 'Surah $testSurahId',
-          url: 'https://example.com/audio.mp3',
+          id: testSurahId, // downloadId matches the URL
+          title: 'Surah Al-Fatiha',
+          url: testSurahId,
           filePath: testFilePath,
           reciterName: testReciterName,
           status: DownloadStatus.completed,
@@ -390,11 +394,14 @@ void main() {
         // Arrange
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
-        // Act & Assert
-        expect(
-          () => repository.getDownloadedFilePath(testSurahId, testReciterName),
-          throwsA(isA<StateError>()),
+        // Act
+        final String? result = await repository.getDownloadedFilePath(
+          testSurahId,
+          testReciterName,
         );
+
+        // Assert
+        expect(result, isNull);
       });
 
       test('should handle get file path failure', () async {

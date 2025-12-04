@@ -199,10 +199,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     }
 
     // Check if download is currently in progress
-    final downloadId =
-        '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
+    // Note: surahId is the URL, and DownloadService uses URL as the task ID
     try {
-      if (await DownloadService.isDownloadActive(downloadId)) {
+      if (await DownloadService.isDownloadActive(event.surahId)) {
         emit(
           DownloadsState.error(
             'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
@@ -231,8 +230,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
 
     // Log analytics event for download start
+    // Use a formatted ID for analytics purposes
+    final analyticsDownloadId =
+        '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
     await _analyticsService.logDownloadStart(
-      downloadId,
+      analyticsDownloadId,
       fileName: '${event.surahTitle}_${event.reciterName}',
     );
 
@@ -248,7 +250,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         _analyticsService.logEvent(
           'download_failed',
           parameters: {
-            'download_id': downloadId,
+            'download_id': analyticsDownloadId,
             'surah_id': event.surahId,
             'reciter_name': event.reciterName,
             'error': failure.message ?? 'Unknown error',
@@ -261,7 +263,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       (_) {
         // Log analytics event for download completion
         _analyticsService.logDownloadComplete(
-          downloadId,
+          analyticsDownloadId,
           fileName: '${event.surahTitle}_${event.reciterName}',
         );
         // Reload downloads after successful download

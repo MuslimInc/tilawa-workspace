@@ -356,10 +356,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    // surahId is the URL, and downloadId is also the URL
+    // So we check if there's a download with matching URL and reciter
+    final String trimmedUrl = surahId.trim();
     for (final d in downloads) {
       final bool isFileExists = await localDataSource.isFileExists(d.filePath);
       if (d.reciterName == reciterName &&
-          d.title.contains(surahId) &&
+          d.id == trimmedUrl &&
           d.status == DownloadStatus.completed &&
           isFileExists) {
         return true;
@@ -374,18 +377,24 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     String reciterName,
   ) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
-    final DownloadItem download = downloads.firstWhere(
-      (d) =>
-          d.reciterName == reciterName &&
-          d.title.contains(surahId) &&
-          d.status == DownloadStatus.completed,
-      orElse: () => throw StateError('Download not found'),
-    );
+    // surahId is the URL, and downloadId is also the URL
+    final String trimmedUrl = surahId.trim();
+    try {
+      final DownloadItem download = downloads.firstWhere(
+        (d) =>
+            d.reciterName == reciterName &&
+            d.id == trimmedUrl &&
+            d.status == DownloadStatus.completed,
+      );
 
-    if (await localDataSource.isFileExists(download.filePath)) {
-      return download.filePath;
+      if (await localDataSource.isFileExists(download.filePath)) {
+        return download.filePath;
+      }
+      return null;
+    } catch (e) {
+      // Download not found, return null
+      return null;
     }
-    return null;
   }
 
   @override
