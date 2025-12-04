@@ -48,3 +48,7 @@ pubspec.lock
 
 # FVM Version Cache
 .fvm/
+
+# Background Downloader Database
+/backgroundDownloaderDatabase/
+/backgroundDownloaderResumeData/
