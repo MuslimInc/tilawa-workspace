@@ -17,12 +17,19 @@ class DownloadService {
   static bool _initialized = false;
   // Track task statuses from updates
   static final Map<String, TaskStatus> _taskStatuses = {};
+  // Track when tasks were enqueued to detect stuck tasks
+  static final Map<String, DateTime> _taskEnqueuedAt = {};
   // Lock to prevent concurrent initialization
   static Completer<void>? _initializationCompleter;
   // Reuse a single FileDownloader instance to avoid stream issues
   static FileDownloader? _fileDownloaderInstance;
 
   static FileDownloader? _fileDownloaderOverride;
+
+  // Queue Management
+  static const int _maxConcurrentDownloads = 3;
+  static final List<DownloadTask> _pendingTasks = [];
+  static final Set<String> _activeTaskIds = {};
 
   @visibleForTesting
   static FileDownloader? get fileDownloaderOverride => _fileDownloaderOverride;
@@ -116,6 +123,20 @@ class DownloadService {
         rethrow;
       }
 
+      // Check for and handle stuck tasks on initialization
+      // Skip in test environments to avoid delays and platform channel issues
+      try {
+        await _checkAndHandleStuckTasks(fileDownloader);
+      } on MissingPluginException {
+        // In test environment, skip stuck task check
+        logger.d(
+          '[DownloadService] Skipping stuck task check - platform channels not available (test environment)',
+        );
+      } catch (e) {
+        // Log but don't fail initialization if stuck task check fails
+        logger.w('[DownloadService] Error checking stuck tasks: $e');
+      }
+
       _initialized = true;
       logger.d(
         '[DownloadService] Initialized with background_downloader and notifications',
@@ -154,6 +175,99 @@ class DownloadService {
     }
   }
 
+  /// Check for and handle stuck tasks (enqueued for too long)
+  static Future<void> _checkAndHandleStuckTasks(
+    FileDownloader fileDownloader,
+  ) async {
+    try {
+      // First check if we can access allTasks - if not, we're in test environment
+      final List<Task> allTasks;
+      try {
+        allTasks = await fileDownloader.allTasks();
+      } on MissingPluginException {
+        // In test environment, skip stuck task check
+        logger.d(
+          '[DownloadService] Skipping stuck task check - platform channels not available (test environment)',
+        );
+        return;
+      } catch (e) {
+        // Any other error - log and skip
+        logger.w('[DownloadService] Error getting all tasks: $e');
+        return;
+      }
+
+      // If no tasks, skip the check (likely test environment or no downloads)
+      if (allTasks.isEmpty) {
+        return;
+      }
+
+      // Sync _activeTaskIds with actual running tasks
+      _activeTaskIds.clear();
+      for (final task in allTasks) {
+        // We assume tasks found here are active/running/enqueued
+        // You might want to check status more carefully if possible,
+        // but allTasks usually returns active tasks.
+        _activeTaskIds.add(task.taskId);
+      }
+
+      // Wait a bit for the updates stream to populate task statuses
+      // Only do this if we successfully got tasks (not in test environment)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final now = DateTime.now();
+
+      for (final task in allTasks) {
+        // Get status from cache (populated by updates stream)
+        final TaskStatus? status = _taskStatuses[task.taskId];
+
+        // If task is enqueued, check if it's stuck
+        if (status == TaskStatus.enqueued) {
+          final DateTime? enqueuedAt = _taskEnqueuedAt[task.taskId];
+
+          // If we don't have a timestamp, assume it might be stuck (app restarted)
+          // Set timestamp to make it appear stuck so it gets canceled
+          if (enqueuedAt == null) {
+            _taskEnqueuedAt[task.taskId] = now.subtract(
+              const Duration(seconds: 35),
+            );
+            logger.w(
+              '[DownloadService] Found enqueued task without timestamp (likely from app restart): id=${task.taskId} - marking as potentially stuck',
+            );
+          }
+
+          final Duration timeEnqueued = now.difference(
+            _taskEnqueuedAt[task.taskId]!,
+          );
+          if (timeEnqueued.inSeconds > 30) {
+            // Task is stuck - cancel it
+            logger.w(
+              '[DownloadService] Found stuck task (enqueued for ${timeEnqueued.inSeconds}s): id=${task.taskId} - canceling',
+            );
+            try {
+              await fileDownloader.cancelTaskWithId(task.taskId);
+              _taskStatuses.remove(task.taskId);
+              _taskEnqueuedAt.remove(task.taskId);
+              _activeTaskIds.remove(task.taskId);
+            } catch (e) {
+              logger.w(
+                '[DownloadService] Error canceling stuck task ${task.taskId}: $e',
+              );
+            }
+          }
+        }
+      }
+      // After cleaning up stuck tasks, process queue to fill any slots
+      await _processQueue();
+    } on MissingPluginException {
+      // In test environment, skip stuck task check
+      logger.d(
+        '[DownloadService] Skipping stuck task check - platform channels not available (test environment)',
+      );
+    } catch (e) {
+      logger.w('[DownloadService] Error checking stuck tasks: $e');
+    }
+  }
+
   /// Handle task updates from background_downloader
   static void _handleTaskUpdate(TaskUpdate update) {
     final String taskId = update.task.taskId;
@@ -161,7 +275,38 @@ class DownloadService {
 
     if (update is TaskStatusUpdate) {
       // Track status
+      final TaskStatus previousStatus =
+          _taskStatuses[taskId] ?? TaskStatus.notFound;
       _taskStatuses[taskId] = update.status;
+
+      // Track when task transitions to enqueued
+      if (update.status == TaskStatus.enqueued &&
+          previousStatus != TaskStatus.enqueued) {
+        _taskEnqueuedAt[taskId] = DateTime.now();
+        logger.d('[DownloadService] Task enqueued: id=$taskId');
+      }
+
+      // Clear enqueued timestamp when task starts running or completes
+      if (update.status == TaskStatus.running ||
+          update.status == TaskStatus.complete ||
+          update.status == TaskStatus.failed ||
+          update.status == TaskStatus.canceled) {
+        _taskEnqueuedAt.remove(taskId);
+      }
+
+      // Update active tasks tracking
+      if (update.status == TaskStatus.running ||
+          update.status == TaskStatus.enqueued) {
+        _activeTaskIds.add(taskId);
+      } else if (update.status == TaskStatus.complete ||
+          update.status == TaskStatus.failed ||
+          update.status == TaskStatus.canceled ||
+          update.status == TaskStatus.notFound) {
+        _activeTaskIds.remove(taskId);
+        // Task finished, try to start next one
+        _processQueue();
+      }
+
       progress = DownloadProgress(
         id: taskId,
         status: _mapTaskStatusToDownloadStatus(update.status),
@@ -173,6 +318,9 @@ class DownloadService {
       final double taskProgress = update.progress;
       final int expectedFileSize = update.expectedFileSize;
       final int receivedBytes = (taskProgress * expectedFileSize).round();
+
+      // Clear enqueued timestamp when progress starts
+      _taskEnqueuedAt.remove(taskId);
 
       progress = DownloadProgress(
         id: taskId,
@@ -189,6 +337,56 @@ class DownloadService {
         logger.d(
           '[DownloadService] progress: id=${progress.id} status=${progress.status} progress=${progress.progress}',
         );
+      }
+    }
+  }
+
+  /// Process the download queue to start pending tasks if slots are available
+  static Future<void> _processQueue() async {
+    if (_pendingTasks.isEmpty) {
+      return;
+    }
+
+    // Check how many are currently active
+    // We double check with _activeTaskIds which is maintained by status updates
+    // and potentially by allTasks() check.
+    if (_activeTaskIds.length >= _maxConcurrentDownloads) {
+      logger.d(
+        '[DownloadService] Queue full (${_activeTaskIds.length}/$_maxConcurrentDownloads active), ${_pendingTasks.length} pending',
+      );
+      return;
+    }
+
+    // Start tasks until we reach max concurrent or run out of pending tasks
+    while (_pendingTasks.isNotEmpty &&
+        _activeTaskIds.length < _maxConcurrentDownloads) {
+      final DownloadTask task = _pendingTasks.removeAt(0);
+      logger.d(
+        '[DownloadService] Dequeuing task: id=${task.taskId}, starting download',
+      );
+
+      try {
+        final FileDownloader fileDownloader = _getFileDownloader();
+        await fileDownloader.enqueue(task);
+        _activeTaskIds.add(task.taskId);
+        _taskEnqueuedAt[task.taskId] = DateTime.now();
+        // Also update status to pending/enqueued immediately so UI reflects it
+        _taskStatuses[task.taskId] = TaskStatus.enqueued;
+        _globalProgressController.add(
+          DownloadProgress(
+            id: task.taskId,
+            status: DownloadStatus.pending,
+            progress: 0.0,
+            downloadedSize: 0,
+            fileSize: 0,
+          ),
+        );
+      } catch (e) {
+        logger.w(
+          '[DownloadService] Error starting queued task ${task.taskId}: $e',
+        );
+        // If start failed, we should probably not count it as active
+        _activeTaskIds.remove(task.taskId);
       }
     }
   }
@@ -237,14 +435,74 @@ class DownloadService {
     }
     final Task? existingTask = await fileDownloader.taskForId(id);
     if (existingTask != null) {
-      // Check if task is running or enqueued
+      // Check if task is running
       final TaskStatus? status = _taskStatuses[id];
-      if (status == TaskStatus.running || status == TaskStatus.enqueued) {
+      if (status == TaskStatus.running) {
         logger.d(
-          '[DownloadService] startDownload skipped: id=$id already active',
+          '[DownloadService] startDownload skipped: id=$id already running',
         );
         return;
       }
+
+      // Check if task is stuck in enqueued state (more than 30 seconds)
+      if (status == TaskStatus.enqueued) {
+        final DateTime? enqueuedAt = _taskEnqueuedAt[id];
+        if (enqueuedAt != null) {
+          final Duration timeEnqueued = DateTime.now().difference(enqueuedAt);
+          if (timeEnqueued.inSeconds > 30) {
+            // Task is stuck in enqueued state - cancel and retry
+            logger.w(
+              '[DownloadService] Task stuck in enqueued state for ${timeEnqueued.inSeconds}s: id=$id - canceling and retrying',
+            );
+            try {
+              await fileDownloader.cancelTaskWithId(id);
+              // Wait a bit before retrying
+              await Future.delayed(const Duration(milliseconds: 500));
+              // Clear the status so we can retry
+              _taskStatuses.remove(id);
+              _taskEnqueuedAt.remove(id);
+              _activeTaskIds.remove(id);
+            } catch (e) {
+              logger.w('[DownloadService] Error canceling stuck task: $e');
+              // Continue to retry anyway
+              _taskStatuses.remove(id);
+              _taskEnqueuedAt.remove(id);
+              _activeTaskIds.remove(id);
+            }
+          } else {
+            // Task is enqueued but not stuck yet
+            logger.d(
+              '[DownloadService] startDownload skipped: id=$id already enqueued (${timeEnqueued.inSeconds}s ago)',
+            );
+            return;
+          }
+        } else {
+          // Task is enqueued but we don't have timestamp - assume it's stuck
+          logger.w(
+            '[DownloadService] Task enqueued without timestamp: id=$id - canceling and retrying',
+          );
+          try {
+            await fileDownloader.cancelTaskWithId(id);
+            await Future.delayed(const Duration(milliseconds: 500));
+            _taskStatuses.remove(id);
+            _taskEnqueuedAt.remove(id);
+            _activeTaskIds.remove(id);
+          } catch (e) {
+            logger.w('[DownloadService] Error canceling task: $e');
+            _taskStatuses.remove(id);
+            _taskEnqueuedAt.remove(id);
+            _activeTaskIds.remove(id);
+          }
+        }
+      }
+    }
+
+    // Check if already in pending queue
+    if (_pendingTasks.any((t) => t.taskId == id)) {
+      logger.d(
+        '[DownloadService] startDownload skipped: id=$id already in pending queue',
+      );
+      return;
     }
 
     // Check if a partial file exists (for resume capability)
@@ -267,6 +525,10 @@ class DownloadService {
     logger.d(
       '[DownloadService] startDownload: id=$id title="$title" reciter="$reciterName" url=$url path=$filePath',
     );
+
+    if (!Uri.parse(url).isAbsolute) {
+      throw ArgumentError('Invalid URL');
+    }
 
     // Extract directory and filename from filePath
     // background_downloader needs relative path from baseDirectory
@@ -306,23 +568,12 @@ class DownloadService {
       // and the server supports HTTP Range requests
     );
 
-    // Enqueue the download task
-    // This starts the download immediately as a foreground service
-    // If a partial file exists, it will automatically resume from where it left off
-    // The notification is shown right away, which helps prevent Android
-    // from killing the process when the app is terminated
-    // Note: There may be a brief delay (5-10 seconds) when app is force-stopped
-    // as Android needs to restart the background service
-    try {
-      await fileDownloader.enqueue(task);
-    } on MissingPluginException {
-      // In test environment, re-throw so callers can handle it
-      rethrow;
-    }
+    // Add to pending queue instead of enqueueing immediately
+    _pendingTasks.add(task);
+    logger.d('[DownloadService] Task added to pending queue: id=$id');
 
-    logger.d(
-      '[DownloadService] task enqueued: id=$id (will resume if partial file exists)',
-    );
+    // Trigger queue processing
+    await _processQueue();
   }
 
   /// Listen to download progress of a specific download ID
@@ -350,6 +601,13 @@ class DownloadService {
         activeIds.add(task.taskId);
       }
     }
+    // Also include pending tasks in "active" list from UI perspective
+    // so they show as "waiting" or similar
+    for (final DownloadTask task in _pendingTasks) {
+      if (!activeIds.contains(task.taskId)) {
+        activeIds.add(task.taskId);
+      }
+    }
 
     return activeIds;
   }
@@ -369,6 +627,11 @@ class DownloadService {
       // Any other error - log and return false
       logger.w('[DownloadService] Error initializing for isDownloadActive: $e');
       return false;
+    }
+
+    // Check pending queue first
+    if (_pendingTasks.any((t) => t.taskId == id)) {
+      return true;
     }
 
     final TaskStatus? status = _taskStatuses[id];
@@ -402,6 +665,8 @@ class DownloadService {
     _initialized = false;
     _fileDownloaderInstance = null;
     _initializationCompleter = null;
+    _pendingTasks.clear();
+    _activeTaskIds.clear();
     logger.d('[DownloadService] dispose: done');
   }
 
@@ -416,13 +681,43 @@ class DownloadService {
     _fileDownloaderInstance = null;
     _initializationCompleter = null;
     _taskStatuses.clear();
+    _taskEnqueuedAt.clear();
+    _pendingTasks.clear();
+    _activeTaskIds.clear();
   }
 
   /// Cancel a download
   static Future<void> cancelDownload(String id) async {
     await _initialize();
     logger.d('[DownloadService] cancelDownload: id=$id');
+
+    // Check if it's in pending queue
+    final int pendingIndex = _pendingTasks.indexWhere((t) => t.taskId == id);
+    if (pendingIndex != -1) {
+      _pendingTasks.removeAt(pendingIndex);
+      logger.d('[DownloadService] Removed task from pending queue: id=$id');
+      // No need to call fileDownloader.cancelTaskWithId because it wasn't enqueued yet
+      // But we should notify listeners that it's cancelled
+      _globalProgressController.add(
+        DownloadProgress(
+          id: id,
+          status: DownloadStatus.cancelled,
+          progress: 0.0,
+          downloadedSize: 0,
+          fileSize: 0,
+        ),
+      );
+      return;
+    }
+
     await _getFileDownloader().cancelTaskWithId(id);
+    // Clear tracking data
+    _taskStatuses.remove(id);
+    _taskEnqueuedAt.remove(id);
+    _activeTaskIds.remove(id);
+
+    // Since a slot might have opened up, process queue
+    await _processQueue();
   }
 
   /// Pause a download
@@ -448,6 +743,12 @@ class DownloadService {
   /// Get download status for a specific ID
   static Future<DownloadStatus?> getDownloadStatus(String id) async {
     await _initialize();
+
+    // Check pending queue
+    if (_pendingTasks.any((t) => t.taskId == id)) {
+      return DownloadStatus.pending;
+    }
+
     final TaskStatus? status = _taskStatuses[id];
     if (status == null) {
       // If not tracked, check if task exists
@@ -464,6 +765,18 @@ class DownloadService {
   /// Get download progress for a specific ID
   static Future<DownloadProgress?> getDownloadProgress(String id) async {
     await _initialize();
+
+    // Check pending queue
+    if (_pendingTasks.any((t) => t.taskId == id)) {
+      return DownloadProgress(
+        id: id,
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        downloadedSize: 0,
+        fileSize: 0,
+      );
+    }
+
     final Task? task = await _getFileDownloader().taskForId(id);
     if (task == null) {
       return null;

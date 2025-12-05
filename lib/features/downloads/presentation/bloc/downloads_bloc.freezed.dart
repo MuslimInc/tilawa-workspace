@@ -1009,12 +1009,11 @@ extension DownloadsStatePatterns on DownloadsState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DownloadsInitial value)?  initial,TResult Function( DownloadsLoading value)?  loading,TResult Function( DownloadsLoaded value)?  loaded,TResult Function( DownloadsError value)?  error,TResult Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult Function( FileValidationResult value)?  fileValidationResult,TResult Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult Function( PlaybackInitiated value)?  playbackInitiated,TResult Function( PremiumRequired value)?  premiumRequired,TResult Function( DownloadStarted value)?  downloadStarted,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DownloadsInitial value)?  initial,TResult Function( DownloadsLoaded value)?  loaded,TResult Function( DownloadsError value)?  error,TResult Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult Function( FileValidationResult value)?  fileValidationResult,TResult Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult Function( PlaybackInitiated value)?  playbackInitiated,TResult Function( PremiumRequired value)?  premiumRequired,TResult Function( DownloadStarted value)?  downloadStarted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case DownloadsInitial() when initial != null:
-return initial(_that);case DownloadsLoading() when loading != null:
-return loading(_that);case DownloadsLoaded() when loaded != null:
+return initial(_that);case DownloadsLoaded() when loaded != null:
 return loaded(_that);case DownloadsError() when error != null:
 return error(_that);case SurahDownloadStatus() when surahDownloadStatus != null:
 return surahDownloadStatus(_that);case FileValidationResult() when fileValidationResult != null:
@@ -1040,12 +1039,11 @@ return downloadStarted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DownloadsInitial value)  initial,required TResult Function( DownloadsLoading value)  loading,required TResult Function( DownloadsLoaded value)  loaded,required TResult Function( DownloadsError value)  error,required TResult Function( SurahDownloadStatus value)  surahDownloadStatus,required TResult Function( FileValidationResult value)  fileValidationResult,required TResult Function( ValidDownloadsLoaded value)  validDownloadsLoaded,required TResult Function( PlaybackInitiated value)  playbackInitiated,required TResult Function( PremiumRequired value)  premiumRequired,required TResult Function( DownloadStarted value)  downloadStarted,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DownloadsInitial value)  initial,required TResult Function( DownloadsLoaded value)  loaded,required TResult Function( DownloadsError value)  error,required TResult Function( SurahDownloadStatus value)  surahDownloadStatus,required TResult Function( FileValidationResult value)  fileValidationResult,required TResult Function( ValidDownloadsLoaded value)  validDownloadsLoaded,required TResult Function( PlaybackInitiated value)  playbackInitiated,required TResult Function( PremiumRequired value)  premiumRequired,required TResult Function( DownloadStarted value)  downloadStarted,}){
 final _that = this;
 switch (_that) {
 case DownloadsInitial():
-return initial(_that);case DownloadsLoading():
-return loading(_that);case DownloadsLoaded():
+return initial(_that);case DownloadsLoaded():
 return loaded(_that);case DownloadsError():
 return error(_that);case SurahDownloadStatus():
 return surahDownloadStatus(_that);case FileValidationResult():
@@ -1067,12 +1065,11 @@ return downloadStarted(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DownloadsInitial value)?  initial,TResult? Function( DownloadsLoading value)?  loading,TResult? Function( DownloadsLoaded value)?  loaded,TResult? Function( DownloadsError value)?  error,TResult? Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult? Function( FileValidationResult value)?  fileValidationResult,TResult? Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult? Function( PlaybackInitiated value)?  playbackInitiated,TResult? Function( PremiumRequired value)?  premiumRequired,TResult? Function( DownloadStarted value)?  downloadStarted,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DownloadsInitial value)?  initial,TResult? Function( DownloadsLoaded value)?  loaded,TResult? Function( DownloadsError value)?  error,TResult? Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult? Function( FileValidationResult value)?  fileValidationResult,TResult? Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult? Function( PlaybackInitiated value)?  playbackInitiated,TResult? Function( PremiumRequired value)?  premiumRequired,TResult? Function( DownloadStarted value)?  downloadStarted,}){
 final _that = this;
 switch (_that) {
 case DownloadsInitial() when initial != null:
-return initial(_that);case DownloadsLoading() when loading != null:
-return loading(_that);case DownloadsLoaded() when loaded != null:
+return initial(_that);case DownloadsLoaded() when loaded != null:
 return loaded(_that);case DownloadsError() when error != null:
 return error(_that);case SurahDownloadStatus() when surahDownloadStatus != null:
 return surahDownloadStatus(_that);case FileValidationResult() when fileValidationResult != null:
@@ -1097,11 +1094,10 @@ return downloadStarted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult Function( String message)?  error,TResult Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult Function( String downloadId,  bool isValid)?  fileValidationResult,TResult Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult Function( String message)?  playbackInitiated,TResult Function( String message)?  premiumRequired,TResult Function( String surahId,  String surahTitle,  String reciterName)?  downloadStarted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult Function( String message)?  error,TResult Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult Function( String downloadId,  bool isValid)?  fileValidationResult,TResult Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult Function( String message)?  playbackInitiated,TResult Function( String message)?  premiumRequired,TResult Function( String surahId,  String surahTitle,  String reciterName)?  downloadStarted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case DownloadsInitial() when initial != null:
-return initial();case DownloadsLoading() when loading != null:
-return loading();case DownloadsLoaded() when loaded != null:
+return initial();case DownloadsLoaded() when loaded != null:
 return loaded(_that.downloadsByReciter);case DownloadsError() when error != null:
 return error(_that.message);case SurahDownloadStatus() when surahDownloadStatus != null:
 return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult() when fileValidationResult != null:
@@ -1127,11 +1123,10 @@ return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)  loaded,required TResult Function( String message)  error,required TResult Function( String surahId,  String reciterName,  bool isDownloaded)  surahDownloadStatus,required TResult Function( String downloadId,  bool isValid)  fileValidationResult,required TResult Function( String reciterName,  List<DownloadItem> validDownloads)  validDownloadsLoaded,required TResult Function( String message)  playbackInitiated,required TResult Function( String message)  premiumRequired,required TResult Function( String surahId,  String surahTitle,  String reciterName)  downloadStarted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)  loaded,required TResult Function( String message)  error,required TResult Function( String surahId,  String reciterName,  bool isDownloaded)  surahDownloadStatus,required TResult Function( String downloadId,  bool isValid)  fileValidationResult,required TResult Function( String reciterName,  List<DownloadItem> validDownloads)  validDownloadsLoaded,required TResult Function( String message)  playbackInitiated,required TResult Function( String message)  premiumRequired,required TResult Function( String surahId,  String surahTitle,  String reciterName)  downloadStarted,}) {final _that = this;
 switch (_that) {
 case DownloadsInitial():
-return initial();case DownloadsLoading():
-return loading();case DownloadsLoaded():
+return initial();case DownloadsLoaded():
 return loaded(_that.downloadsByReciter);case DownloadsError():
 return error(_that.message);case SurahDownloadStatus():
 return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult():
@@ -1153,11 +1148,10 @@ return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult? Function( String message)?  error,TResult? Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult? Function( String downloadId,  bool isValid)?  fileValidationResult,TResult? Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult? Function( String message)?  playbackInitiated,TResult? Function( String message)?  premiumRequired,TResult? Function( String surahId,  String surahTitle,  String reciterName)?  downloadStarted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult? Function( String message)?  error,TResult? Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult? Function( String downloadId,  bool isValid)?  fileValidationResult,TResult? Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult? Function( String message)?  playbackInitiated,TResult? Function( String message)?  premiumRequired,TResult? Function( String surahId,  String surahTitle,  String reciterName)?  downloadStarted,}) {final _that = this;
 switch (_that) {
 case DownloadsInitial() when initial != null:
-return initial();case DownloadsLoading() when loading != null:
-return loading();case DownloadsLoaded() when loaded != null:
+return initial();case DownloadsLoaded() when loaded != null:
 return loaded(_that.downloadsByReciter);case DownloadsError() when error != null:
 return error(_that.message);case SurahDownloadStatus() when surahDownloadStatus != null:
 return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult() when fileValidationResult != null:
@@ -1197,38 +1191,6 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'DownloadsState.initial()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class DownloadsLoading implements DownloadsState {
-  const DownloadsLoading();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsLoading);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'DownloadsState.loading()';
 }
 
 

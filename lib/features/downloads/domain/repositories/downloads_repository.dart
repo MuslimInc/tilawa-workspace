@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+
 import '../entities/download_item.dart';
 
 abstract class DownloadsRepository {
@@ -47,6 +48,9 @@ abstract class DownloadsRepository {
 
   /// Check if a surah is already downloaded
   Future<bool> isSurahDownloaded(String surahId, String reciterName);
+
+  /// Check if a surah is currently downloading
+  Future<bool> isSurahDownloading(String surahId, String reciterName);
 
   /// Get downloaded file path
   Future<String?> getDownloadedFilePath(String surahId, String reciterName);

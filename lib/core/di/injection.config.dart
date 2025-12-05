@@ -434,6 +434,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i131.SetLanguageUseCase>(),
       ),
     );
+    gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
+      () => _i772.ConvertMediaItemsToSurahsUseCase(
+        gh<_i797.SurahRepository>(),
+        gh<_i775.DownloadsRepository>(),
+      ),
+    );
+    gh.singleton<_i506.RefreshSurahDownloadStatusUseCase>(
+      () => _i506.RefreshSurahDownloadStatusUseCase(
+        gh<_i797.SurahRepository>(),
+        gh<_i775.DownloadsRepository>(),
+      ),
+    );
     gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
     gh.singleton<_i778.GetCurrentUserUseCase>(
       () => _i778.GetCurrentUserUseCase(gh<_i538.AuthRepository>()),
@@ -444,15 +456,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i916.CheckSurahDownloadStatusUseCase>(
       () => _i916.CheckSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
     );
-    gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
-      () => _i772.ConvertMediaItemsToSurahsUseCase(gh<_i797.SurahRepository>()),
-    );
     gh.singleton<_i576.GetSurahsForReciterUseCase>(
       () => _i576.GetSurahsForReciterUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.singleton<_i506.RefreshSurahDownloadStatusUseCase>(
-      () =>
-          _i506.RefreshSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
     );
     gh.singleton<_i119.RefreshSurahStatusUseCase>(
       () => _i119.RefreshSurahStatusUseCase(gh<_i797.SurahRepository>()),

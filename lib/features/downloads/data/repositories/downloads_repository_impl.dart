@@ -9,6 +9,7 @@ import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../datasources/downloads_local_datasource.dart';
+import '../services/download_queue_manager.dart';
 import '../services/download_service.dart';
 
 @LazySingleton(as: DownloadsRepository)
@@ -21,8 +22,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<Map<String, List<DownloadItem>>> getDownloadsByReciter() async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
 
-    // Sync status with active downloads in DownloadService
-    // This ensures that downloads that are actively downloading show the correct status
+    // Sync status with active downloads in DownloadService and queue manager
+    // This ensures that downloads that are actively downloading or queued show the correct status
     // Note: In test environments, this may throw MissingPluginException,
     // so we handle it gracefully
     List<String> activeDownloadIds;
@@ -41,11 +42,34 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       return _groupDownloadsByReciter(downloads);
     }
 
+    // Get queued download IDs from queue manager
+    final Set<String> queuedIds = {};
+    try {
+      for (final download in downloads) {
+        if (DownloadQueueManager.instance.isQueued(download.id)) {
+          queuedIds.add(download.id);
+        }
+      }
+    } catch (e) {
+      logger.w('[DownloadsRepository] Error checking queue status: $e');
+    }
+
     final updatedDownloads = <DownloadItem>[];
     var hasChanges = false;
 
     for (final download in downloads) {
       final bool isActive = activeDownloadIds.contains(download.id);
+      final bool isQueued = queuedIds.contains(download.id);
+
+      // Update status for queued downloads
+      if (isQueued && download.status != DownloadStatus.pending) {
+        final DownloadItem updatedDownload = download.copyWith(
+          status: DownloadStatus.pending,
+        );
+        updatedDownloads.add(updatedDownload);
+        hasChanges = true;
+        continue;
+      }
 
       if (isActive) {
         // If download is active in DownloadService but status is not downloading,
@@ -57,7 +81,84 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           updatedDownloads.add(updatedDownload);
           hasChanges = true;
         } else {
-          updatedDownloads.add(download);
+          // Check if download is stuck at 0% for too long even though it's active
+          final Duration timeSinceCreated = DateTime.now().difference(
+            download.createdAt,
+          );
+          final bool isStuck =
+              download.progress == 0.0 && timeSinceCreated.inSeconds > 30;
+
+          if (isStuck) {
+            // Check the actual task status
+            DownloadStatus? actualStatus;
+            try {
+              actualStatus = await DownloadService.getDownloadStatus(
+                download.id,
+              );
+            } on MissingPluginException {
+              actualStatus = null;
+            } catch (e) {
+              logger.w(
+                '[DownloadsRepository] Error getting status for stuck active download: $e',
+              );
+              actualStatus = null;
+            }
+
+            // If task is pending/enqueued but not running, retry it
+            if (actualStatus == DownloadStatus.pending) {
+              logger.w(
+                '[DownloadsRepository] Active download stuck at 0% with pending status: id=${download.id} title="${download.title}" - retrying',
+              );
+              try {
+                // Cancel the existing task
+                try {
+                  await DownloadService.cancelDownload(download.id);
+                } catch (e) {
+                  logger.d(
+                    '[DownloadsRepository] Error canceling stuck active download: $e',
+                  );
+                }
+
+                // Remove from queue if it's there
+                DownloadQueueManager.instance.removeFromQueue(download.id);
+
+                // Wait a bit before retrying
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                // Retry the download using queue manager
+                await DownloadQueueManager.instance.enqueue(
+                  id: download.id,
+                  url: download.url,
+                  filePath: download.filePath,
+                  title: download.title,
+                  reciterName: download.reciterName,
+                );
+
+                // Update the download item with new timestamp
+                final DownloadItem updatedDownload = download.copyWith(
+                  createdAt: DateTime.now(),
+                  progress: 0.0,
+                );
+                updatedDownloads.add(updatedDownload);
+                hasChanges = true;
+              } catch (e) {
+                // If retry fails, mark as failed
+                logger.e(
+                  '[DownloadsRepository] Failed to retry stuck active download: id=${download.id} error=$e',
+                );
+                final DownloadItem updatedDownload = download.copyWith(
+                  status: DownloadStatus.failed,
+                );
+                updatedDownloads.add(updatedDownload);
+                hasChanges = true;
+              }
+            } else {
+              // Still active and not pending, keep as is
+              updatedDownloads.add(download);
+            }
+          } else {
+            updatedDownloads.add(download);
+          }
         }
       } else {
         // Download is NOT active in DownloadService
@@ -111,8 +212,69 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             updatedDownloads.add(updatedDownload);
             hasChanges = true;
           } else {
-            // Status unknown or null - keep as is for now
-            updatedDownloads.add(download);
+            // Check if download is stuck at 0% for too long (more than 30 seconds)
+            final Duration timeSinceCreated = DateTime.now().difference(
+              download.createdAt,
+            );
+            final bool isStuck =
+                download.progress == 0.0 &&
+                timeSinceCreated.inSeconds > 30 &&
+                (backgroundStatus == null ||
+                    backgroundStatus == DownloadStatus.pending);
+
+            if (isStuck) {
+              // Download is stuck - retry it
+              logger.w(
+                '[DownloadsRepository] Download stuck at 0%: id=${download.id} title="${download.title}" - retrying',
+              );
+              try {
+                // Cancel the existing task if it exists
+                try {
+                  await DownloadService.cancelDownload(download.id);
+                } catch (e) {
+                  // Ignore errors when canceling (task might not exist)
+                  logger.d(
+                    '[DownloadsRepository] Error canceling stuck download: $e',
+                  );
+                }
+
+                // Remove from queue if it's there
+                DownloadQueueManager.instance.removeFromQueue(download.id);
+
+                // Wait a bit before retrying
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                // Retry the download using queue manager
+                await DownloadQueueManager.instance.enqueue(
+                  id: download.id,
+                  url: download.url,
+                  filePath: download.filePath,
+                  title: download.title,
+                  reciterName: download.reciterName,
+                );
+
+                // Update the download item with new timestamp
+                final DownloadItem updatedDownload = download.copyWith(
+                  createdAt: DateTime.now(),
+                  progress: 0.0,
+                );
+                updatedDownloads.add(updatedDownload);
+                hasChanges = true;
+              } catch (e) {
+                // If retry fails, mark as failed
+                logger.e(
+                  '[DownloadsRepository] Failed to retry stuck download: id=${download.id} error=$e',
+                );
+                final DownloadItem updatedDownload = download.copyWith(
+                  status: DownloadStatus.failed,
+                );
+                updatedDownloads.add(updatedDownload);
+                hasChanges = true;
+              }
+            } else {
+              // Status unknown or null - keep as is for now
+              updatedDownloads.add(download);
+            }
           }
         } else {
           updatedDownloads.add(download);
@@ -266,14 +428,21 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final String filePath = path.join(downloadsDir, safeFileName);
 
-    // Set status to downloading immediately since we're about to start the download
+    // Check if download is already queued or active
+    final bool isActive = DownloadQueueManager.instance.isActive(downloadId);
+
+    // Determine initial status: pending if queued, downloading if active
+    final DownloadStatus initialStatus = isActive
+        ? DownloadStatus.downloading
+        : DownloadStatus.pending;
+
     final downloadItem = DownloadItem(
       id: downloadId,
       title: surahTitle,
       url: trimmedUrl,
       filePath: filePath,
       reciterName: reciterName,
-      status: DownloadStatus.downloading,
+      status: initialStatus,
       progress: 0.0,
       fileSize: 0,
       downloadedSize: 0,
@@ -283,20 +452,28 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     await addDownload(downloadItem);
 
     logger.d(
-      '[DownloadsRepositoryImpl] startDownload: id=$downloadId fileName=$safeFileName path=$filePath',
+      '[DownloadsRepositoryImpl] startDownload: id=$downloadId fileName=$safeFileName path=$filePath status=$initialStatus',
     );
 
-    // Start the download in background isolate
+    // Enqueue the download (queue manager will handle starting it)
     // Note: In test environments, this may throw MissingPluginException,
     // which is expected and should be handled by the caller
     try {
-      await DownloadService.startDownload(
+      await DownloadQueueManager.instance.enqueue(
         id: downloadId,
         url: trimmedUrl,
         filePath: filePath,
         title: surahTitle,
         reciterName: reciterName,
       );
+
+      // Update status to pending if it was queued (not immediately started)
+      if (!isActive) {
+        final DownloadItem pendingDownload = downloadItem.copyWith(
+          status: DownloadStatus.pending,
+        );
+        await updateDownload(pendingDownload);
+      }
     } on MissingPluginException {
       // In test environment, platform channels are not available
       // This is expected behavior - the download item is still created
@@ -304,7 +481,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       // We catch and swallow this exception since the download item
       // has already been created successfully
       logger.d(
-        '[DownloadsRepositoryImpl] DownloadService.startDownload skipped - platform channels not available (test environment)',
+        '[DownloadsRepositoryImpl] DownloadQueueManager.enqueue skipped - platform channels not available (test environment)',
       );
       // Don't rethrow - the download item was created successfully
       // The actual download service call failed, but that's expected in tests
@@ -339,6 +516,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> cancelDownload(String id) async {
+    // Remove from queue if it's there
+    DownloadQueueManager.instance.removeFromQueue(id);
+
     await DownloadService.cancelDownload(id);
 
     final DownloadItem? download = await getDownloadItem(id);
@@ -369,6 +549,47 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
     }
     return false;
+  }
+
+  @override
+  Future<bool> isSurahDownloading(String surahId, String reciterName) async {
+    final String trimmedUrl = surahId.trim();
+
+    // First check if there's a download item with downloading status
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    for (final d in downloads) {
+      if (d.reciterName == reciterName &&
+          d.id == trimmedUrl &&
+          d.status == DownloadStatus.downloading) {
+        // Also verify it's actually active in DownloadService
+        try {
+          final bool isActive = await DownloadService.isDownloadActive(
+            trimmedUrl,
+          );
+          if (isActive) {
+            return true;
+          }
+        } on MissingPluginException {
+          // In test environment, return true if status is downloading
+          return true;
+        } catch (e) {
+          logger.w(
+            '[DownloadsRepository] Error checking if download is active: $e',
+          );
+        }
+      }
+    }
+
+    // Also check directly with DownloadService in case download item doesn't exist yet
+    try {
+      return await DownloadService.isDownloadActive(trimmedUrl);
+    } on MissingPluginException {
+      // In test environment, return false
+      return false;
+    } catch (e) {
+      logger.w('[DownloadsRepository] Error checking download status: $e');
+      return false;
+    }
   }
 
   @override
@@ -480,9 +701,30 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw Exception('Download not found');
     }
 
-    if (downloadItem.status != DownloadStatus.failed) {
-      throw Exception('Only failed downloads can be retried');
+    // Check if download is stuck (at 0% for more than 30 seconds)
+    final Duration timeSinceCreated = DateTime.now().difference(
+      downloadItem.createdAt,
+    );
+    final bool isStuck =
+        downloadItem.status == DownloadStatus.downloading &&
+        downloadItem.progress == 0.0 &&
+        timeSinceCreated.inSeconds > 30;
+
+    // Allow retry for failed downloads or stuck downloads
+    if (downloadItem.status != DownloadStatus.failed && !isStuck) {
+      throw Exception('Only failed or stuck downloads can be retried');
     }
+
+    // Cancel the existing task if it exists
+    try {
+      await DownloadService.cancelDownload(downloadId);
+    } catch (e) {
+      // Ignore errors when canceling (task might not exist)
+      logger.d('[DownloadsRepository] Error canceling download for retry: $e');
+    }
+
+    // Wait a bit before retrying
+    await Future.delayed(const Duration(milliseconds: 500));
 
     // Reset the download status to pending
     final DownloadItem updatedDownload = downloadItem.copyWith(
@@ -490,11 +732,12 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       progress: 0.0,
       downloadedSize: 0,
       fileSize: 0,
+      createdAt: DateTime.now(),
     );
     await updateDownload(updatedDownload);
 
-    // Start the download again using the existing file path
-    await DownloadService.startDownload(
+    // Enqueue the download again using the queue manager
+    await DownloadQueueManager.instance.enqueue(
       id: downloadItem.id,
       url: downloadItem.url,
       filePath: downloadItem.filePath,

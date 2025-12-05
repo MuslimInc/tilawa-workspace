@@ -159,10 +159,7 @@ void main() {
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const LoadDownloads()),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.loaded({}),
-        ],
+        expect: () => [const DownloadsState.loaded({})],
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -174,10 +171,7 @@ void main() {
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const LoadDownloads()),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.error('Failed to load downloads'),
-        ],
+        expect: () => [const DownloadsState.error('Failed to load downloads')],
       );
     });
 
@@ -232,7 +226,7 @@ void main() {
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
           ),
-          const DownloadsState.loading(),
+
           const DownloadsState.loaded({}),
         ],
         wait: const Duration(milliseconds: 500),
@@ -351,10 +345,7 @@ void main() {
         },
         act: (bloc) =>
             bloc.add(const DeleteDownloadEvent(downloadId: testDownloadId)),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.loaded({}),
-        ],
+        expect: () => [const DownloadsState.loaded({})],
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -394,10 +385,7 @@ void main() {
         act: (bloc) => bloc.add(
           const DeleteReciterDownloads(reciterName: testReciterName),
         ),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.loaded({}),
-        ],
+        expect: () => [const DownloadsState.loaded({})],
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -413,7 +401,6 @@ void main() {
           const DeleteReciterDownloads(reciterName: testReciterName),
         ),
         expect: () => [
-          const DownloadsState.loading(),
           const DownloadsState.error('Failed to delete reciter downloads'),
         ],
       );
@@ -438,10 +425,7 @@ void main() {
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const ClearAllDownloads()),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.loaded({}),
-        ],
+        expect: () => [const DownloadsState.loaded({})],
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -455,7 +439,6 @@ void main() {
         },
         act: (bloc) => bloc.add(const ClearAllDownloads()),
         expect: () => [
-          const DownloadsState.loading(),
           const DownloadsState.error('Failed to clear all downloads'),
         ],
       );
@@ -928,7 +911,7 @@ void main() {
             surahTitle: 'Al-Fatiha',
             reciterName: 'Abdul Rahman Al-Sudais',
           ),
-          const DownloadsState.loading(),
+
           const DownloadsState.loaded({}),
         ],
         wait: const Duration(milliseconds: 500),
@@ -948,7 +931,7 @@ void main() {
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
-        'emits [error] when download is not in failed status',
+        'emits [error] when download is not in failed or stuck status',
         build: () {
           final DownloadItem completedDownload = testDownloadItem.copyWith(
             status: DownloadStatus.completed,
@@ -961,8 +944,52 @@ void main() {
         act: (bloc) =>
             bloc.add(const RetryDownloadEvent(downloadId: testDownloadId)),
         expect: () => [
-          const DownloadsState.error('Only failed downloads can be retried'),
+          const DownloadsState.error(
+            'Only failed or stuck downloads can be retried',
+          ),
         ],
+      );
+
+      blocTest<DownloadsBloc, DownloadsState>(
+        'emits [downloadStarted, loaded] when retrying a stuck download',
+        build: () {
+          final DownloadItem stuckDownload = testDownloadItem.copyWith(
+            status: DownloadStatus.downloading,
+            progress: 0.0,
+            createdAt: DateTime.now().subtract(const Duration(seconds: 31)),
+          );
+          when(
+            mockDownloadsRepository.getDownloadItem(any),
+          ).thenAnswer((_) async => stuckDownload);
+          when(
+            mockPremiumRepository.canDownload(),
+          ).thenAnswer((_) async => true);
+          when(
+            mockDownloadsRepository.retryDownload(any),
+          ).thenAnswer((_) async {});
+          when(
+            mockGetDownloadsByReciterUseCase(),
+          ).thenAnswer((_) async => const Right({}));
+          when(
+            mockAnalyticsService.logEvent(
+              any,
+              parameters: anyNamed('parameters'),
+            ),
+          ).thenAnswer((_) async {});
+          return downloadsBloc;
+        },
+        act: (bloc) =>
+            bloc.add(const RetryDownloadEvent(downloadId: testDownloadId)),
+        expect: () => [
+          const DownloadsState.downloadStarted(
+            surahId: '001',
+            surahTitle: 'Al-Fatiha',
+            reciterName: 'Abdul Rahman Al-Sudais',
+          ),
+
+          const DownloadsState.loaded({}),
+        ],
+        wait: const Duration(milliseconds: 500),
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
@@ -1068,14 +1095,13 @@ void main() {
           bloc.add(const CheckPremiumAccessEvent());
         },
         expect: () => [
-          const DownloadsState.loading(),
           const DownloadsState.loaded({}),
           const DownloadsState.downloadStarted(
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Test Reciter',
           ),
-          const DownloadsState.loading(),
+
           const DownloadsState.loaded({}),
         ],
         wait: const Duration(milliseconds: 500),
@@ -1090,10 +1116,7 @@ void main() {
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const LoadDownloads()),
-        expect: () => [
-          const DownloadsState.loading(),
-          const DownloadsState.error('Failed to load downloads'),
-        ],
+        expect: () => [const DownloadsState.error('Failed to load downloads')],
       );
     });
 
@@ -1131,7 +1154,9 @@ void main() {
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => Right(testDownloads));
         downloadsBloc.add(const DownloadsEvent.refreshDownloadsProgress());
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(
+          const Duration(milliseconds: 1100),
+        ); // Wait for debounce (1000ms) + buffer
 
         // Assert - Should be in loaded state, not loading
         expect(downloadsBloc.state, isA<DownloadsLoaded>());
@@ -1147,9 +1172,11 @@ void main() {
 
         // Act
         downloadsBloc.add(const DownloadsEvent.refreshDownloadsProgress());
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(
+          const Duration(milliseconds: 1100),
+        ); // Wait for debounce (1000ms) + buffer
 
-        // Assert - Should remain in initial state
+        // Assert - Should remain in initial state (debounce won't process if not in loaded state)
         expect(downloadsBloc.state, const DownloadsState.initial());
         verifyNever(mockGetDownloadsByReciterUseCase());
       });
@@ -1196,6 +1223,9 @@ void main() {
         }),
         act: (bloc) =>
             bloc.add(const DownloadsEvent.refreshDownloadsProgress()),
+        wait: const Duration(
+          milliseconds: 1100,
+        ), // Wait for debounce (1000ms) + buffer
         expect: () => [
           isA<DownloadsLoaded>().having(
             (state) => state.downloadsByReciter['Reciter 1']?.first.progress,

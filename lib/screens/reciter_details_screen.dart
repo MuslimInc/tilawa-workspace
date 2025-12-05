@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/di/injection.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../features/downloads/domain/entities/download_item.dart';
 import '../features/downloads/domain/repositories/downloads_repository.dart';
+import '../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
@@ -34,152 +36,201 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
+  void _handleDownloadsState(
+    DownloadsState downloadState,
+    BuildContext context,
+  ) {
+    final ReciterDetailsState currentState = context
+        .read<ReciterDetailsBloc>()
+        .state;
+    if (currentState is! ReciterDetailsLoaded) {
+      return;
+    }
+
+    if (downloadState is DownloadsLoaded) {
+      // Get downloads for this reciter
+      final List<DownloadItem>? reciterDownloads =
+          downloadState.downloadsByReciter[widget.reciter.name];
+
+      if (reciterDownloads == null || reciterDownloads.isEmpty) {
+        return;
+      }
+
+      // Check if any downloads have completed or failed (these need immediate refresh)
+      final bool hasCompletedOrFailed = reciterDownloads.any(
+        (d) =>
+            d.status == DownloadStatus.completed ||
+            d.status == DownloadStatus.failed,
+      );
+
+      // Find surahs that are downloading, completed, or failed
+      // Note: download.id is the URL which matches surah.id
+      final Set<String> surahsToRefresh = {};
+      for (final DownloadItem download in reciterDownloads) {
+        if (download.status == DownloadStatus.downloading ||
+            download.status == DownloadStatus.completed ||
+            download.status == DownloadStatus.failed) {
+          // download.id is the URL which matches surah.id
+          surahsToRefresh.add(download.id);
+        }
+      }
+
+      if (surahsToRefresh.isEmpty) {
+        return;
+      }
+
+      // If downloads completed/failed, reload entire list immediately
+      if (hasCompletedOrFailed) {
+        context.read<ReciterDetailsBloc>().add(
+          LoadSurahList(
+            reciter: widget.reciter,
+            moshaf: currentState.selectedMoshaf,
+          ),
+        );
+        return;
+      }
+
+      // For in-progress downloads, use targeted updates
+      // (debounce is handled by bloc_concurrency in the stream)
+      for (final surahId in surahsToRefresh) {
+        context.read<ReciterDetailsBloc>().add(
+          RefreshSurahDownloadStatus(
+            surahId: surahId,
+            reciterName: widget.reciter.name,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(widget.reciter.name),
-            actions: [
-              if (state is ReciterDetailsLoading)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-            ],
-          ),
-          body: Column(
-            children: [
-              // Moshaf selector
-              if (widget.reciter.moshaf.length > 1)
-                Builder(
-                  builder: (context) {
-                    // Remove duplicates and get unique moshaf list
-                    final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf
-                        .toSet()
-                        .toList();
-                    final Mosahf selectedMoshaf = state is ReciterDetailsLoaded
-                        ? state.selectedMoshaf
-                        : uniqueMoshaf.first;
+    return BlocListener<DownloadsBloc, DownloadsState>(
+      listener: (context, downloadState) {
+        _handleDownloadsState(downloadState, context);
+      },
+      child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(title: Text(widget.reciter.name), actions: const []),
+            body: Column(
+              children: [
+                // Moshaf selector
+                if (widget.reciter.moshaf.length > 1)
+                  Builder(
+                    builder: (context) {
+                      // Remove duplicates and get unique moshaf list
+                      final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf
+                          .toSet()
+                          .toList();
+                      final Mosahf selectedMoshaf =
+                          state is ReciterDetailsLoaded
+                          ? state.selectedMoshaf
+                          : uniqueMoshaf.first;
 
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      child: DropdownButtonFormField<Mosahf>(
-                        style: const TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          color: Colors.black,
-                        ),
-                        initialValue: uniqueMoshaf.contains(selectedMoshaf)
-                            ? selectedMoshaf
-                            : uniqueMoshaf.first,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(
-                            context,
-                          )!.selectRecitation,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: uniqueMoshaf.map((moshaf) {
-                          return DropdownMenuItem<Mosahf>(
-                            value: moshaf,
-                            child: Text(
-                              moshaf.name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (Mosahf? moshaf) {
-                          if (moshaf != null) {
-                            context.read<ReciterDetailsBloc>().add(
-                              LoadSurahList(
-                                reciter: widget.reciter,
-                                moshaf: moshaf,
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        child: DropdownButtonFormField<Mosahf>(
+                          style: const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            color: Colors.black,
+                          ),
+                          initialValue: uniqueMoshaf.contains(selectedMoshaf)
+                              ? selectedMoshaf
+                              : uniqueMoshaf.first,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            )!.selectRecitation,
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: uniqueMoshaf.map((moshaf) {
+                            return DropdownMenuItem<Mosahf>(
+                              value: moshaf,
+                              child: Text(
+                                moshaf.name,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
+                          }).toList(),
+                          onChanged: (Mosahf? moshaf) {
+                            if (moshaf != null) {
+                              context.read<ReciterDetailsBloc>().add(
+                                LoadSurahList(
+                                  reciter: widget.reciter,
+                                  moshaf: moshaf,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
 
-              // Content
-              Expanded(
-                child: state is ReciterDetailsLoading
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const CircularProgressIndicator(),
-                            const SizedBox(height: 16),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.loadingReciterSurahs(widget.reciter.name),
-                            ),
-                          ],
+                // Content
+                Expanded(
+                  child: state is ReciterDetailsError
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error,
+                                size: 64,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(state.message),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<ReciterDetailsBloc>().add(
+                                    LoadSurahList(
+                                      reciter: widget.reciter,
+                                      moshaf: widget.reciter.moshaf.first,
+                                    ),
+                                  );
+                                },
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        )
+                      : state is ReciterDetailsLoaded && state.surahList.isEmpty
+                      ? Center(
+                          child: Text(
+                            AppLocalizations.of(context)!.noSurahsAvailable,
+                          ),
+                        )
+                      : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                          builder: (context, audioState) {
+                            return state is ReciterDetailsLoaded
+                                ? ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    itemCount: state.surahList.length,
+                                    itemBuilder: (context, index) {
+                                      final SurahEntity surah =
+                                          state.surahList[index];
+                                      return _buildSurahCard(
+                                        surah,
+                                        index,
+                                        state,
+                                      );
+                                    },
+                                  )
+                                : const SizedBox.shrink();
+                          },
                         ),
-                      )
-                    : state is ReciterDetailsError
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error,
-                              size: 64,
-                              color: Colors.red,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(state.message),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                context.read<ReciterDetailsBloc>().add(
-                                  LoadSurahList(
-                                    reciter: widget.reciter,
-                                    moshaf: widget.reciter.moshaf.first,
-                                  ),
-                                );
-                              },
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      )
-                    : state is ReciterDetailsLoaded && state.surahList.isEmpty
-                    ? Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.noSurahsAvailable,
-                        ),
-                      )
-                    : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                        builder: (context, audioState) {
-                          return state is ReciterDetailsLoaded
-                              ? ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  itemCount: state.surahList.length,
-                                  itemBuilder: (context, index) {
-                                    final SurahEntity surah =
-                                        state.surahList[index];
-                                    return _buildSurahCard(surah, index, state);
-                                  },
-                                )
-                              : const SizedBox.shrink();
-                        },
-                      ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: const BottomPlayer(),
-        );
-      },
+                ),
+              ],
+            ),
+            bottomNavigationBar: const BottomPlayer(),
+          );
+        },
+      ),
     );
   }
 
@@ -279,21 +330,22 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Download status indicator
-                FutureBuilder<bool>(
-                  future: _isSurahDownloaded(surah),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && (snapshot.data ?? false)) {
-                      return const Icon(
-                        Icons.download_done,
-                        color: Colors.green,
-                        size: 20,
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-                const SizedBox(width: 4),
+                // Download status indicators
+                if (surah.isDownloaded)
+                  const Icon(Icons.download_done, color: Colors.green, size: 20)
+                else if (surah.isDownloading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      value: surah.downloadProgress > 0
+                          ? surah.downloadProgress
+                          : null,
+                    ),
+                  ),
+                if (surah.isDownloaded || surah.isDownloading)
+                  const SizedBox(width: 4),
                 // Download button
                 DownloadButton(
                   surahId: surah.id,
@@ -382,23 +434,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     } catch (e) {
       logger.d('Error checking downloaded file: $e');
       return null;
-    }
-  }
-
-  /// Check if a surah is downloaded
-  Future<bool> _isSurahDownloaded(SurahEntity surah) async {
-    try {
-      final DownloadsRepository downloadsRepository =
-          getIt<DownloadsRepository>();
-      // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
-      final String surahId = surah.name.split(' ').first;
-      return await downloadsRepository.isSurahDownloaded(
-        surahId,
-        widget.reciter.name,
-      );
-    } catch (e) {
-      logger.d('Error checking if surah is downloaded: $e');
-      return false;
     }
   }
 

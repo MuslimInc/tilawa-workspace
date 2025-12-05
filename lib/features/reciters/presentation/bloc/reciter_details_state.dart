@@ -11,10 +11,6 @@ class ReciterDetailsInitial extends ReciterDetailsState {
   const ReciterDetailsInitial();
 }
 
-class ReciterDetailsLoading extends ReciterDetailsState {
-  const ReciterDetailsLoading();
-}
-
 class ReciterDetailsLoaded extends ReciterDetailsState {
   const ReciterDetailsLoaded({
     required this.surahList,

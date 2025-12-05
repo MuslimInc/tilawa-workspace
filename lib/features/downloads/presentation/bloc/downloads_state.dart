@@ -4,8 +4,6 @@ part of 'downloads_bloc.dart';
 sealed class DownloadsState with _$DownloadsState {
   const factory DownloadsState.initial() = DownloadsInitial;
 
-  const factory DownloadsState.loading() = DownloadsLoading;
-
   const factory DownloadsState.loaded(
     Map<String, List<DownloadItem>> downloadsByReciter,
   ) = DownloadsLoaded;

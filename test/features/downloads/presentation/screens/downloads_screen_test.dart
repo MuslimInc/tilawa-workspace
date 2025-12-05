@@ -68,24 +68,6 @@ void main() {
   }
 
   group('DownloadsScreen', () {
-    testWidgets('should display loading indicator when state is loading', (
-      WidgetTester tester,
-    ) async {
-      // Arrange - Set up state and emit it through the stream
-      const loadingState = DownloadsState.loading();
-      when(mockDownloadsBloc.state).thenReturn(loadingState);
-      stateController.add(loadingState);
-
-      // Act
-      await tester.pumpWidget(createTestWidget());
-      // Pump a few frames to allow initState and postFrameCallback to complete
-      await tester.pump();
-      await tester.pump();
-
-      // Assert
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
     testWidgets('should display downloads when state is loaded', (
       WidgetTester tester,
     ) async {

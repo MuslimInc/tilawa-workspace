@@ -33,8 +33,6 @@ class ReciterDetailsBloc
     LoadSurahList event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    emit(const ReciterDetailsLoading());
-
     try {
       final List<MediaItem>? mediaItemList = await _audioHandler
           .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);

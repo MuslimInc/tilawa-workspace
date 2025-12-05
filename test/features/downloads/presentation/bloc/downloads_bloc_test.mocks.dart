@@ -355,6 +355,14 @@ class MockDownloadsRepository extends _i1.Mock
           as _i7.Future<bool>);
 
   @override
+  _i7.Future<bool> isSurahDownloading(String? surahId, String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#isSurahDownloading, [surahId, reciterName]),
+            returnValue: _i7.Future<bool>.value(false),
+          )
+          as _i7.Future<bool>);
+
+  @override
   _i7.Future<String?> getDownloadedFilePath(
     String? surahId,
     String? reciterName,

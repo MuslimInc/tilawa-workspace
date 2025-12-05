@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -24,6 +25,11 @@ import '../../domain/usecases/get_downloads_by_reciter_use_case.dart';
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
 part 'downloads_state.dart';
+
+/// Event transformer for debouncing events
+EventTransformer<T> debounce<T>(Duration duration) {
+  return (events, mapper) => events.debounce(duration).switchMap(mapper);
+}
 
 @injectable
 class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
@@ -59,7 +65,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     on<PlayAllDownloadsEvent>(_onPlayAllDownloads);
     on<CheckPremiumAccessEvent>(_onCheckPremiumAccess);
     on<RetryDownloadEvent>(_onRetryDownload);
-    on<RefreshDownloadsProgress>(_onRefreshDownloadsProgress);
+    on<RefreshDownloadsProgress>(
+      _onRefreshDownloadsProgress,
+      transformer: debounce(const Duration(milliseconds: 1000)),
+    );
 
     // Listen to download progress
     _listenToProgress();
@@ -157,8 +166,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     LoadDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    emit(const DownloadsState.loading());
-
     final Either<Failure, Map<String, List<DownloadItem>>> result =
         await _getDownloadsByReciter();
     await result.fold(
@@ -294,8 +301,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     DeleteReciterDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    emit(const DownloadsState.loading());
-
     final Either<Failure, void> result = await _deleteReciterDownloads(
       event.reciterName,
     );
@@ -324,8 +329,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     ClearAllDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    emit(const DownloadsState.loading());
-
     final Either<Failure, void> result = await _clearAllDownloads();
     result.fold(
       (failure) => emit(
@@ -515,9 +518,21 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         return;
       }
 
-      if (downloadItem.status != DownloadStatus.failed) {
+      // Check if download is stuck (at 0% for more than 30 seconds)
+      final Duration timeSinceCreated = DateTime.now().difference(
+        downloadItem.createdAt,
+      );
+      final bool isStuck =
+          downloadItem.status == DownloadStatus.downloading &&
+          downloadItem.progress == 0.0 &&
+          timeSinceCreated.inSeconds > 30;
+
+      // Allow retry for failed downloads or stuck downloads
+      if (downloadItem.status != DownloadStatus.failed && !isStuck) {
         emit(
-          const DownloadsState.error('Only failed downloads can be retried'),
+          const DownloadsState.error(
+            'Only failed or stuck downloads can be retried',
+          ),
         );
         return;
       }

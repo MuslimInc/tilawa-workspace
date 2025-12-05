@@ -71,7 +71,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
           // Handle states that should show snackbars or other UI feedback
           state.when(
             initial: () {},
-            loading: () {},
             loaded: (_) {},
             error: (message) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -85,34 +84,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             surahDownloadStatus: (_, _, _) {},
             fileValidationResult: (_, _) {},
             validDownloadsLoaded: (_, _) {},
-            playbackInitiated: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            premiumRequired: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.orange,
-                ),
-              );
-            },
-            downloadStarted: (surahId, surahTitle, reciterName) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.downloadingSurah(surahTitle, reciterName),
-                  ),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
+            playbackInitiated: (message) {},
+            premiumRequired: (message) {},
+            downloadStarted: (surahId, surahTitle, reciterName) {},
           );
         },
         child: BlocBuilder<DownloadsBloc, DownloadsState>(
@@ -121,7 +95,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               initial: () => Center(
                 child: Text(AppLocalizations.of(context)!.noDownloadsYet),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
               loaded: (downloadsByReciter) {
                 if (downloadsByReciter.isEmpty) {
                   return Center(

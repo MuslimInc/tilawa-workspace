@@ -36,6 +36,7 @@ class ReciterDownloadsSection extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
         child: ExpansionTile(
+          initiallyExpanded: downloads.isNotEmpty,
           expandedCrossAxisAlignment: CrossAxisAlignment.start,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

@@ -36,20 +36,6 @@ class DownloadButton extends StatelessWidget {
           reciterName: reciterName,
         ),
       );
-
-      // Show success message with View Downloads action
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Downloading $surahTitle...'),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: AppLocalizations.of(context)!.viewDownloads,
-            onPressed: () {
-              const DownloadsRoute().push(context);
-            },
-          ),
-        ),
-      );
     }
 
     Widget buildButton() {

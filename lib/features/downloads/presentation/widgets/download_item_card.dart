@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../data/services/download_queue_manager.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 
@@ -65,8 +66,9 @@ class DownloadItemCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Retry button (only for failed downloads)
-            if (download.status == DownloadStatus.failed)
+            // Retry button (for failed downloads or stuck downloads)
+            if (download.status == DownloadStatus.failed ||
+                _isDownloadStuck(download))
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.blue),
                 onPressed: () => _handleRetryDownload(context),
@@ -142,6 +144,17 @@ class DownloadItemCard extends StatelessWidget {
     final int progress = (download.progress * 100).toInt();
     final downloading =
         '${AppLocalizations.of(context)!.downloading} $progress%';
+
+    if (download.status == DownloadStatus.pending) {
+      final int queuePosition = DownloadQueueManager.instance.getQueuePosition(
+        download.id,
+      );
+      if (queuePosition > 0) {
+        return '${AppLocalizations.of(context)!.pending} (#$queuePosition)';
+      }
+      return AppLocalizations.of(context)!.pending;
+    }
+
     return switch (download.status) {
       DownloadStatus.pending => AppLocalizations.of(context)!.pending,
       DownloadStatus.downloading => downloading,
@@ -253,6 +266,20 @@ class DownloadItemCard extends StatelessWidget {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.retryDownload(downloadId: download.id),
     );
+  }
+
+  /// Check if download is stuck (at 0% for more than 30 seconds)
+  bool _isDownloadStuck(DownloadItem download) {
+    if (download.status != DownloadStatus.downloading) {
+      return false;
+    }
+    if (download.progress > 0.0) {
+      return false;
+    }
+    final Duration timeSinceCreated = DateTime.now().difference(
+      download.createdAt,
+    );
+    return timeSinceCreated.inSeconds > 30;
   }
 
   /// Show error snackbar
