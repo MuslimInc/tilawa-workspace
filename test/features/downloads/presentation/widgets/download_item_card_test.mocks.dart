@@ -10,6 +10,8 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i4;
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart'
     as _i2;
+import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart'
+    as _i7;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i3;
 
@@ -358,4 +360,107 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+}
+
+/// A class which mocks [DownloadQueueManager].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadQueueManager extends _i1.Mock
+    implements _i7.DownloadQueueManager {
+  MockDownloadQueueManager() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  int get queueLength =>
+      (super.noSuchMethod(Invocation.getter(#queueLength), returnValue: 0)
+          as int);
+
+  @override
+  int get activeDownloadsCount =>
+      (super.noSuchMethod(
+            Invocation.getter(#activeDownloadsCount),
+            returnValue: 0,
+          )
+          as int);
+
+  @override
+  _i5.Stream<_i7.QueueUpdate> get queueUpdates =>
+      (super.noSuchMethod(
+            Invocation.getter(#queueUpdates),
+            returnValue: _i5.Stream<_i7.QueueUpdate>.empty(),
+          )
+          as _i5.Stream<_i7.QueueUpdate>);
+
+  @override
+  _i5.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> enqueue({
+    required String? id,
+    required String? url,
+    required String? filePath,
+    required String? title,
+    required String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#enqueue, [], {
+              #id: id,
+              #url: url,
+              #filePath: filePath,
+              #title: title,
+              #reciterName: reciterName,
+            }),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  void removeFromQueue(String? id) => super.noSuchMethod(
+    Invocation.method(#removeFromQueue, [id]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  int getQueuePosition(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getQueuePosition, [id]),
+            returnValue: 0,
+          )
+          as int);
+
+  @override
+  bool isQueued(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#isQueued, [id]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  bool isActive(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#isActive, [id]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  void clearQueue() => super.noSuchMethod(
+    Invocation.method(#clearQueue, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
 }

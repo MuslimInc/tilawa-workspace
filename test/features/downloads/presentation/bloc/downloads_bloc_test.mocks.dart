@@ -443,6 +443,15 @@ class MockDownloadsRepository extends _i1.Mock
             returnValue: <_i2.MediaItem>[],
           )
           as List<_i2.MediaItem>);
+
+  @override
+  _i7.Future<void> resumePendingDownloads() =>
+      (super.noSuchMethod(
+            Invocation.method(#resumePendingDownloads, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
 }
 
 /// A class which mocks [PremiumRepository].
@@ -1426,4 +1435,84 @@ class MockDownloadService extends _i1.Mock implements _i22.DownloadService {
   MockDownloadService() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i7.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
+  _i7.Future<void> download({
+    required String? id,
+    required String? url,
+    required String? filePath,
+    required String? title,
+    required String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#download, [], {
+              #id: id,
+              #url: url,
+              #filePath: filePath,
+              #title: title,
+              #reciterName: reciterName,
+            }),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
+  _i7.Future<void> cancel(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [id]),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
+  _i7.Stream<_i22.DownloadProgress> getProgressStream(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getProgressStream, [id]),
+            returnValue: _i7.Stream<_i22.DownloadProgress>.empty(),
+          )
+          as _i7.Stream<_i22.DownloadProgress>);
+
+  @override
+  _i7.Future<List<String>> getActiveDownloadIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#getActiveDownloadIds, []),
+            returnValue: _i7.Future<List<String>>.value(<String>[]),
+          )
+          as _i7.Future<List<String>>);
+
+  @override
+  _i7.Future<bool> isStatusDownloadActive(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#isStatusDownloadActive, [id]),
+            returnValue: _i7.Future<bool>.value(false),
+          )
+          as _i7.Future<bool>);
+
+  @override
+  _i7.Future<_i10.DownloadStatus?> getStatus(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getStatus, [id]),
+            returnValue: _i7.Future<_i10.DownloadStatus?>.value(),
+          )
+          as _i7.Future<_i10.DownloadStatus?>);
+
+  @override
+  _i7.Future<void> disposeService() =>
+      (super.noSuchMethod(
+            Invocation.method(#disposeService, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
 }

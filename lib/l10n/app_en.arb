@@ -557,5 +557,9 @@
     "playPlaylistComingSoon": "Play playlist functionality coming soon",
     "@playPlaylistComingSoon": {
         "description": "Play playlist coming soon message"
+    },
+    "downloadSurahsOffline": "Download surahs to listen offline",
+    "@downloadSurahsOffline": {
+        "description": "Text prompting users to download surahs for offline listening"
     }
 }

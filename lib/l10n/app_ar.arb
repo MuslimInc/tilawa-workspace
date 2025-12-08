@@ -557,5 +557,9 @@
     "playPlaylistComingSoon": "ميزة تشغيل قائمة التشغيل قادمة قريباً",
     "@playPlaylistComingSoon": {
         "description": "Play playlist coming soon message"
+    },
+    "downloadSurahsOffline": "حمل السور للاستماع دون اتصال",
+    "@downloadSurahsOffline": {
+        "description": "Text prompting users to download surahs for offline listening"
     }
 }

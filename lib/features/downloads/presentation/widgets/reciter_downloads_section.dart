@@ -20,74 +20,95 @@ class ReciterDownloadsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DownloadsBloc, DownloadsState>(
-      listener: (context, state) {
-        if (state is PlaybackInitiated) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else if (state is DownloadsError) {
-          _showErrorSnackBar(context, state.message);
-        }
-      },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
+    return Card(
+      elevation: 2,
+      shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: downloads.isNotEmpty,
-          expandedCrossAxisAlignment: CrossAxisAlignment.start,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          backgroundColor: Theme.of(context).cardColor,
+          collapsedBackgroundColor: Theme.of(context).cardColor,
+          childrenPadding: EdgeInsets.zero,
           title: Text(
             reciterName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
             '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+              fontSize: 13,
+            ),
           ),
-          leading: CircleAvatar(
-            backgroundColor: Theme.of(
-              context,
-            ).primaryColor.withValues(alpha: 0.1),
-            child: Text(
-              reciterName.isNotEmpty ? reciterName[0].toUpperCase() : 'R',
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.bold,
+          leading: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                width: 2,
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Theme.of(
+                context,
+              ).primaryColor.withValues(alpha: 0.1),
+              child: Text(
+                reciterName.isNotEmpty ? reciterName[0].toUpperCase() : 'R',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Play All button (only if there are completed downloads)
               if (_hasCompletedDownloads())
                 BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, audioState) {
                     final bool isPlayingFromThisReciter =
                         _isPlayingFromThisReciter(audioState);
-                    return IconButton(
-                      icon: Icon(
+                    final bool isPlaying =
                         isPlayingFromThisReciter &&
-                                (audioState.playbackState?.playing ?? false)
-                            ? Icons.pause
-                            : Icons.play_arrow,
+                        (audioState.playbackState?.playing ?? false);
+
+                    return IconButton.filledTonal(
+                      style: IconButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.all(8),
+                      ),
+                      icon: Icon(
+                        isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        size: 20,
                       ),
                       onPressed: () =>
                           _handlePlayAllPlayPause(context, audioState),
-                      tooltip:
-                          isPlayingFromThisReciter &&
-                              (audioState.playbackState?.playing ?? false)
+                      tooltip: isPlaying
                           ? AppLocalizations.of(context)!.pauseAll
                           : AppLocalizations.of(context)!.playAll,
                     );
                   },
                 ),
-              // Menu button
+              const SizedBox(width: 4),
               PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert_rounded),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 onSelected: (value) {
                   if (value == 'delete_all') {
                     _showDeleteReciterDialog(context);
@@ -98,9 +119,18 @@ class ReciterDownloadsSection extends StatelessWidget {
                     value: 'delete_all',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text(AppLocalizations.of(context)!.deleteAll),
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppLocalizations.of(context)!.deleteAll,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -109,24 +139,32 @@ class ReciterDownloadsSection extends StatelessWidget {
             ],
           ),
           children: [
-            if (downloads.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(start: 20),
-                child: Text(
-                  '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
+            Divider(
+              height: 1,
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            ),
             ...downloads.map((download) {
-              return DownloadItemCard(
-                download: download,
-                onDelete: () {
-                  context.read<DownloadsBloc>().add(
-                    DeleteDownloadEvent(downloadId: download.id),
-                  );
-                },
+              return Column(
+                children: [
+                  DownloadItemCard(
+                    download: download,
+                    onDelete: () {
+                      context.read<DownloadsBloc>().add(
+                        DeleteDownloadEvent(downloadId: download.id),
+                      );
+                    },
+                  ),
+                  if (download != downloads.last)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(
+                        height: 1,
+                        color: Theme.of(
+                          context,
+                        ).dividerColor.withValues(alpha: 0.1),
+                      ),
+                    ),
+                ],
               );
             }),
           ],
@@ -209,17 +247,6 @@ class ReciterDownloadsSection extends StatelessWidget {
   void _playAllDownloads(BuildContext context) {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.playAllDownloads(reciterName: reciterName),
-    );
-  }
-
-  /// Show error snackbar
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
     );
   }
 }

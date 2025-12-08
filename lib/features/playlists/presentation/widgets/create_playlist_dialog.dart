@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/playlists_bloc.dart';
 
@@ -33,17 +34,10 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
         state.whenOrNull(
           playlistCreated: (playlist, playlists) {
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.playlistCreated),
-                backgroundColor: Colors.green,
-              ),
-            );
+            ToastUtils.showSuccessToast(l10n.playlistCreated);
           },
           error: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
+            ToastUtils.showErrorToast(message);
           },
         );
       },

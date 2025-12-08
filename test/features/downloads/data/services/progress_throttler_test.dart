@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/data/services/progress_throttler.dart';
 
 void main() {
   group('ProgressThrottler', () {

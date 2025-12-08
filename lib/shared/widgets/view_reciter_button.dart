@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/utils/toast_utils.dart';
 import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
 import '../models/reciter_model.dart';
@@ -28,22 +29,12 @@ class ViewReciterButton extends StatelessWidget {
           ).push(context);
         } else {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Reciter information not available'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+            ToastUtils.showToast(msg: 'Reciter information not available');
           }
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error loading reciter: $e'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          ToastUtils.showErrorToast('Error loading reciter: $e');
         }
       }
     }

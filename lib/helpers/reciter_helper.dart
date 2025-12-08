@@ -12,7 +12,16 @@ class ReciterHelper {
     String? languageCode,
   }) async {
     try {
-      final AudioPlayerHandler audioHandler = getIt<AudioPlayerHandler>();
+      // Check if GetIt is available (e.g., in test environment)
+      AudioPlayerHandler audioHandler;
+      try {
+        audioHandler = getIt<AudioPlayerHandler>();
+      } catch (e) {
+        logger.d('AudioPlayerHandler not available in GetIt: $e');
+        return null;
+      }
+
+      // Call getRecitersData - it should always return a Future
       final List<Reciter>? reciters = await audioHandler.getRecitersData(
         languageCode: languageCode,
       );

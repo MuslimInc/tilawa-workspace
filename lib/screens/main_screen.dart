@@ -1,6 +1,9 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -9,7 +12,7 @@ import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../router/app_router_config.dart';
-import '../shared/widgets/bottom_player.dart';
+import '../shared/widgets/bottom_player_widget.dart';
 import 'playlists_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -45,9 +48,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           error: (message) {
             // Show error and redirect to login
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
+            ToastUtils.showErrorToast(message);
             const LoginRoute().go(context);
           },
         );
@@ -62,49 +63,85 @@ class _MainScreenState extends State<MainScreen> {
                   child: IndexedStack(index: _currentIndex, children: _screens),
                 ),
 
-                // Bottom player when audio is playing
-                if (state.hasMediaItem)
-                  ColoredBox(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: const BottomPlayer(),
-                  ),
+                const BottomPlayerWidget(),
               ],
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-                if (index == 1) {
-                  context.read<DownloadsBloc>().add(
-                    const DownloadsEvent.loadDownloads(),
-                  );
-                }
-              },
-              type: BottomNavigationBarType.fixed,
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.person),
-                  activeIcon: const Icon(Icons.person),
-                  label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20.r,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: BottomNavigationBar(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                  if (index == 1) {
+                    context.read<DownloadsBloc>().add(
+                      const DownloadsEvent.loadDownloads(),
+                    );
+                  }
+                },
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                selectedItemColor: Theme.of(context).primaryColor,
+                unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
+                selectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12.sp,
                 ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.download),
-                  activeIcon: const Icon(Icons.download),
-                  label: AppLocalizations.of(context)?.downloads ?? 'Downloads',
+                unselectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12.sp,
                 ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.playlist_play),
-                  activeIcon: const Icon(Icons.playlist_play),
-                  label: AppLocalizations.of(context)?.playlists ?? 'Playlists',
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.settings),
-                  activeIcon: const Icon(Icons.settings),
-                  label: AppLocalizations.of(context)?.settings ?? 'Settings',
-                ),
-              ],
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
+                    activeIcon: Icon(FluentIcons.person_24_filled, size: 24.sp),
+                    label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      FluentIcons.arrow_download_24_regular,
+                      size: 24.sp,
+                    ),
+                    activeIcon: Icon(
+                      FluentIcons.arrow_download_24_filled,
+                      size: 24.sp,
+                    ),
+                    label:
+                        AppLocalizations.of(context)?.downloads ?? 'Downloads',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      FluentIcons.music_note_2_24_regular,
+                      size: 24.sp,
+                    ),
+                    activeIcon: Icon(
+                      FluentIcons.music_note_2_24_filled,
+                      size: 24.sp,
+                    ),
+                    label:
+                        AppLocalizations.of(context)?.playlists ?? 'Playlists',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
+                    activeIcon: Icon(
+                      FluentIcons.settings_24_filled,
+                      size: 24.sp,
+                    ),
+                    label: AppLocalizations.of(context)?.settings ?? 'Settings',
+                  ),
+                ],
+              ),
             ),
           );
         },

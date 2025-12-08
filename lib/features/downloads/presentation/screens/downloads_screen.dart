@@ -48,152 +48,191 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.downloads),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _loadDownloads();
-            },
-            tooltip: AppLocalizations.of(context)!.refreshDownloads,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () {
-              _showClearAllDialog(context);
-            },
-          ),
-        ],
-      ),
       body: BlocListener<DownloadsBloc, DownloadsState>(
         listener: (context, state) {
           // Handle states that should show snackbars or other UI feedback
           state.when(
             initial: () {},
             loaded: (_) {},
-            error: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            },
+            error: (message) {},
             surahDownloadStatus: (_, _, _) {},
             fileValidationResult: (_, _) {},
             validDownloadsLoaded: (_, _) {},
-            playbackInitiated: (message) {},
-            premiumRequired: (message) {},
-            downloadStarted: (surahId, surahTitle, reciterName) {},
+            playbackInitiated: (message, _) {},
+            premiumRequired: (message, _) {},
+            downloadStarted: (surahId, surahTitle, reciterName, _) {},
           );
         },
         child: BlocBuilder<DownloadsBloc, DownloadsState>(
           builder: (context, state) {
-            return state.when(
-              initial: () => Center(
-                child: Text(AppLocalizations.of(context)!.noDownloadsYet),
-              ),
-              loaded: (downloadsByReciter) {
-                if (downloadsByReciter.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.download_outlined,
-                          size: 64,
-                          color: Colors.grey,
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 120.0,
+                  floating: true,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: Text(
+                      AppLocalizations.of(context)!.downloads,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                    ),
+                    centerTitle: true,
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
+                            Theme.of(context).scaffoldBackgroundColor,
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)!.noDownloadsYet,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: downloadsByReciter.length,
-                  itemBuilder: (context, index) {
-                    final String reciterName = downloadsByReciter.keys
-                        .elementAt(index);
-                    final List<DownloadItem> downloads =
-                        downloadsByReciter[reciterName] ?? [];
-
-                    return ReciterDownloadsSection(
-                      reciterName: reciterName,
-                      downloads: downloads,
-                    );
-                  },
-                );
-              },
-              error: (message) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.refresh_rounded),
+                      onPressed: _loadDownloads,
+                      tooltip: AppLocalizations.of(context)!.refreshDownloads,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '${AppLocalizations.of(context)!.error}: $message',
-                      style: const TextStyle(fontSize: 16, color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<DownloadsBloc>().add(
-                          const LoadDownloads(),
-                        );
-                      },
-                      child: Text(AppLocalizations.of(context)!.retry),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_sweep_rounded,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => _showClearAllDialog(context),
+                      tooltip: AppLocalizations.of(context)!.deleteAll,
                     ),
                   ],
                 ),
-              ),
-              // Handle new states - these are typically handled by BlocListener
-              surahDownloadStatus: (surahId, reciterName, isDownloaded) =>
-                  Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.downloadStatusChecked,
+                state.when(
+                  initial: () => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  loaded: (downloadsByReciter) =>
+                      _buildDownloadsList(context, downloadsByReciter),
+                  error: (message) => SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            size: 64,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            message,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              context.read<DownloadsBloc>().add(
+                                const LoadDownloads(),
+                              );
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: Text(AppLocalizations.of(context)!.retry),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-              fileValidationResult: (downloadId, isValid) => Center(
-                child: Text(
-                  AppLocalizations.of(context)!.fileValidationCompleted,
+                  // Handle other states with simple placeholders or non-sliver equivalents if needed for transient states
+                  surahDownloadStatus: (surahId, reciterName, isDownloaded) =>
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  fileValidationResult: (downloadId, isValid) =>
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  validDownloadsLoaded: (reciterName, validDownloads) =>
+                      const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  playbackInitiated: (_, downloadsByReciter) =>
+                      _buildDownloadsList(context, downloadsByReciter),
+                  premiumRequired: (_, downloadsByReciter) =>
+                      _buildDownloadsList(context, downloadsByReciter),
+                  downloadStarted: (_, __, ___, downloadsByReciter) =>
+                      _buildDownloadsList(context, downloadsByReciter),
                 ),
-              ),
-              validDownloadsLoaded: (reciterName, validDownloads) => Center(
-                child: Text(AppLocalizations.of(context)!.validDownloadsLoaded),
-              ),
-              playbackInitiated: (message) => Center(
-                child: Text(AppLocalizations.of(context)!.playbackInitiated),
-              ),
-              premiumRequired: (String message) {
-                return Center(child: Text(message));
-              },
-              downloadStarted: (surahId, surahTitle, reciterName) => Center(
-                child: Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.downloadingSurah(surahTitle, reciterName),
-                ),
-              ),
+                // Add some bottom padding for floating action buttons or player
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
             );
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildDownloadsList(
+    BuildContext context,
+    Map<String, List<DownloadItem>> downloadsByReciter,
+  ) {
+    if (downloadsByReciter.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.download_done_rounded,
+                  size: 64,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)!.noDownloadsYet,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context)!.downloadSurahsOffline,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final String reciterName = downloadsByReciter.keys.elementAt(index);
+        final List<DownloadItem> downloads =
+            downloadsByReciter[reciterName] ?? [];
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ReciterDownloadsSection(
+            reciterName: reciterName,
+            downloads: downloads,
+          ),
+        );
+      }, childCount: downloadsByReciter.length),
     );
   }
 

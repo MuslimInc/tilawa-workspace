@@ -265,4 +265,13 @@ class MockDownloadsRepository extends _i1.Mock
             returnValue: <_i2.MediaItem>[],
           )
           as List<_i2.MediaItem>);
+
+  @override
+  _i4.Future<void> resumePendingDownloads() =>
+      (super.noSuchMethod(
+            Invocation.method(#resumePendingDownloads, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }

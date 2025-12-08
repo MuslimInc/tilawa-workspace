@@ -1,5 +1,7 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/models/reciter_model.dart';
@@ -24,7 +26,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
   @override
   void initState() {
     super.initState();
-    // Load reciters asynchronously to avoid blocking UI
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RecitersBloc>().add(const LoadReciters());
     });
@@ -51,7 +52,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Widget build(BuildContext context) {
     return BlocListener<LocalizationBloc, LocalizationState>(
       listener: (context, state) {
-        // When language changes, refetch reciters with new language
         context.read<RecitersBloc>().add(const LanguageChanged());
       },
       child: BlocBuilder<RecitersBloc, RecitersState>(
@@ -65,11 +65,17 @@ class _RecitersScreenState extends State<RecitersScreen> {
               children: [
                 // Search bar and letter filter
                 Container(
+                  padding: EdgeInsets.all(4.r),
+                  margin: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(12),
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.1),
+                    ),
                   ),
-                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
                       // Letter filter indicator
@@ -77,16 +83,16 @@ class _RecitersScreenState extends State<RecitersScreen> {
                           state.selectedLetter != null)
                         Container(
                           width: double.infinity,
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                          margin: EdgeInsets.only(bottom: 12.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
                           ),
                           decoration: BoxDecoration(
                             color: Theme.of(
                               context,
                             ).primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
                               color: Theme.of(
                                 context,
@@ -96,32 +102,36 @@ class _RecitersScreenState extends State<RecitersScreen> {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.filter_alt,
+                                Icons.filter_alt_rounded,
                                 color: Theme.of(context).primaryColor,
-                                size: 20,
+                                size: 20.sp,
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8.w),
                               Text(
                                 AppLocalizations.of(context)!.filteredByLetter,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w500,
+                                  fontSize: 14.sp,
                                 ),
                               ),
+                              SizedBox(width: 4.w),
                               Text(
                                 state.selectedLetter!,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: 18.sp,
                                 ),
                               ),
                               const Spacer(),
                               IconButton(
-                                icon: const Icon(Icons.close),
+                                icon: const Icon(Icons.close_rounded),
                                 onPressed: _clearLetterFilter,
                                 color: Theme.of(context).primaryColor,
-                                iconSize: 20,
+                                iconSize: 20.sp,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
                             ],
                           ),
@@ -129,26 +139,43 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       // Search field
                       TextField(
                         controller: _searchController,
+                        style: TextStyle(fontSize: 14.sp),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerLowest,
+                          fillColor: Theme.of(context).colorScheme.surface,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                              width: 1.5,
+                            ),
                           ),
                           hintText: AppLocalizations.of(
                             context,
                           )!.searchReciters,
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: Icon(
+                            FluentIcons.search_24_regular,
+                            size: 22.sp,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 14.h,
+                          ),
                           suffixIcon:
                               (state is RecitersLoaded &&
                                   state.searchQuery.isNotEmpty)
                               ? IconButton(
-                                  icon: const Icon(Icons.clear),
+                                  icon: const Icon(
+                                    FluentIcons.dismiss_24_regular,
+                                  ),
                                   onPressed: () {
                                     _searchController.clear();
                                     context.read<RecitersBloc>().add(
@@ -184,11 +211,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const CircularProgressIndicator(),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16.h),
                                     Text(
                                       AppLocalizations.of(
                                         context,
                                       )!.loadingReciters,
+                                      style: TextStyle(fontSize: 14.sp),
                                     ),
                                   ],
                                 ),
@@ -198,14 +226,25 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(
-                                      Icons.error,
-                                      size: 64,
-                                      color: Colors.red,
+                                    Icon(
+                                      Icons.error_outline_rounded,
+                                      size: 64.sp,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
                                     ),
-                                    const SizedBox(height: 16),
-                                    Text(state.message),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      state.message,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.h),
                                     ElevatedButton(
                                       onPressed: () {
                                         context.read<RecitersBloc>().add(
@@ -214,6 +253,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                       },
                                       child: Text(
                                         AppLocalizations.of(context)!.retry,
+                                        style: TextStyle(fontSize: 14.sp),
                                       ),
                                     ),
                                   ],
@@ -225,12 +265,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(
-                                      Icons.search_off,
-                                      size: 64,
-                                      color: Colors.grey,
+                                    Icon(
+                                      Icons.search_off_rounded,
+                                      size: 64.sp,
+                                      color: Theme.of(context).disabledColor,
                                     ),
-                                    const SizedBox(height: 16),
+                                    SizedBox(height: 16.h),
                                     Text(
                                       state.searchQuery.isEmpty
                                           ? AppLocalizations.of(
@@ -239,6 +279,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                           : AppLocalizations.of(
                                               context,
                                             )!.noRecitersMatchSearch,
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: Theme.of(context).disabledColor,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -246,12 +290,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             : state is RecitersLoaded
                             ? ListView.separated(
                                 separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 8.h),
                                 controller: _scrollController,
                                 itemCount: state.filteredReciters.length,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 8.h,
                                 ),
                                 itemBuilder: (context, index) {
                                   final Reciter reciter =

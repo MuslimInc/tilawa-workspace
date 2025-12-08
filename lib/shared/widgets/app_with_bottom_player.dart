@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'bottom_player.dart';
+import 'bottom_player_widget.dart';
 
 class AppWithBottomPlayer extends StatelessWidget {
   const AppWithBottomPlayer({super.key, required this.child});
@@ -38,7 +39,7 @@ class AppWithBottomPlayer extends StatelessWidget {
                   right: 0,
                   bottom:
                       kBottomNavigationBarHeight, // Account for bottom nav bar
-                  child: BottomPlayer(),
+                  child: BottomPlayerWidget(),
                 ),
             ],
           ),

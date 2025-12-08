@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../data/services/download_queue_manager.dart';
@@ -22,71 +23,112 @@ class DownloadItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<DownloadsBloc, DownloadsState>(
       listener: (context, state) {
-        if (state is PlaybackInitiated) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else if (state is DownloadsError) {
+        if (state is DownloadsError) {
           _showErrorSnackBar(context, state.message);
         }
       },
       child: ListTile(
-        leading: _buildStatusIcon(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: _buildStatusIcon(context),
         title: Text(
           download.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (download.status == DownloadStatus.downloading)
-              LinearProgressIndicator(
-                value: download.progress,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).primaryColor,
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                child: LinearProgressIndicator(
+                  value: download.progress,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).dividerColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                  minHeight: 4,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             const SizedBox(height: 4),
-            Text(
-              _getStatusText(context),
-              style: TextStyle(color: _getStatusColor(), fontSize: 12),
+            Row(
+              children: [
+                if (download.status != DownloadStatus.downloading) ...[
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  _getStatusText(context),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: 12,
+                  ),
+                ),
+                if (download.fileSize > 0) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    '•',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
             ),
-            if (download.fileSize > 0)
-              Text(
-                '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
           ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Retry button (for failed downloads or stuck downloads)
             if (download.status == DownloadStatus.failed ||
                 _isDownloadStuck(download))
               IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.blue),
+                icon: const Icon(Icons.refresh_rounded, color: Colors.blue),
                 onPressed: () => _handleRetryDownload(context),
                 tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
               ),
-            // Play/Pause button (only for completed downloads)
             if (download.status == DownloadStatus.completed)
               BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                 builder: (context, audioState) {
                   final bool isCurrentlyPlaying = _isCurrentlyPlaying(
                     audioState,
                   );
-                  return IconButton(
+                  return IconButton.filled(
+                    style: IconButton.styleFrom(
+                      backgroundColor: isCurrentlyPlaying
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
+                      foregroundColor: isCurrentlyPlaying
+                          ? Colors.white
+                          : Theme.of(context).primaryColor,
+                    ),
                     icon: Icon(
                       isCurrentlyPlaying &&
                               (audioState.playbackState?.playing ?? false)
-                          ? Icons.pause
-                          : Icons.play_arrow,
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
                     ),
                     onPressed: () => _handlePlayPause(context, audioState),
                     tooltip:
@@ -97,8 +139,11 @@ class DownloadItemCard extends StatelessWidget {
                   );
                 },
               ),
-            // Menu button
             PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz_rounded),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               onSelected: (value) {
                 if (value == 'delete') {
                   _showDeleteDialog(context);
@@ -109,9 +154,18 @@ class DownloadItemCard extends StatelessWidget {
                   value: 'delete',
                   child: Row(
                     children: [
-                      const Icon(Icons.delete, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Text(AppLocalizations.of(context)!.delete),
+                      Icon(
+                        Icons.delete_outline_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        AppLocalizations.of(context)!.delete,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -123,20 +177,82 @@ class DownloadItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusIcon() {
+  Widget _buildStatusIcon(BuildContext context) {
     switch (download.status) {
       case DownloadStatus.completed:
-        return const Icon(Icons.check_circle, color: Colors.green);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
+        );
       case DownloadStatus.downloading:
-        return const Icon(Icons.download, color: Colors.blue);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.download_rounded,
+            color: Colors.blue,
+            size: 20,
+          ),
+        );
       case DownloadStatus.failed:
-        return const Icon(Icons.error, color: Colors.red);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.red.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.error_outline_rounded,
+            color: Colors.red,
+            size: 20,
+          ),
+        );
       case DownloadStatus.paused:
-        return const Icon(Icons.pause_circle, color: Colors.orange);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.orange.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.pause_circle_outline_rounded,
+            color: Colors.orange,
+            size: 20,
+          ),
+        );
       case DownloadStatus.cancelled:
-        return const Icon(Icons.cancel, color: Colors.grey);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cancel_outlined,
+            color: Colors.grey,
+            size: 20,
+          ),
+        );
       case DownloadStatus.pending:
-        return const Icon(Icons.schedule, color: Colors.grey);
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.schedule_rounded,
+            color: Colors.grey,
+            size: 20,
+          ),
+        );
     }
   }
 
@@ -284,12 +400,6 @@ class DownloadItemCard extends StatelessWidget {
 
   /// Show error snackbar
   void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    ToastUtils.showErrorToast(message);
   }
 }

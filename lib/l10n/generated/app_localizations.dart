@@ -883,6 +883,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play playlist functionality coming soon'**
   String get playPlaylistComingSoon;
+
+  /// Text prompting users to download surahs for offline listening
+  ///
+  /// In en, this message translates to:
+  /// **'Download surahs to listen offline'**
+  String get downloadSurahsOffline;
 }
 
 class _AppLocalizationsDelegate

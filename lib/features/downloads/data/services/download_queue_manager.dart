@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_service.dart';
@@ -7,7 +10,14 @@ import 'download_service.dart';
 /// Manages a queue of pending downloads and controls concurrency
 class DownloadQueueManager {
   DownloadQueueManager._();
-  static final DownloadQueueManager instance = DownloadQueueManager._();
+  static DownloadQueueManager instance = DownloadQueueManager._();
+
+  /// Reset the instance for testing
+  @visibleForTesting
+  static void reset() {
+    instance.dispose();
+    instance = DownloadQueueManager._();
+  }
 
   // Maximum number of concurrent downloads
   static const int maxConcurrentDownloads = 2;
@@ -17,6 +27,12 @@ class DownloadQueueManager {
 
   // Currently active downloads (running or enqueued in DownloadService)
   final Set<String> _activeDownloads = {};
+
+  // Track URLs of active downloads to map IDs to URLs for sync
+  final Map<String, String> _activeDownloadUrls = {};
+
+  // Track last activity time for each active download to detect stuck ones
+  final Map<String, DateTime> _lastActivityTime = {};
 
   // Stream controller for queue updates
   final StreamController<QueueUpdate> _queueUpdateController =
@@ -86,7 +102,7 @@ class DownloadQueueManager {
       filePath: filePath,
       title: title,
       reciterName: reciterName,
-      enqueuedAt: DateTime.now(),
+      enqueuedAt: clock.now(),
     );
 
     _queue.add(queuedDownload);
@@ -146,11 +162,22 @@ class DownloadQueueManager {
           await DownloadService.activeDownloadIds;
       // Filter to only count downloads that are actually running (not just enqueued)
       actualRunningCount = 0;
+
+      // Use a Set to avoid counting duplicate URLs multiple times
+      final Set<String> processedUrls = {};
+
       for (final id in actualActiveIds) {
+        // Skip if we already processed this URL (since DownloadService returns URLs as IDs)
+        if (processedUrls.contains(id)) {
+          continue;
+        }
+        processedUrls.add(id);
+
         final DownloadStatus? status = await DownloadService.getDownloadStatus(
           id,
         );
-        if (status == DownloadStatus.downloading) {
+        if (status == DownloadStatus.downloading ||
+            status == DownloadStatus.pending) {
           actualRunningCount++;
         }
       }
@@ -175,19 +202,21 @@ class DownloadQueueManager {
       return;
     }
 
-    logger.d(
-      '[DownloadQueueManager] Processing queue: actualRunning=$actualRunningCount internal=${_activeDownloads.length}/$maxConcurrentDownloads queueLength=${_queue.length}',
-    );
+    if (_activeDownloads.isNotEmpty) {
+      logger.t(
+        '[Downloading Queue] Active downloads: ${_activeDownloads.join(', ')}',
+      );
+    }
 
     // Process queue while we have capacity
     // Use actualRunningCount to determine capacity, not just _activeDownloads
     while (actualRunningCount < maxConcurrentDownloads && _queue.isNotEmpty) {
-      final QueuedDownload queuedDownload = _queue.removeAt(0);
-      _notifyQueueUpdate();
+      // Peek at the first item
+      final QueuedDownload queuedDownload = _queue.first;
 
       try {
         logger.d(
-          '[DownloadQueueManager] Starting download: id=${queuedDownload.id} title="${queuedDownload.title}" reciter="${queuedDownload.reciterName}" activeCount=${_activeDownloads.length}',
+          '[Downloading Queue] Starting download: id=${queuedDownload.id} title="${queuedDownload.title}" reciter="${queuedDownload.reciterName}" activeCount=${_activeDownloads.length}',
         );
 
         // Start the download
@@ -202,54 +231,94 @@ class DownloadQueueManager {
 
         // Check the actual download status - only mark as active if it's running
         // If it's just enqueued, don't mark as active yet - wait for it to start
-        try {
-          final DownloadStatus? actualStatus =
-              await DownloadService.getDownloadStatus(queuedDownload.id);
+        DownloadStatus? actualStatus;
+        // Increased retries to 10 and delay to 500ms (total 5s) to allow slower devices to register task
+        for (var i = 0; i < 10; i++) {
+          try {
+            actualStatus = await DownloadService.getDownloadStatus(
+              queuedDownload.url,
+            );
+            if (actualStatus != null) {
+              break;
+            }
+            // If null, wait a bit and retry (race condition protection)
+            if (i < 9) {
+              await Future.delayed(const Duration(milliseconds: 500));
+            }
+          } catch (e) {
+            logger.w('[Downloading Queue] Error checking status: $e');
+          }
+        }
 
+        try {
           if (actualStatus == DownloadStatus.downloading) {
             // Only mark as active if it's actually running (not just enqueued)
             _activeDownloads.add(queuedDownload.id);
+            _activeDownloadUrls[queuedDownload.id] =
+                queuedDownload.url; // successful map url
+            _lastActivityTime[queuedDownload.id] = clock
+                .now(); // Initialize activity
             actualRunningCount++; // Increment our running count
+            _queue.removeAt(0); // Successfully started, remove from queue
+            _notifyQueueUpdate();
+
             logger.d(
-              '[DownloadQueueManager] Download is running: id=${queuedDownload.id} actualRunning=$actualRunningCount internal=${_activeDownloads.length} remainingQueue=${_queue.length}',
+              '[Downloading Queue] Download is running: id=${queuedDownload.id} actualRunning=$actualRunningCount internal=${_activeDownloads.length} remainingQueue=${_queue.length}',
             );
           } else if (actualStatus == DownloadStatus.pending) {
-            // Download was enqueued but not running yet - don't mark as active
-            // It will be marked as active when we receive the "running" status update
+            // Download is enqueued - mark as active so we don't flood the service
+            _activeDownloads.add(queuedDownload.id);
+            _activeDownloadUrls[queuedDownload.id] = queuedDownload.url;
+            _lastActivityTime[queuedDownload.id] = clock
+                .now(); // Initialize activity
+            actualRunningCount++;
+            _queue.removeAt(0); // Successfully enqueued, remove from queue
+            _notifyQueueUpdate();
+
             logger.d(
-              '[DownloadQueueManager] Download enqueued but not running yet: id=${queuedDownload.id} status=$actualStatus - will mark active when it starts',
+              '[Downloading Queue] Download enqueued: id=${queuedDownload.id} status=$actualStatus - marking as active',
             );
-            // Don't mark as active - it will be added when we get the running status
-            // Continue processing queue since this one isn't taking up a slot yet
           } else if (actualStatus == DownloadStatus.completed) {
             // Download already completed - skip it
+            _queue.removeAt(0);
+            _notifyQueueUpdate();
+
             logger.d(
-              '[DownloadQueueManager] Download already completed: id=${queuedDownload.id} - skipping',
+              '[Downloading Queue] Download already completed: id=${queuedDownload.id} - skipping',
             );
           } else {
-            // Download might be failed or in some other state
-            logger.d(
-              '[DownloadQueueManager] Download in state: id=${queuedDownload.id} status=$actualStatus - not marking as active',
+            // Download might be failed or in some other state (null means start failed)
+            logger.e(
+              '[Downloading Queue] Download failed to start (status=$actualStatus): id=${queuedDownload.id} - REMOVING from queue to prevent infinite loop',
             );
+            // Remove from queue to prevent infinite retry loop
+            _queue.removeAt(0);
+            _notifyQueueUpdate();
+
+            // Break the loop to avoid immediate processing of next item if this one failed badly
+            break;
           }
         } catch (e) {
           // If status check fails, log but continue
           // The download might still start, and we'll get a progress update
           logger.w(
-            '[DownloadQueueManager] Error checking download status: id=${queuedDownload.id} error=$e',
+            '[Downloading Queue] Error checking download status: id=${queuedDownload.id} error=$e',
           );
+          // If we can't verify status, assume it failed to be safe and don't remove from queue
+          break;
         }
       } catch (e) {
         // If start fails, don't mark as active
         logger.e(
-          '[DownloadQueueManager] Failed to start download: id=${queuedDownload.id} title="${queuedDownload.title}" error=$e activeCount=${_activeDownloads.length} remainingQueue=${_queue.length}',
+          '[Downloading Queue] Failed to start download: id=${queuedDownload.id} title="${queuedDownload.title}" error=$e activeCount=${_activeDownloads.length} remainingQueue=${_queue.length}',
         );
-        // Continue processing queue to try next download
+        // Break loop
+        break;
       }
     }
 
     logger.d(
-      '[DownloadQueueManager] Queue processing complete: actualRunning=$actualRunningCount internal=${_activeDownloads.length} queueLength=${_queue.length}',
+      '[Downloading Queue] Queue processing complete: actualRunning=$actualRunningCount internal=${_activeDownloads.length} queueLength=${_queue.length}',
     );
   }
 
@@ -259,10 +328,16 @@ class DownloadQueueManager {
     if (progress.status == DownloadStatus.downloading) {
       if (!_activeDownloads.contains(progress.id)) {
         _activeDownloads.add(progress.id);
+        // If we don't have the URL yet, assume progress.id IS the URL (since DownloadService usually emits URL)
+        if (!_activeDownloadUrls.containsKey(progress.id)) {
+          _activeDownloadUrls[progress.id] = progress.id;
+        }
         logger.d(
-          '[DownloadQueueManager] Download started running: id=${progress.id} activeCount=${_activeDownloads.length}',
+          '[Downloading Queue] Download started running: id=${progress.id} activeCount=${_activeDownloads.length}',
         );
       }
+      // Update activity time
+      _lastActivityTime[progress.id] = clock.now();
     }
 
     // When a download completes or fails, remove it from active and process queue
@@ -270,8 +345,10 @@ class DownloadQueueManager {
         progress.status == DownloadStatus.failed ||
         progress.status == DownloadStatus.cancelled) {
       final bool wasActive = _activeDownloads.remove(progress.id);
+      _activeDownloadUrls.remove(progress.id);
+      _lastActivityTime.remove(progress.id); // Cleanup activity tracking
       logger.d(
-        '[DownloadQueueManager] Download finished: id=${progress.id} status=${progress.status} wasActive=$wasActive activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
+        '[Downloading Queue] Download finished: id=${progress.id} status=${progress.status} wasActive=$wasActive activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
       );
 
       // Immediately sync active downloads to ensure we have accurate count
@@ -283,11 +360,11 @@ class DownloadQueueManager {
           })
           .catchError((error) {
             logger.e(
-              '[DownloadQueueManager] Error syncing/processing queue after download completion: $error',
+              '[Downloading Queue] Error syncing/processing queue after download completion: $error',
             );
             // Still try to process queue even if sync fails
             _processQueue().catchError((e) {
-              logger.e('[DownloadQueueManager] Error processing queue: $e');
+              logger.e('[Downloading Queue] Error processing queue: $e');
             });
           });
     }
@@ -312,7 +389,7 @@ class DownloadQueueManager {
   void clearQueue() {
     _queue.clear();
     _notifyQueueUpdate();
-    logger.d('[DownloadQueueManager] Queue cleared');
+    logger.d('[Downloading Queue] Queue cleared');
   }
 
   /// Sync active downloads with DownloadService to remove stale entries
@@ -327,17 +404,25 @@ class DownloadQueueManager {
       final Set<String> actualActiveSet = actualActiveIds.toSet();
 
       // Find downloads that are marked as active but are no longer actually active
-      final List<String> staleIds = _activeDownloads
-          .where((id) => !actualActiveSet.contains(id))
-          .toList();
+      // We check if the URL associated with the active ID is present in actualActiveSet
+      final List<String> staleIds = _activeDownloads.where((id) {
+        final String? url = _activeDownloadUrls[id];
+        // If we have a URL, check against that. If not (fallback), check ID.
+        if (url != null) {
+          return !actualActiveSet.contains(url);
+        }
+        return !actualActiveSet.contains(id);
+      }).toList();
 
       if (staleIds.isNotEmpty) {
-        logger.w(
-          '[DownloadQueueManager] Found ${staleIds.length} stale active downloads: $staleIds',
+        logger.d(
+          '[Downloading Queue] Found ${staleIds.length} stale active downloads received update before event: $staleIds',
         );
         staleIds.forEach(_activeDownloads.remove);
+        staleIds.forEach(_activeDownloadUrls.remove);
+        staleIds.forEach(_lastActivityTime.remove);
         logger.d(
-          '[DownloadQueueManager] Removed stale downloads. activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
+          '[Downloading Queue] Removed stale downloads. activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
         );
 
         // Process queue to start next downloads
@@ -345,6 +430,68 @@ class DownloadQueueManager {
           _processQueue().catchError((error) {
             logger.e(
               '[DownloadQueueManager] Error processing queue after sync: $error',
+            );
+          }),
+        );
+      }
+
+      // Also add any active downloads that we missed
+      // These are URLs from DownloadService that we don't have tracking for
+      for (final url in actualActiveIds) {
+        // Check if this URL is already tracked by ANY active ID
+        final bool isTracked =
+            _activeDownloadUrls.values.contains(url) ||
+            _activeDownloads.contains(url);
+
+        if (!isTracked) {
+          _activeDownloads.add(url);
+          _activeDownloadUrls[url] = url; // Map URL to itself
+          _lastActivityTime[url] = clock
+              .now(); // Initialize activity for rediscovered item
+          logger.d(
+            '[DownloadQueueManager] Added missing active download: $url. activeCount=${_activeDownloads.length}',
+          );
+        }
+      }
+
+      // watchdog: Check for stuck downloads (no activity for > 30 seconds)
+      final DateTime now = clock.now();
+      final List<String> stuckIds = [];
+
+      for (final String id in _activeDownloads) {
+        final DateTime? lastActivity = _lastActivityTime[id];
+        if (lastActivity != null &&
+            now.difference(lastActivity).inSeconds > 30) {
+          stuckIds.add(id);
+        }
+      }
+
+      for (final id in stuckIds) {
+        logger.w(
+          '[Downloading Queue] Watchdog: Download $id appears stuck (no activity for 30s). Cancelling.',
+        );
+
+        // Cancel the stuck download using its URL
+        final String cancelId = _activeDownloadUrls[id] ?? id;
+        await DownloadService.cancelDownload(cancelId);
+
+        // Remove from tracking
+        _activeDownloads.remove(id);
+        _activeDownloadUrls.remove(id);
+        _lastActivityTime.remove(id);
+
+        // Note: Cancellation will eventually trigger _handleDownloadProgress
+        // with status.cancelled, which will safely try to process the queue again.
+        // But we proactively remove it here to unblock immediately if the callback is delayed.
+      }
+
+      if (stuckIds.isNotEmpty) {
+        _notifyQueueUpdate();
+        // Force process queue to fill the freed slots
+        unawaited(
+          _processQueue().catchError((e) {
+            logger.e(
+              '[DownloadQueueManager] Error processing queue after watchdog cleanup: $e',
             );
           }),
         );
@@ -361,7 +508,10 @@ class DownloadQueueManager {
     _syncTimer?.cancel();
     _queueUpdateController.close();
     _queue.clear();
+    _queue.clear();
     _activeDownloads.clear();
+    _activeDownloadUrls.clear();
+    _lastActivityTime.clear();
     _isInitialized = false;
     logger.d('[DownloadQueueManager] Disposed');
   }

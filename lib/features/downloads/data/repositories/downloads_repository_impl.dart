@@ -58,7 +58,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     var hasChanges = false;
 
     for (final download in downloads) {
-      final bool isActive = activeDownloadIds.contains(download.id);
+      final bool isActive = activeDownloadIds.contains(download.url);
       final bool isQueued = queuedIds.contains(download.id);
 
       // Update status for queued downloads
@@ -93,7 +93,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             DownloadStatus? actualStatus;
             try {
               actualStatus = await DownloadService.getDownloadStatus(
-                download.id,
+                download.url,
               );
             } on MissingPluginException {
               actualStatus = null;
@@ -112,7 +112,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               try {
                 // Cancel the existing task
                 try {
-                  await DownloadService.cancelDownload(download.id);
+                  await DownloadService.cancelDownload(download.url);
                 } catch (e) {
                   logger.d(
                     '[DownloadsRepository] Error canceling stuck active download: $e',
@@ -167,7 +167,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         DownloadStatus? backgroundStatus;
         try {
           backgroundStatus = await DownloadService.getDownloadStatus(
-            download.id,
+            download.url,
           );
         } on MissingPluginException {
           // In test environment, skip status check
@@ -230,7 +230,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               try {
                 // Cancel the existing task if it exists
                 try {
-                  await DownloadService.cancelDownload(download.id);
+                  await DownloadService.cancelDownload(download.url);
                 } catch (e) {
                   // Ignore errors when canceling (task might not exist)
                   logger.d(
@@ -393,8 +393,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final String downloadsDir = await localDataSource.getDownloadsDirectory();
 
-    // Use URL as the stable download id to avoid mixing in reciter/surah incorrectly
-    final downloadId = trimmedUrl;
+    // Use composite ID to ensure uniqueness across reciters for the same surah (URL)
+    final downloadId = '${trimmedUrl}_${reciterName.replaceAll(' ', '_')}';
 
     // Build a safe filename from the URL; fallback to surahId + reciter if needed
     String safeFileName;
@@ -408,12 +408,17 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         final String baseName = ext.isNotEmpty
             ? lastSegment.substring(0, lastSegment.length - ext.length)
             : lastSegment;
+
         // Allow common audio extensions; default to .mp3
         const allowed = ['.mp3', '.m4a', '.aac', '.wav', '.ogg'];
         final ensuredExt = allowed.contains(ext)
             ? ext
             : (ext.isEmpty ? '.mp3' : ext);
-        safeFileName = '$baseName$ensuredExt';
+
+        // Always append reciter name to ensure uniqueness
+        final fileNameWithReciter =
+            '${baseName}_${reciterName.replaceAll(' ', '_')}';
+        safeFileName = '$fileNameWithReciter$ensuredExt';
       } else {
         safeFileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
       }
@@ -519,7 +524,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // Remove from queue if it's there
     DownloadQueueManager.instance.removeFromQueue(id);
 
-    await DownloadService.cancelDownload(id);
+    final DownloadItem? item = await getDownloadItem(id);
+    if (item != null) {
+      await DownloadService.cancelDownload(item.url);
+    } else {
+      // Fallback: try cancelling with ID if item not found (though unlikely to work if ID != URL)
+      await DownloadService.cancelDownload(id);
+    }
 
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
@@ -536,13 +547,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
-    // surahId is the URL, and downloadId is also the URL
-    // So we check if there's a download with matching URL and reciter
+    // surahId is the URL
+    // We match by checking if the download's URL matches surahId AND reciter matches
     final String trimmedUrl = surahId.trim();
     for (final d in downloads) {
       final bool isFileExists = await localDataSource.isFileExists(d.filePath);
       if (d.reciterName == reciterName &&
-          d.id == trimmedUrl &&
+          d.url == trimmedUrl &&
           d.status == DownloadStatus.completed &&
           isFileExists) {
         return true;
@@ -559,13 +570,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final d in downloads) {
       if (d.reciterName == reciterName &&
-          d.id == trimmedUrl &&
+          d.url == trimmedUrl &&
           d.status == DownloadStatus.downloading) {
         // Also verify it's actually active in DownloadService
         try {
-          final bool isActive = await DownloadService.isDownloadActive(
-            trimmedUrl,
-          );
+          final bool isActive = await DownloadService.isDownloadActive(d.url);
           if (isActive) {
             return true;
           }
@@ -580,7 +589,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
     }
 
-    // Also check directly with DownloadService in case download item doesn't exist yet
+    // Also check directly with DownloadService using the composite ID
+    // Construct the expected ID same as startDownload
     try {
       return await DownloadService.isDownloadActive(trimmedUrl);
     } on MissingPluginException {
@@ -598,13 +608,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     String reciterName,
   ) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
-    // surahId is the URL, and downloadId is also the URL
+    // surahId is the URL
     final String trimmedUrl = surahId.trim();
     try {
       final DownloadItem download = downloads.firstWhere(
         (d) =>
             d.reciterName == reciterName &&
-            d.id == trimmedUrl &&
+            d.url == trimmedUrl &&
             d.status == DownloadStatus.completed,
       );
 
@@ -744,5 +754,65 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       title: downloadItem.title,
       reciterName: downloadItem.reciterName,
     );
+  }
+
+  @override
+  Future<void> resumePendingDownloads() async {
+    logger.d(
+      '[DownloadsRepository] Checking for pending/stuck downloads to resume...',
+    );
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    var resumedCount = 0;
+
+    for (final download in downloads) {
+      // Check for downloads that should be running but might have been interrupted
+      if (download.status == DownloadStatus.pending ||
+          download.status == DownloadStatus.downloading) {
+        // Check if it's already active in the service
+        var isActive = false;
+        try {
+          isActive = await DownloadService.isDownloadActive(download.url);
+        } catch (e) {
+          logger.w(
+            '[DownloadsRepository] Error checking active status for ${download.url}: $e',
+          );
+        }
+
+        // If not active, re-enqueue it
+        if (!isActive) {
+          logger.d(
+            '[DownloadsRepository] Resuming download: id=${download.id} title="${download.title}"',
+          );
+
+          // Ensure status is pending before enqueueing
+          if (download.status != DownloadStatus.pending) {
+            await updateDownload(
+              download.copyWith(status: DownloadStatus.pending),
+            );
+          }
+
+          try {
+            await DownloadQueueManager.instance.enqueue(
+              id: download.id,
+              url: download.url,
+              filePath: download.filePath,
+              title: download.title,
+              reciterName: download.reciterName,
+            );
+            resumedCount++;
+          } catch (e) {
+            logger.e(
+              '[DownloadsRepository] Failed to resume download ${download.id}: $e',
+            );
+          }
+        }
+      }
+    }
+
+    if (resumedCount > 0) {
+      logger.d('[DownloadsRepository] Resumed $resumedCount downloads');
+    } else {
+      logger.d('[DownloadsRepository] No downloads needed resuming');
+    }
   }
 }

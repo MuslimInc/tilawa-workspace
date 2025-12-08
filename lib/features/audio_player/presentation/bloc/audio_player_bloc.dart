@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -48,33 +50,63 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final AudioPlayerHandler _audioHandler;
 
   void _setupAudioStreams() {
-    // Listen to media item changes
+    // Listen to media item changes - start with current value if available
+    final MediaItem? initialMediaItem = _audioHandler.mediaItem.valueOrNull;
+    if (initialMediaItem != null) {
+      // Emit current value immediately
+      add(AudioPlayerEvent.updateMediaItem(initialMediaItem));
+    }
     _audioHandler.mediaItem.listen((mediaItem) {
       add(AudioPlayerEvent.updateMediaItem(mediaItem));
     });
 
-    // Listen to playback state changes
+    // Listen to playback state changes - start with current value
+    final PlaybackState? initialPlaybackState =
+        _audioHandler.playbackState.valueOrNull;
+    if (initialPlaybackState != null) {
+      add(AudioPlayerEvent.updatePlaybackState(initialPlaybackState));
+    }
     _audioHandler.playbackState.listen((playbackState) {
       add(AudioPlayerEvent.updatePlaybackState(playbackState));
     });
 
     // Listen to position data changes
-    _getPositionDataStream().listen((positionData) {
-      add(AudioPlayerEvent.updatePositionData(positionData));
-    });
+    // Use runZoned to catch errors that occur during stream subscription
+    // This handles cases where AudioService is not initialized (e.g., in tests)
+    runZonedGuarded(
+      () {
+        _getPositionDataStream().listen(
+          (positionData) {
+            add(AudioPlayerEvent.updatePositionData(positionData));
+          },
+          onError: (error) {
+            // Handle stream errors
+            logger.d('Error in position stream: $error');
+          },
+          cancelOnError: false,
+        );
+      },
+      (error, stackTrace) {
+        // Catch errors that occur during stream creation/subscription
+        // (e.g., AudioService not initialized)
+        logger.d(
+          'AudioService not initialized, position stream unavailable: $error',
+        );
+      },
+    );
 
     // Listen to queue state changes
     _audioHandler.queueState.listen((queueState) {
       add(AudioPlayerEvent.updateQueueState(queueState));
     });
 
-    // Listen to volume changes
-    _audioHandler.volume.listen((volume) {
+    // Listen to volume changes - start with current value
+    _audioHandler.volume.startWith(_audioHandler.volume.value).listen((volume) {
       add(AudioPlayerEvent.updateVolume(volume));
     });
 
-    // Listen to speed changes
-    _audioHandler.speed.listen((speed) {
+    // Listen to speed changes - start with current value
+    _audioHandler.speed.startWith(_audioHandler.speed.value).listen((speed) {
       add(AudioPlayerEvent.updateSpeed(speed));
     });
   }
@@ -86,23 +118,112 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   Stream<Duration?> get _durationStream =>
       _audioHandler.mediaItem.map((item) => item?.duration).distinct();
 
-  Stream<PositionData> _getPositionDataStream() =>
-      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        AudioService.position,
-        _bufferedPositionStream,
-        _durationStream,
-        (position, bufferedPosition, duration) => PositionData(
-          position: position,
-          bufferedPosition: bufferedPosition,
-          duration: duration ?? Duration.zero,
-        ),
-      );
+  Stream<PositionData> _getPositionDataStream() {
+    // Create the combined stream
+    // If AudioService is not initialized, Rx.combineLatest3 will throw when subscribing
+    // We'll catch this error in _setupAudioStreams
+    return Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
+      AudioService.position,
+      _bufferedPositionStream,
+      _durationStream,
+      (position, bufferedPosition, duration) => PositionData(
+        position: position,
+        bufferedPosition: bufferedPosition,
+        duration: duration ?? Duration.zero,
+      ),
+    );
+  }
 
-  void _onLoadAudioPlayerData(
+  Future<void> _onLoadAudioPlayerData(
     LoadAudioPlayerData event,
     Emitter<AudioPlayerState> emit,
-  ) {
-    emit(state.copyWith(status: AudioPlayerStatus.success));
+  ) async {
+    // Get current values to restore state after restart
+    final double currentVolume = _audioHandler.volume.value;
+    final double currentSpeed = _audioHandler.speed.value;
+
+    // Strategy: Get current item from queue using queueIndex from playbackState
+    // This is more reliable than waiting for mediaItem stream which only emits on changes
+    MediaItem? currentMediaItem;
+    PlaybackState? currentPlaybackState;
+    QueueState? currentQueueState;
+
+    try {
+      // Get queue state first - it contains the queue and current index
+      currentQueueState = await _audioHandler.queueState.first.timeout(
+        const Duration(milliseconds: 500),
+      );
+
+      // Get playback state to get the current queue index
+      currentPlaybackState = await _audioHandler.playbackState.first.timeout(
+        const Duration(milliseconds: 500),
+      );
+
+      // If we have queue state and playback state, get current item from queue
+      if (currentPlaybackState.queueIndex != null) {
+        final int queueIndex = currentPlaybackState.queueIndex!;
+        if (queueIndex >= 0 && queueIndex < currentQueueState.queue.length) {
+          currentMediaItem = currentQueueState.queue[queueIndex];
+          logger.d(
+            'Found current media item from queue at index $queueIndex: ${currentMediaItem.title}',
+          );
+        }
+      }
+    } catch (e) {
+      logger.d('Error getting queue/playback state: $e');
+    }
+
+    // Fallback: If we couldn't get from queue, try mediaItem stream
+    if (currentMediaItem == null) {
+      try {
+        currentMediaItem = await _audioHandler.mediaItem.first.timeout(
+          const Duration(milliseconds: 500),
+        );
+        logger.d(
+          'Got media item from stream: ${currentMediaItem?.title ?? 'null'}',
+        );
+      } catch (e) {
+        logger.d('No media item found from stream: $e');
+      }
+    }
+
+    // If we still don't have playback state, try to get it
+    if (currentPlaybackState == null) {
+      try {
+        currentPlaybackState = await _audioHandler.playbackState.first.timeout(
+          const Duration(milliseconds: 500),
+        );
+      } catch (e) {
+        logger.d('No playback state found: $e');
+      }
+    }
+
+    // If we have a media item, update the state immediately
+    if (currentMediaItem != null) {
+      logger.d(
+        'Restoring audio player state with media item: ${currentMediaItem.title}',
+      );
+      emit(
+        state.copyWith(
+          status: AudioPlayerStatus.success,
+          mediaItem: currentMediaItem,
+          playbackState: currentPlaybackState,
+          queueState: currentQueueState,
+          volume: currentVolume,
+          speed: currentSpeed,
+        ),
+      );
+    } else {
+      // No media item, just update status and settings
+      logger.d('No media item to restore, updating settings only');
+      emit(
+        state.copyWith(
+          status: AudioPlayerStatus.success,
+          volume: currentVolume,
+          speed: currentSpeed,
+        ),
+      );
+    }
   }
 
   void _onUpdateMediaItem(

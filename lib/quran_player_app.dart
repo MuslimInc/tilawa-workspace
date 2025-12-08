@@ -1,8 +1,9 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+
 import 'core/providers/providers.dart';
+import 'core/theme/app_theme.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -13,7 +14,8 @@ class QuranPlayerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
+    return ScreenUtilPlusInit(
+      designSize: const Size(390, 844),
       child: AppProviders.create(child: const _PlayerApp()),
     );
   }
@@ -31,30 +33,8 @@ class _PlayerApp extends StatelessWidget {
             return MaterialApp.router(
               title: 'Muzakri',
               debugShowCheckedModeBanner: false,
-              theme: FlexThemeData.light(
-                scheme: themeState.scheme,
-                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-                blendLevel: 7,
-                appBarStyle: FlexAppBarStyle.primary,
-                appBarOpacity: 0.95,
-                appBarElevation: 0,
-                tabBarStyle: FlexTabBarStyle.forAppBar,
-                tooltipsMatchBackground: true,
-                visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                useMaterial3ErrorColors: true,
-              ),
-              darkTheme: FlexThemeData.dark(
-                scheme: themeState.scheme,
-                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-                blendLevel: 13,
-                appBarStyle: FlexAppBarStyle.background,
-                appBarOpacity: 0.90,
-                appBarElevation: 0,
-                tabBarStyle: FlexTabBarStyle.forAppBar,
-                tooltipsMatchBackground: true,
-                visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                useMaterial3ErrorColors: true,
-              ),
+              theme: AppTheme.getLightTheme(themeState.scheme),
+              darkTheme: AppTheme.getDarkTheme(themeState.scheme),
               themeMode: themeState.mode,
               routerConfig: AppRouter.router,
               locale: locState.locale,

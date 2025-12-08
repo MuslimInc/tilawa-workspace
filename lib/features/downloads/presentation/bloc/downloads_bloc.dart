@@ -176,6 +176,16 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
   }
 
+  Map<String, List<DownloadItem>> _getCurrentDownloads() {
+    return state.maybeWhen(
+      loaded: (downloads) => downloads,
+      downloadStarted: (_, __, ___, downloads) => downloads,
+      premiumRequired: (_, downloads) => downloads,
+      playbackInitiated: (_, downloads) => downloads,
+      orElse: () => {},
+    );
+  }
+
   Future<void> _onDownloadSurah(
     DownloadSurahEvent event,
     Emitter<DownloadsState> emit,
@@ -184,9 +194,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     final bool canDownload = await _premiumRepository.canDownload();
     if (!canDownload) {
       emit(
-        const DownloadsState.premiumRequired(
+        DownloadsState.premiumRequired(
           message:
               'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          downloadsByReciter: _getCurrentDownloads(),
         ),
       );
       return;
@@ -227,12 +238,29 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       logger.w('[DownloadsBloc] Error checking if download is active: $e');
     }
 
+    // Create a temporary DownloadItem to represent the download in progress
+    final downloadItem = DownloadItem(
+      id: '${event.surahId}_${event.reciterName}',
+      title: event.surahTitle,
+      url: event.surahId,
+      reciterName: event.reciterName,
+      status: DownloadStatus.downloading,
+      progress: 0.0,
+      downloadedSize: 0,
+      fileSize: 0,
+      filePath: '',
+      createdAt: DateTime.now(),
+    );
+
     // Emit download started state
     emit(
       DownloadsState.downloadStarted(
-        surahId: event.surahId,
-        surahTitle: event.surahTitle,
-        reciterName: event.reciterName,
+        surahId: downloadItem.id.split(
+          '_',
+        )[0], // Extract surah ID from download ID
+        surahTitle: downloadItem.title,
+        reciterName: downloadItem.reciterName,
+        downloadsByReciter: _getCurrentDownloads(),
       ),
     );
 
@@ -446,7 +474,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       await _audioPlayerHandler.play();
 
       emit(
-        DownloadsState.playbackInitiated(message: 'Playing ${download.title}'),
+        DownloadsState.playbackInitiated(
+          message: 'Playing ${download.title}',
+          downloadsByReciter: _getCurrentDownloads(),
+        ),
       );
     } catch (e) {
       emit(DownloadsState.error('Error playing surah: $e'));
@@ -479,6 +510,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         DownloadsState.playbackInitiated(
           message:
               'Playing ${validDownloads.length} surahs from ${event.reciterName}',
+          downloadsByReciter: _getCurrentDownloads(),
         ),
       );
     } catch (e) {
@@ -494,9 +526,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
         emit(
-          const DownloadsState.premiumRequired(
+          DownloadsState.premiumRequired(
             message:
                 'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            downloadsByReciter: _getCurrentDownloads(),
           ),
         );
       }
@@ -541,9 +574,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
         emit(
-          const DownloadsState.premiumRequired(
+          DownloadsState.premiumRequired(
             message:
                 'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            downloadsByReciter: _getCurrentDownloads(),
           ),
         );
         return;
@@ -573,11 +607,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       // Emit download started state
       emit(
         DownloadsState.downloadStarted(
-          surahId: downloadItem.id.split(
-            '_',
-          )[0], // Extract surah ID from download ID
+          surahId: downloadItem.id.split('_')[0],
           surahTitle: downloadItem.title,
           reciterName: downloadItem.reciterName,
+          downloadsByReciter: _getCurrentDownloads(),
         ),
       );
 

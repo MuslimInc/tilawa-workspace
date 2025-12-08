@@ -23,6 +23,7 @@ import 'package:muzakri/features/premium/domain/repositories/premium_repository.
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import '../../data/services/download_service_test.mocks.dart';
 import 'downloads_bloc_test.mocks.dart';
 
 // Provide dummy values for Either types that Mockito can't generate automatically
@@ -109,6 +110,7 @@ void main() {
   late MockPremiumRepository mockPremiumRepository;
   late MockAudioPlayerHandler mockAudioPlayerHandler;
   late MockAnalyticsService mockAnalyticsService;
+  late MockFlutterDownloaderWrapper mockDownloader;
 
   setUp(() {
     // Provide dummy values for Either types
@@ -126,6 +128,26 @@ void main() {
     mockPremiumRepository = MockPremiumRepository();
     mockAudioPlayerHandler = MockAudioPlayerHandler();
     mockAnalyticsService = MockAnalyticsService();
+
+    // Mock FlutterDownloader for DownloadService
+    mockDownloader = MockFlutterDownloaderWrapper();
+    DownloadService.flutterDownloaderTestOverride = mockDownloader;
+
+    // Stub common methods to avoid MissingStubError
+    when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
+    when(
+      mockDownloader.registerCallback(any, step: anyNamed('step')),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+    when(
+      mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+    ).thenAnswer((_) async => []);
 
     downloadsBloc = DownloadsBloc(
       getDownloadsByReciter: mockGetDownloadsByReciterUseCase,
@@ -225,6 +247,7 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
+            downloadsByReciter: {},
           ),
 
           const DownloadsState.loaded({}),
@@ -251,6 +274,7 @@ void main() {
           const DownloadsState.premiumRequired(
             message:
                 'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            downloadsByReciter: {},
           ),
         ],
       );
@@ -322,6 +346,7 @@ void main() {
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
+            downloadsByReciter: {},
           ),
           const DownloadsState.error('Network error'),
         ],
@@ -671,7 +696,10 @@ void main() {
           const PlayDownloadedSurahEvent(downloadId: testDownloadId),
         ),
         expect: () => [
-          const DownloadsState.playbackInitiated(message: 'Playing Al-Fatiha'),
+          const DownloadsState.playbackInitiated(
+            message: 'Playing Al-Fatiha',
+            downloadsByReciter: {},
+          ),
         ],
       );
 
@@ -781,6 +809,7 @@ void main() {
         expect: () => [
           const DownloadsState.playbackInitiated(
             message: 'Playing 1 surahs from Abdul Rahman Al-Sudais',
+            downloadsByReciter: {},
           ),
         ],
       );
@@ -832,6 +861,7 @@ void main() {
           const DownloadsState.premiumRequired(
             message:
                 'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            downloadsByReciter: {},
           ),
         ],
       );
@@ -910,6 +940,7 @@ void main() {
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Abdul Rahman Al-Sudais',
+            downloadsByReciter: {},
           ),
 
           const DownloadsState.loaded({}),
@@ -985,6 +1016,7 @@ void main() {
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Abdul Rahman Al-Sudais',
+            downloadsByReciter: {},
           ),
 
           const DownloadsState.loaded({}),
@@ -1009,6 +1041,7 @@ void main() {
           const DownloadsState.premiumRequired(
             message:
                 'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            downloadsByReciter: {},
           ),
         ],
       );
@@ -1040,6 +1073,7 @@ void main() {
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Abdul Rahman Al-Sudais',
+            downloadsByReciter: {},
           ),
           const DownloadsState.error(
             'Failed to retry download: Exception: Retry failed',
@@ -1100,6 +1134,7 @@ void main() {
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Test Reciter',
+            downloadsByReciter: {},
           ),
 
           const DownloadsState.loaded({}),

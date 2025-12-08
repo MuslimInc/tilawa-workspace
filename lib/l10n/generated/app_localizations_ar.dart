@@ -417,4 +417,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playPlaylistComingSoon => 'ميزة تشغيل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get downloadSurahsOffline => 'حمل السور للاستماع دون اتصال';
 }

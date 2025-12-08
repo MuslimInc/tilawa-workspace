@@ -15,6 +15,7 @@ import 'core/services/analytics_initialization_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
 import 'core/services/notification_permission_service.dart';
+import 'features/downloads/data/services/downloads_initialization_service.dart';
 import 'firebase_options.dart';
 import 'quran_player_app.dart';
 
@@ -44,6 +45,9 @@ Future<void> main() async {
 
   // Request notification permission on first launch
   await _requestNotificationPermission();
+
+  // Initialize downloads feature (resumes pending downloads)
+  await _initializeDownloads();
 
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
@@ -129,4 +133,15 @@ void _initializeFirebaseDataAsync() {
       logger.d('Warning: Could not initialize Firebase data: $e');
     }
   });
+}
+
+/// Initialize downloads feature
+Future<void> _initializeDownloads() async {
+  try {
+    final DownloadsInitializationService downloadsInitService =
+        getIt<DownloadsInitializationService>();
+    await downloadsInitService.initialize();
+  } catch (e) {
+    logger.d('Warning: Could not initialize downloads: $e');
+  }
 }

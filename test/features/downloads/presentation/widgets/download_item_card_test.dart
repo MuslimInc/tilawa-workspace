@@ -1,9 +1,14 @@
+import 'dart:async';
+
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_item_card.dart';
@@ -15,10 +20,11 @@ import 'download_item_card_test.mocks.dart';
 @visibleForTesting
 DownloadsState provideDummyDownloadsState() => const DownloadsState.initial();
 
-@GenerateMocks([DownloadsBloc, AudioPlayerBloc])
+@GenerateMocks([DownloadsBloc, AudioPlayerBloc, DownloadQueueManager])
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockDownloadQueueManager mockDownloadQueueManager;
 
   setUp(() {
     // Provide dummy value for Mockito before creating mocks
@@ -26,6 +32,8 @@ void main() {
 
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockDownloadQueueManager = MockDownloadQueueManager();
+    DownloadQueueManager.instance = mockDownloadQueueManager;
 
     // Set up stream first (required for BlocProvider)
     when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
@@ -40,6 +48,13 @@ void main() {
     // Stub add() method to prevent errors
     when(mockDownloadsBloc.add(any)).thenReturn(null);
     when(mockAudioPlayerBloc.add(any)).thenReturn(null);
+
+    // Stub queue manager
+    when(mockDownloadQueueManager.getQueuePosition(any)).thenReturn(0);
+  });
+
+  tearDown(() {
+    DownloadQueueManager.reset();
   });
 
   Widget createTestWidget(DownloadItem download) {
@@ -289,7 +304,533 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.byIcon(Icons.download), findsOneWidget);
+      expect(find.byIcon(Icons.download_rounded), findsOneWidget);
+    });
+
+    testWidgets('should display correct status icon/color for completed status', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      // Verify color is green (checking the Icon color or Container decoration is hard,
+      // but finding the icon verifies proper switch case selection)
+      final Icon icon = tester.widget<Icon>(find.byIcon(Icons.check_rounded));
+      expect(icon.color, Colors.green);
+    });
+
+    testWidgets('should display correct status icon/color for failed status', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.failed,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      // Check status icon
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      final Icon icon = tester.widget<Icon>(
+        find.byIcon(Icons.error_outline_rounded),
+      );
+      expect(icon.color, Colors.red);
+
+      // Check status text
+      expect(find.text('Error'), findsOneWidget);
+
+      // Check retry button exists
+      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+    });
+
+    testWidgets('should display correct status icon/color for paused status', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.paused,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.pause_circle_outline_rounded), findsOneWidget);
+      final Icon icon = tester.widget<Icon>(
+        find.byIcon(Icons.pause_circle_outline_rounded),
+      );
+      expect(icon.color, Colors.orange);
+      expect(find.text('Pause'), findsOneWidget);
+    });
+
+    testWidgets(
+      'should display correct status icon/color for cancelled status',
+      (WidgetTester tester) async {
+        final download = DownloadItem(
+          id: 'test_id',
+          title: 'Test Surah',
+          url: 'https://example.com/test.mp3',
+          filePath: '/path/to/test.mp3',
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.cancelled,
+          progress: 0.0,
+          fileSize: 0,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        );
+
+        await tester.pumpWidget(createTestWidget(download));
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
+        final Icon icon = tester.widget<Icon>(
+          find.byIcon(Icons.cancel_outlined),
+        );
+        expect(icon.color, Colors.grey);
+        expect(find.text('Cancelled'), findsOneWidget);
+      },
+    );
+
+    testWidgets('should display correct status icon/color for pending status', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.schedule_rounded), findsOneWidget);
+      final Icon icon = tester.widget<Icon>(
+        find.byIcon(Icons.schedule_rounded),
+      );
+      expect(icon.color, Colors.grey);
+      expect(find.text('Pending'), findsOneWidget);
+    });
+  });
+
+  group('DownloadItemCard - Interactions', () {
+    testWidgets('should show Play button when completed and not playing', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+
+      // Tap play
+      await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+      verify(
+        mockDownloadsBloc.add(
+          const DownloadsEvent.playDownloadedSurah(downloadId: 'test_id'),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('should show Pause button when playing this item', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3', // matches media item id
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      // Mock playing state for this item
+      when(mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: const MediaItem(
+            id: 'file:///path/to/test.mp3',
+            title: 'Test',
+          ),
+          playbackState: PlaybackState(playing: true),
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+
+      // Tap pause
+      await tester.tap(find.byIcon(Icons.pause_rounded));
+      verify(
+        mockAudioPlayerBloc.add(const AudioPlayerEvent.pauseAudio()),
+      ).called(1);
+    });
+
+    testWidgets('should show Play button even if playing ANOTHER item', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      // Mock playing state for DIFFERENT item
+      when(mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: const MediaItem(
+            id: 'file:///path/to/OTHER.mp3',
+            title: 'Other',
+          ),
+          playbackState: PlaybackState(playing: true),
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+    });
+
+    testWidgets('should resume playback when paused on this item', (
+      WidgetTester tester,
+    ) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      // Mock PAUSED state for this item
+      when(mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: const MediaItem(
+            id: 'file:///path/to/test.mp3',
+            title: 'Test',
+          ),
+          playbackState: PlaybackState(),
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      // Should show play icon because it's paused
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+
+      // Tap play
+      await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+
+      // Should send playAudio event to AudioPlayerBloc directly (toggle), not playDownloadedSurah
+      verify(
+        mockAudioPlayerBloc.add(const AudioPlayerEvent.playAudio()),
+      ).called(1);
+    });
+
+    testWidgets(
+      'should trigger retry when retry button clicked (failed status)',
+      (WidgetTester tester) async {
+        final download = DownloadItem(
+          id: 'test_id',
+          title: 'Test Surah',
+          url: 'https://example.com/test.mp3',
+          filePath: '/path/to/test.mp3',
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.failed,
+          progress: 0.0,
+          fileSize: 0,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        );
+
+        await tester.pumpWidget(createTestWidget(download));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.refresh_rounded));
+        verify(
+          mockDownloadsBloc.add(
+            const DownloadsEvent.retryDownload(downloadId: 'test_id'),
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets('retry button should appear for stuck download', (
+      WidgetTester tester,
+    ) async {
+      // Stuck download: Downloading, 0% progress, created > 30s ago
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.0,
+        fileSize: 1000,
+        downloadedSize: 0,
+        createdAt: DateTime.now().subtract(const Duration(seconds: 31)),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+    });
+
+    testWidgets('delete flow works correctly', (WidgetTester tester) async {
+      var deleteCalled = false;
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: MultiBlocProvider(
+              providers: [
+                BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
+                BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+              ],
+              child: DownloadItemCard(
+                download: download,
+                onDelete: () => deleteCalled = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // 1. Open menu
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+
+      // 2. Select delete
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      // 3. Verify Dialog appears
+      expect(find.text('Delete Download'), findsOneWidget);
+
+      // 4. Click cancel
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(deleteCalled, isFalse);
+
+      // 5. Open menu again
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      // 6. Click delete in dialog
+      await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+      await tester.pumpAndSettle();
+      expect(deleteCalled, isTrue);
+    });
+  });
+
+  group('DownloadItemCard - Edge Cases', () {
+    testWidgets('should show queue position when pending and position > 0', (
+      WidgetTester tester,
+    ) async {
+      when(mockDownloadQueueManager.getQueuePosition('test_id')).thenReturn(5);
+
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(createTestWidget(download));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pending (#5)'), findsOneWidget);
+    });
+
+    testWidgets('should show toast on error', (WidgetTester tester) async {
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/to/test.mp3',
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      // Mock Fluttertoast channel
+      final log = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('PonnamKarthik/fluttertoast'),
+            (MethodCall methodCall) async {
+              log.add(methodCall);
+              return null;
+            },
+          );
+
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('PonnamKarthik/fluttertoast'),
+              null,
+            );
+      });
+
+      // Use StreamController to manually trigger state change after widget is mounted
+      final controller = StreamController<DownloadsState>.broadcast();
+      addTearDown(controller.close);
+
+      when(mockDownloadsBloc.stream).thenAnswer((_) => controller.stream);
+
+      await tester.pumpWidget(createTestWidget(download));
+
+      // Emit error state
+      controller.add(const DownloadsState.error('Test Error Message'));
+
+      await tester.pump(); // Process stream event
+
+      // Verify toast was called
+      expect(log, hasLength(1));
+      expect(log.first.method, 'showToast');
+      expect(log.first.arguments['msg'], 'Test Error Message');
+      expect(log.first.arguments['bgcolor'], isNotNull); // Red color
+    });
+
+    testWidgets('should format file sizes correctly', (
+      WidgetTester tester,
+    ) async {
+      // Test 500 Bytes
+      var download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'url',
+        filePath: 'path',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 500,
+        downloadedSize: 250,
+        createdAt: DateTime.now(),
+      );
+      await tester.pumpWidget(createTestWidget(download));
+      expect(find.textContaining('500 B'), findsOneWidget);
+
+      // Test 1.5 KB
+      download = download.copyWith(
+        fileSize: 1536,
+        downloadedSize: 0,
+      ); // 1.5 * 1024
+      await tester.pumpWidget(createTestWidget(download));
+      expect(find.textContaining('1.5 KB'), findsOneWidget);
+
+      // Test 1.5 MB
+      download = download.copyWith(
+        fileSize: 1572864,
+        downloadedSize: 0,
+      ); // 1.5 * 1024 * 1024
+      await tester.pumpWidget(createTestWidget(download));
+      expect(find.textContaining('1.5 MB'), findsOneWidget);
+
+      // Test 1.0 GB
+      download = download.copyWith(
+        fileSize: 1073741824,
+        downloadedSize: 0,
+      ); // 1024^3
+      await tester.pumpWidget(createTestWidget(download));
+      expect(find.textContaining('1.0 GB'), findsOneWidget);
     });
   });
 

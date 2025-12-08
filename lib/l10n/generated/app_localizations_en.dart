@@ -419,4 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get playPlaylistComingSoon =>
       'Play playlist functionality coming soon';
+
+  @override
+  String get downloadSurahsOffline => 'Download surahs to listen offline';
 }

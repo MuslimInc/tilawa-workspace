@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/utils/toast_utils.dart';
 import '../features/playlists/domain/entities/playlist.dart';
 import '../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../features/playlists/presentation/widgets/create_playlist_dialog.dart';
@@ -43,37 +44,21 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         listener: (context, state) {
           state.whenOrNull(
             playlistUpdated: (playlist, playlists) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.playlistUpdated),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              ToastUtils.showSuccessToast(l10n.playlistUpdated);
             },
             playlistDeleted: (playlistId, playlists) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.playlistDeleted),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              ToastUtils.showSuccessToast(l10n.playlistDeleted);
             },
             favoriteToggled: (playlist, playlists) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    playlist.isFavorite
-                        ? l10n.addedToFavorites
-                        : l10n.removedFromFavorites,
-                  ),
-                  backgroundColor: Colors.blue,
-                ),
+              ToastUtils.showToast(
+                msg: playlist.isFavorite
+                    ? l10n.addedToFavorites
+                    : l10n.removedFromFavorites,
+                backgroundColor: Colors.blue,
               );
             },
             error: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.red),
-              );
+              ToastUtils.showErrorToast(message);
             },
           );
         },
@@ -260,9 +245,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   void _showEditPlaylistDialog(BuildContext context, Playlist playlist) {
     // TODO(username): Implement edit playlist dialog
     final AppLocalizations l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.editPlaylistComingSoon)));
+    ToastUtils.showToast(msg: l10n.editPlaylistComingSoon);
   }
 
   void _showDeletePlaylistDialog(BuildContext context, dynamic playlist) {
@@ -299,16 +282,12 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   void _navigateToPlaylistDetails(BuildContext context, Playlist playlist) {
     // TODO(username): Implement playlist details screen
     final AppLocalizations l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.playlistDetailsComingSoon)));
+    ToastUtils.showToast(msg: l10n.playlistDetailsComingSoon);
   }
 
   void _playPlaylist(BuildContext context, Playlist playlist) {
     // TODO(username): Implement play playlist functionality
     final AppLocalizations l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.playPlaylistComingSoon)));
+    ToastUtils.showToast(msg: l10n.playPlaylistComingSoon);
   }
 }

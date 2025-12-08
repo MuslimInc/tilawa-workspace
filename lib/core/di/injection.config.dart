@@ -53,6 +53,8 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
     as _i811;
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart'
     as _i486;
+import 'package:muzakri/features/downloads/data/services/downloads_initialization_service.dart'
+    as _i473;
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart'
     as _i775;
 import 'package:muzakri/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart'
@@ -433,6 +435,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.GetCurrentLanguageUseCase>(),
         gh<_i131.SetLanguageUseCase>(),
       ),
+    );
+    gh.singleton<_i473.DownloadsInitializationService>(
+      () =>
+          _i473.DownloadsInitializationService(gh<_i775.DownloadsRepository>()),
     );
     gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
       () => _i772.ConvertMediaItemsToSurahsUseCase(

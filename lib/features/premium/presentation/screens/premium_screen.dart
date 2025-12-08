@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/toast_utils.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../bloc/premium_bloc.dart';
@@ -38,31 +39,21 @@ class _PremiumScreenState extends State<PremiumScreen> {
             loading: () {},
             loaded: (status, plans, canDownload) {},
             error: (message) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(message)));
+              ToastUtils.showErrorToast(message);
             },
             purchaseSuccess: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.green),
-              );
+              ToastUtils.showSuccessToast(message);
             },
             purchaseFailed: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.red),
-              );
+              ToastUtils.showErrorToast(message);
             },
             trialStarted: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message), backgroundColor: Colors.green),
-              );
+              ToastUtils.showSuccessToast(message);
             },
             trialNotEligible: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.orange,
-                ),
+              ToastUtils.showToast(
+                msg: message,
+                backgroundColor: Colors.orange,
               );
             },
           );

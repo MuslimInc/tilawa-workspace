@@ -3,19 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i9;
+import 'dart:async' as _i3;
 
-import 'package:background_downloader/src/base_downloader.dart' as _i7;
-import 'package:background_downloader/src/database.dart' as _i2;
-import 'package:background_downloader/src/file_downloader.dart' as _i4;
-import 'package:background_downloader/src/models.dart' as _i5;
-import 'package:background_downloader/src/permissions.dart' as _i3;
-import 'package:background_downloader/src/queue/task_queue.dart' as _i11;
-import 'package:background_downloader/src/task.dart' as _i12;
-import 'package:background_downloader/src/uri/uri_utils.dart' as _i10;
-import 'package:http/http.dart' as _i6;
+import 'package:flutter_downloader/flutter_downloader.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart'
+    as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -32,888 +25,142 @@ import 'package:mockito/src/dummies.dart' as _i8;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeDatabase_0 extends _i1.SmartFake implements _i2.Database {
-  _FakeDatabase_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakePermissions_1 extends _i1.SmartFake implements _i3.Permissions {
-  _FakePermissions_1(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeFileDownloader_2 extends _i1.SmartFake
-    implements _i4.FileDownloader {
-  _FakeFileDownloader_2(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeTaskStatusUpdate_3 extends _i1.SmartFake
-    implements _i5.TaskStatusUpdate {
-  _FakeTaskStatusUpdate_3(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeBatch_4 extends _i1.SmartFake implements _i5.Batch {
-  _FakeBatch_4(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeResponse_5 extends _i1.SmartFake implements _i6.Response {
-  _FakeResponse_5(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-/// A class which mocks [FileDownloader].
+/// A class which mocks [FlutterDownloaderWrapper].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockFileDownloader extends _i1.Mock implements _i4.FileDownloader {
-  MockFileDownloader() {
+class MockFlutterDownloaderWrapper extends _i1.Mock
+    implements _i2.FlutterDownloaderWrapper {
+  MockFlutterDownloaderWrapper() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i2.Database get database =>
+  _i3.Future<void> initialize({bool? debug = true, bool? ignoreSsl = false}) =>
       (super.noSuchMethod(
-            Invocation.getter(#database),
-            returnValue: _FakeDatabase_0(this, Invocation.getter(#database)),
-          )
-          as _i2.Database);
-
-  @override
-  _i3.Permissions get permissions =>
-      (super.noSuchMethod(
-            Invocation.getter(#permissions),
-            returnValue: _FakePermissions_1(
-              this,
-              Invocation.getter(#permissions),
-            ),
-          )
-          as _i3.Permissions);
-
-  @override
-  _i7.BaseDownloader get downloaderForTesting =>
-      (super.noSuchMethod(
-            Invocation.getter(#downloaderForTesting),
-            returnValue: _i8.dummyValue<_i7.BaseDownloader>(
-              this,
-              Invocation.getter(#downloaderForTesting),
-            ),
-          )
-          as _i7.BaseDownloader);
-
-  @override
-  _i9.Future<bool> get ready =>
-      (super.noSuchMethod(
-            Invocation.getter(#ready),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Stream<_i5.TaskUpdate> get updates =>
-      (super.noSuchMethod(
-            Invocation.getter(#updates),
-            returnValue: _i9.Stream<_i5.TaskUpdate>.empty(),
-          )
-          as _i9.Stream<_i5.TaskUpdate>);
-
-  @override
-  _i10.UriUtils get uri =>
-      (super.noSuchMethod(
-            Invocation.getter(#uri),
-            returnValue: _i8.dummyValue<_i10.UriUtils>(
-              this,
-              Invocation.getter(#uri),
-            ),
-          )
-          as _i10.UriUtils);
-
-  @override
-  List<_i11.TaskQueue> get taskQueues =>
-      (super.noSuchMethod(
-            Invocation.getter(#taskQueues),
-            returnValue: <_i11.TaskQueue>[],
-          )
-          as List<_i11.TaskQueue>);
-
-  @override
-  set database(_i2.Database? value) => super.noSuchMethod(
-    Invocation.setter(#database, value),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  _i9.Future<List<(String, String)>> configure({
-    dynamic globalConfig,
-    dynamic androidConfig,
-    dynamic iOSConfig,
-    dynamic desktopConfig,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#configure, [], {
-              #globalConfig: globalConfig,
-              #androidConfig: androidConfig,
-              #iOSConfig: iOSConfig,
-              #desktopConfig: desktopConfig,
+            Invocation.method(#initialize, [], {
+              #debug: debug,
+              #ignoreSsl: ignoreSsl,
             }),
-            returnValue: _i9.Future<List<(String, String)>>.value(
-              <(String, String)>[],
-            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i9.Future<List<(String, String)>>);
+          as _i3.Future<void>);
 
   @override
-  _i4.FileDownloader registerCallbacks({
-    String? group = 'default',
-    _i5.TaskStatusCallback? taskStatusCallback,
-    _i5.TaskProgressCallback? taskProgressCallback,
-    _i5.TaskNotificationTapCallback? taskNotificationTapCallback,
+  _i3.Future<void> registerCallback(
+    _i4.DownloadCallback? callback, {
+    int? step = 1,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#registerCallbacks, [], {
-              #group: group,
-              #taskStatusCallback: taskStatusCallback,
-              #taskProgressCallback: taskProgressCallback,
-              #taskNotificationTapCallback: taskNotificationTapCallback,
+            Invocation.method(#registerCallback, [callback], {#step: step}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<String?> enqueue({
+    required String? url,
+    required String? savedDir,
+    required String? fileName,
+    Map<String, String>? headers,
+    bool? showNotification = true,
+    bool? openFileFromNotification = true,
+    bool? requiresStorageNotLow = true,
+    bool? saveInPublicStorage = false,
+    String? title,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#enqueue, [], {
+              #url: url,
+              #savedDir: savedDir,
+              #fileName: fileName,
+              #headers: headers,
+              #showNotification: showNotification,
+              #openFileFromNotification: openFileFromNotification,
+              #requiresStorageNotLow: requiresStorageNotLow,
+              #saveInPublicStorage: saveInPublicStorage,
+              #title: title,
             }),
-            returnValue: _FakeFileDownloader_2(
-              this,
-              Invocation.method(#registerCallbacks, [], {
-                #group: group,
-                #taskStatusCallback: taskStatusCallback,
-                #taskProgressCallback: taskProgressCallback,
-                #taskNotificationTapCallback: taskNotificationTapCallback,
-              }),
-            ),
+            returnValue: _i3.Future<String?>.value(),
           )
-          as _i4.FileDownloader);
+          as _i3.Future<String?>);
 
   @override
-  _i4.FileDownloader unregisterCallbacks({
-    String? group = 'default',
-    Function? callback,
+  _i3.Future<void> cancel({required String? taskId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [], {#taskId: taskId}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> cancelAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelAll, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> pause({required String? taskId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#pause, [], {#taskId: taskId}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> resume({required String? taskId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#resume, [], {#taskId: taskId}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> retry({required String? taskId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#retry, [], {#taskId: taskId}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> remove({
+    required String? taskId,
+    bool? shouldDeleteContent = false,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#unregisterCallbacks, [], {
-              #group: group,
-              #callback: callback,
+            Invocation.method(#remove, [], {
+              #taskId: taskId,
+              #shouldDeleteContent: shouldDeleteContent,
             }),
-            returnValue: _FakeFileDownloader_2(
-              this,
-              Invocation.method(#unregisterCallbacks, [], {
-                #group: group,
-                #callback: callback,
-              }),
-            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.FileDownloader);
+          as _i3.Future<void>);
 
   @override
-  void addTaskQueue(_i11.TaskQueue? taskQueue) => super.noSuchMethod(
-    Invocation.method(#addTaskQueue, [taskQueue]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  bool removeTaskQueue(_i11.TaskQueue? taskQueue) =>
+  _i3.Future<List<_i4.DownloadTask>?> loadTasks() =>
       (super.noSuchMethod(
-            Invocation.method(#removeTaskQueue, [taskQueue]),
-            returnValue: false,
+            Invocation.method(#loadTasks, []),
+            returnValue: _i3.Future<List<_i4.DownloadTask>?>.value(),
           )
-          as bool);
+          as _i3.Future<List<_i4.DownloadTask>?>);
 
   @override
-  _i9.Future<bool> enqueue(_i12.Task? task) =>
-      (super.noSuchMethod(
-            Invocation.method(#enqueue, [task]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<List<bool>> enqueueAll(Iterable<_i12.Task>? tasks) =>
-      (super.noSuchMethod(
-            Invocation.method(#enqueueAll, [tasks]),
-            returnValue: _i9.Future<List<bool>>.value(<bool>[]),
-          )
-          as _i9.Future<List<bool>>);
-
-  @override
-  _i9.Future<_i5.TaskStatusUpdate> download(
-    _i12.DownloadTask? task, {
-    void Function(_i5.TaskStatus)? onStatus,
-    void Function(double)? onProgress,
-    void Function(Duration)? onElapsedTime,
-    Duration? elapsedTimeInterval,
+  _i3.Future<List<_i4.DownloadTask>?> loadTasksWithRawQuery({
+    required String? query,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(
-              #download,
-              [task],
-              {
-                #onStatus: onStatus,
-                #onProgress: onProgress,
-                #onElapsedTime: onElapsedTime,
-                #elapsedTimeInterval: elapsedTimeInterval,
-              },
-            ),
-            returnValue: _i9.Future<_i5.TaskStatusUpdate>.value(
-              _FakeTaskStatusUpdate_3(
-                this,
-                Invocation.method(
-                  #download,
-                  [task],
-                  {
-                    #onStatus: onStatus,
-                    #onProgress: onProgress,
-                    #onElapsedTime: onElapsedTime,
-                    #elapsedTimeInterval: elapsedTimeInterval,
-                  },
-                ),
-              ),
-            ),
+            Invocation.method(#loadTasksWithRawQuery, [], {#query: query}),
+            returnValue: _i3.Future<List<_i4.DownloadTask>?>.value(),
           )
-          as _i9.Future<_i5.TaskStatusUpdate>);
-
-  @override
-  _i9.Future<_i5.TaskStatusUpdate> upload(
-    _i12.UploadTask? task, {
-    void Function(_i5.TaskStatus)? onStatus,
-    void Function(double)? onProgress,
-    void Function(Duration)? onElapsedTime,
-    Duration? elapsedTimeInterval,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #upload,
-              [task],
-              {
-                #onStatus: onStatus,
-                #onProgress: onProgress,
-                #onElapsedTime: onElapsedTime,
-                #elapsedTimeInterval: elapsedTimeInterval,
-              },
-            ),
-            returnValue: _i9.Future<_i5.TaskStatusUpdate>.value(
-              _FakeTaskStatusUpdate_3(
-                this,
-                Invocation.method(
-                  #upload,
-                  [task],
-                  {
-                    #onStatus: onStatus,
-                    #onProgress: onProgress,
-                    #onElapsedTime: onElapsedTime,
-                    #elapsedTimeInterval: elapsedTimeInterval,
-                  },
-                ),
-              ),
-            ),
-          )
-          as _i9.Future<_i5.TaskStatusUpdate>);
-
-  @override
-  _i9.Future<_i5.TaskStatusUpdate> transmit(
-    _i12.DataTask? task, {
-    void Function(_i5.TaskStatus)? onStatus,
-    void Function(Duration)? onElapsedTime,
-    Duration? elapsedTimeInterval,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #transmit,
-              [task],
-              {
-                #onStatus: onStatus,
-                #onElapsedTime: onElapsedTime,
-                #elapsedTimeInterval: elapsedTimeInterval,
-              },
-            ),
-            returnValue: _i9.Future<_i5.TaskStatusUpdate>.value(
-              _FakeTaskStatusUpdate_3(
-                this,
-                Invocation.method(
-                  #transmit,
-                  [task],
-                  {
-                    #onStatus: onStatus,
-                    #onElapsedTime: onElapsedTime,
-                    #elapsedTimeInterval: elapsedTimeInterval,
-                  },
-                ),
-              ),
-            ),
-          )
-          as _i9.Future<_i5.TaskStatusUpdate>);
-
-  @override
-  _i9.Future<_i5.Batch> downloadBatch(
-    List<_i12.DownloadTask>? tasks, {
-    _i5.BatchProgressCallback? batchProgressCallback,
-    _i5.TaskStatusCallback? taskStatusCallback,
-    _i5.TaskProgressCallback? taskProgressCallback,
-    void Function(Duration)? onElapsedTime,
-    Duration? elapsedTimeInterval,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #downloadBatch,
-              [tasks],
-              {
-                #batchProgressCallback: batchProgressCallback,
-                #taskStatusCallback: taskStatusCallback,
-                #taskProgressCallback: taskProgressCallback,
-                #onElapsedTime: onElapsedTime,
-                #elapsedTimeInterval: elapsedTimeInterval,
-              },
-            ),
-            returnValue: _i9.Future<_i5.Batch>.value(
-              _FakeBatch_4(
-                this,
-                Invocation.method(
-                  #downloadBatch,
-                  [tasks],
-                  {
-                    #batchProgressCallback: batchProgressCallback,
-                    #taskStatusCallback: taskStatusCallback,
-                    #taskProgressCallback: taskProgressCallback,
-                    #onElapsedTime: onElapsedTime,
-                    #elapsedTimeInterval: elapsedTimeInterval,
-                  },
-                ),
-              ),
-            ),
-          )
-          as _i9.Future<_i5.Batch>);
-
-  @override
-  _i9.Future<_i5.Batch> uploadBatch(
-    List<_i12.UploadTask>? tasks, {
-    _i5.BatchProgressCallback? batchProgressCallback,
-    _i5.TaskStatusCallback? taskStatusCallback,
-    _i5.TaskProgressCallback? taskProgressCallback,
-    void Function(Duration)? onElapsedTime,
-    Duration? elapsedTimeInterval,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #uploadBatch,
-              [tasks],
-              {
-                #batchProgressCallback: batchProgressCallback,
-                #taskStatusCallback: taskStatusCallback,
-                #taskProgressCallback: taskProgressCallback,
-                #onElapsedTime: onElapsedTime,
-                #elapsedTimeInterval: elapsedTimeInterval,
-              },
-            ),
-            returnValue: _i9.Future<_i5.Batch>.value(
-              _FakeBatch_4(
-                this,
-                Invocation.method(
-                  #uploadBatch,
-                  [tasks],
-                  {
-                    #batchProgressCallback: batchProgressCallback,
-                    #taskStatusCallback: taskStatusCallback,
-                    #taskProgressCallback: taskProgressCallback,
-                    #onElapsedTime: onElapsedTime,
-                    #elapsedTimeInterval: elapsedTimeInterval,
-                  },
-                ),
-              ),
-            ),
-          )
-          as _i9.Future<_i5.Batch>);
-
-  @override
-  _i9.Future<int> reset({String? group = 'default'}) =>
-      (super.noSuchMethod(
-            Invocation.method(#reset, [], {#group: group}),
-            returnValue: _i9.Future<int>.value(0),
-          )
-          as _i9.Future<int>);
-
-  @override
-  _i9.Future<List<String>> allTaskIds({
-    String? group = 'default',
-    bool? includeTasksWaitingToRetry = true,
-    dynamic allGroups = false,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#allTaskIds, [], {
-              #group: group,
-              #includeTasksWaitingToRetry: includeTasksWaitingToRetry,
-              #allGroups: allGroups,
-            }),
-            returnValue: _i9.Future<List<String>>.value(<String>[]),
-          )
-          as _i9.Future<List<String>>);
-
-  @override
-  _i9.Future<List<_i12.Task>> allTasks({
-    String? group = 'default',
-    bool? includeTasksWaitingToRetry = true,
-    bool? allGroups = false,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#allTasks, [], {
-              #group: group,
-              #includeTasksWaitingToRetry: includeTasksWaitingToRetry,
-              #allGroups: allGroups,
-            }),
-            returnValue: _i9.Future<List<_i12.Task>>.value(<_i12.Task>[]),
-          )
-          as _i9.Future<List<_i12.Task>>);
-
-  @override
-  _i9.Future<bool> tasksFinished({
-    String? group = 'default',
-    bool? includeTasksWaitingToRetry = true,
-    String? ignoreTaskId,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#tasksFinished, [], {
-              #group: group,
-              #includeTasksWaitingToRetry: includeTasksWaitingToRetry,
-              #ignoreTaskId: ignoreTaskId,
-            }),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<bool> cancelTasksWithIds(Iterable<String>? taskIds) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancelTasksWithIds, [taskIds]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<bool> cancelTaskWithId(String? taskId) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancelTaskWithId, [taskId]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<bool> cancel(_i12.Task? task) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancel, [task]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<bool> cancelAll({Iterable<_i12.Task>? tasks, String? group}) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancelAll, [], {#tasks: tasks, #group: group}),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<_i12.Task?> taskForId(String? taskId) =>
-      (super.noSuchMethod(
-            Invocation.method(#taskForId, [taskId]),
-            returnValue: _i9.Future<_i12.Task?>.value(),
-          )
-          as _i9.Future<_i12.Task?>);
-
-  @override
-  _i9.Future<void> start({
-    bool? doTrackTasks = true,
-    bool? markDownloadedComplete = true,
-    bool? doRescheduleKilledTasks = true,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#start, [], {
-              #doTrackTasks: doTrackTasks,
-              #markDownloadedComplete: markDownloadedComplete,
-              #doRescheduleKilledTasks: doRescheduleKilledTasks,
-            }),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
-          )
-          as _i9.Future<void>);
-
-  @override
-  _i9.Future<_i4.FileDownloader> trackTasksInGroup(
-    String? group, {
-    bool? markDownloadedComplete = true,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #trackTasksInGroup,
-              [group],
-              {#markDownloadedComplete: markDownloadedComplete},
-            ),
-            returnValue: _i9.Future<_i4.FileDownloader>.value(
-              _FakeFileDownloader_2(
-                this,
-                Invocation.method(
-                  #trackTasksInGroup,
-                  [group],
-                  {#markDownloadedComplete: markDownloadedComplete},
-                ),
-              ),
-            ),
-          )
-          as _i9.Future<_i4.FileDownloader>);
-
-  @override
-  _i9.Future<_i4.FileDownloader> trackTasks({
-    bool? markDownloadedComplete = true,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#trackTasks, [], {
-              #markDownloadedComplete: markDownloadedComplete,
-            }),
-            returnValue: _i9.Future<_i4.FileDownloader>.value(
-              _FakeFileDownloader_2(
-                this,
-                Invocation.method(#trackTasks, [], {
-                  #markDownloadedComplete: markDownloadedComplete,
-                }),
-              ),
-            ),
-          )
-          as _i9.Future<_i4.FileDownloader>);
-
-  @override
-  _i9.Future<void> resumeFromBackground() =>
-      (super.noSuchMethod(
-            Invocation.method(#resumeFromBackground, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
-          )
-          as _i9.Future<void>);
-
-  @override
-  _i9.Future<(List<_i12.Task>, List<_i12.Task>)> rescheduleKilledTasks() =>
-      (super.noSuchMethod(
-            Invocation.method(#rescheduleKilledTasks, []),
-            returnValue: _i9.Future<(List<_i12.Task>, List<_i12.Task>)>.value((
-              <_i12.Task>[],
-              <_i12.Task>[],
-            )),
-          )
-          as _i9.Future<(List<_i12.Task>, List<_i12.Task>)>);
-
-  @override
-  _i9.Future<bool> taskCanResume(_i12.Task? task) =>
-      (super.noSuchMethod(
-            Invocation.method(#taskCanResume, [task]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<bool> pause(_i12.DownloadTask? task) =>
-      (super.noSuchMethod(
-            Invocation.method(#pause, [task]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<List<_i12.DownloadTask>> pauseAll({
-    Iterable<_i12.DownloadTask>? tasks,
-    String? group,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#pauseAll, [], {#tasks: tasks, #group: group}),
-            returnValue: _i9.Future<List<_i12.DownloadTask>>.value(
-              <_i12.DownloadTask>[],
-            ),
-          )
-          as _i9.Future<List<_i12.DownloadTask>>);
-
-  @override
-  _i9.Future<bool> resume(_i12.DownloadTask? task) =>
-      (super.noSuchMethod(
-            Invocation.method(#resume, [task]),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<List<_i12.Task>> resumeAll({
-    Iterable<_i12.DownloadTask>? tasks,
-    String? group,
-    Duration? interval = const Duration(milliseconds: 50),
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#resumeAll, [], {
-              #tasks: tasks,
-              #group: group,
-              #interval: interval,
-            }),
-            returnValue: _i9.Future<List<_i12.Task>>.value(<_i12.Task>[]),
-          )
-          as _i9.Future<List<_i12.Task>>);
-
-  @override
-  _i9.Future<bool> requireWiFi(
-    _i5.RequireWiFi? requirement, {
-    dynamic rescheduleRunningTasks = true,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #requireWiFi,
-              [requirement],
-              {#rescheduleRunningTasks: rescheduleRunningTasks},
-            ),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<_i5.RequireWiFi> getRequireWiFiSetting() =>
-      (super.noSuchMethod(
-            Invocation.method(#getRequireWiFiSetting, []),
-            returnValue: _i9.Future<_i5.RequireWiFi>.value(
-              _i5.RequireWiFi.asSetByTask,
-            ),
-          )
-          as _i9.Future<_i5.RequireWiFi>);
-
-  @override
-  _i4.FileDownloader configureNotificationForTask(
-    _i12.Task? task, {
-    _i5.TaskNotification? running,
-    _i5.TaskNotification? complete,
-    _i5.TaskNotification? error,
-    _i5.TaskNotification? paused,
-    _i5.TaskNotification? canceled,
-    bool? progressBar = false,
-    bool? tapOpensFile = false,
-    String? groupNotificationId = '',
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #configureNotificationForTask,
-              [task],
-              {
-                #running: running,
-                #complete: complete,
-                #error: error,
-                #paused: paused,
-                #canceled: canceled,
-                #progressBar: progressBar,
-                #tapOpensFile: tapOpensFile,
-                #groupNotificationId: groupNotificationId,
-              },
-            ),
-            returnValue: _FakeFileDownloader_2(
-              this,
-              Invocation.method(
-                #configureNotificationForTask,
-                [task],
-                {
-                  #running: running,
-                  #complete: complete,
-                  #error: error,
-                  #paused: paused,
-                  #canceled: canceled,
-                  #progressBar: progressBar,
-                  #tapOpensFile: tapOpensFile,
-                  #groupNotificationId: groupNotificationId,
-                },
-              ),
-            ),
-          )
-          as _i4.FileDownloader);
-
-  @override
-  _i4.FileDownloader configureNotificationForGroup(
-    String? group, {
-    _i5.TaskNotification? running,
-    _i5.TaskNotification? complete,
-    _i5.TaskNotification? error,
-    _i5.TaskNotification? paused,
-    _i5.TaskNotification? canceled,
-    bool? progressBar = false,
-    bool? tapOpensFile = false,
-    String? groupNotificationId = '',
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #configureNotificationForGroup,
-              [group],
-              {
-                #running: running,
-                #complete: complete,
-                #error: error,
-                #paused: paused,
-                #canceled: canceled,
-                #progressBar: progressBar,
-                #tapOpensFile: tapOpensFile,
-                #groupNotificationId: groupNotificationId,
-              },
-            ),
-            returnValue: _FakeFileDownloader_2(
-              this,
-              Invocation.method(
-                #configureNotificationForGroup,
-                [group],
-                {
-                  #running: running,
-                  #complete: complete,
-                  #error: error,
-                  #paused: paused,
-                  #canceled: canceled,
-                  #progressBar: progressBar,
-                  #tapOpensFile: tapOpensFile,
-                  #groupNotificationId: groupNotificationId,
-                },
-              ),
-            ),
-          )
-          as _i4.FileDownloader);
-
-  @override
-  _i4.FileDownloader configureNotification({
-    _i5.TaskNotification? running,
-    _i5.TaskNotification? complete,
-    _i5.TaskNotification? error,
-    _i5.TaskNotification? paused,
-    _i5.TaskNotification? canceled,
-    bool? progressBar = false,
-    bool? tapOpensFile = false,
-    String? groupNotificationId = '',
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#configureNotification, [], {
-              #running: running,
-              #complete: complete,
-              #error: error,
-              #paused: paused,
-              #canceled: canceled,
-              #progressBar: progressBar,
-              #tapOpensFile: tapOpensFile,
-              #groupNotificationId: groupNotificationId,
-            }),
-            returnValue: _FakeFileDownloader_2(
-              this,
-              Invocation.method(#configureNotification, [], {
-                #running: running,
-                #complete: complete,
-                #error: error,
-                #paused: paused,
-                #canceled: canceled,
-                #progressBar: progressBar,
-                #tapOpensFile: tapOpensFile,
-                #groupNotificationId: groupNotificationId,
-              }),
-            ),
-          )
-          as _i4.FileDownloader);
-
-  @override
-  _i9.Future<_i6.Response> request(_i12.Request? request) =>
-      (super.noSuchMethod(
-            Invocation.method(#request, [request]),
-            returnValue: _i9.Future<_i6.Response>.value(
-              _FakeResponse_5(this, Invocation.method(#request, [request])),
-            ),
-          )
-          as _i9.Future<_i6.Response>);
-
-  @override
-  _i9.Future<String?> moveToSharedStorage(
-    _i12.DownloadTask? task,
-    _i5.SharedStorage? destination, {
-    String? directory = '',
-    String? mimeType,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #moveToSharedStorage,
-              [task, destination],
-              {#directory: directory, #mimeType: mimeType},
-            ),
-            returnValue: _i9.Future<String?>.value(),
-          )
-          as _i9.Future<String?>);
-
-  @override
-  _i9.Future<String?> moveFileToSharedStorage(
-    String? filePath,
-    _i5.SharedStorage? destination, {
-    String? directory = '',
-    String? mimeType,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #moveFileToSharedStorage,
-              [filePath, destination],
-              {#directory: directory, #mimeType: mimeType},
-            ),
-            returnValue: _i9.Future<String?>.value(),
-          )
-          as _i9.Future<String?>);
-
-  @override
-  _i9.Future<String?> pathInSharedStorage(
-    String? filePath,
-    _i5.SharedStorage? destination, {
-    String? directory = '',
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #pathInSharedStorage,
-              [filePath, destination],
-              {#directory: directory},
-            ),
-            returnValue: _i9.Future<String?>.value(),
-          )
-          as _i9.Future<String?>);
-
-  @override
-  _i9.Future<bool> openFile({
-    _i12.Task? task,
-    String? filePath,
-    String? mimeType,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#openFile, [], {
-              #task: task,
-              #filePath: filePath,
-              #mimeType: mimeType,
-            }),
-            returnValue: _i9.Future<bool>.value(false),
-          )
-          as _i9.Future<bool>);
-
-  @override
-  _i9.Future<String> platformVersion() =>
-      (super.noSuchMethod(
-            Invocation.method(#platformVersion, []),
-            returnValue: _i9.Future<String>.value(
-              _i8.dummyValue<String>(
-                this,
-                Invocation.method(#platformVersion, []),
-              ),
-            ),
-          )
-          as _i9.Future<String>);
-
-  @override
-  _i9.Future<void> resetUpdates() =>
-      (super.noSuchMethod(
-            Invocation.method(#resetUpdates, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
-          )
-          as _i9.Future<void>);
-
-  @override
-  void destroy() => super.noSuchMethod(
-    Invocation.method(#destroy, []),
-    returnValueForMissingStub: null,
-  );
+          as _i3.Future<List<_i4.DownloadTask>?>);
 }

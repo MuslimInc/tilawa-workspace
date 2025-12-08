@@ -42,8 +42,14 @@ class ExpandedPlayerRoute extends GoRouteData with $ExpandedPlayerRoute {
   const ExpandedPlayerRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ExpandedPlayerScreen();
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: const ExpandedPlayerScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    );
   }
 }
 

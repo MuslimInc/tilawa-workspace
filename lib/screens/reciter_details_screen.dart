@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../core/di/injection.dart';
+import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/downloads/domain/entities/download_item.dart';
 import '../features/downloads/domain/repositories/downloads_repository.dart';
@@ -16,7 +18,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../main.dart';
 import '../shared/audio/audio_player_handler.dart';
 import '../shared/models/reciter_model.dart';
-import '../shared/widgets/bottom_player.dart';
+import '../shared/widgets/bottom_player_widget.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   const ReciterDetailsScreen({super.key, required this.reciter});
@@ -109,128 +111,211 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       listener: (context, downloadState) {
         _handleDownloadsState(downloadState, context);
       },
-      child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(title: Text(widget.reciter.name), actions: const []),
-            body: Column(
-              children: [
-                // Moshaf selector
+      child: Scaffold(
+        body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+          builder: (context, state) {
+            return CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context),
                 if (widget.reciter.moshaf.length > 1)
-                  Builder(
-                    builder: (context) {
-                      // Remove duplicates and get unique moshaf list
-                      final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf
-                          .toSet()
-                          .toList();
-                      final Mosahf selectedMoshaf =
-                          state is ReciterDetailsLoaded
-                          ? state.selectedMoshaf
-                          : uniqueMoshaf.first;
-
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        child: DropdownButtonFormField<Mosahf>(
-                          style: const TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            color: Colors.black,
-                          ),
-                          initialValue: uniqueMoshaf.contains(selectedMoshaf)
-                              ? selectedMoshaf
-                              : uniqueMoshaf.first,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(
-                              context,
-                            )!.selectRecitation,
-                            border: const OutlineInputBorder(),
-                          ),
-                          items: uniqueMoshaf.map((moshaf) {
-                            return DropdownMenuItem<Mosahf>(
-                              value: moshaf,
-                              child: Text(
-                                moshaf.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (Mosahf? moshaf) {
-                            if (moshaf != null) {
-                              context.read<ReciterDetailsBloc>().add(
-                                LoadSurahList(
-                                  reciter: widget.reciter,
-                                  moshaf: moshaf,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
+                  SliverToBoxAdapter(
+                    child: _buildMoshafSelector(context, state),
                   ),
+                _buildContent(context, state),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: const BottomPlayerWidget(),
+      ),
+    );
+  }
 
-                // Content
-                Expanded(
-                  child: state is ReciterDetailsError
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.error,
-                                size: 64,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(state.message),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<ReciterDetailsBloc>().add(
-                                    LoadSurahList(
-                                      reciter: widget.reciter,
-                                      moshaf: widget.reciter.moshaf.first,
-                                    ),
-                                  );
-                                },
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : state is ReciterDetailsLoaded && state.surahList.isEmpty
-                      ? Center(
-                          child: Text(
-                            AppLocalizations.of(context)!.noSurahsAvailable,
-                          ),
-                        )
-                      : BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                          builder: (context, audioState) {
-                            return state is ReciterDetailsLoaded
-                                ? ListView.builder(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    itemCount: state.surahList.length,
-                                    itemBuilder: (context, index) {
-                                      final SurahEntity surah =
-                                          state.surahList[index];
-                                      return _buildSurahCard(
-                                        surah,
-                                        index,
-                                        state,
-                                      );
-                                    },
-                                  )
-                                : const SizedBox.shrink();
-                          },
-                        ),
-                ),
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 200.h,
+      pinned: true,
+      stretch: true,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        centerTitle: true,
+        title: Text(
+          widget.reciter.name,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18.sp,
+          ),
+        ),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withValues(alpha: 0.7),
               ],
             ),
-            bottomNavigationBar: const BottomPlayer(),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -50.w,
+                bottom: -50.h,
+                child: Icon(
+                  Icons.mic_external_on,
+                  size: 200.sp,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black45],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoshafSelector(BuildContext context, ReciterDetailsState state) {
+    // Remove duplicates and get unique moshaf list
+    final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf.toSet().toList();
+    final Mosahf selectedMoshaf = state is ReciterDetailsLoaded
+        ? state.selectedMoshaf
+        : uniqueMoshaf.first;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<Mosahf>(
+            isExpanded: true,
+            icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
+            value: uniqueMoshaf.contains(selectedMoshaf)
+                ? selectedMoshaf
+                : uniqueMoshaf.first,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            items: uniqueMoshaf.map((moshaf) {
+              return DropdownMenuItem<Mosahf>(
+                value: moshaf,
+                child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
+              );
+            }).toList(),
+            onChanged: (Mosahf? moshaf) {
+              if (moshaf != null) {
+                context.read<ReciterDetailsBloc>().add(
+                  LoadSurahList(reciter: widget.reciter, moshaf: moshaf),
+                );
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, ReciterDetailsState state) {
+    if (state is ReciterDetailsError) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 64.sp,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              SizedBox(height: 16.h),
+              Text(state.message, style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 16.h),
+              ElevatedButton.icon(
+                onPressed: () {
+                  context.read<ReciterDetailsBloc>().add(
+                    LoadSurahList(
+                      reciter: widget.reciter,
+                      moshaf: widget.reciter.moshaf.first,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 12.h,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (state is ReciterDetailsLoaded && state.surahList.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search_off_rounded, size: 64.sp, color: Colors.grey),
+              SizedBox(height: 16.h),
+              Text(
+                AppLocalizations.of(context)!.noSurahsAvailable,
+                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (state is ReciterDetailsLoaded) {
+      return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+        builder: (context, audioState) {
+          return SliverPadding(
+            padding: EdgeInsets.only(
+              top: 16.h,
+              left: 16.w,
+              right: 16.w,
+              bottom: 30.h, // Space for bottom player
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final SurahEntity surah = state.surahList[index];
+                return _buildSurahCard(surah, index, state, audioState);
+              }, childCount: state.surahList.length),
+            ),
           );
         },
-      ),
+      );
+    }
+    return const SliverFillRemaining(
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -238,171 +323,176 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     SurahEntity surah,
     int index,
     ReciterDetailsLoaded state,
+    AudioPlayerState audioState,
   ) {
-    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-      builder: (context, audioState) {
-        if (audioState.status != AudioPlayerStatus.success) {
-          // Return basic card without highlighting
-          final roundedRectangleBorder = RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          );
-          return ListTile(
-            shape: roundedRectangleBorder,
-            leading: CircleAvatar(
-              backgroundColor: Colors.grey.shade300,
-              child: Text(
-                '${index + 1}',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+    final MediaItem? currentMediaItem = audioState.mediaItem;
+    final PlaybackState? playbackState = audioState.playbackState;
+    final bool isCurrentlyPlaying =
+        currentMediaItem?.id == surah.id ||
+        // Also check if originalId in extras matches (for local files)
+        currentMediaItem?.extras?['originalId'] == surah.id;
+
+    final bool isPlaying =
+        isCurrentlyPlaying && (playbackState?.playing ?? false);
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: isCurrentlyPlaying
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
+            : Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+        border: isCurrentlyPlaying
+            ? Border.all(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+              )
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: () {
+            if (isCurrentlyPlaying) {
+              if (isPlaying) {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.pauseAudio(),
+                );
+              } else {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.playAudio(),
+                );
+              }
+            } else {
+              _playSurah(surah, state);
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.all(12.w),
+            child: Row(
+              children: [
+                Container(
+                  width: 48.w,
+                  height: 48.w,
+                  decoration: BoxDecoration(
+                    color: isCurrentlyPlaying
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    boxShadow: isCurrentlyPlaying
+                        ? [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.4),
+                              blurRadius: 8.r,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Center(
+                    child: isCurrentlyPlaying
+                        ? Icon(
+                            Icons.graphic_eq_rounded,
+                            color: Colors.white,
+                            size: 24.sp,
+                          )
+                        : Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                            ),
+                          ),
+                  ),
                 ),
-              ),
-            ),
-            title: Text(
-              surah.name,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              surah.reciterName,
-              style: const TextStyle(color: Colors.grey),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.play_arrow),
-              onPressed: () {
-                // Play surah logic here
-              },
-            ),
-            onTap: () {
-              // Play surah logic here
-            },
-          );
-        }
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        surah.name,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isCurrentlyPlaying
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        surah.reciterName,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Download Status
+                    DownloadButton(
+                      surahId: surah.id,
+                      surahTitle: surah.name,
+                      reciterName: widget.reciter.name,
+                    ),
 
-        final MediaItem? currentMediaItem = audioState.mediaItem;
-        final PlaybackState? playbackState = audioState.playbackState;
-        // Highlight if the surah is selected (clicked) or currently playing
-        // final isSelected = state.selectedSurahId == surah.id;
-        final isCurrentlyPlaying = currentMediaItem?.id == surah.id;
+                    SizedBox(width: 12.w),
 
-        final roundedRectangleBorder = RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        );
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          color: isCurrentlyPlaying
-              ? Colors.purple.withValues(alpha: 0.1)
-              : null,
-          shape: roundedRectangleBorder,
-          elevation: 0,
-          child: ListTile(
-            shape: roundedRectangleBorder,
-            leading: CircleAvatar(
-              backgroundColor: isCurrentlyPlaying
-                  ? Colors.purple
-                  : Theme.of(context).primaryColor,
-              child: isCurrentlyPlaying
-                  ? const Icon(Icons.music_note, color: Colors.white, size: 20)
-                  : Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    // Play Button Container
+                    Container(
+                      width: 36.w,
+                      height: 36.w,
+                      decoration: BoxDecoration(
+                        color: isCurrentlyPlaying
+                            ? Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: isCurrentlyPlaying
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Icon(
+                        isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: isCurrentlyPlaying
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey,
+                        size: 24.sp,
                       ),
                     ),
-            ),
-            title: Text(
-              surah.name,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: isCurrentlyPlaying ? Colors.purple[800] : null,
-              ),
-            ),
-            subtitle: Text(
-              surah.reciterName,
-              style: TextStyle(
-                color: isCurrentlyPlaying ? Colors.purple[600] : null,
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Download status indicators
-                if (surah.isDownloaded)
-                  const Icon(Icons.download_done, color: Colors.green, size: 20)
-                else if (surah.isDownloading)
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      value: surah.downloadProgress > 0
-                          ? surah.downloadProgress
-                          : null,
-                    ),
-                  ),
-                if (surah.isDownloaded || surah.isDownloading)
-                  const SizedBox(width: 4),
-                // Download button
-                DownloadButton(
-                  surahId: surah.id,
-                  surahTitle: surah.name,
-                  reciterName: widget.reciter.name,
+                  ],
                 ),
-                const SizedBox(width: 8),
-                // Play button
-                if (isCurrentlyPlaying)
-                  IconButton(
-                    icon: Icon(
-                      playbackState?.playing ?? false
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.purple,
-                    ),
-                    onPressed: () {
-                      if (playbackState?.playing ?? false) {
-                        context.read<AudioPlayerBloc>().add(
-                          const AudioPlayerEvent.pauseAudio(),
-                        );
-                      } else {
-                        context.read<AudioPlayerBloc>().add(
-                          const AudioPlayerEvent.playAudio(),
-                        );
-                      }
-                    },
-                  )
-                else
-                  IconButton(
-                    icon: const Icon(Icons.play_arrow),
-                    onPressed: () {
-                      _playSurah(surah, state);
-                    },
-                  ),
               ],
             ),
-            onTap: () {
-              if (isCurrentlyPlaying) {
-                // Toggle play/pause if this is the current surah
-                if (playbackState?.playing ?? false) {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.pauseAudio(),
-                  );
-                } else {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.playAudio(),
-                  );
-                }
-              } else {
-                // Play this surah
-                _playSurah(surah, state);
-              }
-            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -581,13 +671,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       logger.d('_playSurah error: $e');
       logger.d('Stack trace: $stackTrace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error playing surah: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        ToastUtils.showErrorToast('Error playing surah: $e');
       }
     }
   }

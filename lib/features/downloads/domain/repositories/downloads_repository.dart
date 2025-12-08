@@ -78,4 +78,7 @@ abstract class DownloadsRepository {
 
   /// Create MediaItems from multiple downloads
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads);
+
+  /// Resume any pending or stuck downloads on app start
+  Future<void> resumePendingDownloads();
 }

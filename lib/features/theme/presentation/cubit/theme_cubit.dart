@@ -3,7 +3,8 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../data/theme_service.dart';
+
+import '../../../../core/theme/app_theme.dart';
 
 class ThemeState extends Equatable {
   const ThemeState({
@@ -100,38 +101,16 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
   /// Get the current light theme
   ThemeData getLightTheme() {
-    return FlexThemeData.light(
-      scheme: state.scheme,
-      surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-      blendLevel: 7,
-      appBarStyle: FlexAppBarStyle.primary,
-      appBarOpacity: 0.95,
-      appBarElevation: 0,
-      tabBarStyle: FlexTabBarStyle.forAppBar,
-      tooltipsMatchBackground: true,
-      visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3ErrorColors: true,
-    );
+    return AppTheme.getLightTheme(state.scheme);
   }
 
   /// Get the current dark theme
   ThemeData getDarkTheme() {
-    return FlexThemeData.dark(
-      scheme: state.scheme,
-      surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-      blendLevel: 13,
-      appBarStyle: FlexAppBarStyle.background,
-      appBarOpacity: 0.90,
-      appBarElevation: 0,
-      tabBarStyle: FlexTabBarStyle.forAppBar,
-      tooltipsMatchBackground: true,
-      visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3ErrorColors: true,
-    );
+    return AppTheme.getDarkTheme(state.scheme);
   }
 
   /// Get available color schemes
   List<FlexScheme> getAvailableSchemes() {
-    return ThemeService.getAvailableSchemes();
+    return AppTheme.getAvailableSchemes();
   }
 }
