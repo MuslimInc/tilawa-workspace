@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -20,6 +21,12 @@ void main() {
     tempDir = Directory.systemTemp.createTempSync('dqm_test');
     mockDownloader = MockFlutterDownloaderWrapper();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
+
+    // Register DownloadService in GetIt
+    final GetIt getIt = GetIt.instance;
+    if (!getIt.isRegistered<DownloadService>()) {
+      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    }
 
     // Setup Service basics
     when(
@@ -108,6 +115,11 @@ void main() {
       try {
         tempDir.deleteSync(recursive: true);
       } catch (_) {}
+    }
+
+    final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
     }
   });
 

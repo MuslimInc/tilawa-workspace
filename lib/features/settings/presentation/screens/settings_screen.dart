@@ -10,6 +10,9 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
+import '../cubit/settings_cubit.dart';
+
+// ... other imports
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -59,6 +62,32 @@ class SettingsScreen extends StatelessWidget {
                       borderRadius: BorderRadiusGeometry.vertical(
                         bottom: Radius.circular(16.r),
                       ),
+                    );
+                  },
+                ),
+              ],
+            ),
+
+            SizedBox(height: 24.h),
+
+            // Downloads Group
+            // Downloads Group
+            _SettingsGroup(
+              title: 'Downloads',
+              children: [
+                BlocBuilder<SettingsCubit, SettingsState>(
+                  builder: (context, state) {
+                    return _SettingsTile(
+                      icon: FluentIcons.arrow_download_24_regular,
+                      title: 'Concurrent Downloads',
+                      subtitle:
+                          '${state.maxConcurrentDownloads} downloads at once',
+                      onTap: () => _showConcurrentDownloadsPicker(
+                        context,
+                        state.maxConcurrentDownloads,
+                      ),
+                      showDivider: false,
+                      borderRadius: BorderRadius.circular(16.r),
                     );
                   },
                 ),
@@ -291,6 +320,43 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
+            SizedBox(height: 16.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16.h),
+            Text(
+              'Concurrent Downloads',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.h),
+            for (int i = 1; i <= 5; i++)
+              ListTile(
+                title: Text('$i'),
+                trailing: currentValue == i
+                    ? Icon(
+                        FluentIcons.checkmark_24_regular,
+                        color: Theme.of(context).primaryColor,
+                      )
+                    : null,
+                onTap: () {
+                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                  Navigator.pop(context);
+                },
+              ),
             SizedBox(height: 16.h),
           ],
         ),

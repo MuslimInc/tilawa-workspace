@@ -9,6 +9,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
+import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
@@ -62,6 +63,15 @@ void main() {
     mockDownloader = MockFlutterDownloaderWrapper();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
+    // Register DownloadService in GetIt for DownloadQueueManager
+    final GetIt getIt = GetIt.instance;
+    if (!getIt.isRegistered<DownloadService>()) {
+      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    }
+
+    // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
+    DownloadQueueManager.reset();
+
     // Stub common methods to avoid MissingStubError
     when(
       mockDownloader.initialize(debug: anyNamed('debug')),
@@ -86,6 +96,20 @@ void main() {
       mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
     ).thenAnswer((_) async => []);
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+    when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+
+    // Stub getDownloadsDirectory globally as it is now used in many methods
+    when(
+      mockLocalDataSource.getDownloadsDirectory(),
+    ).thenAnswer((_) async => '/tmp/downloads');
+  });
+
+  tearDown(() {
+    final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
+    }
+    DownloadQueueManager.instance.dispose();
   });
 
   group('DownloadsRepositoryImpl', () {
@@ -362,7 +386,7 @@ void main() {
           id: compositeId,
           title: 'Surah Al-Fatiha',
           url: testSurahId,
-          filePath: '/test/downloads/test.mp3',
+          filePath: '/tmp/downloads/test.mp3',
           reciterName: testReciterName,
           status: DownloadStatus.completed,
           progress: 1.0,
@@ -515,7 +539,7 @@ void main() {
       // Note: surahId is the URL in the actual implementation
       const testSurahId = 'https://example.com/audio.mp3';
       const testReciterName = 'Abdul Rahman Al-Sudais';
-      const testFilePath = '/path/to/downloaded/file.mp3';
+      const testFilePath = '/tmp/downloads/file.mp3';
 
       test('should return file path when surah is downloaded', () async {
         // Arrange
@@ -525,7 +549,8 @@ void main() {
           id: compositeId,
           title: 'Surah Al-Fatiha',
           url: testSurahId,
-          filePath: testFilePath,
+          filePath:
+              '/tmp/downloads/file.mp3', // Resolved path matches getDownloadsDirectory stub
           reciterName: testReciterName,
           status: DownloadStatus.completed,
           progress: 1.0,
@@ -547,9 +572,11 @@ void main() {
         );
 
         // Assert
-        expect(result, testFilePath);
+        expect(result, '/tmp/downloads/file.mp3');
         verify(mockLocalDataSource.getDownloads()).called(1);
-        verify(mockLocalDataSource.isFileExists(testFilePath)).called(1);
+        verify(
+          mockLocalDataSource.isFileExists('/tmp/downloads/file.mp3'),
+        ).called(1);
       });
 
       test('should return null when surah is not downloaded', () async {
@@ -808,8 +835,152 @@ void main() {
         );
 
         // Assert - Should not throw, just do nothing
-        verify(mockLocalDataSource.getDownloads()).called(1);
+        verify(mockLocalDataSource.getDownloads()).called(2);
         verifyNever(mockLocalDataSource.updateDownload(any));
+      });
+    });
+    group('updateDownloadProgress', () {
+      test(
+        'should update download using URL matching fallback when exact ID not found',
+        () async {
+          // Arrange
+          const testUrl = 'https://example.com/audio.mp3';
+          const reciterName = 'Test Reciter';
+          // Composite ID format: url_reciter
+          final compositeId = '${testUrl}_${reciterName.replaceAll(' ', '_')}';
+
+          final existingDownload = DownloadItem(
+            id: compositeId,
+            title: 'Test Surah',
+            url: testUrl,
+            filePath: '/path/to/file.mp3',
+            reciterName: reciterName,
+            status: DownloadStatus.pending,
+            progress: 0.0,
+            fileSize: 0,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          );
+
+          // We simulate getDownloads returning our item
+          // This is used by both getDownloadItem and the fallback logic
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [existingDownload]);
+
+          // Act
+          // We pass the URL as the ID, simulating the DownloadService issue where it sends URL instead of task ID/composite ID
+          await repository.updateDownloadProgress(
+            testUrl, // <-- PASSING URL INSTEAD OF COMPOSITE ID
+            DownloadStatus.downloading,
+            0.5,
+            500,
+            1000,
+          );
+
+          // Assert
+          final List<dynamic> captured = verify(
+            mockLocalDataSource.updateDownload(captureAny),
+          ).captured;
+          expect(captured.length, 1);
+          final updatedDownload = captured.first as DownloadItem;
+
+          // Verify that the correct item was updated despite the ID mismatch in the call
+          expect(
+            updatedDownload.id,
+            compositeId,
+          ); // Should match the composite ID from DB
+          expect(updatedDownload.status, DownloadStatus.downloading);
+          expect(updatedDownload.progress, 0.5);
+          expect(updatedDownload.downloadedSize, 500);
+          expect(updatedDownload.fileSize, 1000);
+        },
+      );
+    });
+    group('Dynamic Path Resolution', () {
+      test(
+        'should dynamically resolve file path when retrieving downloads',
+        () async {
+          // Arrange
+          const oldDownloadsDir =
+              '/var/mobile/Containers/Data/Application/OLD-UUID/Documents/downloads';
+          const newDownloadsDir =
+              '/var/mobile/Containers/Data/Application/NEW-UUID/Documents/downloads';
+          const filename = 'surah_001_reciter.mp3';
+
+          final itemWithOldPath = DownloadItem(
+            id: 'test_id',
+            title: 'Test Surah',
+            url: 'https://example.com/surah.mp3',
+            filePath: '$oldDownloadsDir/$filename', // Old absolute path
+            reciterName: 'Test Reciter',
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            fileSize: 1024,
+            downloadedSize: 1024,
+            createdAt: DateTime.now(),
+          );
+
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [itemWithOldPath]);
+
+          // Mock the current directory to be different (simulating app relaunch on iOS)
+          when(
+            mockLocalDataSource.getDownloadsDirectory(),
+          ).thenAnswer((_) async => newDownloadsDir);
+
+          // Act
+          final Map<String, List<DownloadItem>> result = await repository
+              .getDownloadsByReciter();
+
+          // Assert
+          verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+
+          final List<DownloadItem>? downloads = result['Test Reciter'];
+          expect(downloads, isNotNull);
+          expect(downloads!.first.filePath, '$newDownloadsDir/$filename');
+          expect(
+            downloads.first.filePath,
+            isNot(equals(itemWithOldPath.filePath)),
+          );
+        },
+      );
+
+      test('should dynamically resolve file path in getDownloadItem', () async {
+        // Arrange
+        const oldDownloadsDir = '/old/path';
+        const newDownloadsDir = '/new/path';
+        const filename = 'file.mp3';
+
+        final itemWithOldPath = DownloadItem(
+          id: 'test_id',
+          title: 'Test',
+          url: 'url',
+          filePath: '$oldDownloadsDir/$filename',
+          reciterName: 'Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 100,
+          downloadedSize: 100,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [itemWithOldPath]);
+        when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => newDownloadsDir);
+
+        // Act
+        final DownloadItem? result = await repository.getDownloadItem(
+          'test_id',
+        );
+
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.filePath, '$newDownloadsDir/$filename');
       });
     });
   });

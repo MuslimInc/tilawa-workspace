@@ -53,6 +53,8 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
     as _i811;
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart'
     as _i486;
+import 'package:muzakri/features/downloads/data/services/download_service.dart'
+    as _i313;
 import 'package:muzakri/features/downloads/data/services/downloads_initialization_service.dart'
     as _i473;
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart'
@@ -147,6 +149,8 @@ import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc
     as _i447;
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart'
     as _i864;
+import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart'
+    as _i727;
 import 'package:muzakri/features/surah/data/repositories/surah_repository_impl.dart'
     as _i724;
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart'
@@ -183,6 +187,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i203.AlphabetScrollbarBloc>(
       () => _i203.AlphabetScrollbarBloc(),
     );
+    gh.factory<_i727.SettingsCubit>(() => _i727.SettingsCubit());
     gh.factory<_i52.ThemeCubit>(() => _i52.ThemeCubit());
     gh.singleton<_i974.FirebaseFirestore>(
       () => externalDependenciesModule.firestore,
@@ -204,6 +209,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i460.SharedPreferencesAsync>(
       () => externalDependenciesModule.sharedPreferences,
+    );
+    gh.singleton<_i313.DownloadService>(
+      () => externalDependenciesModule.downloadService,
     );
     gh.singleton<_i361.Dio>(() => externalDependenciesModule.dioClient());
     gh.singleton<List<_i87.MediaItem>>(

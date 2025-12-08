@@ -280,7 +280,7 @@ void main() {
       );
 
       blocTest<DownloadsBloc, DownloadsState>(
-        'emits [error] when surah is already downloaded',
+        'emits [error, loaded] when surah is already downloaded',
         build: () {
           when(
             mockPremiumRepository.canDownload(),
@@ -288,6 +288,9 @@ void main() {
           when(
             mockDownloadsRepository.isSurahDownloaded(any, any),
           ).thenAnswer((_) async => true);
+          when(
+            mockGetDownloadsByReciterUseCase(),
+          ).thenAnswer((_) async => const Right({}));
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(
@@ -301,6 +304,7 @@ void main() {
           const DownloadsState.error(
             'Surah "Al-Fatiha" by Abdul Rahman Al-Sudais is already downloaded',
           ),
+          const DownloadsState.loaded({}),
         ],
       );
 

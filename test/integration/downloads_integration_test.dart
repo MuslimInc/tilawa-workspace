@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
@@ -30,6 +31,12 @@ void main() {
     mockDownloader = MockFlutterDownloaderWrapper();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
+    // Register DownloadService in GetIt
+    final GetIt getIt = GetIt.instance;
+    if (!getIt.isRegistered<DownloadService>()) {
+      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    }
+
     // Reset singleton
     DownloadQueueManager.reset();
     await DownloadQueueManager.instance.initialize();
@@ -41,8 +48,12 @@ void main() {
       mockLocalDataSource.getDownloadsDirectory(),
     ).thenAnswer((_) async => tempDir.path);
     when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-    when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
-    when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+    when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+      return;
+    });
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
     when(
       mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
@@ -50,6 +61,13 @@ void main() {
 
     // Stub logging to avoid noise
     // setupLogger(); // Assuming logger is accessible or mocked if needed
+  });
+
+  tearDown(() {
+    final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
+    }
   });
 
   group('Downloads Integration Flow', () {

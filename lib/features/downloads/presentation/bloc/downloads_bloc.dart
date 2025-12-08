@@ -207,12 +207,18 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     final bool isAlreadyDownloaded = await _downloadsRepository
         .isSurahDownloaded(event.surahId, event.reciterName);
 
+    // Capture current downloads before potential state change
+    final Map<String, List<DownloadItem>> currentDownloads =
+        _getCurrentDownloads();
+
     if (isAlreadyDownloaded) {
       emit(
         DownloadsState.error(
           'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
         ),
       );
+      // Restore loaded state to ensure UI displays the list
+      emit(DownloadsState.loaded(currentDownloads));
       return;
     }
 

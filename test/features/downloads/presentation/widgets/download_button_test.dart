@@ -63,7 +63,7 @@ void main() {
 
   testWidgets('shows progress when downloading', (tester) async {
     final downloadItem = DownloadItem(
-      id: '${surahId}_$reciterName',
+      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
       title: surahTitle,
       url: 'url',
       filePath: 'path',
@@ -95,9 +95,42 @@ void main() {
     expect(find.text('50'), findsOneWidget);
   });
 
+  testWidgets('shows progress when pending', (tester) async {
+    final downloadItem = DownloadItem(
+      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
+      title: surahTitle,
+      url: 'url',
+      filePath: 'path',
+      reciterName: reciterName,
+      status: DownloadStatus.pending,
+      progress: 0.0,
+      fileSize: 100,
+      downloadedSize: 0,
+      createdAt: DateTime.now(),
+    );
+
+    when(() => mockDownloadsBloc.state).thenReturn(
+      DownloadsState.loaded({
+        reciterName: [downloadItem],
+      }),
+    );
+
+    await tester.pumpWidget(
+      createTestWidget(
+        const DownloadButton(
+          surahId: surahId,
+          surahTitle: surahTitle,
+          reciterName: reciterName,
+        ),
+      ),
+    );
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
   testWidgets('shows check icon when downloaded', (tester) async {
     final downloadItem = DownloadItem(
-      id: '${surahId}_$reciterName',
+      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
       title: surahTitle,
       url: 'url',
       filePath: 'path',

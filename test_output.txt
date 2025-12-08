@@ -1,0 +1,538 @@
+00:00 +0: loading /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart                                                                           00:00 +0: (setUpAll)                                                                                                                                                                                   00:00 +0: DownloadsRepositoryImpl startDownload should create download item and start download service                                                                                                 00:01 +0: DownloadsRepositoryImpl startDownload should create download item and start download service                                                                                                 00:01 +0: DownloadsRepositoryImpl startDownload should create download item and start download service                                                                                                 
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadsRepositoryImpl.startDownload (package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart:534:12)
+│ #1   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadsRepositoryImpl] startDownload: id=001_Abdul_Rahman_Al-Sudais fileName=001_Abdul_Rahman_Al-Sudais.mp3 path=/var/folders/n6/pg32hzh502jg42ny5c77lw7w0000gn/T/kEgAdT/001_Abdul_Rahman_Al-Sudais.mp3 status=DownloadStatus.pending
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.initialize (package:muzakri/features/downloads/data/services/download_queue_manager.dart:99:12)
+│ #1   DownloadQueueManager.enqueue (package:muzakri/features/downloads/data/services/download_queue_manager.dart:110:11)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Initialized
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.enqueue (package:muzakri/features/downloads/data/services/download_queue_manager.dart:132:12)
+│ #1   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Enqueued download: id=001_Abdul_Rahman_Al-Sudais title="Al-Fatiha" queuePosition=1
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadService._performInitialization (package:muzakri/features/downloads/data/services/download_service.dart:135:14)
+│ #1   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadService] Initialized with FlutterDownloader
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager._processQueue (package:muzakri/features/downloads/data/services/download_queue_manager.dart:237:16)
+│ #1   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [Downloading Queue] Starting download: id=001_Abdul_Rahman_Al-Sudais title="Al-Fatiha" reciter="Abdul Rahman Al-Sudais" activeCount=0
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+[38;5;196m┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;196m│ #0   DownloadQueueManager._processQueue (package:muzakri/features/downloads/data/services/download_queue_manager.dart:315:20)[0m
+[38;5;196m│ #1   <asynchronous suspension>[0m
+[38;5;196m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+[38;5;196m│ ⛔ [Downloading Queue] Download failed to start (status=null): id=001_Abdul_Rahman_Al-Sudais - REMOVING from queue to prevent infinite loop[0m
+[38;5;196m└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager._processQueue (package:muzakri/features/downloads/data/services/download_queue_manager.dart:344:12)
+│ #1   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [Downloading Queue] Queue processing complete: actualRunning=0 internal=0 queueLength=0
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +1: DownloadsRepositoryImpl startDownload should create download item and start download service                                                                                                 00:05 +1: DownloadsRepositoryImpl startDownload should handle directory creation failure                                                                                                               00:05 +1: DownloadsRepositoryImpl startDownload should handle directory creation failure                                                                                                               
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +2: DownloadsRepositoryImpl startDownload should handle directory creation failure                                                                                                               00:05 +2: DownloadsRepositoryImpl startDownload should handle addDownload failure                                                                                                                      00:05 +2: DownloadsRepositoryImpl startDownload should handle addDownload failure                                                                                                                      
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +3: DownloadsRepositoryImpl startDownload should handle addDownload failure                                                                                                                      00:05 +3: DownloadsRepositoryImpl retryDownload should successfully retry a failed download                                                                                                            00:05 +3: DownloadsRepositoryImpl retryDownload should successfully retry a failed download                                                                                                            
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +3 -1: DownloadsRepositoryImpl retryDownload should successfully retry a failed download [E]                                                                                                     
+  No matching calls. All calls: [VERIFIED] MockDownloadsLocalDataSource.getDownloads(), MockDownloadsLocalDataSource.getDownloadsDirectory()
+  (If you called `verify(...).called(0);`, please instead use `verifyNever(...);`.)
+  package:matcher                                                                       fail
+  package:mockito/src/mock.dart 852:7                                                   _VerifyCall._checkWith
+  package:mockito/src/mock.dart 1152:18                                                 _makeVerify.<fn>
+  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 245:15  main.<fn>.<fn>.<fn>
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl retryDownload should successfully retry a failed download'
+00:05 +3 -1: DownloadsRepositoryImpl retryDownload should throw exception when download not found                                                                                                      00:05 +3 -1: DownloadsRepositoryImpl retryDownload should throw exception when download not found                                                                                                      
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +4 -1: DownloadsRepositoryImpl retryDownload should throw exception when download not found                                                                                                      00:05 +4 -1: DownloadsRepositoryImpl retryDownload should throw exception when download is not failed or stuck                                                                                         00:05 +4 -1: DownloadsRepositoryImpl retryDownload should throw exception when download is not failed or stuck                                                                                         
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +4 -2: DownloadsRepositoryImpl retryDownload should throw exception when download is not failed or stuck [E]                                                                                     
+  Expected: throws <Instance of 'Exception'> with `message`: contains 'Only failed or stuck downloads can be retried'
+    Actual: <Closure: () => Future<void>>
+     Which: threw _Exception:<Exception: Download not found>
+            stack package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 813:7  DownloadsRepositoryImpl.retryDownload
+                  ===== asynchronous gap ===========================
+                  package:matcher                                                                            expect
+                  package:flutter_test/src/widget_tester.dart 473:18                                         expect
+                  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 279:11       main.<fn>.<fn>.<fn>
+                  
+            which has `message` with value 'Exception: Download not found' which does not contain 'Only failed or stuck downloads can be retried'
+  
+  package:matcher                                                                       expect
+  package:flutter_test/src/widget_tester.dart 473:18                                    expect
+  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 279:11  main.<fn>.<fn>.<fn>
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl retryDownload should throw exception when download is not failed or stuck'
+00:05 +4 -2: DownloadsRepositoryImpl retryDownload should successfully retry a stuck download                                                                                                          00:05 +4 -2: DownloadsRepositoryImpl retryDownload should successfully retry a stuck download                                                                                                          
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +4 -3: DownloadsRepositoryImpl retryDownload should successfully retry a stuck download [E]                                                                                                      
+  No matching calls. All calls: [VERIFIED] MockDownloadsLocalDataSource.getDownloads(), MockDownloadsLocalDataSource.getDownloadsDirectory()
+  (If you called `verify(...).called(0);`, please instead use `verifyNever(...);`.)
+  package:matcher                                                                       fail
+  package:mockito/src/mock.dart 852:7                                                   _VerifyCall._checkWith
+  package:mockito/src/mock.dart 1152:18                                                 _makeVerify.<fn>
+  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 320:15  main.<fn>.<fn>.<fn>
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl retryDownload should successfully retry a stuck download'
+00:05 +4 -3: DownloadsRepositoryImpl retryDownload should handle updateDownload failure                                                                                                                00:05 +4 -3: DownloadsRepositoryImpl retryDownload should handle updateDownload failure                                                                                                                
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +5 -3: DownloadsRepositoryImpl retryDownload should handle updateDownload failure                                                                                                                00:05 +5 -3: DownloadsRepositoryImpl validateDownloadedFile should return false when file validation fails                                                                                             00:05 +5 -3: DownloadsRepositoryImpl validateDownloadedFile should return false when file validation fails                                                                                             
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +6 -3: DownloadsRepositoryImpl validateDownloadedFile should return false when file validation fails                                                                                             00:05 +6 -3: DownloadsRepositoryImpl isSurahDownloaded should return true when surah is downloaded                                                                                                     00:05 +6 -3: DownloadsRepositoryImpl isSurahDownloaded should return true when surah is downloaded                                                                                                     
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +6 -4: DownloadsRepositoryImpl isSurahDownloaded should return true when surah is downloaded [E]                                                                                                 
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                         Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                        Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14   MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49   DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 628:39  DownloadsRepositoryImpl.isSurahDownloaded
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl isSurahDownloaded should return true when surah is downloaded'
+00:05 +6 -4: DownloadsRepositoryImpl isSurahDownloaded should return false when surah is not downloaded                                                                                                00:05 +6 -4: DownloadsRepositoryImpl isSurahDownloaded should return false when surah is not downloaded                                                                                                
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +6 -5: DownloadsRepositoryImpl isSurahDownloaded should return false when surah is not downloaded [E]                                                                                            
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                         Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                        Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14   MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49   DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 628:39  DownloadsRepositoryImpl.isSurahDownloaded
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl isSurahDownloaded should return false when surah is not downloaded'
+00:05 +6 -5: DownloadsRepositoryImpl isSurahDownloaded should handle check failure                                                                                                                     00:05 +6 -5: DownloadsRepositoryImpl isSurahDownloaded should handle check failure                                                                                                                     
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +7 -5: DownloadsRepositoryImpl isSurahDownloaded should handle check failure                                                                                                                     00:05 +7 -5: DownloadsRepositoryImpl isSurahDownloading should return true when surah is downloading in local source                                                                                   00:05 +7 -5: DownloadsRepositoryImpl isSurahDownloading should return true when surah is downloading in local source                                                                                   
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +8 -5: DownloadsRepositoryImpl isSurahDownloading should return true when surah is downloading in local source                                                                                   00:05 +8 -5: DownloadsRepositoryImpl isSurahDownloading should return false when surah is not downloading                                                                                              00:05 +8 -5: DownloadsRepositoryImpl isSurahDownloading should return false when surah is not downloading                                                                                              
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +9 -5: DownloadsRepositoryImpl isSurahDownloading should return false when surah is not downloading                                                                                              00:05 +9 -5: DownloadsRepositoryImpl getDownloadedFilePath should return file path when surah is downloaded                                                                                            00:05 +9 -5: DownloadsRepositoryImpl getDownloadedFilePath should return file path when surah is downloaded                                                                                            
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +9 -6: DownloadsRepositoryImpl getDownloadedFilePath should return file path when surah is downloaded [E]                                                                                        
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                         Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                        Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14   MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49   DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 691:39  DownloadsRepositoryImpl.getDownloadedFilePath
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl getDownloadedFilePath should return file path when surah is downloaded'
+00:05 +9 -6: DownloadsRepositoryImpl getDownloadedFilePath should return null when surah is not downloaded                                                                                             00:05 +9 -6: DownloadsRepositoryImpl getDownloadedFilePath should return null when surah is not downloaded                                                                                             
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +9 -7: DownloadsRepositoryImpl getDownloadedFilePath should return null when surah is not downloaded [E]                                                                                         
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                         Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                        Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14   MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49   DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 691:39  DownloadsRepositoryImpl.getDownloadedFilePath
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl getDownloadedFilePath should return null when surah is not downloaded'
+00:05 +9 -7: DownloadsRepositoryImpl getDownloadedFilePath should handle get file path failure                                                                                                         00:05 +9 -7: DownloadsRepositoryImpl getDownloadedFilePath should handle get file path failure                                                                                                         
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -7: DownloadsRepositoryImpl getDownloadedFilePath should handle get file path failure                                                                                                        00:05 +10 -7: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should mark interrupted downloads as failed when app restarts                                                             00:05 +10 -7: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should mark interrupted downloads as failed when app restarts                                                             
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -8: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should mark interrupted downloads as failed when app restarts [E]                                                         
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                        Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                       Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14  MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49  DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 50:39  DownloadsRepositoryImpl.getDownloadsByReciter
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should mark interrupted downloads as failed when app restarts'
+00:05 +10 -8: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should sync status to downloading when download is active in DownloadService                                              00:05 +10 -8: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should sync status to downloading when download is active in DownloadService                                              
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -9: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should sync status to downloading when download is active in DownloadService [E]                                          
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                        Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                       Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14  MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49  DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 50:39  DownloadsRepositoryImpl.getDownloadsByReciter
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should sync status to downloading when download is active in DownloadService'
+00:05 +10 -9: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should not change status when download is not active                                                                      00:05 +10 -9: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should not change status when download is not active                                                                      
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -10: DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should not change status when download is not active [E]                                                                 
+  MissingStubError: 'getDownloadsDirectory'
+  No stub was found which matches the arguments of this method call:
+  getDownloadsDirectory()
+  
+  Add a stub for this method using Mockito's 'when' API, or generate the MockDownloadsLocalDataSource mock with the @GenerateNiceMocks annotation (see https://pub.dev/documentation/mockito/latest/annotations/MockSpec-class.html).
+  package:mockito/src/mock.dart 200:7                                                        Mock._noSuchMethod
+  package:mockito/src/mock.dart 194:47                                                       Mock.noSuchMethod
+  test/features/downloads/data/repositories/downloads_repository_impl_test.mocks.dart 96:14  MockDownloadsLocalDataSource.getDownloadsDirectory
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 26:49  DownloadsRepositoryImpl._getDownloadsDir
+  package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart 50:39  DownloadsRepositoryImpl.getDownloadsByReciter
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl getDownloadsByReciter - Status Syncing should not change status when download is not active'
+00:05 +10 -10: DownloadsRepositoryImpl updateDownloadProgress should update download progress and status correctly                                                                                     00:05 +10 -10: DownloadsRepositoryImpl updateDownloadProgress should update download progress and status correctly                                                                                     
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -11: DownloadsRepositoryImpl updateDownloadProgress should update download progress and status correctly [E]                                                                                 
+  Expected: <1>
+    Actual: <2>
+  Unexpected number of calls
+  
+  package:matcher                                                                       expect
+  package:mockito/src/mock.dart 1069:5                                                  VerificationResult.called
+  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 759:52  main.<fn>.<fn>.<fn>
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl updateDownloadProgress should update download progress and status correctly'
+00:05 +10 -11: DownloadsRepositoryImpl updateDownloadProgress should set completedAt when status is completed                                                                                          00:05 +10 -11: DownloadsRepositoryImpl updateDownloadProgress should set completedAt when status is completed                                                                                          
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +10 -12: DownloadsRepositoryImpl updateDownloadProgress should set completedAt when status is completed [E]                                                                                      
+  No matching calls. All calls: MockDownloadsLocalDataSource.getDownloads(), MockDownloadsLocalDataSource.getDownloadsDirectory(), MockDownloadsLocalDataSource.getDownloads()
+  (If you called `verify(...).called(0);`, please instead use `verifyNever(...);`.)
+  package:matcher                                                                       fail
+  package:mockito/src/mock.dart 852:7                                                   _VerifyCall._checkWith
+  package:mockito/src/mock.dart 1152:18                                                 _makeVerify.<fn>
+  test/features/downloads/data/repositories/downloads_repository_impl_test.dart 806:46  main.<fn>.<fn>.<fn>
+  
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart -p vm --plain-name 'DownloadsRepositoryImpl updateDownloadProgress should set completedAt when status is completed'
+00:05 +10 -12: DownloadsRepositoryImpl updateDownloadProgress should handle update when download not found                                                                                             00:05 +10 -12: DownloadsRepositoryImpl updateDownloadProgress should handle update when download not found                                                                                             
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +11 -12: DownloadsRepositoryImpl updateDownloadProgress should handle update when download not found                                                                                             00:05 +11 -12: DownloadsRepositoryImpl updateDownloadProgress should update download using URL matching fallback when exact ID not found                                                               00:05 +11 -12: DownloadsRepositoryImpl updateDownloadProgress should update download using URL matching fallback when exact ID not found                                                               
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +12 -12: DownloadsRepositoryImpl updateDownloadProgress should update download using URL matching fallback when exact ID not found                                                               00:05 +12 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path when retrieving downloads                                                                          00:05 +12 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path when retrieving downloads                                                                          
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +13 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path when retrieving downloads                                                                          00:05 +13 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path in getDownloadItem                                                                                 00:05 +13 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path in getDownloadItem                                                                                 
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   DownloadQueueManager.reset (package:muzakri/features/downloads/data/services/download_queue_manager.dart:22:14)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   DownloadQueueManager.dispose (package:muzakri/features/downloads/data/services/download_queue_manager.dart:563:12)
+│ #1   main.<anonymous closure> (file:///Users/mohammadkamel/muzakri/test/features/downloads/data/repositories/downloads_repository_impl_test.dart:107:35)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 [DownloadQueueManager] Disposed
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+00:05 +14 -12: DownloadsRepositoryImpl Dynamic Path Resolution should dynamically resolve file path in getDownloadItem                                                                                 00:05 +14 -12: (tearDownAll)                                                                                                                                                                           00:05 +14 -12: Some tests failed.                                                                                                                                                                      

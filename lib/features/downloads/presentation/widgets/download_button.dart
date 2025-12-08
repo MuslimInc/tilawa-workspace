@@ -57,12 +57,12 @@ class DownloadButton extends StatelessWidget {
     if (downloadsByReciter != null) {
       final List<DownloadItem> downloads =
           downloadsByReciter[reciterName] ?? [];
+
+      // Construct the expected composite ID: URL_ReciterName
+      final expectedId = '${surahId}_${reciterName.replaceAll(' ', '_')}';
+
       try {
-        return downloads.firstWhere(
-          (download) =>
-              download.id.startsWith(surahId) && // ID might be combined
-              download.reciterName == reciterName,
-        );
+        return downloads.firstWhere((download) => download.id == expectedId);
       } catch (_) {
         return null;
       }
@@ -76,10 +76,6 @@ class DownloadButton extends StatelessWidget {
       listener: (context, state) {
         if (state is PremiumRequired) {
           _showPremiumUpgradeDialog(context, state.message);
-        } else if (state is DownloadStarted &&
-            state.surahId == surahId &&
-            state.reciterName == reciterName) {
-          // Optional: Handle start if needed, but UI updates via builder
         }
       },
       child: BlocBuilder<DownloadsBloc, DownloadsState>(
@@ -87,15 +83,9 @@ class DownloadButton extends StatelessWidget {
           // Check for download item in loaded state
           final DownloadItem? downloadItem = _getDownloadItem(state);
 
-          // Also check for separate download started state if not yet in loaded list
-          final bool isStarting =
-              state is DownloadStarted &&
-              state.surahId == surahId &&
-              state.reciterName == reciterName;
-
           final bool isDownloading =
-              isStarting ||
-              (downloadItem?.status == DownloadStatus.downloading);
+              (downloadItem?.status == DownloadStatus.downloading) ||
+              (downloadItem?.status == DownloadStatus.pending);
           final isDownloaded = downloadItem?.status == DownloadStatus.completed;
           final double progress = downloadItem?.progress ?? 0.0;
 

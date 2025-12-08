@@ -12,6 +12,10 @@ import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_blo
     as _i2;
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart'
     as _i7;
+import 'package:muzakri/features/downloads/data/services/download_service.dart'
+    as _i8;
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
+    as _i9;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i3;
 
@@ -372,6 +376,14 @@ class MockDownloadQueueManager extends _i1.Mock
   }
 
   @override
+  int get maxConcurrentDownloads =>
+      (super.noSuchMethod(
+            Invocation.getter(#maxConcurrentDownloads),
+            returnValue: 0,
+          )
+          as int);
+
+  @override
   int get queueLength =>
       (super.noSuchMethod(Invocation.getter(#queueLength), returnValue: 0)
           as int);
@@ -391,6 +403,12 @@ class MockDownloadQueueManager extends _i1.Mock
             returnValue: _i5.Stream<_i7.QueueUpdate>.empty(),
           )
           as _i5.Stream<_i7.QueueUpdate>);
+
+  @override
+  void setMaxConcurrentDownloads(int? count) => super.noSuchMethod(
+    Invocation.method(#setMaxConcurrentDownloads, [count]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i5.Future<void> initialize() =>
@@ -463,4 +481,93 @@ class MockDownloadQueueManager extends _i1.Mock
     Invocation.method(#dispose, []),
     returnValueForMissingStub: null,
   );
+}
+
+/// A class which mocks [DownloadService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadService extends _i1.Mock implements _i8.DownloadService {
+  MockDownloadService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> download({
+    required String? id,
+    required String? url,
+    required String? filePath,
+    required String? title,
+    required String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#download, [], {
+              #id: id,
+              #url: url,
+              #filePath: filePath,
+              #title: title,
+              #reciterName: reciterName,
+            }),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> cancel(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Stream<_i8.DownloadProgress> getProgressStream(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getProgressStream, [id]),
+            returnValue: _i5.Stream<_i8.DownloadProgress>.empty(),
+          )
+          as _i5.Stream<_i8.DownloadProgress>);
+
+  @override
+  _i5.Future<List<String>> getActiveDownloadIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#getActiveDownloadIds, []),
+            returnValue: _i5.Future<List<String>>.value(<String>[]),
+          )
+          as _i5.Future<List<String>>);
+
+  @override
+  _i5.Future<bool> isStatusDownloadActive(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#isStatusDownloadActive, [id]),
+            returnValue: _i5.Future<bool>.value(false),
+          )
+          as _i5.Future<bool>);
+
+  @override
+  _i5.Future<_i9.DownloadStatus?> getStatus(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getStatus, [id]),
+            returnValue: _i5.Future<_i9.DownloadStatus?>.value(),
+          )
+          as _i5.Future<_i9.DownloadStatus?>);
+
+  @override
+  _i5.Future<void> disposeService() =>
+      (super.noSuchMethod(
+            Invocation.method(#disposeService, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 }

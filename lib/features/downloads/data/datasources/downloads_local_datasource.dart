@@ -48,7 +48,12 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
   @override
   Future<void> addDownload(DownloadItem download) async {
     final List<DownloadItem> downloads = await getDownloads();
-    downloads.add(download);
+    final int index = downloads.indexWhere((d) => d.id == download.id);
+    if (index != -1) {
+      downloads[index] = download;
+    } else {
+      downloads.add(download);
+    }
     await saveDownloads(downloads);
   }
 
@@ -76,7 +81,14 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<String> getDownloadsDirectory() async {
-    final Directory directory = await getApplicationDocumentsDirectory();
+    Directory? directory;
+    if (Platform.isAndroid) {
+      directory = await getExternalStorageDirectory();
+    }
+
+    // Fallback to application documents directory (iOS or if external storage failed)
+    directory ??= await getApplicationDocumentsDirectory();
+
     final downloadsDir = Directory('${directory.path}/downloads');
     if (!downloadsDir.existsSync()) {
       await downloadsDir.create(recursive: true);

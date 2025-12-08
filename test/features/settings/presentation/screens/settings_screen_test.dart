@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
 import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
 import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
@@ -22,15 +23,20 @@ class MockLocalizationBloc
     extends MockBloc<LocalizationEvent, LocalizationState>
     implements LocalizationBloc {}
 
+class MockSettingsCubit extends MockBloc<SettingsCubit, SettingsState>
+    implements SettingsCubit {}
+
 void main() {
   late MockAuthBloc mockAuthBloc;
   late MockThemeCubit mockThemeCubit;
   late MockLocalizationBloc mockLocalizationBloc;
+  late MockSettingsCubit mockSettingsCubit;
 
   setUp(() {
     mockAuthBloc = MockAuthBloc();
     mockThemeCubit = MockThemeCubit();
     mockLocalizationBloc = MockLocalizationBloc();
+    mockSettingsCubit = MockSettingsCubit();
   });
 
   Widget createWidgetUnderTest() {
@@ -39,6 +45,7 @@ void main() {
         BlocProvider<AuthBloc>.value(value: mockAuthBloc),
         BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
         BlocProvider<LocalizationBloc>.value(value: mockLocalizationBloc),
+        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
       ],
       child: const ScreenUtilPlusInit(
         designSize: Size(375, 812),
@@ -71,6 +78,7 @@ void main() {
     when(
       () => mockLocalizationBloc.state,
     ).thenReturn(const LocalizationState(locale: Locale('en')));
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
@@ -84,16 +92,19 @@ void main() {
 
     // Verify Sections
     expect(find.text('Appearance'), findsOneWidget);
+    expect(find.text('Downloads'), findsOneWidget);
     expect(find.text('Account'), findsOneWidget);
 
     // Verify Tiles
     expect(find.text('Theme'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
+    expect(find.text('Concurrent Downloads'), findsOneWidget);
     expect(find.text('Logout'), findsOneWidget);
 
     // Verify Icons
     expect(find.byIcon(FluentIcons.dark_theme_24_regular), findsOneWidget);
     expect(find.byIcon(FluentIcons.local_language_24_regular), findsOneWidget);
+    expect(find.byIcon(FluentIcons.arrow_download_24_regular), findsOneWidget);
     expect(find.byIcon(FluentIcons.sign_out_24_regular), findsOneWidget);
   });
 
@@ -105,6 +116,7 @@ void main() {
     when(
       () => mockLocalizationBloc.state,
     ).thenReturn(const LocalizationState(locale: Locale('en')));
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();

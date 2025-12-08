@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
+import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_item_card.dart';
@@ -20,11 +22,17 @@ import 'download_item_card_test.mocks.dart';
 @visibleForTesting
 DownloadsState provideDummyDownloadsState() => const DownloadsState.initial();
 
-@GenerateMocks([DownloadsBloc, AudioPlayerBloc, DownloadQueueManager])
+@GenerateMocks([
+  DownloadsBloc,
+  AudioPlayerBloc,
+  DownloadQueueManager,
+  DownloadService,
+])
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockDownloadQueueManager mockDownloadQueueManager;
+  late MockDownloadService mockDownloadService;
 
   setUp(() {
     // Provide dummy value for Mockito before creating mocks
@@ -33,7 +41,19 @@ void main() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockDownloadQueueManager = MockDownloadQueueManager();
+    mockDownloadService = MockDownloadService();
+
+    // Setup DownloadQueueManager.instance for older tests that might rely on it directly
     DownloadQueueManager.instance = mockDownloadQueueManager;
+
+    // Register mock DownloadService in GetIt for DownloadQueueManager internal use
+    final GetIt getIt = GetIt.instance;
+    if (!getIt.isRegistered<DownloadService>()) {
+      getIt.registerSingleton<DownloadService>(mockDownloadService);
+    } else {
+      getIt.unregister<DownloadService>();
+      getIt.registerSingleton<DownloadService>(mockDownloadService);
+    }
 
     // Set up stream first (required for BlocProvider)
     when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
@@ -55,6 +75,10 @@ void main() {
 
   tearDown(() {
     DownloadQueueManager.reset();
+    final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
+    }
   });
 
   Widget createTestWidget(DownloadItem download) {

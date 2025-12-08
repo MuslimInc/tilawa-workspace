@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_service.dart';
@@ -12,6 +14,8 @@ class DownloadQueueManager {
   DownloadQueueManager._();
   static DownloadQueueManager instance = DownloadQueueManager._();
 
+  final DownloadService _downloadService = getIt<DownloadService>();
+
   /// Reset the instance for testing
   @visibleForTesting
   static void reset() {
@@ -20,7 +24,24 @@ class DownloadQueueManager {
   }
 
   // Maximum number of concurrent downloads
-  static const int maxConcurrentDownloads = 2;
+  // Maximum number of concurrent downloads
+  int _maxConcurrentDownloads = 2; // Default to 2
+
+  /// Set the maximum number of concurrent downloads
+  void setMaxConcurrentDownloads(int count) {
+    if (count < 1) return;
+    _maxConcurrentDownloads = count;
+    logger.d(
+      '[DownloadQueueManager] Max concurrent downloads set to $_maxConcurrentDownloads',
+    );
+    // Trigger queue processing to potentially start more downloads
+    if (_activeDownloads.length < _maxConcurrentDownloads) {
+      unawaited(_processQueue());
+    }
+  }
+
+  /// Get the maximum number of concurrent downloads
+  int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
   // Queue of pending downloads
   final List<QueuedDownload> _queue = [];
@@ -158,8 +179,8 @@ class DownloadQueueManager {
     // Check actual running downloads from DownloadService
     int actualRunningCount;
     try {
-      final List<String> actualActiveIds =
-          await DownloadService.activeDownloadIds;
+      final List<String> actualActiveIds = await _downloadService
+          .getActiveDownloadIds();
       // Filter to only count downloads that are actually running (not just enqueued)
       actualRunningCount = 0;
 
@@ -173,9 +194,7 @@ class DownloadQueueManager {
         }
         processedUrls.add(id);
 
-        final DownloadStatus? status = await DownloadService.getDownloadStatus(
-          id,
-        );
+        final DownloadStatus? status = await _downloadService.getStatus(id);
         if (status == DownloadStatus.downloading ||
             status == DownloadStatus.pending) {
           actualRunningCount++;
@@ -262,6 +281,11 @@ class DownloadQueueManager {
             _queue.removeAt(0); // Successfully started, remove from queue
             _notifyQueueUpdate();
 
+            // Notify user
+            ToastUtils.showToast(
+              msg: 'Starting download: ${queuedDownload.title}',
+            );
+
             logger.d(
               '[Downloading Queue] Download is running: id=${queuedDownload.id} actualRunning=$actualRunningCount internal=${_activeDownloads.length} remainingQueue=${_queue.length}',
             );
@@ -344,7 +368,30 @@ class DownloadQueueManager {
     if (progress.status == DownloadStatus.completed ||
         progress.status == DownloadStatus.failed ||
         progress.status == DownloadStatus.cancelled) {
-      final bool wasActive = _activeDownloads.remove(progress.id);
+      // Try to remove using the ID we received (could be ID or URL)
+      bool wasActive = _activeDownloads.remove(progress.id);
+
+      // If not found directly, check if it's a URL for a tracked Composite ID
+      if (!wasActive) {
+        try {
+          // Find key (Composite ID) where value (URL) matches progress.id
+          final String compositeId = _activeDownloadUrls.entries
+              .firstWhere(
+                (entry) => entry.value == progress.id,
+                orElse: () => const MapEntry('', ''),
+              )
+              .key;
+
+          if (compositeId.isNotEmpty) {
+            wasActive = _activeDownloads.remove(compositeId);
+            // Also remove the entry from map since we found it
+            _activeDownloadUrls.remove(compositeId);
+          }
+        } catch (e) {
+          // Ignore error in lookup
+        }
+      }
+
       _activeDownloadUrls.remove(progress.id);
       _lastActivityTime.remove(progress.id); // Cleanup activity tracking
       logger.d(

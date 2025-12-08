@@ -10,6 +10,7 @@ import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
+import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
 import '../di/injection.dart';
 
@@ -28,6 +29,10 @@ class AppProviders {
     BlocProvider<ThemeCubit>(create: (context) => getIt<ThemeCubit>()),
     BlocProvider<LocalizationBloc>(
       create: (context) => getIt<LocalizationBloc>(),
+    ),
+    BlocProvider<SettingsCubit>(
+      create: (context) => getIt<SettingsCubit>(),
+      lazy: false,
     ),
 
     // Feature providers

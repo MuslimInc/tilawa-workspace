@@ -14,13 +14,45 @@ import '../services/download_service.dart';
 
 @LazySingleton(as: DownloadsRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
-  const DownloadsRepositoryImpl(this.localDataSource);
+  DownloadsRepositoryImpl(this.localDataSource);
 
   final DownloadsLocalDataSource localDataSource;
 
+  // Cache for the downloads directory to avoid repeated async calls
+  String? _cachedDownloadsDir;
+
+  Future<String> _getDownloadsDir() async {
+    if (_cachedDownloadsDir != null) return _cachedDownloadsDir!;
+    _cachedDownloadsDir = await localDataSource.getDownloadsDirectory();
+    return _cachedDownloadsDir!;
+  }
+
+  /// Resolves the file path for a download item dynamically.
+  /// This fixes issues where absolute paths persist in DB but become invalid
+  /// when the app's container path changes (e.g. on iOS/Simulators after relaunch).
+  DownloadItem _resolveDownloadPath(DownloadItem item, String downloadsDir) {
+    if (item.filePath.isEmpty) return item;
+
+    final String fileName = path.basename(item.filePath);
+    final String resolvedPath = path.join(downloadsDir, fileName);
+
+    // Only update if the path has actually changed
+    if (resolvedPath != item.filePath) {
+      return item.copyWith(filePath: resolvedPath);
+    }
+    return item;
+  }
+
   @override
   Future<Map<String, List<DownloadItem>>> getDownloadsByReciter() async {
-    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> rawDownloads = await localDataSource
+        .getDownloads();
+    final String downloadsDir = await _getDownloadsDir();
+
+    // Resolve paths for all downloads
+    final List<DownloadItem> downloads = rawDownloads
+        .map((item) => _resolveDownloadPath(item, downloadsDir))
+        .toList();
 
     // Sync status with active downloads in DownloadService and queue manager
     // This ensures that downloads that are actively downloading or queued show the correct status
@@ -69,6 +101,34 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         updatedDownloads.add(updatedDownload);
         hasChanges = true;
         continue;
+      }
+
+      // Check for orphaned pending downloads (Pending in DB, but not in queue and not active)
+      // This happens if app was killed while pending, or if queue manager lost track
+      if (download.status == DownloadStatus.pending && !isQueued && !isActive) {
+        logger.w(
+          '[DownloadsRepository] Found orphaned pending download: id=${download.id} isQueued=$isQueued isActive=$isActive - Re-enqueueing',
+        );
+
+        // Re-enqueue (auto-resume)
+        try {
+          await DownloadQueueManager.instance.enqueue(
+            id: download.id,
+            url: download.url,
+            filePath: download.filePath,
+            title: download.title,
+            reciterName: download.reciterName,
+          );
+          // Keep as pending in the list
+          updatedDownloads.add(download);
+          // No need to set hasChanges unless we changed the item itself, but enqueue might trigger updates later
+          continue;
+        } catch (e) {
+          logger.e(
+            '[DownloadsRepository] Failed to re-enqueue orphaned download: $e',
+          );
+          // Fallthrough to regular processing
+        }
       }
 
       if (isActive) {
@@ -310,15 +370,24 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<List<DownloadItem>> getDownloadsForReciter(String reciterName) async {
-    final List<DownloadItem> downloads = await localDataSource.getDownloads();
-    return downloads.where((d) => d.reciterName == reciterName).toList();
+    final List<DownloadItem> rawDownloads = await localDataSource
+        .getDownloads();
+    final String downloadsDir = await _getDownloadsDir();
+
+    return rawDownloads
+        .where((d) => d.reciterName == reciterName)
+        .map((item) => _resolveDownloadPath(item, downloadsDir))
+        .toList();
   }
 
   @override
   Future<DownloadItem?> getDownloadItem(String id) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     try {
-      return downloads.firstWhere((d) => d.id == id);
+      final DownloadItem item = downloads.firstWhere((d) => d.id == id);
+      final String downloadsDir = await _getDownloadsDir();
+      return _resolveDownloadPath(item, downloadsDir);
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       return null;
     }
@@ -434,12 +503,18 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final String filePath = path.join(downloadsDir, safeFileName);
 
     // Check if download is already queued or active
+    final bool isQueued = DownloadQueueManager.instance.isQueued(downloadId);
     final bool isActive = DownloadQueueManager.instance.isActive(downloadId);
 
-    // Determine initial status: pending if queued, downloading if active
-    final DownloadStatus initialStatus = isActive
-        ? DownloadStatus.downloading
-        : DownloadStatus.pending;
+    if (isQueued || isActive) {
+      logger.d(
+        '[DownloadsRepositoryImpl] Download already queued or active: id=$downloadId (queued=$isQueued, active=$isActive)',
+      );
+      return;
+    }
+
+    // Determine initial status: pending (since we just checked likely not active, but safe default)
+    const DownloadStatus initialStatus = DownloadStatus.pending;
 
     final downloadItem = DownloadItem(
       id: downloadId,
@@ -550,7 +625,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // surahId is the URL
     // We match by checking if the download's URL matches surahId AND reciter matches
     final String trimmedUrl = surahId.trim();
-    for (final d in downloads) {
+    final String downloadsDir = await _getDownloadsDir();
+
+    for (final rawDownload in downloads) {
+      final DownloadItem d = _resolveDownloadPath(rawDownload, downloadsDir);
       final bool isFileExists = await localDataSource.isFileExists(d.filePath);
       if (d.reciterName == reciterName &&
           d.url == trimmedUrl &&
@@ -610,18 +688,26 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     // surahId is the URL
     final String trimmedUrl = surahId.trim();
+    final String downloadsDir = await _getDownloadsDir();
+
     try {
-      final DownloadItem download = downloads.firstWhere(
+      final DownloadItem rawDownload = downloads.firstWhere(
         (d) =>
             d.reciterName == reciterName &&
             d.url == trimmedUrl &&
             d.status == DownloadStatus.completed,
       );
 
+      final DownloadItem download = _resolveDownloadPath(
+        rawDownload,
+        downloadsDir,
+      );
+
       if (await localDataSource.isFileExists(download.filePath)) {
         return download.filePath;
       }
       return null;
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       // Download not found, return null
       return null;
@@ -636,7 +722,23 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     int downloadedSize,
     int fileSize,
   ) async {
-    final DownloadItem? download = await getDownloadItem(id);
+    DownloadItem? download = await getDownloadItem(id);
+
+    // If not found by exact ID, it might be that DownloadService is reporting the URL
+    // instead of the composite ID (e.g. after app restart or if mapping was lost).
+    // Try to find the download by matching the URL.
+    if (download == null) {
+      try {
+        final List<DownloadItem> allDownloads = await localDataSource
+            .getDownloads();
+        // Find a download where key url matches the ID reported by service
+        // We prioritize active downloads if there are multiple matches (rare)
+        download = allDownloads.firstWhere((d) => d.url == id);
+      } catch (_) {
+        // Still not found, ignore update
+      }
+    }
+
     if (download != null) {
       final DownloadItem updatedDownload = download.copyWith(
         status: status,

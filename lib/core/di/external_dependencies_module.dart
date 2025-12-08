@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/downloads/data/services/download_service.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
 import '../../main.dart';
 import '../../shared/audio/audio_player_handler.dart';
@@ -110,4 +111,7 @@ abstract class ExternalDependenciesModule {
       return fallbackHandler;
     }
   }
+
+  @singleton
+  DownloadService get downloadService => DownloadService.instance;
 }
