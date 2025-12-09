@@ -254,10 +254,53 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         } else if (download.status == DownloadStatus.downloading) {
           // Was downloading but not active anymore - check if it completed or failed
           if (backgroundStatus == DownloadStatus.completed) {
-            // Download completed in background
+            // Download reported as completed - verify before marking as such
+            // Check if file exists
+            final bool fileExists = await localDataSource.isFileExists(
+              download.filePath,
+            );
+
+            if (!fileExists) {
+              logger.w(
+                '[DownloadsRepository] Download reported as completed but file not found: id=${download.id} - keeping as downloading',
+              );
+              updatedDownloads.add(download);
+              continue;
+            }
+
+            // Verify file size if we have it
+            if (download.fileSize > 0) {
+              try {
+                final file = File(download.filePath);
+                final int actualFileSize = await file.length();
+                final int tolerance = (download.fileSize * 0.01).round();
+                final int sizeDiff = (actualFileSize - download.fileSize).abs();
+
+                if (sizeDiff > tolerance) {
+                  logger.w(
+                    '[DownloadsRepository] Download reported as completed but file size mismatch: '
+                    'expected=${download.fileSize} actual=$actualFileSize - keeping as downloading',
+                  );
+                  updatedDownloads.add(download);
+                  continue;
+                }
+              } catch (e) {
+                logger.e(
+                  '[DownloadsRepository] Error verifying file size: $e - keeping as downloading',
+                );
+                updatedDownloads.add(download);
+                continue;
+              }
+            }
+
+            // All checks passed - mark as completed
+            logger.d(
+              '[DownloadsRepository] Download verified and marked as completed in sync: id=${download.id}',
+            );
             final DownloadItem updatedDownload = download.copyWith(
               status: DownloadStatus.completed,
               progress: 1.0,
+              completedAt: DateTime.now(),
             );
             updatedDownloads.add(updatedDownload);
             hasChanges = true;
@@ -740,14 +783,112 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
 
     if (download != null) {
-      final DownloadItem updatedDownload = download.copyWith(
-        status: status,
-        progress: progress,
-        downloadedSize: downloadedSize,
-        fileSize: fileSize,
-        completedAt: status == DownloadStatus.completed ? DateTime.now() : null,
-      );
-      await updateDownload(updatedDownload);
+      // Special handling for completed status:
+      // Only mark as completed if:
+      // 1. Progress is 100% (1.0)
+      // 2. File actually exists on disk
+      // 3. File size matches expected size (if available)
+      if (status == DownloadStatus.completed) {
+        // Verify progress is actually 100%
+        if (progress < 1.0) {
+          logger.w(
+            '[DownloadsRepository] Download reported as completed but progress is ${(progress * 100).toStringAsFixed(1)}% - keeping as downloading',
+          );
+          // Keep status as downloading until progress reaches 100%
+          final DownloadItem updatedDownload = download.copyWith(
+            status: DownloadStatus.downloading,
+            progress: progress,
+            downloadedSize: downloadedSize,
+            fileSize: fileSize,
+          );
+          await updateDownload(updatedDownload);
+          return;
+        }
+
+        // Verify file actually exists
+        final bool fileExists = await localDataSource.isFileExists(
+          download.filePath,
+        );
+
+        if (!fileExists) {
+          logger.w(
+            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} - keeping as downloading',
+          );
+          // File doesn't exist yet, keep as downloading
+          final DownloadItem updatedDownload = download.copyWith(
+            status: DownloadStatus.downloading,
+            progress: progress,
+            downloadedSize: downloadedSize,
+            fileSize: fileSize,
+          );
+          await updateDownload(updatedDownload);
+          return;
+        }
+
+        // Verify file size if available
+        if (fileSize > 0) {
+          try {
+            final file = File(download.filePath);
+            final int actualFileSize = await file.length();
+
+            // Allow some tolerance (1%) for file size differences due to metadata
+            final int tolerance = (fileSize * 0.01).round();
+            final int sizeDiff = (actualFileSize - fileSize).abs();
+
+            if (sizeDiff > tolerance) {
+              logger.w(
+                '[DownloadsRepository] Download reported as completed but file size mismatch: '
+                'expected=$fileSize actual=$actualFileSize diff=$sizeDiff - keeping as downloading',
+              );
+              // File size doesn't match, keep as downloading
+              final DownloadItem updatedDownload = download.copyWith(
+                status: DownloadStatus.downloading,
+                progress: progress,
+                downloadedSize: downloadedSize,
+                fileSize: fileSize,
+              );
+              await updateDownload(updatedDownload);
+              return;
+            }
+          } catch (e) {
+            logger.e(
+              '[DownloadsRepository] Error verifying file size for completed download: $e',
+            );
+            // If we can't verify, keep as downloading to be safe
+            final DownloadItem updatedDownload = download.copyWith(
+              status: DownloadStatus.downloading,
+              progress: progress,
+              downloadedSize: downloadedSize,
+              fileSize: fileSize,
+            );
+            await updateDownload(updatedDownload);
+            return;
+          }
+        }
+
+        // All checks passed - mark as completed
+        logger.d(
+          '[DownloadsRepository] Download verified and marked as completed: '
+          'id=${download.id} file=${download.filePath} size=$fileSize',
+        );
+        final DownloadItem updatedDownload = download.copyWith(
+          status: DownloadStatus.completed,
+          progress: 1.0, // Ensure progress is exactly 1.0
+          downloadedSize: downloadedSize,
+          fileSize: fileSize,
+          completedAt: DateTime.now(),
+        );
+        await updateDownload(updatedDownload);
+      } else {
+        // For non-completed statuses, update normally
+        final DownloadItem updatedDownload = download.copyWith(
+          status: status,
+          progress: progress,
+          downloadedSize: downloadedSize,
+          fileSize: fileSize,
+        );
+        await updateDownload(updatedDownload);
+      }
     }
   }
 

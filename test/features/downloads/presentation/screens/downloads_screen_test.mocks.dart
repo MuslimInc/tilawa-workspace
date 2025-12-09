@@ -3,11 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i3;
 
-import 'package:hydrated_bloc/hydrated_bloc.dart' as _i5;
+import 'package:hydrated_bloc/hydrated_bloc.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i3;
+import 'package:mockito/src/dummies.dart' as _i5;
+import 'package:muzakri/features/downloads/data/services/download_service.dart'
+    as _i4;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i2;
 
@@ -35,10 +37,18 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   }
 
   @override
+  _i3.Stream<_i4.DownloadProgress> get downloadProgressStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#downloadProgressStream),
+            returnValue: _i3.Stream<_i4.DownloadProgress>.empty(),
+          )
+          as _i3.Stream<_i4.DownloadProgress>);
+
+  @override
   _i2.DownloadsState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i3.dummyValue<_i2.DownloadsState>(
+            returnValue: _i5.dummyValue<_i2.DownloadsState>(
               this,
               Invocation.getter(#state),
             ),
@@ -46,12 +56,12 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
           as _i2.DownloadsState);
 
   @override
-  _i4.Stream<_i2.DownloadsState> get stream =>
+  _i3.Stream<_i2.DownloadsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i4.Stream<_i2.DownloadsState>.empty(),
+            returnValue: _i3.Stream<_i2.DownloadsState>.empty(),
           )
-          as _i4.Stream<_i2.DownloadsState>);
+          as _i3.Stream<_i2.DownloadsState>);
 
   @override
   bool get isClosed =>
@@ -62,7 +72,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i3.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i5.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -70,7 +80,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i3.dummyValue<String>(
+            returnValue: _i5.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -81,7 +91,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i3.dummyValue<String>(
+            returnValue: _i5.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -89,13 +99,23 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
           as String);
 
   @override
-  _i4.Future<void> close() =>
+  _i3.Stream<_i4.DownloadProgress> getDownloadProgressStream(
+    String? downloadId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDownloadProgressStream, [downloadId]),
+            returnValue: _i3.Stream<_i4.DownloadProgress>.empty(),
+          )
+          as _i3.Stream<_i4.DownloadProgress>);
+
+  @override
+  _i3.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
   _i2.DownloadsState? fromJson(Map<String, dynamic>? json) =>
@@ -127,8 +147,8 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
 
   @override
   void on<E extends _i2.DownloadsEvent>(
-    _i5.EventHandler<E, _i2.DownloadsState>? handler, {
-    _i5.EventTransformer<E>? transformer,
+    _i6.EventHandler<E, _i2.DownloadsState>? handler, {
+    _i6.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -136,7 +156,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
 
   @override
   void onTransition(
-    _i5.Transition<_i2.DownloadsEvent, _i2.DownloadsState>? transition,
+    _i6.Transition<_i2.DownloadsEvent, _i2.DownloadsState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -153,7 +173,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   );
 
   @override
-  void onChange(_i5.Change<_i2.DownloadsState>? change) => super.noSuchMethod(
+  void onChange(_i6.Change<_i2.DownloadsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -172,19 +192,19 @@ class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
 
   @override
   void hydrate({
-    _i5.Storage? storage,
-    _i5.OnHydrationError? onError = _i5.defaultOnHydrationError,
+    _i6.Storage? storage,
+    _i6.OnHydrationError? onError = _i6.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i4.Future<void> clear() =>
+  _i3.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 }
