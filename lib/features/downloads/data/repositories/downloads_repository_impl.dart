@@ -505,37 +505,35 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final String downloadsDir = await localDataSource.getDownloadsDirectory();
 
-    // Use composite ID to ensure uniqueness across reciters for the same surah (URL)
-    final downloadId = '${trimmedUrl}_${reciterName.replaceAll(' ', '_')}';
+    // Use the URL as download ID (uniqueness is maintained through filename)
+    final downloadId = trimmedUrl;
 
-    // Build a safe filename from the URL; fallback to surahId + reciter if needed
+    // Extract the complete directory structure from URL to maintain server organization
+    // E.g., https://server6.mp3quran.net/husary/hafs/002.mp3 -> husary/hafs/002.mp3
+    // E.g., https://server6.mp3quran.net/earawi/002.mp3 -> earawi/002.mp3
     String safeFileName;
     try {
       final Uri parsed = Uri.parse(trimmedUrl);
-      final String lastSegment = parsed.pathSegments.isNotEmpty
-          ? parsed.pathSegments.last
-          : '';
-      if (lastSegment.isNotEmpty) {
-        final String ext = path.extension(lastSegment).toLowerCase();
-        final String baseName = ext.isNotEmpty
-            ? lastSegment.substring(0, lastSegment.length - ext.length)
-            : lastSegment;
+      final List<String> pathSegments = parsed.pathSegments;
 
-        // Allow common audio extensions; default to .mp3
-        const allowed = ['.mp3', '.m4a', '.aac', '.wav', '.ogg'];
-        final ensuredExt = allowed.contains(ext)
-            ? ext
-            : (ext.isEmpty ? '.mp3' : ext);
-
-        // Always append reciter name to ensure uniqueness
-        final fileNameWithReciter =
-            '${baseName}_${reciterName.replaceAll(' ', '_')}';
-        safeFileName = '$fileNameWithReciter$ensuredExt';
+      if (pathSegments.length >= 2) {
+        // URL has folder structure and filename
+        // Join all path segments to preserve reciter/narrative/file structure
+        // For example: ['husary', 'hafs', '002.mp3'] -> 'husary/hafs/002.mp3'
+        safeFileName = path.joinAll(pathSegments);
+      } else if (pathSegments.isNotEmpty) {
+        // URL only has filename, create folder from reciter name
+        final String sanitizedReciter = reciterName.replaceAll(' ', '_');
+        safeFileName = path.join(sanitizedReciter, pathSegments.last);
       } else {
-        safeFileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
+        // Fallback: create folder from reciter name
+        final String sanitizedReciter = reciterName.replaceAll(' ', '_');
+        safeFileName = path.join(sanitizedReciter, '$surahId.mp3');
       }
     } catch (_) {
-      safeFileName = '${surahId}_${reciterName.replaceAll(' ', '_')}.mp3';
+      // Fallback if URL parsing fails
+      final String sanitizedReciter = reciterName.replaceAll(' ', '_');
+      safeFileName = path.join(sanitizedReciter, '$surahId.mp3');
     }
 
     // Final guard to ensure we have an extension
