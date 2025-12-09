@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import '../../core/config/language_config.dart';
+import '../../features/localization/presentation/bloc/localization_bloc.dart';
 
 class LanguageSwitcher extends StatelessWidget {
   const LanguageSwitcher({super.key});
@@ -10,7 +10,7 @@ class LanguageSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LocalizationBloc, LocalizationState>(
       builder: (context, state) {
-        final currentLocale = state.locale;
+        final Locale currentLocale = state.locale;
 
         return PopupMenuButton<Locale>(
           icon: const Icon(Icons.language),
@@ -20,7 +20,7 @@ class LanguageSwitcher extends StatelessWidget {
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem<Locale>(
-                value: Locale(LanguageConfig.defaultLanguageCode),
+                value: const Locale(LanguageConfig.defaultLanguageCode),
                 child: Row(
                   children: [
                     Text(

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart';
-import 'package:muzakri/features/premium/presentation/bloc/premium_state.dart';
+import '../bloc/premium_bloc.dart';
+import '../bloc/premium_state.dart';
 
 class PremiumUpgradeDialog extends StatelessWidget {
-  final String title;
-  final String message;
-  final VoidCallback? onUpgrade;
-
   const PremiumUpgradeDialog({
     super.key,
     required this.title,
     required this.message,
     this.onUpgrade,
   });
+  final String title;
+  final String message;
+  final VoidCallback? onUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +94,9 @@ class PremiumUpgradeDialog extends StatelessWidget {
 }
 
 class _PremiumFeatureItem extends StatelessWidget {
+  const _PremiumFeatureItem({required this.icon, required this.text});
   final IconData icon;
   final String text;
-
-  const _PremiumFeatureItem({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {

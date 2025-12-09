@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -61,10 +61,14 @@ void main() {
           ).thenAnswer((_) async => testDownloads);
 
           // Act
-          final result = await useCase();
+          final Either<Failure, Map<String, List<DownloadItem>>> result =
+              await useCase();
 
           // Assert
-          expect(result, Right(testDownloads));
+          result.fold(
+            (_) => fail('Expected Right but got Left'),
+            (downloads) => expect(downloads, testDownloads),
+          );
           verify(mockRepository.getDownloadsByReciter()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -81,10 +85,14 @@ void main() {
           ).thenAnswer((_) async => testDownloads);
 
           // Act
-          final result = await useCase();
+          final Either<Failure, Map<String, List<DownloadItem>>> result =
+              await useCase();
 
           // Assert
-          expect(result, const Right(testDownloads));
+          result.fold(
+            (_) => fail('Expected Right but got Left'),
+            (downloads) => expect(downloads, testDownloads),
+          );
           verify(mockRepository.getDownloadsByReciter()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -100,10 +108,14 @@ void main() {
           ).thenThrow(Exception(errorMessage));
 
           // Act
-          final result = await useCase();
+          final Either<Failure, Map<String, List<DownloadItem>>> result =
+              await useCase();
 
           // Assert
-          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Exception: $errorMessage');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.getDownloadsByReciter()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -118,10 +130,14 @@ void main() {
           ).thenThrow('Generic error');
 
           // Act
-          final result = await useCase();
+          final Either<Failure, Map<String, List<DownloadItem>>> result =
+              await useCase();
 
           // Assert
-          expect(result, const Left(AudioFailure('Generic error')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Generic error');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.getDownloadsByReciter()).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -199,10 +215,14 @@ void main() {
         ).thenAnswer((_) async => testDownloads);
 
         // Act
-        final result = await useCase();
+        final Either<Failure, Map<String, List<DownloadItem>>> result =
+            await useCase();
 
         // Assert
-        expect(result, Right(testDownloads));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (downloads) => expect(downloads, testDownloads),
+        );
         verify(mockRepository.getDownloadsByReciter()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -212,11 +232,11 @@ void main() {
         final testDownloads = <String, List<DownloadItem>>{};
 
         // Create 100 downloads for 10 different reciters
-        for (int i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
           final reciterName = 'Reciter $i';
           final downloads = <DownloadItem>[];
 
-          for (int j = 1; j <= 10; j++) {
+          for (var j = 1; j <= 10; j++) {
             downloads.add(
               DownloadItem(
                 id: '${j.toString().padLeft(3, '0')}_Reciter_$i',
@@ -241,10 +261,14 @@ void main() {
         ).thenAnswer((_) async => testDownloads);
 
         // Act
-        final result = await useCase();
+        final Either<Failure, Map<String, List<DownloadItem>>> result =
+            await useCase();
 
         // Assert
-        expect(result, Right(testDownloads));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (downloads) => expect(downloads, testDownloads),
+        );
         expect(result.getOrElse(() => {}).length, 10);
         expect(result.getOrElse(() => {}).values.expand((x) => x).length, 100);
         verify(mockRepository.getDownloadsByReciter()).called(1);
@@ -266,7 +290,6 @@ void main() {
               fileSize: 1024000,
               downloadedSize: 1024000,
               createdAt: DateTime.now(),
-              completedAt: null, // null completedAt
             ),
           ],
         };
@@ -276,10 +299,14 @@ void main() {
         ).thenAnswer((_) async => testDownloads);
 
         // Act
-        final result = await useCase();
+        final Either<Failure, Map<String, List<DownloadItem>>> result =
+            await useCase();
 
         // Assert
-        expect(result, Right(testDownloads));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (downloads) => expect(downloads, testDownloads),
+        );
         verify(mockRepository.getDownloadsByReciter()).called(1);
         verifyNoMoreInteractions(mockRepository);
       });

@@ -1,5 +1,5 @@
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/audio_player/domain/repositories/audio_player_repository.dart';
+import '../../../../core/utils/typedefs.dart';
+import '../repositories/audio_player_repository.dart';
 
 class PlayAudioUseCase {
   const PlayAudioUseCase(this._repository);
@@ -7,6 +7,6 @@ class PlayAudioUseCase {
   final AudioPlayerRepository _repository;
 
   ResultVoid call() async {
-    return await _repository.play();
+    return _repository.play();
   }
 }

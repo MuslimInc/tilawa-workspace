@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -26,10 +26,13 @@ void main() {
         when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -45,10 +48,13 @@ void main() {
           ).thenThrow(Exception(errorMessage));
 
           // Act
-          final result = await useCase(testDownloadId);
+          final Either<Failure, void> result = await useCase(testDownloadId);
 
           // Assert
-          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Exception: $errorMessage');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.deleteDownload(testDownloadId)).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -62,10 +68,13 @@ void main() {
           when(mockRepository.deleteDownload(any)).thenThrow('Generic error');
 
           // Act
-          final result = await useCase(testDownloadId);
+          final Either<Failure, void> result = await useCase(testDownloadId);
 
           // Assert
-          expect(result, const Left(AudioFailure('Generic error')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Generic error');
+          }, (_) => fail('Expected Left but got Right'));
           verify(mockRepository.deleteDownload(testDownloadId)).called(1);
           verifyNoMoreInteractions(mockRepository);
         },
@@ -90,10 +99,13 @@ void main() {
         when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -104,24 +116,30 @@ void main() {
         when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
 
       test('should handle very long download ID', () async {
         // Arrange
-        final testDownloadId = 'a' * 1000; // Very long ID
+        final String testDownloadId = 'a' * 1000; // Very long ID
         when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -135,10 +153,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -152,10 +173,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -169,10 +193,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testDownloadId);
+        final Either<Failure, void> result = await useCase(testDownloadId);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(mockRepository.deleteDownload(testDownloadId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -186,14 +213,23 @@ void main() {
         when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
 
         // Act
-        final result1 = await useCase(testDownloadId1);
-        final result2 = await useCase(testDownloadId2);
-        final result3 = await useCase(testDownloadId3);
+        final Either<Failure, void> result1 = await useCase(testDownloadId1);
+        final Either<Failure, void> result2 = await useCase(testDownloadId2);
+        final Either<Failure, void> result3 = await useCase(testDownloadId3);
 
         // Assert
-        expect(result1, const Right(null));
-        expect(result2, const Right(null));
-        expect(result3, const Right(null));
+        result1.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
+        result2.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
+        result3.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
 
         verify(mockRepository.deleteDownload(testDownloadId1)).called(1);
         verify(mockRepository.deleteDownload(testDownloadId2)).called(1);

@@ -92,7 +92,7 @@ void main() {
 
     group('Download Status Analysis', () {
       test('should handle all download statuses correctly', () {
-        final statuses = DownloadStatus.values;
+        const List<DownloadStatus> statuses = DownloadStatus.values;
 
         expect(statuses, contains(DownloadStatus.pending));
         expect(statuses, contains(DownloadStatus.downloading));
@@ -103,7 +103,7 @@ void main() {
       });
 
       test('should identify failure-prone statuses', () {
-        final failureProneStatuses = [
+        final List<DownloadStatus> failureProneStatuses = [
           DownloadStatus.failed,
           DownloadStatus.cancelled,
         ];
@@ -114,7 +114,7 @@ void main() {
       });
 
       test('should identify retryable statuses', () {
-        final retryableStatuses = [
+        final List<DownloadStatus> retryableStatuses = [
           DownloadStatus.failed,
           DownloadStatus.cancelled,
         ];
@@ -143,7 +143,7 @@ void main() {
           'Connection refused by server',
         ];
 
-        for (int i = 0; i < networkErrorPatterns.length; i++) {
+        for (var i = 0; i < networkErrorPatterns.length; i++) {
           expect(networkErrorPatterns[i].hasMatch(testMessages[i]), true);
         }
       });
@@ -163,7 +163,7 @@ void main() {
           'HTTP 429 Too Many Requests',
         ];
 
-        for (int i = 0; i < httpErrorPatterns.length; i++) {
+        for (var i = 0; i < httpErrorPatterns.length; i++) {
           expect(httpErrorPatterns[i].hasMatch(testMessages[i]), true);
         }
       });
@@ -183,7 +183,7 @@ void main() {
           'Directory does not exist',
         ];
 
-        for (int i = 0; i < fileSystemErrorPatterns.length; i++) {
+        for (var i = 0; i < fileSystemErrorPatterns.length; i++) {
           expect(fileSystemErrorPatterns[i].hasMatch(testMessages[i]), true);
         }
       });
@@ -191,7 +191,7 @@ void main() {
 
     group('Download Failure Debugging', () {
       test('should provide debugging information for failures', () {
-        final debugInfo = {
+        final Map<String, Object> debugInfo = {
           'timestamp': DateTime.now().toIso8601String(),
           'downloadId': '001_Abdul_Rahman_Al-Sudais',
           'url': 'https://example.com/audio.mp3',
@@ -231,14 +231,14 @@ void main() {
           'device': ['Low battery', 'Storage full', 'Background restrictions'],
         };
 
-        for (final category in failureCategories.keys) {
+        for (final String category in failureCategories.keys) {
           expect(failureCategories[category], isA<List<String>>());
           expect(failureCategories[category]!.isNotEmpty, true);
         }
       });
 
       test('should suggest retry strategies', () {
-        final retryStrategies = {
+        final Map<String, Map<String, Object>> retryStrategies = {
           'network': {
             'maxRetries': 3,
             'retryDelay': 'exponential',
@@ -261,7 +261,7 @@ void main() {
           },
         };
 
-        for (final strategy in retryStrategies.keys) {
+        for (final String strategy in retryStrategies.keys) {
           expect(retryStrategies[strategy], isA<Map<String, dynamic>>());
           expect(retryStrategies[strategy]!['maxRetries'], isA<int>());
           expect(retryStrategies[strategy]!['retryDelay'], isA<String>());

@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart';
+import '../../../../core/utils/typedefs.dart';
+import '../repositories/localization_repository.dart';
 
 @Singleton()
 class GetCurrentLanguageUseCase {
@@ -9,6 +9,6 @@ class GetCurrentLanguageUseCase {
   final LocalizationRepository _repository;
 
   ResultFuture<String> call() async {
-    return await _repository.getCurrentLanguage();
+    return _repository.getCurrentLanguage();
   }
 }

@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
-import 'package:muzakri/core/errors/failures.dart';
+import 'package:dartz_plus/dartz_plus.dart';
+import '../errors/failures.dart';
 
 typedef ResultFuture<T> = Future<Either<Failure, T>>;
 typedef ResultVoid = ResultFuture<void>;

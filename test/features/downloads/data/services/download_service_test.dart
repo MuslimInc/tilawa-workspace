@@ -1,339 +1,282 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
-import 'package:dio/dio.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart';
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:path/path.dart' as path;
 
+import 'download_service_test.mocks.dart';
+
+@GenerateMocks([FlutterDownloaderWrapper])
 void main() {
-  setUpAll(() {
-    // Register Dio in GetIt for DownloadService to use
-    // This prevents "Dio is not registered" errors when DownloadService
-    // tries to access Dio via GetIt
-    final getIt = GetIt.instance;
-    if (getIt.isRegistered<Dio>()) {
-      getIt.unregister<Dio>();
-    }
-    // Use registerSingleton to ensure it's available immediately
-    getIt.registerSingleton<Dio>(Dio());
-  });
-
-  tearDownAll(() {
-    // Clean up GetIt registration
-    final getIt = GetIt.instance;
-    if (getIt.isRegistered<Dio>()) {
-      getIt.unregister<Dio>();
-    }
-  });
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('DownloadService', () {
-    const testId = 'test_download_id';
+    // const testId = 'test_download_id';
     const testUrl = 'https://example.com/test.mp3';
-    const testFilePath = '/test/path/test.mp3';
+
+    late Directory tempDir;
+    late String testFilePath;
+
     const testTitle = 'Test Audio';
     const testReciterName = 'Test Reciter';
+    const testTaskId = 'task-uuid-123';
 
-    tearDown(() {
-      // Clean up any active downloads
-      DownloadService.cancelDownload(testId);
+    late MockFlutterDownloaderWrapper mockDownloader;
+    late DownloadService downloadService;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('download_test');
+      testFilePath = path.join(tempDir.path, 'test.mp3');
+
+      mockDownloader = MockFlutterDownloaderWrapper();
+
+      when(
+        mockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(
+        mockDownloader.registerCallback(any, step: anyNamed('step')),
+      ).thenAnswer((_) async {});
+      when(
+        mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+      ).thenAnswer((_) async => []);
+
+      downloadService = DownloadService(flutterDownloader: mockDownloader);
     });
 
-    group('startDownload', () {
-      test('should start download and emit progress events', () async {
-        // Arrange
+    tearDown(() async {
+      await downloadService.disposeService();
+      if (tempDir.existsSync()) {
+        try {
+          tempDir.deleteSync(recursive: true);
+        } catch (_) {}
+      }
+    });
+
+    test('initialize registers port and callback', () async {
+      await downloadService.initialize();
+
+      verify(mockDownloader.initialize(debug: anyNamed('debug'))).called(1);
+      verify(
+        mockDownloader.registerCallback(any, step: anyNamed('step')),
+      ).called(1);
+
+      final SendPort? port = IsolateNameServer.lookupPortByName(
+        'downloader_send_port',
+      );
+      expect(port, isNotNull);
+    });
+
+    group('download', () {
+      test('should enqueue download and emit pending status', () async {
+        when(
+          mockDownloader.enqueue(
+            url: anyNamed('url'),
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            title: anyNamed('title'),
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          ),
+        ).thenAnswer((_) async => testTaskId);
+
         final progressEvents = <DownloadProgress>[];
-        late StreamSubscription subscription;
+        final StreamSubscription<DownloadProgress> subscription =
+            downloadService
+                .getProgressStream(testUrl)
+                .listen(progressEvents.add);
 
-        // Act
-        subscription = DownloadService.progressStream(testId).listen((
-          progress,
-        ) {
-          progressEvents.add(progress);
-        });
+        await downloadService.download(
+          id: testUrl,
+          url: testUrl,
+          filePath: testFilePath,
+          title: testTitle,
+          reciterName: testReciterName,
+        );
 
-        // Start download (this will fail in test environment, but we can test the structure)
-        try {
-          await DownloadService.startDownload(
-            id: testId,
+        verify(
+          mockDownloader.enqueue(
             url: testUrl,
-            filePath: testFilePath,
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            openFileFromNotification: false,
             title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          ),
+        ).called(1);
 
-        // Wait a bit for any events
-        await Future.delayed(const Duration(milliseconds: 100));
+        // Wait for stream to emit
+        await Future.delayed(Duration.zero);
 
-        // Assert
-        // In a real test environment, we would expect progress events
-        // For now, we just verify the service doesn't crash
-        expect(progressEvents, isA<List<DownloadProgress>>());
+        expect(progressEvents, isNotEmpty);
+        expect(progressEvents.first.status, DownloadStatus.pending);
+        expect(progressEvents.first.id, testUrl);
 
-        // Cleanup
         await subscription.cancel();
       });
 
-      test('should not start duplicate downloads', () async {
-        // Arrange
-        const testId = 'test_duplicate_download';
+      test('should not enqueue if already active', () async {
+        final task = DownloadTask(
+          taskId: 'existing-task',
+          status: DownloadTaskStatus.running,
+          progress: 50,
+          url: testUrl,
+          filename: 'test.mp3',
+          savedDir: '/path',
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
 
-        // Act
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
+        when(
+          mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+        ).thenAnswer((_) async => [task]);
 
-        // Check if download is active
-        final isActive = DownloadService.isDownloadActive(testId);
+        await downloadService.download(
+          id: testUrl,
+          url: testUrl,
+          filePath: testFilePath,
+          title: testTitle,
+          reciterName: testReciterName,
+        );
 
-        // Try to start the same download again
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
-
-        // Assert
-        // If the first download is active, the second call should not start a new one
-        if (isActive) {
-          expect(DownloadService.isDownloadActive(testId), true);
-        }
-
-        // Clean up
-        await DownloadService.cancelDownload(testId);
-      });
-
-      test('should handle invalid URL gracefully', () async {
-        // Arrange
-        const invalidUrl = 'not-a-valid-url';
-
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: invalidUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
+        verifyNever(
+          mockDownloader.enqueue(
+            url: anyNamed('url'),
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            headers: anyNamed('headers'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
           ),
-          returnsNormally,
         );
       });
+    });
 
-      test('should handle empty parameters', () async {
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: '',
-            url: '',
-            filePath: '',
-            title: '',
-            reciterName: '',
+    group('Progress Updates', () {
+      test('should handle progress updates from port', () async {
+        when(
+          mockDownloader.enqueue(
+            url: anyNamed('url'),
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            title: anyNamed('title'),
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
           ),
-          returnsNormally,
+        ).thenAnswer((_) async => testTaskId);
+
+        await downloadService.download(
+          id: testUrl,
+          url: testUrl,
+          filePath: testFilePath,
+          title: testTitle,
+          reciterName: testReciterName,
         );
-      });
-    });
 
-    group('isDownloadActive', () {
-      test('should return false for non-existent download', () {
-        // Act
-        final isActive = DownloadService.isDownloadActive('non_existent_id');
+        final progressEvents = <DownloadProgress>[];
+        final StreamSubscription<DownloadProgress> subscription =
+            downloadService
+                .getProgressStream(testUrl)
+                .listen(progressEvents.add);
 
-        // Assert
-        expect(isActive, false);
-      });
-
-      test('should return true for active download', () async {
-        // Arrange
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
-
-        // Act
-        final isActive = DownloadService.isDownloadActive(testId);
-
-        // Assert
-        // In test environment, this might still be false due to isolate limitations
-        expect(isActive, isA<bool>());
-      });
-    });
-
-    group('cancelDownload', () {
-      test('should cancel active download', () async {
-        // Arrange
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
-
-        // Act
-        await DownloadService.cancelDownload(testId);
-
-        // Assert
-        final isActive = DownloadService.isDownloadActive(testId);
-        expect(isActive, false);
-      });
-
-      test('should handle canceling non-existent download', () async {
-        // Act & Assert
-        expect(
-          () => DownloadService.cancelDownload('non_existent_id'),
-          returnsNormally,
+        final SendPort? port = IsolateNameServer.lookupPortByName(
+          'downloader_send_port',
         );
-      });
-    });
+        expect(port, isNotNull);
 
-    group('globalProgressStream', () {
-      test('should emit progress events for all downloads', () async {
-        // Arrange
-        final globalEvents = <DownloadProgress>[];
-        late StreamSubscription subscription;
+        port!.send([testTaskId, 2, 50]);
 
-        subscription = DownloadService.globalProgressStream.listen((progress) {
-          globalEvents.add(progress);
-        });
-
-        // Act
-        try {
-          await DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          );
-        } catch (e) {
-          // Expected to fail in test environment
-        }
-
-        // Wait a bit for any events
         await Future.delayed(const Duration(milliseconds: 100));
 
-        // Assert
-        expect(globalEvents, isA<List<DownloadProgress>>());
+        expect(progressEvents.last.status, DownloadStatus.downloading);
+        expect(progressEvents.last.progress, 0.5);
 
-        // Cleanup
+        await subscription.cancel();
+      });
+
+      test('should resolve ID from DB if not in map', () async {
+        await downloadService.initialize();
+
+        final task = DownloadTask(
+          taskId: testTaskId,
+          status: DownloadTaskStatus.running,
+          progress: 50,
+          url: testUrl,
+          filename: 'test.mp3',
+          savedDir: '/path',
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
+
+        when(
+          mockDownloader.loadTasksWithRawQuery(
+            query: argThat(
+              contains("WHERE task_id = '$testTaskId'"),
+              named: 'query',
+            ),
+          ),
+        ).thenAnswer((_) async => [task]);
+
+        final progressEvents = <DownloadProgress>[];
+        final StreamSubscription<DownloadProgress> subscription =
+            downloadService
+                .getProgressStream(testUrl)
+                .listen(progressEvents.add);
+
+        final SendPort? port = IsolateNameServer.lookupPortByName(
+          'downloader_send_port',
+        );
+        port!.send([testTaskId, 2, 50]);
+
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(progressEvents, isNotEmpty);
+        expect(progressEvents.first.id, testUrl);
+        expect(progressEvents.first.status, DownloadStatus.downloading);
+
         await subscription.cancel();
       });
     });
 
-    group('Error Scenarios', () {
-      test('should handle network timeout', () async {
-        // Arrange
-        const timeoutUrl =
-            'https://httpstat.us/200?sleep=30000'; // 30 second delay
-
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: timeoutUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          ),
-          returnsNormally,
+    group('cancel', () {
+      test('should cancel task', () async {
+        final task = DownloadTask(
+          taskId: testTaskId,
+          status: DownloadTaskStatus.running,
+          progress: 50,
+          url: testUrl,
+          filename: 'test.mp3',
+          savedDir: '/path',
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
         );
-      });
 
-      test('should handle 404 errors', () async {
-        // Arrange
-        const notFoundUrl = 'https://httpstat.us/404';
-
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: notFoundUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
+        when(
+          mockDownloader.loadTasksWithRawQuery(
+            query: argThat(contains("WHERE url = '$testUrl'"), named: 'query'),
           ),
-          returnsNormally,
-        );
-      });
+        ).thenAnswer((_) async => [task]);
 
-      test('should handle 500 errors', () async {
-        // Arrange
-        const serverErrorUrl = 'https://httpstat.us/500';
+        await downloadService.cancel(testUrl);
 
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: serverErrorUrl,
-            filePath: testFilePath,
-            title: testTitle,
-            reciterName: testReciterName,
-          ),
-          returnsNormally,
-        );
-      });
-
-      test('should handle invalid file path', () async {
-        // Arrange
-        const invalidPath = '/invalid/path/that/does/not/exist/file.mp3';
-
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: invalidPath,
-            title: testTitle,
-            reciterName: testReciterName,
-          ),
-          returnsNormally,
-        );
-      });
-
-      test('should handle permission denied', () async {
-        // Arrange
-        const restrictedPath = '/root/restricted/file.mp3';
-
-        // Act & Assert
-        expect(
-          () => DownloadService.startDownload(
-            id: testId,
-            url: testUrl,
-            filePath: restrictedPath,
-            title: testTitle,
-            reciterName: testReciterName,
-          ),
-          returnsNormally,
-        );
+        verify(mockDownloader.cancel(taskId: testTaskId)).called(1);
       });
     });
   });

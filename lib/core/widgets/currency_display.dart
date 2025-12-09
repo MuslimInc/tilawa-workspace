@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/core/config/currency_config.dart';
+import '../config/currency_config.dart';
 
 /// Widget for displaying currency amounts consistently across the app
 class CurrencyDisplay extends StatelessWidget {
@@ -29,8 +29,8 @@ class CurrencyDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final decimalPlaces = decimals ?? CurrencyConfig.decimalPlaces;
-    final formattedAmount = amount.toStringAsFixed(decimalPlaces);
+    final int decimalPlaces = decimals ?? CurrencyConfig.decimalPlaces;
+    final String formattedAmount = amount.toStringAsFixed(decimalPlaces);
 
     if (!showSymbol) {
       return Text(formattedAmount, style: style, textAlign: textAlign);
@@ -59,8 +59,8 @@ class CurrencyDisplay extends StatelessWidget {
 extension CurrencyFormatting on double {
   /// Format as currency string
   String toCurrency({bool showSymbol = true, int? decimals}) {
-    final decimalPlaces = decimals ?? CurrencyConfig.decimalPlaces;
-    final formattedAmount = toStringAsFixed(decimalPlaces);
+    final int decimalPlaces = decimals ?? CurrencyConfig.decimalPlaces;
+    final String formattedAmount = toStringAsFixed(decimalPlaces);
 
     if (!showSymbol) {
       return formattedAmount;

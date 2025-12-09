@@ -15,6 +15,27 @@ class DownloadItem extends Equatable {
     this.completedAt,
   });
 
+  factory DownloadItem.fromJson(Map<String, dynamic> json) {
+    return DownloadItem(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      url: json['url'] as String,
+      filePath: json['filePath'] as String,
+      reciterName: json['reciterName'] as String,
+      status: DownloadStatus.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => DownloadStatus.pending,
+      ),
+      progress: (json['progress'] as num).toDouble(),
+      fileSize: json['fileSize'] as int,
+      downloadedSize: json['downloadedSize'] as int,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
+    );
+  }
+
   final String id;
   final String title;
   final String url;
@@ -84,27 +105,6 @@ class DownloadItem extends Equatable {
       'createdAt': createdAt.toIso8601String(),
       'completedAt': completedAt?.toIso8601String(),
     };
-  }
-
-  factory DownloadItem.fromJson(Map<String, dynamic> json) {
-    return DownloadItem(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      url: json['url'] as String,
-      filePath: json['filePath'] as String,
-      reciterName: json['reciterName'] as String,
-      status: DownloadStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => DownloadStatus.pending,
-      ),
-      progress: (json['progress'] as num).toDouble(),
-      fileSize: json['fileSize'] as int,
-      downloadedSize: json['downloadedSize'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
-          : null,
-    );
   }
 }
 

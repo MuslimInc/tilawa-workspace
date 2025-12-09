@@ -379,6 +379,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تسجيل الدخول بجوجل غير مُعد. يرجى الاتصال بالدعم.';
 
   @override
+  String get unableToSignInWithThirdPartyAccount =>
+      'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
+
+  @override
   String get networkError => 'خطأ في الشبكة. يرجى التحقق من اتصالك.';
 
   @override
@@ -413,4 +417,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playPlaylistComingSoon => 'ميزة تشغيل قائمة التشغيل قادمة قريباً';
+
+  @override
+  String get downloadSurahsOffline => 'حمل السور للاستماع دون اتصال';
 }

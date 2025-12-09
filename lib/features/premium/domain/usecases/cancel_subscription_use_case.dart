@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import '../repositories/premium_repository.dart';
 
 @Singleton()
 class CancelSubscriptionUseCase {
@@ -8,6 +8,6 @@ class CancelSubscriptionUseCase {
   final PremiumRepository _premiumRepository;
 
   Future<bool> call() async {
-    return await _premiumRepository.cancelSubscription();
+    return _premiumRepository.cancelSubscription();
   }
 }

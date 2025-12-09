@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:muzakri/core/config/firebase_options.dart';
-import 'package:muzakri/core/services/firebase_initialization_service.dart';
-import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
-import 'package:muzakri/main.dart';
+
+import '../../features/premium/data/services/subscription_plans_service.dart';
+import '../../firebase_options.dart';
+import '../../main.dart';
+import '../services/firebase_initialization_service.dart';
 
 /// Command-line tool to initialize Firebase data
 /// Run this with: dart lib/core/utils/firebase_data_initializer.dart
@@ -21,7 +22,7 @@ Future<void> main() async {
     logger.d('✅ Firebase initialized');
 
     // Create services
-    final firestore = FirebaseFirestore.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final subscriptionPlansService = SubscriptionPlansService(
       firestore: firestore,
     );
@@ -34,7 +35,8 @@ Future<void> main() async {
     await initializationService.initializeFirebaseData();
 
     // Show statistics
-    final stats = await initializationService.getFirebaseDataStats();
+    final Map<String, int> stats = await initializationService
+        .getFirebaseDataStats();
     logger.d('\n📊 Firebase Data Statistics:');
     logger.d('Subscription Plans: ${stats['subscription_plans']}');
     logger.d('Users: ${stats['users']}');

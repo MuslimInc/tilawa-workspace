@@ -502,6 +502,10 @@
     "@googleSignInNotConfigured": {
         "description": "Google Sign-In configuration error message"
     },
+    "unableToSignInWithThirdPartyAccount": "Unable to sign in with third-party account",
+    "@unableToSignInWithThirdPartyAccount": {
+        "description": "Error message shown when third-party sign-in fails"
+    },
     "networkError": "Network error. Please check your connection.",
     "@networkError": {
         "description": "Network error message"
@@ -553,5 +557,9 @@
     "playPlaylistComingSoon": "Play playlist functionality coming soon",
     "@playPlaylistComingSoon": {
         "description": "Play playlist coming soon message"
+    },
+    "downloadSurahsOffline": "Download surahs to listen offline",
+    "@downloadSurahsOffline": {
+        "description": "Text prompting users to download surahs for offline listening"
     }
 }

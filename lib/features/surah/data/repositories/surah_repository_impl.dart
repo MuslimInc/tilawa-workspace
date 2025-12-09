@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
+import '../../../downloads/domain/repositories/downloads_repository.dart';
+import '../../domain/entities/surah_entity.dart';
+import '../../domain/repositories/surah_repository.dart';
 
 @LazySingleton(as: SurahRepository)
 class SurahRepositoryImpl implements SurahRepository {
@@ -29,8 +29,8 @@ class SurahRepositoryImpl implements SurahRepository {
     String reciterName,
     bool isDownloaded,
   ) async {
-    final cacheKey = _getCacheKey(surahId, reciterName);
-    final existingSurah = _surahCache[cacheKey];
+    final String cacheKey = _getCacheKey(surahId, reciterName);
+    final SurahEntity? existingSurah = _surahCache[cacheKey];
 
     if (existingSurah != null) {
       _surahCache[cacheKey] = existingSurah.copyWith(
@@ -49,8 +49,8 @@ class SurahRepositoryImpl implements SurahRepository {
     double progress,
     String? downloadId,
   ) async {
-    final cacheKey = _getCacheKey(surahId, reciterName);
-    final existingSurah = _surahCache[cacheKey];
+    final String cacheKey = _getCacheKey(surahId, reciterName);
+    final SurahEntity? existingSurah = _surahCache[cacheKey];
 
     if (existingSurah != null) {
       _surahCache[cacheKey] = existingSurah.copyWith(
@@ -64,32 +64,32 @@ class SurahRepositoryImpl implements SurahRepository {
   @override
   Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
     // First check cache
-    final cacheKey = _getCacheKey(surahId, reciterName);
-    final cachedSurah = _surahCache[cacheKey];
+    final String cacheKey = _getCacheKey(surahId, reciterName);
+    final SurahEntity? cachedSurah = _surahCache[cacheKey];
 
     if (cachedSurah != null) {
       return cachedSurah.isDownloaded;
     }
 
     // Fallback to downloads repository
-    return await _downloadsRepository.isSurahDownloaded(surahId, reciterName);
+    return _downloadsRepository.isSurahDownloaded(surahId, reciterName);
   }
 
   @override
   Future<SurahEntity?> getSurah(String surahId, String reciterName) async {
-    final cacheKey = _getCacheKey(surahId, reciterName);
+    final String cacheKey = _getCacheKey(surahId, reciterName);
     return _surahCache[cacheKey];
   }
 
   @override
   Future<void> updateSurah(SurahEntity surah) async {
-    final cacheKey = _getCacheKey(surah.id, surah.reciterName);
+    final String cacheKey = _getCacheKey(surah.id, surah.reciterName);
     _surahCache[cacheKey] = surah;
   }
 
   /// Add surah to cache (useful when creating surahs from external data)
   void addSurahToCache(SurahEntity surah) {
-    final cacheKey = _getCacheKey(surah.id, surah.reciterName);
+    final String cacheKey = _getCacheKey(surah.id, surah.reciterName);
     _surahCache[cacheKey] = surah;
   }
 

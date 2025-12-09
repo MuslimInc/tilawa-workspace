@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/currency_config.dart';
-import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
-import 'package:muzakri/main.dart';
+
+import '../../../../core/config/currency_config.dart';
+import '../../../../main.dart';
+import '../../domain/entities/premium_status.dart';
+import '../../domain/entities/subscription_plan.dart';
 
 abstract class PremiumRemoteDataSource {
   Future<PremiumStatus?> getPremiumStatus();
@@ -17,18 +18,19 @@ abstract class PremiumRemoteDataSource {
 
 @LazySingleton(as: PremiumRemoteDataSource)
 class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
+  PremiumRemoteDataSourceImpl(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  PremiumRemoteDataSourceImpl(this._firestore, this._auth);
 
   @override
   Future<PremiumStatus?> getPremiumStatus() async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) return null;
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        return null;
+      }
 
-      final doc = await _firestore
+      final DocumentSnapshot<Map<String, dynamic>> doc = await _firestore
           .collection('users')
           .doc(user.uid)
           .collection('premium')
@@ -48,8 +50,10 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<void> updatePremiumStatus(PremiumStatus status) async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
 
       await _firestore
           .collection('users')
@@ -66,7 +70,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<List<SubscriptionPlan>> getAvailablePlans() async {
     try {
-      final querySnapshot = await _firestore
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
           .collection('subscription_plans')
           .orderBy('order', descending: false)
           .get();
@@ -84,8 +88,10 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<bool> purchaseSubscription(String planId) async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) return false;
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        return false;
+      }
 
       // Create purchase record in Firebase
       await _firestore
@@ -121,8 +127,10 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<bool> cancelSubscription() async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) return false;
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        return false;
+      }
 
       // Create cancellation record
       await _firestore
@@ -135,9 +143,9 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
           });
 
       // Update premium status to cancelled
-      final currentStatus = await getPremiumStatus();
+      final PremiumStatus? currentStatus = await getPremiumStatus();
       if (currentStatus != null) {
-        final updatedStatus = currentStatus.copyWith(
+        final PremiumStatus updatedStatus = currentStatus.copyWith(
           isPremium: false,
           subscriptionEndDate: DateTime.now(),
         );
@@ -154,20 +162,23 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<bool> restoreSubscription() async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) return false;
+      final User? user = _auth.currentUser;
+      if (user == null) {
+        return false;
+      }
 
       // Check for recent purchases
-      final purchasesQuery = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('purchases')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .get();
+      final QuerySnapshot<Map<String, dynamic>> purchasesQuery =
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('purchases')
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
 
       if (purchasesQuery.docs.isNotEmpty) {
-        final purchase = purchasesQuery.docs.first.data();
+        final Map<String, dynamic> purchase = purchasesQuery.docs.first.data();
         final planId = purchase['planId'] as String;
 
         // Restore the subscription

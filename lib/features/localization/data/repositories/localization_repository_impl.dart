@@ -1,9 +1,10 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart';
-import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart';
+
+import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/typedefs.dart';
+import '../../domain/repositories/localization_repository.dart';
+import '../datasources/localization_local_datasource.dart';
 
 @LazySingleton(as: LocalizationRepository)
 class LocalizationRepositoryImpl implements LocalizationRepository {
@@ -14,7 +15,7 @@ class LocalizationRepositoryImpl implements LocalizationRepository {
   @override
   ResultFuture<String> getCurrentLanguage() async {
     try {
-      final language = await _localDataSource.getCurrentLanguage();
+      final String language = await _localDataSource.getCurrentLanguage();
       return Right(language);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
@@ -34,7 +35,8 @@ class LocalizationRepositoryImpl implements LocalizationRepository {
   @override
   ResultFuture<List<String>> getSupportedLanguages() async {
     try {
-      final languages = await _localDataSource.getSupportedLanguages();
+      final List<String> languages = await _localDataSource
+          .getSupportedLanguages();
       return Right(languages);
     } catch (e) {
       return Left(CacheFailure(e.toString()));

@@ -1,4 +1,4 @@
-import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
+import '../entities/playlist.dart';
 
 abstract class PlaylistsRepository {
   /// Get all playlists

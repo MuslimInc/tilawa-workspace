@@ -1,0 +1,217 @@
+import 'package:audio_service/audio_service.dart';
+import 'package:bloc_test/bloc_test.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
+
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
+
+class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
+
+void main() {
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
+
+  late MockAudioPlayerHandler mockAudioPlayerHandler;
+
+  setUp(() {
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockAudioPlayerHandler = MockAudioPlayerHandler();
+    GetIt.instance.registerSingleton<AudioPlayerHandler>(
+      mockAudioPlayerHandler,
+    );
+    when(
+      () => mockAudioPlayerHandler.getRecitersData(
+        languageCode: any(named: 'languageCode'),
+      ),
+    ).thenAnswer((_) async => null);
+  });
+
+  tearDown(() {
+    GetIt.instance.reset();
+  });
+
+  Widget createWidgetUnderTest() {
+    return BlocProvider<AudioPlayerBloc>.value(
+      value: mockAudioPlayerBloc,
+      child: const ScreenUtilPlusInit(
+        designSize: Size(375, 812),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        child: MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: BottomPlayerWidget(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  group('BottomPlayer Integration Tests', () {
+    testWidgets('should rely on hasMediaItem to determine visibility', (
+      tester,
+    ) async {
+      // Arrange
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Assert: Should be effectively invisible (SizedBox.shrink)
+      // The BottomPlayer itself is in the tree, but it returns SizedBox.shrink
+      expect(find.byType(Container), findsNothing);
+      expect(find.text('Unknown Reciter'), findsNothing);
+    });
+
+    testWidgets(
+      'should display media info when mediaItem is present and status is success',
+      (tester) async {
+        // Arrange
+        const testMediaItem = MediaItem(
+          id: '1',
+          title: 'Surah Al-Fatiha',
+          artist: 'Mishary Rashid',
+        );
+
+        when(() => mockAudioPlayerBloc.state).thenReturn(
+          AudioPlayerState(
+            status: AudioPlayerStatus.success,
+            mediaItem: testMediaItem,
+            playbackState: PlaybackState(
+              playing: true,
+              processingState: AudioProcessingState.ready,
+            ),
+          ),
+        );
+
+        // Act
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(find.text('Surah Al-Fatiha'), findsOneWidget);
+        expect(find.text('Mishary Rashid'), findsOneWidget);
+        expect(find.byIcon(FluentIcons.pause_24_filled), findsOneWidget);
+      },
+    );
+
+    testWidgets('should toggle play/pause icon based on isPlaying state', (
+      tester,
+    ) async {
+      // Arrange: Paused state
+      const testMediaItem = MediaItem(
+        id: '1',
+        title: 'Surah Al-Fatiha',
+        artist: 'Mishary Rashid',
+      );
+
+      when(() => mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: testMediaItem,
+          playbackState: PlaybackState(
+            processingState: AudioProcessingState.ready,
+          ), // Paused
+        ),
+      );
+
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Assert: Play icon should be visible
+      expect(find.byIcon(FluentIcons.play_24_filled), findsOneWidget);
+      expect(find.byIcon(FluentIcons.pause_24_filled), findsNothing);
+    });
+
+    testWidgets('should add PlayAudio event when play button is tapped', (
+      tester,
+    ) async {
+      // Arrange
+      const testMediaItem = MediaItem(
+        id: '1',
+        title: 'Surah Al-Fatiha',
+        artist: 'Mishary Rashid',
+      );
+
+      when(() => mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: testMediaItem,
+          playbackState: PlaybackState(
+            processingState: AudioProcessingState.ready,
+          ), // Paused
+        ),
+      );
+
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Find play button and tap
+      final Finder playButtonFinder = find.byIcon(FluentIcons.play_24_filled);
+      await tester.tap(playButtonFinder);
+      await tester.pump();
+
+      // Assert
+      verify(
+        () => mockAudioPlayerBloc.add(const AudioPlayerEvent.playAudio()),
+      ).called(1);
+    });
+
+    testWidgets('should add PauseAudio event when pause button is tapped', (
+      tester,
+    ) async {
+      // Arrange
+      const testMediaItem = MediaItem(
+        id: '1',
+        title: 'Surah Al-Fatiha',
+        artist: 'Mishary Rashid',
+      );
+
+      when(() => mockAudioPlayerBloc.state).thenReturn(
+        AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          mediaItem: testMediaItem,
+          playbackState: PlaybackState(
+            playing: true,
+            processingState: AudioProcessingState.ready,
+          ), // Playing
+        ),
+      );
+
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Find pause button and tap
+      final Finder pauseButtonFinder = find.byIcon(FluentIcons.pause_24_filled);
+      await tester.tap(pauseButtonFinder);
+      await tester.pump();
+
+      // Assert
+      verify(
+        () => mockAudioPlayerBloc.add(const AudioPlayerEvent.pauseAudio()),
+      ).called(1);
+    });
+  });
+}

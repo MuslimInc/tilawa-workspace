@@ -1,14 +1,15 @@
 import 'dart:async';
 
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/usecases/check_surah_download_status_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/get_surahs_for_reciter_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/refresh_surah_status_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/update_surah_download_progress_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/update_surah_download_status_use_case.dart';
+
+import '../../domain/entities/surah_entity.dart';
+import '../../domain/usecases/check_surah_download_status_use_case.dart';
+import '../../domain/usecases/get_surahs_for_reciter_use_case.dart';
+import '../../domain/usecases/refresh_surah_status_use_case.dart';
+import '../../domain/usecases/update_surah_download_progress_use_case.dart';
+import '../../domain/usecases/update_surah_download_status_use_case.dart';
 
 part 'surah_bloc.freezed.dart';
 part 'surah_event.dart';
@@ -43,7 +44,9 @@ class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
     emit(const SurahState.loading());
 
     try {
-      final surahs = await _getSurahsForReciter(event.reciterName);
+      final List<SurahEntity> surahs = await _getSurahsForReciter(
+        event.reciterName,
+      );
       emit(SurahState.loaded(surahs: surahs, reciterName: event.reciterName));
     } catch (e) {
       emit(SurahState.error('Failed to load surahs: $e'));
@@ -62,7 +65,7 @@ class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
       );
 
       // Get updated surah
-      final surah = await _checkSurahDownloadStatus(
+      final SurahEntity? surah = await _checkSurahDownloadStatus(
         surahId: event.surahId,
         reciterName: event.reciterName,
       );
@@ -88,7 +91,7 @@ class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
       );
 
       // Get updated surah
-      final surah = await _checkSurahDownloadStatus(
+      final SurahEntity? surah = await _checkSurahDownloadStatus(
         surahId: event.surahId,
         reciterName: event.reciterName,
       );
@@ -105,7 +108,7 @@ class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
     Emitter<SurahState> emit,
   ) async {
     try {
-      final surah = await _checkSurahDownloadStatus(
+      final SurahEntity? surah = await _checkSurahDownloadStatus(
         surahId: event.surahId,
         reciterName: event.reciterName,
       );
@@ -122,7 +125,7 @@ class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
     Emitter<SurahState> emit,
   ) async {
     try {
-      final surah = await _refreshSurahStatus(
+      final SurahEntity? surah = await _refreshSurahStatus(
         surahId: event.surahId,
         reciterName: event.reciterName,
       );

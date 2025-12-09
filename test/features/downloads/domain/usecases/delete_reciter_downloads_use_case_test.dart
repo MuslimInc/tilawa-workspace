@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -28,10 +28,13 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -49,10 +52,13 @@ void main() {
           ).thenThrow(Exception(errorMessage));
 
           // Act
-          final result = await useCase(testReciterName);
+          final Either<Failure, void> result = await useCase(testReciterName);
 
           // Assert
-          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Exception: $errorMessage');
+          }, (_) => fail('Expected Left but got Right'));
           verify(
             mockRepository.deleteDownloadsForReciter(testReciterName),
           ).called(1);
@@ -70,10 +76,13 @@ void main() {
           ).thenThrow('Generic error');
 
           // Act
-          final result = await useCase(testReciterName);
+          final Either<Failure, void> result = await useCase(testReciterName);
 
           // Assert
-          expect(result, const Left(AudioFailure('Generic error')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Generic error');
+          }, (_) => fail('Expected Left but got Right'));
           verify(
             mockRepository.deleteDownloadsForReciter(testReciterName),
           ).called(1);
@@ -106,10 +115,13 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -124,10 +136,13 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -136,16 +151,19 @@ void main() {
 
       test('should handle very long reciter name', () async {
         // Arrange
-        final testReciterName = 'A' * 1000; // Very long name
+        final String testReciterName = 'A' * 1000; // Very long name
         when(
           mockRepository.deleteDownloadsForReciter(any),
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -161,10 +179,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -180,10 +201,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -199,10 +223,13 @@ void main() {
         ).thenThrow(Exception(errorMessage));
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, Left(AudioFailure('Exception: $errorMessage')));
+        result.fold((failure) {
+          expect(failure, isA<AudioFailure>());
+          expect(failure.message, 'Exception: $errorMessage');
+        }, (_) => fail('Expected Left but got Right'));
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -217,10 +244,13 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);
@@ -240,14 +270,23 @@ void main() {
           ).thenAnswer((_) async {});
 
           // Act
-          final result1 = await useCase(testReciterName1);
-          final result2 = await useCase(testReciterName2);
-          final result3 = await useCase(testReciterName3);
+          final Either<Failure, void> result1 = await useCase(testReciterName1);
+          final Either<Failure, void> result2 = await useCase(testReciterName2);
+          final Either<Failure, void> result3 = await useCase(testReciterName3);
 
           // Assert
-          expect(result1, const Right(null));
-          expect(result2, const Right(null));
-          expect(result3, const Right(null));
+          result1.fold(
+            (_) => fail('Expected Right but got Left'),
+            (_) => expect(true, true), // Right with void
+          );
+          result2.fold(
+            (_) => fail('Expected Right but got Left'),
+            (_) => expect(true, true), // Right with void
+          );
+          result3.fold(
+            (_) => fail('Expected Right but got Left'),
+            (_) => expect(true, true), // Right with void
+          );
 
           verify(
             mockRepository.deleteDownloadsForReciter(testReciterName1),
@@ -272,10 +311,13 @@ void main() {
           ).thenAnswer((_) async {});
 
           // Act
-          final result = await useCase(testReciterName);
+          final Either<Failure, void> result = await useCase(testReciterName);
 
           // Assert
-          expect(result, const Right(null));
+          result.fold(
+            (_) => fail('Expected Right but got Left'),
+            (_) => expect(true, true), // Right with void
+          );
           verify(
             mockRepository.deleteDownloadsForReciter(testReciterName),
           ).called(1);
@@ -291,10 +333,13 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(testReciterName);
+        final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.deleteDownloadsForReciter(testReciterName),
         ).called(1);

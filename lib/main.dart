@@ -4,21 +4,28 @@ import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
-import 'package:muzakri/core/config/firebase_options.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/core/observers/app_bloc_observer.dart';
-import 'package:muzakri/core/services/analytics_initialization_service.dart';
-import 'package:muzakri/core/services/crashlytics_service.dart';
-import 'package:muzakri/core/services/firebase_initialization_service.dart';
-import 'package:muzakri/quran_player_app.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'core/di/injection.dart';
+import 'core/observers/app_bloc_observer.dart';
+import 'core/services/analytics_initialization_service.dart';
+import 'core/services/crashlytics_service.dart';
+import 'core/services/firebase_initialization_service.dart';
+import 'core/services/notification_permission_service.dart';
+import 'features/downloads/data/services/downloads_initialization_service.dart';
+import 'firebase_options.dart';
+import 'quran_player_app.dart';
 
 final logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Enable edge-to-edge display (Flutter recommended approach)
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Initialize Firebase first, then DI
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -35,6 +42,12 @@ Future<void> main() async {
 
   // Initialize Analytics
   await _initializeAnalytics();
+
+  // Request notification permission on first launch
+  await _requestNotificationPermission();
+
+  // Initialize downloads feature (resumes pending downloads)
+  await _initializeDownloads();
 
   // Initialize Firebase data asynchronously after app starts
   _initializeFirebaseDataAsync();
@@ -62,7 +75,7 @@ Future<void> _initializeHydratedStorage() async {
 /// Initialize Credential Manager with Google Client ID
 Future<void> _initializeCredentialManager() async {
   try {
-    final credentialManager = getIt<CredentialManager>();
+    final CredentialManager credentialManager = getIt<CredentialManager>();
     await credentialManager.init(
       preferImmediatelyAvailableCredentials: true,
       googleClientId:
@@ -77,7 +90,7 @@ Future<void> _initializeCredentialManager() async {
 /// Initialize Crashlytics
 Future<void> _initializeCrashlytics() async {
   try {
-    final crashlyticsService = getIt<CrashlyticsService>();
+    final CrashlyticsService crashlyticsService = getIt<CrashlyticsService>();
     await crashlyticsService.initialize();
     logger.d('Crashlytics initialized successfully');
   } catch (e) {
@@ -88,7 +101,8 @@ Future<void> _initializeCrashlytics() async {
 /// Initialize Analytics
 Future<void> _initializeAnalytics() async {
   try {
-    final analyticsInitService = getIt<AnalyticsInitializationService>();
+    final AnalyticsInitializationService analyticsInitService =
+        getIt<AnalyticsInitializationService>();
     await analyticsInitService.initialize();
     logger.d('Analytics initialized successfully');
   } catch (e) {
@@ -96,14 +110,38 @@ Future<void> _initializeAnalytics() async {
   }
 }
 
+/// Request notification permission on first launch
+Future<void> _requestNotificationPermission() async {
+  try {
+    final NotificationPermissionService notificationPermissionService =
+        getIt<NotificationPermissionService>();
+    await notificationPermissionService.requestPermissionOnFirstLaunch();
+    logger.d('Notification permission request completed');
+  } catch (e) {
+    logger.d('Warning: Could not request notification permission: $e');
+  }
+}
+
 /// Initialize Firebase data asynchronously to avoid blocking main thread
 void _initializeFirebaseDataAsync() {
   Future.microtask(() async {
     try {
-      final firebaseInitService = getIt<FirebaseInitializationService>();
+      final FirebaseInitializationService firebaseInitService =
+          getIt<FirebaseInitializationService>();
       await firebaseInitService.initializeFirebaseData();
     } catch (e) {
       logger.d('Warning: Could not initialize Firebase data: $e');
     }
   });
+}
+
+/// Initialize downloads feature
+Future<void> _initializeDownloads() async {
+  try {
+    final DownloadsInitializationService downloadsInitService =
+        getIt<DownloadsInitializationService>();
+    await downloadsInitService.initialize();
+  } catch (e) {
+    logger.d('Warning: Could not initialize downloads: $e');
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+
+import '../entities/download_item.dart';
 
 abstract class DownloadsRepository {
   /// Get all downloads grouped by reciter
@@ -48,6 +49,9 @@ abstract class DownloadsRepository {
   /// Check if a surah is already downloaded
   Future<bool> isSurahDownloaded(String surahId, String reciterName);
 
+  /// Check if a surah is currently downloading
+  Future<bool> isSurahDownloading(String surahId, String reciterName);
+
   /// Get downloaded file path
   Future<String?> getDownloadedFilePath(String surahId, String reciterName);
 
@@ -74,4 +78,7 @@ abstract class DownloadsRepository {
 
   /// Create MediaItems from multiple downloads
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads);
+
+  /// Resume any pending or stuck downloads on app start
+  Future<void> resumePendingDownloads();
 }

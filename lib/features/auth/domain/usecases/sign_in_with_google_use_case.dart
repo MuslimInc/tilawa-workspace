@@ -1,14 +1,13 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
-import 'package:muzakri/features/auth/domain/repositories/auth_repository.dart';
+import '../entities/auth_result.dart';
+import '../repositories/auth_repository.dart';
 
 @Singleton()
 class SignInWithGoogleUseCase {
+  SignInWithGoogleUseCase(this._repository);
   final AuthRepository _repository;
 
-  SignInWithGoogleUseCase(this._repository);
-
   Future<AuthResult> call() async {
-    return await _repository.signInWithGoogle();
+    return _repository.signInWithGoogle();
   }
 }

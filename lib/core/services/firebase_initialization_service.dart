@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
-import 'package:muzakri/main.dart';
+import '../../features/premium/data/services/subscription_plans_service.dart';
+import '../../main.dart';
 
 class FirebaseInitializationService {
-  final FirebaseFirestore _firestore;
-  final SubscriptionPlansService _subscriptionPlansService;
-
   FirebaseInitializationService({
     required FirebaseFirestore firestore,
     required SubscriptionPlansService subscriptionPlansService,
   }) : _firestore = firestore,
        _subscriptionPlansService = subscriptionPlansService;
+  final FirebaseFirestore _firestore;
+  final SubscriptionPlansService _subscriptionPlansService;
 
   /// Initialize Firebase with default data
   Future<void> initializeFirebaseData() async {
@@ -18,7 +17,7 @@ class FirebaseInitializationService {
       logger.d('🚀 Initializing Firebase data...');
 
       // Check if subscription plans already exist
-      final plansSnapshot = await _firestore
+      final QuerySnapshot<Map<String, dynamic>> plansSnapshot = await _firestore
           .collection('subscription_plans')
           .limit(1)
           .get();
@@ -58,10 +57,12 @@ class FirebaseInitializationService {
   /// Get Firebase data statistics
   Future<Map<String, int>> getFirebaseDataStats() async {
     try {
-      final plansSnapshot = await _firestore
+      final QuerySnapshot<Map<String, dynamic>> plansSnapshot = await _firestore
           .collection('subscription_plans')
           .get();
-      final usersSnapshot = await _firestore.collection('users').get();
+      final QuerySnapshot<Map<String, dynamic>> usersSnapshot = await _firestore
+          .collection('users')
+          .get();
 
       return {
         'subscription_plans': plansSnapshot.docs.length,
@@ -79,16 +80,20 @@ class FirebaseInitializationService {
       logger.d('⚠️  Clearing all Firebase data...');
 
       // Delete subscription plans
-      final plansSnapshot = await _firestore
+      final QuerySnapshot<Map<String, dynamic>> plansSnapshot = await _firestore
           .collection('subscription_plans')
           .get();
-      for (final doc in plansSnapshot.docs) {
+      for (final QueryDocumentSnapshot<Map<String, dynamic>> doc
+          in plansSnapshot.docs) {
         await doc.reference.delete();
       }
 
       // Delete users (be careful with this!)
-      final usersSnapshot = await _firestore.collection('users').get();
-      for (final doc in usersSnapshot.docs) {
+      final QuerySnapshot<Map<String, dynamic>> usersSnapshot = await _firestore
+          .collection('users')
+          .get();
+      for (final QueryDocumentSnapshot<Map<String, dynamic>> doc
+          in usersSnapshot.docs) {
         await doc.reference.delete();
       }
 

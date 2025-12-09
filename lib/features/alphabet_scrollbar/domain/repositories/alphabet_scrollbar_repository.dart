@@ -1,4 +1,4 @@
-import 'package:muzakri/core/utils/typedefs.dart';
+import '../../../../core/utils/typedefs.dart';
 
 abstract class AlphabetScrollbarRepository {
   ResultFuture<List<String>> getAvailableLetters();

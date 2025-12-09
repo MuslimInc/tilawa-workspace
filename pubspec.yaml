@@ -5,73 +5,75 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: 3.10.0
+  sdk: ^3.10.3
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  # audioplayers: ^0.19.1
+  audio_service: ^0.18.18
+  audio_session: ^0.2.2
+  audio_video_progress_bar: ^2.0.3
+  flutter_downloader: ^1.11.4
   cached_network_image: ^3.4.1
+  cloud_firestore: ^6.0.3
+  credential_manager: ^2.0.4
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
-  # excel: 2.0.0-null-safety-3
-  file_picker: ^10.3.3
-  flutter_bloc: ^9.1.1
-  hydrated_bloc: ^10.1.1
-  flutter_svg: ^2.2.1
-  http: ^1.5.0
-  get_it: ^9.0.5
-  flutter_screenutil: ^5.9.3
-
-  # Audio Packages
-  # just_audio_background:
-  audio_video_progress_bar: ^2.0.3
-  audio_session: ^0.2.2
-  audio_service: ^0.18.18
-  just_audio: ^0.10.5
-  rxdart: ^0.28.0
-
-  provider: ^6.1.5
+  dartz_plus: ^0.1.0
   equatable: ^2.0.7
-  go_router: ^17.0.0
-  dartz: ^0.10.1
-  shared_preferences: ^2.5.3
-  hugeicons: ^1.1.1
-  fluentui_system_icons: ^1.1.273
-  freezed_annotation: ^3.1.0
-  json_annotation: ^4.9.0
-  path: ^1.9.1
-  path_provider: ^2.1.5
-  cloud_firestore: ^6.0.3
+  file_picker: ^10.3.3
+  firebase_analytics: ^12.0.3
   firebase_auth: ^6.1.1
   firebase_core: ^4.2.0
-  firebase_analytics: ^12.0.3
-  google_sign_in: ^7.2.0
-  credential_manager: ^2.0.4
-  injectable: ^2.5.2
   firebase_crashlytics: ^5.0.3
-  logger: ^2.6.2
   flex_color_scheme: ^8.3.0
+  fluentui_system_icons: ^1.1.273
+  flutter_bloc: ^9.1.1
+  flutter_screenutil_plus: ^1.3.0
+  flutter_svg: ^2.2.1
+  freezed_annotation: ^3.1.0
+  get_it: ^9.0.5
+  go_router: ^17.0.0
+  google_sign_in: ^7.2.0
+  hugeicons: ^1.1.1
+  http: ^1.5.0
+  hydrated_bloc: ^10.1.1
+  injectable: ^2.5.2
+  json_annotation: ^4.9.0
+  just_audio: ^0.10.5
+  logger: ^2.6.2
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  provider: ^6.1.5
+  rxdart: ^0.28.0
+  shared_preferences: ^2.5.3
+  stream_transform: ^2.0.0
+  gap: ^3.0.1
+  fluttertoast: ^8.2.8
+  fake_async: ^1.3.3
+  clock: ^1.1.2
 
 dev_dependencies:
+  bloc_concurrency: ^0.3.0
+  bloc_test: ^10.0.0
+  build_runner: ^2.10.3
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  build_runner: ^2.7.1
   freezed: ^3.2.3
-  json_serializable: ^6.11.1
+  go_router_builder: ^4.1.3
   injectable_generator: ^2.8.1
+  json_serializable: ^6.11.1
   mockito: ^5.5.0
-  bloc_test: ^10.0.0
-  go_router_builder: ^4.1.1
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true
   generate: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
     - assets/Book.xlsx

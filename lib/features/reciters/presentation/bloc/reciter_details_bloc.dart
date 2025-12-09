@@ -1,11 +1,13 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
+
+import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../../shared/models/reciter_model.dart';
+import '../../../surah/domain/entities/surah_entity.dart';
+import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
+import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.dart';
 
 part 'reciter_details_event.dart';
 part 'reciter_details_state.dart';
@@ -13,10 +15,6 @@ part 'reciter_details_state.dart';
 @injectable
 class ReciterDetailsBloc
     extends HydratedBloc<ReciterDetailsEvent, ReciterDetailsState> {
-  final AudioPlayerHandler _audioHandler;
-  final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
-  final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
-
   ReciterDetailsBloc(
     this._audioHandler,
     this._convertMediaItemsToSurahs,
@@ -27,22 +25,23 @@ class ReciterDetailsBloc
     on<SelectSurah>(_onSelectSurah);
     on<RefreshSurahDownloadStatus>(_onRefreshSurahDownloadStatus);
   }
+  final AudioPlayerHandler _audioHandler;
+  final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
+  final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
 
   Future<void> _onLoadSurahList(
     LoadSurahList event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    emit(const ReciterDetailsLoading());
-
     try {
-      final mediaItemList = await _audioHandler.getSurahListForMoshaf(
-        event.moshaf,
-        reciterName: event.reciter.name,
-      );
+      final List<MediaItem>? mediaItemList = await _audioHandler
+          .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
 
       if (mediaItemList != null) {
         // Convert MediaItem list to Surah list with download status
-        final surahList = await _convertMediaItemsToSurahs(mediaItemList);
+        final List<SurahEntity> surahList = await _convertMediaItemsToSurahs(
+          mediaItemList,
+        );
 
         emit(
           ReciterDetailsLoaded(
@@ -59,14 +58,18 @@ class ReciterDetailsBloc
   }
 
   void _onSelectMoshaf(SelectMoshaf event, Emitter<ReciterDetailsState> emit) {
-    if (state is! ReciterDetailsLoaded) return;
+    if (state is! ReciterDetailsLoaded) {
+      return;
+    }
 
     final currentState = state as ReciterDetailsLoaded;
     emit(currentState.copyWith(selectedMoshaf: event.moshaf));
   }
 
   void _onSelectSurah(SelectSurah event, Emitter<ReciterDetailsState> emit) {
-    if (state is! ReciterDetailsLoaded) return;
+    if (state is! ReciterDetailsLoaded) {
+      return;
+    }
 
     final currentState = state as ReciterDetailsLoaded;
     emit(currentState.copyWith(selectedSurahId: event.surahId));
@@ -76,16 +79,19 @@ class ReciterDetailsBloc
     RefreshSurahDownloadStatus event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    if (state is! ReciterDetailsLoaded) return;
+    if (state is! ReciterDetailsLoaded) {
+      return;
+    }
 
     final currentState = state as ReciterDetailsLoaded;
 
     try {
-      final updatedSurahList = await _refreshSurahDownloadStatusUseCase.call(
-        currentSurahs: currentState.surahList,
-        surahId: event.surahId,
-        reciterName: event.reciterName,
-      );
+      final List<SurahEntity> updatedSurahList =
+          await _refreshSurahDownloadStatusUseCase.call(
+            currentSurahs: currentState.surahList,
+            surahId: event.surahId,
+            reciterName: event.reciterName,
+          );
 
       emit(currentState.copyWith(surahList: updatedSurahList));
     } catch (e) {

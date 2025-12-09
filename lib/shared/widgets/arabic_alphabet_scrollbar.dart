@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
+
+import '../../features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import '../models/reciter_model.dart';
 
 class ArabicAlphabetScrollbar extends StatelessWidget {
-  final List<String> letters;
-  final Function(String letter) onLetterSelected;
-  final ScrollController scrollController;
-  final List<dynamic> items; // List of items to search through
-  final String Function(dynamic item)
-  getItemLetter; // Function to get letter from item
+  // Function to get letter from item
 
   const ArabicAlphabetScrollbar({
     super.key,
@@ -19,13 +15,18 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
     required this.items,
     required this.getItemLetter,
   });
+  final List<String> letters;
+  final Function(String letter) onLetterSelected;
+  final ScrollController scrollController;
+  final List<dynamic> items; // List of items to search through
+  final String Function(Reciter item) getItemLetter;
 
   void _onLetterTap(String letter, BuildContext context) {
     context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
 
     // Find the first item that starts with this letter
-    final index = items.indexWhere((item) {
-      final itemLetter = getItemLetter(item);
+    final int index = items.indexWhere((item) {
+      final String itemLetter = getItemLetter(item);
       return itemLetter == letter;
     });
 
@@ -50,20 +51,22 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
   }
 
   void _onPanUpdate(DragUpdateDetails details, BuildContext context) {
-    final currentState = context.read<AlphabetScrollbarBloc>().state;
+    final AlphabetScrollbarState currentState = context
+        .read<AlphabetScrollbarBloc>()
+        .state;
     if (!currentState.isDragging) {
       return;
     }
 
-    final RenderBox box = context.findRenderObject() as RenderBox;
-    final localPosition = box.globalToLocal(details.globalPosition);
-    final letterHeight = box.size.height / letters.length;
-    final letterIndex = (localPosition.dy / letterHeight)
+    final box = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = box.globalToLocal(details.globalPosition);
+    final double letterHeight = box.size.height / letters.length;
+    final int letterIndex = (localPosition.dy / letterHeight)
         .clamp(0, letters.length - 1)
         .floor();
 
     if (letterIndex >= 0 && letterIndex < letters.length) {
-      final letter = letters[letterIndex];
+      final String letter = letters[letterIndex];
       if (currentState.selectedLetter != letter) {
         context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
         _onLetterTap(letter, context);
@@ -79,7 +82,7 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AlphabetScrollbarBloc, AlphabetScrollbarState>(
       builder: (context, state) {
-        final selectedLetter = state.selectedLetter;
+        final String? selectedLetter = state.selectedLetter;
 
         return Container(
           width: 40,
@@ -136,16 +139,15 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
 
 // Helper class to create alphabet scrollbar for reciters
 class ReciterAlphabetScrollbar extends StatelessWidget {
-  final List<Reciter> reciters;
-  final ScrollController scrollController;
-  final Function(String letter) onLetterSelected;
-
   const ReciterAlphabetScrollbar({
     super.key,
     required this.reciters,
     required this.scrollController,
     required this.onLetterSelected,
   });
+  final List<Reciter> reciters;
+  final ScrollController scrollController;
+  final Function(String letter) onLetterSelected;
 
   void clearSelection(BuildContext context) {
     context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
@@ -154,15 +156,18 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Get unique letters from reciters, sorted
-    final letters = reciters.map((reciter) => reciter.letter).toSet().toList()
-      ..sort();
+    final List<String> letters =
+        reciters.map((reciter) => reciter.letter).toSet().toList()..sort();
 
     return ArabicAlphabetScrollbar(
       letters: letters,
       onLetterSelected: onLetterSelected,
       scrollController: scrollController,
       items: reciters,
-      getItemLetter: (reciter) => reciter.letter,
+      getItemLetter: (dynamic item) {
+        final reciter = item as Reciter;
+        return reciter.letter;
+      },
     );
   }
 }

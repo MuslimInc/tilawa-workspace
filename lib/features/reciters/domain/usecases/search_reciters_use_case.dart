@@ -1,7 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:muzakri/core/entities/reciter.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:dartz_plus/dartz_plus.dart';
+
+import '../../../../core/entities/reciter.dart';
+import '../../../../core/utils/typedefs.dart';
+import '../repositories/reciters_repository.dart';
 
 class SearchRecitersUseCase {
   const SearchRecitersUseCase(this._repository);
@@ -10,8 +11,8 @@ class SearchRecitersUseCase {
 
   ResultFuture<List<ReciterEntity>> call(String query) async {
     if (query.isEmpty) {
-      return Right([]);
+      return const Right([]);
     }
-    return await _repository.searchReciters(query);
+    return _repository.searchReciters(query);
   }
 }

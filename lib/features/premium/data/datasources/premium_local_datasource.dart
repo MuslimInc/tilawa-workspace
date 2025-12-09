@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/premium/domain/entities/premium_status.dart';
-import 'package:muzakri/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../main.dart';
+import '../../domain/entities/premium_status.dart';
 
 abstract class PremiumLocalDataSource {
   Future<PremiumStatus> getPremiumStatus();
@@ -13,15 +14,14 @@ abstract class PremiumLocalDataSource {
 
 @LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
+  PremiumLocalDataSourceImpl(this._prefs);
   static const String _premiumStatusKey = 'premium_status';
 
   final SharedPreferencesAsync _prefs;
 
-  PremiumLocalDataSourceImpl(this._prefs);
-
   @override
   Future<PremiumStatus> getPremiumStatus() async {
-    final statusJson = await _prefs.getString(_premiumStatusKey) ?? '';
+    final String statusJson = await _prefs.getString(_premiumStatusKey) ?? '';
 
     try {
       final statusMap = jsonDecode(statusJson) as Map<String, dynamic>;
@@ -44,7 +44,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   @override
   Future<void> savePremiumStatus(PremiumStatus status) async {
     try {
-      final statusJson = jsonEncode(status.toJson());
+      final String statusJson = jsonEncode(status.toJson());
       await _prefs.setString(_premiumStatusKey, statusJson);
     } catch (e) {
       logger.d('Error saving premium status: $e');

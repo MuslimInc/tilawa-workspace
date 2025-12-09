@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/language_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../core/config/language_config.dart';
 
 abstract class LocalizationLocalDataSource {
   Future<String> getCurrentLanguage();

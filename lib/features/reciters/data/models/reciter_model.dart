@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muzakri/core/entities/reciter.dart';
+import '../../../../core/entities/reciter.dart';
 
 part 'reciter_model.freezed.dart';
 part 'reciter_model.g.dart';

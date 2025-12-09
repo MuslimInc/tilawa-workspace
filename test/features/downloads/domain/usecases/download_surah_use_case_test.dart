@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -31,14 +31,17 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(
+        final Either<Failure, void> result = await useCase(
           surahId: testSurahId,
           surahTitle: testSurahTitle,
           reciterName: testReciterName,
         );
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.startDownload(
             testSurahId,
@@ -59,14 +62,17 @@ void main() {
           ).thenThrow(Exception(errorMessage));
 
           // Act
-          final result = await useCase(
+          final Either<Failure, void> result = await useCase(
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
           );
 
           // Assert
-          expect(result, Left(AudioFailure('Exception: $errorMessage')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Exception: $errorMessage');
+          }, (_) => fail('Expected Left but got Right'));
           verify(
             mockRepository.startDownload(
               testSurahId,
@@ -87,14 +93,17 @@ void main() {
           ).thenThrow('Generic error');
 
           // Act
-          final result = await useCase(
+          final Either<Failure, void> result = await useCase(
             surahId: testSurahId,
             surahTitle: testSurahTitle,
             reciterName: testReciterName,
           );
 
           // Assert
-          expect(result, const Left(AudioFailure('Generic error')));
+          result.fold((failure) {
+            expect(failure, isA<AudioFailure>());
+            expect(failure.message, 'Generic error');
+          }, (_) => fail('Expected Left but got Right'));
           verify(
             mockRepository.startDownload(
               testSurahId,
@@ -137,14 +146,17 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(
+        final Either<Failure, void> result = await useCase(
           surahId: '',
           surahTitle: '',
           reciterName: '',
         );
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(mockRepository.startDownload('', '', '')).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
@@ -160,14 +172,17 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        final result = await useCase(
+        final Either<Failure, void> result = await useCase(
           surahId: specialSurahId,
           surahTitle: specialSurahTitle,
           reciterName: specialReciterName,
         );
 
         // Assert
-        expect(result, const Right(null));
+        result.fold(
+          (_) => fail('Expected Right but got Left'),
+          (_) => expect(true, true), // Right with void
+        );
         verify(
           mockRepository.startDownload(
             specialSurahId,

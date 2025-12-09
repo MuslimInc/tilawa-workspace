@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/playlists/presentation/bloc/playlists_bloc.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+
+import '../../../../core/utils/toast_utils.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../bloc/playlists_bloc.dart';
 
 class CreatePlaylistDialog extends StatefulWidget {
   const CreatePlaylistDialog({super.key});
@@ -25,24 +27,17 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return BlocListener<PlaylistsBloc, PlaylistsState>(
       listener: (context, state) {
         state.whenOrNull(
           playlistCreated: (playlist, playlists) {
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.playlistCreated),
-                backgroundColor: Colors.green,
-              ),
-            );
+            ToastUtils.showSuccessToast(l10n.playlistCreated);
           },
           error: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
+            ToastUtils.showErrorToast(message);
           },
         );
       },

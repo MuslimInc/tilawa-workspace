@@ -43,4 +43,7 @@ sealed class DownloadsEvent with _$DownloadsEvent {
 
   const factory DownloadsEvent.retryDownload({required String downloadId}) =
       RetryDownloadEvent;
+
+  const factory DownloadsEvent.refreshDownloadsProgress() =
+      RefreshDownloadsProgress;
 }

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:muzakri/features/premium/domain/entities/subscription_plan.dart';
+import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlanCard extends StatelessWidget {
-  final SubscriptionPlan plan;
-  final VoidCallback onSelect;
-
   const SubscriptionPlanCard({
     super.key,
     required this.plan,
     required this.onSelect,
   });
+  final SubscriptionPlan plan;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +17,7 @@ class SubscriptionPlanCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: plan.isPopular
-            ? BorderSide(color: Colors.amber, width: 2)
+            ? const BorderSide(color: Colors.amber, width: 2)
             : BorderSide.none,
       ),
       child: Container(

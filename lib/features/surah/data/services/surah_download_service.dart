@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
+import '../../../downloads/data/services/download_service.dart';
+import '../../../downloads/domain/entities/download_item.dart';
+import '../../domain/repositories/surah_repository.dart';
 
 class SurahDownloadService {
   static final Map<String, StreamSubscription> _progressSubscriptions = {};
@@ -37,7 +37,7 @@ class SurahDownloadService {
               true,
             );
             // Cancel subscription after completion
-            _progressSubscriptions[downloadId]?.cancel();
+            await _progressSubscriptions[downloadId]?.cancel();
             _progressSubscriptions.remove(downloadId);
           } else if (progress.status == DownloadStatus.failed ||
               progress.status == DownloadStatus.cancelled) {
@@ -49,7 +49,7 @@ class SurahDownloadService {
               null,
             );
             // Cancel subscription after failure/cancellation
-            _progressSubscriptions[downloadId]?.cancel();
+            await _progressSubscriptions[downloadId]?.cancel();
             _progressSubscriptions.remove(downloadId);
           }
         });
@@ -64,14 +64,18 @@ class SurahDownloadService {
 
   /// Stop all progress subscriptions
   static void stopAllProgressSubscriptions() {
-    for (final subscription in _progressSubscriptions.values) {
+    for (final StreamSubscription<dynamic> subscription
+        in _progressSubscriptions.values) {
       subscription.cancel();
     }
     _progressSubscriptions.clear();
   }
 
   /// Check if a surah download is currently active
-  static bool isDownloadActive(String surahId, String reciterName) {
+  static Future<bool> isDownloadActive(
+    String surahId,
+    String reciterName,
+  ) async {
     final downloadId = '${surahId}_${reciterName.replaceAll(' ', '_')}';
     return DownloadService.isDownloadActive(downloadId);
   }

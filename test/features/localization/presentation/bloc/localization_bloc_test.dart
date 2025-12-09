@@ -1,10 +1,27 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:muzakri/core/config/language_config.dart';
+import 'package:muzakri/core/errors/failures.dart';
+import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
+import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import '../../../../helpers/hydrated_bloc_test_helper.dart';
 
+import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import 'localization_bloc_test.mocks.dart';
+
+// Provide dummy values for Either types
+@visibleForTesting
+Either<Failure, String> provideDummyEitherFailureString() =>
+    const Right(LanguageConfig.defaultLanguageCode);
+
+@visibleForTesting
+Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
+
+@GenerateMocks([GetCurrentLanguageUseCase, SetLanguageUseCase])
 void main() {
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -16,9 +33,33 @@ void main() {
 
   group('LocalizationBloc', () {
     late LocalizationBloc bloc;
+    late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
+    late MockSetLanguageUseCase mockSetLanguageUseCase;
 
     setUp(() {
-      bloc = LocalizationBloc();
+      // Provide dummy values for Either types
+      provideDummy<Either<Failure, String>>(
+        const Right(LanguageConfig.defaultLanguageCode),
+      );
+      provideDummy<Either<Failure, void>>(const Right(null));
+
+      mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
+      mockSetLanguageUseCase = MockSetLanguageUseCase();
+
+      // Mock GetCurrentLanguageUseCase to return default language
+      when(mockGetCurrentLanguageUseCase()).thenAnswer(
+        (_) async => const Right(LanguageConfig.defaultLanguageCode),
+      );
+
+      // Mock SetLanguageUseCase to return success
+      when(
+        mockSetLanguageUseCase(any),
+      ).thenAnswer((_) async => const Right(null));
+
+      bloc = LocalizationBloc(
+        mockGetCurrentLanguageUseCase,
+        mockSetLanguageUseCase,
+      );
     });
 
     tearDown(() {
@@ -38,10 +79,85 @@ void main() {
 
     group('LoadLanguage', () {
       blocTest<LocalizationBloc, LocalizationState>(
-        'does not emit new state since state is loaded from storage automatically',
-        build: () => bloc,
-        act: (bloc) => bloc.add(const LoadLanguage()),
-        expect: () => [], // No state change expected
+        'ensures SharedPreferences has the current language value',
+        build: () {
+          // Reset mocks to only count calls from this test
+          reset(mockGetCurrentLanguageUseCase);
+          reset(mockSetLanguageUseCase);
+
+          // Mock GetCurrentLanguageUseCase to return default language
+          when(mockGetCurrentLanguageUseCase()).thenAnswer(
+            (_) async => const Right(LanguageConfig.defaultLanguageCode),
+          );
+
+          // Mock SetLanguageUseCase to return success
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+
+          // Create a fresh bloc instance for this test
+          return LocalizationBloc(
+            mockGetCurrentLanguageUseCase,
+            mockSetLanguageUseCase,
+          );
+        },
+        act: (bloc) async {
+          // Wait a bit for the initialization LoadLanguage to complete
+          await Future.delayed(const Duration(milliseconds: 50));
+          // Reset mocks to only count the call from this test action
+          reset(mockSetLanguageUseCase);
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+          bloc.add(const LoadLanguage());
+        },
+        verify: (_) {
+          // Verify that SetLanguageUseCase was called with the current language
+          // (at least once from the test action, possibly also from initialization)
+          verify(mockSetLanguageUseCase(LanguageConfig.defaultLanguageCode));
+        },
+        expect: () => [], // No state change expected if language matches
+      );
+
+      blocTest<LocalizationBloc, LocalizationState>(
+        'emits new state when SharedPreferences has different language',
+        build: () {
+          // Reset mocks to only count calls from this test
+          reset(mockGetCurrentLanguageUseCase);
+          reset(mockSetLanguageUseCase);
+
+          // Mock GetCurrentLanguageUseCase to return English
+          when(
+            mockGetCurrentLanguageUseCase(),
+          ).thenAnswer((_) async => const Right('en'));
+
+          // Mock SetLanguageUseCase to return success
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+
+          // Create a fresh bloc instance for this test
+          return LocalizationBloc(
+            mockGetCurrentLanguageUseCase,
+            mockSetLanguageUseCase,
+          );
+        },
+        act: (bloc) async {
+          // Wait a bit for the initialization LoadLanguage to complete
+          await Future.delayed(const Duration(milliseconds: 50));
+          // Reset mocks to only count the call from this test action
+          reset(mockSetLanguageUseCase);
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+          bloc.add(const LoadLanguage());
+        },
+        verify: (_) {
+          // Verify that SetLanguageUseCase was called
+          // (at least once from the test action, possibly also from initialization)
+          verify(mockSetLanguageUseCase(any));
+        },
+        expect: () => [const LocalizationState(locale: Locale('en'))],
       );
     });
 
@@ -50,6 +166,10 @@ void main() {
         'emits [LocalizationState] when language is changed successfully',
         build: () => bloc,
         act: (bloc) => bloc.add(const ChangeLanguage(Locale('en'))),
+        verify: (_) {
+          // Verify that SetLanguageUseCase was called with the new language
+          verify(mockSetLanguageUseCase('en')).called(1);
+        },
         expect: () => [const LocalizationState(locale: Locale('en'))],
       );
 
@@ -132,7 +252,21 @@ void main() {
 
       test('new bloc instance loads persisted language', () async {
         // Create a bloc and change language
-        final firstBloc = LocalizationBloc();
+        final firstMockGetCurrentLanguageUseCase =
+            MockGetCurrentLanguageUseCase();
+        final firstMockSetLanguageUseCase = MockSetLanguageUseCase();
+
+        when(firstMockGetCurrentLanguageUseCase()).thenAnswer(
+          (_) async => const Right(LanguageConfig.defaultLanguageCode),
+        );
+        when(
+          firstMockSetLanguageUseCase(any),
+        ).thenAnswer((_) async => const Right(null));
+
+        final firstBloc = LocalizationBloc(
+          firstMockGetCurrentLanguageUseCase,
+          firstMockSetLanguageUseCase,
+        );
         firstBloc.add(const ChangeLanguage(Locale('en')));
 
         // Wait for state to be persisted
@@ -141,7 +275,21 @@ void main() {
 
         // Create new bloc instance - it should load from storage
         // Note: We don't clear storage here to test actual persistence
-        final newBloc = LocalizationBloc();
+        final newMockGetCurrentLanguageUseCase =
+            MockGetCurrentLanguageUseCase();
+        final newMockSetLanguageUseCase = MockSetLanguageUseCase();
+
+        when(
+          newMockGetCurrentLanguageUseCase(),
+        ).thenAnswer((_) async => const Right('en'));
+        when(
+          newMockSetLanguageUseCase(any),
+        ).thenAnswer((_) async => const Right(null));
+
+        final newBloc = LocalizationBloc(
+          newMockGetCurrentLanguageUseCase,
+          newMockSetLanguageUseCase,
+        );
         await Future.delayed(const Duration(milliseconds: 200));
 
         // The new bloc should have the persisted language (or default if storage didn't work)

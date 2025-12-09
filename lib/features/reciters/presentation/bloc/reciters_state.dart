@@ -16,17 +16,16 @@ class RecitersLoading extends RecitersState {
 }
 
 class RecitersLoaded extends RecitersState {
-  final List<Reciter> reciters;
-  final List<Reciter> filteredReciters;
-  final String searchQuery;
-  final String? selectedLetter;
-
   const RecitersLoaded({
     required this.reciters,
     required this.filteredReciters,
     this.searchQuery = '',
     this.selectedLetter,
   });
+  final List<Reciter> reciters;
+  final List<Reciter> filteredReciters;
+  final String searchQuery;
+  final String? selectedLetter;
 
   @override
   List<Object?> get props => [
@@ -55,9 +54,8 @@ class RecitersLoaded extends RecitersState {
 }
 
 class RecitersError extends RecitersState {
-  final String message;
-
   const RecitersError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];

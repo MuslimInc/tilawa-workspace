@@ -1,8 +1,11 @@
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/playlists/domain/entities/playlist.dart';
-import 'package:muzakri/features/playlists/domain/usecases/usecases.dart';
+
+import '../../../../core/errors/failures.dart';
+import '../../domain/entities/playlist.dart';
+import '../../domain/usecases/usecases.dart';
 
 part 'playlists_bloc.freezed.dart';
 part 'playlists_event.dart';
@@ -10,15 +13,6 @@ part 'playlists_state.dart';
 
 @injectable
 class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
-  final GetAllPlaylistsUseCase _getAllPlaylistsUseCase;
-  final CreatePlaylistUseCase _createPlaylistUseCase;
-  final UpdatePlaylistUseCase _updatePlaylistUseCase;
-  final DeletePlaylistUseCase _deletePlaylistUseCase;
-  final AddItemToPlaylistUseCase _addItemToPlaylistUseCase;
-  final RemoveItemFromPlaylistUseCase _removeItemFromPlaylistUseCase;
-  final SearchPlaylistsUseCase _searchPlaylistsUseCase;
-  final ToggleFavoritePlaylistUseCase _toggleFavoritePlaylistUseCase;
-
   PlaylistsBloc({
     required GetAllPlaylistsUseCase getAllPlaylistsUseCase,
     required CreatePlaylistUseCase createPlaylistUseCase,
@@ -50,6 +44,14 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     on<ClearSearchEvent>(_onClearSearch);
     on<RefreshPlaylistsEvent>(_onRefreshPlaylists);
   }
+  final GetAllPlaylistsUseCase _getAllPlaylistsUseCase;
+  final CreatePlaylistUseCase _createPlaylistUseCase;
+  final UpdatePlaylistUseCase _updatePlaylistUseCase;
+  final DeletePlaylistUseCase _deletePlaylistUseCase;
+  final AddItemToPlaylistUseCase _addItemToPlaylistUseCase;
+  final RemoveItemFromPlaylistUseCase _removeItemFromPlaylistUseCase;
+  final SearchPlaylistsUseCase _searchPlaylistsUseCase;
+  final ToggleFavoritePlaylistUseCase _toggleFavoritePlaylistUseCase;
 
   Future<void> _onLoadPlaylists(
     LoadPlaylistsEvent event,
@@ -57,7 +59,8 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
   ) async {
     emit(const PlaylistsState.loading());
 
-    final result = await _getAllPlaylistsUseCase();
+    final Either<Failure, List<Playlist>> result =
+        await _getAllPlaylistsUseCase();
     result.fold(
       (failure) => emit(
         PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -75,7 +78,7 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     CreatePlaylistEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final result = await _createPlaylistUseCase(
+    final Either<Failure, Playlist> result = await _createPlaylistUseCase(
       name: event.name,
       description: event.description,
       coverImageUrl: event.coverImageUrl,
@@ -88,7 +91,8 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
       ),
       (playlist) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -109,29 +113,34 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     Emitter<PlaylistsState> emit,
   ) async {
     // Get current playlists to find the one to update
-    final currentState = state;
-    if (currentState is! PlaylistsLoaded) return;
+    final PlaylistsState currentState = state;
+    if (currentState is! PlaylistsLoaded) {
+      return;
+    }
 
-    final playlistToUpdate = currentState.playlists.firstWhere(
+    final Playlist playlistToUpdate = currentState.playlists.firstWhere(
       (p) => p.id == event.id,
       orElse: () => throw Exception('Playlist not found'),
     );
 
-    final updatedPlaylist = playlistToUpdate.copyWith(
+    final Playlist updatedPlaylist = playlistToUpdate.copyWith(
       name: event.name,
       description: event.description,
       coverImageUrl: event.coverImageUrl,
       isPublic: event.isPublic,
     );
 
-    final result = await _updatePlaylistUseCase(updatedPlaylist);
+    final Either<Failure, Playlist> result = await _updatePlaylistUseCase(
+      updatedPlaylist,
+    );
     await result.fold(
       (failure) async => emit(
         PlaylistsState.error(failure.message ?? 'Failed to update playlist'),
       ),
       (playlist) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -151,14 +160,15 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     DeletePlaylistEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final result = await _deletePlaylistUseCase(event.id);
+    final Either<Failure, void> result = await _deletePlaylistUseCase(event.id);
     await result.fold(
       (failure) async => emit(
         PlaylistsState.error(failure.message ?? 'Failed to delete playlist'),
       ),
       (_) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -178,7 +188,7 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     AddItemToPlaylistEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final result = await _addItemToPlaylistUseCase(
+    final Either<Failure, Playlist> result = await _addItemToPlaylistUseCase(
       playlistId: event.playlistId,
       item: event.item,
     );
@@ -191,7 +201,8 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
       ),
       (playlist) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -208,10 +219,11 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     RemoveItemFromPlaylistEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final result = await _removeItemFromPlaylistUseCase(
-      playlistId: event.playlistId,
-      itemId: event.itemId,
-    );
+    final Either<Failure, Playlist> result =
+        await _removeItemFromPlaylistUseCase(
+          playlistId: event.playlistId,
+          itemId: event.itemId,
+        );
 
     await result.fold(
       (failure) async => emit(
@@ -221,7 +233,8 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
       ),
       (playlist) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -252,8 +265,10 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     SearchPlaylistsEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is! PlaylistsLoaded) return;
+    final PlaylistsState currentState = state;
+    if (currentState is! PlaylistsLoaded) {
+      return;
+    }
 
     if (event.query.isEmpty) {
       emit(
@@ -265,7 +280,8 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
       return;
     }
 
-    final result = await _searchPlaylistsUseCase(event.query);
+    final Either<Failure, List<Playlist>> result =
+        await _searchPlaylistsUseCase(event.query);
     result.fold(
       (failure) => emit(
         PlaylistsState.error(failure.message ?? 'Failed to search playlists'),
@@ -283,14 +299,16 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     ToggleFavoriteEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final result = await _toggleFavoritePlaylistUseCase(event.playlistId);
+    final Either<Failure, Playlist> result =
+        await _toggleFavoritePlaylistUseCase(event.playlistId);
     await result.fold(
       (failure) async => emit(
         PlaylistsState.error(failure.message ?? 'Failed to toggle favorite'),
       ),
       (playlist) async {
         // Reload playlists to get updated list
-        final loadResult = await _getAllPlaylistsUseCase();
+        final Either<Failure, List<Playlist>> loadResult =
+            await _getAllPlaylistsUseCase();
         await loadResult.fold(
           (failure) async => emit(
             PlaylistsState.error(failure.message ?? 'Failed to load playlists'),
@@ -321,8 +339,10 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
     ClearSearchEvent event,
     Emitter<PlaylistsState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is! PlaylistsLoaded) return;
+    final PlaylistsState currentState = state;
+    if (currentState is! PlaylistsLoaded) {
+      return;
+    }
 
     emit(
       currentState.copyWith(

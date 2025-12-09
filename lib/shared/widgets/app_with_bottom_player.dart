@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/shared/widgets/bottom_player.dart';
+
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'bottom_player_widget.dart';
 
 class AppWithBottomPlayer extends StatelessWidget {
-  final Widget child;
-
   const AppWithBottomPlayer({super.key, required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +34,12 @@ class AppWithBottomPlayer extends StatelessWidget {
 
               // Bottom player
               if (state.hasMediaItem)
-                Positioned(
+                const Positioned(
                   left: 0,
                   right: 0,
                   bottom:
                       kBottomNavigationBarHeight, // Account for bottom nav bar
-                  child: BottomPlayer(),
+                  child: BottomPlayerWidget(),
                 ),
             ],
           ),

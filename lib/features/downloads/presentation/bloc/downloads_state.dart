@@ -4,8 +4,6 @@ part of 'downloads_bloc.dart';
 sealed class DownloadsState with _$DownloadsState {
   const factory DownloadsState.initial() = DownloadsInitial;
 
-  const factory DownloadsState.loading() = DownloadsLoading;
-
   const factory DownloadsState.loaded(
     Map<String, List<DownloadItem>> downloadsByReciter,
   ) = DownloadsLoaded;
@@ -28,15 +26,20 @@ sealed class DownloadsState with _$DownloadsState {
     required List<DownloadItem> validDownloads,
   }) = ValidDownloadsLoaded;
 
-  const factory DownloadsState.playbackInitiated({required String message}) =
-      PlaybackInitiated;
+  const factory DownloadsState.playbackInitiated({
+    required String message,
+    required Map<String, List<DownloadItem>> downloadsByReciter,
+  }) = PlaybackInitiated;
 
-  const factory DownloadsState.premiumRequired({required String message}) =
-      PremiumRequired;
+  const factory DownloadsState.premiumRequired({
+    required String message,
+    required Map<String, List<DownloadItem>> downloadsByReciter,
+  }) = PremiumRequired;
 
   const factory DownloadsState.downloadStarted({
     required String surahId,
     required String surahTitle,
     required String reciterName,
+    required Map<String, List<DownloadItem>> downloadsByReciter,
   }) = DownloadStarted;
 }

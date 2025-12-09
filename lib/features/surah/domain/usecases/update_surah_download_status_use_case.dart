@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart';
+import '../repositories/surah_repository.dart';
 
 @Singleton()
 class UpdateSurahDownloadStatusUseCase {

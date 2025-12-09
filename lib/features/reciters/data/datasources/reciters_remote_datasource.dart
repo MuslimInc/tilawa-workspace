@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/api_config.dart';
-import 'package:muzakri/features/reciters/data/models/reciter_model.dart';
+import '../../../../core/config/api_config.dart';
+import '../models/reciter_model.dart';
 
 abstract class RecitersRemoteDataSource {
   Future<List<ReciterModel>> getReciters({String? language});
@@ -16,7 +16,7 @@ class RecitersRemoteDataSourceImpl implements RecitersRemoteDataSource {
   @override
   Future<List<ReciterModel>> getReciters({String? language}) async {
     try {
-      final response = await _dio.get(
+      final Response<dynamic> response = await _dio.get(
         ApiConfig.recitersPath,
         queryParameters: language == null || language.isEmpty
             ? null

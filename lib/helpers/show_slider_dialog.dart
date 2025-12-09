@@ -25,13 +25,6 @@ void showSliderDialog({
 }
 
 class _VolumeSlider extends StatefulWidget {
-  final String title;
-  final int divisions;
-  final double min;
-  final double max;
-  final String valueSuffix;
-  final double value;
-  final ValueChanged<double> onChanged;
   const _VolumeSlider({
     required this.title,
     required this.divisions,
@@ -41,6 +34,13 @@ class _VolumeSlider extends StatefulWidget {
     required this.value,
     required this.onChanged,
   });
+  final String title;
+  final int divisions;
+  final double min;
+  final double max;
+  final String valueSuffix;
+  final double value;
+  final ValueChanged<double> onChanged;
 
   @override
   State<_VolumeSlider> createState() => _VolumeSliderState();

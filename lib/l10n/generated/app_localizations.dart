@@ -818,6 +818,12 @@ abstract class AppLocalizations {
   /// **'Google Sign-In not configured. Please contact support.'**
   String get googleSignInNotConfigured;
 
+  /// Error message shown when third-party sign-in fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to sign in with third-party account'**
+  String get unableToSignInWithThirdPartyAccount;
+
   /// Network error message
   ///
   /// In en, this message translates to:
@@ -877,6 +883,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play playlist functionality coming soon'**
   String get playPlaylistComingSoon;
+
+  /// Text prompting users to download surahs for offline listening
+  ///
+  /// In en, this message translates to:
+  /// **'Download surahs to listen offline'**
+  String get downloadSurahsOffline;
 }
 
 class _AppLocalizationsDelegate

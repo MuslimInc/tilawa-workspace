@@ -1,19 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:muzakri/main.dart';
+
+import '../../main.dart';
 
 class AppBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
-    logger.d('[BlocObserver] onEvent: (${bloc.runtimeType}) > $event');
+    // logger.d('[BlocObserver] onEvent: (${bloc.runtimeType}) > $event');
   }
 
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    logger.d(
-      '[BlocObserver] onTransition: (${bloc.runtimeType}) > $transition',
-    );
+    // logger.d(
+    //   '[BlocObserver] onTransition: (${bloc.runtimeType}) > $transition',
+    // );
   }
 
   @override
@@ -39,10 +40,10 @@ class AppBlocObserver extends BlocObserver {
     StackTrace? stackTrace,
   ]) {
     super.onDone(bloc, event);
-    logger.d(
-      '[BlocObserver] onDone: (${bloc.runtimeType}) > $event',
-      error: error,
-      stackTrace: stackTrace,
-    );
+    // logger.d(
+    //   '[BlocObserver] onDone: (${bloc.runtimeType}) > $event',
+    //   error: error,
+    //   stackTrace: stackTrace,
+    // );
   }
 }

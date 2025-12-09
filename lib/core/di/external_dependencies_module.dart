@@ -1,20 +1,22 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:credential_manager/credential_manager.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:dio/dio.dart';
-import 'package:muzakri/core/config/api_config.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/core/services/firebase_initialization_service.dart';
-import 'package:muzakri/features/premium/data/services/subscription_plans_service.dart';
-import 'package:muzakri/main.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/audio/audio_player_handler_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../features/downloads/data/services/download_service.dart';
+import '../../features/premium/data/services/subscription_plans_service.dart';
+import '../../main.dart';
+import '../../shared/audio/audio_player_handler.dart';
+import '../../shared/audio/audio_player_handler_impl.dart';
+import '../config/api_config.dart';
+import '../services/analytics_service.dart';
+import '../services/firebase_initialization_service.dart';
 
 @module
 abstract class ExternalDependenciesModule {
@@ -87,7 +89,7 @@ abstract class ExternalDependenciesModule {
         prefs,
       );
 
-      final audioHandler = await AudioService.init(
+      final AudioPlayerHandlerImpl audioHandler = await AudioService.init(
         builder: () => audioPlayerHandlerImpl,
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
@@ -109,4 +111,7 @@ abstract class ExternalDependenciesModule {
       return fallbackHandler;
     }
   }
+
+  @singleton
+  DownloadService get downloadService => DownloadService.instance;
 }

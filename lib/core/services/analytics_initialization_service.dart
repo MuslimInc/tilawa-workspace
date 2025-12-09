@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/config/currency_config.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/core/services/crashlytics_service.dart';
-import 'package:muzakri/main.dart';
+
+import '../../main.dart';
+import '../config/currency_config.dart';
+import 'analytics_service.dart';
+import 'crashlytics_service.dart';
 
 /// Service to initialize analytics with user data and app settings
 @Singleton()
@@ -22,7 +23,7 @@ class AnalyticsInitializationService {
   Future<void> initialize() async {
     try {
       // Set user ID if user is logged in
-      final user = _auth.currentUser;
+      final User? user = _auth.currentUser;
       if (user != null) {
         await _analyticsService.setUserId(user.uid);
         await _crashlyticsService.setUserId(user.uid);
@@ -71,7 +72,7 @@ class AnalyticsInitializationService {
   /// Update user properties when user signs in
   Future<void> onUserSignIn() async {
     try {
-      final user = _auth.currentUser;
+      final User? user = _auth.currentUser;
       if (user != null) {
         await _analyticsService.setUserId(user.uid);
         await _analyticsService.setUserProperty('user_type', 'authenticated');

@@ -1,317 +1,381 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui';
 
-import 'package:dio/dio.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/main.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:path/path.dart' as path;
 
+import '../../../../main.dart';
+import '../../domain/entities/download_item.dart';
+import 'flutter_downloader_wrapper.dart';
+
+@pragma('vm:entry-point')
 class DownloadService {
-  static final Map<String, _DownloadTask> _tasks = {};
-  static final StreamController<DownloadProgress> _globalProgressController =
+  /// Create a new DownloadService.
+  ///
+  /// [flutterDownloader] can be provided for testing purposes.
+  DownloadService({FlutterDownloaderWrapper? flutterDownloader})
+    : _flutterDownloader = flutterDownloader ?? FlutterDownloaderWrapper();
+
+  /// Singleton instance for backward compatibility
+  static final DownloadService _instance = DownloadService();
+  static DownloadService get instance => _instance;
+
+  FlutterDownloaderWrapper _flutterDownloader;
+  final StreamController<DownloadProgress> _globalProgressController =
       StreamController<DownloadProgress>.broadcast();
 
-  /// Start downloading a file in background with its own isolate
+  bool _initialized = false;
+  Completer<void>? _initializationCompleter;
+  ReceivePort? _port;
+  static const String _portName = 'downloader_send_port';
+
+  // Map to store taskId -> externalId (URL)
+  final Map<String, String> _taskIdMap = {};
+
+  // --------------------------------------------------------------------------
+  // Static Compatibility Layer
+  // --------------------------------------------------------------------------
+
+  @visibleForTesting
+  static set flutterDownloaderTestOverride(FlutterDownloaderWrapper value) {
+    instance._flutterDownloader = value;
+  }
+
+  static Stream<DownloadProgress> get globalProgressStream =>
+      instance._globalProgressController.stream;
+
+  static Stream<DownloadProgress> progressStream(String id) =>
+      instance.getProgressStream(id);
+
+  static Future<List<String>> get activeDownloadIds =>
+      instance.getActiveDownloadIds();
+
+  static Future<bool> isDownloadActive(String id) =>
+      instance.isStatusDownloadActive(id);
+
+  static Future<DownloadStatus?> getDownloadStatus(String id) =>
+      instance.getStatus(id);
+
   static Future<void> startDownload({
     required String id,
     required String url,
     required String filePath,
     required String title,
     required String reciterName,
-  }) async {
-    if (_tasks.containsKey(id)) {
-      // Already downloading
-      // ignore: avoid_print
-      logger.d(
-        '[DownloadService] startDownload skipped: id=$id already active',
-      );
-      return;
+  }) => instance.download(
+    id: id,
+    url: url,
+    filePath: filePath,
+    title: title,
+    reciterName: reciterName,
+  );
+
+  static Future<void> cancelDownload(String id) => instance.cancel(id);
+
+  static Future<void> dispose() => instance.disposeService();
+
+  @visibleForTesting
+  static Future<void> reset() async {
+    await instance.disposeService();
+  }
+
+  // --------------------------------------------------------------------------
+  // Instance Methods
+  // --------------------------------------------------------------------------
+
+  /// Initialize the download service and set up update listeners
+  Future<void> initialize() async {
+    if (_initializationCompleter != null) {
+      return _initializationCompleter!.future;
     }
 
-    // ignore: avoid_print
-    logger.d(
-      '[DownloadService] startDownload: id=$id title="$title" reciter="$reciterName" url=$url path=$filePath',
-    );
+    if (_initialized) {
+      return Future.value();
+    }
 
-    final receivePort = ReceivePort();
-    final completer = Completer<SendPort>();
+    final completer = Completer<void>();
+    _initializationCompleter = completer;
 
-    late final StreamSubscription sub;
-    sub = receivePort.listen((message) {
-      if (message is SendPort) {
-        completer.complete(message);
-      } else if (message is DownloadProgress) {
-        // Forward to individual task controller
-        _tasks[id]?.controller.add(message);
-        // Forward to global progress stream
-        _globalProgressController.add(message);
-        if (message.progress == 0.0 || message.progress == 1.0) {
-          // ignore: avoid_print
-          logger.d(
-            '[DownloadService] progress: id=${message.id} status=${message.status} progress=${message.progress}',
-          );
-        }
+    try {
+      await _performInitialization();
+      _initialized = true;
+      completer.complete();
+    } catch (e) {
+      _initialized = false;
+      if (!completer.isCompleted) {
+        completer.completeError(e);
+      }
+      rethrow;
+    } finally {
+      _initializationCompleter = null;
+    }
+  }
+
+  Future<void> _performInitialization() async {
+    try {
+      // Initialize FlutterDownloader
+      // We assume WidgetsFlutterBinding is already initialized in main.dart
+      try {
+        await _flutterDownloader.initialize();
+      } catch (e) {
+        logger.d('[DownloadService] FlutterDownloader initialize warning: $e');
+        // It might be already initialized or platform issues
+      }
+
+      // Register port for background communication
+      _registerPort();
+
+      // Register the static callback
+      await _flutterDownloader.registerCallback(_downloadCallback);
+
+      logger.d('[DownloadService] Initialized with FlutterDownloader');
+    } catch (e) {
+      logger.w('[DownloadService] Error during initialization: $e');
+      rethrow;
+    }
+  }
+
+  void _registerPort() {
+    IsolateNameServer.removePortNameMapping(_portName);
+
+    _port = ReceivePort();
+    IsolateNameServer.registerPortWithName(_port!.sendPort, _portName);
+
+    _port!.listen((dynamic data) async {
+      if (data is List) {
+        final taskId = data[0] as String;
+        final statusInt = data[1] as int;
+        final progress = data[2] as int;
+        final status = DownloadTaskStatus.fromInt(statusInt);
+
+        await _handleTaskUpdate(taskId, status, progress);
       }
     });
-
-    // Pull headers/options from the shared Dio instance (DI) to keep config consistent
-    final sharedDio = getIt<Dio>();
-    final sharedHeaders = Map<String, dynamic>.from(sharedDio.options.headers);
-
-    final isolate = await Isolate.spawn<_DownloadInitMessage>(
-      _downloadIsolateEntry,
-      _DownloadInitMessage(
-        id: id,
-        url: url,
-        filePath: filePath,
-        title: title,
-        reciterName: reciterName,
-        sendPort: receivePort.sendPort,
-        headers: sharedHeaders,
-      ),
-    );
-
-    final sendPort = await completer.future;
-
-    final controller = StreamController<DownloadProgress>.broadcast(
-      onCancel: () {
-        // Optionally handle controller cancellation
-      },
-    );
-
-    _tasks[id] = _DownloadTask(
-      isolate: isolate,
-      controller: controller,
-      receivePort: receivePort,
-      sendPort: sendPort,
-      subscription: sub,
-    );
-
-    // ignore: avoid_print
-    logger.d('[DownloadService] task registered: id=$id');
-  }
-
-  /// Listen to download progress of a specific download ID
-  static Stream<DownloadProgress> progressStream(String id) {
-    final task = _tasks[id];
-    if (task != null) {
-      return task.controller.stream;
-    }
-    return Stream.empty();
-  }
-
-  /// Listen to all download progress updates
-  static Stream<DownloadProgress> get globalProgressStream =>
-      _globalProgressController.stream;
-
-  /// Get all active download task IDs
-  static List<String> get activeDownloadIds => _tasks.keys.toList();
-
-  /// Check if a download is active
-  static bool isDownloadActive(String id) => _tasks.containsKey(id);
-
-  /// Dispose all downloads and cleanup
-  static Future<void> dispose() async {
-    // Cancel all active downloads
-    // ignore: avoid_print
-    logger.d(
-      '[DownloadService] dispose: cancelling ${_tasks.length} active task(s)',
-    );
-    for (final task in _tasks.values) {
-      task.isolate.kill(priority: Isolate.immediate);
-      await task.subscription.cancel();
-      task.receivePort.close();
-      await task.controller.close();
-    }
-    _tasks.clear();
-    await _globalProgressController.close();
-    // ignore: avoid_print
-    logger.d('[DownloadService] dispose: done');
-  }
-
-  /// Cancel a download and clean up its resources
-  static Future<void> cancelDownload(String id) async {
-    final task = _tasks.remove(id);
-    if (task != null) {
-      // ignore: avoid_print
-      logger.d('[DownloadService] cancelDownload: id=$id');
-      task.isolate.kill(priority: Isolate.immediate);
-      await task.subscription.cancel();
-      task.receivePort.close();
-      await task.controller.close();
-    }
   }
 
   @pragma('vm:entry-point')
-  static void _downloadIsolateEntry(_DownloadInitMessage message) async {
-    final id = message.id;
-    final url = message.url;
-    final filePath = message.filePath;
-    final sendPort = message.sendPort;
+  static void _downloadCallback(String id, int status, int progress) {
+    final SendPort? send = IsolateNameServer.lookupPortByName(_portName);
+    send?.send([id, status, progress]);
+  }
 
-    final receivePort = ReceivePort();
-    sendPort.send(receivePort.sendPort);
+  Future<void> _handleTaskUpdate(
+    String taskId,
+    DownloadTaskStatus status,
+    int progress,
+  ) async {
+    // Resolve external ID (URL)
+    String? externalId = _taskIdMap[taskId];
 
-    final dio = Dio(
-      BaseOptions(
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 30),
-        followRedirects: true,
-        maxRedirects: 5,
-        validateStatus: (status) => status != null && status < 500,
-        headers: message.headers.isEmpty
-            ? {'User-Agent': 'muzakri/1.0 (Flutter; Dart)'}
-            : message.headers,
-      ),
-    );
-    final cancelToken = CancelToken();
-
-    receivePort.listen((dynamic msg) {
-      // We can extend this for pause/resume if needed
-      if (msg is String && msg == 'cancel') {
-        cancelToken.cancel();
+    if (externalId == null) {
+      // Try to find it in DB
+      try {
+        final List<DownloadTask>? tasks = await _flutterDownloader
+            .loadTasksWithRawQuery(
+              query: "SELECT * FROM task WHERE task_id = '$taskId'",
+            );
+        if (tasks != null && tasks.isNotEmpty) {
+          externalId = tasks.first.url;
+          _taskIdMap[taskId] = externalId;
+        }
+      } catch (e) {
+        logger.w('[DownloadService] Error resolving taskId $taskId: $e');
       }
-    });
+    }
 
-    try {
-      // ignore: avoid_print
-      logger.d(
-        '[DownloadService Isolate] starting: id=$id url=$url -> $filePath',
+    if (externalId != null) {
+      final DownloadStatus downloadStatus = _mapTaskStatusToDownloadStatus(
+        status,
       );
-      // Send initial progress
-      sendPort.send(
+      _globalProgressController.add(
+        DownloadProgress(
+          id: externalId,
+          status: downloadStatus,
+          progress: progress / 100.0,
+          downloadedSize: 0,
+          fileSize: 0,
+        ),
+      );
+    }
+  }
+
+  Future<void> download({
+    required String id,
+    required String url,
+    required String filePath,
+    required String title,
+    required String reciterName,
+  }) async {
+    await initialize();
+
+    // Check if already active
+    // We treat 'id' as the URL for querying purposes
+    final List<DownloadTask>?
+    tasks = await _flutterDownloader.loadTasksWithRawQuery(
+      query:
+          "SELECT * FROM task WHERE url = '$url' AND status != 4 AND status != 5",
+    );
+
+    if (tasks != null && tasks.isNotEmpty) {
+      final DownloadTask task = tasks.first;
+      if (task.status == DownloadTaskStatus.complete) {
+        _globalProgressController.add(
+          DownloadProgress(
+            id: id,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            downloadedSize: 0,
+            fileSize: 0,
+          ),
+        );
+        return;
+      } else if (task.status == DownloadTaskStatus.running ||
+          task.status == DownloadTaskStatus.enqueued) {
+        // Already active
+        // Map the existing taskId to this ID just in case
+        _taskIdMap[task.taskId] = id;
+        return;
+      }
+    }
+
+    final String savedDir = path.dirname(filePath);
+    final String fileName = path.basename(filePath);
+
+    final dir = Directory(savedDir);
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
+    }
+
+    final String? taskId = await _flutterDownloader.enqueue(
+      url: url,
+      savedDir: savedDir,
+      fileName: fileName,
+      openFileFromNotification: false,
+      title: title,
+    );
+
+    if (taskId != null) {
+      _taskIdMap[taskId] = id;
+
+      _globalProgressController.add(
         DownloadProgress(
           id: id,
-          status: DownloadStatus.downloading,
+          status: DownloadStatus.pending,
           progress: 0.0,
           downloadedSize: 0,
           fileSize: 0,
         ),
       );
+    }
+  }
 
-      await dio.download(
-        url,
-        filePath,
-        cancelToken: cancelToken,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            final progress = received / total;
-            sendPort.send(
-              DownloadProgress(
-                id: id,
-                status: DownloadStatus.downloading,
-                progress: progress,
-                downloadedSize: received,
-                fileSize: total,
-              ),
-            );
-            if (received == 0 || received == total) {
-              logger.d(
-                '[DownloadService Isolate] onReceive: id=$id received=$received total=$total',
-              );
-            }
-          }
-        },
-      );
+  Future<void> cancel(String id) async {
+    await initialize();
+    // Assuming id is the URL
+    final List<DownloadTask>? tasks = await _flutterDownloader
+        .loadTasksWithRawQuery(query: "SELECT * FROM task WHERE url = '$id'");
 
-      // Send completion
-      sendPort.send(
-        DownloadProgress(
-          id: id,
-          status: DownloadStatus.completed,
-          progress: 1.0,
-          downloadedSize: 0,
-          fileSize: 0,
-        ),
-      );
-      // ignore: avoid_print
-      logger.d('[DownloadService Isolate] completed: id=$id');
-    } catch (e) {
-      if (e is DioException && e.type == DioExceptionType.cancel) {
-        // ignore: avoid_print
-        logger.d('[DownloadService Isolate] cancelled: id=$id');
-        sendPort.send(
-          DownloadProgress(
-            id: id,
-            status: DownloadStatus.cancelled,
-            progress: 0.0,
-            downloadedSize: 0,
-            fileSize: 0,
-          ),
-        );
-      } else {
-        if (e is DioException) {
-          // ignore: avoid_print
-          logger.d(
-            '[DownloadService Isolate] DioException: id=$id type=${e.type} status=${e.response?.statusCode} message=${e.message} url=$url',
-          );
-        } else {
-          // ignore: avoid_print
-          logger.d(
-            '[DownloadService Isolate] Error: id=$id error=${e.toString()}',
-          );
-        }
-        sendPort.send(
-          DownloadProgress(
-            id: id,
-            status: DownloadStatus.failed,
-            progress: 0.0,
-            downloadedSize: 0,
-            fileSize: 0,
-          ),
+    if (tasks != null) {
+      for (final DownloadTask task in tasks) {
+        // Cancel or remove. Remove is safer to clean up DB.
+        await _flutterDownloader.cancel(taskId: task.taskId);
+        await _flutterDownloader.remove(
+          taskId: task.taskId,
+          shouldDeleteContent: true,
         );
       }
-    } finally {
-      receivePort.close();
-      // ignore: avoid_print
-      logger.d('[DownloadService Isolate] closed: id=$id');
     }
+
+    _globalProgressController.add(
+      DownloadProgress(
+        id: id,
+        status: DownloadStatus.cancelled,
+        progress: 0.0,
+        downloadedSize: 0,
+        fileSize: 0,
+      ),
+    );
+  }
+
+  Stream<DownloadProgress> getProgressStream(String id) {
+    return _globalProgressController.stream.where(
+      (progress) => progress.id == id,
+    );
+  }
+
+  Future<List<String>> getActiveDownloadIds() async {
+    await initialize();
+    final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
+    if (tasks == null) {
+      return [];
+    }
+
+    return tasks
+        .where(
+          (t) =>
+              t.status == DownloadTaskStatus.running ||
+              t.status == DownloadTaskStatus.enqueued,
+        )
+        .map((t) => t.url)
+        .toList();
+  }
+
+  Future<bool> isStatusDownloadActive(String id) async {
+    await initialize();
+    final List<DownloadTask>? tasks = await _flutterDownloader
+        .loadTasksWithRawQuery(query: "SELECT * FROM task WHERE url = '$id'");
+    if (tasks == null || tasks.isEmpty) {
+      return false;
+    }
+
+    return tasks.any(
+      (t) =>
+          t.status == DownloadTaskStatus.running ||
+          t.status == DownloadTaskStatus.enqueued,
+    );
+  }
+
+  Future<DownloadStatus?> getStatus(String id) async {
+    await initialize();
+    final List<DownloadTask>? tasks = await _flutterDownloader
+        .loadTasksWithRawQuery(query: "SELECT * FROM task WHERE url = '$id'");
+    if (tasks == null || tasks.isEmpty) {
+      return null;
+    }
+
+    final DownloadTask task = tasks.last;
+    return _mapTaskStatusToDownloadStatus(task.status);
+  }
+
+  Future<void> disposeService() async {
+    _port?.close();
+    IsolateNameServer.removePortNameMapping(_portName);
+    _initialized = false;
+    _taskIdMap.clear();
+  }
+
+  static DownloadStatus _mapTaskStatusToDownloadStatus(
+    DownloadTaskStatus status,
+  ) {
+    return switch (status) {
+      DownloadTaskStatus.enqueued => DownloadStatus.pending,
+      DownloadTaskStatus.running => DownloadStatus.downloading,
+      DownloadTaskStatus.complete => DownloadStatus.completed,
+      DownloadTaskStatus.failed => DownloadStatus.failed,
+      DownloadTaskStatus.canceled => DownloadStatus.cancelled,
+      DownloadTaskStatus.paused => DownloadStatus.paused,
+      _ => DownloadStatus.failed,
+    };
   }
 }
 
-class _DownloadTask {
-  final Isolate isolate;
-  final StreamController<DownloadProgress> controller;
-  final ReceivePort receivePort;
-  final SendPort sendPort;
-  final StreamSubscription subscription;
-
-  _DownloadTask({
-    required this.isolate,
-    required this.controller,
-    required this.receivePort,
-    required this.sendPort,
-    required this.subscription,
-  });
-}
-
-class _DownloadInitMessage {
-  final String id;
-  final String url;
-  final String filePath;
-  final String title;
-  final String reciterName;
-  final SendPort sendPort;
-  final Map<String, dynamic> headers;
-
-  _DownloadInitMessage({
-    required this.id,
-    required this.url,
-    required this.filePath,
-    required this.title,
-    required this.reciterName,
-    required this.sendPort,
-    required this.headers,
-  });
-}
-
-class DownloadProgress {
-  final String id;
-  final DownloadStatus status;
-  final double progress;
-  final int downloadedSize;
-  final int fileSize;
-
+/// Download Status Enum related classes
+@immutable
+class DownloadProgress extends Equatable {
   const DownloadProgress({
     required this.id,
     required this.status,
@@ -319,4 +383,13 @@ class DownloadProgress {
     required this.downloadedSize,
     required this.fileSize,
   });
+
+  final String id;
+  final DownloadStatus status;
+  final double progress;
+  final int downloadedSize;
+  final int fileSize;
+
+  @override
+  List<Object?> get props => [id, status, progress, downloadedSize, fileSize];
 }

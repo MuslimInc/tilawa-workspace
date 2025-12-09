@@ -1,7 +1,7 @@
-import 'package:muzakri/main.dart';
+import '../../main.dart';
 
 class GoogleSignInConfig {
-  // TODO: Replace with your actual server client ID from Firebase Console
+  // TODO(username): Replace with your actual server client ID from Firebase Console
   // To get this:
   // 1. Go to Firebase Console -> Project Settings -> General
   // 2. Scroll down to "Your apps" section

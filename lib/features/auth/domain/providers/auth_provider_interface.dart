@@ -1,5 +1,5 @@
-import 'package:muzakri/features/auth/domain/entities/auth_result.dart';
-import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
+import '../entities/auth_result.dart';
+import '../entities/user_entity.dart';
 
 /// Abstract interface for authentication providers
 /// This allows us to easily switch between different authentication methods

@@ -1,21 +1,19 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:muzakri/core/entities/reciter.dart' as entity;
-import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
-import 'package:muzakri/features/reciters/domain/usecases/get_reciters_use_case.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
+
+import '../../../../core/entities/reciter.dart' as entity;
+import '../../../../core/errors/failures.dart';
+import '../../../../shared/models/reciter_model.dart';
+import '../../domain/usecases/get_reciters_use_case.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';
 
 @injectable
 class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
-  final GetCurrentLanguageUseCase _getCurrentLanguageUseCase;
-  final GetRecitersUseCase _getRecitersUseCase;
-
-  RecitersBloc(this._getCurrentLanguageUseCase, this._getRecitersUseCase)
-    : super(const RecitersInitial()) {
+  RecitersBloc(this._getRecitersUseCase) : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
@@ -23,6 +21,7 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     on<ClearSearch>(_onClearSearch);
     on<LanguageChanged>(_onLanguageChanged);
   }
+  final GetRecitersUseCase _getRecitersUseCase;
 
   Reciter _mapEntityToModel(entity.ReciterEntity e) => Reciter(
     id: e.id,
@@ -51,8 +50,9 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
 
     try {
       // Prefer domain use case to fetch once and share data
-      final result = await _getRecitersUseCase();
-      final recitersData = result.fold<List<Reciter>?>(
+      final Either<Failure, List<entity.ReciterEntity>> result =
+          await _getRecitersUseCase();
+      final List<Reciter>? recitersData = result.fold<List<Reciter>?>(
         (_) => null,
         (entities) => entities.map(_mapEntityToModel).toList(),
       );
@@ -76,10 +76,12 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     SearchRecitersEvent event,
     Emitter<RecitersState> emit,
   ) {
-    if (state is! RecitersLoaded) return;
+    if (state is! RecitersLoaded) {
+      return;
+    }
 
     final currentState = state as RecitersLoaded;
-    final filteredReciters = _filterReciters(
+    final List<Reciter> filteredReciters = _filterReciters(
       currentState.reciters,
       event.query,
       null, // Clear letter filter when searching
@@ -95,10 +97,12 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
   }
 
   void _onFilterByLetter(FilterByLetter event, Emitter<RecitersState> emit) {
-    if (state is! RecitersLoaded) return;
+    if (state is! RecitersLoaded) {
+      return;
+    }
 
     final currentState = state as RecitersLoaded;
-    final filteredReciters = _filterReciters(
+    final List<Reciter> filteredReciters = _filterReciters(
       currentState.reciters,
       '', // Clear search when filtering by letter
       event.letter,
@@ -117,10 +121,12 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     ClearLetterFilter event,
     Emitter<RecitersState> emit,
   ) {
-    if (state is! RecitersLoaded) return;
+    if (state is! RecitersLoaded) {
+      return;
+    }
 
     final currentState = state as RecitersLoaded;
-    final filteredReciters = _filterReciters(
+    final List<Reciter> filteredReciters = _filterReciters(
       currentState.reciters,
       currentState.searchQuery,
       null,
@@ -135,10 +141,12 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
   }
 
   void _onClearSearch(ClearSearch event, Emitter<RecitersState> emit) {
-    if (state is! RecitersLoaded) return;
+    if (state is! RecitersLoaded) {
+      return;
+    }
 
     final currentState = state as RecitersLoaded;
-    final filteredReciters = _filterReciters(
+    final List<Reciter> filteredReciters = _filterReciters(
       currentState.reciters,
       '',
       currentState.selectedLetter,
@@ -157,7 +165,7 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     String searchQuery,
     String? selectedLetter,
   ) {
-    List<Reciter> filtered = reciters;
+    var filtered = reciters;
 
     // Filter by search query
     if (searchQuery.isNotEmpty) {
