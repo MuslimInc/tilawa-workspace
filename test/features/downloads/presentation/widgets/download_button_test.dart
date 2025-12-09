@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
@@ -17,6 +18,11 @@ void main() {
 
   setUp(() {
     mockDownloadsBloc = MockDownloadsBloc();
+
+    // Stub getDownloadProgressStream to return an empty stream by default
+    when(
+      () => mockDownloadsBloc.getDownloadProgressStream(any()),
+    ).thenAnswer((_) => const Stream<DownloadProgress>.empty());
 
     // Mock fluttertoast channel
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -81,6 +87,22 @@ void main() {
       }),
     );
 
+    // Stub the progress stream for this specific download
+    final downloadId = '${surahId}_${reciterName.replaceAll(' ', '_')}';
+    when(
+      () => mockDownloadsBloc.getDownloadProgressStream(downloadId),
+    ).thenAnswer(
+      (_) => Stream.value(
+        DownloadProgress(
+          id: downloadId,
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          downloadedSize: 50,
+          fileSize: 100,
+        ),
+      ),
+    );
+
     await tester.pumpWidget(
       createTestWidget(
         const DownloadButton(
@@ -91,11 +113,14 @@ void main() {
       ),
     );
 
+    // Wait for StreamBuilder to process
+    await tester.pumpAndSettle();
+
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('50'), findsOneWidget);
   });
 
-  testWidgets('shows progress when pending', (tester) async {
+  testWidgets('shows hourglass when pending', (tester) async {
     final downloadItem = DownloadItem(
       id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
       title: surahTitle,
@@ -125,7 +150,11 @@ void main() {
       ),
     );
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Use pump() not pumpAndSettle() since pending animation repeats infinitely
+    await tester.pump();
+
+    // Pending state shows pulsing hourglass icon
+    expect(find.byIcon(Icons.hourglass_empty_rounded), findsOneWidget);
   });
 
   testWidgets('shows check icon when downloaded', (tester) async {
@@ -158,7 +187,10 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    // Completed state shows solid check_circle icon (not outline)
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
   });
 
   testWidgets('triggers download event on tap', (tester) async {

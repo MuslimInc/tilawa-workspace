@@ -41,6 +41,10 @@ class DownloadService {
   // --------------------------------------------------------------------------
 
   @visibleForTesting
+  static FlutterDownloaderWrapper get flutterDownloaderTestOverride =>
+      instance._flutterDownloader;
+
+  @visibleForTesting
   static set flutterDownloaderTestOverride(FlutterDownloaderWrapper value) {
     instance._flutterDownloader = value;
   }

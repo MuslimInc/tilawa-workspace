@@ -781,11 +781,19 @@ void main() {
       test('should set completedAt when status is completed', () async {
         // Arrange
         const testDownloadId = 'test_download_id';
+
+        // Create actual temp file for file size validation
+        final Directory tempDir = Directory.systemTemp.createTempSync(
+          'download_test_',
+        );
+        final tempFile = File('${tempDir.path}/file.mp3');
+        await tempFile.writeAsBytes(List.filled(1024, 0)); // Write 1024 bytes
+
         final initialDownload = DownloadItem(
           id: testDownloadId,
           title: 'Al-Fatiha',
           url: 'https://example.com/audio.mp3',
-          filePath: '/path/to/file.mp3',
+          filePath: tempFile.path,
           reciterName: 'Abdul Rahman Al-Sudais',
           status: DownloadStatus.downloading,
           progress: 0.5,
@@ -795,11 +803,19 @@ void main() {
         );
 
         when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => tempDir.path);
+        when(
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [initialDownload]);
         when(
           mockLocalDataSource.updateDownload(any),
         ).thenAnswer((_) async => {});
+        // Stub file existence check for completed status validation
+        // Use any matcher since path may be resolved dynamically
+        when(
+          mockLocalDataSource.isFileExists(any),
+        ).thenAnswer((_) async => true);
 
         // Act - Mark as completed
         await repository.updateDownloadProgress(
@@ -819,6 +835,9 @@ void main() {
         expect(updatedDownload.status, DownloadStatus.completed);
         expect(updatedDownload.progress, 1.0);
         expect(updatedDownload.completedAt, isNotNull);
+
+        // Cleanup
+        await tempDir.delete(recursive: true);
       });
 
       test('should handle update when download not found', () async {

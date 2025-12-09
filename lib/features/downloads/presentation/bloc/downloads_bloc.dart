@@ -86,50 +86,178 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   StreamSubscription<DownloadProgress>? _progressSubscription;
   Timer? _progressReloadTimer;
 
+  // Broadcast stream controller for download progress updates
+  // This allows multiple widgets to listen to individual download progress
+  final StreamController<DownloadProgress> _downloadProgressController =
+      StreamController<DownloadProgress>.broadcast();
+
+  /// Exposes a broadcast stream of download progress updates.
+  ///
+  /// Widgets can listen to this stream to get real-time progress updates
+  /// for all downloads without needing to reload the entire downloads list.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// bloc.downloadProgressStream
+  ///   .where((progress) => progress.id == downloadId)
+  ///   .listen((progress) {
+  ///     // Update UI with progress
+  ///   });
+  /// ```
+  Stream<DownloadProgress> get downloadProgressStream =>
+      _downloadProgressController.stream;
+
+  /// Gets a filtered stream for a specific download ID.
+  ///
+  /// This is a convenience method that filters the broadcast stream
+  /// to only emit progress updates for the specified download.
+  ///
+  /// Example:
+  /// ```dart
+  /// bloc.getDownloadProgressStream(downloadId).listen((progress) {
+  ///   setState(() {
+  ///     _progress = progress.progress;
+  ///     _status = progress.status;
+  ///   });
+  /// });
+  /// ```
+  Stream<DownloadProgress> getDownloadProgressStream(String downloadId) {
+    return _downloadProgressController.stream.where(
+      (progress) => progress.id == downloadId,
+    );
+  }
+
+  /// Listens to download progress updates from the DownloadService.
+  ///
+  /// This method sets up a stream subscription to monitor download progress
+  /// and update the UI accordingly. It includes:
+  /// - Error handling for platform-specific exceptions
+  /// - Debouncing to prevent excessive UI updates
+  /// - Immediate updates for completion/failure states
+  /// - Proper cleanup on subscription cancellation
   void _listenToProgress() {
     try {
-      _progressSubscription = DownloadService.globalProgressStream.listen((
-        progress,
-      ) {
-        // Update the download progress in the repository
-        _downloadsRepository.updateDownloadProgress(
-          progress.id,
-          progress.status,
-          progress.progress,
-          progress.downloadedSize,
-          progress.fileSize,
-        );
+      _progressSubscription?.cancel(); // Cancel any existing subscription
 
-        // Only reload if we're in a loaded state to avoid unnecessary reloads
-        if (state is DownloadsLoaded) {
-          // Reload immediately if download completed or failed
-          if (progress.status == DownloadStatus.completed ||
-              progress.status == DownloadStatus.failed) {
-            _progressReloadTimer?.cancel();
-            add(const LoadDownloads());
-          } else {
-            // Throttle reloads for in-progress downloads to avoid too many updates
-            // Cancel previous timer if it exists
-            _progressReloadTimer?.cancel();
-
-            // Debounce: wait 150ms after last progress update before reloading
-            // This provides smooth updates (updates ~6-7 times per second)
-            _progressReloadTimer = Timer(const Duration(milliseconds: 150), () {
-              add(const DownloadsEvent.refreshDownloadsProgress());
-            });
-          }
-        }
-      });
-    } on MissingPluginException {
-      // In test environment, platform channels are not available
-      // Skip progress listening - this is expected in test environment
-      logger.d(
-        '[DownloadsBloc] Progress stream listening skipped - platform channels not available (test environment)',
+      _progressSubscription = DownloadService.globalProgressStream.listen(
+        _handleProgressUpdate,
+        onError: _handleProgressError,
+        onDone: _handleProgressDone,
+        cancelOnError: false, // Continue listening even after errors
       );
-    } catch (e) {
-      // Any other error - log and continue
-      logger.w('[DownloadsBloc] Error setting up progress stream: $e');
+
+      logger.d('[DownloadsBloc] Progress stream listener initialized');
+    } on MissingPluginException catch (e) {
+      // In test environment, platform channels are not available
+      // This is expected and should not cause the bloc to fail
+      logger.d(
+        '[DownloadsBloc] Progress stream listening skipped - '
+        'platform channels not available (test environment): $e',
+      );
+    } on StateError catch (e) {
+      // Stream has already been listened to or closed
+      logger.w('[DownloadsBloc] Progress stream state error: $e');
+    } catch (e, stackTrace) {
+      // Any other unexpected error
+      logger.e(
+        '[DownloadsBloc] Unexpected error setting up progress stream',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
+  }
+
+  /// Handles a single progress update from the download service.
+  void _handleProgressUpdate(DownloadProgress progress) {
+    try {
+      // Broadcast progress update to all listeners
+      // This allows widgets to listen for specific download progress updates
+      if (!_downloadProgressController.isClosed) {
+        _downloadProgressController.add(progress);
+      }
+
+      // Update the download progress in the repository
+      _downloadsRepository.updateDownloadProgress(
+        progress.id,
+        progress.status,
+        progress.progress,
+        progress.downloadedSize,
+        progress.fileSize,
+      );
+
+      // Only reload if we're in a loaded state to avoid unnecessary reloads
+      if (state is! DownloadsLoaded) {
+        return;
+      }
+
+      // Immediate reload for terminal states (completed/failed/cancelled)
+      if (_isTerminalStatus(progress.status)) {
+        _cancelProgressTimer();
+        add(const LoadDownloads());
+        logger.d(
+          '[DownloadsBloc] Terminal status ${progress.status} for ${progress.id}, '
+          'triggering immediate reload',
+        );
+        return;
+      }
+
+      // Debounce in-progress updates to avoid excessive reloads
+      _scheduleProgressRefresh();
+    } catch (e, stackTrace) {
+      logger.e(
+        '[DownloadsBloc] Error handling progress update',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Handles errors from the progress stream.
+  void _handleProgressError(Object error, StackTrace stackTrace) {
+    logger.e(
+      '[DownloadsBloc] Progress stream error',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    // Don't add error state here - we want downloads list to remain visible
+    // The stream will continue listening due to cancelOnError: false
+  }
+
+  /// Handles completion of the progress stream.
+  void _handleProgressDone() {
+    logger.d('[DownloadsBloc] Progress stream completed');
+    _cancelProgressTimer();
+    // Stream completed - might want to attempt reconnection
+    // For now, just log it
+  }
+
+  /// Checks if a download status is terminal (no more updates expected).
+  bool _isTerminalStatus(DownloadStatus status) {
+    return status == DownloadStatus.completed ||
+        status == DownloadStatus.failed ||
+        status == DownloadStatus.cancelled;
+  }
+
+  /// Schedules a refresh of the downloads list after a debounce period.
+  ///
+  /// This prevents excessive UI updates during rapid progress changes.
+  /// Cancels any pending refresh and schedules a new one.
+  void _scheduleProgressRefresh() {
+    _cancelProgressTimer();
+
+    // Debounce: wait 150ms after last progress update before reloading
+    // This provides smooth updates (~6-7 times per second)
+    _progressReloadTimer = Timer(const Duration(milliseconds: 150), () {
+      if (!isClosed) {
+        add(const DownloadsEvent.refreshDownloadsProgress());
+      }
+    });
+  }
+
+  /// Cancels the pending progress reload timer if it exists.
+  void _cancelProgressTimer() {
+    _progressReloadTimer?.cancel();
+    _progressReloadTimer = null;
   }
 
   Future<void> _onRefreshDownloadsProgress(
@@ -156,9 +284,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   }
 
   @override
-  Future<void> close() {
-    _progressSubscription?.cancel();
+  Future<void> close() async {
     _progressReloadTimer?.cancel();
+    await _progressSubscription?.cancel();
+    await _downloadProgressController.close();
     return super.close();
   }
 
