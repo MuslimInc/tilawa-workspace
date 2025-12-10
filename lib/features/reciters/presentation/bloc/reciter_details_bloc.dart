@@ -19,7 +19,7 @@ class ReciterDetailsBloc
     this._audioHandler,
     this._convertMediaItemsToSurahs,
     this._refreshSurahDownloadStatusUseCase,
-  ) : super(const ReciterDetailsInitial()) {
+  ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
     on<SelectSurah>(_onSelectSurah);
@@ -33,6 +33,7 @@ class ReciterDetailsBloc
     LoadSurahList event,
     Emitter<ReciterDetailsState> emit,
   ) async {
+    emit(state.copyWith(status: ReciterDetailsStatus.loading));
     try {
       final List<MediaItem>? mediaItemList = await _audioHandler
           .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
@@ -44,56 +45,63 @@ class ReciterDetailsBloc
         );
 
         emit(
-          ReciterDetailsLoaded(
+          state.copyWith(
+            status: ReciterDetailsStatus.loaded,
             surahList: surahList,
             selectedMoshaf: event.moshaf,
           ),
         );
       } else {
-        emit(const ReciterDetailsError('Failed to load surah list'));
+        emit(
+          state.copyWith(
+            status: ReciterDetailsStatus.error,
+            errorMessage: 'Failed to load surah list',
+          ),
+        );
       }
     } catch (e) {
-      emit(ReciterDetailsError('Error loading surah list: $e'));
+      emit(
+        state.copyWith(
+          status: ReciterDetailsStatus.error,
+          errorMessage: 'Error loading surah list: $e',
+        ),
+      );
     }
   }
 
   void _onSelectMoshaf(SelectMoshaf event, Emitter<ReciterDetailsState> emit) {
-    if (state is! ReciterDetailsLoaded) {
+    if (state.status != ReciterDetailsStatus.loaded) {
       return;
     }
 
-    final currentState = state as ReciterDetailsLoaded;
-    emit(currentState.copyWith(selectedMoshaf: event.moshaf));
+    emit(state.copyWith(selectedMoshaf: event.moshaf));
   }
 
   void _onSelectSurah(SelectSurah event, Emitter<ReciterDetailsState> emit) {
-    if (state is! ReciterDetailsLoaded) {
+    if (state.status != ReciterDetailsStatus.loaded) {
       return;
     }
 
-    final currentState = state as ReciterDetailsLoaded;
-    emit(currentState.copyWith(selectedSurahId: event.surahId));
+    emit(state.copyWith(selectedSurahId: event.surahId));
   }
 
   Future<void> _onRefreshSurahDownloadStatus(
     RefreshSurahDownloadStatus event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    if (state is! ReciterDetailsLoaded) {
+    if (state.status != ReciterDetailsStatus.loaded) {
       return;
     }
-
-    final currentState = state as ReciterDetailsLoaded;
 
     try {
       final List<SurahEntity> updatedSurahList =
           await _refreshSurahDownloadStatusUseCase.call(
-            currentSurahs: currentState.surahList,
+            currentSurahs: state.surahList,
             surahId: event.surahId,
             reciterName: event.reciterName,
           );
 
-      emit(currentState.copyWith(surahList: updatedSurahList));
+      emit(state.copyWith(surahList: updatedSurahList));
     } catch (e) {
       // Don't emit error for refresh, just keep current state
     }
@@ -102,7 +110,7 @@ class ReciterDetailsBloc
   @override
   ReciterDetailsState? fromJson(Map<String, dynamic> json) {
     // Reciter details should be loaded from repository, so we always start with initial state
-    return const ReciterDetailsInitial();
+    return const ReciterDetailsState();
   }
 
   @override

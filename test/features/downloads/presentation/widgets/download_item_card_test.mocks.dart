@@ -5,19 +5,21 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
-import 'package:hydrated_bloc/hydrated_bloc.dart' as _i7;
+import 'package:hydrated_bloc/hydrated_bloc.dart' as _i8;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
+import 'package:mockito/src/dummies.dart' as _i7;
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart'
-    as _i2;
-import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart'
-    as _i8;
-import 'package:muzakri/features/downloads/data/services/download_service.dart'
-    as _i5;
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
-    as _i9;
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i3;
+import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart'
+    as _i9;
+import 'package:muzakri/features/downloads/data/services/download_service.dart'
+    as _i6;
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
+    as _i10;
+import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
+    as _i2;
+import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart'
+    as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -34,46 +36,57 @@ import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeAudioPlayerState_0 extends _i1.SmartFake
-    implements _i2.AudioPlayerState {
-  _FakeAudioPlayerState_0(Object parent, Invocation parentInvocation)
+class _FakeDownloadsState_0 extends _i1.SmartFake
+    implements _i2.DownloadsState {
+  _FakeDownloadsState_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeAudioPlayerState_1 extends _i1.SmartFake
+    implements _i3.AudioPlayerState {
+  _FakeAudioPlayerState_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [DownloadsBloc].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
+class MockDownloadsBloc extends _i1.Mock implements _i2.DownloadsBloc {
   MockDownloadsBloc() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Stream<_i5.DownloadProgress> get downloadProgressStream =>
+  _i4.Stream<_i5.DownloadsStatus> get statusStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#statusStream),
+            returnValue: _i4.Stream<_i5.DownloadsStatus>.empty(),
+          )
+          as _i4.Stream<_i5.DownloadsStatus>);
+
+  @override
+  _i4.Stream<_i6.DownloadProgress> get downloadProgressStream =>
       (super.noSuchMethod(
             Invocation.getter(#downloadProgressStream),
-            returnValue: _i4.Stream<_i5.DownloadProgress>.empty(),
+            returnValue: _i4.Stream<_i6.DownloadProgress>.empty(),
           )
-          as _i4.Stream<_i5.DownloadProgress>);
+          as _i4.Stream<_i6.DownloadProgress>);
 
   @override
-  _i3.DownloadsState get state =>
+  _i2.DownloadsState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i6.dummyValue<_i3.DownloadsState>(
-              this,
-              Invocation.getter(#state),
-            ),
+            returnValue: _FakeDownloadsState_0(this, Invocation.getter(#state)),
           )
-          as _i3.DownloadsState);
+          as _i2.DownloadsState);
 
   @override
-  _i4.Stream<_i3.DownloadsState> get stream =>
+  _i4.Stream<_i2.DownloadsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i4.Stream<_i3.DownloadsState>.empty(),
+            returnValue: _i4.Stream<_i2.DownloadsState>.empty(),
           )
-          as _i4.Stream<_i3.DownloadsState>);
+          as _i4.Stream<_i2.DownloadsState>);
 
   @override
   bool get isClosed =>
@@ -84,7 +97,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i6.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i7.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -92,7 +105,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i6.dummyValue<String>(
+            returnValue: _i7.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -103,7 +116,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i6.dummyValue<String>(
+            returnValue: _i7.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -111,14 +124,14 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
           as String);
 
   @override
-  _i4.Stream<_i5.DownloadProgress> getDownloadProgressStream(
+  _i4.Stream<_i6.DownloadProgress> getDownloadProgressStream(
     String? downloadId,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getDownloadProgressStream, [downloadId]),
-            returnValue: _i4.Stream<_i5.DownloadProgress>.empty(),
+            returnValue: _i4.Stream<_i6.DownloadProgress>.empty(),
           )
-          as _i4.Stream<_i5.DownloadProgress>);
+          as _i4.Stream<_i6.DownloadProgress>);
 
   @override
   _i4.Future<void> close() =>
@@ -130,37 +143,37 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
           as _i4.Future<void>);
 
   @override
-  _i3.DownloadsState? fromJson(Map<String, dynamic>? json) =>
+  _i2.DownloadsState? fromJson(Map<String, dynamic>? json) =>
       (super.noSuchMethod(Invocation.method(#fromJson, [json]))
-          as _i3.DownloadsState?);
+          as _i2.DownloadsState?);
 
   @override
-  Map<String, dynamic>? toJson(_i3.DownloadsState? state) =>
+  Map<String, dynamic>? toJson(_i2.DownloadsState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);
 
   @override
-  void add(_i3.DownloadsEvent? event) => super.noSuchMethod(
+  void add(_i2.DownloadsEvent? event) => super.noSuchMethod(
     Invocation.method(#add, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void onEvent(_i3.DownloadsEvent? event) => super.noSuchMethod(
+  void onEvent(_i2.DownloadsEvent? event) => super.noSuchMethod(
     Invocation.method(#onEvent, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void emit(_i3.DownloadsState? state) => super.noSuchMethod(
+  void emit(_i2.DownloadsState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void on<E extends _i3.DownloadsEvent>(
-    _i7.EventHandler<E, _i3.DownloadsState>? handler, {
-    _i7.EventTransformer<E>? transformer,
+  void on<E extends _i2.DownloadsEvent>(
+    _i8.EventHandler<E, _i2.DownloadsState>? handler, {
+    _i8.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -168,7 +181,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
 
   @override
   void onTransition(
-    _i7.Transition<_i3.DownloadsEvent, _i3.DownloadsState>? transition,
+    _i8.Transition<_i2.DownloadsEvent, _i2.DownloadsState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -176,7 +189,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
 
   @override
   void onDone(
-    _i3.DownloadsEvent? event, [
+    _i2.DownloadsEvent? event, [
     Object? error,
     StackTrace? stackTrace,
   ]) => super.noSuchMethod(
@@ -185,7 +198,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
   );
 
   @override
-  void onChange(_i7.Change<_i3.DownloadsState>? change) => super.noSuchMethod(
+  void onChange(_i8.Change<_i2.DownloadsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -204,8 +217,8 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
 
   @override
   void hydrate({
-    _i7.Storage? storage,
-    _i7.OnHydrationError? onError = _i7.defaultOnHydrationError,
+    _i8.Storage? storage,
+    _i8.OnHydrationError? onError = _i8.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
@@ -224,29 +237,29 @@ class MockDownloadsBloc extends _i1.Mock implements _i3.DownloadsBloc {
 /// A class which mocks [AudioPlayerBloc].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
+class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
   MockAudioPlayerBloc() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i2.AudioPlayerState get state =>
+  _i3.AudioPlayerState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _FakeAudioPlayerState_0(
+            returnValue: _FakeAudioPlayerState_1(
               this,
               Invocation.getter(#state),
             ),
           )
-          as _i2.AudioPlayerState);
+          as _i3.AudioPlayerState);
 
   @override
-  _i4.Stream<_i2.AudioPlayerState> get stream =>
+  _i4.Stream<_i3.AudioPlayerState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i4.Stream<_i2.AudioPlayerState>.empty(),
+            returnValue: _i4.Stream<_i3.AudioPlayerState>.empty(),
           )
-          as _i4.Stream<_i2.AudioPlayerState>);
+          as _i4.Stream<_i3.AudioPlayerState>);
 
   @override
   bool get isClosed =>
@@ -257,7 +270,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i6.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i7.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -265,7 +278,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i6.dummyValue<String>(
+            returnValue: _i7.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -276,7 +289,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i6.dummyValue<String>(
+            returnValue: _i7.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -284,37 +297,37 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
           as String);
 
   @override
-  _i2.AudioPlayerState? fromJson(Map<String, dynamic>? json) =>
+  _i3.AudioPlayerState? fromJson(Map<String, dynamic>? json) =>
       (super.noSuchMethod(Invocation.method(#fromJson, [json]))
-          as _i2.AudioPlayerState?);
+          as _i3.AudioPlayerState?);
 
   @override
-  Map<String, dynamic>? toJson(_i2.AudioPlayerState? state) =>
+  Map<String, dynamic>? toJson(_i3.AudioPlayerState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);
 
   @override
-  void add(_i2.AudioPlayerEvent? event) => super.noSuchMethod(
+  void add(_i3.AudioPlayerEvent? event) => super.noSuchMethod(
     Invocation.method(#add, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void onEvent(_i2.AudioPlayerEvent? event) => super.noSuchMethod(
+  void onEvent(_i3.AudioPlayerEvent? event) => super.noSuchMethod(
     Invocation.method(#onEvent, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void emit(_i2.AudioPlayerState? state) => super.noSuchMethod(
+  void emit(_i3.AudioPlayerState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void on<E extends _i2.AudioPlayerEvent>(
-    _i7.EventHandler<E, _i2.AudioPlayerState>? handler, {
-    _i7.EventTransformer<E>? transformer,
+  void on<E extends _i3.AudioPlayerEvent>(
+    _i8.EventHandler<E, _i3.AudioPlayerState>? handler, {
+    _i8.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -322,7 +335,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void onTransition(
-    _i7.Transition<_i2.AudioPlayerEvent, _i2.AudioPlayerState>? transition,
+    _i8.Transition<_i3.AudioPlayerEvent, _i3.AudioPlayerState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -330,7 +343,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void onDone(
-    _i2.AudioPlayerEvent? event, [
+    _i3.AudioPlayerEvent? event, [
     Object? error,
     StackTrace? stackTrace,
   ]) => super.noSuchMethod(
@@ -348,7 +361,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
           as _i4.Future<void>);
 
   @override
-  void onChange(_i7.Change<_i2.AudioPlayerState>? change) => super.noSuchMethod(
+  void onChange(_i8.Change<_i3.AudioPlayerState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -367,8 +380,8 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void hydrate({
-    _i7.Storage? storage,
-    _i7.OnHydrationError? onError = _i7.defaultOnHydrationError,
+    _i8.Storage? storage,
+    _i8.OnHydrationError? onError = _i8.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
@@ -388,7 +401,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadQueueManager extends _i1.Mock
-    implements _i8.DownloadQueueManager {
+    implements _i9.DownloadQueueManager {
   MockDownloadQueueManager() {
     _i1.throwOnMissingStub(this);
   }
@@ -415,12 +428,12 @@ class MockDownloadQueueManager extends _i1.Mock
           as int);
 
   @override
-  _i4.Stream<_i8.QueueUpdate> get queueUpdates =>
+  _i4.Stream<_i9.QueueUpdate> get queueUpdates =>
       (super.noSuchMethod(
             Invocation.getter(#queueUpdates),
-            returnValue: _i4.Stream<_i8.QueueUpdate>.empty(),
+            returnValue: _i4.Stream<_i9.QueueUpdate>.empty(),
           )
-          as _i4.Stream<_i8.QueueUpdate>);
+          as _i4.Stream<_i9.QueueUpdate>);
 
   @override
   void setMaxConcurrentDownloads(int? count) => super.noSuchMethod(
@@ -504,7 +517,7 @@ class MockDownloadQueueManager extends _i1.Mock
 /// A class which mocks [DownloadService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDownloadService extends _i1.Mock implements _i5.DownloadService {
+class MockDownloadService extends _i1.Mock implements _i6.DownloadService {
   MockDownloadService() {
     _i1.throwOnMissingStub(this);
   }
@@ -549,12 +562,12 @@ class MockDownloadService extends _i1.Mock implements _i5.DownloadService {
           as _i4.Future<void>);
 
   @override
-  _i4.Stream<_i5.DownloadProgress> getProgressStream(String? id) =>
+  _i4.Stream<_i6.DownloadProgress> getProgressStream(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getProgressStream, [id]),
-            returnValue: _i4.Stream<_i5.DownloadProgress>.empty(),
+            returnValue: _i4.Stream<_i6.DownloadProgress>.empty(),
           )
-          as _i4.Stream<_i5.DownloadProgress>);
+          as _i4.Stream<_i6.DownloadProgress>);
 
   @override
   _i4.Future<List<String>> getActiveDownloadIds() =>
@@ -573,12 +586,12 @@ class MockDownloadService extends _i1.Mock implements _i5.DownloadService {
           as _i4.Future<bool>);
 
   @override
-  _i4.Future<_i9.DownloadStatus?> getStatus(String? id) =>
+  _i4.Future<_i10.DownloadStatus?> getStatus(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getStatus, [id]),
-            returnValue: _i4.Future<_i9.DownloadStatus?>.value(),
+            returnValue: _i4.Future<_i10.DownloadStatus?>.value(),
           )
-          as _i4.Future<_i9.DownloadStatus?>);
+          as _i4.Future<_i10.DownloadStatus?>);
 
   @override
   _i4.Future<void> disposeService() =>

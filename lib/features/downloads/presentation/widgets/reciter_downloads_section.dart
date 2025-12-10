@@ -12,14 +12,23 @@ class ReciterDownloadsSection extends StatelessWidget {
   const ReciterDownloadsSection({
     super.key,
     required this.reciterName,
-    required this.downloads,
+    required this.downloadsByNarrative,
   });
 
   final String reciterName;
-  final List<DownloadItem> downloads;
+  final Map<String, List<DownloadItem>> downloadsByNarrative;
+
+  // Get all downloads (flatten map)
+  List<DownloadItem> get _allDownloads {
+    return downloadsByNarrative.values
+        .expand((downloads) => downloads)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<DownloadItem> downloads = _allDownloads;
+
     return Card(
       elevation: 2,
       shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.1),
@@ -42,7 +51,7 @@ class ReciterDownloadsSection extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
-            '${downloads.length} ${AppLocalizations.of(context)!.surahs}',
+            '${downloads.length} ${AppLocalizations.of(context)!.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
             style: TextStyle(
               color: Theme.of(context).textTheme.bodySmall?.color,
               fontSize: 13,
@@ -143,28 +152,88 @@ class ReciterDownloadsSection extends StatelessWidget {
               height: 1,
               color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
-            ...downloads.map((download) {
-              return Column(
-                children: [
-                  DownloadItemCard(
-                    download: download,
-                    onDelete: () {
-                      context.read<DownloadsBloc>().add(
-                        DeleteDownloadEvent(downloadId: download.id),
-                      );
-                    },
+            // Display downloads grouped by narrative
+            ...downloadsByNarrative.entries.map((entry) {
+              final String narrativeName = entry.key;
+              final List<DownloadItem> narrativeDownloads = entry.value;
+
+              // If only one narrative, just show downloads without extra grouping
+              if (downloadsByNarrative.length == 1) {
+                return Column(
+                  children: narrativeDownloads.map((download) {
+                    return Column(
+                      children: [
+                        DownloadItemCard(
+                          download: download,
+                          onDelete: () {
+                            context.read<DownloadsBloc>().add(
+                              DeleteDownloadEvent(downloadId: download.id),
+                            );
+                          },
+                        ),
+                        if (download != narrativeDownloads.last)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Divider(
+                              height: 1,
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withValues(alpha: 0.1),
+                            ),
+                          ),
+                      ],
+                    );
+                  }).toList(),
+                );
+              }
+
+              // Multiple narratives - show grouped by narrative
+              return ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                childrenPadding: EdgeInsets.zero,
+                initiallyExpanded: true,
+                title: Text(
+                  narrativeName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
-                  if (download != downloads.last)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Divider(
-                        height: 1,
-                        color: Theme.of(
-                          context,
-                        ).dividerColor.withValues(alpha: 0.1),
+                ),
+                subtitle: Text(
+                  '${narrativeDownloads.length} ${AppLocalizations.of(context)!.surahs}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+                children: narrativeDownloads.map((download) {
+                  return Column(
+                    children: [
+                      DownloadItemCard(
+                        download: download,
+                        onDelete: () {
+                          context.read<DownloadsBloc>().add(
+                            DeleteDownloadEvent(downloadId: download.id),
+                          );
+                        },
                       ),
-                    ),
-                ],
+                      if (download != narrativeDownloads.last)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Divider(
+                            height: 1,
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                    ],
+                  );
+                }).toList(),
               );
             }),
           ],
@@ -205,7 +274,7 @@ class ReciterDownloadsSection extends StatelessWidget {
 
   /// Check if there are any completed downloads
   bool _hasCompletedDownloads() {
-    return downloads.any(
+    return _allDownloads.any(
       (download) => download.status == DownloadStatus.completed,
     );
   }

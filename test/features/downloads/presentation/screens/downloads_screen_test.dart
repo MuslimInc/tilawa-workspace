@@ -16,7 +16,7 @@ import 'downloads_screen_test.mocks.dart';
 // The function name must follow the pattern: provideDummy<TypeName>
 // This must be a top-level function in the same file as @GenerateMocks
 @visibleForTesting
-DownloadsState provideDummyDownloadsState() => const DownloadsState.initial();
+DownloadsState provideDummyDownloadsState() => const DownloadsState();
 
 @GenerateMocks([DownloadsBloc])
 void main() {
@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     // Provide dummy value for Mockito
-    provideDummy(const DownloadsState.initial());
+    provideDummy(const DownloadsState());
 
     // Create a fresh mock for each test
     mockDownloadsBloc = MockDownloadsBloc();
@@ -35,9 +35,15 @@ void main() {
 
     // Set up stream to use our controller
     when(mockDownloadsBloc.stream).thenAnswer((_) => stateController.stream);
+    when(
+      mockDownloadsBloc.statusStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      mockDownloadsBloc.downloadProgressStream,
+    ).thenAnswer((_) => const Stream.empty());
 
     // Set up default state (tests can override this)
-    when(mockDownloadsBloc.state).thenReturn(const DownloadsState.initial());
+    when(mockDownloadsBloc.state).thenReturn(const DownloadsState());
 
     // Stub add() method to prevent errors when DownloadsScreen dispatches events
     when(mockDownloadsBloc.add(any)).thenReturn(null);
@@ -73,24 +79,29 @@ void main() {
     ) async {
       // Arrange
       final downloads = {
-        'Test Reciter': [
-          DownloadItem(
-            id: 'test_id',
-            title: 'Test Surah',
-            url: 'https://example.com/test.mp3',
-            filePath: '/path/to/test.mp3',
-            reciterName: 'Test Reciter',
-            status: DownloadStatus.downloading,
-            progress: 0.5,
-            fileSize: 1024,
-            downloadedSize: 512,
-            createdAt: DateTime.now(),
-          ),
-        ],
+        'Test Reciter': {
+          'Default': [
+            DownloadItem(
+              id: 'test_id',
+              title: 'Test Surah',
+              url: 'https://example.com/test.mp3',
+              filePath: '/path/to/test.mp3',
+              reciterName: 'Test Reciter',
+              status: DownloadStatus.downloading,
+              progress: 0.5,
+              fileSize: 1024,
+              downloadedSize: 512,
+              createdAt: DateTime.now(),
+            ),
+          ],
+        },
       };
 
       // Set up state and emit it through the stream
-      final loadedState = DownloadsState.loaded(downloads);
+      final loadedState = DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: downloads,
+      );
       when(mockDownloadsBloc.state).thenReturn(loadedState);
 
       // Emit state first so BlocBuilder can receive it when it subscribes
@@ -132,9 +143,14 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      var loadedState = DownloadsState.loaded({
-        'Test Reciter': [download],
-      });
+      var loadedState = DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          'Test Reciter': {
+            'Default': [download],
+          },
+        },
+      );
 
       // Emit state BEFORE building widget
       when(mockDownloadsBloc.state).thenReturn(loadedState);
@@ -157,9 +173,14 @@ void main() {
 
       // Act - Update progress to 30%
       download = download.copyWith(progress: 0.3, downloadedSize: 300);
-      loadedState = DownloadsState.loaded({
-        'Test Reciter': [download],
-      });
+      loadedState = DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          'Test Reciter': {
+            'Default': [download],
+          },
+        },
+      );
       when(mockDownloadsBloc.state).thenReturn(loadedState);
       stateController.add(loadedState);
 
@@ -192,9 +213,14 @@ void main() {
       );
 
       // Set up initial state
-      var loadedState = DownloadsState.loaded({
-        'Test Reciter': [download],
-      });
+      var loadedState = DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          'Test Reciter': {
+            'Default': [download],
+          },
+        },
+      );
       when(mockDownloadsBloc.state).thenReturn(loadedState);
       stateController.add(loadedState);
 
@@ -218,9 +244,14 @@ void main() {
           downloadedSize: (1000 * progress).round(),
         );
 
-        loadedState = DownloadsState.loaded({
-          'Test Reciter': [download],
-        });
+        loadedState = DownloadsState(
+          status: DownloadsStateStatus.loaded,
+          downloads: {
+            'Test Reciter': {
+              'Default': [download],
+            },
+          },
+        );
         when(mockDownloadsBloc.state).thenReturn(loadedState);
         stateController.add(loadedState);
 
@@ -277,9 +308,14 @@ void main() {
       final progressValues = <double>[];
 
       // Set up initial state
-      var loadedState = DownloadsState.loaded({
-        'Test Reciter': [download],
-      });
+      var loadedState = DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          'Test Reciter': {
+            'Default': [download],
+          },
+        },
+      );
       when(mockDownloadsBloc.state).thenReturn(loadedState);
       stateController.add(loadedState);
 
@@ -303,9 +339,14 @@ void main() {
           downloadedSize: (10000 * progress).round(),
         );
 
-        loadedState = DownloadsState.loaded({
-          'Test Reciter': [download],
-        });
+        loadedState = DownloadsState(
+          status: DownloadsStateStatus.loaded,
+          downloads: {
+            'Test Reciter': {
+              'Default': [download],
+            },
+          },
+        );
         when(mockDownloadsBloc.state).thenReturn(loadedState);
         stateController.add(loadedState);
 
@@ -364,9 +405,14 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        final loadedState = DownloadsState.loaded({
-          'Test Reciter': [download],
-        });
+        final loadedState = DownloadsState(
+          status: DownloadsStateStatus.loaded,
+          downloads: {
+            'Test Reciter': {
+              'Default': [download],
+            },
+          },
+        );
         when(mockDownloadsBloc.state).thenReturn(loadedState);
         stateController.add(loadedState);
 
@@ -415,9 +461,14 @@ void main() {
         final progressHistory = <double>[];
 
         // Set up initial state
-        var loadedState = DownloadsState.loaded({
-          'Test Reciter': [download],
-        });
+        var loadedState = DownloadsState(
+          status: DownloadsStateStatus.loaded,
+          downloads: {
+            'Test Reciter': {
+              'Default': [download],
+            },
+          },
+        );
         when(mockDownloadsBloc.state).thenReturn(loadedState);
         stateController.add(loadedState);
 
@@ -448,9 +499,14 @@ void main() {
 
           // Simulate progress update being emitted through the bloc stream
           // (In real app, this would come from DownloadService.globalProgressStream)
-          loadedState = DownloadsState.loaded({
-            'Test Reciter': [download],
-          });
+          loadedState = DownloadsState(
+            status: DownloadsStateStatus.loaded,
+            downloads: {
+              'Test Reciter': {
+                'Default': [download],
+              },
+            },
+          );
           when(mockDownloadsBloc.state).thenReturn(loadedState);
           stateController.add(loadedState);
 

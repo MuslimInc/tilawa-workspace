@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,6 +10,8 @@ import '../../../premium/presentation/widgets/premium_upgrade_dialog.dart';
 import '../../data/services/download_service.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
+import '../bloc/downloads_state_extension.dart';
+import '../bloc/downloads_status.dart';
 
 class DownloadButton extends StatefulWidget {
   const DownloadButton({
@@ -27,6 +31,7 @@ class DownloadButton extends StatefulWidget {
 
 class _DownloadButtonState extends State<DownloadButton>
     with SingleTickerProviderStateMixin {
+  StreamSubscription<DownloadsStatus>? _statusSubscription;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -40,10 +45,21 @@ class _DownloadButtonState extends State<DownloadButton>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    // Listen to status events
+    _statusSubscription = context.read<DownloadsBloc>().statusStream.listen((
+      status,
+    ) {
+      status.mapOrNull(
+        premiumRequired: (s) => _showPremiumUpgradeDialog(context, s.message),
+        error: (s) => ToastUtils.showToast(msg: s.message),
+      );
+    });
   }
 
   @override
   void dispose() {
+    _statusSubscription?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -73,78 +89,62 @@ class _DownloadButtonState extends State<DownloadButton>
     );
   }
 
-  DownloadItem? _getDownloadItem(DownloadsState state) {
-    final Map<String, List<DownloadItem>>? downloadsByReciter = state.maybeMap(
-      loaded: (s) => s.downloadsByReciter,
-      downloadStarted: (s) => s.downloadsByReciter,
-      premiumRequired: (s) => s.downloadsByReciter,
-      playbackInitiated: (s) => s.downloadsByReciter,
-      orElse: () => null,
-    );
-
-    if (downloadsByReciter != null) {
-      final List<DownloadItem> downloads =
-          downloadsByReciter[widget.reciterName] ?? [];
-
-      // Construct the expected composite ID: URL_ReciterName
-      final expectedId =
-          '${widget.surahId}_${widget.reciterName.replaceAll(' ', '_')}';
-
-      try {
-        return downloads.firstWhere((download) => download.id == expectedId);
-      } catch (_) {
-        return null;
-      }
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Get the composite download ID
-    final downloadId =
-        '${widget.surahId}_${widget.reciterName.replaceAll(' ', '_')}';
+    // Use surahId (URL) as downloadId
+    final String downloadId = widget.surahId;
 
-    return BlocListener<DownloadsBloc, DownloadsState>(
-      listener: (context, state) {
-        if (state is PremiumRequired) {
-          _showPremiumUpgradeDialog(context, state.message);
-        }
+    return BlocBuilder<DownloadsBloc, DownloadsState>(
+      buildWhen: (previous, current) {
+        // Only rebuild when this specific download's status changes
+        final DownloadItem? previousItem = previous.getDownload(
+          widget.surahId,
+          widget.reciterName,
+        );
+        final DownloadItem? currentItem = current.getDownload(
+          widget.surahId,
+          widget.reciterName,
+        );
+
+        // Rebuild if download item changed (status, progress, etc.)
+        return previousItem?.status != currentItem?.status ||
+            previousItem?.progress != currentItem?.progress;
       },
-      child: BlocBuilder<DownloadsBloc, DownloadsState>(
-        builder: (context, state) {
-          // Check for download item in loaded state
-          final DownloadItem? downloadItem = _getDownloadItem(state);
-          final DownloadStatus? status = downloadItem?.status;
+      builder: (context, state) {
+        // Check for download item in loaded state
+        final DownloadItem? downloadItem = state.getDownload(
+          widget.surahId,
+          widget.reciterName,
+        );
+        final DownloadStatus? status = downloadItem?.status;
 
-          // Route to appropriate state widget
-          return switch (status) {
-            DownloadStatus.completed => _CompletedDownloadButton(
-              animationController: _animationController,
-              scaleAnimation: _scaleAnimation,
-            ),
+        // Route to appropriate state widget
+        return switch (status) {
+          DownloadStatus.completed => _CompletedDownloadButton(
+            animationController: _animationController,
+            scaleAnimation: _scaleAnimation,
+          ),
 
-            DownloadStatus.failed => _FailedDownloadButton(
-              onRetry: () => _downloadSurah(context),
-            ),
+          DownloadStatus.failed => _FailedDownloadButton(
+            onRetry: () => _downloadSurah(context),
+          ),
 
-            DownloadStatus.cancelled => _CancelledDownloadButton(
-              onRestart: () => _downloadSurah(context),
-            ),
+          DownloadStatus.cancelled => _CancelledDownloadButton(
+            onRestart: () => _downloadSurah(context),
+          ),
 
-            DownloadStatus.pending => const _PendingDownloadButton(),
+          DownloadStatus.pending => const _PendingDownloadButton(),
 
-            DownloadStatus.downloading => _DownloadingProgressButton(
-              downloadId: downloadId,
-              downloadItem: downloadItem,
-            ),
+          DownloadStatus.downloading => _DownloadingProgressButton(
+            downloadId: downloadId,
+            downloadItem: downloadItem,
+          ),
 
-            _ => _DefaultDownloadButton(
-              onDownload: () => _downloadSurah(context),
-            ),
-          };
-        },
-      ),
+          _ => _DefaultDownloadButton(
+            onDownload: () => _downloadSurah(context),
+          ),
+        };
+      },
     );
   }
 }

@@ -968,30 +968,63 @@ String toString() {
 /// @nodoc
 mixin _$DownloadsState {
 
-
+ DownloadsStateStatus get status; Map<String, Map<String, List<DownloadItem>>> get downloads; String? get errorMessage;
+/// Create a copy of DownloadsState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DownloadsStateCopyWith<DownloadsState> get copyWith => _$DownloadsStateCopyWithImpl<DownloadsState>(this as DownloadsState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.downloads, downloads)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(downloads),errorMessage);
 
 @override
 String toString() {
-  return 'DownloadsState()';
+  return 'DownloadsState(status: $status, downloads: $downloads, errorMessage: $errorMessage)';
 }
 
 
 }
 
 /// @nodoc
-class $DownloadsStateCopyWith<$Res>  {
-$DownloadsStateCopyWith(DownloadsState _, $Res Function(DownloadsState) __);
+abstract mixin class $DownloadsStateCopyWith<$Res>  {
+  factory $DownloadsStateCopyWith(DownloadsState value, $Res Function(DownloadsState) _then) = _$DownloadsStateCopyWithImpl;
+@useResult
+$Res call({
+ DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, String? errorMessage
+});
+
+
+
+
+}
+/// @nodoc
+class _$DownloadsStateCopyWithImpl<$Res>
+    implements $DownloadsStateCopyWith<$Res> {
+  _$DownloadsStateCopyWithImpl(this._self, this._then);
+
+  final DownloadsState _self;
+  final $Res Function(DownloadsState) _then;
+
+/// Create a copy of DownloadsState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? downloads = null,Object? errorMessage = freezed,}) {
+  return _then(_self.copyWith(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DownloadsStateStatus,downloads: null == downloads ? _self.downloads : downloads // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, List<DownloadItem>>>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
 }
 
 
@@ -1009,19 +1042,11 @@ extension DownloadsStatePatterns on DownloadsState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DownloadsInitial value)?  initial,TResult Function( DownloadsLoaded value)?  loaded,TResult Function( DownloadsError value)?  error,TResult Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult Function( FileValidationResult value)?  fileValidationResult,TResult Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult Function( PlaybackInitiated value)?  playbackInitiated,TResult Function( PremiumRequired value)?  premiumRequired,TResult Function( DownloadStarted value)?  downloadStarted,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _DownloadsState value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case DownloadsInitial() when initial != null:
-return initial(_that);case DownloadsLoaded() when loaded != null:
-return loaded(_that);case DownloadsError() when error != null:
-return error(_that);case SurahDownloadStatus() when surahDownloadStatus != null:
-return surahDownloadStatus(_that);case FileValidationResult() when fileValidationResult != null:
-return fileValidationResult(_that);case ValidDownloadsLoaded() when validDownloadsLoaded != null:
-return validDownloadsLoaded(_that);case PlaybackInitiated() when playbackInitiated != null:
-return playbackInitiated(_that);case PremiumRequired() when premiumRequired != null:
-return premiumRequired(_that);case DownloadStarted() when downloadStarted != null:
-return downloadStarted(_that);case _:
+case _DownloadsState() when $default != null:
+return $default(_that);case _:
   return orElse();
 
 }
@@ -1039,19 +1064,14 @@ return downloadStarted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DownloadsInitial value)  initial,required TResult Function( DownloadsLoaded value)  loaded,required TResult Function( DownloadsError value)  error,required TResult Function( SurahDownloadStatus value)  surahDownloadStatus,required TResult Function( FileValidationResult value)  fileValidationResult,required TResult Function( ValidDownloadsLoaded value)  validDownloadsLoaded,required TResult Function( PlaybackInitiated value)  playbackInitiated,required TResult Function( PremiumRequired value)  premiumRequired,required TResult Function( DownloadStarted value)  downloadStarted,}){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _DownloadsState value)  $default,){
 final _that = this;
 switch (_that) {
-case DownloadsInitial():
-return initial(_that);case DownloadsLoaded():
-return loaded(_that);case DownloadsError():
-return error(_that);case SurahDownloadStatus():
-return surahDownloadStatus(_that);case FileValidationResult():
-return fileValidationResult(_that);case ValidDownloadsLoaded():
-return validDownloadsLoaded(_that);case PlaybackInitiated():
-return playbackInitiated(_that);case PremiumRequired():
-return premiumRequired(_that);case DownloadStarted():
-return downloadStarted(_that);}
+case _DownloadsState():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -1065,19 +1085,11 @@ return downloadStarted(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DownloadsInitial value)?  initial,TResult? Function( DownloadsLoaded value)?  loaded,TResult? Function( DownloadsError value)?  error,TResult? Function( SurahDownloadStatus value)?  surahDownloadStatus,TResult? Function( FileValidationResult value)?  fileValidationResult,TResult? Function( ValidDownloadsLoaded value)?  validDownloadsLoaded,TResult? Function( PlaybackInitiated value)?  playbackInitiated,TResult? Function( PremiumRequired value)?  premiumRequired,TResult? Function( DownloadStarted value)?  downloadStarted,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _DownloadsState value)?  $default,){
 final _that = this;
 switch (_that) {
-case DownloadsInitial() when initial != null:
-return initial(_that);case DownloadsLoaded() when loaded != null:
-return loaded(_that);case DownloadsError() when error != null:
-return error(_that);case SurahDownloadStatus() when surahDownloadStatus != null:
-return surahDownloadStatus(_that);case FileValidationResult() when fileValidationResult != null:
-return fileValidationResult(_that);case ValidDownloadsLoaded() when validDownloadsLoaded != null:
-return validDownloadsLoaded(_that);case PlaybackInitiated() when playbackInitiated != null:
-return playbackInitiated(_that);case PremiumRequired() when premiumRequired != null:
-return premiumRequired(_that);case DownloadStarted() when downloadStarted != null:
-return downloadStarted(_that);case _:
+case _DownloadsState() when $default != null:
+return $default(_that);case _:
   return null;
 
 }
@@ -1094,18 +1106,10 @@ return downloadStarted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult Function( String message)?  error,TResult Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult Function( String downloadId,  bool isValid)?  fileValidationResult,TResult Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)?  playbackInitiated,TResult Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)?  premiumRequired,TResult Function( String surahId,  String surahTitle,  String reciterName,  Map<String, List<DownloadItem>> downloadsByReciter)?  downloadStarted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case DownloadsInitial() when initial != null:
-return initial();case DownloadsLoaded() when loaded != null:
-return loaded(_that.downloadsByReciter);case DownloadsError() when error != null:
-return error(_that.message);case SurahDownloadStatus() when surahDownloadStatus != null:
-return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult() when fileValidationResult != null:
-return fileValidationResult(_that.downloadId,_that.isValid);case ValidDownloadsLoaded() when validDownloadsLoaded != null:
-return validDownloadsLoaded(_that.reciterName,_that.validDownloads);case PlaybackInitiated() when playbackInitiated != null:
-return playbackInitiated(_that.message,_that.downloadsByReciter);case PremiumRequired() when premiumRequired != null:
-return premiumRequired(_that.message,_that.downloadsByReciter);case DownloadStarted() when downloadStarted != null:
-return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.downloadsByReciter);case _:
+case _DownloadsState() when $default != null:
+return $default(_that.status,_that.downloads,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -1123,18 +1127,13 @@ return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.do
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( Map<String, List<DownloadItem>> downloadsByReciter)  loaded,required TResult Function( String message)  error,required TResult Function( String surahId,  String reciterName,  bool isDownloaded)  surahDownloadStatus,required TResult Function( String downloadId,  bool isValid)  fileValidationResult,required TResult Function( String reciterName,  List<DownloadItem> validDownloads)  validDownloadsLoaded,required TResult Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)  playbackInitiated,required TResult Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)  premiumRequired,required TResult Function( String surahId,  String surahTitle,  String reciterName,  Map<String, List<DownloadItem>> downloadsByReciter)  downloadStarted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
-case DownloadsInitial():
-return initial();case DownloadsLoaded():
-return loaded(_that.downloadsByReciter);case DownloadsError():
-return error(_that.message);case SurahDownloadStatus():
-return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult():
-return fileValidationResult(_that.downloadId,_that.isValid);case ValidDownloadsLoaded():
-return validDownloadsLoaded(_that.reciterName,_that.validDownloads);case PlaybackInitiated():
-return playbackInitiated(_that.message,_that.downloadsByReciter);case PremiumRequired():
-return premiumRequired(_that.message,_that.downloadsByReciter);case DownloadStarted():
-return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.downloadsByReciter);}
+case _DownloadsState():
+return $default(_that.status,_that.downloads,_that.errorMessage);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -1148,18 +1147,10 @@ return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.do
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( Map<String, List<DownloadItem>> downloadsByReciter)?  loaded,TResult? Function( String message)?  error,TResult? Function( String surahId,  String reciterName,  bool isDownloaded)?  surahDownloadStatus,TResult? Function( String downloadId,  bool isValid)?  fileValidationResult,TResult? Function( String reciterName,  List<DownloadItem> validDownloads)?  validDownloadsLoaded,TResult? Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)?  playbackInitiated,TResult? Function( String message,  Map<String, List<DownloadItem>> downloadsByReciter)?  premiumRequired,TResult? Function( String surahId,  String surahTitle,  String reciterName,  Map<String, List<DownloadItem>> downloadsByReciter)?  downloadStarted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
-case DownloadsInitial() when initial != null:
-return initial();case DownloadsLoaded() when loaded != null:
-return loaded(_that.downloadsByReciter);case DownloadsError() when error != null:
-return error(_that.message);case SurahDownloadStatus() when surahDownloadStatus != null:
-return surahDownloadStatus(_that.surahId,_that.reciterName,_that.isDownloaded);case FileValidationResult() when fileValidationResult != null:
-return fileValidationResult(_that.downloadId,_that.isValid);case ValidDownloadsLoaded() when validDownloadsLoaded != null:
-return validDownloadsLoaded(_that.reciterName,_that.validDownloads);case PlaybackInitiated() when playbackInitiated != null:
-return playbackInitiated(_that.message,_that.downloadsByReciter);case PremiumRequired() when premiumRequired != null:
-return premiumRequired(_that.message,_that.downloadsByReciter);case DownloadStarted() when downloadStarted != null:
-return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.downloadsByReciter);case _:
+case _DownloadsState() when $default != null:
+return $default(_that.status,_that.downloads,_that.errorMessage);case _:
   return null;
 
 }
@@ -1170,81 +1161,51 @@ return downloadStarted(_that.surahId,_that.surahTitle,_that.reciterName,_that.do
 /// @nodoc
 
 
-class DownloadsInitial implements DownloadsState {
-  const DownloadsInitial();
+class _DownloadsState extends DownloadsState {
+  const _DownloadsState({this.status = DownloadsStateStatus.initial, final  Map<String, Map<String, List<DownloadItem>>> downloads = const {}, this.errorMessage}): _downloads = downloads,super._();
   
 
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsInitial);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'DownloadsState.initial()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class DownloadsLoaded implements DownloadsState {
-  const DownloadsLoaded(final  Map<String, List<DownloadItem>> downloadsByReciter): _downloadsByReciter = downloadsByReciter;
-  
-
- final  Map<String, List<DownloadItem>> _downloadsByReciter;
- Map<String, List<DownloadItem>> get downloadsByReciter {
-  if (_downloadsByReciter is EqualUnmodifiableMapView) return _downloadsByReciter;
+@override@JsonKey() final  DownloadsStateStatus status;
+ final  Map<String, Map<String, List<DownloadItem>>> _downloads;
+@override@JsonKey() Map<String, Map<String, List<DownloadItem>>> get downloads {
+  if (_downloads is EqualUnmodifiableMapView) return _downloads;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_downloadsByReciter);
+  return EqualUnmodifiableMapView(_downloads);
 }
 
+@override final  String? errorMessage;
 
 /// Create a copy of DownloadsState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$DownloadsLoadedCopyWith<DownloadsLoaded> get copyWith => _$DownloadsLoadedCopyWithImpl<DownloadsLoaded>(this, _$identity);
+_$DownloadsStateCopyWith<_DownloadsState> get copyWith => __$DownloadsStateCopyWithImpl<_DownloadsState>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsLoaded&&const DeepCollectionEquality().equals(other._downloadsByReciter, _downloadsByReciter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._downloads, _downloads)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_downloadsByReciter));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_downloads),errorMessage);
 
 @override
 String toString() {
-  return 'DownloadsState.loaded(downloadsByReciter: $downloadsByReciter)';
+  return 'DownloadsState(status: $status, downloads: $downloads, errorMessage: $errorMessage)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $DownloadsLoadedCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $DownloadsLoadedCopyWith(DownloadsLoaded value, $Res Function(DownloadsLoaded) _then) = _$DownloadsLoadedCopyWithImpl;
-@useResult
+abstract mixin class _$DownloadsStateCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
+  factory _$DownloadsStateCopyWith(_DownloadsState value, $Res Function(_DownloadsState) _then) = __$DownloadsStateCopyWithImpl;
+@override @useResult
 $Res call({
- Map<String, List<DownloadItem>> downloadsByReciter
+ DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, String? errorMessage
 });
 
 
@@ -1252,523 +1213,21 @@ $Res call({
 
 }
 /// @nodoc
-class _$DownloadsLoadedCopyWithImpl<$Res>
-    implements $DownloadsLoadedCopyWith<$Res> {
-  _$DownloadsLoadedCopyWithImpl(this._self, this._then);
+class __$DownloadsStateCopyWithImpl<$Res>
+    implements _$DownloadsStateCopyWith<$Res> {
+  __$DownloadsStateCopyWithImpl(this._self, this._then);
 
-  final DownloadsLoaded _self;
-  final $Res Function(DownloadsLoaded) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? downloadsByReciter = null,}) {
-  return _then(DownloadsLoaded(
-null == downloadsByReciter ? _self._downloadsByReciter : downloadsByReciter // ignore: cast_nullable_to_non_nullable
-as Map<String, List<DownloadItem>>,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class DownloadsError implements DownloadsState {
-  const DownloadsError(this.message);
-  
-
- final  String message;
+  final _DownloadsState _self;
+  final $Res Function(_DownloadsState) _then;
 
 /// Create a copy of DownloadsState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$DownloadsErrorCopyWith<DownloadsError> get copyWith => _$DownloadsErrorCopyWithImpl<DownloadsError>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsError&&(identical(other.message, message) || other.message == message));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,message);
-
-@override
-String toString() {
-  return 'DownloadsState.error(message: $message)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $DownloadsErrorCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $DownloadsErrorCopyWith(DownloadsError value, $Res Function(DownloadsError) _then) = _$DownloadsErrorCopyWithImpl;
-@useResult
-$Res call({
- String message
-});
-
-
-
-
-}
-/// @nodoc
-class _$DownloadsErrorCopyWithImpl<$Res>
-    implements $DownloadsErrorCopyWith<$Res> {
-  _$DownloadsErrorCopyWithImpl(this._self, this._then);
-
-  final DownloadsError _self;
-  final $Res Function(DownloadsError) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
-  return _then(DownloadsError(
-null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class SurahDownloadStatus implements DownloadsState {
-  const SurahDownloadStatus({required this.surahId, required this.reciterName, required this.isDownloaded});
-  
-
- final  String surahId;
- final  String reciterName;
- final  bool isDownloaded;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SurahDownloadStatusCopyWith<SurahDownloadStatus> get copyWith => _$SurahDownloadStatusCopyWithImpl<SurahDownloadStatus>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SurahDownloadStatus&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,surahId,reciterName,isDownloaded);
-
-@override
-String toString() {
-  return 'DownloadsState.surahDownloadStatus(surahId: $surahId, reciterName: $reciterName, isDownloaded: $isDownloaded)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $SurahDownloadStatusCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $SurahDownloadStatusCopyWith(SurahDownloadStatus value, $Res Function(SurahDownloadStatus) _then) = _$SurahDownloadStatusCopyWithImpl;
-@useResult
-$Res call({
- String surahId, String reciterName, bool isDownloaded
-});
-
-
-
-
-}
-/// @nodoc
-class _$SurahDownloadStatusCopyWithImpl<$Res>
-    implements $SurahDownloadStatusCopyWith<$Res> {
-  _$SurahDownloadStatusCopyWithImpl(this._self, this._then);
-
-  final SurahDownloadStatus _self;
-  final $Res Function(SurahDownloadStatus) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? reciterName = null,Object? isDownloaded = null,}) {
-  return _then(SurahDownloadStatus(
-surahId: null == surahId ? _self.surahId : surahId // ignore: cast_nullable_to_non_nullable
-as String,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
-as String,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class FileValidationResult implements DownloadsState {
-  const FileValidationResult({required this.downloadId, required this.isValid});
-  
-
- final  String downloadId;
- final  bool isValid;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$FileValidationResultCopyWith<FileValidationResult> get copyWith => _$FileValidationResultCopyWithImpl<FileValidationResult>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileValidationResult&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId)&&(identical(other.isValid, isValid) || other.isValid == isValid));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,downloadId,isValid);
-
-@override
-String toString() {
-  return 'DownloadsState.fileValidationResult(downloadId: $downloadId, isValid: $isValid)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $FileValidationResultCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $FileValidationResultCopyWith(FileValidationResult value, $Res Function(FileValidationResult) _then) = _$FileValidationResultCopyWithImpl;
-@useResult
-$Res call({
- String downloadId, bool isValid
-});
-
-
-
-
-}
-/// @nodoc
-class _$FileValidationResultCopyWithImpl<$Res>
-    implements $FileValidationResultCopyWith<$Res> {
-  _$FileValidationResultCopyWithImpl(this._self, this._then);
-
-  final FileValidationResult _self;
-  final $Res Function(FileValidationResult) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? downloadId = null,Object? isValid = null,}) {
-  return _then(FileValidationResult(
-downloadId: null == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
-as String,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class ValidDownloadsLoaded implements DownloadsState {
-  const ValidDownloadsLoaded({required this.reciterName, required final  List<DownloadItem> validDownloads}): _validDownloads = validDownloads;
-  
-
- final  String reciterName;
- final  List<DownloadItem> _validDownloads;
- List<DownloadItem> get validDownloads {
-  if (_validDownloads is EqualUnmodifiableListView) return _validDownloads;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_validDownloads);
-}
-
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ValidDownloadsLoadedCopyWith<ValidDownloadsLoaded> get copyWith => _$ValidDownloadsLoadedCopyWithImpl<ValidDownloadsLoaded>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidDownloadsLoaded&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName)&&const DeepCollectionEquality().equals(other._validDownloads, _validDownloads));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,reciterName,const DeepCollectionEquality().hash(_validDownloads));
-
-@override
-String toString() {
-  return 'DownloadsState.validDownloadsLoaded(reciterName: $reciterName, validDownloads: $validDownloads)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $ValidDownloadsLoadedCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $ValidDownloadsLoadedCopyWith(ValidDownloadsLoaded value, $Res Function(ValidDownloadsLoaded) _then) = _$ValidDownloadsLoadedCopyWithImpl;
-@useResult
-$Res call({
- String reciterName, List<DownloadItem> validDownloads
-});
-
-
-
-
-}
-/// @nodoc
-class _$ValidDownloadsLoadedCopyWithImpl<$Res>
-    implements $ValidDownloadsLoadedCopyWith<$Res> {
-  _$ValidDownloadsLoadedCopyWithImpl(this._self, this._then);
-
-  final ValidDownloadsLoaded _self;
-  final $Res Function(ValidDownloadsLoaded) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? reciterName = null,Object? validDownloads = null,}) {
-  return _then(ValidDownloadsLoaded(
-reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
-as String,validDownloads: null == validDownloads ? _self._validDownloads : validDownloads // ignore: cast_nullable_to_non_nullable
-as List<DownloadItem>,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class PlaybackInitiated implements DownloadsState {
-  const PlaybackInitiated({required this.message, required final  Map<String, List<DownloadItem>> downloadsByReciter}): _downloadsByReciter = downloadsByReciter;
-  
-
- final  String message;
- final  Map<String, List<DownloadItem>> _downloadsByReciter;
- Map<String, List<DownloadItem>> get downloadsByReciter {
-  if (_downloadsByReciter is EqualUnmodifiableMapView) return _downloadsByReciter;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_downloadsByReciter);
-}
-
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$PlaybackInitiatedCopyWith<PlaybackInitiated> get copyWith => _$PlaybackInitiatedCopyWithImpl<PlaybackInitiated>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlaybackInitiated&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._downloadsByReciter, _downloadsByReciter));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,message,const DeepCollectionEquality().hash(_downloadsByReciter));
-
-@override
-String toString() {
-  return 'DownloadsState.playbackInitiated(message: $message, downloadsByReciter: $downloadsByReciter)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $PlaybackInitiatedCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $PlaybackInitiatedCopyWith(PlaybackInitiated value, $Res Function(PlaybackInitiated) _then) = _$PlaybackInitiatedCopyWithImpl;
-@useResult
-$Res call({
- String message, Map<String, List<DownloadItem>> downloadsByReciter
-});
-
-
-
-
-}
-/// @nodoc
-class _$PlaybackInitiatedCopyWithImpl<$Res>
-    implements $PlaybackInitiatedCopyWith<$Res> {
-  _$PlaybackInitiatedCopyWithImpl(this._self, this._then);
-
-  final PlaybackInitiated _self;
-  final $Res Function(PlaybackInitiated) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,Object? downloadsByReciter = null,}) {
-  return _then(PlaybackInitiated(
-message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,downloadsByReciter: null == downloadsByReciter ? _self._downloadsByReciter : downloadsByReciter // ignore: cast_nullable_to_non_nullable
-as Map<String, List<DownloadItem>>,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class PremiumRequired implements DownloadsState {
-  const PremiumRequired({required this.message, required final  Map<String, List<DownloadItem>> downloadsByReciter}): _downloadsByReciter = downloadsByReciter;
-  
-
- final  String message;
- final  Map<String, List<DownloadItem>> _downloadsByReciter;
- Map<String, List<DownloadItem>> get downloadsByReciter {
-  if (_downloadsByReciter is EqualUnmodifiableMapView) return _downloadsByReciter;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_downloadsByReciter);
-}
-
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$PremiumRequiredCopyWith<PremiumRequired> get copyWith => _$PremiumRequiredCopyWithImpl<PremiumRequired>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PremiumRequired&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._downloadsByReciter, _downloadsByReciter));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,message,const DeepCollectionEquality().hash(_downloadsByReciter));
-
-@override
-String toString() {
-  return 'DownloadsState.premiumRequired(message: $message, downloadsByReciter: $downloadsByReciter)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $PremiumRequiredCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $PremiumRequiredCopyWith(PremiumRequired value, $Res Function(PremiumRequired) _then) = _$PremiumRequiredCopyWithImpl;
-@useResult
-$Res call({
- String message, Map<String, List<DownloadItem>> downloadsByReciter
-});
-
-
-
-
-}
-/// @nodoc
-class _$PremiumRequiredCopyWithImpl<$Res>
-    implements $PremiumRequiredCopyWith<$Res> {
-  _$PremiumRequiredCopyWithImpl(this._self, this._then);
-
-  final PremiumRequired _self;
-  final $Res Function(PremiumRequired) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,Object? downloadsByReciter = null,}) {
-  return _then(PremiumRequired(
-message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,downloadsByReciter: null == downloadsByReciter ? _self._downloadsByReciter : downloadsByReciter // ignore: cast_nullable_to_non_nullable
-as Map<String, List<DownloadItem>>,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class DownloadStarted implements DownloadsState {
-  const DownloadStarted({required this.surahId, required this.surahTitle, required this.reciterName, required final  Map<String, List<DownloadItem>> downloadsByReciter}): _downloadsByReciter = downloadsByReciter;
-  
-
- final  String surahId;
- final  String surahTitle;
- final  String reciterName;
- final  Map<String, List<DownloadItem>> _downloadsByReciter;
- Map<String, List<DownloadItem>> get downloadsByReciter {
-  if (_downloadsByReciter is EqualUnmodifiableMapView) return _downloadsByReciter;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_downloadsByReciter);
-}
-
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$DownloadStartedCopyWith<DownloadStarted> get copyWith => _$DownloadStartedCopyWithImpl<DownloadStarted>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadStarted&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahTitle, surahTitle) || other.surahTitle == surahTitle)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName)&&const DeepCollectionEquality().equals(other._downloadsByReciter, _downloadsByReciter));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,surahId,surahTitle,reciterName,const DeepCollectionEquality().hash(_downloadsByReciter));
-
-@override
-String toString() {
-  return 'DownloadsState.downloadStarted(surahId: $surahId, surahTitle: $surahTitle, reciterName: $reciterName, downloadsByReciter: $downloadsByReciter)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $DownloadStartedCopyWith<$Res> implements $DownloadsStateCopyWith<$Res> {
-  factory $DownloadStartedCopyWith(DownloadStarted value, $Res Function(DownloadStarted) _then) = _$DownloadStartedCopyWithImpl;
-@useResult
-$Res call({
- String surahId, String surahTitle, String reciterName, Map<String, List<DownloadItem>> downloadsByReciter
-});
-
-
-
-
-}
-/// @nodoc
-class _$DownloadStartedCopyWithImpl<$Res>
-    implements $DownloadStartedCopyWith<$Res> {
-  _$DownloadStartedCopyWithImpl(this._self, this._then);
-
-  final DownloadStarted _self;
-  final $Res Function(DownloadStarted) _then;
-
-/// Create a copy of DownloadsState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? surahTitle = null,Object? reciterName = null,Object? downloadsByReciter = null,}) {
-  return _then(DownloadStarted(
-surahId: null == surahId ? _self.surahId : surahId // ignore: cast_nullable_to_non_nullable
-as String,surahTitle: null == surahTitle ? _self.surahTitle : surahTitle // ignore: cast_nullable_to_non_nullable
-as String,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
-as String,downloadsByReciter: null == downloadsByReciter ? _self._downloadsByReciter : downloadsByReciter // ignore: cast_nullable_to_non_nullable
-as Map<String, List<DownloadItem>>,
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? downloads = null,Object? errorMessage = freezed,}) {
+  return _then(_DownloadsState(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DownloadsStateStatus,downloads: null == downloads ? _self._downloads : downloads // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, List<DownloadItem>>>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

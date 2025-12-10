@@ -128,13 +128,13 @@ void main() {
         mockLocalDataSource.addDownload(captureAny),
       ).captured;
       final addedItem = captured.first as DownloadItem;
-      expect(addedItem.id, compositeId);
+      expect(addedItem.id, url);
       expect(addedItem.url, url);
 
       // Verify: Queued or Active in Manager (since it starts immediately)
       expect(
-        DownloadQueueManager.instance.isQueued(compositeId) ||
-            DownloadQueueManager.instance.isActive(compositeId),
+        DownloadQueueManager.instance.isQueued(url) ||
+            DownloadQueueManager.instance.isActive(url),
         isTrue,
         reason: 'Download should be either queued or active',
       );

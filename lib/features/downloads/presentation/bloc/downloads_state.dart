@@ -1,45 +1,28 @@
 part of 'downloads_bloc.dart';
 
+/// Status enum for DownloadsState
+enum DownloadsStateStatus {
+  /// Initial state before any data is loaded
+  initial,
+
+  /// Loading downloads from repository
+  loading,
+
+  /// Downloads loaded successfully
+  loaded,
+
+  /// An error occurred
+  error,
+}
+
+/// Main state class for downloads
 @freezed
-sealed class DownloadsState with _$DownloadsState {
-  const factory DownloadsState.initial() = DownloadsInitial;
+abstract class DownloadsState with _$DownloadsState {
+  const factory DownloadsState({
+    @Default(DownloadsStateStatus.initial) DownloadsStateStatus status,
+    @Default({}) Map<String, Map<String, List<DownloadItem>>> downloads,
+    String? errorMessage,
+  }) = _DownloadsState;
 
-  const factory DownloadsState.loaded(
-    Map<String, List<DownloadItem>> downloadsByReciter,
-  ) = DownloadsLoaded;
-
-  const factory DownloadsState.error(String message) = DownloadsError;
-
-  const factory DownloadsState.surahDownloadStatus({
-    required String surahId,
-    required String reciterName,
-    required bool isDownloaded,
-  }) = SurahDownloadStatus;
-
-  const factory DownloadsState.fileValidationResult({
-    required String downloadId,
-    required bool isValid,
-  }) = FileValidationResult;
-
-  const factory DownloadsState.validDownloadsLoaded({
-    required String reciterName,
-    required List<DownloadItem> validDownloads,
-  }) = ValidDownloadsLoaded;
-
-  const factory DownloadsState.playbackInitiated({
-    required String message,
-    required Map<String, List<DownloadItem>> downloadsByReciter,
-  }) = PlaybackInitiated;
-
-  const factory DownloadsState.premiumRequired({
-    required String message,
-    required Map<String, List<DownloadItem>> downloadsByReciter,
-  }) = PremiumRequired;
-
-  const factory DownloadsState.downloadStarted({
-    required String surahId,
-    required String surahTitle,
-    required String reciterName,
-    required Map<String, List<DownloadItem>> downloadsByReciter,
-  }) = DownloadStarted;
+  const DownloadsState._();
 }

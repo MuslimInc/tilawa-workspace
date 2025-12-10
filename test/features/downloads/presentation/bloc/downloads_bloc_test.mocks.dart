@@ -85,24 +85,32 @@ class MockGetDownloadsByReciterUseCase extends _i1.Mock
   }
 
   @override
-  _i7.Future<_i8.Either<_i9.Failure, Map<String, List<_i10.DownloadItem>>>>
+  _i7.Future<
+    _i8.Either<_i9.Failure, Map<String, Map<String, List<_i10.DownloadItem>>>>
+  >
   call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
             returnValue:
                 _i7.Future<
-                  _i8.Either<_i9.Failure, Map<String, List<_i10.DownloadItem>>>
+                  _i8.Either<
+                    _i9.Failure,
+                    Map<String, Map<String, List<_i10.DownloadItem>>>
+                  >
                 >.value(
                   _i11.dummyValue<
                     _i8.Either<
                       _i9.Failure,
-                      Map<String, List<_i10.DownloadItem>>
+                      Map<String, Map<String, List<_i10.DownloadItem>>>
                     >
                   >(this, Invocation.method(#call, [])),
                 ),
           )
           as _i7.Future<
-            _i8.Either<_i9.Failure, Map<String, List<_i10.DownloadItem>>>
+            _i8.Either<
+              _i9.Failure,
+              Map<String, Map<String, List<_i10.DownloadItem>>>
+            >
           >);
 }
 
@@ -220,14 +228,16 @@ class MockDownloadsRepository extends _i1.Mock
   }
 
   @override
-  _i7.Future<Map<String, List<_i10.DownloadItem>>> getDownloadsByReciter() =>
+  _i7.Future<Map<String, Map<String, List<_i10.DownloadItem>>>>
+  getDownloadsByReciter() =>
       (super.noSuchMethod(
             Invocation.method(#getDownloadsByReciter, []),
-            returnValue: _i7.Future<Map<String, List<_i10.DownloadItem>>>.value(
-              <String, List<_i10.DownloadItem>>{},
-            ),
+            returnValue:
+                _i7.Future<
+                  Map<String, Map<String, List<_i10.DownloadItem>>>
+                >.value(<String, Map<String, List<_i10.DownloadItem>>>{}),
           )
-          as _i7.Future<Map<String, List<_i10.DownloadItem>>>);
+          as _i7.Future<Map<String, Map<String, List<_i10.DownloadItem>>>>);
 
   @override
   _i7.Future<List<_i10.DownloadItem>> getDownloadsForReciter(

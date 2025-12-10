@@ -42,14 +42,16 @@ class MockDownloadsRepository extends _i1.Mock
   }
 
   @override
-  _i4.Future<Map<String, List<_i5.DownloadItem>>> getDownloadsByReciter() =>
+  _i4.Future<Map<String, Map<String, List<_i5.DownloadItem>>>>
+  getDownloadsByReciter() =>
       (super.noSuchMethod(
             Invocation.method(#getDownloadsByReciter, []),
-            returnValue: _i4.Future<Map<String, List<_i5.DownloadItem>>>.value(
-              <String, List<_i5.DownloadItem>>{},
-            ),
+            returnValue:
+                _i4.Future<
+                  Map<String, Map<String, List<_i5.DownloadItem>>>
+                >.value(<String, Map<String, List<_i5.DownloadItem>>>{}),
           )
-          as _i4.Future<Map<String, List<_i5.DownloadItem>>>);
+          as _i4.Future<Map<String, Map<String, List<_i5.DownloadItem>>>>);
 
   @override
   _i4.Future<List<_i5.DownloadItem>> getDownloadsForReciter(

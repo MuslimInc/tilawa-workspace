@@ -24,6 +24,11 @@ void main() {
       () => mockDownloadsBloc.getDownloadProgressStream(any()),
     ).thenAnswer((_) => const Stream<DownloadProgress>.empty());
 
+    // Stub statusStream since it's used in initState
+    when(
+      () => mockDownloadsBloc.statusStream,
+    ).thenAnswer((_) => const Stream.empty());
+
     // Mock fluttertoast channel
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -52,7 +57,7 @@ void main() {
   testWidgets('shows download icon when not downloaded', (tester) async {
     when(
       () => mockDownloadsBloc.state,
-    ).thenReturn(const DownloadsState.loaded({}));
+    ).thenReturn(const DownloadsState(status: DownloadsStateStatus.loaded));
 
     await tester.pumpWidget(
       createTestWidget(
@@ -69,7 +74,7 @@ void main() {
 
   testWidgets('shows progress when downloading', (tester) async {
     final downloadItem = DownloadItem(
-      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
+      id: surahId,
       title: surahTitle,
       url: 'url',
       filePath: 'path',
@@ -82,18 +87,23 @@ void main() {
     );
 
     when(() => mockDownloadsBloc.state).thenReturn(
-      DownloadsState.loaded({
-        reciterName: [downloadItem],
-      }),
+      DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          reciterName: {
+            'Default': [downloadItem],
+          },
+        },
+      ),
     );
 
     // Stub the progress stream for this specific download
-    final downloadId = '${surahId}_${reciterName.replaceAll(' ', '_')}';
+    const downloadId = surahId;
     when(
       () => mockDownloadsBloc.getDownloadProgressStream(downloadId),
     ).thenAnswer(
       (_) => Stream.value(
-        DownloadProgress(
+        const DownloadProgress(
           id: downloadId,
           status: DownloadStatus.downloading,
           progress: 0.5,
@@ -122,7 +132,7 @@ void main() {
 
   testWidgets('shows hourglass when pending', (tester) async {
     final downloadItem = DownloadItem(
-      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
+      id: surahId,
       title: surahTitle,
       url: 'url',
       filePath: 'path',
@@ -135,9 +145,14 @@ void main() {
     );
 
     when(() => mockDownloadsBloc.state).thenReturn(
-      DownloadsState.loaded({
-        reciterName: [downloadItem],
-      }),
+      DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          reciterName: {
+            'Default': [downloadItem],
+          },
+        },
+      ),
     );
 
     await tester.pumpWidget(
@@ -159,7 +174,7 @@ void main() {
 
   testWidgets('shows check icon when downloaded', (tester) async {
     final downloadItem = DownloadItem(
-      id: '${surahId}_${reciterName.replaceAll(' ', '_')}',
+      id: surahId,
       title: surahTitle,
       url: 'url',
       filePath: 'path',
@@ -172,9 +187,14 @@ void main() {
     );
 
     when(() => mockDownloadsBloc.state).thenReturn(
-      DownloadsState.loaded({
-        reciterName: [downloadItem],
-      }),
+      DownloadsState(
+        status: DownloadsStateStatus.loaded,
+        downloads: {
+          reciterName: {
+            'Default': [downloadItem],
+          },
+        },
+      ),
     );
 
     await tester.pumpWidget(
@@ -196,7 +216,7 @@ void main() {
   testWidgets('triggers download event on tap', (tester) async {
     when(
       () => mockDownloadsBloc.state,
-    ).thenReturn(const DownloadsState.loaded({}));
+    ).thenReturn(const DownloadsState(status: DownloadsStateStatus.loaded));
 
     await tester.pumpWidget(
       createTestWidget(
@@ -207,9 +227,12 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle(); // Wait for initial animation
 
     await tester.tap(find.byIcon(Icons.download_rounded));
     await tester.pump();
+    // Wait for toast timer (1 second) and animation (300ms)
+    await tester.pump(const Duration(seconds: 2));
 
     verify(
       () => mockDownloadsBloc.add(

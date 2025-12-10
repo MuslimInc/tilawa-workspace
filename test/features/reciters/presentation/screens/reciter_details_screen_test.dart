@@ -59,6 +59,13 @@ void main() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
 
+    when(
+      () => mockDownloadsBloc.statusStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockDownloadsBloc.downloadProgressStream,
+    ).thenAnswer((_) => const Stream.empty());
+
     // Mock fluttertoast channel
     const channel = MethodChannel('PonnamKarthik/fluttertoast');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -136,12 +143,13 @@ void main() {
     tester,
   ) async {
     when(() => mockReciterDetailsBloc.state).thenReturn(
-      ReciterDetailsLoaded(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
         surahList: testSurahList,
         selectedMoshaf: testReciter.moshaf.first,
       ),
     );
-    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsInitial());
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
     when(() => mockAudioPlayerBloc.state).thenReturn(
       AudioPlayerState(
         status: AudioPlayerStatus.initial,
@@ -168,12 +176,13 @@ void main() {
     tester,
   ) async {
     when(() => mockReciterDetailsBloc.state).thenReturn(
-      ReciterDetailsLoaded(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
         surahList: testSurahList,
         selectedMoshaf: testReciter.moshaf.first,
       ),
     );
-    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsInitial());
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
     when(() => mockAudioPlayerBloc.state).thenReturn(
       AudioPlayerState(
         status: AudioPlayerStatus.initial,

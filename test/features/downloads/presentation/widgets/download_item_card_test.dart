@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -20,7 +19,7 @@ import 'download_item_card_test.mocks.dart';
 
 // Provide dummy value for DownloadsState - Mockito will use this automatically
 @visibleForTesting
-DownloadsState provideDummyDownloadsState() => const DownloadsState.initial();
+DownloadsState provideDummyDownloadsState() => const DownloadsState();
 
 @GenerateMocks([
   DownloadsBloc,
@@ -36,7 +35,7 @@ void main() {
 
   setUp(() {
     // Provide dummy value for Mockito before creating mocks
-    provideDummy(const DownloadsState.initial());
+    provideDummy(const DownloadsState());
 
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
@@ -57,13 +56,22 @@ void main() {
 
     // Set up stream first (required for BlocProvider)
     when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
-    when(mockAudioPlayerBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      mockDownloadsBloc.statusStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      mockDownloadsBloc.downloadProgressStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      mockDownloadsBloc.getDownloadProgressStream(any),
+    ).thenAnswer((_) => const Stream.empty());
 
     // Provide default dummy values for state
-    when(mockDownloadsBloc.state).thenReturn(const DownloadsState.initial());
+    when(mockDownloadsBloc.state).thenReturn(const DownloadsState());
     when(
       mockAudioPlayerBloc.state,
     ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+    when(mockAudioPlayerBloc.stream).thenAnswer((_) => const Stream.empty());
 
     // Stub add() method to prevent errors
     when(mockDownloadsBloc.add(any)).thenReturn(null);
@@ -71,6 +79,13 @@ void main() {
 
     // Stub queue manager
     when(mockDownloadQueueManager.getQueuePosition(any)).thenReturn(0);
+
+    // Set screen size to larger value to avoid overflows
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final TestFlutterView view =
+        TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+    view.physicalSize = const Size(1080, 2400); // larger size
+    view.devicePixelRatio = 3.0; // standard density
   });
 
   tearDown(() {
@@ -81,7 +96,7 @@ void main() {
     }
   });
 
-  Widget createTestWidget(DownloadItem download) {
+  Widget createTestWidget(DownloadItem download, {VoidCallback? onDelete}) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -91,7 +106,10 @@ void main() {
             BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
             BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
           ],
-          child: DownloadItemCard(download: download, onDelete: () {}),
+          child: DownloadItemCard(
+            download: download,
+            onDelete: onDelete ?? () {},
+          ),
         ),
       ),
     );
@@ -688,22 +706,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: MultiBlocProvider(
-              providers: [
-                BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
-                BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
-              ],
-              child: DownloadItemCard(
-                download: download,
-                onDelete: () => deleteCalled = true,
-              ),
-            ),
-          ),
-        ),
+        createTestWidget(download, onDelete: () => deleteCalled = true),
       );
 
       // 1. Open menu
@@ -758,59 +761,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Pending (#5)'), findsOneWidget);
-    });
-
-    testWidgets('should show toast on error', (WidgetTester tester) async {
-      final download = DownloadItem(
-        id: 'test_id',
-        title: 'Test Surah',
-        url: 'https://example.com/test.mp3',
-        filePath: '/path/to/test.mp3',
-        reciterName: 'Test Reciter',
-        status: DownloadStatus.downloading,
-        progress: 0.5,
-        fileSize: 1024,
-        downloadedSize: 512,
-        createdAt: DateTime.now(),
-      );
-
-      // Mock Fluttertoast channel
-      final log = <MethodCall>[];
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-            const MethodChannel('PonnamKarthik/fluttertoast'),
-            (MethodCall methodCall) async {
-              log.add(methodCall);
-              return null;
-            },
-          );
-
-      addTearDown(() {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(
-              const MethodChannel('PonnamKarthik/fluttertoast'),
-              null,
-            );
-      });
-
-      // Use StreamController to manually trigger state change after widget is mounted
-      final controller = StreamController<DownloadsState>.broadcast();
-      addTearDown(controller.close);
-
-      when(mockDownloadsBloc.stream).thenAnswer((_) => controller.stream);
-
-      await tester.pumpWidget(createTestWidget(download));
-
-      // Emit error state
-      controller.add(const DownloadsState.error('Test Error Message'));
-
-      await tester.pump(); // Process stream event
-
-      // Verify toast was called
-      expect(log, hasLength(1));
-      expect(log.first.method, 'showToast');
-      expect(log.first.arguments['msg'], 'Test Error Message');
-      expect(log.first.arguments['bgcolor'], isNotNull); // Red color
     });
 
     testWidgets('should format file sizes correctly', (

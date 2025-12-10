@@ -73,9 +73,15 @@ void main() {
       ).thenAnswer((invocation) async {
         final query =
             invocation.namedArguments[const Symbol('query')] as String;
-        if (query.contains("url = 'url1'")) return [existingTasks[0]];
-        if (query.contains("url = 'url2'")) return [existingTasks[1]];
-        if (query.contains("url = 'url3'")) return [existingTasks[2]];
+        if (query.contains("url = 'url1'")) {
+          return [existingTasks[0]];
+        }
+        if (query.contains("url = 'url2'")) {
+          return [existingTasks[1]];
+        }
+        if (query.contains("url = 'url3'")) {
+          return [existingTasks[2]];
+        }
         return [];
       });
 

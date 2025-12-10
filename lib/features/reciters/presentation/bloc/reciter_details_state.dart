@@ -1,46 +1,44 @@
 part of 'reciter_details_bloc.dart';
 
-abstract class ReciterDetailsState extends Equatable {
-  const ReciterDetailsState();
+enum ReciterDetailsStatus { initial, loading, loaded, error }
 
-  @override
-  List<Object?> get props => [];
-}
-
-class ReciterDetailsInitial extends ReciterDetailsState {
-  const ReciterDetailsInitial();
-}
-
-class ReciterDetailsLoaded extends ReciterDetailsState {
-  const ReciterDetailsLoaded({
-    required this.surahList,
-    required this.selectedMoshaf,
+class ReciterDetailsState extends Equatable {
+  const ReciterDetailsState({
+    this.status = ReciterDetailsStatus.initial,
+    this.surahList = const [],
+    this.selectedMoshaf,
     this.selectedSurahId,
+    this.errorMessage,
   });
+
+  final ReciterDetailsStatus status;
   final List<SurahEntity> surahList;
-  final Mosahf selectedMoshaf;
+  final Mosahf? selectedMoshaf;
   final String? selectedSurahId;
+  final String? errorMessage;
 
   @override
-  List<Object?> get props => [surahList, selectedMoshaf, selectedSurahId];
+  List<Object?> get props => [
+    status,
+    surahList,
+    selectedMoshaf,
+    selectedSurahId,
+    errorMessage,
+  ];
 
-  ReciterDetailsLoaded copyWith({
+  ReciterDetailsState copyWith({
+    ReciterDetailsStatus? status,
     List<SurahEntity>? surahList,
     Mosahf? selectedMoshaf,
     String? selectedSurahId,
+    String? errorMessage,
   }) {
-    return ReciterDetailsLoaded(
+    return ReciterDetailsState(
+      status: status ?? this.status,
       surahList: surahList ?? this.surahList,
       selectedMoshaf: selectedMoshaf ?? this.selectedMoshaf,
       selectedSurahId: selectedSurahId ?? this.selectedSurahId,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
-}
-
-class ReciterDetailsError extends ReciterDetailsState {
-  const ReciterDetailsError(this.message);
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
 }

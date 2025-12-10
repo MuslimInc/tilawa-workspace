@@ -10,7 +10,7 @@ import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:path/path.dart' as path;
+import 'package:muzakri/features/downloads/utils/download_path_utils.dart';
 
 import 'download_service_test.mocks.dart';
 
@@ -31,7 +31,10 @@ void main() {
 
     setUp(() {
       tempDir = Directory.systemTemp.createTempSync('download_test');
-      testFilePath = path.join(tempDir.path, 'test.mp3');
+      testFilePath = DownloadPathUtils.resolveFullPath(
+        tempDir.path,
+        'test.mp3',
+      );
 
       mockDownloader = MockFlutterDownloaderWrapper();
 
@@ -164,8 +167,8 @@ void main() {
         verify(
           mockDownloader.enqueue(
             url: testUrl,
-            savedDir: path.dirname(testFilePath),
-            fileName: path.basename(testFilePath),
+            savedDir: DownloadPathUtils.getDirectoryName(testFilePath),
+            fileName: DownloadPathUtils.getFileName(testFilePath),
             openFileFromNotification: false,
             title: testTitle,
           ),
@@ -264,8 +267,14 @@ void main() {
       });
 
       test('should create directory if it does not exist', () async {
-        final String newDir = path.join(tempDir.path, 'new_subdir');
-        final String newFilePath = path.join(newDir, 'test.mp3');
+        final String newDir = DownloadPathUtils.resolveFullPath(
+          tempDir.path,
+          'new_subdir',
+        );
+        final String newFilePath = DownloadPathUtils.resolveFullPath(
+          newDir,
+          'test.mp3',
+        );
 
         // Ensure clean slate
         if (Directory(newDir).existsSync()) {

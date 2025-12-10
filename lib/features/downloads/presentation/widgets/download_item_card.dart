@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../data/services/download_queue_manager.dart';
@@ -21,158 +20,156 @@ class DownloadItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DownloadsBloc, DownloadsState>(
-      listener: (context, state) {
-        if (state is DownloadsError) {
-          _showErrorSnackBar(context, state.message);
-        }
-      },
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: _buildStatusIcon(context),
-        title: Text(
-          download.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (download.status == DownloadStatus.downloading)
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 4),
-                child: LinearProgressIndicator(
-                  value: download.progress,
-                  backgroundColor: Theme.of(
-                    context,
-                  ).dividerColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                  minHeight: 4,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
-                  ),
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: _buildStatusIcon(context),
+      title: Text(
+        download.title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (download.status == DownloadStatus.downloading)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: LinearProgressIndicator(
+                value: download.progress,
+                backgroundColor: Theme.of(
+                  context,
+                ).dividerColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+                minHeight: 4,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).primaryColor,
                 ),
               ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                if (download.status != DownloadStatus.downloading) ...[
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(),
-                      shape: BoxShape.circle,
-                    ),
+            ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (download.status != DownloadStatus.downloading) ...[
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 6),
-                ],
-                Text(
+                ),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: Text(
                   _getStatusText(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Theme.of(context).textTheme.bodySmall?.color,
                     fontSize: 12,
                   ),
                 ),
-                if (download.fileSize > 0) ...[
-                  const SizedBox(width: 8),
-                  Text(
-                    '•',
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                      fontSize: 12,
-                    ),
+              ),
+              if (download.fileSize > 0) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '•',
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: 12,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
                     '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodySmall?.color,
                       fontSize: 12,
                     ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (download.status == DownloadStatus.failed ||
-                _isDownloadStuck(download))
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, color: Colors.blue),
-                onPressed: () => _handleRetryDownload(context),
-                tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
-              ),
-            if (download.status == DownloadStatus.completed)
-              BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                builder: (context, audioState) {
-                  final bool isCurrentlyPlaying = _isCurrentlyPlaying(
-                    audioState,
-                  );
-                  return IconButton.filled(
-                    style: IconButton.styleFrom(
-                      backgroundColor: isCurrentlyPlaying
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1),
-                      foregroundColor: isCurrentlyPlaying
-                          ? Colors.white
-                          : Theme.of(context).primaryColor,
-                    ),
-                    icon: Icon(
-                      isCurrentlyPlaying &&
-                              (audioState.playbackState?.playing ?? false)
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                    ),
-                    onPressed: () => _handlePlayPause(context, audioState),
-                    tooltip:
-                        isCurrentlyPlaying &&
-                            (audioState.playbackState?.playing ?? false)
-                        ? AppLocalizations.of(context)!.pause
-                        : AppLocalizations.of(context)!.play,
-                  );
-                },
-              ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_horiz_rounded),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              onSelected: (value) {
-                if (value == 'delete') {
-                  _showDeleteDialog(context);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outline_rounded,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        AppLocalizations.of(context)!.delete,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
+            ],
+          ),
+        ],
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (download.status == DownloadStatus.failed ||
+              _isDownloadStuck(download))
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded, color: Colors.blue),
+              onPressed: () => _handleRetryDownload(context),
+              tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
             ),
-          ],
-        ),
+          if (download.status == DownloadStatus.completed)
+            BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+              builder: (context, audioState) {
+                final bool isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
+                return IconButton.filled(
+                  style: IconButton.styleFrom(
+                    backgroundColor: isCurrentlyPlaying
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    foregroundColor: isCurrentlyPlaying
+                        ? Colors.white
+                        : Theme.of(context).primaryColor,
+                  ),
+                  icon: Icon(
+                    isCurrentlyPlaying &&
+                            (audioState.playbackState?.playing ?? false)
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                  ),
+                  onPressed: () => _handlePlayPause(context, audioState),
+                  tooltip:
+                      isCurrentlyPlaying &&
+                          (audioState.playbackState?.playing ?? false)
+                      ? AppLocalizations.of(context)!.pause
+                      : AppLocalizations.of(context)!.play,
+                );
+              },
+            ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_horiz_rounded),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onSelected: (value) {
+              if (value == 'delete') {
+                _showDeleteDialog(context);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_outline_rounded,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      AppLocalizations.of(context)!.delete,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -396,10 +393,5 @@ class DownloadItemCard extends StatelessWidget {
       download.createdAt,
     );
     return timeSinceCreated.inSeconds > 30;
-  }
-
-  /// Show error snackbar
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ToastUtils.showErrorToast(message);
   }
 }

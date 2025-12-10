@@ -3,8 +3,8 @@ import 'package:audio_service/audio_service.dart';
 import '../entities/download_item.dart';
 
 abstract class DownloadsRepository {
-  /// Get all downloads grouped by reciter
-  Future<Map<String, List<DownloadItem>>> getDownloadsByReciter();
+  /// Get all downloads grouped by reciter and then by narrative
+  Future<Map<String, Map<String, List<DownloadItem>>>> getDownloadsByReciter();
 
   /// Get downloads for a specific reciter
   Future<List<DownloadItem>> getDownloadsForReciter(String reciterName);

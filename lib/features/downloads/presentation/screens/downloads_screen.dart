@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
+import '../bloc/downloads_status.dart';
 import '../widgets/reciter_downloads_section.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -19,13 +23,36 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   @override
   bool get wantKeepAlive => true;
 
+  final ScrollController _scrollController = ScrollController();
+  StreamSubscription<DownloadsStatus>? _statusSubscription;
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
+
+    // Listen to status events
+    _statusSubscription = context.read<DownloadsBloc>().statusStream.listen((
+      status,
+    ) {
+      status.mapOrNull(
+        error: (s) => ToastUtils.showToast(msg: s.message),
+        premiumRequired: (s) => ToastUtils.showToast(msg: s.message),
+        playbackInitiated: (s) => ToastUtils.showToast(msg: s.message),
+      );
+    });
+
     // Load downloads when the screen is first displayed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDownloads();
     });
+  }
+
+  @override
+  void dispose() {
+    _statusSubscription?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -44,130 +71,113 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     context.read<DownloadsBloc>().add(const LoadDownloads());
   }
 
+  void _onScroll() {
+    // Handle scroll events if needed
+  }
+
+  @override
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
-      body: BlocListener<DownloadsBloc, DownloadsState>(
-        listener: (context, state) {
-          // Handle states that should show snackbars or other UI feedback
-          state.when(
-            initial: () {},
-            loaded: (_) {},
-            error: (message) {},
-            surahDownloadStatus: (_, _, _) {},
-            fileValidationResult: (_, _) {},
-            validDownloadsLoaded: (_, _) {},
-            playbackInitiated: (message, _) {},
-            premiumRequired: (message, _) {},
-            downloadStarted: (surahId, surahTitle, reciterName, _) {},
-          );
-        },
-        child: BlocBuilder<DownloadsBloc, DownloadsState>(
-          builder: (context, state) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 120.0,
-                  floating: true,
-                  pinned: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: Text(
-                      AppLocalizations.of(context)!.downloads,
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.titleLarge?.color,
-                      ),
-                    ),
-                    centerTitle: true,
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1),
-                            Theme.of(context).scaffoldBackgroundColor,
-                          ],
-                        ),
-                      ),
+      body: BlocBuilder<DownloadsBloc, DownloadsState>(
+        builder: (context, state) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 120.0,
+                floating: true,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(
+                    AppLocalizations.of(context)!.downloads,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded),
-                      onPressed: _loadDownloads,
-                      tooltip: AppLocalizations.of(context)!.refreshDownloads,
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.delete_sweep_rounded,
-                        color: Colors.redAccent,
-                      ),
-                      onPressed: () => _showClearAllDialog(context),
-                      tooltip: AppLocalizations.of(context)!.deleteAll,
-                    ),
-                  ],
-                ),
-                state.when(
-                  initial: () => const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  loaded: (downloadsByReciter) =>
-                      _buildDownloadsList(context, downloadsByReciter),
-                  error: (message) => SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline_rounded,
-                            size: 64,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            message,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              context.read<DownloadsBloc>().add(
-                                const LoadDownloads(),
-                              );
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: Text(AppLocalizations.of(context)!.retry),
-                          ),
+                  centerTitle: true,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          Theme.of(context).scaffoldBackgroundColor,
                         ],
                       ),
                     ),
                   ),
-                  // Handle other states with simple placeholders or non-sliver equivalents if needed for transient states
-                  surahDownloadStatus: (surahId, reciterName, isDownloaded) =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  fileValidationResult: (downloadId, isValid) =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  validDownloadsLoaded: (reciterName, validDownloads) =>
-                      const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  playbackInitiated: (_, downloadsByReciter) =>
-                      _buildDownloadsList(context, downloadsByReciter),
-                  premiumRequired: (_, downloadsByReciter) =>
-                      _buildDownloadsList(context, downloadsByReciter),
-                  downloadStarted: (_, __, ___, downloadsByReciter) =>
-                      _buildDownloadsList(context, downloadsByReciter),
                 ),
-                // Add some bottom padding for floating action buttons or player
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
-            );
-          },
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh_rounded),
+                    onPressed: _loadDownloads,
+                    tooltip: AppLocalizations.of(context)!.refreshDownloads,
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_sweep_rounded,
+                      color: Colors.redAccent,
+                    ),
+                    onPressed: () => _showClearAllDialog(context),
+                    tooltip: AppLocalizations.of(context)!.deleteAll,
+                  ),
+                ],
+              ),
+              _buildBody(context, state),
+              // Add some bottom padding for floating action buttons or player
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, DownloadsState state) {
+    switch (state.status) {
+      case DownloadsStateStatus.initial:
+      case DownloadsStateStatus.loading:
+        return const SliverFillRemaining(
+          child: Center(child: CircularProgressIndicator()),
+        );
+      case DownloadsStateStatus.loaded:
+        return _buildDownloadsList(context, state.downloads);
+      case DownloadsStateStatus.error:
+        return _buildError(
+          context,
+          state.errorMessage ?? AppLocalizations.of(context)!.error,
+        );
+    }
+  }
+
+  Widget _buildError(BuildContext context, String message) {
+    return SliverFillRemaining(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16, color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<DownloadsBloc>().add(const LoadDownloads());
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context)!.retry),
+            ),
+          ],
         ),
       ),
     );
@@ -175,7 +185,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   Widget _buildDownloadsList(
     BuildContext context,
-    Map<String, List<DownloadItem>> downloadsByReciter,
+    Map<String, Map<String, List<DownloadItem>>> downloadsByReciter,
   ) {
     if (downloadsByReciter.isEmpty) {
       return SliverFillRemaining(
@@ -222,14 +232,14 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         final String reciterName = downloadsByReciter.keys.elementAt(index);
-        final List<DownloadItem> downloads =
-            downloadsByReciter[reciterName] ?? [];
+        final Map<String, List<DownloadItem>> narrativeDownloads =
+            downloadsByReciter[reciterName] ?? {};
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ReciterDownloadsSection(
             reciterName: reciterName,
-            downloads: downloads,
+            downloadsByNarrative: narrativeDownloads,
           ),
         );
       }, childCount: downloadsByReciter.length),

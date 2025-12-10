@@ -4,13 +4,12 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/di/injection.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../features/downloads/domain/entities/download_item.dart';
 import '../features/downloads/domain/repositories/downloads_repository.dart';
-import '../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
@@ -38,96 +37,24 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
-  void _handleDownloadsState(
-    DownloadsState downloadState,
-    BuildContext context,
-  ) {
-    final ReciterDetailsState currentState = context
-        .read<ReciterDetailsBloc>()
-        .state;
-    if (currentState is! ReciterDetailsLoaded) {
-      return;
-    }
-
-    if (downloadState is DownloadsLoaded) {
-      // Get downloads for this reciter
-      final List<DownloadItem>? reciterDownloads =
-          downloadState.downloadsByReciter[widget.reciter.name];
-
-      if (reciterDownloads == null || reciterDownloads.isEmpty) {
-        return;
-      }
-
-      // Check if any downloads have completed or failed (these need immediate refresh)
-      final bool hasCompletedOrFailed = reciterDownloads.any(
-        (d) =>
-            d.status == DownloadStatus.completed ||
-            d.status == DownloadStatus.failed,
-      );
-
-      // Find surahs that are downloading, completed, or failed
-      // Note: download.id is the URL which matches surah.id
-      final Set<String> surahsToRefresh = {};
-      for (final DownloadItem download in reciterDownloads) {
-        if (download.status == DownloadStatus.downloading ||
-            download.status == DownloadStatus.completed ||
-            download.status == DownloadStatus.failed) {
-          // download.id is the URL which matches surah.id
-          surahsToRefresh.add(download.id);
-        }
-      }
-
-      if (surahsToRefresh.isEmpty) {
-        return;
-      }
-
-      // If downloads completed/failed, reload entire list immediately
-      if (hasCompletedOrFailed) {
-        context.read<ReciterDetailsBloc>().add(
-          LoadSurahList(
-            reciter: widget.reciter,
-            moshaf: currentState.selectedMoshaf,
-          ),
-        );
-        return;
-      }
-
-      // For in-progress downloads, use targeted updates
-      // (debounce is handled by bloc_concurrency in the stream)
-      for (final surahId in surahsToRefresh) {
-        context.read<ReciterDetailsBloc>().add(
-          RefreshSurahDownloadStatus(
-            surahId: surahId,
-            reciterName: widget.reciter.name,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DownloadsBloc, DownloadsState>(
-      listener: (context, downloadState) {
-        _handleDownloadsState(downloadState, context);
-      },
-      child: Scaffold(
-        body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-          builder: (context, state) {
-            return CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(context),
-                if (widget.reciter.moshaf.length > 1)
-                  SliverToBoxAdapter(
-                    child: _buildMoshafSelector(context, state),
-                  ),
-                _buildContent(context, state),
-              ],
-            );
-          },
-        ),
-        bottomNavigationBar: const BottomPlayerWidget(),
+    // Note: DownloadButton gets its state directly from DownloadsBloc,
+    // so no need to listen to DownloadsBloc here and update surah list
+    return Scaffold(
+      body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+        builder: (context, state) {
+          return CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context),
+              if (widget.reciter.moshaf.length > 1)
+                SliverToBoxAdapter(child: _buildMoshafSelector(context, state)),
+              _buildContent(context, state),
+            ],
+          );
+        },
       ),
+      bottomNavigationBar: const BottomPlayerWidget(),
     );
   }
 
@@ -188,9 +115,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget _buildMoshafSelector(BuildContext context, ReciterDetailsState state) {
     // Remove duplicates and get unique moshaf list
     final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf.toSet().toList();
-    final Mosahf selectedMoshaf = state is ReciterDetailsLoaded
-        ? state.selectedMoshaf
-        : uniqueMoshaf.first;
+    final Mosahf selectedMoshaf = state.selectedMoshaf ?? uniqueMoshaf.first;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -239,90 +164,225 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   Widget _buildContent(BuildContext context, ReciterDetailsState state) {
-    if (state is ReciterDetailsError) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 64.sp,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              SizedBox(height: 16.h),
-              Text(state.message, style: TextStyle(fontSize: 16.sp)),
-              SizedBox(height: 16.h),
-              ElevatedButton.icon(
-                onPressed: () {
-                  context.read<ReciterDetailsBloc>().add(
-                    LoadSurahList(
-                      reciter: widget.reciter,
-                      moshaf: widget.reciter.moshaf.first,
+    switch (state.status) {
+      case ReciterDetailsStatus.error:
+        return SliverFillRemaining(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 64.sp,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  state.errorMessage ?? 'An error occurred',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+                SizedBox(height: 16.h),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<ReciterDetailsBloc>().add(
+                      LoadSurahList(
+                        reciter: widget.reciter,
+                        moshaf: widget.reciter.moshaf.first,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 12.h,
                     ),
-                  );
-                },
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 12.h,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                ),
+              ],
+            ),
+          ),
+        );
+      case ReciterDetailsStatus.loaded:
+        if (state.surahList.isEmpty) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off_rounded,
+                    size: 64.sp,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    AppLocalizations.of(context)!.noSurahsAvailable,
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+          builder: (context, audioState) {
+            return SliverPadding(
+              padding: EdgeInsets.only(
+                top: 16.h,
+                left: 16.w,
+                right: 16.w,
+                bottom: 30.h, // Space for bottom player
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final SurahEntity surah = state.surahList[index];
+                  return _buildSurahCard(surah, index, state, audioState);
+                }, childCount: state.surahList.length),
+              ),
+            );
+          },
+        );
+      case ReciterDetailsStatus.initial:
+      case ReciterDetailsStatus.loading:
+        // Loading state - show skeleton
+        return SliverPadding(
+          padding: EdgeInsets.only(
+            top: 16.h,
+            left: 16.w,
+            right: 16.w,
+            bottom: 30.h,
+          ),
+          sliver: SliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildSkeletonSurahCard(),
+                childCount: 10, // Show 10 skeleton items
+              ),
+            ),
+          ),
+        );
+    }
+  }
+
+  Widget _buildSkeletonSurahCard() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(12.w),
+        child: Row(
+          children: [
+            // Circle placeholder for index
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '1',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      );
-    } else if (state is ReciterDetailsLoaded && state.surahList.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.search_off_rounded, size: 64.sp, color: Colors.grey),
-              SizedBox(height: 16.h),
-              Text(
-                AppLocalizations.of(context)!.noSurahsAvailable,
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+            ),
+            SizedBox(width: 16.w),
+            // Text placeholders
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Surah Name Placeholder',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Reciter Name',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // Button placeholders
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.download_outlined,
+                    color: Colors.grey,
+                    size: 20.sp,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.grey,
+                    size: 24.sp,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      );
-    } else if (state is ReciterDetailsLoaded) {
-      return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-        builder: (context, audioState) {
-          return SliverPadding(
-            padding: EdgeInsets.only(
-              top: 16.h,
-              left: 16.w,
-              right: 16.w,
-              bottom: 30.h, // Space for bottom player
-            ),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final SurahEntity surah = state.surahList[index];
-                return _buildSurahCard(surah, index, state, audioState);
-              }, childCount: state.surahList.length),
-            ),
-          );
-        },
-      );
-    }
-    return const SliverFillRemaining(
-      child: Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 
   Widget _buildSurahCard(
     SurahEntity surah,
     int index,
-    ReciterDetailsLoaded state,
+    ReciterDetailsState state,
     AudioPlayerState audioState,
   ) {
     final MediaItem? currentMediaItem = audioState.mediaItem;
@@ -558,7 +618,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     }
   }
 
-  Future<void> _playSurah(SurahEntity surah, ReciterDetailsLoaded state) async {
+  Future<void> _playSurah(SurahEntity surah, ReciterDetailsState state) async {
     try {
       // Check if the surah is downloaded
       final String? downloadedFilePath = await _getDownloadedFilePath(surah);

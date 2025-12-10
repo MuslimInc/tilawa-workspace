@@ -11,10 +11,11 @@ class GetDownloadsByReciterUseCase {
 
   final DownloadsRepository _repository;
 
-  Future<Either<Failure, Map<String, List<DownloadItem>>>> call() async {
+  Future<Either<Failure, Map<String, Map<String, List<DownloadItem>>>>>
+  call() async {
     try {
-      final Map<String, List<DownloadItem>> downloads = await _repository
-          .getDownloadsByReciter();
+      final Map<String, Map<String, List<DownloadItem>>> downloads =
+          await _repository.getDownloadsByReciter();
       return Right(downloads);
     } catch (e) {
       return Left(AudioFailure(e.toString()));

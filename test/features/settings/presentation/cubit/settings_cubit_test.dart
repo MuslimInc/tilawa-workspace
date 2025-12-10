@@ -37,7 +37,7 @@ void main() {
       getIt.registerSingleton<DownloadService>(mockDownloadService);
       getIt.registerSingleton<DownloadsRepository>(mockDownloadsRepository);
 
-      DownloadQueueManager.reset();
+      DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
       cubit = SettingsCubit();
     });
 

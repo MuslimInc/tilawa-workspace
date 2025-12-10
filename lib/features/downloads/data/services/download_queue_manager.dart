@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
@@ -11,10 +11,12 @@ import 'download_service.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
 class DownloadQueueManager {
-  DownloadQueueManager._();
+  DownloadQueueManager._({DownloadService? downloadService})
+    : _downloadService = downloadService ?? DownloadService.instance;
+
   static DownloadQueueManager instance = DownloadQueueManager._();
 
-  final DownloadService _downloadService = getIt<DownloadService>();
+  final DownloadService _downloadService;
 
   /// Reset the instance for testing
   @visibleForTesting
@@ -23,13 +25,22 @@ class DownloadQueueManager {
     instance = DownloadQueueManager._();
   }
 
+  /// Initialize the instance with a mock service for testing
+  @visibleForTesting
+  static void initForTesting({required DownloadService downloadService}) {
+    instance.dispose();
+    instance = DownloadQueueManager._(downloadService: downloadService);
+  }
+
   // Maximum number of concurrent downloads
   // Maximum number of concurrent downloads
   int _maxConcurrentDownloads = 2; // Default to 2
 
   /// Set the maximum number of concurrent downloads
   void setMaxConcurrentDownloads(int count) {
-    if (count < 1) return;
+    if (count < 1) {
+      return;
+    }
     _maxConcurrentDownloads = count;
     logger.d(
       '[DownloadQueueManager] Max concurrent downloads set to $_maxConcurrentDownloads',
@@ -565,7 +576,7 @@ class DownloadQueueManager {
 }
 
 /// Represents a download in the queue
-class QueuedDownload {
+class QueuedDownload extends Equatable {
   const QueuedDownload({
     required this.id,
     required this.url,
@@ -581,10 +592,20 @@ class QueuedDownload {
   final String title;
   final String reciterName;
   final DateTime enqueuedAt;
+
+  @override
+  List<Object?> get props => [
+    id,
+    url,
+    filePath,
+    title,
+    reciterName,
+    enqueuedAt,
+  ];
 }
 
 /// Represents a queue update event
-class QueueUpdate {
+class QueueUpdate extends Equatable {
   const QueueUpdate({
     required this.queueLength,
     required this.activeCount,
@@ -596,4 +617,7 @@ class QueueUpdate {
   final int activeCount;
   final List<String> queuedIds;
   final List<String> activeIds;
+
+  @override
+  List<Object?> get props => [queueLength, activeCount, queuedIds, activeIds];
 }

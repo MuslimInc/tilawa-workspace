@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
+import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
 import '../services/download_queue_manager.dart';
 import '../services/download_service.dart';
@@ -22,19 +22,30 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   String? _cachedDownloadsDir;
 
   Future<String> _getDownloadsDir() async {
-    if (_cachedDownloadsDir != null) return _cachedDownloadsDir!;
+    if (_cachedDownloadsDir != null) {
+      return _cachedDownloadsDir!;
+    }
     _cachedDownloadsDir = await localDataSource.getDownloadsDirectory();
     return _cachedDownloadsDir!;
   }
 
   /// Resolves the file path for a download item dynamically.
   /// This fixes issues where absolute paths persist in DB but become invalid
-  /// when the app's container path changes (e.g. on iOS/Simulators after relaunch).
+  /// when the app's container path changes, while preserving the subdirectory structure.
   DownloadItem _resolveDownloadPath(DownloadItem item, String downloadsDir) {
-    if (item.filePath.isEmpty) return item;
+    if (item.filePath.isEmpty) {
+      return item;
+    }
 
-    final String fileName = path.basename(item.filePath);
-    final String resolvedPath = path.join(downloadsDir, fileName);
+    // Recalculate relative path to ensure structure is preserved
+    final String relativePath = DownloadPathUtils.calculateRelativePath(
+      item.url,
+      item.reciterName,
+    );
+    final String resolvedPath = DownloadPathUtils.resolveFullPath(
+      downloadsDir,
+      relativePath,
+    );
 
     // Only update if the path has actually changed
     if (resolvedPath != item.filePath) {
@@ -44,7 +55,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   }
 
   @override
-  Future<Map<String, List<DownloadItem>>> getDownloadsByReciter() async {
+  Future<Map<String, Map<String, List<DownloadItem>>>>
+  getDownloadsByReciter() async {
     final List<DownloadItem> rawDownloads = await localDataSource
         .getDownloads();
     final String downloadsDir = await _getDownloadsDir();
@@ -262,9 +274,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
             if (!fileExists) {
               logger.w(
-                '[DownloadsRepository] Download reported as completed but file not found: id=${download.id} - keeping as downloading',
+                '[DownloadsRepository] Download reported as completed but file not found: id=${download.id} - marking as failed',
               );
-              updatedDownloads.add(download);
+              final DownloadItem failedDownload = download.copyWith(
+                status: DownloadStatus.failed,
+              );
+              updatedDownloads.add(failedDownload);
+              hasChanges = true;
               continue;
             }
 
@@ -279,9 +295,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
                 if (sizeDiff > tolerance) {
                   logger.w(
                     '[DownloadsRepository] Download reported as completed but file size mismatch: '
-                    'expected=${download.fileSize} actual=$actualFileSize - keeping as downloading',
+                    'expected=${download.fileSize} actual=$actualFileSize - marking as failed',
                   );
-                  updatedDownloads.add(download);
+                  final DownloadItem failedDownload = download.copyWith(
+                    status: DownloadStatus.failed,
+                  );
+                  updatedDownloads.add(failedDownload);
+                  hasChanges = true;
                   continue;
                 }
               } catch (e) {
@@ -397,17 +417,32 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     );
   }
 
-  /// Groups downloads by reciter name
-  Map<String, List<DownloadItem>> _groupDownloadsByReciter(
+  /// Groups downloads by reciter name and then by narrative
+  Map<String, Map<String, List<DownloadItem>>> _groupDownloadsByReciter(
     List<DownloadItem> downloads,
   ) {
-    final Map<String, List<DownloadItem>> grouped = {};
+    final Map<String, Map<String, List<DownloadItem>>> grouped = {};
+
     for (final download in downloads) {
-      if (!grouped.containsKey(download.reciterName)) {
-        grouped[download.reciterName] = [];
+      final String reciterName = download.reciterName;
+      final String narrative = DownloadPathUtils.extractNarrativeFromPath(
+        download.filePath,
+      );
+
+      // Ensure reciter group exists
+      if (!grouped.containsKey(reciterName)) {
+        grouped[reciterName] = {};
       }
-      grouped[download.reciterName]!.add(download);
+
+      // Ensure narrative group exists within reciter
+      if (!grouped[reciterName]!.containsKey(narrative)) {
+        grouped[reciterName]![narrative] = [];
+      }
+
+      // Add download to appropriate narrative group
+      grouped[reciterName]![narrative]!.add(download);
     }
+
     return grouped;
   }
 
@@ -510,38 +545,15 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     // Extract the complete directory structure from URL to maintain server organization
     // E.g., https://server6.mp3quran.net/husary/hafs/002.mp3 -> husary/hafs/002.mp3
-    // E.g., https://server6.mp3quran.net/earawi/002.mp3 -> earawi/002.mp3
-    String safeFileName;
-    try {
-      final Uri parsed = Uri.parse(trimmedUrl);
-      final List<String> pathSegments = parsed.pathSegments;
+    final String safeFileName = DownloadPathUtils.calculateRelativePath(
+      trimmedUrl,
+      reciterName,
+    );
 
-      if (pathSegments.length >= 2) {
-        // URL has folder structure and filename
-        // Join all path segments to preserve reciter/narrative/file structure
-        // For example: ['husary', 'hafs', '002.mp3'] -> 'husary/hafs/002.mp3'
-        safeFileName = path.joinAll(pathSegments);
-      } else if (pathSegments.isNotEmpty) {
-        // URL only has filename, create folder from reciter name
-        final String sanitizedReciter = reciterName.replaceAll(' ', '_');
-        safeFileName = path.join(sanitizedReciter, pathSegments.last);
-      } else {
-        // Fallback: create folder from reciter name
-        final String sanitizedReciter = reciterName.replaceAll(' ', '_');
-        safeFileName = path.join(sanitizedReciter, '$surahId.mp3');
-      }
-    } catch (_) {
-      // Fallback if URL parsing fails
-      final String sanitizedReciter = reciterName.replaceAll(' ', '_');
-      safeFileName = path.join(sanitizedReciter, '$surahId.mp3');
-    }
-
-    // Final guard to ensure we have an extension
-    if (path.extension(safeFileName).isEmpty) {
-      safeFileName = '$safeFileName.mp3';
-    }
-
-    final String filePath = path.join(downloadsDir, safeFileName);
+    final String filePath = DownloadPathUtils.resolveFullPath(
+      downloadsDir,
+      safeFileName,
+    );
 
     // Check if download is already queued or active
     final bool isQueued = DownloadQueueManager.instance.isQueued(downloadId);
@@ -810,11 +822,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
         if (!fileExists) {
           logger.w(
-            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} - keeping as downloading',
+            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} - marking as failed',
           );
-          // File doesn't exist yet, keep as downloading
+          // File doesn't exist yet, mark as failed
           final DownloadItem updatedDownload = download.copyWith(
-            status: DownloadStatus.downloading,
+            status: DownloadStatus.failed,
             progress: progress,
             downloadedSize: downloadedSize,
             fileSize: fileSize,
@@ -836,11 +848,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             if (sizeDiff > tolerance) {
               logger.w(
                 '[DownloadsRepository] Download reported as completed but file size mismatch: '
-                'expected=$fileSize actual=$actualFileSize diff=$sizeDiff - keeping as downloading',
+                'expected=$fileSize actual=$actualFileSize diff=$sizeDiff - marking as failed',
               );
-              // File size doesn't match, keep as downloading
+              // File size doesn't match, mark as failed
               final DownloadItem updatedDownload = download.copyWith(
-                status: DownloadStatus.downloading,
+                status: DownloadStatus.failed,
                 progress: progress,
                 downloadedSize: downloadedSize,
                 fileSize: fileSize,
@@ -878,12 +890,42 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         );
         await updateDownload(updatedDownload);
       } else {
+        // Use existing file size if incoming is 0 (DownloadService often sends 0)
+        final int effectiveFileSize = fileSize > 0
+            ? fileSize
+            : download.fileSize;
+
+        // Special check: if downloading and progress is at 100%, check if we should mark as completed
+        // This handles cases where FlutterDownloader might be stuck or late in sending completion event
+        if (status == DownloadStatus.downloading && progress >= 1.0) {
+          final bool fileExists = await localDataSource.isFileExists(
+            download.filePath,
+          );
+          if (fileExists) {
+            // If file exists and we are at 100%, trust it is completed
+            logger.d(
+              '[DownloadsRepository] Download at 100% with downloading status - auto-marking as completed: id=${download.id}',
+            );
+            final DownloadItem updatedDownload = download.copyWith(
+              status: DownloadStatus.completed,
+              progress: 1.0,
+              downloadedSize: effectiveFileSize > 0
+                  ? effectiveFileSize
+                  : downloadedSize,
+              fileSize: effectiveFileSize,
+              completedAt: DateTime.now(),
+            );
+            await updateDownload(updatedDownload);
+            return;
+          }
+        }
+
         // For non-completed statuses, update normally
         final DownloadItem updatedDownload = download.copyWith(
           status: status,
           progress: progress,
           downloadedSize: downloadedSize,
-          fileSize: fileSize,
+          fileSize: effectiveFileSize,
         );
         await updateDownload(updatedDownload);
       }

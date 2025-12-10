@@ -6,10 +6,10 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../../utils/download_path_utils.dart';
 import 'flutter_downloader_wrapper.dart';
 
 @pragma('vm:entry-point')
@@ -246,8 +246,8 @@ class DownloadService {
       }
     }
 
-    final String savedDir = path.dirname(filePath);
-    final String fileName = path.basename(filePath);
+    final String savedDir = DownloadPathUtils.getDirectoryName(filePath);
+    final String fileName = DownloadPathUtils.getFileName(filePath);
 
     final dir = Directory(savedDir);
     if (!dir.existsSync()) {

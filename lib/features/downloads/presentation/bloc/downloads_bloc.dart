@@ -13,6 +13,7 @@ import '../../../../core/services/analytics_service.dart';
 import '../../../../main.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../premium/domain/repositories/premium_repository.dart';
+import '../../data/services/download_queue_manager.dart';
 import '../../data/services/download_service.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
@@ -21,6 +22,7 @@ import '../../domain/usecases/delete_download_use_case.dart';
 import '../../domain/usecases/delete_reciter_downloads_use_case.dart';
 import '../../domain/usecases/download_surah_use_case.dart';
 import '../../domain/usecases/get_downloads_by_reciter_use_case.dart';
+import 'downloads_status.dart';
 
 part 'downloads_bloc.freezed.dart';
 part 'downloads_event.dart';
@@ -52,7 +54,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
        _premiumRepository = premiumRepository,
        _audioPlayerHandler = audioPlayerHandler,
        _analyticsService = analyticsService,
-       super(const DownloadsState.initial()) {
+       super(const DownloadsState()) {
     on<LoadDownloads>(_onLoadDownloads);
     on<DownloadSurahEvent>(_onDownloadSurah);
     on<DeleteDownloadEvent>(_onDeleteDownload);
@@ -90,6 +92,14 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   // This allows multiple widgets to listen to individual download progress
   final StreamController<DownloadProgress> _downloadProgressController =
       StreamController<DownloadProgress>.broadcast();
+
+  // Broadcast stream controller for one-time status events
+  // This allows UI to react to events without changing the main state
+  final StreamController<DownloadsStatus> _statusController =
+      StreamController<DownloadsStatus>.broadcast();
+
+  /// Exposes a broadcast stream of status events
+  Stream<DownloadsStatus> get statusStream => _statusController.stream;
 
   /// Exposes a broadcast stream of download progress updates.
   ///
@@ -186,7 +196,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       );
 
       // Only reload if we're in a loaded state to avoid unnecessary reloads
-      if (state is! DownloadsLoaded) {
+      if (state.status != DownloadsStateStatus.loaded) {
         return;
       }
 
@@ -265,11 +275,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     // Only refresh if we're in loaded state
-    if (state is! DownloadsLoaded) {
+    if (state.status != DownloadsStateStatus.loaded) {
       return;
     }
 
-    final Either<Failure, Map<String, List<DownloadItem>>> result =
+    final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
     result.fold(
       (failure) {
@@ -278,7 +288,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       },
       (downloads) {
         // Emit loaded state directly with updated downloads (no loading state)
-        emit(DownloadsState.loaded(downloads));
+        // Emit loaded state directly with updated downloads (no loading state)
+        emit(
+          state.copyWith(
+            status: DownloadsStateStatus.loaded,
+            downloads: downloads,
+          ),
+        );
       },
     );
   }
@@ -288,6 +304,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     _progressReloadTimer?.cancel();
     await _progressSubscription?.cancel();
     await _downloadProgressController.close();
+    await _statusController.close();
     return super.close();
   }
 
@@ -295,23 +312,23 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     LoadDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    final Either<Failure, Map<String, List<DownloadItem>>> result =
+    emit(state.copyWith(status: DownloadsStateStatus.loading));
+    final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
-    await result.fold(
-      (failure) async => emit(
-        DownloadsState.error(failure.message ?? 'Failed to load downloads'),
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: DownloadsStateStatus.error,
+          errorMessage: failure.message ?? 'Failed to load downloads',
+        ),
       ),
-      (downloads) async => emit(DownloadsState.loaded(downloads)),
-    );
-  }
-
-  Map<String, List<DownloadItem>> _getCurrentDownloads() {
-    return state.maybeWhen(
-      loaded: (downloads) => downloads,
-      downloadStarted: (_, __, ___, downloads) => downloads,
-      premiumRequired: (_, downloads) => downloads,
-      playbackInitiated: (_, downloads) => downloads,
-      orElse: () => {},
+      (downloads) => emit(
+        state.copyWith(
+          status: DownloadsStateStatus.loaded,
+          downloads: downloads,
+          errorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -322,13 +339,14 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     // Check premium access before allowing download
     final bool canDownload = await _premiumRepository.canDownload();
     if (!canDownload) {
-      emit(
-        DownloadsState.premiumRequired(
-          message:
-              'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-          downloadsByReciter: _getCurrentDownloads(),
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          const DownloadsStatus.premiumRequired(
+            message:
+                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+          ),
+        );
+      }
       return;
     }
 
@@ -337,17 +355,16 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         .isSurahDownloaded(event.surahId, event.reciterName);
 
     // Capture current downloads before potential state change
-    final Map<String, List<DownloadItem>> currentDownloads =
-        _getCurrentDownloads();
 
     if (isAlreadyDownloaded) {
-      emit(
-        DownloadsState.error(
-          'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
-        ),
-      );
-      // Restore loaded state to ensure UI displays the list
-      emit(DownloadsState.loaded(currentDownloads));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(
+            message:
+                'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
+          ),
+        );
+      }
       return;
     }
 
@@ -355,11 +372,14 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     // Note: surahId is the URL, and DownloadService uses URL as the task ID
     try {
       if (await DownloadService.isDownloadActive(event.surahId)) {
-        emit(
-          DownloadsState.error(
-            'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
-          ),
-        );
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message:
+                  'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
+            ),
+          );
+        }
         return;
       }
     } on MissingPluginException {
@@ -388,16 +408,18 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
 
     // Emit download started state
-    emit(
-      DownloadsState.downloadStarted(
-        surahId: downloadItem.id.split(
-          '_',
-        )[0], // Extract surah ID from download ID
-        surahTitle: downloadItem.title,
-        reciterName: downloadItem.reciterName,
-        downloadsByReciter: _getCurrentDownloads(),
-      ),
-    );
+    // Emit download started status
+    if (!_statusController.isClosed) {
+      _statusController.add(
+        DownloadsStatus.downloadStarted(
+          surahId: downloadItem.id.split(
+            '_',
+          )[0], // Extract surah ID from download ID
+          surahTitle: downloadItem.title,
+          reciterName: downloadItem.reciterName,
+        ),
+      );
+    }
 
     // Log analytics event for download start
     // Use a formatted ID for analytics purposes
@@ -426,9 +448,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
             'error': failure.message ?? 'Unknown error',
           },
         );
-        emit(
-          DownloadsState.error(failure.message ?? 'Failed to download surah'),
-        );
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to download surah',
+            ),
+          );
+        }
       },
       (_) {
         // Log analytics event for download completion
@@ -446,13 +472,34 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     DeleteDownloadEvent event,
     Emitter<DownloadsState> emit,
   ) async {
+    // Cancel the download if it's active in the queue
+    try {
+      await DownloadService.cancelDownload(event.downloadId);
+    } on MissingPluginException {
+      // In test environment, platform channels are not available
+      logger.d(
+        '[DownloadsBloc] DownloadService.cancelDownload skipped - platform channels not available',
+      );
+    } catch (e) {
+      logger.w('[DownloadsBloc] Error cancelling download before deletion: $e');
+    }
+
+    // Also remove from the pending queue if present
+    DownloadQueueManager.instance.removeFromQueue(event.downloadId);
+
     final Either<Failure, void> result = await _deleteDownload(
       event.downloadId,
     );
     result.fold(
-      (failure) => emit(
-        DownloadsState.error(failure.message ?? 'Failed to delete download'),
-      ),
+      (failure) {
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to delete download',
+            ),
+          );
+        }
+      },
       (_) {
         // Reload downloads after successful deletion
         add(const LoadDownloads());
@@ -464,15 +511,45 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     DeleteReciterDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
+    // Cancel all active downloads for this reciter before deleting
+    try {
+      final Map<String, List<DownloadItem>>? reciterNarratives =
+          state.downloads[event.reciterName];
+      if (reciterNarratives != null) {
+        for (final List<DownloadItem> downloads in reciterNarratives.values) {
+          for (final download in downloads) {
+            if (download.status == DownloadStatus.downloading ||
+                download.status == DownloadStatus.pending) {
+              await DownloadService.cancelDownload(download.url);
+            }
+            // Also remove from the pending queue
+            DownloadQueueManager.instance.removeFromQueue(download.id);
+          }
+        }
+      }
+    } on MissingPluginException {
+      logger.d(
+        '[DownloadsBloc] DownloadService.cancelDownload skipped - platform channels not available',
+      );
+    } catch (e) {
+      logger.w(
+        '[DownloadsBloc] Error cancelling downloads before deletion: $e',
+      );
+    }
+
     final Either<Failure, void> result = await _deleteReciterDownloads(
       event.reciterName,
     );
     result.fold(
-      (failure) => emit(
-        DownloadsState.error(
-          failure.message ?? 'Failed to delete reciter downloads',
-        ),
-      ),
+      (failure) {
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to delete reciter downloads',
+            ),
+          );
+        }
+      },
       (_) {
         // Log analytics event for delete reciter downloads
         _analyticsService.logEvent(
@@ -492,13 +569,42 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     ClearAllDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
+    // Cancel all active downloads before clearing
+    try {
+      for (final Map<String, List<DownloadItem>> reciterDownloads
+          in state.downloads.values) {
+        for (final List<DownloadItem> downloads in reciterDownloads.values) {
+          for (final download in downloads) {
+            if (download.status == DownloadStatus.downloading ||
+                download.status == DownloadStatus.pending) {
+              await DownloadService.cancelDownload(download.url);
+            }
+          }
+        }
+      }
+      // Clear the entire pending queue
+      DownloadQueueManager.instance.clearQueue();
+    } on MissingPluginException {
+      logger.d(
+        '[DownloadsBloc] DownloadService.cancelDownload skipped - platform channels not available',
+      );
+    } catch (e) {
+      logger.w(
+        '[DownloadsBloc] Error cancelling downloads before clearing: $e',
+      );
+    }
+
     final Either<Failure, void> result = await _clearAllDownloads();
     result.fold(
-      (failure) => emit(
-        DownloadsState.error(
-          failure.message ?? 'Failed to clear all downloads',
-        ),
-      ),
+      (failure) {
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to clear all downloads',
+            ),
+          );
+        }
+      },
       (_) {
         // Log analytics event for clear all downloads
         _analyticsService.logEvent(
@@ -520,15 +626,21 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         event.surahId,
         event.reciterName,
       );
-      emit(
-        DownloadsState.surahDownloadStatus(
-          surahId: event.surahId,
-          reciterName: event.reciterName,
-          isDownloaded: isDownloaded,
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.surahDownloadStatus(
+            surahId: event.surahId,
+            reciterName: event.reciterName,
+            isDownloaded: isDownloaded,
+          ),
+        );
+      }
     } catch (e) {
-      emit(DownloadsState.error('Failed to check download status: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Failed to check download status: $e'),
+        );
+      }
     }
   }
 
@@ -541,21 +653,32 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         event.downloadId,
       );
       if (download == null) {
-        emit(const DownloadsState.error('Download not found'));
+        emit(
+          state.copyWith(
+            status: DownloadsStateStatus.error,
+            errorMessage: 'Download not found',
+          ),
+        );
         return;
       }
 
       final bool isValid = await _downloadsRepository.validateDownloadedFile(
         download,
       );
-      emit(
-        DownloadsState.fileValidationResult(
-          downloadId: event.downloadId,
-          isValid: isValid,
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.fileValidationResult(
+            downloadId: event.downloadId,
+            isValid: isValid,
+          ),
+        );
+      }
     } catch (e) {
-      emit(DownloadsState.error('Failed to validate file: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Failed to validate file: $e'),
+        );
+      }
     }
   }
 
@@ -566,14 +689,20 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     try {
       final List<DownloadItem> validDownloads = await _downloadsRepository
           .getValidCompletedDownloads(event.reciterName);
-      emit(
-        DownloadsState.validDownloadsLoaded(
-          reciterName: event.reciterName,
-          validDownloads: validDownloads,
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.validDownloadsLoaded(
+            reciterName: event.reciterName,
+            validDownloads: validDownloads,
+          ),
+        );
+      }
     } catch (e) {
-      emit(DownloadsState.error('Failed to get valid downloads: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Failed to get valid downloads: $e'),
+        );
+      }
     }
   }
 
@@ -586,7 +715,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         event.downloadId,
       );
       if (download == null) {
-        emit(const DownloadsState.error('Download not found'));
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.error(message: 'Download not found'),
+          );
+        }
         return;
       }
 
@@ -595,7 +728,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         download,
       );
       if (!fileExists) {
-        emit(const DownloadsState.error('Downloaded file not found'));
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.error(message: 'Downloaded file not found'),
+          );
+        }
         return;
       }
 
@@ -608,14 +745,19 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       await _audioPlayerHandler.skipToQueueItem(0);
       await _audioPlayerHandler.play();
 
-      emit(
-        DownloadsState.playbackInitiated(
-          message: 'Playing ${download.title}',
-          downloadsByReciter: _getCurrentDownloads(),
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.playbackInitiated(
+            message: 'Playing ${download.title}',
+          ),
+        );
+      }
     } catch (e) {
-      emit(DownloadsState.error('Error playing surah: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Error playing surah: $e'),
+        );
+      }
     }
   }
 
@@ -628,7 +770,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           .getValidCompletedDownloads(event.reciterName);
 
       if (validDownloads.isEmpty) {
-        emit(const DownloadsState.error('No valid downloaded files found'));
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.error(
+              message: 'No valid downloaded files found',
+            ),
+          );
+        }
         return;
       }
 
@@ -641,15 +789,20 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       await _audioPlayerHandler.skipToQueueItem(0);
       await _audioPlayerHandler.play();
 
-      emit(
-        DownloadsState.playbackInitiated(
-          message:
-              'Playing ${validDownloads.length} surahs from ${event.reciterName}',
-          downloadsByReciter: _getCurrentDownloads(),
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.playbackInitiated(
+            message:
+                'Playing ${validDownloads.length} surahs from ${event.reciterName}',
+          ),
+        );
+      }
     } catch (e) {
-      emit(DownloadsState.error('Error playing downloads: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Error playing downloads: $e'),
+        );
+      }
     }
   }
 
@@ -660,16 +813,21 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     try {
       final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
-        emit(
-          DownloadsState.premiumRequired(
-            message:
-                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-            downloadsByReciter: _getCurrentDownloads(),
-          ),
-        );
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.premiumRequired(
+              message:
+                  'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            ),
+          );
+        }
       }
     } catch (e) {
-      emit(DownloadsState.error('Failed to check premium access: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Failed to check premium access: $e'),
+        );
+      }
     }
   }
 
@@ -682,7 +840,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final DownloadItem? downloadItem = await _downloadsRepository
           .getDownloadItem(event.downloadId);
       if (downloadItem == null) {
-        emit(const DownloadsState.error('Download not found'));
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.error(message: 'Download not found'),
+          );
+        }
         return;
       }
 
@@ -697,35 +859,41 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       // Allow retry for failed downloads or stuck downloads
       if (downloadItem.status != DownloadStatus.failed && !isStuck) {
-        emit(
-          const DownloadsState.error(
-            'Only failed or stuck downloads can be retried',
-          ),
-        );
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.error(
+              message: 'Only failed or stuck downloads can be retried',
+            ),
+          );
+        }
         return;
       }
 
       // Check premium access before allowing retry
       final bool canDownload = await _premiumRepository.canDownload();
       if (!canDownload) {
-        emit(
-          DownloadsState.premiumRequired(
-            message:
-                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-            downloadsByReciter: _getCurrentDownloads(),
-          ),
-        );
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            const DownloadsStatus.premiumRequired(
+              message:
+                  'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+            ),
+          );
+        }
         return;
       }
 
       // Check if download is currently in progress
       try {
         if (await DownloadService.isDownloadActive(event.downloadId)) {
-          emit(
-            DownloadsState.error(
-              'Download "${downloadItem.title}" is already being downloaded',
-            ),
-          );
+          if (!_statusController.isClosed) {
+            _statusController.add(
+              DownloadsStatus.error(
+                message:
+                    'Download "${downloadItem.title}" is already being downloaded',
+              ),
+            );
+          }
           return;
         }
       } on MissingPluginException {
@@ -740,14 +908,15 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       }
 
       // Emit download started state
-      emit(
-        DownloadsState.downloadStarted(
-          surahId: downloadItem.id.split('_')[0],
-          surahTitle: downloadItem.title,
-          reciterName: downloadItem.reciterName,
-          downloadsByReciter: _getCurrentDownloads(),
-        ),
-      );
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.downloadStarted(
+            surahId: downloadItem.id.split('_')[0],
+            surahTitle: downloadItem.title,
+            reciterName: downloadItem.reciterName,
+          ),
+        );
+      }
 
       // Log analytics event for retry
       await _analyticsService.logEvent(
@@ -785,23 +954,31 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
             'error': e.toString(),
           },
         );
-        emit(DownloadsState.error('Failed to retry download: $e'));
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(message: 'Failed to retry download: $e'),
+          );
+        }
       }
     } catch (e) {
-      emit(DownloadsState.error('Failed to retry download: $e'));
+      if (!_statusController.isClosed) {
+        _statusController.add(
+          DownloadsStatus.error(message: 'Failed to retry download: $e'),
+        );
+      }
     }
   }
 
   @override
   DownloadsState? fromJson(Map<String, dynamic> json) {
     // Downloads should be loaded from database, so we always start with initial state
-    return const DownloadsState.initial();
+    return const DownloadsState();
   }
 
   @override
   Map<String, dynamic>? toJson(DownloadsState state) {
     // Only persist if in initial state to avoid storing complex download data
-    if (state is DownloadsInitial) {
+    if (state.status == DownloadsStateStatus.initial) {
       return {'state': 'initial'};
     }
     // For other states, don't persist (will reload from database)
