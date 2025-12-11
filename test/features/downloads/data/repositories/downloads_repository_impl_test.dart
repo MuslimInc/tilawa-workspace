@@ -508,6 +508,19 @@ void main() {
           return [];
         });
 
+        // Setup mock for DownloadService to confirm download is active
+        final task = DownloadTask(
+          taskId: 'mock_task_id',
+          status: DownloadTaskStatus.running,
+          progress: 50,
+          url: testSurahId,
+          filename: 'test.mp3',
+          savedDir: '/test/downloads',
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
+
         // Act
         // Note: DownloadService checks are skipped in test environment due to MissingPluginException
         // but the method should return true based on local source status

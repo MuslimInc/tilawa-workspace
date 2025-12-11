@@ -76,7 +76,6 @@ void main() {
       const url = 'https://example.com/s1.mp3';
       const reciter = 'Reciter A';
       const surahTitle = 'Surah 1';
-      final compositeId = '${url}_${reciter.replaceAll(' ', '_')}';
 
       // Mock enqueue in downloader to return a task ID
       when(
@@ -119,6 +118,22 @@ void main() {
         }
         return [];
       });
+
+      // Stub loadTasks to return the running task (used by DownloadService.getDownloadStatus)
+      when(mockDownloader.loadTasks()).thenAnswer(
+        (_) async => [
+          DownloadTask(
+            taskId: 'task_uuid_1',
+            status: DownloadTaskStatus.running,
+            progress: 0,
+            url: url,
+            filename: 's1_Reciter_A.mp3',
+            savedDir: tempDir.path,
+            timeCreated: DateTime.now().millisecondsSinceEpoch,
+            allowCellular: true,
+          ),
+        ],
+      );
 
       // Act: Start Download
       await repository.startDownload(url, surahTitle, reciter);
@@ -163,20 +178,18 @@ void main() {
       // NOTE: Because DownloadService relies on MethodChannels or SQLite queries which we replaced with
       // MockFlutterDownloaderWrapper, `DownloadService.isDownloadActive` logic depends on `loadTasksWithRawQuery`.
 
-      await repository.isSurahDownloading(url, reciter);
+      final bool isDownloading = await repository.isSurahDownloading(
+        url,
+        reciter,
+      );
+      expect(isDownloading, isTrue);
 
-      // Verify that the query was constructed with the URL, not the ID
-      verify(
-        mockDownloader.loadTasksWithRawQuery(
-          query: argThat(contains("url = '$url'"), named: 'query'),
-        ),
-      ).called(greaterThan(0));
+      // Verify that loadTasks was called to check status
+      verify(mockDownloader.loadTasks()).called(greaterThan(0));
 
-      // Ensure no query used the composite ID
+      // Ensure no query used the composite ID (since we don't use raw queries anymore)
       verifyNever(
-        mockDownloader.loadTasksWithRawQuery(
-          query: argThat(contains("url = '$compositeId'"), named: 'query'),
-        ),
+        mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
       );
     });
   });

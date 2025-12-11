@@ -199,6 +199,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription =
@@ -246,6 +247,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         await downloadService.download(
           id: testUrl,
@@ -386,15 +388,7 @@ void main() {
             allowCellular: true,
           );
 
-          when(
-            mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
-          ).thenAnswer((invocation) async {
-            final query = invocation.namedArguments[#query] as String;
-            if (query.contains("task_id = '$testTaskId'")) {
-              return [task];
-            }
-            return [];
-          });
+          when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
           final progressEvents = <DownloadProgress>[];
           // Listen to local service stream
@@ -410,9 +404,7 @@ void main() {
 
           await Future.delayed(const Duration(milliseconds: 500));
 
-          verify(
-            mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
-          ).called(1);
+          verify(mockDownloader.loadTasks()).called(1);
 
           expect(progressEvents, isNotEmpty);
           expect(progressEvents.first.id, testUrl);
@@ -569,6 +561,7 @@ void main() {
           when(
             mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
           ).thenAnswer((_) async => [task]);
+          when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
           expect(await downloadService.isStatusDownloadActive(testUrl), isTrue);
         },
@@ -578,6 +571,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => []);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
         expect(await downloadService.isStatusDownloadActive(testUrl), isFalse);
       });
@@ -596,6 +590,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         expect(
           await downloadService.getStatus(testUrl),
@@ -607,6 +602,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => []);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
         expect(await downloadService.getStatus(testUrl), isNull);
       });
@@ -644,6 +640,9 @@ void main() {
           }
           return [];
         });
+        when(
+          mockDownloader.loadTasks(),
+        ).thenAnswer((_) async => [task1, task2]);
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription =
@@ -724,6 +723,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         final bool isActive = await DownloadService.isDownloadActive(testUrl);
         expect(isActive, isTrue);
@@ -744,6 +744,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         final DownloadStatus? status = await DownloadService.getDownloadStatus(
           testUrl,
@@ -785,6 +786,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
 
         await DownloadService.cancelDownload(testUrl);
 
@@ -877,6 +879,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => null);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => null);
 
         final bool isActive = await downloadService.isStatusDownloadActive(
           testUrl,
@@ -888,6 +891,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => null);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => null);
 
         final DownloadStatus? status = await downloadService.getStatus(testUrl);
         expect(status, isNull);
@@ -897,6 +901,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => []);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
         final DownloadStatus? status = await downloadService.getStatus(testUrl);
         expect(status, isNull);
@@ -906,6 +911,7 @@ void main() {
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => null);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => null);
 
         // Should not throw
         await downloadService.cancel(testUrl);
@@ -967,6 +973,9 @@ void main() {
 
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+        ).thenAnswer((_) async => [task1, task2]);
+        when(
+          mockDownloader.loadTasks(),
         ).thenAnswer((_) async => [task1, task2]);
 
         final DownloadStatus? status = await downloadService.getStatus(testUrl);

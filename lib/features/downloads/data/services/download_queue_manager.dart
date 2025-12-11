@@ -73,6 +73,7 @@ class DownloadQueueManager {
   StreamSubscription<DownloadProgress>? _progressSubscription;
   Timer? _syncTimer;
   bool _isInitialized = false;
+  bool _isDisposed = false;
 
   /// Initialize the queue manager and listen to download progress
   Future<void> initialize() async {
@@ -195,15 +196,17 @@ class DownloadQueueManager {
       // Filter to only count downloads that are actually running (not just enqueued)
       actualRunningCount = 0;
 
-      // Use a Set to avoid counting duplicate URLs multiple times
+      // Use a Set of normalized URLs to avoid counting duplicate URLs multiple times
       final Set<String> processedUrls = {};
 
       for (final id in actualActiveIds) {
-        // Skip if we already processed this URL (since DownloadService returns URLs as IDs)
-        if (processedUrls.contains(id)) {
+        final String norm = _normalizeUrlString(id);
+
+        // Skip if we already processed this normalized URL
+        if (processedUrls.contains(norm)) {
           continue;
         }
-        processedUrls.add(id);
+        processedUrls.add(norm);
 
         final DownloadStatus? status = await _downloadService.getStatus(id);
         if (status == DownloadStatus.downloading ||
@@ -212,6 +215,9 @@ class DownloadQueueManager {
         }
       }
     } catch (e) {
+      if (_isDisposed) {
+        return;
+      }
       // If we can't get actual count, fall back to our internal tracking
       logger.w(
         '[DownloadQueueManager] Error getting actual running count: $e - using internal count',
@@ -259,6 +265,11 @@ class DownloadQueueManager {
           reciterName: queuedDownload.reciterName,
         );
 
+        // Check if disposed after await
+        if (_isDisposed) {
+          return;
+        }
+
         // Check the actual download status - only mark as active if it's running
         // If it's just enqueued, don't mark as active yet - wait for it to start
         DownloadStatus? actualStatus;
@@ -274,6 +285,9 @@ class DownloadQueueManager {
             // If null, wait a bit and retry (race condition protection)
             if (i < 9) {
               await Future.delayed(const Duration(milliseconds: 500));
+              if (_isDisposed) {
+                return;
+              }
             }
           } catch (e) {
             logger.w('[Downloading Queue] Error checking status: $e');
@@ -357,6 +371,25 @@ class DownloadQueueManager {
     );
   }
 
+  /// Normalize a URL/ID string for comparison.
+  ///
+  /// This trims whitespace and attempts to parse as a URI, normalizing duplicate
+  /// slashes in the path. If parsing fails, returns the trimmed input.
+  String _normalizeUrlString(String? input) {
+    if (input == null) {
+      return '';
+    }
+    final String trimmed = input.trim();
+    try {
+      final Uri uri = Uri.parse(trimmed);
+      final String normalizedPath = uri.path.replaceAll(RegExp('/+'), '/');
+      final Uri normalized = uri.replace(path: normalizedPath);
+      return normalized.toString();
+    } catch (_) {
+      return trimmed;
+    }
+  }
+
   /// Handle download progress updates
   void _handleDownloadProgress(DownloadProgress progress) {
     // When a download starts running, mark it as active if not already marked
@@ -382,27 +415,49 @@ class DownloadQueueManager {
       // Try to remove using the ID we received (could be ID or URL)
       bool wasActive = _activeDownloads.remove(progress.id);
 
-      // If not found directly, check if it's a URL for a tracked Composite ID
+      // If not found directly, check for keys where the URL/value matches (normalized)
       if (!wasActive) {
         try {
-          // Find key (Composite ID) where value (URL) matches progress.id
+          final String normalizedProgressId = _normalizeUrlString(progress.id);
+
+          // Try direct value match (normalized)
           final String compositeId = _activeDownloadUrls.entries
               .firstWhere(
-                (entry) => entry.value == progress.id,
+                (entry) =>
+                    _normalizeUrlString(entry.value) == normalizedProgressId,
                 orElse: () => const MapEntry('', ''),
               )
               .key;
 
           if (compositeId.isNotEmpty) {
             wasActive = _activeDownloads.remove(compositeId);
-            // Also remove the entry from map since we found it
             _activeDownloadUrls.remove(compositeId);
+            _lastActivityTime.remove(compositeId);
           }
         } catch (e) {
           // Ignore error in lookup
         }
       }
 
+      // Also remove any entries keyed by the progress.id (or its normalized form)
+      final String normProgress = _normalizeUrlString(progress.id);
+      final List<String> keysToRemove = _activeDownloadUrls.entries
+          .where(
+            (e) =>
+                _normalizeUrlString(e.key) == normProgress ||
+                _normalizeUrlString(e.value) == normProgress,
+          )
+          .map((e) => e.key)
+          .toList();
+
+      for (final key in keysToRemove) {
+        _activeDownloadUrls.remove(key);
+        _activeDownloads.remove(key);
+        _lastActivityTime.remove(key);
+        wasActive = true;
+      }
+
+      // Cleanup any direct keys matching the raw progress.id
       _activeDownloadUrls.remove(progress.id);
       _lastActivityTime.remove(progress.id); // Cleanup activity tracking
       logger.d(
@@ -430,6 +485,9 @@ class DownloadQueueManager {
 
   /// Notify listeners of queue updates
   void _notifyQueueUpdate() {
+    if (_isDisposed || _queueUpdateController.isClosed) {
+      return;
+    }
     _queueUpdateController.add(
       QueueUpdate(
         queueLength: _queue.length,
@@ -457,19 +515,26 @@ class DownloadQueueManager {
     }
 
     try {
+      if (_isDisposed) {
+        return;
+      }
       final List<String> actualActiveIds =
           await DownloadService.activeDownloadIds;
-      final Set<String> actualActiveSet = actualActiveIds.toSet();
+
+      if (_isDisposed) {
+        return;
+      }
+
+      final Set<String> actualActiveSet = actualActiveIds
+          .map(_normalizeUrlString)
+          .toSet();
 
       // Find downloads that are marked as active but are no longer actually active
-      // We check if the URL associated with the active ID is present in actualActiveSet
+      // We normalize both sides for robust comparison (IDs or URLs)
       final List<String> staleIds = _activeDownloads.where((id) {
         final String? url = _activeDownloadUrls[id];
-        // If we have a URL, check against that. If not (fallback), check ID.
-        if (url != null) {
-          return !actualActiveSet.contains(url);
-        }
-        return !actualActiveSet.contains(id);
+        final String key = _normalizeUrlString(url ?? id);
+        return !actualActiveSet.contains(key);
       }).toList();
 
       if (staleIds.isNotEmpty) {
@@ -496,18 +561,21 @@ class DownloadQueueManager {
       // Also add any active downloads that we missed
       // These are URLs from DownloadService that we don't have tracking for
       for (final url in actualActiveIds) {
-        // Check if this URL is already tracked by ANY active ID
+        final String norm = _normalizeUrlString(url);
+        // Check if this URL is already tracked by ANY active ID (normalized)
         final bool isTracked =
-            _activeDownloadUrls.values.contains(url) ||
-            _activeDownloads.contains(url);
+            _activeDownloadUrls.values
+                .map(_normalizeUrlString)
+                .contains(norm) ||
+            _activeDownloads.map(_normalizeUrlString).contains(norm);
 
         if (!isTracked) {
-          _activeDownloads.add(url);
-          _activeDownloadUrls[url] = url; // Map URL to itself
-          _lastActivityTime[url] = clock
-              .now(); // Initialize activity for rediscovered item
+          // Use the normalized key for internal tracking to avoid duplicates
+          _activeDownloads.add(norm);
+          _activeDownloadUrls[norm] = url; // Map normalized -> original url
+          _lastActivityTime[norm] = clock.now(); // Initialize activity
           logger.d(
-            '[DownloadQueueManager] Added missing active download: $url. activeCount=${_activeDownloads.length}',
+            '[DownloadQueueManager] Added missing active download: $url (normalized: $norm). activeCount=${_activeDownloads.length}',
           );
         }
       }
@@ -532,6 +600,10 @@ class DownloadQueueManager {
         // Cancel the stuck download using its URL
         final String cancelId = _activeDownloadUrls[id] ?? id;
         await DownloadService.cancelDownload(cancelId);
+
+        if (_isDisposed) {
+          return;
+        }
 
         // Remove from tracking
         _activeDownloads.remove(id);
@@ -562,6 +634,7 @@ class DownloadQueueManager {
 
   /// Dispose resources
   void dispose() {
+    _isDisposed = true;
     _progressSubscription?.cancel();
     _syncTimer?.cancel();
     _queueUpdateController.close();

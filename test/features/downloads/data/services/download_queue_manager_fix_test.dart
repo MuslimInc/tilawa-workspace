@@ -231,14 +231,16 @@ void main() {
       );
       // DownloadService.getActiveDownloadIds returns list of URLs. If 3 tasks have same URL, it returns [url, url, url]
 
-      when(
-        mockDownloader.loadTasks(),
-      ).thenAnswer((_) async => [task1, task1, task1]);
+      final mockTasks = <DownloadTask>[task1, task1, task1];
+
+      when(mockDownloader.loadTasks()).thenAnswer((_) async => mockTasks);
       when(
         mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
       ).thenAnswer(
-        (_) async => [task1],
-      ); // getStatus uses query, so returns task for that URL
+        (_) async => mockTasks
+            .where((t) => t.url == 'http://example.com/same.mp3')
+            .toList(),
+      );
 
       // Act
       DownloadQueueManager.instance.initialize();
@@ -255,7 +257,21 @@ void main() {
           requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
           saveInPublicStorage: anyNamed('saveInPublicStorage'),
         ),
-      ).thenAnswer((_) async => 'task_new');
+      ).thenAnswer((invocation) async {
+        final url = invocation.namedArguments[#url] as String;
+        final newTask = DownloadTask(
+          taskId: 'task_new',
+          status: DownloadTaskStatus.running,
+          progress: 0,
+          url: url,
+          filename: 'new.mp3',
+          savedDir: tempDir.path,
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
+        mockTasks.add(newTask);
+        return 'task_new';
+      });
 
       unawaited(
         DownloadQueueManager.instance.enqueue(
