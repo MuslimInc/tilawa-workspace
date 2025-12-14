@@ -207,6 +207,9 @@ void main() {
                 .getProgressStream(testUrl)
                 .listen(progressEvents.add);
 
+        // Create the file so it's not treated as stale
+        File(testFilePath).createSync(recursive: true);
+
         await downloadService.download(
           id: testUrl,
           url: testUrl,
@@ -231,6 +234,51 @@ void main() {
 
         await subscription.cancel();
       });
+
+      test(
+        'should restart download if task is complete but file is missing',
+        () async {
+          final task = DownloadTask(
+            taskId: 'stale-completed',
+            status: DownloadTaskStatus.complete,
+            progress: 100,
+            url: testUrl,
+            filename: 'test.mp3',
+            savedDir: tempDir.path,
+            timeCreated: DateTime.now().millisecondsSinceEpoch,
+            allowCellular: true,
+          );
+
+          when(
+            mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+          ).thenAnswer((_) async => [task]);
+          when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
+
+          // File is intentionally NOT created
+
+          await downloadService.download(
+            id: testUrl,
+            url: testUrl,
+            filePath: testFilePath,
+            title: testTitle,
+            reciterName: testReciterName,
+          );
+
+          // Should verify it tries to remove the stale task
+          verify(mockDownloader.remove(taskId: 'stale-completed')).called(1);
+
+          // And then enqueue a new one
+          verify(
+            mockDownloader.enqueue(
+              url: testUrl,
+              savedDir: DownloadPathUtils.getDirectoryName(testFilePath),
+              fileName: DownloadPathUtils.getFileName(testFilePath),
+              openFileFromNotification: false,
+              title: testTitle,
+            ),
+          ).called(1);
+        },
+      );
 
       test('should not enqueue if already running or enqueued', () async {
         final task = DownloadTask(

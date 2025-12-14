@@ -109,12 +109,12 @@ class MockDownloadsLocalDataSource extends _i1.Mock
           as _i3.Future<String>);
 
   @override
-  _i3.Future<bool> isFileExists(String? filePath) =>
+  bool isFileExists(String? filePath) =>
       (super.noSuchMethod(
             Invocation.method(#isFileExists, [filePath]),
-            returnValue: _i3.Future<bool>.value(false),
+            returnValue: false,
           )
-          as _i3.Future<bool>);
+          as bool);
 
   @override
   _i3.Future<void> deleteFile(String? filePath) =>

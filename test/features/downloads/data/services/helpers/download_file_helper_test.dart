@@ -29,7 +29,7 @@ void main() {
 
       expect(targetDir.existsSync(), isFalse);
 
-      final bool result = await fileHelper.ensureDirectoryExists(
+      final bool result = fileHelper.ensureDirectoryExists(
         targetDir.path,
       );
 
@@ -49,7 +49,7 @@ void main() {
 
         expect(tempDir.existsSync(), isTrue);
 
-        final bool result = await fileHelper.ensureDirectoryExists(
+        final bool result = fileHelper.ensureDirectoryExists(
           tempDir.path,
         );
 
@@ -73,7 +73,7 @@ void main() {
         final fileBlockingDir = File('${tempDir.path}/blocked_dir');
         fileBlockingDir.createSync();
 
-        final bool result = await fileHelper.ensureDirectoryExists(
+        final bool result = fileHelper.ensureDirectoryExists(
           fileBlockingDir.path,
         );
 

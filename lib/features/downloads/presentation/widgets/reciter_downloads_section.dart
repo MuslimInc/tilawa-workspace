@@ -26,12 +26,14 @@ class ReciterDownloadsSection extends StatelessWidget {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final List<DownloadItem> downloads = _allDownloads;
 
     return Card(
-      elevation: 2,
-      shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
@@ -39,25 +41,31 @@ class ReciterDownloadsSection extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: downloads.isNotEmpty,
-          backgroundColor: Theme.of(context).cardColor,
-          collapsedBackgroundColor: Theme.of(context).cardColor,
-          childrenPadding: EdgeInsets.zero,
-          title: Text(
-            reciterName,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildReciterHeader(context, downloads),
+          Divider(
+            height: 1,
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-          subtitle: Text(
-            '${downloads.length} ${AppLocalizations.of(context)!.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodySmall?.color,
-              fontSize: 13,
-            ),
-          ),
-          leading: Container(
+          _buildDownloadsList(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReciterHeader(
+    BuildContext context,
+    List<DownloadItem> downloads,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Reciter Avatar
+          Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -81,7 +89,28 @@ class ReciterDownloadsSection extends StatelessWidget {
               ),
             ),
           ),
-          trailing: Row(
+          const SizedBox(width: 16),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reciterName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${downloads.length} ${AppLocalizations.of(context)!.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          // Actions
+          Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_hasCompletedDownloads())
@@ -147,98 +176,105 @@ class ReciterDownloadsSection extends StatelessWidget {
               ),
             ],
           ),
-          children: [
-            Divider(
-              height: 1,
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-            ),
-            // Display downloads grouped by narrative
-            ...downloadsByNarrative.entries.map((entry) {
-              final String narrativeName = entry.key;
-              final List<DownloadItem> narrativeDownloads = entry.value;
+        ],
+      ),
+    );
+  }
 
-              // If only one narrative, just show downloads without extra grouping
-              if (downloadsByNarrative.length == 1) {
-                return Column(
-                  children: narrativeDownloads.map((download) {
-                    return Column(
-                      children: [
-                        DownloadItemCard(
-                          download: download,
-                          onDelete: () {
-                            context.read<DownloadsBloc>().add(
-                              DeleteDownloadEvent(downloadId: download.id),
-                            );
-                          },
-                        ),
-                        if (download != narrativeDownloads.last)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Divider(
-                              height: 1,
-                              color: Theme.of(
-                                context,
-                              ).dividerColor.withValues(alpha: 0.1),
-                            ),
-                          ),
-                      ],
-                    );
-                  }).toList(),
-                );
-              }
-
-              // Multiple narratives - show grouped by narrative
-              return ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                childrenPadding: EdgeInsets.zero,
-                initiallyExpanded: true,
-                title: Text(
-                  narrativeName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Theme.of(context).textTheme.titleMedium?.color,
-                  ),
-                ),
-                subtitle: Text(
-                  '${narrativeDownloads.length} ${AppLocalizations.of(context)!.surahs}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                ),
-                children: narrativeDownloads.map((download) {
-                  return Column(
-                    children: [
-                      DownloadItemCard(
-                        download: download,
-                        onDelete: () {
-                          context.read<DownloadsBloc>().add(
-                            DeleteDownloadEvent(downloadId: download.id),
-                          );
-                        },
-                      ),
-                      if (download != narrativeDownloads.last)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Divider(
-                            height: 1,
-                            color: Theme.of(
-                              context,
-                            ).dividerColor.withValues(alpha: 0.1),
-                          ),
-                        ),
-                    ],
+  Widget _buildDownloadsList(BuildContext context) {
+    if (downloadsByNarrative.length == 1) {
+      // Single narrative: just show the list
+      final List<DownloadItem> downloads = downloadsByNarrative.values.first;
+      return Column(
+        children: downloads.asMap().entries.map((entry) {
+          final int index = entry.key;
+          final DownloadItem download = entry.value;
+          return Column(
+            children: [
+              DownloadItemCard(
+                download: download,
+                onDelete: () {
+                  context.read<DownloadsBloc>().add(
+                    DeleteDownloadEvent(downloadId: download.id),
                   );
-                }).toList(),
+                },
+              ),
+              if (index != downloads.length - 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(
+                    height: 1,
+                    color: Theme.of(
+                      context,
+                    ).dividerColor.withValues(alpha: 0.1),
+                  ),
+                ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Multiple narratives: Show header for each narrative
+    return Column(
+      children: downloadsByNarrative.entries.map((entry) {
+        final String narrativeName = entry.key;
+        final List<DownloadItem> narrativeDownloads = entry.value;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Narrative Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              child: Text(
+                narrativeName,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+            // Downloads for this narrative
+            ...narrativeDownloads.asMap().entries.map((downloadEntry) {
+              final int index = downloadEntry.key;
+              final DownloadItem download = downloadEntry.value;
+              return Column(
+                children: [
+                  DownloadItemCard(
+                    download: download,
+                    onDelete: () {
+                      context.read<DownloadsBloc>().add(
+                        DeleteDownloadEvent(downloadId: download.id),
+                      );
+                    },
+                  ),
+                  // Show divider unless it's the last item in this narrative
+                  if (index != narrativeDownloads.length - 1)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(
+                        height: 1,
+                        color: Theme.of(
+                          context,
+                        ).dividerColor.withValues(alpha: 0.1),
+                      ),
+                    ),
+                ],
               );
             }),
+            // Divider between narrative sections (except after the last one)
+            if (entry.key != downloadsByNarrative.keys.last)
+              Divider(
+                height: 1,
+                thickness: 4,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+              ),
           ],
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 

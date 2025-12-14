@@ -326,7 +326,7 @@ void main() {
         await testFile.writeAsBytes([0, 1, 2, 3]);
 
         // Act
-        final bool result = await dataSource.isFileExists(testFile.path);
+        final bool result = dataSource.isFileExists(testFile.path);
 
         // Assert
         expect(result, isTrue);
@@ -338,7 +338,7 @@ void main() {
 
       test('should return false when file does not exist', () async {
         // Act
-        final bool result = await dataSource.isFileExists(
+        final bool result = dataSource.isFileExists(
           '/non/existent/path.mp3',
         );
 

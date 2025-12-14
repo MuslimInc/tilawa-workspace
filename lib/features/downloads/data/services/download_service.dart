@@ -288,17 +288,28 @@ class DownloadServiceImpl implements DownloadService {
       final DownloadTask task = existingTasks.first;
 
       if (task.status == DownloadTaskStatus.complete) {
-        // Already completed
-        _globalProgressController.add(
-          DownloadProgress(
-            id: id,
-            status: DownloadStatus.completed,
-            progress: 1.0,
-            downloadedSize: 0,
-            fileSize: 0,
-          ),
-        );
-        return;
+        // Verify the file actually exists
+        final bool exists = _fileHelper.isFileExists(filePath);
+        if (exists) {
+          // Already completed and file exists
+          _globalProgressController.add(
+            DownloadProgress(
+              id: id,
+              status: DownloadStatus.completed,
+              progress: 1.0,
+              downloadedSize: 0,
+              fileSize: 0,
+            ),
+          );
+          return;
+        } else {
+          // Stale task - DB says complete but file is missing
+          logger.i(
+            '[DownloadService] Found stale complete task for $url. File missing at $filePath. Removing stale task and restarting download.',
+          );
+          await _removeTaskWithRetries(task.taskId);
+          // Continue to enqueue new download...
+        }
       } else if (task.status == DownloadTaskStatus.running ||
           task.status == DownloadTaskStatus.enqueued) {
         // Already active, map it
@@ -325,7 +336,7 @@ class DownloadServiceImpl implements DownloadService {
       return;
     }
 
-    if (!(await _fileHelper.ensureDirectoryExists(savedDir))) {
+    if (!_fileHelper.ensureDirectoryExists(savedDir)) {
       return;
     }
 
@@ -481,6 +492,32 @@ class DownloadServiceImpl implements DownloadService {
     } catch (e) {
       logger.w('[DownloadService] Error querying tasks for $url: $e');
       return null;
+    }
+  }
+
+  /// Remove a task from the downloader with a small retry/backoff policy.
+  /// Helps handle transient platform/database errors when calling into the
+  /// native downloader plugin.
+  Future<void> _removeTaskWithRetries(String taskId, {int retries = 3}) async {
+    var attempt = 0;
+    while (true) {
+      try {
+        await _flutterDownloader.remove(taskId: taskId);
+        logger.d('[DownloadService] Successfully removed task $taskId');
+        return;
+      } catch (e) {
+        attempt++;
+        logger.w(
+          '[DownloadService] Failed to remove task $taskId (attempt $attempt): $e',
+        );
+        if (attempt >= retries) {
+          logger.e(
+            '[DownloadService] Giving up removing task $taskId after $attempt attempts',
+          );
+          return;
+        }
+        await Future.delayed(Duration(milliseconds: 200 * attempt));
+      }
     }
   }
 

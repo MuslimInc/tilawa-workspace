@@ -206,12 +206,20 @@ class MockDownloadFileHelper extends _i1.Mock
           as String);
 
   @override
-  _i3.Future<bool> ensureDirectoryExists(String? savedDir) =>
+  bool ensureDirectoryExists(String? savedDir) =>
       (super.noSuchMethod(
             Invocation.method(#ensureDirectoryExists, [savedDir]),
-            returnValue: _i3.Future<bool>.value(false),
+            returnValue: false,
           )
-          as _i3.Future<bool>);
+          as bool);
+
+  @override
+  bool isFileExists(String? filePath) =>
+      (super.noSuchMethod(
+            Invocation.method(#isFileExists, [filePath]),
+            returnValue: false,
+          )
+          as bool);
 }
 
 /// A class which mocks [DownloadStatusMapper].

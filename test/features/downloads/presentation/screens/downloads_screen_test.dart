@@ -114,13 +114,6 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      // Expand the ExpansionTile to see the download items
-      final Finder expansionTile = find.byType(ExpansionTile);
-      expect(expansionTile, findsOneWidget);
-      await tester.tap(expansionTile);
-      await tester.pump();
-      await tester.pump();
-
       // Assert
       expect(find.text('Test Surah'), findsOneWidget);
       expect(find.text('Test Reciter'), findsOneWidget);
@@ -158,13 +151,6 @@ void main() {
 
       // Act - Initial render
       await tester.pumpWidget(createTestWidget());
-      await tester.pump();
-      await tester.pump();
-
-      // Expand the ExpansionTile to see the download items
-      final Finder expansionTile = find.byType(ExpansionTile);
-      expect(expansionTile, findsOneWidget);
-      await tester.tap(expansionTile);
       await tester.pump();
       await tester.pump();
 
@@ -226,13 +212,6 @@ void main() {
 
       // Create widget once
       await tester.pumpWidget(createTestWidget());
-      await tester.pump();
-      await tester.pump();
-
-      // Expand ExpansionTile once
-      final Finder expansionTile = find.byType(ExpansionTile);
-      expect(expansionTile, findsOneWidget);
-      await tester.tap(expansionTile);
       await tester.pump();
       await tester.pump();
 
@@ -321,13 +300,6 @@ void main() {
 
       // Create widget once
       await tester.pumpWidget(createTestWidget());
-      await tester.pump();
-      await tester.pump();
-
-      // Expand ExpansionTile once
-      final Finder expansionTile = find.byType(ExpansionTile);
-      expect(expansionTile, findsOneWidget);
-      await tester.tap(expansionTile);
       await tester.pump();
       await tester.pump();
 
@@ -421,13 +393,6 @@ void main() {
         await tester.pump();
         await tester.pump();
 
-        // Expand the ExpansionTile to see the download items
-        final Finder expansionTile = find.byType(ExpansionTile);
-        expect(expansionTile, findsOneWidget);
-        await tester.tap(expansionTile);
-        await tester.pump();
-        await tester.pump();
-
         // Assert
         // Should display "Downloading 75%" (or localized equivalent)
         expect(find.textContaining('75%'), findsOneWidget);
@@ -474,13 +439,6 @@ void main() {
 
         // Create widget once - it will stay alive and update as state changes
         await tester.pumpWidget(createTestWidget());
-        await tester.pump();
-        await tester.pump();
-
-        // Expand ExpansionTile once
-        final Finder expansionTile = find.byType(ExpansionTile);
-        expect(expansionTile, findsOneWidget);
-        await tester.tap(expansionTile);
         await tester.pump();
         await tester.pump();
 

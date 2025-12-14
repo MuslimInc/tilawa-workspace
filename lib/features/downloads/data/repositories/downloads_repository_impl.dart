@@ -265,7 +265,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           if (backgroundStatus == DownloadStatus.completed) {
             // Download reported as completed - verify before marking as such
             // Check if file exists
-            final bool fileExists = await localDataSource.isFileExists(
+            final bool fileExists = localDataSource.isFileExists(
               download.filePath,
             );
 
@@ -482,7 +482,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> deleteDownload(String id) async {
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null &&
-        await localDataSource.isFileExists(download.filePath)) {
+        localDataSource.isFileExists(download.filePath)) {
       await localDataSource.deleteFile(download.filePath);
     }
     await localDataSource.deleteDownload(id);
@@ -502,7 +502,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> clearAllDownloads() async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final download in downloads) {
-      if (await localDataSource.isFileExists(download.filePath)) {
+      if (localDataSource.isFileExists(download.filePath)) {
         await localDataSource.deleteFile(download.filePath);
       }
     }
@@ -663,7 +663,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         status: DownloadStatus.cancelled,
       );
       await updateDownload(updatedDownload);
-      if (await localDataSource.isFileExists(download.filePath)) {
+      if (localDataSource.isFileExists(download.filePath)) {
         await localDataSource.deleteFile(download.filePath);
       }
     }
@@ -679,7 +679,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     for (final rawDownload in downloads) {
       final DownloadItem d = _resolveDownloadPath(rawDownload, downloadsDir);
-      final bool isFileExists = await localDataSource.isFileExists(d.filePath);
+      final bool isFileExists = localDataSource.isFileExists(d.filePath);
       if (d.reciterName == reciterName &&
           d.url == trimmedUrl &&
           d.status == DownloadStatus.completed &&
@@ -755,7 +755,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         downloadsDir,
       );
 
-      if (await localDataSource.isFileExists(download.filePath)) {
+      if (localDataSource.isFileExists(download.filePath)) {
         return download.filePath;
       }
       return null;
@@ -819,7 +819,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         var fileExists = false;
         // Increase retries to 10 (approx 5 seconds) to account for slower IO/devices
         for (var i = 0; i < 10; i++) {
-          fileExists = await localDataSource.isFileExists(download.filePath);
+          fileExists = localDataSource.isFileExists(download.filePath);
           if (fileExists) {
             break;
           }
@@ -847,7 +847,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               final String fileNames = contents
                   .map((e) => e.path.split(Platform.pathSeparator).last)
                   .join(', ');
-              logger.w(
+              logger.d(
                 '[DownloadsRepository] Contents of $parentDirPath: [$fileNames]',
               );
             } else {
@@ -960,7 +960,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         // Special check: if downloading and progress is at 100%, check if we should mark as completed
         // This handles cases where FlutterDownloader might be stuck or late in sending completion event
         if (status == DownloadStatus.downloading && progress >= 1.0) {
-          final bool fileExists = await localDataSource.isFileExists(
+          final bool fileExists = localDataSource.isFileExists(
             download.filePath,
           );
           if (fileExists) {

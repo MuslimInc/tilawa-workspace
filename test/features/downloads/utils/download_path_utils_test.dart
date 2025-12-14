@@ -79,6 +79,51 @@ void main() {
 
         expect(result, path.join('Reciter_With_Spaces', '001.mp3'));
       });
+
+      test('should remove invalid characters from reciter name', () {
+        const url = 'https://server.com/001.mp3';
+        const reciter = r'Reciter/With\Invalid:Chars?*<>"|';
+
+        final String result = DownloadPathUtils.calculateRelativePath(
+          url,
+          reciter,
+        );
+
+        // All invalid chars should be removed, spaces replaced by underscores
+        // "ReciterWithInvalidChars" (spaces replaced by _ but there are no spaces here)
+        expect(result, path.join('ReciterWithInvalidChars', '001.mp3'));
+      });
+
+      test('should sanitize fallback path when URL is invalid', () {
+        const url = 'invalid-url';
+        const reciter = 'Reciter Name';
+
+        final String result = DownloadPathUtils.calculateRelativePath(
+          url,
+          reciter,
+        );
+
+        // Since 'invalid-url' is treated as a filename (no path separators),
+        // and it doesn't fail parsing (it's a valid URI string),
+        // it gets joined with the sanitized reciter name.
+        expect(result, path.join('Reciter_Name', 'invalid-url.mp3'));
+      });
+
+      test(
+        'should handle completely malformed URL by falling back to reciter dir',
+        () {
+          // "::" causes Uri.parse to throw FormatException
+          const url = '::';
+          const reciter = 'Reciter Name';
+
+          final String result = DownloadPathUtils.calculateRelativePath(
+            url,
+            reciter,
+          );
+
+          expect(result, path.join('Reciter_Name', 'audio.mp3'));
+        },
+      );
     });
 
     group('extractNarrativeFromPath', () {

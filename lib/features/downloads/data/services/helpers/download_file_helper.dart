@@ -15,7 +15,7 @@ class DownloadFileHelper {
   }
 
   /// Ensure the directory exists, create if necessary.
-  Future<bool> ensureDirectoryExists(String savedDir) async {
+  bool ensureDirectoryExists(String savedDir) {
     final dir = Directory(savedDir);
     if (!dir.existsSync()) {
       try {
@@ -29,5 +29,19 @@ class DownloadFileHelper {
       }
     }
     return true;
+  }
+
+  /// Check if a file exists.
+  bool isFileExists(String filePath) {
+    final file = File(filePath);
+    try {
+      // Use synchronous check to satisfy `dartavoid_slow_async_io` lint
+      return file.existsSync();
+    } catch (e) {
+      logger.w(
+        '[DownloadService] Error checking file existence for $filePath: $e',
+      );
+      return false;
+    }
   }
 }

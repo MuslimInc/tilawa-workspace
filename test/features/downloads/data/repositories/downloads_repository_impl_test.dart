@@ -441,7 +441,7 @@ void main() {
         ).thenAnswer((_) async => [testDownload]);
         when(
           mockLocalDataSource.isFileExists(expectedPath),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) => true);
 
         // Act
         final bool result = await repository.isSurahDownloaded(
@@ -615,7 +615,7 @@ void main() {
         ).thenAnswer((_) async => [testDownload]);
         when(
           mockLocalDataSource.isFileExists(expectedPath),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) => true);
 
         // Act
         final String? result = await repository.getDownloadedFilePath(
@@ -878,9 +878,7 @@ void main() {
           mockLocalDataSource.updateDownload(any),
         ).thenAnswer((_) async => {});
         // Stub file existence check for completed status validation
-        when(
-          mockLocalDataSource.isFileExists(any),
-        ).thenAnswer((_) async => true);
+        when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
 
         // Act - Mark as completed
         await repository.updateDownloadProgress(
@@ -953,9 +951,7 @@ void main() {
 
         // Mock file existence: false first, then true
         var callCount = 0;
-        when(mockLocalDataSource.isFileExists(testFilePath)).thenAnswer((
-          _,
-        ) async {
+        when(mockLocalDataSource.isFileExists(testFilePath)).thenAnswer((_) {
           callCount++;
           if (callCount < 2) {
             return false;
@@ -1589,7 +1585,7 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) async => true);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
       when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
       when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
 
@@ -1620,9 +1616,7 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(
-        mockLocalDataSource.isFileExists(any),
-      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => false);
       when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
 
       // Act
@@ -1736,7 +1730,7 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => downloads);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) async => true);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
       when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {
         return;
       });
@@ -1770,9 +1764,7 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(
-        mockLocalDataSource.isFileExists(any),
-      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => false);
       when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
         return;
       });

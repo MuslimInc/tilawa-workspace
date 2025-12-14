@@ -56,9 +56,7 @@ void main() {
     // Default file helper behavior
     when(mockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
     when(mockFileHelper.getFileName(any)).thenReturn('file.mp3');
-    when(
-      mockFileHelper.ensureDirectoryExists(any),
-    ).thenAnswer((_) async => true);
+    when(mockFileHelper.ensureDirectoryExists(any)).thenAnswer((_) => true);
 
     downloadService = DownloadServiceImpl(
       flutterDownloader: mockDownloader,
@@ -230,7 +228,8 @@ void main() {
         when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
         when(
           localMockFileHelper.ensureDirectoryExists(any),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) => true);
+        when(localMockFileHelper.isFileExists(any)).thenAnswer((_) => true);
 
         final localService = DownloadServiceImpl(
           flutterDownloader: localMockDownloader,
@@ -313,7 +312,7 @@ void main() {
         when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
         when(
           localMockFileHelper.ensureDirectoryExists(any),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) => true);
 
         final localService = DownloadServiceImpl(
           flutterDownloader: localMockDownloader,
@@ -383,7 +382,7 @@ void main() {
         // Simulating failure
         when(
           localMockFileHelper.ensureDirectoryExists(any),
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) => false);
 
         // Also stub loadTasks as it's called during download
         when(localMockDownloader.loadTasks()).thenAnswer((_) async => []);
@@ -439,7 +438,7 @@ void main() {
         // Even if directory exists, empty path should abort
         when(
           localMockFileHelper.ensureDirectoryExists(any),
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) => true);
         when(localMockDownloader.loadTasks()).thenAnswer((_) async => []);
 
         final localService = DownloadServiceImpl(

@@ -15,7 +15,7 @@ abstract class DownloadsLocalDataSource {
   Future<void> deleteDownload(String id);
   Future<void> clearAllDownloads();
   Future<String> getDownloadsDirectory();
-  Future<bool> isFileExists(String filePath);
+  bool isFileExists(String filePath);
   Future<void> deleteFile(String filePath);
 }
 
@@ -97,7 +97,7 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
   }
 
   @override
-  Future<bool> isFileExists(String filePath) async {
+  bool isFileExists(String filePath) {
     final file = File(filePath);
     return file.existsSync();
   }
