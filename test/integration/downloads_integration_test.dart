@@ -7,13 +7,14 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
 import '../features/downloads/data/services/download_service_test.mocks.dart';
 // Generate mocks
-@GenerateMocks([DownloadsLocalDataSource])
+@GenerateMocks([DownloadsLocalDataSource, DownloadNotificationService])
 import 'downloads_integration_test.mocks.dart';
 
 void main() {
@@ -36,6 +37,29 @@ void main() {
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(DownloadService.instance);
     }
+    final mockDownloadNotificationService = MockDownloadNotificationService();
+    if (!getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    }
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
+    when(
+      mockDownloadNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      mockDownloadNotificationService.cancelNotification(any),
+    ).thenAnswer((_) async {});
 
     // Reset singleton
     DownloadQueueManager.reset();

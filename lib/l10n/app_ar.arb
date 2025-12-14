@@ -561,5 +561,27 @@
     "downloadSurahsOffline": "حمل السور للاستماع دون اتصال",
     "@downloadSurahsOffline": {
         "description": "Text prompting users to download surahs for offline listening"
+    },
+    "notificationWaitingToStart": "في انتظار البدء...",
+    "@notificationWaitingToStart": {
+        "description": "Notification message when download is pending"
+    },
+    "notificationDownloadingProgress": "جاري التحميل: {progress}%",
+    "@notificationDownloadingProgress": {
+        "description": "Notification message showing download progress",
+        "placeholders": {
+            "progress": {
+                "type": "int",
+                "description": "Download progress percentage"
+            }
+        }
+    },
+    "notificationDownloadComplete": "اكتمل التحميل",
+    "@notificationDownloadComplete": {
+        "description": "Notification message when download completes"
+    },
+    "notificationDownloadFailed": "فشل التحميل",
+    "@notificationDownloadFailed": {
+        "description": "Notification message when download fails"
     }
 }

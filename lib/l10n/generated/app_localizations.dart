@@ -889,6 +889,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download surahs to listen offline'**
   String get downloadSurahsOffline;
+
+  /// Notification message when download is pending
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to start...'**
+  String get notificationWaitingToStart;
+
+  /// Notification message showing download progress
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading: {progress}%'**
+  String notificationDownloadingProgress(int progress);
+
+  /// Notification message when download completes
+  ///
+  /// In en, this message translates to:
+  /// **'Download complete'**
+  String get notificationDownloadComplete;
+
+  /// Notification message when download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get notificationDownloadFailed;
 }
 
 class _AppLocalizationsDelegate

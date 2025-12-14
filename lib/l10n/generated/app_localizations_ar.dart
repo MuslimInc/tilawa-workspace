@@ -420,4 +420,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get downloadSurahsOffline => 'حمل السور للاستماع دون اتصال';
+
+  @override
+  String get notificationWaitingToStart => 'في انتظار البدء...';
+
+  @override
+  String notificationDownloadingProgress(int progress) {
+    return 'جاري التحميل: $progress%';
+  }
+
+  @override
+  String get notificationDownloadComplete => 'اكتمل التحميل';
+
+  @override
+  String get notificationDownloadFailed => 'فشل التحميل';
 }

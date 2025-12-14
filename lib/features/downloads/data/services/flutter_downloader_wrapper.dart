@@ -21,7 +21,7 @@ class FlutterDownloaderWrapper {
     required String savedDir,
     required String fileName,
     Map<String, String>? headers,
-    bool showNotification = true,
+    bool showNotification = false, // Disabled - using custom notifications
     bool openFileFromNotification = true,
     bool requiresStorageNotLow = true,
     bool saveInPublicStorage = false,

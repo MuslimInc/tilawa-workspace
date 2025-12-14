@@ -4,11 +4,18 @@ import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 
 import 'data/services/download_service_test.mocks.dart';
+@GenerateMocks([DownloadNotificationService])
+import 'download_queue_repro_test.mocks.dart';
+
+// class MockDownloadNotificationService extends Mock
+//     implements DownloadNotificationService {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +34,35 @@ void main() {
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(DownloadService.instance);
     }
+    final mockDownloadNotificationService = MockDownloadNotificationService();
+    if (!getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    }
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+      return;
+    });
+    when(
+      mockDownloadNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
 
     // Setup Service basics
     when(
@@ -120,6 +156,9 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
+    }
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
     }
   });
 

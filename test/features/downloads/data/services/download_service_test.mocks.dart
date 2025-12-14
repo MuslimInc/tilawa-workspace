@@ -64,7 +64,7 @@ class MockFlutterDownloaderWrapper extends _i1.Mock
     required String? savedDir,
     required String? fileName,
     Map<String, String>? headers,
-    bool? showNotification = true,
+    bool? showNotification = false,
     bool? openFileFromNotification = true,
     bool? requiresStorageNotLow = true,
     bool? saveInPublicStorage = false,

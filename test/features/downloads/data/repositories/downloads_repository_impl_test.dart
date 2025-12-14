@@ -9,6 +9,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
@@ -16,7 +17,7 @@ import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import '../services/download_service_test.mocks.dart';
 import 'downloads_repository_impl_test.mocks.dart';
 
-@GenerateMocks([DownloadsLocalDataSource])
+@GenerateMocks([DownloadsLocalDataSource, DownloadNotificationService])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -71,17 +72,51 @@ void main() {
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(DownloadService.instance);
     }
+    final mockDownloadNotificationService = MockDownloadNotificationService();
+    if (!getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    }
+
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+      return;
+    });
+    when(
+      mockDownloadNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
 
     // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
     DownloadQueueManager.reset();
 
     // Stub common methods to avoid MissingStubError
-    when(
-      mockDownloader.initialize(debug: anyNamed('debug')),
-    ).thenAnswer((_) async {});
+    when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
     when(
       mockDownloader.registerCallback(any, step: anyNamed('step')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDownloader.enqueue(
         url: anyNamed('url'),

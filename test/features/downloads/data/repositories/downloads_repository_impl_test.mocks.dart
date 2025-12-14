@@ -5,10 +5,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart'
     as _i2;
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart'
+    as _i6;
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
     as _i4;
 
@@ -116,6 +120,83 @@ class MockDownloadsLocalDataSource extends _i1.Mock
   _i3.Future<void> deleteFile(String? filePath) =>
       (super.noSuchMethod(
             Invocation.method(#deleteFile, [filePath]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [DownloadNotificationService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadNotificationService extends _i1.Mock
+    implements _i6.DownloadNotificationService {
+  MockDownloadNotificationService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> showDownloadProgress({
+    required String? downloadId,
+    required String? title,
+    required String? reciterName,
+    required int? progress,
+    required _i4.DownloadStatus? status,
+    String? pendingMessage,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#showDownloadProgress, [], {
+              #downloadId: downloadId,
+              #title: title,
+              #reciterName: reciterName,
+              #progress: progress,
+              #status: status,
+              #pendingMessage: pendingMessage,
+              #progressMessage: progressMessage,
+              #completeMessage: completeMessage,
+              #failedMessage: failedMessage,
+            }),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> cancelNotification(String? downloadId) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelNotification, [downloadId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> cancelAllNotifications() =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelAllNotifications, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> handleNotificationResponse(
+    _i7.NotificationResponse? response,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#handleNotificationResponse, [response]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

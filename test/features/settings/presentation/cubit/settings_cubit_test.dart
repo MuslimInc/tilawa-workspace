@@ -2,8 +2,10 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
 
@@ -13,10 +15,14 @@ class MockDownloadService extends Mock implements DownloadService {}
 
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
+class MockDownloadNotificationService extends Mock
+    implements DownloadNotificationService {}
+
 final GetIt getIt = GetIt.instance;
 
 void main() {
   setUpAll(() async {
+    registerFallbackValue(DownloadStatus.pending);
     await initializeHydratedStorageForTest();
   });
 
@@ -24,11 +30,13 @@ void main() {
     late SettingsCubit cubit;
     late MockDownloadService mockDownloadService;
     late MockDownloadsRepository mockDownloadsRepository;
+    late MockDownloadNotificationService mockDownloadNotificationService;
 
     setUp(() {
       getIt.reset();
       mockDownloadService = MockDownloadService();
       mockDownloadsRepository = MockDownloadsRepository();
+      mockDownloadNotificationService = MockDownloadNotificationService();
 
       when(
         () => mockDownloadService.getActiveDownloadIds(),
@@ -36,6 +44,29 @@ void main() {
 
       getIt.registerSingleton<DownloadService>(mockDownloadService);
       getIt.registerSingleton<DownloadsRepository>(mockDownloadsRepository);
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+
+      when(
+        () => mockDownloadNotificationService.initialize(),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockDownloadNotificationService.showDownloadProgress(
+          downloadId: any(named: 'downloadId'),
+          title: any(named: 'title'),
+          reciterName: any(named: 'reciterName'),
+          progress: any(named: 'progress'),
+          status: any(named: 'status'),
+          pendingMessage: any(named: 'pendingMessage'),
+          progressMessage: any(named: 'progressMessage'),
+          completeMessage: any(named: 'completeMessage'),
+          failedMessage: any(named: 'failedMessage'),
+        ),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockDownloadNotificationService.cancelNotification(any()),
+      ).thenAnswer((_) async {});
 
       DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
       cubit = SettingsCubit();

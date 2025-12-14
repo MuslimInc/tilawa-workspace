@@ -12,6 +12,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/services/analytics_service.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
@@ -25,6 +26,7 @@ import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_s
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
+import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
@@ -40,19 +42,24 @@ Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
 provideDummyEitherFailureMapStringMapStringListDownloadItem() =>
     const Right({});
 
-@GenerateMocks([
-  GetDownloadsByReciterUseCase,
-  GetTotalDownloadsSizeUseCase,
-  DownloadSurahUseCase,
-  DeleteDownloadUseCase,
-  DeleteReciterDownloadsUseCase,
-  ClearAllDownloadsUseCase,
-  DownloadsRepository,
-  PremiumRepository,
-  AudioPlayerHandler,
-  AnalyticsService,
-  DownloadService,
-])
+@GenerateMocks(
+  [
+    GetDownloadsByReciterUseCase,
+    GetTotalDownloadsSizeUseCase,
+    DownloadSurahUseCase,
+    DeleteDownloadUseCase,
+    DeleteReciterDownloadsUseCase,
+    ClearAllDownloadsUseCase,
+    DownloadsRepository,
+    RecitersRepository,
+    PremiumRepository,
+    AudioPlayerHandler,
+    AnalyticsService,
+    DownloadService,
+    DownloadNotificationService,
+  ],
+  customMocks: [MockSpec<Dio>(as: #MockDio)],
+)
 void main() {
   // Initialize Flutter bindings for background_downloader
   // This is required because DownloadService uses platform channels
@@ -105,6 +112,9 @@ void main() {
     if (getIt.isRegistered<Dio>()) {
       await getIt.unregister<Dio>();
     }
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      await getIt.unregister<DownloadNotificationService>();
+    }
   });
 
   late DownloadsBloc downloadsBloc;
@@ -118,6 +128,7 @@ void main() {
   late MockPremiumRepository mockPremiumRepository;
   late MockAudioPlayerHandler mockAudioPlayerHandler;
   late MockAnalyticsService mockAnalyticsService;
+  late MockDownloadNotificationService mockDownloadNotificationService;
   late MockFlutterDownloaderWrapper mockDownloader;
 
   setUp(() {
@@ -138,6 +149,30 @@ void main() {
     mockPremiumRepository = MockPremiumRepository();
     mockAudioPlayerHandler = MockAudioPlayerHandler();
     mockAnalyticsService = MockAnalyticsService();
+    mockDownloadNotificationService = MockDownloadNotificationService();
+
+    if (!GetIt.I.isRegistered<DownloadNotificationService>()) {
+      GetIt.I.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    }
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
+    when(
+      mockDownloadNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      mockDownloadNotificationService.cancelNotification(any),
+    ).thenAnswer((_) async {});
 
     // Mock FlutterDownloader for DownloadService
     mockDownloader = MockFlutterDownloaderWrapper();

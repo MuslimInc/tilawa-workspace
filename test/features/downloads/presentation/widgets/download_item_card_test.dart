@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
@@ -26,12 +27,14 @@ DownloadsState provideDummyDownloadsState() => const DownloadsState();
   AudioPlayerBloc,
   DownloadQueueManager,
   DownloadService,
+  DownloadNotificationService,
 ])
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockDownloadQueueManager mockDownloadQueueManager;
   late MockDownloadService mockDownloadService;
+  late MockDownloadNotificationService mockDownloadNotificationService;
 
   setUp(() {
     // Provide dummy value for Mockito before creating mocks
@@ -49,10 +52,44 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(mockDownloadService);
-    } else {
       getIt.unregister<DownloadService>();
       getIt.registerSingleton<DownloadService>(mockDownloadService);
     }
+
+    mockDownloadNotificationService = MockDownloadNotificationService();
+    if (!getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    } else {
+      getIt.unregister<DownloadNotificationService>();
+      getIt.registerSingleton<DownloadNotificationService>(
+        mockDownloadNotificationService,
+      );
+    }
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+      return;
+    });
+    when(
+      mockDownloadNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
 
     // Set up stream first (required for BlocProvider)
     when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
@@ -93,6 +130,9 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
+    }
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
     }
   });
 

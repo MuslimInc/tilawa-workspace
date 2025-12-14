@@ -561,5 +561,27 @@
     "downloadSurahsOffline": "Download surahs to listen offline",
     "@downloadSurahsOffline": {
         "description": "Text prompting users to download surahs for offline listening"
+    },
+    "notificationWaitingToStart": "Waiting to start...",
+    "@notificationWaitingToStart": {
+        "description": "Notification message when download is pending"
+    },
+    "notificationDownloadingProgress": "Downloading: {progress}%",
+    "@notificationDownloadingProgress": {
+        "description": "Notification message showing download progress",
+        "placeholders": {
+            "progress": {
+                "type": "int",
+                "description": "Download progress percentage"
+            }
+        }
+    },
+    "notificationDownloadComplete": "Download complete",
+    "@notificationDownloadComplete": {
+        "description": "Notification message when download completes"
+    },
+    "notificationDownloadFailed": "Download failed",
+    "@notificationDownloadFailed": {
+        "description": "Notification message when download fails"
     }
 }

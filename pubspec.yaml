@@ -57,6 +57,7 @@ dependencies:
   shared_preferences: ^2.5.3
   skeletonizer: ^2.1.1
   stream_transform: ^2.0.0
+  flutter_local_notifications: ^19.5.0
 
 dev_dependencies:
   bloc_test: ^10.0.0

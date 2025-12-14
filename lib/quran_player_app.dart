@@ -4,6 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import 'core/providers/providers.dart';
 import 'core/theme/app_theme.dart';
+import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -26,24 +27,33 @@ class _PlayerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LocalizationBloc, LocalizationState>(
-      builder: (context, locState) {
-        return BlocBuilder<ThemeCubit, ThemeState>(
-          builder: (context, themeState) {
-            return MaterialApp.router(
-              title: 'Muzakri',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.getLightTheme(themeState.scheme),
-              darkTheme: AppTheme.getDarkTheme(themeState.scheme),
-              themeMode: themeState.mode,
-              routerConfig: AppRouter.router,
-              locale: locState.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-            );
-          },
-        );
+    return BlocListener<LocalizationBloc, LocalizationState>(
+      listener: (context, state) {
+        // Update download notification locale when app locale changes
+        DownloadQueueManager.instance.setLocale(state.locale);
       },
+      child: BlocBuilder<LocalizationBloc, LocalizationState>(
+        builder: (context, locState) {
+          // Set initial locale for download notifications
+          DownloadQueueManager.instance.setLocale(locState.locale);
+
+          return BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, themeState) {
+              return MaterialApp.router(
+                title: 'Muzakri',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.getLightTheme(themeState.scheme),
+                darkTheme: AppTheme.getDarkTheme(themeState.scheme),
+                themeMode: themeState.mode,
+                routerConfig: AppRouter.router,
+                locale: locState.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

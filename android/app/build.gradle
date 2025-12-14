@@ -19,6 +19,8 @@ android {
     }
 
     compileOptions {
+        // Enable core library desugaring for flutter_local_notifications
+        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -90,4 +92,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
     implementation 'com.google.firebase:firebase-auth:22.3.0'
     implementation 'com.google.firebase:firebase-firestore:24.9.1'
+    // Core library desugaring for flutter_local_notifications
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }

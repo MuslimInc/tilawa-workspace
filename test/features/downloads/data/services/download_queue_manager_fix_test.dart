@@ -6,12 +6,16 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart';
 
-import 'download_service_test.mocks.dart';
+import 'download_queue_manager_fix_test.mocks.dart';
 
+@GenerateMocks([FlutterDownloaderWrapper, DownloadNotificationService])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -27,6 +31,11 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    }
+    if (!getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.registerSingleton<DownloadNotificationService>(
+        MockDownloadNotificationService(),
+      );
     }
 
     // Default stubbing
@@ -54,6 +63,9 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
+    }
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
     }
   });
 

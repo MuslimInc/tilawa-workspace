@@ -1,22 +1,31 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/utils/toast_utils.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import 'download_notification_service.dart';
 import 'download_service.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
 class DownloadQueueManager {
-  DownloadQueueManager._({DownloadService? downloadService})
-    : _downloadService = downloadService ?? DownloadService.instance;
+  DownloadQueueManager._({
+    DownloadService? downloadService,
+    DownloadNotificationService? notificationService,
+  }) : _downloadService = downloadService ?? DownloadService.instance,
+       _notificationService =
+           notificationService ?? getIt<DownloadNotificationService>();
 
   static DownloadQueueManager instance = DownloadQueueManager._();
 
   final DownloadService _downloadService;
+  final DownloadNotificationService _notificationService;
 
   /// Reset the instance for testing
   @visibleForTesting
@@ -54,6 +63,14 @@ class DownloadQueueManager {
   /// Get the maximum number of concurrent downloads
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
+  // Current locale for localized notification messages
+  Locale _currentLocale = const Locale('en');
+
+  /// Set the current locale for notification messages
+  void setLocale(Locale locale) {
+    _currentLocale = locale;
+  }
+
   // Queue of pending downloads
   final List<QueuedDownload> _queue = [];
 
@@ -62,6 +79,10 @@ class DownloadQueueManager {
 
   // Track URLs of active downloads to map IDs to URLs for sync
   final Map<String, String> _activeDownloadUrls = {};
+
+  // Track download metadata (title, reciter) for notifications
+  final Map<String, ({String title, String reciterName})> _downloadMetadata =
+      {};
 
   // Track last activity time for each active download to detect stuck ones
   final Map<String, DateTime> _lastActivityTime = {};
@@ -139,6 +160,7 @@ class DownloadQueueManager {
     );
 
     _queue.add(queuedDownload);
+    _downloadMetadata[id] = (title: title, reciterName: reciterName);
     _notifyQueueUpdate();
 
     logger.d(
@@ -388,8 +410,42 @@ class DownloadQueueManager {
     }
   }
 
+  /// Find metadata for a download by matching against active download URLs
+  ({String title, String reciterName})? _findMetadataByUrl(String url) {
+    final String normalizedUrl = _normalizeUrlString(url);
+    for (final MapEntry<String, String> entry in _activeDownloadUrls.entries) {
+      if (_normalizeUrlString(entry.value) == normalizedUrl) {
+        return _downloadMetadata[entry.key];
+      }
+    }
+    return null;
+  }
+
   /// Handle download progress updates
   void _handleDownloadProgress(DownloadProgress progress) {
+    // Find metadata for this download (could be by ID or URL)
+    final ({String reciterName, String title})? metadata =
+        _downloadMetadata[progress.id] ?? _findMetadataByUrl(progress.id);
+
+    // Show notification with custom title format and localized messages
+    if (metadata != null) {
+      // Get localized strings based on current locale
+      final AppLocalizations l10n = lookupAppLocalizations(_currentLocale);
+      final int progressPercent = (progress.progress * 100).round();
+
+      _notificationService.showDownloadProgress(
+        downloadId: progress.id,
+        title: metadata.title,
+        reciterName: metadata.reciterName,
+        progress: progressPercent,
+        status: progress.status,
+        pendingMessage: l10n.notificationWaitingToStart,
+        progressMessage: l10n.notificationDownloadingProgress(progressPercent),
+        completeMessage: l10n.notificationDownloadComplete,
+        failedMessage: l10n.notificationDownloadFailed,
+      );
+    }
+
     // When a download starts running, mark it as active if not already marked
     if (progress.status == DownloadStatus.downloading) {
       if (!_activeDownloads.contains(progress.id)) {
@@ -458,6 +514,11 @@ class DownloadQueueManager {
       // Cleanup any direct keys matching the raw progress.id
       _activeDownloadUrls.remove(progress.id);
       _lastActivityTime.remove(progress.id); // Cleanup activity tracking
+      _downloadMetadata.remove(progress.id); // Cleanup notification metadata
+
+      // Also cleanup metadata for normalized keys
+      keysToRemove.forEach(_downloadMetadata.remove);
+
       logger.d(
         '[Downloading Queue] Download finished: id=${progress.id} status=${progress.status} wasActive=$wasActive activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
       );

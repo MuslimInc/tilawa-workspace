@@ -26,6 +26,7 @@ import 'package:muzakri/core/services/analytics_service.dart' as _i557;
 import 'package:muzakri/core/services/crashlytics_service.dart' as _i235;
 import 'package:muzakri/core/services/firebase_initialization_service.dart'
     as _i197;
+import 'package:muzakri/core/services/navigation_service.dart' as _i681;
 import 'package:muzakri/core/services/notification_permission_service.dart'
     as _i4;
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
@@ -53,6 +54,8 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
     as _i811;
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart'
     as _i486;
+import 'package:muzakri/features/downloads/data/services/download_notification_service.dart'
+    as _i288;
 import 'package:muzakri/features/downloads/data/services/download_service.dart'
     as _i313;
 import 'package:muzakri/features/downloads/data/services/downloads_initialization_service.dart'
@@ -230,6 +233,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i681.NavigationService>(
+      () => _i681.NavigationServiceImpl(),
+    );
     gh.lazySingleton<_i4.NotificationPermissionService>(
       () =>
           _i4.NotificationPermissionService(gh<_i460.SharedPreferencesAsync>()),
@@ -312,6 +318,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.GoogleSignIn>(),
       ),
     );
+    gh.lazySingleton<_i288.DownloadNotificationService>(
+      () => _i288.DownloadNotificationService(
+        gh<_i619.RecitersRepository>(),
+        gh<_i681.NavigationService>(),
+      ),
+    );
     gh.lazySingleton<_i870.LocalizationRepository>(
       () => _i319.LocalizationRepositoryImpl(
         gh<_i322.LocalizationLocalDataSource>(),
@@ -331,8 +343,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),
     );
     gh.singleton<_i473.DownloadsInitializationService>(
-      () =>
-          _i473.DownloadsInitializationService(gh<_i775.DownloadsRepository>()),
+      () => _i473.DownloadsInitializationService(
+        gh<_i775.DownloadsRepository>(),
+        gh<_i288.DownloadNotificationService>(),
+      ),
     );
     gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
       () => _i772.ConvertMediaItemsToSurahsUseCase(
