@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui'; // or flutter/material.dart
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart'; // for visibleForTesting
@@ -139,6 +140,8 @@ class DownloadNotificationService {
           progress: progress,
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
+          color: const Color(0xFF1AADC5),
+          largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         );
 
         final notificationDetails = NotificationDetails(
@@ -189,6 +192,8 @@ class DownloadNotificationService {
       _downloadChannelId,
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
+      color: Color(0xFF1AADC5),
+      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);
@@ -212,6 +217,8 @@ class DownloadNotificationService {
       _downloadChannelId,
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
+      color: Color(0xFF1AADC5),
+      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);

@@ -133,7 +133,11 @@ class _DownloadButtonState extends State<DownloadButton>
             onRestart: () => _downloadSurah(context),
           ),
 
-          DownloadStatus.pending => const _PendingDownloadButton(),
+          DownloadStatus.pending => _PendingDownloadButton(
+            onCancel: () => context.read<DownloadsBloc>().add(
+              DeleteDownloadEvent(downloadId: downloadId),
+            ),
+          ),
 
           DownloadStatus.downloading => _DownloadingProgressButton(
             downloadId: downloadId,
@@ -229,14 +233,22 @@ class _CancelledDownloadButton extends StatelessWidget {
 
 /// Pending download state widget
 class _PendingDownloadButton extends StatelessWidget {
-  const _PendingDownloadButton();
+  const _PendingDownloadButton({this.onCancel});
+
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: 48,
       height: 48,
-      child: Center(child: _PulsingPendingIcon()),
+      child: Center(
+        child: InkWell(
+          onTap: onCancel,
+          borderRadius: BorderRadius.circular(24),
+          child: const _PulsingPendingIcon(),
+        ),
+      ),
     );
   }
 }

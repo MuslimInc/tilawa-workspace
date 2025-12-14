@@ -358,11 +358,18 @@ class DownloadQueueManager {
           } else {
             // Download might be failed or in some other state (null means start failed)
             logger.e(
-              '[Downloading Queue] Download failed to start (status=$actualStatus): id=${queuedDownload.id} - REMOVING from queue to prevent infinite loop',
+              '[Downloading Queue] Download failed to start (status=$actualStatus): id=${queuedDownload.id} - cancelling to reset UI',
             );
+
+            // Force cancel to notify UI that it's not pending anymore
+            // This emits a cancelled event which widgets listen to
+            await _downloadService.cancel(queuedDownload.id);
+
             // Remove from queue to prevent infinite retry loop
-            _queue.removeAt(0);
-            _notifyQueueUpdate();
+            if (_queue.isNotEmpty && _queue.first.id == queuedDownload.id) {
+              _queue.removeAt(0);
+              _notifyQueueUpdate();
+            }
 
             // Break the loop to avoid immediate processing of next item if this one failed badly
             break;
@@ -381,6 +388,16 @@ class DownloadQueueManager {
         logger.e(
           '[Downloading Queue] Failed to start download: id=${queuedDownload.id} title="${queuedDownload.title}" error=$e activeCount=${_activeDownloads.length} remainingQueue=${_queue.length}',
         );
+
+        // Ensure UI is not stuck in pending
+        await _downloadService.cancel(queuedDownload.id);
+
+        // Remove from queue?
+        if (_queue.isNotEmpty && _queue.first.id == queuedDownload.id) {
+          _queue.removeAt(0);
+          _notifyQueueUpdate();
+        }
+
         // Break loop
         break;
       }
