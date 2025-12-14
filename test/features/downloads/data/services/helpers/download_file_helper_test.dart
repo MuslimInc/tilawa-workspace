@@ -70,7 +70,7 @@ void main() {
 
         // Create a file with the same name as the intended directory
         // This causes createSync to throw a FileSystemException
-        final File fileBlockingDir = File('${tempDir.path}/blocked_dir');
+        final fileBlockingDir = File('${tempDir.path}/blocked_dir');
         fileBlockingDir.createSync();
 
         final bool result = await fileHelper.ensureDirectoryExists(

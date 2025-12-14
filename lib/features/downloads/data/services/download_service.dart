@@ -474,7 +474,9 @@ class DownloadServiceImpl implements DownloadService {
   Future<List<DownloadTask>?> _queryTasksByUrl(String url) async {
     try {
       final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
-      if (tasks == null) return null;
+      if (tasks == null) {
+        return null;
+      }
       return tasks.where((t) => t.url == url).toList();
     } catch (e) {
       logger.w('[DownloadService] Error querying tasks for $url: $e');

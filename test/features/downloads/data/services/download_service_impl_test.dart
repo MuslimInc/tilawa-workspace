@@ -162,8 +162,8 @@ void main() {
         ),
       ).thenReturn(DownloadStatus.downloading);
 
-      // Listen to service stream
-      expectLater(
+      // Set up the expectation first (but don't await yet)
+      final Future<void> expectation = expectLater(
         downloadService.globalProgressStream,
         emits(
           predicate<DownloadProgress>((progress) {
@@ -174,8 +174,11 @@ void main() {
         ),
       );
 
-      // Emit update from isolate
+      // Emit update from isolate AFTER setting up expectation
       updateController.add((taskId, DownloadTaskStatus.running, 50));
+
+      // Now wait for the expectation
+      await expectation;
     });
 
     test('rethrows initialization error', () async {
@@ -686,15 +689,20 @@ void main() {
         ),
       ).thenReturn(DownloadStatus.downloading);
 
-      expectLater(
+      // Set up the expectation first (but don't await yet)
+      final Future<void> expectation = expectLater(
         localService.globalProgressStream,
         emits(predicate<DownloadProgress>((p) => p.id == url)),
       );
 
+      // Emit update from isolate AFTER setting up expectation
       localController.add((taskId, DownloadTaskStatus.running, 50));
 
+      // Now wait for the expectation
+      await expectation;
+
       // Cleanup
-      localController.close();
+      await localController.close();
     });
   });
 }

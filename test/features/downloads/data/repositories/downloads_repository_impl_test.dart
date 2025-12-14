@@ -1455,7 +1455,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       final int totalSize = await repository.getTotalDownloadsSize();
@@ -1475,6 +1477,308 @@ void main() {
       if (file.existsSync()) {
         await file.delete();
       }
+    });
+  });
+
+  group('addDownload', () {
+    test('should delegate to local data source', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/test.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+      when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.addDownload(download);
+
+      // Assert
+      verify(mockLocalDataSource.addDownload(download)).called(1);
+    });
+  });
+
+  group('updateDownload', () {
+    test('should delegate to local data source', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test',
+        url: 'https://example.com/test.mp3',
+        filePath: '/path/test.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.updateDownload(download);
+
+      // Assert
+      verify(mockLocalDataSource.updateDownload(download)).called(1);
+    });
+  });
+
+  group('deleteDownload', () {
+    test('should delete file and record when file exists', () async {
+      // Arrange
+      const testId = 'test_download_id';
+      const testFilePath = '/path/to/file.mp3';
+      final download = DownloadItem(
+        id: testId,
+        title: 'Test',
+        url: 'url',
+        filePath: testFilePath,
+        reciterName: 'Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) async => true);
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
+
+      // Act
+      await repository.deleteDownload(testId);
+
+      // Assert
+      verify(mockLocalDataSource.deleteFile(any)).called(1);
+      verify(mockLocalDataSource.deleteDownload(testId)).called(1);
+    });
+
+    test('should only delete record when file does not exist', () async {
+      // Arrange
+      const testId = 'test_download_id';
+      const testFilePath = '/path/to/file.mp3';
+      final download = DownloadItem(
+        id: testId,
+        title: 'Test',
+        url: 'url',
+        filePath: testFilePath,
+        reciterName: 'Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockLocalDataSource.isFileExists(any),
+      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
+
+      // Act
+      await repository.deleteDownload(testId);
+
+      // Assert
+      verifyNever(mockLocalDataSource.deleteFile(any));
+      verify(mockLocalDataSource.deleteDownload(testId)).called(1);
+    });
+  });
+
+  group('pauseDownload', () {
+    test('should update status to paused', () async {
+      // Arrange
+      const testId = 'test_download_id';
+      final download = DownloadItem(
+        id: testId,
+        title: 'Test',
+        url: 'url',
+        filePath: '/path/file.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.pauseDownload(testId);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updatedDownload = captured.first as DownloadItem;
+      expect(updatedDownload.status, DownloadStatus.paused);
+    });
+  });
+
+  group('resumeDownload', () {
+    test('should update status to downloading', () async {
+      // Arrange
+      const testId = 'test_download_id';
+      final download = DownloadItem(
+        id: testId,
+        title: 'Test',
+        url: 'url',
+        filePath: '/path/file.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.paused,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.resumeDownload(testId);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updatedDownload = captured.first as DownloadItem;
+      expect(updatedDownload.status, DownloadStatus.downloading);
+    });
+  });
+
+  group('clearAllDownloads', () {
+    test('should delete all files and clear data source', () async {
+      // Arrange
+      final downloads = [
+        DownloadItem(
+          id: 'id1',
+          title: 'Test 1',
+          url: 'url1',
+          filePath: '/path/file1.mp3',
+          reciterName: 'Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 1024,
+          downloadedSize: 1024,
+          createdAt: DateTime.now(),
+        ),
+        DownloadItem(
+          id: 'id2',
+          title: 'Test 2',
+          url: 'url2',
+          filePath: '/path/file2.mp3',
+          reciterName: 'Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 2048,
+          downloadedSize: 2048,
+          createdAt: DateTime.now(),
+        ),
+      ];
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => downloads);
+      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) async => true);
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.clearAllDownloads();
+
+      // Assert
+      verify(mockLocalDataSource.deleteFile('/path/file1.mp3')).called(1);
+      verify(mockLocalDataSource.deleteFile('/path/file2.mp3')).called(1);
+      verify(mockLocalDataSource.clearAllDownloads()).called(1);
+    });
+
+    test('should skip deleting files that do not exist', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: 'id1',
+        title: 'Test 1',
+        url: 'url1',
+        filePath: '/path/file1.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockLocalDataSource.isFileExists(any),
+      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
+        return;
+      });
+
+      // Act
+      await repository.clearAllDownloads();
+
+      // Assert
+      verifyNever(mockLocalDataSource.deleteFile(any));
+      verify(mockLocalDataSource.clearAllDownloads()).called(1);
+    });
+  });
+
+  group('getDownloadProgress', () {
+    test('should yield download item when found', () async {
+      // Arrange
+      const testId = 'test_download_id';
+      final download = DownloadItem(
+        id: testId,
+        title: 'Test',
+        url: 'url',
+        filePath: '/path/file.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+
+      // Act
+      final List<DownloadItem> results = await repository
+          .getDownloadProgress(testId)
+          .toList();
+
+      // Assert
+      expect(results.length, 1);
+      expect(results.first.id, testId);
     });
   });
 }
