@@ -14,6 +14,13 @@ class AppTheme {
   static const double _lightAppBarElevation = 0;
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
+  // Custom theme colors
+  static const Color _primaryColor = Color(0xFF1AADC5);
+  static final FlexSchemeColor _customScheme = FlexSchemeColor.from(
+    primary: _primaryColor,
+    secondary: _primaryColor,
+  );
+
   // Dark theme configuration constants
   static const FlexSurfaceMode _darkSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
@@ -28,9 +35,9 @@ class AppTheme {
   static const bool _useMaterial3ErrorColors = true;
 
   /// Get the light theme for the given color scheme
-  static ThemeData getLightTheme(FlexScheme scheme) {
+  static ThemeData getLightTheme(FlexScheme? scheme) {
     return FlexThemeData.light(
-      scheme: scheme,
+      colors: _customScheme,
       surfaceMode: _lightSurfaceMode,
       blendLevel: _lightBlendLevel,
       appBarStyle: _lightAppBarStyle,
@@ -44,9 +51,9 @@ class AppTheme {
   }
 
   /// Get the dark theme for the given color scheme
-  static ThemeData getDarkTheme(FlexScheme scheme) {
+  static ThemeData getDarkTheme(FlexScheme? scheme) {
     return FlexThemeData.dark(
-      scheme: scheme,
+      colors: _customScheme,
       surfaceMode: _darkSurfaceMode,
       blendLevel: _darkBlendLevel,
       appBarStyle: _darkAppBarStyle,

@@ -45,7 +45,7 @@ class DownloadNotificationService {
 
     try {
       const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher',
+        '@mipmap/ic_launcher_monochrome',
       );
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
