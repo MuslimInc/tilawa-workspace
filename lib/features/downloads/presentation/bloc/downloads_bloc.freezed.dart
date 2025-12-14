@@ -968,7 +968,7 @@ String toString() {
 /// @nodoc
 mixin _$DownloadsState {
 
- DownloadsStateStatus get status; Map<String, Map<String, List<DownloadItem>>> get downloads; String? get errorMessage;
+ DownloadsStateStatus get status; Map<String, Map<String, List<DownloadItem>>> get downloads; int get totalDownloadsSize; String? get errorMessage;
 /// Create a copy of DownloadsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -979,16 +979,16 @@ $DownloadsStateCopyWith<DownloadsState> get copyWith => _$DownloadsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.downloads, downloads)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.downloads, downloads)&&(identical(other.totalDownloadsSize, totalDownloadsSize) || other.totalDownloadsSize == totalDownloadsSize)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(downloads),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(downloads),totalDownloadsSize,errorMessage);
 
 @override
 String toString() {
-  return 'DownloadsState(status: $status, downloads: $downloads, errorMessage: $errorMessage)';
+  return 'DownloadsState(status: $status, downloads: $downloads, totalDownloadsSize: $totalDownloadsSize, errorMessage: $errorMessage)';
 }
 
 
@@ -999,7 +999,7 @@ abstract mixin class $DownloadsStateCopyWith<$Res>  {
   factory $DownloadsStateCopyWith(DownloadsState value, $Res Function(DownloadsState) _then) = _$DownloadsStateCopyWithImpl;
 @useResult
 $Res call({
- DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, String? errorMessage
+ DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, int totalDownloadsSize, String? errorMessage
 });
 
 
@@ -1016,11 +1016,12 @@ class _$DownloadsStateCopyWithImpl<$Res>
 
 /// Create a copy of DownloadsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? downloads = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? downloads = null,Object? totalDownloadsSize = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DownloadsStateStatus,downloads: null == downloads ? _self.downloads : downloads // ignore: cast_nullable_to_non_nullable
-as Map<String, Map<String, List<DownloadItem>>>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, List<DownloadItem>>>,totalDownloadsSize: null == totalDownloadsSize ? _self.totalDownloadsSize : totalDownloadsSize // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -1106,10 +1107,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  int totalDownloadsSize,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DownloadsState() when $default != null:
-return $default(_that.status,_that.downloads,_that.errorMessage);case _:
+return $default(_that.status,_that.downloads,_that.totalDownloadsSize,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -1127,10 +1128,10 @@ return $default(_that.status,_that.downloads,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  int totalDownloadsSize,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _DownloadsState():
-return $default(_that.status,_that.downloads,_that.errorMessage);case _:
+return $default(_that.status,_that.downloads,_that.totalDownloadsSize,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1147,10 +1148,10 @@ return $default(_that.status,_that.downloads,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DownloadsStateStatus status,  Map<String, Map<String, List<DownloadItem>>> downloads,  int totalDownloadsSize,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _DownloadsState() when $default != null:
-return $default(_that.status,_that.downloads,_that.errorMessage);case _:
+return $default(_that.status,_that.downloads,_that.totalDownloadsSize,_that.errorMessage);case _:
   return null;
 
 }
@@ -1162,7 +1163,7 @@ return $default(_that.status,_that.downloads,_that.errorMessage);case _:
 
 
 class _DownloadsState extends DownloadsState {
-  const _DownloadsState({this.status = DownloadsStateStatus.initial, final  Map<String, Map<String, List<DownloadItem>>> downloads = const {}, this.errorMessage}): _downloads = downloads,super._();
+  const _DownloadsState({this.status = DownloadsStateStatus.initial, final  Map<String, Map<String, List<DownloadItem>>> downloads = const {}, this.totalDownloadsSize = 0, this.errorMessage}): _downloads = downloads,super._();
   
 
 @override@JsonKey() final  DownloadsStateStatus status;
@@ -1173,6 +1174,7 @@ class _DownloadsState extends DownloadsState {
   return EqualUnmodifiableMapView(_downloads);
 }
 
+@override@JsonKey() final  int totalDownloadsSize;
 @override final  String? errorMessage;
 
 /// Create a copy of DownloadsState
@@ -1185,16 +1187,16 @@ _$DownloadsStateCopyWith<_DownloadsState> get copyWith => __$DownloadsStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._downloads, _downloads)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DownloadsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._downloads, _downloads)&&(identical(other.totalDownloadsSize, totalDownloadsSize) || other.totalDownloadsSize == totalDownloadsSize)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_downloads),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_downloads),totalDownloadsSize,errorMessage);
 
 @override
 String toString() {
-  return 'DownloadsState(status: $status, downloads: $downloads, errorMessage: $errorMessage)';
+  return 'DownloadsState(status: $status, downloads: $downloads, totalDownloadsSize: $totalDownloadsSize, errorMessage: $errorMessage)';
 }
 
 
@@ -1205,7 +1207,7 @@ abstract mixin class _$DownloadsStateCopyWith<$Res> implements $DownloadsStateCo
   factory _$DownloadsStateCopyWith(_DownloadsState value, $Res Function(_DownloadsState) _then) = __$DownloadsStateCopyWithImpl;
 @override @useResult
 $Res call({
- DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, String? errorMessage
+ DownloadsStateStatus status, Map<String, Map<String, List<DownloadItem>>> downloads, int totalDownloadsSize, String? errorMessage
 });
 
 
@@ -1222,11 +1224,12 @@ class __$DownloadsStateCopyWithImpl<$Res>
 
 /// Create a copy of DownloadsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? downloads = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? downloads = null,Object? totalDownloadsSize = null,Object? errorMessage = freezed,}) {
   return _then(_DownloadsState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DownloadsStateStatus,downloads: null == downloads ? _self._downloads : downloads // ignore: cast_nullable_to_non_nullable
-as Map<String, Map<String, List<DownloadItem>>>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as Map<String, Map<String, List<DownloadItem>>>,totalDownloadsSize: null == totalDownloadsSize ? _self.totalDownloadsSize : totalDownloadsSize // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

@@ -14,9 +14,10 @@ import '../services/download_service.dart';
 
 @LazySingleton(as: DownloadsRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
-  DownloadsRepositoryImpl(this.localDataSource);
+  DownloadsRepositoryImpl(this.localDataSource, this.downloadService);
 
   final DownloadsLocalDataSource localDataSource;
+  final DownloadService downloadService;
 
   // Cache for the downloads directory to avoid repeated async calls
   String? _cachedDownloadsDir;
@@ -72,7 +73,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // so we handle it gracefully
     List<String> activeDownloadIds;
     try {
-      activeDownloadIds = await DownloadService.activeDownloadIds;
+      activeDownloadIds = await downloadService.getActiveDownloadIds();
     } on MissingPluginException {
       // In test environment, platform channels are not available
       // Skip status syncing and return downloads as-is
@@ -164,9 +165,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             // Check the actual task status
             DownloadStatus? actualStatus;
             try {
-              actualStatus = await DownloadService.getDownloadStatus(
-                download.url,
-              );
+              actualStatus = await downloadService.getStatus(download.url);
             } on MissingPluginException {
               actualStatus = null;
             } catch (e) {
@@ -184,7 +183,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               try {
                 // Cancel the existing task
                 try {
-                  await DownloadService.cancelDownload(download.url);
+                  await downloadService.cancel(download.url);
                 } catch (e) {
                   logger.d(
                     '[DownloadsRepository] Error canceling stuck active download: $e',
@@ -238,9 +237,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         // (background downloads continue even when app is closed)
         DownloadStatus? backgroundStatus;
         try {
-          backgroundStatus = await DownloadService.getDownloadStatus(
-            download.url,
-          );
+          backgroundStatus = await downloadService.getStatus(download.url);
         } on MissingPluginException {
           // In test environment, skip status check
           backgroundStatus = null;
@@ -353,7 +350,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               try {
                 // Cancel the existing task if it exists
                 try {
-                  await DownloadService.cancelDownload(download.url);
+                  await downloadService.cancel(download.url);
                 } catch (e) {
                   // Ignore errors when canceling (task might not exist)
                   logger.d(
@@ -654,10 +651,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final DownloadItem? item = await getDownloadItem(id);
     if (item != null) {
-      await DownloadService.cancelDownload(item.url);
+      await downloadService.cancel(item.url);
     } else {
       // Fallback: try cancelling with ID if item not found (though unlikely to work if ID != URL)
-      await DownloadService.cancelDownload(id);
+      await downloadService.cancel(id);
     }
 
     final DownloadItem? download = await getDownloadItem(id);
@@ -705,7 +702,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           d.status == DownloadStatus.downloading) {
         // Also verify it's actually active in DownloadService
         try {
-          final bool isActive = await DownloadService.isDownloadActive(d.url);
+          final bool isActive = await downloadService.isStatusDownloadActive(
+            d.url,
+          );
           if (isActive) {
             return true;
           }
@@ -723,7 +722,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // Also check directly with DownloadService using the composite ID
     // Construct the expected ID same as startDownload
     try {
-      return await DownloadService.isDownloadActive(trimmedUrl);
+      return await downloadService.isStatusDownloadActive(trimmedUrl);
     } on MissingPluginException {
       // In test environment, return false
       return false;
@@ -815,15 +814,53 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           return;
         }
 
-        // Verify file actually exists
-        final bool fileExists = await localDataSource.isFileExists(
-          download.filePath,
-        );
+        // Verify file actually exists with retry mechanism
+        // Sometimes the file system has not fully committed the move from temp to final path
+        var fileExists = false;
+        // Increase retries to 10 (approx 5 seconds) to account for slower IO/devices
+        for (var i = 0; i < 10; i++) {
+          fileExists = await localDataSource.isFileExists(download.filePath);
+          if (fileExists) {
+            break;
+          }
+          // Wait a bit before retrying
+          if (i < 9) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
 
         if (!fileExists) {
           logger.w(
-            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} - marking as failed',
+            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} after retries - marking as failed',
           );
+
+          // Diagnostic: List contents of the parent directory to see what's there
+          try {
+            final String parentDirPath = DownloadPathUtils.getDirectoryName(
+              download.filePath,
+            );
+            final parentDir = Directory(parentDirPath);
+            if (parentDir.existsSync()) {
+              final List<FileSystemEntity> contents = await parentDir
+                  .list()
+                  .toList();
+              final String fileNames = contents
+                  .map((e) => e.path.split(Platform.pathSeparator).last)
+                  .join(', ');
+              logger.w(
+                '[DownloadsRepository] Contents of $parentDirPath: [$fileNames]',
+              );
+            } else {
+              logger.w(
+                '[DownloadsRepository] Parent directory does not exist: $parentDirPath',
+              );
+            }
+          } catch (e) {
+            logger.e(
+              '[DownloadsRepository] Failed to list directory contents: $e',
+            );
+          }
+
           // File doesn't exist yet, mark as failed
           final DownloadItem updatedDownload = download.copyWith(
             status: DownloadStatus.failed,
@@ -874,6 +911,31 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             await updateDownload(updatedDownload);
             return;
           }
+        } else {
+          // File size is 0 or unknown - try to get it from disk since we are completed
+          try {
+            final file = File(download.filePath);
+            // ignore: avoid_slow_async_io
+            if (await file.exists()) {
+              final int actualFileSize = await file.length();
+              if (actualFileSize > 0) {
+                // Update the file size with the actual size on disk
+                final DownloadItem updatedDownload = download.copyWith(
+                  status: DownloadStatus.completed,
+                  progress: 1.0,
+                  downloadedSize: actualFileSize,
+                  fileSize: actualFileSize,
+                  completedAt: DateTime.now(),
+                );
+                await updateDownload(updatedDownload);
+                return;
+              }
+            }
+          } catch (e) {
+            logger.w(
+              '[DownloadsRepository] Failed to update file size from disk: $e',
+            );
+          }
         }
 
         // All checks passed - mark as completed
@@ -906,13 +968,29 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             logger.d(
               '[DownloadsRepository] Download at 100% with downloading status - auto-marking as completed: id=${download.id}',
             );
+
+            // Try to get actual file size from disk if current size is invalid
+            var finalFileSize = effectiveFileSize;
+            if (finalFileSize <= 0) {
+              try {
+                final file = File(download.filePath);
+                // ignore: avoid_slow_async_io
+                final int actualSize = await file.length();
+                if (actualSize > 0) {
+                  finalFileSize = actualSize;
+                }
+              } catch (e) {
+                // Ignore error, keep existing size
+              }
+            }
+
             final DownloadItem updatedDownload = download.copyWith(
               status: DownloadStatus.completed,
               progress: 1.0,
-              downloadedSize: effectiveFileSize > 0
-                  ? effectiveFileSize
+              downloadedSize: finalFileSize > 0
+                  ? finalFileSize
                   : downloadedSize,
-              fileSize: effectiveFileSize,
+              fileSize: finalFileSize,
               completedAt: DateTime.now(),
             );
             await updateDownload(updatedDownload);
@@ -1097,5 +1175,43 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     } else {
       logger.d('[DownloadsRepository] No downloads needed resuming');
     }
+  }
+
+  @override
+  Future<int> getTotalDownloadsSize() async {
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    var totalBytes = 0;
+    for (final download in downloads) {
+      if (download.status == DownloadStatus.completed) {
+        if (download.fileSize > 0) {
+          totalBytes += download.fileSize;
+        } else {
+          // Self-heal: Check actual file size if database says 0
+          try {
+            final file = File(download.filePath);
+            if (file.existsSync()) {
+              final int actualSize = await file.length();
+              if (actualSize > 0) {
+                totalBytes += actualSize;
+                // Update database with correct size to avoid future checks
+                await localDataSource.updateDownload(
+                  download.copyWith(
+                    fileSize: actualSize,
+                    downloadedSize: actualSize,
+                  ),
+                );
+              }
+            }
+          } catch (e) {
+            logger.w(
+              '[DownloadsRepository] Failed to get file size for ${download.filePath}: $e',
+            );
+          }
+        }
+      } else {
+        totalBytes += download.downloadedSize;
+      }
+    }
+    return totalBytes;
   }
 }

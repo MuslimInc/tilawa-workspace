@@ -82,7 +82,7 @@ class DownloadQueueManager {
     }
 
     // Listen to download progress to know when downloads complete
-    _progressSubscription = DownloadService.globalProgressStream.listen((
+    _progressSubscription = _downloadService.globalProgressStream.listen((
       progress,
     ) {
       _handleDownloadProgress(progress);
@@ -257,7 +257,7 @@ class DownloadQueueManager {
 
         // Start the download
         // DownloadService will emit progress updates when the download actually starts
-        await DownloadService.startDownload(
+        await _downloadService.download(
           id: queuedDownload.id,
           url: queuedDownload.url,
           filePath: queuedDownload.filePath,
@@ -276,9 +276,7 @@ class DownloadQueueManager {
         // Increased retries to 10 and delay to 500ms (total 5s) to allow slower devices to register task
         for (var i = 0; i < 10; i++) {
           try {
-            actualStatus = await DownloadService.getDownloadStatus(
-              queuedDownload.url,
-            );
+            actualStatus = await _downloadService.getStatus(queuedDownload.url);
             if (actualStatus != null) {
               break;
             }
@@ -518,8 +516,8 @@ class DownloadQueueManager {
       if (_isDisposed) {
         return;
       }
-      final List<String> actualActiveIds =
-          await DownloadService.activeDownloadIds;
+      final List<String> actualActiveIds = await _downloadService
+          .getActiveDownloadIds();
 
       if (_isDisposed) {
         return;
@@ -599,7 +597,7 @@ class DownloadQueueManager {
 
         // Cancel the stuck download using its URL
         final String cancelId = _activeDownloadUrls[id] ?? id;
-        await DownloadService.cancelDownload(cancelId);
+        await _downloadService.cancel(cancelId);
 
         if (_isDisposed) {
           return;

@@ -57,7 +57,10 @@ void main() {
 
   setUp(() {
     mockLocalDataSource = MockDownloadsLocalDataSource();
-    repository = DownloadsRepositoryImpl(mockLocalDataSource);
+    repository = DownloadsRepositoryImpl(
+      mockLocalDataSource,
+      DownloadService.instance,
+    );
 
     // Mock FlutterDownloader for DownloadService
     mockDownloader = MockFlutterDownloaderWrapper();
@@ -805,21 +808,21 @@ void main() {
         );
 
         // We need to create the directory structure that matches the resolved path
-        // for Reciter: 'Abdul Rahman Al-Sudais' and URL 'https://example.com/audio.mp3'
-        // Logic: _calculateRelativePath -> Abdul_Rahman_Al-Sudais/audio.mp3
         final reciterDir = Directory('${tempDir.path}/Abdul_Rahman_Al-Sudais');
         if (!reciterDir.existsSync()) {
           reciterDir.createSync(recursive: true);
         }
 
-        final tempFile = File('${reciterDir.path}/audio.mp3');
-        await tempFile.writeAsBytes(List.filled(1024, 0)); // Write 1024 bytes
+        // Create the file so length verification (File.length) passes
+        final testFilePath = '${reciterDir.path}/audio.mp3';
+        final file = File(testFilePath);
+        file.writeAsBytesSync(List.filled(1024, 0));
 
         final initialDownload = DownloadItem(
           id: testDownloadId,
           title: 'Al-Fatiha',
           url: 'https://example.com/audio.mp3',
-          filePath: tempFile.path,
+          filePath: testFilePath,
           reciterName: 'Abdul Rahman Al-Sudais',
           status: DownloadStatus.downloading,
           progress: 0.5,
@@ -828,9 +831,11 @@ void main() {
           createdAt: DateTime.now(),
         );
 
+        // Override global mock to use the real temp dir for this test
         when(
           mockLocalDataSource.getDownloadsDirectory(),
         ).thenAnswer((_) async => tempDir.path);
+
         when(
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [initialDownload]);
@@ -838,7 +843,6 @@ void main() {
           mockLocalDataSource.updateDownload(any),
         ).thenAnswer((_) async => {});
         // Stub file existence check for completed status validation
-        // Use any matcher since path may be resolved dynamically
         when(
           mockLocalDataSource.isFileExists(any),
         ).thenAnswer((_) async => true);
@@ -863,28 +867,91 @@ void main() {
         expect(updatedDownload.completedAt, isNotNull);
 
         // Cleanup
-        await tempDir.delete(recursive: true);
+        if (tempDir.existsSync()) {
+          await tempDir.delete(recursive: true);
+        }
       });
 
-      test('should handle update when download not found', () async {
+      test('should retry file existence check if initially false', () async {
         // Arrange
-        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-        // Act - Try to update non-existent download
-        await repository.updateDownloadProgress(
-          'non_existent_id',
-          DownloadStatus.downloading,
-          0.5,
-          512,
-          1024,
+        // Create actual temp file for file size validation
+        final Directory tempDir = Directory.systemTemp.createTempSync(
+          'download_test_retry_',
         );
 
-        // Assert - Should not throw, just do nothing
-        verify(mockLocalDataSource.getDownloads()).called(2);
-        verifyNever(mockLocalDataSource.updateDownload(any));
+        const testId = 'test_download_id_retry';
+        // Logic will resolve to: tempDir/Reciter/audio_retry.mp3
+        final testFilePath = '${tempDir.path}/Reciter/audio_retry.mp3';
+        const testFileSize = 1024; // Actual file size
+
+        // Create the file so length verification (File.length) passes
+        final file = File(testFilePath);
+        if (!file.parent.existsSync()) {
+          file.parent.createSync(recursive: true);
+        }
+        file.writeAsBytesSync(List.filled(testFileSize, 0));
+
+        final initialDownload = DownloadItem(
+          id: testId,
+          title: 'Surah Resume',
+          url: 'https://example.com/audio_retry.mp3',
+          filePath: testFilePath,
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.9,
+          fileSize: testFileSize,
+          downloadedSize: 900,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => tempDir.path);
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [initialDownload]);
+
+        when(
+          mockLocalDataSource.updateDownload(any),
+        ).thenAnswer((_) async => {});
+
+        // Mock file existence: false first, then true
+        var callCount = 0;
+        when(mockLocalDataSource.isFileExists(testFilePath)).thenAnswer((
+          _,
+        ) async {
+          callCount++;
+          if (callCount < 2) {
+            return false;
+          }
+          return true;
+        });
+
+        // Act
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.completed,
+          1.0,
+          testFileSize, // Pass the actual file size
+          testFileSize, // Pass the actual file size
+        );
+
+        // Assert
+        expect(callCount, greaterThanOrEqualTo(2));
+
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.updateDownload(captureAny),
+        ).captured;
+        final updated = captured.last as DownloadItem;
+        expect(updated.status, DownloadStatus.completed);
+
+        // Cleanup
+        if (tempDir.existsSync()) {
+          await tempDir.delete(recursive: true);
+        }
       });
-    });
-    group('updateDownloadProgress', () {
+
       test(
         'should update download using URL matching fallback when exact ID not found',
         () async {
@@ -907,16 +974,13 @@ void main() {
             createdAt: DateTime.now(),
           );
 
-          // We simulate getDownloads returning our item
-          // This is used by both getDownloadItem and the fallback logic
           when(
             mockLocalDataSource.getDownloads(),
           ).thenAnswer((_) async => [existingDownload]);
 
           // Act
-          // We pass the URL as the ID, simulating the DownloadService issue where it sends URL instead of task ID/composite ID
           await repository.updateDownloadProgress(
-            testUrl, // <-- PASSING URL INSTEAD OF COMPOSITE ID
+            testUrl,
             DownloadStatus.downloading,
             0.5,
             500,
@@ -930,11 +994,7 @@ void main() {
           expect(captured.length, 1);
           final updatedDownload = captured.first as DownloadItem;
 
-          // Verify that the correct item was updated despite the ID mismatch in the call
-          expect(
-            updatedDownload.id,
-            compositeId,
-          ); // Should match the composite ID from DB
+          expect(updatedDownload.id, compositeId);
           expect(updatedDownload.status, DownloadStatus.downloading);
           expect(updatedDownload.progress, 0.5);
           expect(updatedDownload.downloadedSize, 500);
@@ -942,108 +1002,133 @@ void main() {
         },
       );
     });
-    group('Dynamic Path Resolution', () {
-      test('should dynamically resolve file path when retrieving downloads', () async {
-        // Arrange
-        const oldDownloadsDir =
-            '/var/mobile/Containers/Data/Application/OLD-UUID/Documents/downloads';
-        const newDownloadsDir =
-            '/var/mobile/Containers/Data/Application/NEW-UUID/Documents/downloads';
+    test('should dynamically resolve file path when retrieving downloads', () async {
+      // Arrange
+      const oldDownloadsDir =
+          '/var/mobile/Containers/Data/Application/OLD-UUID/Documents/downloads';
+      const newDownloadsDir =
+          '/var/mobile/Containers/Data/Application/NEW-UUID/Documents/downloads';
 
-        // New logic calculates path based on URL/Reciter.
-        // URL: https://example.com/surah.mp3 -> Path: reciter/surah.mp3 (fallback)
-        const expectedRelativePath = 'Test_Reciter/surah.mp3';
+      // New logic calculates path based on URL/Reciter.
+      // URL: https://example.com/surah.mp3 -> Path: reciter/surah.mp3 (fallback)
+      const expectedRelativePath = 'Test_Reciter/surah.mp3';
 
-        final itemWithOldPath = DownloadItem(
-          id: 'test_id',
-          title: 'Test Surah',
-          url: 'https://example.com/surah.mp3',
-          filePath:
-              '$oldDownloadsDir/some_old_flat_path.mp3', // Old absolute path
-          reciterName: 'Test Reciter',
-          status: DownloadStatus.completed,
-          progress: 1.0,
-          fileSize: 1024,
-          downloadedSize: 1024,
-          createdAt: DateTime.now(),
-        );
+      final itemWithOldPath = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'https://example.com/surah.mp3',
+        filePath:
+            '$oldDownloadsDir/some_old_flat_path.mp3', // Old absolute path
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
 
-        when(
-          mockLocalDataSource.getDownloads(),
-        ).thenAnswer((_) async => [itemWithOldPath]);
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [itemWithOldPath]);
 
-        // Mock the current directory to be different (simulating app relaunch on iOS)
-        when(
-          mockLocalDataSource.getDownloadsDirectory(),
-        ).thenAnswer((_) async => newDownloadsDir);
+      // Mock the current directory to be different (simulating app relaunch on iOS)
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => newDownloadsDir);
 
-        // Act
-        final Map<String, Map<String, List<DownloadItem>>> result =
-            await repository.getDownloadsByReciter();
+      // Act
+      final Map<String, Map<String, List<DownloadItem>>> result =
+          await repository.getDownloadsByReciter();
 
-        // Assert
-        verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+      // Assert
+      verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
 
-        final Map<String, List<DownloadItem>>? narrativeMap =
-            result['Test Reciter'];
-        expect(narrativeMap, isNotNull);
-        final List<DownloadItem> downloads = narrativeMap!.values
-            .expand((e) => e)
-            .toList();
+      final Map<String, List<DownloadItem>>? narrativeMap =
+          result['Test Reciter'];
+      expect(narrativeMap, isNotNull);
+      final List<DownloadItem> downloads = narrativeMap!.values
+          .expand((e) => e)
+          .toList();
 
-        // New path should be structured correctly under the new directory
-        expect(
-          downloads.first.filePath,
-          '$newDownloadsDir/$expectedRelativePath',
-        );
-        expect(
-          downloads.first.filePath,
-          isNot(equals(itemWithOldPath.filePath)),
-        );
-      });
-
-      test('should dynamically resolve file path in getDownloadItem', () async {
-        // Arrange
-        const oldDownloadsDir = '/old/path';
-        const newDownloadsDir = '/new/path';
-        // Logic for Reciter and url 'url' -> Reciter/url.mp3 (fallback)
-        const expectedRelativePath = 'Reciter/url.mp3';
-
-        final itemWithOldPath = DownloadItem(
-          id: 'test_id',
-          title: 'Test',
-          url: 'url',
-          filePath: '$oldDownloadsDir/file.mp3',
-          reciterName: 'Reciter',
-          status: DownloadStatus.completed,
-          progress: 1.0,
-          fileSize: 100,
-          downloadedSize: 100,
-          createdAt: DateTime.now(),
-        );
-
-        when(
-          mockLocalDataSource.getDownloads(),
-        ).thenAnswer((_) async => [itemWithOldPath]);
-        when(
-          mockLocalDataSource.getDownloadsDirectory(),
-        ).thenAnswer((_) async => newDownloadsDir);
-
-        // Act
-        final DownloadItem? result = await repository.getDownloadItem(
-          'test_id',
-        );
-
-        // Assert
-        expect(result, isNotNull);
-        expect(result!.filePath, '$newDownloadsDir/$expectedRelativePath');
-      });
+      // New path should be structured correctly under the new directory
+      expect(
+        downloads.first.filePath,
+        '$newDownloadsDir/$expectedRelativePath',
+      );
+      expect(downloads.first.filePath, isNot(equals(itemWithOldPath.filePath)));
     });
 
-    group('File Path Structure and Download ID', () {
-      test('should use plain URL as download ID', () async {
+    test('should dynamically resolve file path in getDownloadItem', () async {
+      // Arrange
+      const oldDownloadsDir = '/old/path';
+      const newDownloadsDir = '/new/path';
+      // Logic for Reciter and url 'url' -> Reciter/url.mp3 (fallback)
+      const expectedRelativePath = 'Reciter/url.mp3';
+
+      final itemWithOldPath = DownloadItem(
+        id: 'test_id',
+        title: 'Test',
+        url: 'url',
+        filePath: '$oldDownloadsDir/file.mp3',
+        reciterName: 'Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 100,
+        downloadedSize: 100,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [itemWithOldPath]);
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => newDownloadsDir);
+
+      // Act
+      final DownloadItem? result = await repository.getDownloadItem('test_id');
+
+      // Assert
+      expect(result, isNotNull);
+      expect(result!.filePath, '$newDownloadsDir/$expectedRelativePath');
+    });
+  });
+
+  group('File Path Structure and Download ID', () {
+    test('should use plain URL as download ID', () async {
+      // Arrange
+      const testUrl = 'https://server13.mp3quran.net/husr/hafs/001.mp3';
+      const testTitle = 'Al-Fatiha';
+      const testReciter = 'Hussary';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Download ID should be the plain URL
+      expect(downloadItem.id, testUrl);
+      expect(downloadItem.url, testUrl);
+    });
+
+    test(
+      'should preserve complete directory structure for reciter/narrative/file URL',
+      () async {
         // Arrange
-        const testUrl = 'https://server13.mp3quran.net/husr/hafs/001.mp3';
+        const testUrl =
+            'https://server13.mp3quran.net/husr/Rewayat-Hafs/001.mp3';
         const testTitle = 'Al-Fatiha';
         const testReciter = 'Hussary';
         final String testDownloadsDir = Directory.systemTemp
@@ -1064,277 +1149,49 @@ void main() {
         ).captured;
         final downloadItem = captured.first as DownloadItem;
 
-        // Download ID should be the plain URL
-        expect(downloadItem.id, testUrl);
-        expect(downloadItem.url, testUrl);
-      });
-
-      test(
-        'should preserve complete directory structure for reciter/narrative/file URL',
-        () async {
-          // Arrange
-          const testUrl =
-              'https://server13.mp3quran.net/husr/Rewayat-Hafs/001.mp3';
-          const testTitle = 'Al-Fatiha';
-          const testReciter = 'Hussary';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
-
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-          // Act
-          await repository.startDownload(testUrl, testTitle, testReciter);
-
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-          final downloadItem = captured.first as DownloadItem;
-
-          // File path should be: downloads/husr/Rewayat-Hafs/001.mp3
-          expect(
-            downloadItem.filePath,
-            '$testDownloadsDir/husr/Rewayat-Hafs/001.mp3',
-          );
-        },
-      );
-
-      test('should handle simple reciter/file URL structure', () async {
-        // Arrange
-        const testUrl = 'https://server6.mp3quran.net/earawi/002.mp3';
-        const testTitle = 'Al-Baqarah';
-        const testReciter = 'Al-Earawi';
-        final String testDownloadsDir = Directory.systemTemp
-            .createTempSync()
-            .path;
-
-        when(
-          mockLocalDataSource.getDownloadsDirectory(),
-        ).thenAnswer((_) async => testDownloadsDir);
-        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-        // Act
-        await repository.startDownload(testUrl, testTitle, testReciter);
-
-        // Assert
-        final List<dynamic> captured = verify(
-          mockLocalDataSource.addDownload(captureAny),
-        ).captured;
-        final downloadItem = captured.first as DownloadItem;
-
-        // File path should be: downloads/earawi/002.mp3
-        expect(downloadItem.filePath, '$testDownloadsDir/earawi/002.mp3');
-      });
-
-      test(
-        'should handle three-level directory structure (reciter/narrative/quality)',
-        () async {
-          // Arrange
-          const testUrl =
-              'https://server.com/minshawi/mujawwad/high-quality/003.mp3';
-          const testTitle = 'Al-Imran';
-          const testReciter = 'Minshawi';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
-
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-          // Act
-          await repository.startDownload(testUrl, testTitle, testReciter);
-
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-          final downloadItem = captured.first as DownloadItem;
-
-          // File path should preserve all segments
-          expect(
-            downloadItem.filePath,
-            '$testDownloadsDir/minshawi/mujawwad/high-quality/003.mp3',
-          );
-        },
-      );
-
-      test('should handle URL with special characters in path', () async {
-        // Arrange
-        const testUrl =
-            'https://server.com/reciter-name/Rewayat-Aldori-A-n-Abi-Amr/001.mp3';
-        const testTitle = 'Al-Fatiha';
-        const testReciter = 'Reciter Name';
-        final String testDownloadsDir = Directory.systemTemp
-            .createTempSync()
-            .path;
-
-        when(
-          mockLocalDataSource.getDownloadsDirectory(),
-        ).thenAnswer((_) async => testDownloadsDir);
-        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-        // Act
-        await repository.startDownload(testUrl, testTitle, testReciter);
-
-        // Assert
-        final List<dynamic> captured = verify(
-          mockLocalDataSource.addDownload(captureAny),
-        ).captured;
-        final downloadItem = captured.first as DownloadItem;
-
-        // Should preserve the exact path structure including special characters
+        // File path should be: downloads/husr/Rewayat-Hafs/001.mp3
         expect(
           downloadItem.filePath,
-          '$testDownloadsDir/reciter-name/Rewayat-Aldori-A-n-Abi-Amr/001.mp3',
+          '$testDownloadsDir/husr/Rewayat-Hafs/001.mp3',
         );
-      });
+      },
+    );
 
-      test(
-        'should use reciter name folder when URL has only filename',
-        () async {
-          // Arrange
-          const testUrl = 'https://server.com/001.mp3';
-          const testTitle = 'Al-Fatiha';
-          const testReciter = 'Abdul Basit';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
+    test('should handle simple reciter/file URL structure', () async {
+      // Arrange
+      const testUrl = 'https://server6.mp3quran.net/earawi/002.mp3';
+      const testTitle = 'Al-Baqarah';
+      const testReciter = 'Al-Earawi';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
 
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
-          // Act
-          await repository.startDownload(testUrl, testTitle, testReciter);
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
 
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-          final downloadItem = captured.first as DownloadItem;
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
 
-          // Should create folder from reciter name
-          expect(
-            downloadItem.filePath,
-            '$testDownloadsDir/Abdul_Basit/001.mp3',
-          );
-        },
-      );
+      // File path should be: downloads/earawi/002.mp3
+      expect(downloadItem.filePath, '$testDownloadsDir/earawi/002.mp3');
+    });
 
-      test(
-        'should fallback to reciter name folder when URL parsing fails',
-        () async {
-          // Arrange
-          const testUrl = 'invalid://url:with:invalid:chars';
-          const testTitle = 'Al-Fatiha';
-          const testReciter = 'Test Reciter';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
-
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-          // Act
-          await repository.startDownload(testUrl, testTitle, testReciter);
-
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-          final downloadItem = captured.first as DownloadItem;
-
-          // Should use fallback with reciter name folder
-          expect(downloadItem.filePath, contains('Test_Reciter'));
-        },
-      );
-
-      test(
-        'should add .mp3 extension when filename has no extension',
-        () async {
-          // Arrange
-          const testUrl = 'https://server.com/reciter/narrative/surah001';
-          const testTitle = 'Al-Fatiha';
-          const testReciter = 'Reciter';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
-
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-          // Act
-          await repository.startDownload(testUrl, testTitle, testReciter);
-
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-          final downloadItem = captured.first as DownloadItem;
-
-          // Should add .mp3 extension
-          expect(downloadItem.filePath, endsWith('.mp3'));
-        },
-      );
-
-      test(
-        'should handle multiple downloads from same reciter different narratives',
-        () async {
-          // Arrange
-          const testUrl1 = 'https://server.com/husary/hafs/001.mp3';
-          const testUrl2 = 'https://server.com/husary/warsh/001.mp3';
-          const testTitle = 'Al-Fatiha';
-          const testReciter = 'Hussary';
-          final String testDownloadsDir = Directory.systemTemp
-              .createTempSync()
-              .path;
-
-          when(
-            mockLocalDataSource.getDownloadsDirectory(),
-          ).thenAnswer((_) async => testDownloadsDir);
-          when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-          // Act - Start both downloads
-          await repository.startDownload(testUrl1, testTitle, testReciter);
-          await repository.startDownload(testUrl2, testTitle, testReciter);
-
-          // Assert
-          final List<dynamic> captured = verify(
-            mockLocalDataSource.addDownload(captureAny),
-          ).captured;
-
-          final download1 = captured[0] as DownloadItem;
-          final download2 = captured[1] as DownloadItem;
-
-          // Both should have unique IDs (the URLs)
-          expect(download1.id, testUrl1);
-          expect(download2.id, testUrl2);
-
-          // Both should have different file paths (different narrative folders)
-          expect(download1.filePath, '$testDownloadsDir/husary/hafs/001.mp3');
-          expect(download2.filePath, '$testDownloadsDir/husary/warsh/001.mp3');
-
-          // Verify they don't overwrite each other
-          expect(download1.filePath, isNot(equals(download2.filePath)));
-        },
-      );
-
-      test('should preserve URL filename exactly as provided', () async {
+    test(
+      'should handle three-level directory structure (reciter/narrative/quality)',
+      () async {
         // Arrange
-        const testUrl = 'https://server.com/reciter/002.mp3';
-        const testTitle = 'Al-Baqarah';
-        const testReciter = 'Reciter';
+        const testUrl =
+            'https://server.com/minshawi/mujawwad/high-quality/003.mp3';
+        const testTitle = 'Al-Imran';
+        const testReciter = 'Minshawi';
         final String testDownloadsDir = Directory.systemTemp
             .createTempSync()
             .path;
@@ -1353,17 +1210,79 @@ void main() {
         ).captured;
         final downloadItem = captured.first as DownloadItem;
 
-        // Filename should be exactly as in URL (002.mp3)
-        expect(downloadItem.filePath, endsWith('002.mp3'));
-        expect(downloadItem.filePath, isNot(contains(testReciter)));
-        expect(downloadItem.filePath, isNot(contains('Al-Baqarah')));
-      });
+        // File path should preserve all segments
+        expect(
+          downloadItem.filePath,
+          '$testDownloadsDir/minshawi/mujawwad/high-quality/003.mp3',
+        );
+      },
+    );
 
-      test('should handle empty path segments gracefully', () async {
+    test('should handle URL with special characters in path', () async {
+      // Arrange
+      const testUrl =
+          'https://server.com/reciter-name/Rewayat-Aldori-A-n-Abi-Amr/001.mp3';
+      const testTitle = 'Al-Fatiha';
+      const testReciter = 'Reciter Name';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Should preserve the exact path structure including special characters
+      expect(
+        downloadItem.filePath,
+        '$testDownloadsDir/reciter-name/Rewayat-Aldori-A-n-Abi-Amr/001.mp3',
+      );
+    });
+
+    test('should use reciter name folder when URL has only filename', () async {
+      // Arrange
+      const testUrl = 'https://server.com/001.mp3';
+      const testTitle = 'Al-Fatiha';
+      const testReciter = 'Abdul Basit';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Should create folder from reciter name
+      expect(downloadItem.filePath, '$testDownloadsDir/Abdul_Basit/001.mp3');
+    });
+
+    test(
+      'should fallback to reciter name folder when URL parsing fails',
+      () async {
         // Arrange
-        const testUrl = 'https://server.com///001.mp3';
+        const testUrl = 'invalid://url:with:invalid:chars';
         const testTitle = 'Al-Fatiha';
-        const testReciter = 'Reciter';
+        const testReciter = 'Test Reciter';
         final String testDownloadsDir = Directory.systemTemp
             .createTempSync()
             .path;
@@ -1382,10 +1301,180 @@ void main() {
         ).captured;
         final downloadItem = captured.first as DownloadItem;
 
-        // Should handle empty segments and create a valid path
-        expect(downloadItem.filePath, isNotEmpty);
-        expect(downloadItem.filePath, endsWith('.mp3'));
-      });
+        // Should use fallback with reciter name folder
+        expect(downloadItem.filePath, contains('Test_Reciter'));
+      },
+    );
+
+    test('should add .mp3 extension when filename has no extension', () async {
+      // Arrange
+      const testUrl = 'https://server.com/reciter/narrative/surah001';
+      const testTitle = 'Al-Fatiha';
+      const testReciter = 'Reciter';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Should add .mp3 extension
+      expect(downloadItem.filePath, endsWith('.mp3'));
+    });
+
+    test(
+      'should handle multiple downloads from same reciter different narratives',
+      () async {
+        // Arrange
+        const testUrl1 = 'https://server.com/husary/hafs/001.mp3';
+        const testUrl2 = 'https://server.com/husary/warsh/001.mp3';
+        const testTitle = 'Al-Fatiha';
+        const testReciter = 'Hussary';
+        final String testDownloadsDir = Directory.systemTemp
+            .createTempSync()
+            .path;
+
+        when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => testDownloadsDir);
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+        // Act - Start both downloads
+        await repository.startDownload(testUrl1, testTitle, testReciter);
+        await repository.startDownload(testUrl2, testTitle, testReciter);
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.addDownload(captureAny),
+        ).captured;
+
+        final download1 = captured[0] as DownloadItem;
+        final download2 = captured[1] as DownloadItem;
+
+        // Both should have unique IDs (the URLs)
+        expect(download1.id, testUrl1);
+        expect(download2.id, testUrl2);
+
+        // Both should have different file paths (different narrative folders)
+        expect(download1.filePath, '$testDownloadsDir/husary/hafs/001.mp3');
+        expect(download2.filePath, '$testDownloadsDir/husary/warsh/001.mp3');
+
+        // Verify they don't overwrite each other
+        expect(download1.filePath, isNot(equals(download2.filePath)));
+      },
+    );
+
+    test('should preserve URL filename exactly as provided', () async {
+      // Arrange
+      const testUrl = 'https://server.com/reciter/002.mp3';
+      const testTitle = 'Al-Baqarah';
+      const testReciter = 'Reciter';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Filename should be exactly as in URL (002.mp3)
+      expect(downloadItem.filePath, endsWith('002.mp3'));
+      expect(downloadItem.filePath, isNot(contains(testReciter)));
+      expect(downloadItem.filePath, isNot(contains('Al-Baqarah')));
+    });
+
+    test('should handle empty path segments gracefully', () async {
+      // Arrange
+      const testUrl = 'https://server.com///001.mp3';
+      const testTitle = 'Al-Fatiha';
+      const testReciter = 'Reciter';
+      final String testDownloadsDir = Directory.systemTemp
+          .createTempSync()
+          .path;
+
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => testDownloadsDir);
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.startDownload(testUrl, testTitle, testReciter);
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.addDownload(captureAny),
+      ).captured;
+      final downloadItem = captured.first as DownloadItem;
+
+      // Should handle empty segments and create a valid path
+      expect(downloadItem.filePath, isNotEmpty);
+      expect(downloadItem.filePath, endsWith('.mp3'));
+    });
+  });
+  group('getTotalDownloadsSize', () {
+    test('should calculate total size and self-heal 0-byte files', () async {
+      // Arrange
+      final Directory tempDir = Directory.systemTemp.createTempSync();
+      final file = File('${tempDir.path}/test_zero_size.mp3');
+      await file.writeAsBytes(List.filled(1024, 0)); // 1 KB dummy file
+
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Test Surah',
+        url: 'url',
+        filePath: file.path,
+        reciterName: 'Test Reciter',
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 0, // Wrong size in DB
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      final int totalSize = await repository.getTotalDownloadsSize();
+
+      // Assert
+      expect(totalSize, 1024);
+
+      // Verify database was updated with correct size
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updatedDownload = captured.first as DownloadItem;
+      expect(updatedDownload.fileSize, 1024);
+      expect(updatedDownload.downloadedSize, 1024);
+
+      // Cleanup
+      if (file.existsSync()) {
+        await file.delete();
+      }
     });
   });
 }

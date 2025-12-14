@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../data/services/download_queue_manager.dart';
@@ -102,13 +103,25 @@ class DownloadItemCard extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Failed / Stuck -> Retry
           if (download.status == DownloadStatus.failed ||
               _isDownloadStuck(download))
             IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: Colors.blue),
+              icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
               onPressed: () => _handleRetryDownload(context),
               tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
             ),
+
+          // Downloading / Pending -> Cancel
+          if (download.status == DownloadStatus.downloading ||
+              download.status == DownloadStatus.pending)
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.grey),
+              onPressed: () => _showDeleteDialog(context),
+              tooltip: AppLocalizations.of(context)!.cancel,
+            ),
+
+          // Completed -> Play/Pause
           if (download.status == DownloadStatus.completed)
             BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
               builder: (context, audioState) {
@@ -137,6 +150,8 @@ class DownloadItemCard extends StatelessWidget {
                 );
               },
             ),
+
+          // Menu for additional actions
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_horiz_rounded),
             shape: RoundedRectangleBorder(
@@ -296,16 +311,7 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   String _formatFileSize(int bytes) {
-    if (bytes < 1024) {
-      return '$bytes B';
-    }
-    if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    }
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    return FileSizeFormatter.formatBytes(bytes);
   }
 
   void _showDeleteDialog(BuildContext context) {

@@ -41,7 +41,10 @@ void main() {
     DownloadQueueManager.reset();
     await DownloadQueueManager.instance.initialize();
 
-    repository = DownloadsRepositoryImpl(mockLocalDataSource);
+    repository = DownloadsRepositoryImpl(
+      mockLocalDataSource,
+      DownloadService.instance,
+    );
 
     // Default stubs
     when(

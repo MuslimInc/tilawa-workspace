@@ -18,7 +18,9 @@ class SurahDownloadService {
     // Cancel existing subscription if any
     _progressSubscriptions[downloadId]?.cancel();
 
-    _progressSubscriptions[downloadId] = DownloadService.globalProgressStream
+    _progressSubscriptions[downloadId] = DownloadService
+        .instance
+        .globalProgressStream
         .where((progress) => progress.id == downloadId)
         .listen((progress) async {
           await surahRepository.updateSurahDownloadProgress(

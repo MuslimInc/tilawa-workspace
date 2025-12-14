@@ -19,6 +19,7 @@
         android:label="Quran Player"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:manageSpaceActivity=".ManageStorageActivity"
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="true">
         <activity
@@ -66,6 +67,14 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <activity
+            android:name=".ManageStorageActivity"
+            android:exported="true"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 </manifest>

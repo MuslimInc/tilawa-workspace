@@ -87,7 +87,7 @@ void main() {
 
       // Act
       // Initialize service (simulating app restart with new instance)
-      final service = DownloadService(flutterDownloader: mockDownloader);
+      final service = DownloadServiceImpl(flutterDownloader: mockDownloader);
 
       final List<String> activeIds = await service.getActiveDownloadIds();
 

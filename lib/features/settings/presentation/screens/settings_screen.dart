@@ -6,6 +6,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/config/language_config.dart';
 import '../../../../core/extensions.dart';
+import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -75,6 +76,15 @@ class SettingsScreen extends StatelessWidget {
             _SettingsGroup(
               title: 'Downloads',
               children: [
+                _SettingsTile(
+                  icon: FluentIcons.folder_24_regular,
+                  title: 'Manage Storage',
+                  subtitle: 'View and manage downloaded content',
+                  onTap: () => const DownloadsRoute().push(context),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.r),
+                  ),
+                ),
                 BlocBuilder<SettingsCubit, SettingsState>(
                   builder: (context, state) {
                     return _SettingsTile(
@@ -87,7 +97,9 @@ class SettingsScreen extends StatelessWidget {
                         state.maxConcurrentDownloads,
                       ),
                       showDivider: false,
-                      borderRadius: BorderRadius.circular(16.r),
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(16.r),
+                      ),
                     );
                   },
                 ),

@@ -276,4 +276,12 @@ class MockDownloadsRepository extends _i1.Mock
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+
+  @override
+  _i4.Future<int> getTotalDownloadsSize() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTotalDownloadsSize, []),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
 }

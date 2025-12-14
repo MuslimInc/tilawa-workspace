@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -9,38 +6,133 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
-import '../../utils/download_path_utils.dart';
 import 'flutter_downloader_wrapper.dart';
+import 'helpers/download_file_helper.dart';
+import 'helpers/download_isolate_manager.dart';
+import 'helpers/download_status_mapper.dart';
+
+/// Abstract interface for download service.
+abstract class DownloadService {
+  /// Stream for monitoring all download progress updates globally.
+  Stream<DownloadProgress> get globalProgressStream;
+
+  /// Get a filtered stream for a specific download by URL.
+  Stream<DownloadProgress> getProgressStream(String id);
+
+  /// Get all currently active download URLs.
+  Future<List<String>> getActiveDownloadIds();
+
+  /// Check if a download is currently active (running or enqueued).
+  Future<bool> isStatusDownloadActive(String id);
+
+  /// Get the current status of a download.
+  Future<DownloadStatus?> getStatus(String id);
+
+  /// Start a new download.
+  Future<void> download({
+    required String id,
+    required String url,
+    required String filePath,
+    required String title,
+    required String reciterName,
+  });
+
+  /// Cancel a download by its ID.
+  Future<void> cancel(String id);
+
+  /// Dispose and cleanup the download service.
+  Future<void> disposeService();
+
+  /// Initialize the download service and set up update listeners.
+  Future<void> initialize();
+
+  /// Static instance for backward compatibility - delegates to DownloadServiceImpl
+  static DownloadService get instance => DownloadServiceImpl.instance;
+
+  // --------------------------------------------------------------------------
+  // Static Compatibility Layer - DEPRECATED: PREFER INSTANCE methods via DI
+  // --------------------------------------------------------------------------
+
+  static Stream<DownloadProgress> get globalProgressStreamStatic =>
+      DownloadServiceImpl.instance._globalProgressController.stream;
+
+  static Stream<DownloadProgress> progressStream(String id) =>
+      DownloadServiceImpl.instance.getProgressStream(id);
+
+  static Future<List<String>> get activeDownloadIds =>
+      DownloadServiceImpl.instance.getActiveDownloadIds();
+
+  static Future<bool> isDownloadActive(String id) =>
+      DownloadServiceImpl.instance.isStatusDownloadActive(id);
+
+  static Future<DownloadStatus?> getDownloadStatus(String id) =>
+      DownloadServiceImpl.instance.getStatus(id);
+
+  static Future<void> startDownload({
+    required String id,
+    required String url,
+    required String filePath,
+    required String title,
+    required String reciterName,
+  }) => DownloadServiceImpl.instance.download(
+    id: id,
+    url: url,
+    filePath: filePath,
+    title: title,
+    reciterName: reciterName,
+  );
+
+  static Future<void> cancelDownload(String id) =>
+      DownloadServiceImpl.instance.cancel(id);
+
+  static Future<void> dispose() =>
+      DownloadServiceImpl.instance.disposeService();
+
+  @visibleForTesting
+  static Future<void> reset() async {
+    await DownloadServiceImpl.instance.disposeService();
+  }
+
+  @visibleForTesting
+  static FlutterDownloaderWrapper get flutterDownloaderTestOverride =>
+      DownloadServiceImpl.instance._flutterDownloader;
+
+  @visibleForTesting
+  static set flutterDownloaderTestOverride(FlutterDownloaderWrapper value) {
+    DownloadServiceImpl.instance._flutterDownloader = value;
+  }
+}
 
 @pragma('vm:entry-point')
-class DownloadService {
-  /// Create a new DownloadService.
+class DownloadServiceImpl implements DownloadService {
+  /// Create a new DownloadServiceImpl.
   ///
   /// [flutterDownloader] can be provided for testing purposes.
-  DownloadService({FlutterDownloaderWrapper? flutterDownloader})
-    : _flutterDownloader = flutterDownloader ?? FlutterDownloaderWrapper();
+  DownloadServiceImpl({
+    FlutterDownloaderWrapper? flutterDownloader,
+    DownloadFileHelper? fileHelper,
+    DownloadStatusMapper? statusMapper,
+    DownloadIsolateManager? isolateManager,
+  }) : _flutterDownloader = flutterDownloader ?? FlutterDownloaderWrapper(),
+       _fileHelper = fileHelper ?? DownloadFileHelper(),
+       _statusMapper = statusMapper ?? DownloadStatusMapper(),
+       _isolateManager = isolateManager ?? DownloadIsolateManager();
 
-  /// Singleton instance for backward compatibility
-  static final DownloadService _instance = DownloadService();
-  static DownloadService get instance => _instance;
+  /// Singleton instance
+  static final DownloadServiceImpl _instance = DownloadServiceImpl();
+  static DownloadServiceImpl get instance => _instance;
 
   FlutterDownloaderWrapper _flutterDownloader;
+  final DownloadFileHelper _fileHelper;
+  final DownloadStatusMapper _statusMapper;
+  final DownloadIsolateManager _isolateManager;
+
   final StreamController<DownloadProgress> _globalProgressController =
       StreamController<DownloadProgress>.broadcast();
 
   /// Tracks initialization state
   bool _initialized = false;
   Completer<void>? _initializationCompleter;
-  ReceivePort? _port;
-  static const String _portName = 'downloader_send_port';
-
-  /// Map to store taskId -> URL for reverse lookups
-  /// Used to map platform callbacks back to external IDs
-  final Map<String, String> _taskIdToUrlMap = {};
-
-  // --------------------------------------------------------------------------
-  // Static Compatibility Layer
-  // --------------------------------------------------------------------------
 
   @visibleForTesting
   static FlutterDownloaderWrapper get flutterDownloaderTestOverride =>
@@ -51,71 +143,13 @@ class DownloadService {
     instance._flutterDownloader = value;
   }
 
-  /// Stream for monitoring all download progress updates globally.
-  /// Emits [DownloadProgress] events for every active download.
-  static Stream<DownloadProgress> get globalProgressStream =>
-      instance._globalProgressController.stream;
+  /// Map to store taskId -> URL for reverse lookups
+  /// Used to map platform callbacks back to external IDs
+  final Map<String, String> _taskIdToUrlMap = {};
 
-  /// Get a filtered stream for a specific download by URL.
-  ///
-  /// [id] The download URL/ID to monitor.
-  /// Returns a stream that only emits updates for the specified download.
-  static Stream<DownloadProgress> progressStream(String id) =>
-      instance.getProgressStream(id);
-
-  /// Get all currently active download URLs.
-  ///
-  /// Returns a list of URLs for downloads that are running or enqueued.
-  static Future<List<String>> get activeDownloadIds =>
-      instance.getActiveDownloadIds();
-
-  /// Check if a download is currently active (running or enqueued).
-  ///
-  /// [id] The download URL/ID to check.
-  /// Returns true if the download is active, false otherwise.
-  static Future<bool> isDownloadActive(String id) =>
-      instance.isStatusDownloadActive(id);
-
-  /// Get the current status of a download.
-  ///
-  /// [id] The download URL/ID.
-  /// Returns the [DownloadStatus] or null if not found.
-  static Future<DownloadStatus?> getDownloadStatus(String id) =>
-      instance.getStatus(id);
-
-  /// Start a new download.
-  ///
-  /// [id] Unique identifier (typically the download URL).
-  /// [url] The remote file URL to download.
-  /// [filePath] Local file path where to save the download.
-  /// [title] Human-readable title for notifications.
-  /// [reciterName] The reciter name (metadata).
-  static Future<void> startDownload({
-    required String id,
-    required String url,
-    required String filePath,
-    required String title,
-    required String reciterName,
-  }) => instance.download(
-    id: id,
-    url: url,
-    filePath: filePath,
-    title: title,
-    reciterName: reciterName,
-  );
-
-  /// Cancel a download by its ID.
-  ///
-  /// [id] The download URL/ID to cancel.
-  static Future<void> cancelDownload(String id) => instance.cancel(id);
-
-  /// Dispose and cleanup the download service.
-  static Future<void> dispose() => instance.disposeService();
-
-  @visibleForTesting
-  static Future<void> reset() async {
-    await instance.disposeService();
-  }
+  @override
+  Stream<DownloadProgress> get globalProgressStream =>
+      _globalProgressController.stream;
 
   // --------------------------------------------------------------------------
   // Instance Methods
@@ -125,6 +159,7 @@ class DownloadService {
   ///
   /// Must be called before any download operations. Safe to call multiple times.
   /// Subsequent calls will return the same initialization future.
+  @override
   Future<void> initialize() async {
     if (_initializationCompleter != null) {
       return _initializationCompleter!.future;
@@ -157,54 +192,28 @@ class DownloadService {
   Future<void> _performInitialization() async {
     try {
       // Initialize FlutterDownloader
-      // Assumes WidgetsFlutterBinding is already initialized in main.dart
-      try {
-        await _flutterDownloader.initialize();
-      } catch (e) {
-        // FlutterDownloader may be already initialized or have platform issues
-        logger.d('[DownloadService] FlutterDownloader initialize warning: $e');
-      }
+      // Initialize FlutterDownloader
+      await _flutterDownloader.initialize();
 
       // Register port for background IPC communication
-      _registerPort();
+      _isolateManager.registerPort();
+
+      // Listen for updates
+      _isolateManager.updateStream.listen((data) {
+        final (taskId, status, progress) = data;
+        _handleTaskUpdate(taskId, status, progress);
+      });
 
       // Register the static callback for platform layer
-      await _flutterDownloader.registerCallback(_downloadCallback);
+      await _flutterDownloader.registerCallback(
+        DownloadServiceImpl._downloadCallback,
+      );
 
       logger.d('[DownloadService] Initialized successfully');
     } catch (e) {
       logger.w('[DownloadService] Initialization error: $e');
       rethrow;
     }
-  }
-
-  /// Register an isolate port for receiving download updates from the platform layer.
-  /// Uses IsolateNameServer for cross-isolate communication.
-  void _registerPort() {
-    IsolateNameServer.removePortNameMapping(_portName);
-
-    _port = ReceivePort();
-    IsolateNameServer.registerPortWithName(_port!.sendPort, _portName);
-
-    _port!.listen((dynamic data) async {
-      if (data is List && data.length >= 3) {
-        final taskId = data[0] as String;
-        final statusInt = data[1] as int;
-        final progress = data[2] as int;
-        final status = DownloadTaskStatus.fromInt(statusInt);
-
-        await _handleTaskUpdate(taskId, status, progress);
-      }
-    });
-  }
-
-  /// Static callback registered with FlutterDownloader.
-  /// Called by the platform layer when download status/progress changes.
-  /// Posts updates to the registered isolate port.
-  @pragma('vm:entry-point')
-  static void _downloadCallback(String id, int status, int progress) {
-    final SendPort? send = IsolateNameServer.lookupPortByName(_portName);
-    send?.send([id, status, progress]);
   }
 
   /// Handle a task status/progress update from the platform layer.
@@ -237,9 +246,8 @@ class DownloadService {
     }
 
     if (url != null) {
-      final DownloadStatus downloadStatus = _mapTaskStatusToDownloadStatus(
-        status,
-      );
+      final DownloadStatus downloadStatus = _statusMapper
+          .mapTaskStatusToDownloadStatus(status);
       _globalProgressController.add(
         DownloadProgress(
           id: url,
@@ -262,6 +270,7 @@ class DownloadService {
   ///
   /// If a download for this URL is already active, returns immediately.
   /// If already completed, emits a completed progress event.
+  @override
   Future<void> download({
     required String id,
     required String url,
@@ -299,37 +308,56 @@ class DownloadService {
     }
 
     // Create directory if needed
-    final String savedDir = DownloadPathUtils.getDirectoryName(filePath);
-    final String fileName = DownloadPathUtils.getFileName(filePath);
-    final dir = Directory(savedDir);
+    final String savedDir = _fileHelper.getDirectoryName(filePath);
+    final String fileName = _fileHelper.getFileName(filePath);
 
-    if (!dir.existsSync()) {
-      dir.createSync(recursive: true);
-    }
-
-    // Enqueue the download
-    final String? taskId = await _flutterDownloader.enqueue(
-      url: url,
-      savedDir: savedDir,
-      fileName: fileName,
-      openFileFromNotification: false,
-      title: title,
+    logger.d(
+      '[DownloadService] Enqueuing: url=$url, filePath=$filePath, savedDir=$savedDir, fileName=$fileName',
     );
 
-    if (taskId != null) {
-      _taskIdToUrlMap[taskId] = id;
+    // Validate parameters to prevent NPE in background worker
+    if (savedDir.isEmpty) {
+      logger.e('[DownloadService] Cannot enqueue: savedDir is empty for $url');
+      return;
+    }
+    if (fileName.isEmpty) {
+      logger.e('[DownloadService] Cannot enqueue: fileName is empty for $url');
+      return;
+    }
 
-      _globalProgressController.add(
-        DownloadProgress(
-          id: id,
-          status: DownloadStatus.pending,
-          progress: 0.0,
-          downloadedSize: 0,
-          fileSize: 0,
-        ),
+    if (!(await _fileHelper.ensureDirectoryExists(savedDir))) {
+      return;
+    }
+
+    try {
+      // Enqueue the download
+      final String? taskId = await _flutterDownloader.enqueue(
+        url: url,
+        savedDir: savedDir,
+        fileName: fileName,
+        openFileFromNotification: false,
+        title: title,
       );
-    } else {
-      logger.w('[DownloadService] Failed to enqueue download for $url');
+
+      if (taskId != null) {
+        _taskIdToUrlMap[taskId] = id;
+
+        _globalProgressController.add(
+          DownloadProgress(
+            id: id,
+            status: DownloadStatus.pending,
+            progress: 0.0,
+            downloadedSize: 0,
+            fileSize: 0,
+          ),
+        );
+      } else {
+        logger.w(
+          '[DownloadService] Failed to enqueue download for $url (taskId is null)',
+        );
+      }
+    } catch (e) {
+      logger.e('[DownloadService] Exception enqueuing download for $url: $e');
     }
   }
 
@@ -337,6 +365,7 @@ class DownloadService {
   ///
   /// Attempts to cancel and remove the task from the download manager.
   /// Emits a cancelled progress event.
+  @override
   Future<void> cancel(String id) async {
     await initialize();
 
@@ -370,6 +399,7 @@ class DownloadService {
   }
 
   /// Get a filtered stream for a specific download.
+  @override
   Stream<DownloadProgress> getProgressStream(String id) {
     return _globalProgressController.stream.where(
       (progress) => progress.id == id,
@@ -377,6 +407,7 @@ class DownloadService {
   }
 
   /// Get all currently active download URLs.
+  @override
   Future<List<String>> getActiveDownloadIds() async {
     await initialize();
     final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
@@ -396,6 +427,7 @@ class DownloadService {
   }
 
   /// Check if a download is currently active.
+  @override
   Future<bool> isStatusDownloadActive(String id) async {
     await initialize();
     final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
@@ -412,6 +444,7 @@ class DownloadService {
   }
 
   /// Get the current status of a download.
+  @override
   Future<DownloadStatus?> getStatus(String id) async {
     await initialize();
     final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
@@ -420,13 +453,15 @@ class DownloadService {
       return null;
     }
 
-    return _mapTaskStatusToDownloadStatus(tasks.last.status);
+    return _statusMapper.mapTaskStatusToDownloadStatus(tasks.last.status);
   }
 
   /// Cleanup and dispose of resources.
+  @override
   Future<void> disposeService() async {
-    _port?.close();
-    IsolateNameServer.removePortNameMapping(_portName);
+    try {
+      _isolateManager.dispose();
+    } catch (_) {}
     _initialized = false;
     _taskIdToUrlMap.clear();
   }
@@ -447,19 +482,11 @@ class DownloadService {
     }
   }
 
-  /// Map FlutterDownloader task status to app-level status.
-  static DownloadStatus _mapTaskStatusToDownloadStatus(
-    DownloadTaskStatus status,
-  ) {
-    return switch (status) {
-      DownloadTaskStatus.enqueued => DownloadStatus.pending,
-      DownloadTaskStatus.running => DownloadStatus.downloading,
-      DownloadTaskStatus.complete => DownloadStatus.completed,
-      DownloadTaskStatus.failed => DownloadStatus.failed,
-      DownloadTaskStatus.canceled => DownloadStatus.cancelled,
-      DownloadTaskStatus.paused => DownloadStatus.paused,
-      _ => DownloadStatus.failed,
-    };
+  /// Static callback registered with FlutterDownloader.
+  /// Called by the platform layer when download status/progress changes.
+  @pragma('vm:entry-point')
+  static void _downloadCallback(String id, int status, int progress) {
+    DownloadIsolateManager.forwardDownloadUpdate(id, status, progress);
   }
 }
 

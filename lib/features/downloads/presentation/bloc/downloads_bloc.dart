@@ -10,6 +10,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../../../main.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../premium/domain/repositories/premium_repository.dart';
@@ -22,6 +23,7 @@ import '../../domain/usecases/delete_download_use_case.dart';
 import '../../domain/usecases/delete_reciter_downloads_use_case.dart';
 import '../../domain/usecases/download_surah_use_case.dart';
 import '../../domain/usecases/get_downloads_by_reciter_use_case.dart';
+import '../../domain/usecases/get_total_downloads_size_use_case.dart';
 import 'downloads_status.dart';
 
 part 'downloads_bloc.freezed.dart';
@@ -41,6 +43,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     required DeleteDownloadUseCase deleteDownload,
     required DeleteReciterDownloadsUseCase deleteReciterDownloads,
     required ClearAllDownloadsUseCase clearAllDownloads,
+    required GetTotalDownloadsSizeUseCase getTotalDownloadsSize,
     required DownloadsRepository downloadsRepository,
     required PremiumRepository premiumRepository,
     required AudioPlayerHandler audioPlayerHandler,
@@ -50,6 +53,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
        _deleteDownload = deleteDownload,
        _deleteReciterDownloads = deleteReciterDownloads,
        _clearAllDownloads = clearAllDownloads,
+       _getTotalDownloadsSize = getTotalDownloadsSize,
        _downloadsRepository = downloadsRepository,
        _premiumRepository = premiumRepository,
        _audioPlayerHandler = audioPlayerHandler,
@@ -80,6 +84,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final DeleteDownloadUseCase _deleteDownload;
   final DeleteReciterDownloadsUseCase _deleteReciterDownloads;
   final ClearAllDownloadsUseCase _clearAllDownloads;
+  final GetTotalDownloadsSizeUseCase _getTotalDownloadsSize;
   final DownloadsRepository _downloadsRepository;
   final PremiumRepository _premiumRepository;
   final AudioPlayerHandler _audioPlayerHandler;
@@ -149,12 +154,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     try {
       _progressSubscription?.cancel(); // Cancel any existing subscription
 
-      _progressSubscription = DownloadService.globalProgressStream.listen(
-        _handleProgressUpdate,
-        onError: _handleProgressError,
-        onDone: _handleProgressDone,
-        cancelOnError: false, // Continue listening even after errors
-      );
+      _progressSubscription = DownloadService.instance.globalProgressStream
+          .listen(
+            _handleProgressUpdate,
+            onError: _handleProgressError,
+            onDone: _handleProgressDone,
+            cancelOnError: false, // Continue listening even after errors
+          );
 
       logger.d('[DownloadsBloc] Progress stream listener initialized');
     } on MissingPluginException catch (e) {
@@ -281,18 +287,24 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
-    result.fold(
+    await result.fold(
       (failure) {
         // Don't show error for progress updates, just log it
         logger.e('Failed to refresh downloads progress: ${failure.message}');
       },
-      (downloads) {
-        // Emit loaded state directly with updated downloads (no loading state)
-        // Emit loaded state directly with updated downloads (no loading state)
+      (downloads) async {
+        // Also fetch total size to keep it updated during download
+        final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
+          NoParams(),
+        );
+
         emit(
           state.copyWith(
             status: DownloadsStateStatus.loaded,
             downloads: downloads,
+            totalDownloadsSize: sizeResult.getOrElse(
+              () => state.totalDownloadsSize,
+            ),
           ),
         );
       },
@@ -315,20 +327,28 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     emit(state.copyWith(status: DownloadsStateStatus.loading));
     final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
-    result.fold(
-      (failure) => emit(
+    await result.fold(
+      (failure) async => emit(
         state.copyWith(
           status: DownloadsStateStatus.error,
           errorMessage: failure.message ?? 'Failed to load downloads',
         ),
       ),
-      (downloads) => emit(
-        state.copyWith(
-          status: DownloadsStateStatus.loaded,
-          downloads: downloads,
-          errorMessage: null,
-        ),
-      ),
+      (downloads) async {
+        // Also fetch total size
+        final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
+          NoParams(),
+        );
+
+        emit(
+          state.copyWith(
+            status: DownloadsStateStatus.loaded,
+            downloads: downloads,
+            totalDownloadsSize: sizeResult.getOrElse(() => 0),
+            errorMessage: null,
+          ),
+        );
+      },
     );
   }
 
@@ -474,7 +494,18 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     // Cancel the download if it's active in the queue
     try {
-      await DownloadService.cancelDownload(event.downloadId);
+      final DownloadStatus? status = await DownloadService.getDownloadStatus(
+        event.downloadId,
+      );
+
+      // Only cancel if it's actually running or pending
+      // Cancelling a completed download might trigger a 'cancelled' event
+      // which could revive the download in the db
+      if (status == DownloadStatus.downloading ||
+          status == DownloadStatus.pending ||
+          status == DownloadStatus.paused) {
+        await DownloadService.cancelDownload(event.downloadId);
+      }
     } on MissingPluginException {
       // In test environment, platform channels are not available
       logger.d(

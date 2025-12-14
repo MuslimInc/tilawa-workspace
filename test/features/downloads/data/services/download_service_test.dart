@@ -27,7 +27,7 @@ void main() {
     late Directory tempDir;
     late String testFilePath;
     late MockFlutterDownloaderWrapper mockDownloader;
-    late DownloadService downloadService;
+    late DownloadServiceImpl downloadService;
 
     setUp(() {
       tempDir = Directory.systemTemp.createTempSync('download_test');
@@ -72,7 +72,7 @@ void main() {
       // Override the singleton instance to use our mock
       DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-      downloadService = DownloadService(flutterDownloader: mockDownloader);
+      downloadService = DownloadServiceImpl(flutterDownloader: mockDownloader);
     });
 
     tearDown(() async {
@@ -124,7 +124,7 @@ void main() {
           localMock.registerCallback(any),
         ).thenThrow(Exception('Callback init failed'));
 
-        final localService = DownloadService(flutterDownloader: localMock);
+        final localService = DownloadServiceImpl(flutterDownloader: localMock);
 
         Object? caughtError;
         await runZonedGuarded(
@@ -315,7 +315,7 @@ void main() {
           ),
         ).thenAnswer((_) async => null);
 
-        final localService = DownloadService(flutterDownloader: localMock);
+        final localService = DownloadServiceImpl(flutterDownloader: localMock);
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription = localService
@@ -806,7 +806,7 @@ void main() {
 
       test('globalProgressStream provides broadcast stream', () {
         final Stream<DownloadProgress> stream =
-            DownloadService.globalProgressStream;
+            DownloadService.instance.globalProgressStream;
         expect(stream, isNotNull);
         expect(stream.isBroadcast, isTrue);
       });
@@ -852,7 +852,9 @@ void main() {
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription =
-            DownloadService.globalProgressStream.listen(progressEvents.add);
+            DownloadService.instance.globalProgressStream.listen(
+              progressEvents.add,
+            );
 
         final SendPort? port = IsolateNameServer.lookupPortByName(
           'downloader_send_port',

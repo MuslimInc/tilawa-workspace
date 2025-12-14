@@ -71,6 +71,8 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
     as _i251;
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart'
     as _i748;
+import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart'
+    as _i22;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i811;
 import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart'
@@ -259,6 +261,34 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
     );
+    gh.lazySingleton<_i775.DownloadsRepository>(
+      () => _i486.DownloadsRepositoryImpl(
+        gh<_i811.DownloadsLocalDataSource>(),
+        gh<_i313.DownloadService>(),
+      ),
+    );
+    gh.lazySingleton<_i797.SurahRepository>(
+      () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i732.CheckSurahDownloadedUseCase>(
+      () => _i732.CheckSurahDownloadedUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i917.ClearAllDownloadsUseCase>(
+      () => _i917.ClearAllDownloadsUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i602.DeleteDownloadUseCase>(
+      () => _i602.DeleteDownloadUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
+      () =>
+          _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i251.DownloadSurahUseCase>(
+      () => _i251.DownloadSurahUseCase(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i748.GetDownloadsByReciterUseCase>(
+      () => _i748.GetDownloadsByReciterUseCase(gh<_i775.DownloadsRepository>()),
+    );
     gh.lazySingleton<_i906.PlaylistsLocalDataSource>(
       () => _i906.PlaylistsLocalDataSourceImpl(
         gh<_i460.SharedPreferencesAsync>(),
@@ -300,6 +330,22 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i785.GetRecitersUseCase>(
       () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),
     );
+    gh.singleton<_i473.DownloadsInitializationService>(
+      () =>
+          _i473.DownloadsInitializationService(gh<_i775.DownloadsRepository>()),
+    );
+    gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
+      () => _i772.ConvertMediaItemsToSurahsUseCase(
+        gh<_i797.SurahRepository>(),
+        gh<_i775.DownloadsRepository>(),
+      ),
+    );
+    gh.singleton<_i506.RefreshSurahDownloadStatusUseCase>(
+      () => _i506.RefreshSurahDownloadStatusUseCase(
+        gh<_i797.SurahRepository>(),
+        gh<_i775.DownloadsRepository>(),
+      ),
+    );
     gh.singleton<_i724.GetCurrentLanguageUseCase>(
       () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
     );
@@ -317,8 +363,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i908.PlaylistsRepository>(
       () => _i452.PlaylistsRepositoryImpl(gh<_i906.PlaylistsLocalDataSource>()),
     );
-    gh.lazySingleton<_i775.DownloadsRepository>(
-      () => _i486.DownloadsRepositoryImpl(gh<_i811.DownloadsLocalDataSource>()),
+    gh.singleton<_i916.CheckSurahDownloadStatusUseCase>(
+      () => _i916.CheckSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
+    );
+    gh.singleton<_i576.GetSurahsForReciterUseCase>(
+      () => _i576.GetSurahsForReciterUseCase(gh<_i797.SurahRepository>()),
+    );
+    gh.singleton<_i119.RefreshSurahStatusUseCase>(
+      () => _i119.RefreshSurahStatusUseCase(gh<_i797.SurahRepository>()),
+    );
+    gh.singleton<_i319.UpdateSurahDownloadProgressUseCase>(
+      () =>
+          _i319.UpdateSurahDownloadProgressUseCase(gh<_i797.SurahRepository>()),
+    );
+    gh.singleton<_i641.UpdateSurahDownloadStatusUseCase>(
+      () => _i641.UpdateSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
     );
     gh.lazySingleton<_i872.PremiumRepository>(
       () => _i756.PremiumRepositoryImpl(
@@ -329,27 +388,31 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i965.AudioPlayerBloc>(
       () => _i965.AudioPlayerBloc(gh<_i622.AudioPlayerHandler>()),
     );
-    gh.lazySingleton<_i797.SurahRepository>(
-      () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
+    gh.lazySingleton<_i22.GetTotalDownloadsSizeUseCase>(
+      () => _i22.GetTotalDownloadsSizeUseCase(gh<_i775.DownloadsRepository>()),
     );
-    gh.singleton<_i732.CheckSurahDownloadedUseCase>(
-      () => _i732.CheckSurahDownloadedUseCase(gh<_i775.DownloadsRepository>()),
+    gh.factory<_i595.SurahBloc>(
+      () => _i595.SurahBloc(
+        gh<_i576.GetSurahsForReciterUseCase>(),
+        gh<_i641.UpdateSurahDownloadStatusUseCase>(),
+        gh<_i319.UpdateSurahDownloadProgressUseCase>(),
+        gh<_i916.CheckSurahDownloadStatusUseCase>(),
+        gh<_i119.RefreshSurahStatusUseCase>(),
+      ),
     );
-    gh.singleton<_i917.ClearAllDownloadsUseCase>(
-      () => _i917.ClearAllDownloadsUseCase(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i602.DeleteDownloadUseCase>(
-      () => _i602.DeleteDownloadUseCase(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i242.DeleteReciterDownloadsUseCase>(
-      () =>
-          _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i251.DownloadSurahUseCase>(
-      () => _i251.DownloadSurahUseCase(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i748.GetDownloadsByReciterUseCase>(
-      () => _i748.GetDownloadsByReciterUseCase(gh<_i775.DownloadsRepository>()),
+    gh.factory<_i811.DownloadsBloc>(
+      () => _i811.DownloadsBloc(
+        getDownloadsByReciter: gh<_i748.GetDownloadsByReciterUseCase>(),
+        downloadSurah: gh<_i251.DownloadSurahUseCase>(),
+        deleteDownload: gh<_i602.DeleteDownloadUseCase>(),
+        deleteReciterDownloads: gh<_i242.DeleteReciterDownloadsUseCase>(),
+        clearAllDownloads: gh<_i917.ClearAllDownloadsUseCase>(),
+        getTotalDownloadsSize: gh<_i22.GetTotalDownloadsSizeUseCase>(),
+        downloadsRepository: gh<_i775.DownloadsRepository>(),
+        premiumRepository: gh<_i872.PremiumRepository>(),
+        audioPlayerHandler: gh<_i622.AudioPlayerHandler>(),
+        analyticsService: gh<_i557.AnalyticsService>(),
+      ),
     );
     gh.singleton<_i749.AddItemToPlaylistUseCase>(
       () => _i749.AddItemToPlaylistUseCase(gh<_i908.PlaylistsRepository>()),
@@ -377,24 +440,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i748.UpdatePlaylistUseCase>(
       () => _i748.UpdatePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
     );
+    gh.factory<_i447.ReciterDetailsBloc>(
+      () => _i447.ReciterDetailsBloc(
+        gh<_i622.AudioPlayerHandler>(),
+        gh<_i772.ConvertMediaItemsToSurahsUseCase>(),
+        gh<_i506.RefreshSurahDownloadStatusUseCase>(),
+      ),
+    );
     gh.singleton<_i528.AnalyticsInitializationService>(
       () => _i528.AnalyticsInitializationService(
         gh<_i557.AnalyticsService>(),
         gh<_i59.FirebaseAuth>(),
         gh<_i235.CrashlyticsService>(),
-      ),
-    );
-    gh.factory<_i811.DownloadsBloc>(
-      () => _i811.DownloadsBloc(
-        getDownloadsByReciter: gh<_i748.GetDownloadsByReciterUseCase>(),
-        downloadSurah: gh<_i251.DownloadSurahUseCase>(),
-        deleteDownload: gh<_i602.DeleteDownloadUseCase>(),
-        deleteReciterDownloads: gh<_i242.DeleteReciterDownloadsUseCase>(),
-        clearAllDownloads: gh<_i917.ClearAllDownloadsUseCase>(),
-        downloadsRepository: gh<_i775.DownloadsRepository>(),
-        premiumRepository: gh<_i872.PremiumRepository>(),
-        audioPlayerHandler: gh<_i622.AudioPlayerHandler>(),
-        analyticsService: gh<_i557.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i538.AuthRepository>(
@@ -444,22 +501,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i131.SetLanguageUseCase>(),
       ),
     );
-    gh.singleton<_i473.DownloadsInitializationService>(
-      () =>
-          _i473.DownloadsInitializationService(gh<_i775.DownloadsRepository>()),
-    );
-    gh.singleton<_i772.ConvertMediaItemsToSurahsUseCase>(
-      () => _i772.ConvertMediaItemsToSurahsUseCase(
-        gh<_i797.SurahRepository>(),
-        gh<_i775.DownloadsRepository>(),
-      ),
-    );
-    gh.singleton<_i506.RefreshSurahDownloadStatusUseCase>(
-      () => _i506.RefreshSurahDownloadStatusUseCase(
-        gh<_i797.SurahRepository>(),
-        gh<_i775.DownloadsRepository>(),
-      ),
-    );
     gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
     gh.singleton<_i778.GetCurrentUserUseCase>(
       () => _i778.GetCurrentUserUseCase(gh<_i538.AuthRepository>()),
@@ -467,36 +508,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i922.SignInWithGoogleUseCase>(
       () => _i922.SignInWithGoogleUseCase(gh<_i538.AuthRepository>()),
     );
-    gh.singleton<_i916.CheckSurahDownloadStatusUseCase>(
-      () => _i916.CheckSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.singleton<_i576.GetSurahsForReciterUseCase>(
-      () => _i576.GetSurahsForReciterUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.singleton<_i119.RefreshSurahStatusUseCase>(
-      () => _i119.RefreshSurahStatusUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.singleton<_i319.UpdateSurahDownloadProgressUseCase>(
-      () =>
-          _i319.UpdateSurahDownloadProgressUseCase(gh<_i797.SurahRepository>()),
-    );
-    gh.singleton<_i641.UpdateSurahDownloadStatusUseCase>(
-      () => _i641.UpdateSurahDownloadStatusUseCase(gh<_i797.SurahRepository>()),
-    );
     gh.factory<_i253.AuthBloc>(
       () => _i253.AuthBloc(
         gh<_i922.SignInWithGoogleUseCase>(),
         gh<_i95.SignOut>(),
         gh<_i778.GetCurrentUserUseCase>(),
-      ),
-    );
-    gh.factory<_i595.SurahBloc>(
-      () => _i595.SurahBloc(
-        gh<_i576.GetSurahsForReciterUseCase>(),
-        gh<_i641.UpdateSurahDownloadStatusUseCase>(),
-        gh<_i319.UpdateSurahDownloadProgressUseCase>(),
-        gh<_i916.CheckSurahDownloadStatusUseCase>(),
-        gh<_i119.RefreshSurahStatusUseCase>(),
       ),
     );
     gh.factory<_i504.PremiumBloc>(
@@ -509,13 +525,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i415.GetAvailablePlansUseCase>(),
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_i447.ReciterDetailsBloc>(
-      () => _i447.ReciterDetailsBloc(
-        gh<_i622.AudioPlayerHandler>(),
-        gh<_i772.ConvertMediaItemsToSurahsUseCase>(),
-        gh<_i506.RefreshSurahDownloadStatusUseCase>(),
       ),
     );
     return this;

@@ -523,43 +523,12 @@ class MockDownloadService extends _i1.Mock implements _i6.DownloadService {
   }
 
   @override
-  _i4.Future<void> initialize() =>
+  _i4.Stream<_i6.DownloadProgress> get globalProgressStream =>
       (super.noSuchMethod(
-            Invocation.method(#initialize, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            Invocation.getter(#globalProgressStream),
+            returnValue: _i4.Stream<_i6.DownloadProgress>.empty(),
           )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<void> download({
-    required String? id,
-    required String? url,
-    required String? filePath,
-    required String? title,
-    required String? reciterName,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#download, [], {
-              #id: id,
-              #url: url,
-              #filePath: filePath,
-              #title: title,
-              #reciterName: reciterName,
-            }),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<void> cancel(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancel, [id]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
+          as _i4.Stream<_i6.DownloadProgress>);
 
   @override
   _i4.Stream<_i6.DownloadProgress> getProgressStream(String? id) =>
@@ -594,9 +563,48 @@ class MockDownloadService extends _i1.Mock implements _i6.DownloadService {
           as _i4.Future<_i10.DownloadStatus?>);
 
   @override
+  _i4.Future<void> download({
+    required String? id,
+    required String? url,
+    required String? filePath,
+    required String? title,
+    required String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#download, [], {
+              #id: id,
+              #url: url,
+              #filePath: filePath,
+              #title: title,
+              #reciterName: reciterName,
+            }),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> cancel(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [id]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
   _i4.Future<void> disposeService() =>
       (super.noSuchMethod(
             Invocation.method(#disposeService, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )

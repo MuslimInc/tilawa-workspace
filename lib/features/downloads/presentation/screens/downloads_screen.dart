@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
@@ -76,12 +78,16 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       body: BlocBuilder<DownloadsBloc, DownloadsState>(
         builder: (context, state) {
+          final int totalBytes = state.totalDownloadsSize;
+          final String formattedSize = FileSizeFormatter.formatBytes(
+            totalBytes,
+          );
+
           return CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -89,13 +95,36 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                 floating: true,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  title: Text(
-                    AppLocalizations.of(context)!.downloads,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                    ),
+                  titlePadding: EdgeInsetsDirectional.only(
+                    start: 16.w,
+                    bottom: 16.h,
                   ),
-                  centerTitle: true,
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.downloads,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (state.status == DownloadsStateStatus.loaded &&
+                          state.downloads.isNotEmpty)
+                        Text(
+                          'Storage Used: $formattedSize',
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                    ],
+                  ),
+                  centerTitle: false,
                   background: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(

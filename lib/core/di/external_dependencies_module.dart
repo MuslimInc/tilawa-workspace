@@ -113,5 +113,5 @@ abstract class ExternalDependenciesModule {
   }
 
   @singleton
-  DownloadService get downloadService => DownloadService.instance;
+  DownloadService get downloadService => DownloadServiceImpl.instance;
 }

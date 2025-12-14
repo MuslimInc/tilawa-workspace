@@ -81,4 +81,7 @@ abstract class DownloadsRepository {
 
   /// Resume any pending or stuck downloads on app start
   Future<void> resumePendingDownloads();
+
+  /// Get total size of all downloads in bytes
+  Future<int> getTotalDownloadsSize();
 }

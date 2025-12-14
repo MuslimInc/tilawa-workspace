@@ -21,6 +21,7 @@ import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_c
 import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
@@ -41,6 +42,7 @@ provideDummyEitherFailureMapStringMapStringListDownloadItem() =>
 
 @GenerateMocks([
   GetDownloadsByReciterUseCase,
+  GetTotalDownloadsSizeUseCase,
   DownloadSurahUseCase,
   DeleteDownloadUseCase,
   DeleteReciterDownloadsUseCase,
@@ -107,6 +109,7 @@ void main() {
 
   late DownloadsBloc downloadsBloc;
   late MockGetDownloadsByReciterUseCase mockGetDownloadsByReciterUseCase;
+  late MockGetTotalDownloadsSizeUseCase mockGetTotalDownloadsSizeUseCase;
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
   late MockDeleteDownloadUseCase mockDeleteDownloadUseCase;
   late MockDeleteReciterDownloadsUseCase mockDeleteReciterDownloadsUseCase;
@@ -123,8 +126,10 @@ void main() {
     provideDummy<Either<Failure, Map<String, Map<String, List<DownloadItem>>>>>(
       const Right({}),
     );
+    provideDummy<Either<Failure, int>>(const Right(0));
 
     mockGetDownloadsByReciterUseCase = MockGetDownloadsByReciterUseCase();
+    mockGetTotalDownloadsSizeUseCase = MockGetTotalDownloadsSizeUseCase();
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
     mockDeleteDownloadUseCase = MockDeleteDownloadUseCase();
     mockDeleteReciterDownloadsUseCase = MockDeleteReciterDownloadsUseCase();
@@ -156,12 +161,17 @@ void main() {
       mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
     ).thenAnswer((_) async => []);
 
+    when(
+      mockGetTotalDownloadsSizeUseCase(any),
+    ).thenAnswer((_) async => const Right(0));
+
     downloadsBloc = DownloadsBloc(
       getDownloadsByReciter: mockGetDownloadsByReciterUseCase,
       downloadSurah: mockDownloadSurahUseCase,
       deleteDownload: mockDeleteDownloadUseCase,
       deleteReciterDownloads: mockDeleteReciterDownloadsUseCase,
       clearAllDownloads: mockClearAllDownloadsUseCase,
+      getTotalDownloadsSize: mockGetTotalDownloadsSizeUseCase,
       downloadsRepository: mockDownloadsRepository,
       premiumRepository: mockPremiumRepository,
       audioPlayerHandler: mockAudioPlayerHandler,
@@ -200,6 +210,9 @@ void main() {
           when(mockGetDownloadsByReciterUseCase()).thenAnswer(
             (_) async => const Left(AudioFailure('Failed to load downloads')),
           );
+          when(
+            mockGetTotalDownloadsSizeUseCase(any),
+          ).thenAnswer((_) async => const Right(0));
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const LoadDownloads()),
@@ -242,7 +255,9 @@ void main() {
               any,
               fileName: anyNamed('fileName'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
 
           unawaited(
             expectLater(
@@ -347,13 +362,17 @@ void main() {
               any,
               fileName: anyNamed('fileName'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
           when(
             mockAnalyticsService.logEvent(
               any,
               parameters: anyNamed('parameters'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
 
           unawaited(
             expectLater(
@@ -443,7 +462,9 @@ void main() {
               any,
               parameters: anyNamed('parameters'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(
@@ -495,7 +516,9 @@ void main() {
               any,
               parameters: anyNamed('parameters'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const ClearAllDownloads()),
@@ -791,14 +814,20 @@ void main() {
               extras: {'filePath': testDownloadItem.filePath},
             ),
           );
-          when(
-            mockAudioPlayerHandler.updateQueue(any),
-          ).thenAnswer((_) async {});
-          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {});
-          when(
-            mockAudioPlayerHandler.skipToQueueItem(any),
-          ).thenAnswer((_) async {});
-          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {});
+          when(mockAudioPlayerHandler.updateQueue(any)).thenAnswer((_) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.skipToQueueItem(any)).thenAnswer((
+            _,
+          ) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {
+            return;
+          });
 
           unawaited(
             expectLater(
@@ -936,14 +965,20 @@ void main() {
               extras: {'filePath': '/path/to/file.mp3'},
             ),
           ]);
-          when(
-            mockAudioPlayerHandler.updateQueue(any),
-          ).thenAnswer((_) async {});
-          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {});
-          when(
-            mockAudioPlayerHandler.skipToQueueItem(any),
-          ).thenAnswer((_) async {});
-          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {});
+          when(mockAudioPlayerHandler.updateQueue(any)).thenAnswer((_) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.skipToQueueItem(any)).thenAnswer((
+            _,
+          ) async {
+            return;
+          });
+          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {
+            return;
+          });
 
           unawaited(
             expectLater(
@@ -1093,9 +1128,9 @@ void main() {
           mockDownloadsRepository.getDownloadItem(any),
         ).thenAnswer((_) async => testDownloadItem);
         when(mockPremiumRepository.canDownload()).thenAnswer((_) async => true);
-        when(
-          mockDownloadsRepository.retryDownload(any),
-        ).thenAnswer((_) async {});
+        when(mockDownloadsRepository.retryDownload(any)).thenAnswer((_) async {
+          return;
+        });
         when(
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => const Right({}));
@@ -1104,7 +1139,9 @@ void main() {
             any,
             parameters: anyNamed('parameters'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         unawaited(
           expectLater(
@@ -1197,7 +1234,9 @@ void main() {
             any,
             parameters: anyNamed('parameters'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         unawaited(
           expectLater(
@@ -1238,19 +1277,25 @@ void main() {
             any,
             fileName: anyNamed('fileName'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
         when(
           mockAnalyticsService.logDownloadComplete(
             any,
             fileName: anyNamed('fileName'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
         when(
           mockAnalyticsService.logEvent(
             any,
             parameters: anyNamed('parameters'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Expect stream emissions for DownloadSurah
         unawaited(
