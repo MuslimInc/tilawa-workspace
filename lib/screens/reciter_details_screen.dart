@@ -67,7 +67,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       stretch: true,
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        centerTitle: true,
         title: Text(
           widget.reciter.name,
           style: TextStyle(

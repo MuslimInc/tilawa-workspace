@@ -30,7 +30,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.playlists),
-        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

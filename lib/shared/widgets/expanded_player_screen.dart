@@ -157,7 +157,6 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          centerTitle: true,
                         ),
 
                         SizedBox(height: 20.h),

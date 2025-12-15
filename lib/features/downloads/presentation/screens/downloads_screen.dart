@@ -7,7 +7,6 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../core/utils/toast_utils.dart';
-import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
@@ -106,14 +105,14 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       floating: true,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsetsDirectional.only(start: 16.w, bottom: 16.h),
+        titlePadding: EdgeInsetsDirectional.only(start: 42.w, bottom: 16.h),
         title: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              AppLocalizations.of(context)!.downloads,
+              context.l10n.downloads,
               style: TextStyle(
                 color: Theme.of(context).textTheme.titleLarge?.color,
                 fontSize: 16.sp,
@@ -132,14 +131,13 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               ),
           ],
         ),
-        centerTitle: false,
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).primaryColor.withOpacity(0.1),
+                Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 Theme.of(context).scaffoldBackgroundColor,
               ],
             ),
@@ -150,12 +148,12 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
           onPressed: _loadDownloads,
-          tooltip: AppLocalizations.of(context)!.refreshDownloads,
+          tooltip: context.l10n.refreshDownloads,
         ),
         IconButton(
           icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
           onPressed: () => _showClearAllDialog(context),
-          tooltip: AppLocalizations.of(context)!.deleteAll,
+          tooltip: context.l10n.deleteAll,
         ),
       ],
     );
@@ -174,10 +172,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       case DownloadsStateStatus.loaded:
         return _buildDownloadsList(context, state.downloads);
       case DownloadsStateStatus.error:
-        return _buildError(
-          context,
-          state.errorMessage ?? AppLocalizations.of(context)!.error,
-        );
+        return _buildError(context, state.errorMessage ?? context.l10n.error);
     }
   }
 
@@ -204,7 +199,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                 context.read<DownloadsBloc>().add(const LoadDownloads());
               },
               icon: const Icon(Icons.refresh),
-              label: Text(AppLocalizations.of(context)!.retry),
+              label: Text(context.l10n.retry),
             ),
           ],
         ),
@@ -236,7 +231,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                AppLocalizations.of(context)!.noDownloadsYet,
+                context.l10n.noDownloadsYet,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -244,7 +239,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                AppLocalizations.of(context)!.downloadSurahsOffline,
+                context.l10n.downloadSurahsOffline,
                 style: TextStyle(
                   fontSize: 16,
                   color: Theme.of(
@@ -280,12 +275,12 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.clearAllDownloads),
-        content: Text(AppLocalizations.of(context)!.clearAllDownloadsMessage),
+        title: Text(context.l10n.clearAllDownloads),
+        content: Text(context.l10n.clearAllDownloadsMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -293,7 +288,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               context.read<DownloadsBloc>().add(const ClearAllDownloads());
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.deleteAll),
+            child: Text(context.l10n.deleteAll),
           ),
         ],
       ),
