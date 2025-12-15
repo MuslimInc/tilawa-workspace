@@ -144,6 +144,8 @@ import 'package:muzakri/features/premium/domain/usecases/start_trial_use_case.da
     as _i509;
 import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart'
     as _i504;
+import 'package:muzakri/features/reciters/data/datasources/reciters_local_datasource.dart'
+    as _i500;
 import 'package:muzakri/features/reciters/data/datasources/reciters_remote_datasource.dart'
     as _i4;
 import 'package:muzakri/features/reciters/data/repositories/reciters_repository_impl.dart'
@@ -259,15 +261,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
-    gh.lazySingleton<_i619.RecitersRepository>(
-      () => _i124.RecitersRepositoryImpl(
-        gh<_i4.RecitersRemoteDataSource>(),
-        gh<_i460.SharedPreferencesAsync>(),
-      ),
-    );
     gh.lazySingleton<_i919.PremiumLocalDataSource>(
       () =>
           _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
+    );
+    gh.lazySingleton<_i500.RecitersLocalDataSource>(
+      () => _i500.RecitersLocalDataSourceImpl(),
     );
     gh.lazySingleton<_i775.DownloadsRepository>(
       () => _i486.DownloadsRepositoryImpl(
@@ -318,6 +317,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i719.GoogleAuthProviderImpl(
         gh<_i59.FirebaseAuth>(),
         gh<_i116.GoogleSignIn>(),
+      ),
+    );
+    gh.lazySingleton<_i619.RecitersRepository>(
+      () => _i124.RecitersRepositoryImpl(
+        gh<_i4.RecitersRemoteDataSource>(),
+        gh<_i500.RecitersLocalDataSource>(),
+        gh<_i460.SharedPreferencesAsync>(),
       ),
     );
     gh.lazySingleton<_i288.DownloadNotificationService>(
