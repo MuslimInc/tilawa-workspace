@@ -9,6 +9,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:muzakri/core/entities/reciter.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -18,7 +19,6 @@ import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
 
 class MockReciterDetailsBloc
     extends MockBloc<ReciterDetailsEvent, ReciterDetailsState>
@@ -97,13 +97,13 @@ void main() {
         });
   });
 
-  const testReciter = Reciter(
+  const testReciter = ReciterEntity(
     id: 1,
     name: 'Test Reciter',
     letter: 'T',
     date: '2023',
     moshaf: [
-      Mosahf(
+      MoshafEntity(
         id: 1,
         name: 'Hafs',
         server: 'server1',
@@ -111,7 +111,7 @@ void main() {
         moshafType: 1,
         surahList: '1,2,3',
       ),
-      Mosahf(
+      MoshafEntity(
         id: 2,
         name: 'Warsh',
         server: 'server2',
@@ -194,7 +194,7 @@ void main() {
     expect(find.text('Test Reciter'), findsWidgets);
 
     // Verify Moshaf selector (DropdownButton)
-    expect(find.byType(DropdownButton<Mosahf>), findsOneWidget);
+    expect(find.byType(DropdownButton<MoshafEntity>), findsOneWidget);
     expect(find.text('Hafs'), findsOneWidget);
 
     // Verify Surah list
@@ -243,7 +243,7 @@ void main() {
     FlutterError.onError = originalOnError;
 
     // Open dropdown
-    await tester.tap(find.byType(DropdownButton<Mosahf>));
+    await tester.tap(find.byType(DropdownButton<MoshafEntity>));
     await tester.pumpAndSettle();
 
     // Verify options visible

@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muzakri/core/entities/reciter.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockRecitersBloc extends MockBloc<RecitersEvent, RecitersState>
@@ -109,14 +109,14 @@ void main() {
     'RecitersScreen displays reciter cards when state is RecitersLoaded',
     (tester) async {
       final reciters = [
-        const Reciter(
+        const ReciterEntity(
           id: 1,
           name: 'Reciter 1',
           letter: 'A',
           date: '2023',
           moshaf: [],
         ),
-        const Reciter(
+        const ReciterEntity(
           id: 2,
           name: 'Reciter 2',
           letter: 'B',

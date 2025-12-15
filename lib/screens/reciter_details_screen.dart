@@ -7,6 +7,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/di/injection.dart';
+import '../core/entities/reciter.dart';
 import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -18,12 +19,11 @@ import '../features/surah/domain/entities/surah_entity.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../main.dart';
 import '../shared/audio/audio_player_handler.dart';
-import '../shared/models/reciter_model.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   const ReciterDetailsScreen({super.key, required this.reciter});
-  final Reciter reciter;
+  final ReciterEntity reciter;
 
   @override
   State<ReciterDetailsScreen> createState() => _ReciterDetailsScreenState();
@@ -33,7 +33,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    final Mosahf selectedMoshaf = widget.reciter.moshaf.first;
+    final MoshafEntity selectedMoshaf = widget.reciter.moshaf.first;
     context.read<ReciterDetailsBloc>().add(
       LoadSurahList(reciter: widget.reciter, moshaf: selectedMoshaf),
     );
@@ -116,8 +116,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   Widget _buildMoshafSelector(BuildContext context, ReciterDetailsState state) {
     // Remove duplicates and get unique moshaf list
-    final List<Mosahf> uniqueMoshaf = widget.reciter.moshaf.toSet().toList();
-    final Mosahf selectedMoshaf = state.selectedMoshaf ?? uniqueMoshaf.first;
+    final List<MoshafEntity> uniqueMoshaf = widget.reciter.moshaf
+        .toSet()
+        .toList();
+    final MoshafEntity selectedMoshaf =
+        state.selectedMoshaf ?? uniqueMoshaf.first;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -135,7 +138,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           ],
         ),
         child: DropdownButtonHideUnderline(
-          child: DropdownButton<Mosahf>(
+          child: DropdownButton<MoshafEntity>(
             isExpanded: true,
             icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
             value: uniqueMoshaf.contains(selectedMoshaf)
@@ -147,12 +150,12 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             items: uniqueMoshaf.map((moshaf) {
-              return DropdownMenuItem<Mosahf>(
+              return DropdownMenuItem<MoshafEntity>(
                 value: moshaf,
                 child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
               );
             }).toList(),
-            onChanged: (Mosahf? moshaf) {
+            onChanged: (MoshafEntity? moshaf) {
               if (moshaf != null) {
                 context.read<ReciterDetailsBloc>().add(
                   LoadSurahList(reciter: widget.reciter, moshaf: moshaf),

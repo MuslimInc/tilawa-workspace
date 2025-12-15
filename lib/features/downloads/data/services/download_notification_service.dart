@@ -12,7 +12,6 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/services/navigation_service.dart';
 import '../../../../main.dart';
 import '../../../../router/app_router_config.dart';
-import '../../../../shared/models/reciter_model.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/entities/download_item.dart';
 
@@ -286,11 +285,11 @@ class DownloadNotificationService {
               (r) => r.name == reciterName,
             );
 
-            final Reciter reciter = _mapEntityToModel(reciterEntity);
+            final reciter = reciterEntity;
             final reciterId = reciter.id.toString();
             final String location = ReciterDetailsRoute(
               reciterId: reciterId,
-              reciter: reciter,
+              $extra: reciter,
             ).location;
 
             final String? currentLocation = _navigator.getCurrentLocation();
@@ -313,28 +312,5 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('DownloadNotificationService: Navigation error: $e');
     }
-  }
-
-  /// Map ReciterEntity (Domain) to Reciter (Model/Data) using manual mapping
-  /// because they are separate classes in this project architecture.
-  Reciter _mapEntityToModel(ReciterEntity entity) {
-    return Reciter(
-      id: entity.id,
-      name: entity.name,
-      letter: entity.letter,
-      date: entity.date,
-      moshaf: entity.moshaf
-          .map(
-            (m) => Mosahf(
-              id: m.id,
-              name: m.name,
-              server: m.server,
-              surahTotal: m.surahTotal,
-              moshafType: m.moshafType,
-              surahList: m.surahList,
-            ),
-          )
-          .toList(),
-    );
   }
 }

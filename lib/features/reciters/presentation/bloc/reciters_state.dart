@@ -22,8 +22,8 @@ class RecitersLoaded extends RecitersState {
     this.searchQuery = '',
     this.selectedLetter,
   });
-  final List<Reciter> reciters;
-  final List<Reciter> filteredReciters;
+  final List<entity.ReciterEntity> reciters;
+  final List<entity.ReciterEntity> filteredReciters;
   final String searchQuery;
   final String? selectedLetter;
 
@@ -36,8 +36,8 @@ class RecitersLoaded extends RecitersState {
   ];
 
   RecitersLoaded copyWith({
-    List<Reciter>? reciters,
-    List<Reciter>? filteredReciters,
+    List<entity.ReciterEntity>? reciters,
+    List<entity.ReciterEntity>? filteredReciters,
     String? searchQuery,
     String? selectedLetter,
     bool clearSelectedLetter = false,

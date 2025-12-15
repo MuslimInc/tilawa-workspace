@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/entities/reciter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
-import '../../../../shared/models/reciter_model.dart';
 
 class ReciterCard extends StatelessWidget {
   const ReciterCard({super.key, required this.reciter});
 
-  final Reciter reciter;
+  final ReciterEntity reciter;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +30,8 @@ class ReciterCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           onTap: () {
             ReciterDetailsRoute(
-              reciter: reciter,
               reciterId: reciter.id.toString(),
+              $extra: reciter,
             ).push(context);
           },
           child: Padding(

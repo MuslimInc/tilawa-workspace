@@ -1,13 +1,13 @@
 import 'package:audio_service/audio_service.dart';
 
 import '../core/di/injection.dart';
+import '../core/entities/reciter.dart';
 import '../main.dart';
 import '../shared/audio/audio_player_handler.dart';
-import '../shared/models/reciter_model.dart';
 
 class ReciterHelper {
   /// Extract reciter information from a MediaItem
-  static Future<Reciter?> getReciterFromMediaItem(
+  static Future<ReciterEntity?> getReciterFromMediaItem(
     MediaItem mediaItem, {
     String? languageCode,
   }) async {
@@ -22,7 +22,7 @@ class ReciterHelper {
       }
 
       // Call getRecitersData - it should always return a Future
-      final List<Reciter>? reciters = await audioHandler.getRecitersData(
+      final List<ReciterEntity>? reciters = await audioHandler.getRecitersData(
         languageCode: languageCode,
       );
 
@@ -45,8 +45,8 @@ class ReciterHelper {
 
       // If artist field is empty, try to find by matching the server URL in the MediaItem ID
       // This is a fallback approach for when artist field is not set
-      for (final Reciter reciter in reciters) {
-        for (final Mosahf moshaf in reciter.moshaf) {
+      for (final ReciterEntity reciter in reciters) {
+        for (final MoshafEntity moshaf in reciter.moshaf) {
           if (mediaItem.id.contains(moshaf.server)) {
             logger.d('Found reciter by server match: ${reciter.name}');
             return reciter;

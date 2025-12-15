@@ -49,31 +49,29 @@ mixin $ReciterDetailsRoute on GoRouteData {
   static ReciterDetailsRoute _fromState(GoRouterState state) =>
       ReciterDetailsRoute(
         reciterId: state.pathParameters['reciterId']!,
-        reciter: (String json0) {
-          return Reciter.fromJson(jsonDecode(json0) as Map<String, dynamic>);
-        }(state.uri.queryParameters['reciter']!),
+        $extra: state.extra as ReciterEntity,
       );
 
   ReciterDetailsRoute get _self => this as ReciterDetailsRoute;
 
   @override
-  String get location => GoRouteData.$location(
-    '/reciter/${Uri.encodeComponent(_self.reciterId)}',
-    queryParams: {'reciter': jsonEncode(_self.reciter.toJson())},
-  );
+  String get location =>
+      GoRouteData.$location('/reciter/${Uri.encodeComponent(_self.reciterId)}');
 
   @override
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
 
   @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: _self.$extra);
 
   @override
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $expandedPlayerRoute => GoRouteData.$route(

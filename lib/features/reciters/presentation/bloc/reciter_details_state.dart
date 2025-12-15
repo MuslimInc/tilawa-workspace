@@ -13,7 +13,7 @@ class ReciterDetailsState extends Equatable {
 
   final ReciterDetailsStatus status;
   final List<SurahEntity> surahList;
-  final Mosahf? selectedMoshaf;
+  final MoshafEntity? selectedMoshaf;
   final String? selectedSurahId;
   final String? errorMessage;
 
@@ -29,7 +29,7 @@ class ReciterDetailsState extends Equatable {
   ReciterDetailsState copyWith({
     ReciterDetailsStatus? status,
     List<SurahEntity>? surahList,
-    Mosahf? selectedMoshaf,
+    MoshafEntity? selectedMoshaf,
     String? selectedSurahId,
     String? errorMessage,
   }) {

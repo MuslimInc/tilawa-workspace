@@ -756,7 +756,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Downloading {surahTitle} by {reciterName}...'**
-  String downloadingSurah(String surahTitle, String reciterName);
+  String downloadingSurahByReciter(String surahTitle, String reciterName);
 
   /// Delete download dialog title
   ///
@@ -1081,6 +1081,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading reciter: {error}'**
   String errorLoadingReciter(String error);
+
+  /// Downloading surah message
+  ///
+  /// In en, this message translates to:
+  /// **'تحميل {surahTitle}'**
+  String downloadingSurah(String surahTitle);
 }
 
 class _AppLocalizationsDelegate

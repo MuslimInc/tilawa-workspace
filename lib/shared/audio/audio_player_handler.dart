@@ -3,13 +3,20 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../core/entities/reciter.dart';
 import '../models/queue_state.dart';
-import '../models/reciter_model.dart';
 
 abstract class AudioPlayerHandler implements AudioHandler {
   Stream<QueueState> get queueState;
   ValueStream<double> get volume;
   ValueStream<double> get speed;
+
+  @override
+  ValueStream<MediaItem?> get mediaItem;
+  @override
+  ValueStream<PlaybackState> get playbackState;
+  @override
+  ValueStream<List<MediaItem>> get queue;
 
   // Queue management methods
   Future<void> moveQueueItem(int currentIndex, int newIndex);
@@ -54,9 +61,9 @@ abstract class AudioPlayerHandler implements AudioHandler {
 
   // Reciter and surah management
   Future<List<MediaItem>?> getReciters({String? languageCode});
-  Future<List<Reciter>?> getRecitersData({String? languageCode});
+  Future<List<ReciterEntity>?> getRecitersData({String? languageCode});
   Future<List<MediaItem>?> getSurahListForMoshaf(
-    Mosahf moshaf, {
+    MoshafEntity moshaf, {
     String? reciterName,
   });
   Future<void> playArtistPlaylist(String artistId);

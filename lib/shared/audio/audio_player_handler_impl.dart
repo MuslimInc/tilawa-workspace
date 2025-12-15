@@ -3,24 +3,30 @@ import 'dart:developer';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
-import 'package:dio/dio.dart';
+import 'package:dartz_plus/src/either.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/config/api_config.dart';
 import '../../core/config/language_config.dart';
-import '../../core/di/injection.dart';
+import '../../core/entities/reciter.dart';
+import '../../core/errors/failures.dart';
 import '../../core/services/analytics_service.dart';
+import '../../core/utils/surah_names.dart';
+import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
 import '../models/queue_state.dart';
-import '../models/reciter_model.dart';
 import 'audio_player_handler.dart';
 
 class AudioPlayerHandlerImpl extends BaseAudioHandler
     with SeekHandler
     implements AudioPlayerHandler {
-  AudioPlayerHandlerImpl(this.newList, this._analyticsService, this._prefs) {
+  AudioPlayerHandlerImpl(
+    this.newList,
+    this._analyticsService,
+    this._prefs,
+    this._recitersRepository,
+  ) {
     _init();
   }
   final BehaviorSubject<List<MediaItem>> _recentSubject =
@@ -28,6 +34,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final List<MediaItem> newList;
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
+  final RecitersRepository _recitersRepository;
   final _items = <String, List<MediaItem>>{};
   final _player = AudioPlayer();
   final List<AudioSource> _playlist = [];
@@ -38,10 +45,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final _mediaItemExpando = Expando<MediaItem>();
 
   // Caching and pagination
-  List<MediaItem>? _cachedReciters;
-  List<Reciter>? _cachedRecitersData;
-  String? _cachedRecitersLanguage;
-  final Map<String, Future<List<Reciter>>> _inFlightReciters = {};
+  List<MediaItem>? _cachedMediaItems;
+
   final Map<String, List<MediaItem>> _artistPlaylists = {};
   bool _isLoadingReciters = false;
 
@@ -459,121 +464,82 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   @override
   Future<List<MediaItem>?> getReciters({String? languageCode}) async {
     // Return cached data if available
-    if (_cachedReciters != null) {
-      return _cachedReciters;
+    if (_cachedMediaItems != null) {
+      return _cachedMediaItems;
     }
 
     // Prevent multiple simultaneous requests
     if (_isLoadingReciters) {
-      // Wait for the ongoing request to complete
-      while (_isLoadingReciters) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-      return _cachedReciters;
+      await Future.delayed(const Duration(milliseconds: 200));
+      return _cachedMediaItems;
     }
 
     _isLoadingReciters = true;
-    final String languageParam = _convertLanguageCode(languageCode);
 
     try {
-      final List<Reciter> reciters = await _fetchReciters(languageParam);
+      final Either<Failure, List<ReciterEntity>> recitersData =
+          await _recitersRepository.getReciters();
 
-      // Convert Reciters to MediaItems (if needed)
-      final mediaItems = <MediaItem>[];
+      return recitersData.fold(
+        (failure) {
+          log('Error fetching reciters: ${failure.message}');
+          return null;
+        },
+        (reciters) {
+          final mediaItems = <MediaItem>[];
+          for (final reciter in reciters) {
+            for (final MoshafEntity moshaf in reciter.moshaf) {
+              final List<String> surahList = moshaf.surahList.split(',');
+              for (final surahId in surahList) {
+                final String formattedSurahId = surahId.padLeft(3, '0');
+                final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
+                // Note: Using SurahNames helper here might be async if you wanted strict localization check
+                // but since title construction usually needs context or prefs
+                // we can accept a slight delay or use the helper
+                // Wait, SurahNames is sync.
+                // But we might want localized names. The previous impl fetched reciters with lang code.
+                // Our repo handles lang internally?
+                // The repository fetches data based on prefs internally.
 
-      // Iterate through each reciter and generate MediaItems for their surahs
-      for (final reciter in reciters) {
-        for (final Mosahf moshaf in reciter.moshaf) {
-          // Split the surah_list into individual surah IDs
-          final List<String> surahList = moshaf.surahList.split(',');
-
-          // Create MediaItem for each surah
-          for (final surahId in surahList) {
-            final String formattedSurahId = surahId.padLeft(
-              3,
-              '0',
-            ); // Make sure surah ID is like '001'
-            final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
-
-            mediaItems.add(
-              MediaItem(
-                id: mediaItemId,
-                title: '${surahId.surahName} $formattedSurahId',
-                album: moshaf.name,
-                artist: reciter.name,
-                // Add other MediaItem properties as needed
-              ),
-            );
+                mediaItems.add(
+                  MediaItem(
+                    id: mediaItemId,
+                    title:
+                        '${SurahNames.getEnglishSurahName(int.parse(surahId))} $formattedSurahId', // Fallback or standard
+                    album: moshaf.name,
+                    artist: reciter.name,
+                  ),
+                );
+              }
+            }
           }
-        }
-      }
-
-      // Cache the results
-      _cachedReciters = mediaItems;
-      return mediaItems;
-    } catch (e) {
-      log('Exception: $e');
+          _cachedMediaItems = mediaItems;
+          // _cachedRecitersEntities = reciters;
+          return mediaItems;
+        },
+      );
     } finally {
       _isLoadingReciters = false;
     }
-    return null;
   }
 
   /// Get raw reciters data for the RecitersScreen
   @override
-  Future<List<Reciter>?> getRecitersData({String? languageCode}) async {
-    final String languageParam = _convertLanguageCode(languageCode);
-
-    // Serve from cache when available for the same language
-    if (_cachedRecitersData != null &&
-        _cachedRecitersLanguage == languageParam) {
-      return _cachedRecitersData;
-    }
-    try {
-      final List<Reciter> reciters = await _fetchReciters(languageParam);
-      return reciters;
-    } catch (e) {
-      log('Exception getting reciters data: $e');
+  Future<List<ReciterEntity>?> getRecitersData({String? languageCode}) async {
+    final Either<Failure, List<ReciterEntity>> result =
+        await _recitersRepository.getReciters();
+    return result.fold((failure) {
+      log('Error getting reciters data: ${failure.message}');
       return null;
-    }
+    }, (reciters) => reciters);
   }
 
-  Future<List<Reciter>> _fetchReciters(String languageParam) async {
-    if (_cachedRecitersData != null &&
-        _cachedRecitersLanguage == languageParam) {
-      return _cachedRecitersData!;
-    }
-    final Future<List<Reciter>>? existing = _inFlightReciters[languageParam];
-    if (existing != null) {
-      return existing;
-    }
-
-    final Future<List<Reciter>> future = (() async {
-      final String baseUrl = ApiConfig.reciters(language: languageParam);
-      final Response<dynamic> response = await getIt<Dio>().get(baseUrl);
-      if (response.statusCode != 200) {
-        throw StateError('Bad status: ${response.statusCode}');
-      }
-      final map = response.data as Map<String, dynamic>;
-      final recitersModel = RecitersModel.fromJson(map);
-      _cachedRecitersData = recitersModel.reciters;
-      _cachedRecitersLanguage = languageParam;
-      return recitersModel.reciters;
-    })();
-
-    _inFlightReciters[languageParam] = future;
-    try {
-      final List<Reciter> reciters = await future;
-      return reciters;
-    } finally {
-      await _inFlightReciters.remove(languageParam);
-    }
-  }
+  // Helper to removed: _fetchReciters
 
   /// Get surah list for a specific moshaf
   @override
   Future<List<MediaItem>?> getSurahListForMoshaf(
-    Mosahf moshaf, {
+    MoshafEntity moshaf, {
     String? reciterName,
   }) async {
     try {
@@ -604,11 +570,6 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     }
   }
 
-  /// Convert app language code to API language code
-  String _convertLanguageCode(String? languageCode) {
-    return LanguageConfig.convertToApiLanguageCode(languageCode);
-  }
-
   /// Get surah name by surah number based on selected language
   Future<String> _getSurahName(int surahNumber) async {
     final String currentLanguage =
@@ -616,255 +577,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         LanguageConfig.getDefaultLanguageCode();
 
     if (currentLanguage == 'en') {
-      return _getEnglishSurahName(surahNumber);
+      return SurahNames.getEnglishSurahName(surahNumber);
     } else {
-      return _getArabicSurahName(surahNumber);
+      return SurahNames.getArabicSurahName(surahNumber);
     }
   }
 
-  /// Get Arabic surah name by surah number
-  String _getArabicSurahName(int surahNumber) {
-    const surahNames = {
-      1: 'سورة الفاتحة',
-      2: 'سورة البقرة',
-      3: 'سورة آل عمران',
-      4: 'سورة النساء',
-      5: 'سورة المائدة',
-      6: 'سورة الأنعام',
-      7: 'سورة الأعراف',
-      8: 'سورة الأنفال',
-      9: 'سورة التوبة',
-      10: 'سورة يونس',
-      11: 'سورة هود',
-      12: 'سورة يوسف',
-      13: 'سورة الرعد',
-      14: 'سورة إبراهيم',
-      15: 'سورة الحجر',
-      16: 'سورة النحل',
-      17: 'سورة الإسراء',
-      18: 'سورة الكهف',
-      19: 'سورة مريم',
-      20: 'سورة طه',
-      21: 'سورة الأنبياء',
-      22: 'سورة الحج',
-      23: 'سورة المؤمنون',
-      24: 'سورة النور',
-      25: 'سورة الفرقان',
-      26: 'سورة الشعراء',
-      27: 'سورة النمل',
-      28: 'سورة القصص',
-      29: 'سورة العنكبوت',
-      30: 'سورة الروم',
-      31: 'سورة لقمان',
-      32: 'سورة السجدة',
-      33: 'سورة الأحزاب',
-      34: 'سورة سبأ',
-      35: 'سورة فاطر',
-      36: 'سورة يس',
-      37: 'سورة الصافات',
-      38: 'سورة ص',
-      39: 'سورة الزمر',
-      40: 'سورة غافر',
-      41: 'سورة فصلت',
-      42: 'سورة الشورى',
-      43: 'سورة الزخرف',
-      44: 'سورة الدخان',
-      45: 'سورة الجاثية',
-      46: 'سورة الأحقاف',
-      47: 'سورة محمد',
-      48: 'سورة الفتح',
-      49: 'سورة الحجرات',
-      50: 'سورة ق',
-      51: 'سورة الذاريات',
-      52: 'سورة الطور',
-      53: 'سورة النجم',
-      54: 'سورة القمر',
-      55: 'سورة الرحمن',
-      56: 'سورة الواقعة',
-      57: 'سورة الحديد',
-      58: 'سورة المجادلة',
-      59: 'سورة الحشر',
-      60: 'سورة الممتحنة',
-      61: 'سورة الصف',
-      62: 'سورة الجمعة',
-      63: 'سورة المنافقون',
-      64: 'سورة التغابن',
-      65: 'سورة الطلاق',
-      66: 'سورة التحريم',
-      67: 'سورة الملك',
-      68: 'سورة القلم',
-      69: 'سورة الحاقة',
-      70: 'سورة المعارج',
-      71: 'سورة نوح',
-      72: 'سورة الجن',
-      73: 'سورة المزمل',
-      74: 'سورة المدثر',
-      75: 'سورة القيامة',
-      76: 'سورة الإنسان',
-      77: 'سورة المرسلات',
-      78: 'سورة النبأ',
-      79: 'سورة النازعات',
-      80: 'سورة عبس',
-      81: 'سورة التكوير',
-      82: 'سورة الانفطار',
-      83: 'سورة المطففين',
-      84: 'سورة الانشقاق',
-      85: 'سورة البروج',
-      86: 'سورة الطارق',
-      87: 'سورة الأعلى',
-      88: 'سورة الغاشية',
-      89: 'سورة الفجر',
-      90: 'سورة البلد',
-      91: 'سورة الشمس',
-      92: 'سورة الليل',
-      93: 'سورة الضحى',
-      94: 'سورة الشرح',
-      95: 'سورة التين',
-      96: 'سورة العلق',
-      97: 'سورة القدر',
-      98: 'سورة البينة',
-      99: 'سورة الزلزلة',
-      100: 'سورة العاديات',
-      101: 'سورة القارعة',
-      102: 'سورة التكاثر',
-      103: 'سورة العصر',
-      104: 'سورة الهمزة',
-      105: 'سورة الفيل',
-      106: 'سورة قريش',
-      107: 'سورة الماعون',
-      108: 'سورة الكوثر',
-      109: 'سورة الكافرون',
-      110: 'سورة النصر',
-      111: 'سورة المسد',
-      112: 'سورة الإخلاص',
-      113: 'سورة الفلق',
-      114: 'سورة الناس',
-    };
-
-    return surahNames[surahNumber] ?? 'سورة غير معروفة';
-  }
-
-  /// Get English surah name by surah number
-  String _getEnglishSurahName(int surahNumber) {
-    const surahNames = {
-      1: 'Al-Fatihah',
-      2: 'Al-Baqarah',
-      3: 'Ali Imran',
-      4: 'An-Nisa',
-      5: 'Al-Maidah',
-      6: "Al-An'am",
-      7: "Al-A'raf",
-      8: 'Al-Anfal',
-      9: 'At-Tawbah',
-      10: 'Yunus',
-      11: 'Hud',
-      12: 'Yusuf',
-      13: "Ar-Ra'd",
-      14: 'Ibrahim',
-      15: 'Al-Hijr',
-      16: 'An-Nahl',
-      17: 'Al-Isra',
-      18: 'Al-Kahf',
-      19: 'Maryam',
-      20: 'Taha',
-      21: 'Al-Anbiya',
-      22: 'Al-Hajj',
-      23: "Al-Mu'minun",
-      24: 'An-Nur',
-      25: 'Al-Furqan',
-      26: "Ash-Shu'ara",
-      27: 'An-Naml',
-      28: 'Al-Qasas',
-      29: 'Al-Ankabut',
-      30: 'Ar-Rum',
-      31: 'Luqman',
-      32: 'As-Sajdah',
-      33: 'Al-Ahzab',
-      34: 'Saba',
-      35: 'Fatir',
-      36: 'Ya-Sin',
-      37: 'As-Saffat',
-      38: 'Sad',
-      39: 'Az-Zumar',
-      40: 'Ghafir',
-      41: 'Fussilat',
-      42: 'Ash-Shura',
-      43: 'Az-Zukhruf',
-      44: 'Ad-Dukhan',
-      45: 'Al-Jathiyah',
-      46: 'Al-Ahqaf',
-      47: 'Muhammad',
-      48: 'Al-Fath',
-      49: 'Al-Hujurat',
-      50: 'Qaf',
-      51: 'Adh-Dhariyat',
-      52: 'At-Tur',
-      53: 'An-Najm',
-      54: 'Al-Qamar',
-      55: 'Ar-Rahman',
-      56: "Al-Waqi'ah",
-      57: 'Al-Hadid',
-      58: 'Al-Mujadilah',
-      59: 'Al-Hashr',
-      60: 'Al-Mumtahanah',
-      61: 'As-Saff',
-      62: "Al-Jumu'ah",
-      63: 'Al-Munafiqun',
-      64: 'At-Taghabun',
-      65: 'At-Talaq',
-      66: 'At-Tahrim',
-      67: 'Al-Mulk',
-      68: 'Al-Qalam',
-      69: 'Al-Haqqah',
-      70: "Al-Ma'arij",
-      71: 'Nuh',
-      72: 'Al-Jinn',
-      73: 'Al-Muzzammil',
-      74: 'Al-Muddaththir',
-      75: 'Al-Qiyamah',
-      76: 'Al-Insan',
-      77: 'Al-Mursalat',
-      78: 'An-Naba',
-      79: "An-Nazi'at",
-      80: 'Abasa',
-      81: 'At-Takwir',
-      82: 'Al-Infitar',
-      83: 'Al-Mutaffifin',
-      84: 'Al-Inshiqaq',
-      85: 'Al-Buruj',
-      86: 'At-Tariq',
-      87: "Al-A'la",
-      88: 'Al-Ghashiyah',
-      89: 'Al-Fajr',
-      90: 'Al-Balad',
-      91: 'Ash-Shams',
-      92: 'Al-Layl',
-      93: 'Ad-Duha',
-      94: 'Ash-Sharh',
-      95: 'At-Tin',
-      96: 'Al-Alaq',
-      97: 'Al-Qadr',
-      98: 'Al-Bayyinah',
-      99: 'Az-Zalzalah',
-      100: 'Al-Adiyat',
-      101: "Al-Qari'ah",
-      102: 'At-Takathur',
-      103: 'Al-Asr',
-      104: 'Al-Humazah',
-      105: 'Al-Fil',
-      106: 'Quraysh',
-      107: "Al-Ma'un",
-      108: 'Al-Kawthar',
-      109: 'Al-Kafirun',
-      110: 'An-Nasr',
-      111: 'Al-Masad',
-      112: 'Al-Ikhlas',
-      113: 'Al-Falaq',
-      114: 'An-Nas',
-    };
-
-    return surahNames[surahNumber] ?? 'Unknown Surah';
-  }
+  // Removed _getArabicSurahName and _getEnglishSurahName
+  // They are now in SurahNames helper
 
   // Future<void> playArtistPlaylist(String artistId) async {
   //   final reciters = await getReciters();
@@ -951,8 +671,15 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
 extension SurahNameX on String {
   String get surahName {
-    final arabic = 'سورة $this';
-
-    return '$arabic $this';
+    try {
+      final int n = int.parse(this);
+      // Assuming Arabic default for this random extension if context is unknown,
+      // or we can use the helper which handles localization if we passed lang.
+      // But this extension just returns the Arabic name prefixed.
+      // Keeping original behavior:
+      return SurahNames.getArabicSurahName(n);
+    } catch (e) {
+      return this;
+    }
   }
 }

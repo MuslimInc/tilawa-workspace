@@ -384,14 +384,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i131.SetLanguageUseCase>(
       () => _i131.SetLanguageUseCase(gh<_i870.LocalizationRepository>()),
     );
-    await gh.singletonAsync<_i622.AudioPlayerHandler>(
-      () => externalDependenciesModule.audioPlayerHandler(
-        gh<List<_i87.MediaItem>>(),
-        gh<_i557.AnalyticsService>(),
-        gh<_i460.SharedPreferencesAsync>(),
-      ),
-      preResolve: true,
-    );
     gh.lazySingleton<_i908.PlaylistsRepository>(
       () => _i452.PlaylistsRepositoryImpl(gh<_i906.PlaylistsLocalDataSource>()),
     );
@@ -417,9 +409,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i906.PremiumRemoteDataSource>(),
       ),
     );
-    gh.factory<_i965.AudioPlayerBloc>(
-      () => _i965.AudioPlayerBloc(gh<_i622.AudioPlayerHandler>()),
-    );
     gh.lazySingleton<_i22.GetTotalDownloadsSizeUseCase>(
       () => _i22.GetTotalDownloadsSizeUseCase(gh<_i775.DownloadsRepository>()),
     );
@@ -431,6 +420,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i916.CheckSurahDownloadStatusUseCase>(),
         gh<_i119.RefreshSurahStatusUseCase>(),
       ),
+    );
+    await gh.singletonAsync<_i622.AudioPlayerHandler>(
+      () => externalDependenciesModule.audioPlayerHandler(
+        gh<List<_i87.MediaItem>>(),
+        gh<_i557.AnalyticsService>(),
+        gh<_i460.SharedPreferencesAsync>(),
+        gh<_i619.RecitersRepository>(),
+      ),
+      preResolve: true,
     );
     gh.factory<_i811.DownloadsBloc>(
       () => _i811.DownloadsBloc(
@@ -546,6 +544,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i95.SignOut>(),
         gh<_i778.GetCurrentUserUseCase>(),
       ),
+    );
+    gh.factory<_i965.AudioPlayerBloc>(
+      () => _i965.AudioPlayerBloc(gh<_i622.AudioPlayerHandler>()),
     );
     gh.factory<_i504.PremiumBloc>(
       () => _i504.PremiumBloc(

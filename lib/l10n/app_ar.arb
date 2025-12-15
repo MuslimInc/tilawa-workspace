@@ -436,8 +436,8 @@
     "@refreshDownloads": {
         "description": "Refresh downloads tooltip"
     },
-    "downloadingSurah": "جاري تحميل {surahTitle} بصوت {reciterName}...",
-    "@downloadingSurah": {
+    "downloadingSurahByReciter": "جاري تحميل {surahTitle} بصوت {reciterName}...",
+    "@downloadingSurahByReciter": {
         "description": "Download progress message",
         "placeholders": {
             "surahTitle": {
@@ -723,6 +723,16 @@
             "error": {
                 "type": "String",
                 "description": "The error message"
+            }
+        }
+    },
+    "downloadingSurah": "تحميل {surahTitle}",
+    "@downloadingSurah": {
+        "description": "Downloading surah message",
+        "placeholders": {
+            "surahTitle": {
+                "type": "String",
+                "description": "The title of the surah"
             }
         }
     }

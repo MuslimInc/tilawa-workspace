@@ -2,11 +2,11 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/entities/reciter.dart';
 import '../../core/extensions.dart';
 import '../../core/utils/toast_utils.dart';
 import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
-import '../models/reciter_model.dart';
 
 class ViewReciterButton extends StatelessWidget {
   const ViewReciterButton({super.key, required this.mediaItem});
@@ -19,14 +19,13 @@ class ViewReciterButton extends StatelessWidget {
       MediaItem mediaItem,
     ) async {
       try {
-        final Reciter? reciter = await ReciterHelper.getReciterFromMediaItem(
-          mediaItem,
-        );
+        final ReciterEntity? reciter =
+            await ReciterHelper.getReciterFromMediaItem(mediaItem);
         if (reciter != null && context.mounted) {
           // Use GoRouter to navigate to reciter details
           await ReciterDetailsRoute(
             reciterId: reciter.id.toString(),
-            reciter: reciter,
+            $extra: reciter,
           ).push(context);
         } else {
           if (context.mounted) {

@@ -5,7 +5,11 @@ import '../core/extensions.dart';
 import 'app_router_config.dart';
 
 class AppRouter {
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   static final GoRouter router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: const HomeRoute().location,
     debugLogDiagnostics: true,
     redirect: (context, state) {

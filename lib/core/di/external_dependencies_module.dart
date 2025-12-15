@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/downloads/data/services/download_service.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
+import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
 import '../../shared/audio/audio_player_handler.dart';
 import '../../shared/audio/audio_player_handler_impl.dart';
@@ -80,6 +81,7 @@ abstract class ExternalDependenciesModule {
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
     SharedPreferencesAsync prefs,
+    RecitersRepository recitersRepository,
   ) async {
     try {
       logger.d('Initializing audio service...');
@@ -87,6 +89,7 @@ abstract class ExternalDependenciesModule {
         mediaItems,
         analyticsService,
         prefs,
+        recitersRepository,
       );
 
       final AudioPlayerHandlerImpl audioHandler = await AudioService.init(
@@ -106,6 +109,7 @@ abstract class ExternalDependenciesModule {
         [],
         analyticsService,
         prefs,
+        recitersRepository,
       );
       logger.d('Fallback AudioPlayerHandler registered');
       return fallbackHandler;

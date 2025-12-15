@@ -339,7 +339,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refreshDownloads => 'Refresh Downloads';
 
   @override
-  String downloadingSurah(String surahTitle, String reciterName) {
+  String downloadingSurahByReciter(String surahTitle, String reciterName) {
     return 'Downloading $surahTitle by $reciterName...';
   }
 
@@ -530,5 +530,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String errorLoadingReciter(String error) {
     return 'Error loading reciter: $error';
+  }
+
+  @override
+  String downloadingSurah(String surahTitle) {
+    return 'تحميل $surahTitle';
   }
 }

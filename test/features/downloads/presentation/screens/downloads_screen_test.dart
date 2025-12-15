@@ -361,13 +361,6 @@ void main() {
           reason: 'CustomScrollView not found - BlocBuilder failing?',
         );
 
-        // 0. Check Debug Sliver
-        expect(
-          find.byKey(const Key('debug_sliver')),
-          findsOneWidget,
-          reason: 'Debug Sliver not found inside CustomScrollView',
-        );
-
         // 1. Check Reciter Header
         expect(
           find.text('Test Reciter', skipOffstage: false),

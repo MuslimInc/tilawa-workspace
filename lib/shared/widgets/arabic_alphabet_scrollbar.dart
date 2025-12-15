@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/entities/reciter.dart';
 import '../../features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import '../models/reciter_model.dart';
 
 class ArabicAlphabetScrollbar extends StatelessWidget {
   // Function to get letter from item
@@ -19,14 +19,14 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
   final Function(String letter) onLetterSelected;
   final ScrollController scrollController;
   final List<dynamic> items; // List of items to search through
-  final String Function(Reciter item) getItemLetter;
+  final String Function(ReciterEntity item) getItemLetter;
 
   void _onLetterTap(String letter, BuildContext context) {
     context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
 
     // Find the first item that starts with this letter
     final int index = items.indexWhere((item) {
-      final String itemLetter = getItemLetter(item);
+      final String itemLetter = getItemLetter(item as ReciterEntity);
       return itemLetter == letter;
     });
 
@@ -145,7 +145,7 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
     required this.scrollController,
     required this.onLetterSelected,
   });
-  final List<Reciter> reciters;
+  final List<ReciterEntity> reciters;
   final ScrollController scrollController;
   final Function(String letter) onLetterSelected;
 
@@ -165,7 +165,7 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
       scrollController: scrollController,
       items: reciters,
       getItemLetter: (dynamic item) {
-        final reciter = item as Reciter;
+        final reciter = item as ReciterEntity;
         return reciter.letter;
       },
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/extensions.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/repositories/downloads_repository.dart';
@@ -31,6 +32,7 @@ class DownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     return BlocProvider(
       create: (context) {
         // Try provider first, fall back to GetIt if provider isn't available
@@ -57,9 +59,9 @@ class DownloadButton extends StatelessWidget {
         buildWhen: (previous, current) {
           // Throttle progress updates to reduce rebuilds
           return current.maybeWhen(
-            downloading: (currProgress, _, __) {
+            downloading: (currProgress, _, _) {
               return previous.maybeWhen(
-                downloading: (prevProgress, _, __) =>
+                downloading: (prevProgress, _, _) =>
                     (currProgress - prevProgress).abs() > 0.02, // 2% threshold
                 orElse: () => true,
               );
@@ -78,7 +80,9 @@ class DownloadButton extends StatelessWidget {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
-                    ToastUtils.showToast(msg: 'Downloading $surahTitle...');
+                    ToastUtils.showToast(
+                      msg: l10n.downloadingSurah(surahTitle),
+                    );
                   },
                 ),
                 pending: () => _PendingDownloadButton(
@@ -406,9 +410,10 @@ class _PausedDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     return IconButton(
       icon: const Icon(Icons.play_arrow_rounded),
-      tooltip: AppLocalizations.of(context)!.resume,
+      tooltip: l10n.resume,
       onPressed: onUnpause,
     );
   }

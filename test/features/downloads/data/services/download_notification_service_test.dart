@@ -10,7 +10,6 @@ import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/services/navigation_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:muzakri/shared/models/reciter_model.dart';
 
 import 'download_notification_service_test.mocks.dart';
 
@@ -79,14 +78,6 @@ void main() {
       // Assert
       verify(mockRecitersRepository.getReciters()).called(1);
 
-      const expectedReciter = Reciter(
-        id: 1,
-        name: reciterName,
-        letter: 'A',
-        date: '2023',
-        moshaf: [],
-      );
-
       // Verify navigation call
       // Capture arguments to verify details
       final List<dynamic> captured = verify(
@@ -95,9 +86,8 @@ void main() {
 
       expect(captured[0], isA<String>()); // location string
       expect(captured[0], contains(reciterEntity.id.toString()));
-      expect(captured[1], isA<Reciter>()); // extra
-      expect((captured[1] as Reciter).name, equals(expectedReciter.name));
-      expect((captured[1] as Reciter).name, equals(expectedReciter.name));
+      expect(captured[1], isA<ReciterEntity>()); // extra
+      expect((captured[1] as ReciterEntity).name, equals(reciterEntity.name));
     });
 
     test('should NOT navigate if already on target route', () async {

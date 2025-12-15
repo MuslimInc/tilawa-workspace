@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/entities/reciter.dart';
 import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../shared/models/reciter_model.dart';
 import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
 import '../../../alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -294,7 +294,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   vertical: 8.h,
                                 ),
                                 itemBuilder: (context, index) {
-                                  final Reciter reciter =
+                                  final ReciterEntity reciter =
                                       state.filteredReciters[index];
                                   return ReciterCard(reciter: reciter);
                                 },

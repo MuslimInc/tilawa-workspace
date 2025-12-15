@@ -1798,6 +1798,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
+      when(
+        mockLocalDataSource.getDownloadsDirectory(),
+      ).thenAnswer((_) async => '/tmp/downloads');
 
       // Act
       final List<DownloadItem> results = await repository

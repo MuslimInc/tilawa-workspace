@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/entities/reciter.dart';
 import '../core/extensions.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
@@ -10,7 +9,6 @@ import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/reciter_details_screen.dart';
-import '../shared/models/reciter_model.dart';
 import '../shared/widgets/expanded_player_screen.dart';
 
 part 'app_router_config.g.dart';
@@ -27,14 +25,14 @@ class HomeRoute extends GoRouteData with $HomeRoute {
 
 @TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId')
 class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
-  const ReciterDetailsRoute({required this.reciter, required this.reciterId});
+  const ReciterDetailsRoute({required this.$extra, required this.reciterId});
 
-  final Reciter reciter;
+  final ReciterEntity $extra;
   final String reciterId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ReciterDetailsScreen(reciter: reciter);
+    return ReciterDetailsScreen(reciter: $extra);
   }
 }
 

@@ -7,9 +7,9 @@ import 'dart:async' as _i4;
 
 import 'package:audio_service/audio_service.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:muzakri/core/entities/reciter.dart' as _i7;
 import 'package:muzakri/shared/audio/audio_player_handler.dart' as _i3;
 import 'package:muzakri/shared/models/queue_state.dart' as _i5;
-import 'package:muzakri/shared/models/reciter_model.dart' as _i7;
 import 'package:rxdart/rxdart.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -73,6 +73,17 @@ class MockAudioPlayerHandler extends _i1.Mock
           as _i2.ValueStream<double>);
 
   @override
+  _i2.ValueStream<_i6.MediaItem?> get mediaItem =>
+      (super.noSuchMethod(
+            Invocation.getter(#mediaItem),
+            returnValue: _FakeValueStream_0<_i6.MediaItem?>(
+              this,
+              Invocation.getter(#mediaItem),
+            ),
+          )
+          as _i2.ValueStream<_i6.MediaItem?>);
+
+  @override
   _i2.ValueStream<_i6.PlaybackState> get playbackState =>
       (super.noSuchMethod(
             Invocation.getter(#playbackState),
@@ -104,17 +115,6 @@ class MockAudioPlayerHandler extends _i1.Mock
             ),
           )
           as _i2.ValueStream<String>);
-
-  @override
-  _i2.ValueStream<_i6.MediaItem?> get mediaItem =>
-      (super.noSuchMethod(
-            Invocation.getter(#mediaItem),
-            returnValue: _FakeValueStream_0<_i6.MediaItem?>(
-              this,
-              Invocation.getter(#mediaItem),
-            ),
-          )
-          as _i2.ValueStream<_i6.MediaItem?>);
 
   @override
   _i2.ValueStream<_i6.RatingStyle> get ratingStyle =>
@@ -337,18 +337,20 @@ class MockAudioPlayerHandler extends _i1.Mock
           as _i4.Future<List<_i6.MediaItem>?>);
 
   @override
-  _i4.Future<List<_i7.Reciter>?> getRecitersData({String? languageCode}) =>
+  _i4.Future<List<_i7.ReciterEntity>?> getRecitersData({
+    String? languageCode,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(#getRecitersData, [], {
               #languageCode: languageCode,
             }),
-            returnValue: _i4.Future<List<_i7.Reciter>?>.value(),
+            returnValue: _i4.Future<List<_i7.ReciterEntity>?>.value(),
           )
-          as _i4.Future<List<_i7.Reciter>?>);
+          as _i4.Future<List<_i7.ReciterEntity>?>);
 
   @override
   _i4.Future<List<_i6.MediaItem>?> getSurahListForMoshaf(
-    _i7.Mosahf? moshaf, {
+    _i7.MoshafEntity? moshaf, {
     String? reciterName,
   }) =>
       (super.noSuchMethod(
@@ -365,6 +367,15 @@ class MockAudioPlayerHandler extends _i1.Mock
   _i4.Future<void> playArtistPlaylist(String? artistId) =>
       (super.noSuchMethod(
             Invocation.method(#playArtistPlaylist, [artistId]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> playFromQueue(List<_i6.MediaItem>? queue, int? index) =>
+      (super.noSuchMethod(
+            Invocation.method(#playFromQueue, [queue, index]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )

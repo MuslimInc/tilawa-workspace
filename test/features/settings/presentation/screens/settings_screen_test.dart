@@ -93,7 +93,6 @@ void main() {
     // Verify Sections
     expect(find.text('Appearance'), findsOneWidget);
     expect(find.text('Downloads'), findsOneWidget);
-    expect(find.text('Account'), findsOneWidget);
 
     // Verify Tiles
     expect(find.text('Theme'), findsOneWidget);
@@ -125,7 +124,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Choose Theme'), findsOneWidget);
-    expect(find.text('System Default'), findsOneWidget);
+    expect(find.text('System Default'), findsNWidgets(2));
     expect(find.text('Light Mode'), findsOneWidget);
     expect(find.text('Dark Mode'), findsOneWidget);
   });

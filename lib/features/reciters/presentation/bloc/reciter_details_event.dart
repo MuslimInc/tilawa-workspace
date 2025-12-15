@@ -9,8 +9,8 @@ abstract class ReciterDetailsEvent extends Equatable {
 
 class LoadSurahList extends ReciterDetailsEvent {
   const LoadSurahList({required this.reciter, required this.moshaf});
-  final Reciter reciter;
-  final Mosahf moshaf;
+  final ReciterEntity reciter;
+  final MoshafEntity moshaf;
 
   @override
   List<Object?> get props => [reciter, moshaf];
@@ -18,7 +18,7 @@ class LoadSurahList extends ReciterDetailsEvent {
 
 class SelectMoshaf extends ReciterDetailsEvent {
   const SelectMoshaf(this.moshaf);
-  final Mosahf moshaf;
+  final MoshafEntity moshaf;
 
   @override
   List<Object?> get props => [moshaf];
