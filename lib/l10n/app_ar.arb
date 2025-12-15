@@ -583,5 +583,9 @@
     "notificationDownloadFailed": "فشل التحميل",
     "@notificationDownloadFailed": {
         "description": "Notification message when download fails"
+    },
+    "resume": "استئناف",
+    "@resume": {
+        "description": "Resume button text"
     }
 }

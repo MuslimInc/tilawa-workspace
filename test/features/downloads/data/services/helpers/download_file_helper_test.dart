@@ -29,9 +29,7 @@ void main() {
 
       expect(targetDir.existsSync(), isFalse);
 
-      final bool result = fileHelper.ensureDirectoryExists(
-        targetDir.path,
-      );
+      final bool result = fileHelper.ensureDirectoryExists(targetDir.path);
 
       expect(result, isTrue);
       expect(targetDir.existsSync(), isTrue);
@@ -49,9 +47,7 @@ void main() {
 
         expect(tempDir.existsSync(), isTrue);
 
-        final bool result = fileHelper.ensureDirectoryExists(
-          tempDir.path,
-        );
+        final bool result = fileHelper.ensureDirectoryExists(tempDir.path);
 
         expect(result, isTrue);
         expect(tempDir.existsSync(), isTrue);

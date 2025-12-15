@@ -143,9 +143,20 @@ class DownloadServiceImpl implements DownloadService {
     instance._flutterDownloader = value;
   }
 
+  /// Reset internal state for testing
+  @visibleForTesting
+  void resetForTesting() {
+    _activeDownloadUrls.clear();
+    _taskIdToUrlMap.clear();
+    _initialized = false;
+  }
+
   /// Map to store taskId -> URL for reverse lookups
   /// Used to map platform callbacks back to external IDs
   final Map<String, String> _taskIdToUrlMap = {};
+
+  /// Cache for active download URLs to avoid expensive IPC calls
+  final Set<String> _activeDownloadUrls = {};
 
   @override
   Stream<DownloadProgress> get globalProgressStream =>
@@ -192,7 +203,6 @@ class DownloadServiceImpl implements DownloadService {
   Future<void> _performInitialization() async {
     try {
       // Initialize FlutterDownloader
-      // Initialize FlutterDownloader
       await _flutterDownloader.initialize();
 
       // Register port for background IPC communication
@@ -208,6 +218,26 @@ class DownloadServiceImpl implements DownloadService {
       await _flutterDownloader.registerCallback(
         DownloadServiceImpl._downloadCallback,
       );
+
+      // Populate initial cache
+      try {
+        final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
+        if (tasks != null) {
+          _activeDownloadUrls.clear();
+          for (final DownloadTask task in tasks) {
+            // Cache task ID mapping
+            _taskIdToUrlMap[task.taskId] = task.url;
+
+            // Cache active status
+            if (task.status == DownloadTaskStatus.running ||
+                task.status == DownloadTaskStatus.enqueued) {
+              _activeDownloadUrls.add(task.url);
+            }
+          }
+        }
+      } catch (e) {
+        logger.w('[DownloadService] Failed to load initial tasks: $e');
+      }
 
       logger.d('[DownloadService] Initialized successfully');
     } catch (e) {
@@ -246,6 +276,14 @@ class DownloadServiceImpl implements DownloadService {
     }
 
     if (url != null) {
+      // Update active cache
+      if (status == DownloadTaskStatus.running ||
+          status == DownloadTaskStatus.enqueued) {
+        _activeDownloadUrls.add(url);
+      } else {
+        _activeDownloadUrls.remove(url);
+      }
+
       final DownloadStatus downloadStatus = _statusMapper
           .mapTaskStatusToDownloadStatus(status);
       _globalProgressController.add(
@@ -352,6 +390,7 @@ class DownloadServiceImpl implements DownloadService {
 
       if (taskId != null) {
         _taskIdToUrlMap[taskId] = id;
+        _activeDownloadUrls.add(id);
 
         _globalProgressController.add(
           DownloadProgress(
@@ -398,6 +437,8 @@ class DownloadServiceImpl implements DownloadService {
       }
     }
 
+    _activeDownloadUrls.remove(id);
+
     _globalProgressController.add(
       DownloadProgress(
         id: id,
@@ -421,37 +462,14 @@ class DownloadServiceImpl implements DownloadService {
   @override
   Future<List<String>> getActiveDownloadIds() async {
     await initialize();
-    final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
-
-    if (tasks == null) {
-      return [];
-    }
-
-    return tasks
-        .where(
-          (t) =>
-              t.status == DownloadTaskStatus.running ||
-              t.status == DownloadTaskStatus.enqueued,
-        )
-        .map((t) => t.url)
-        .toList();
+    return _activeDownloadUrls.toList();
   }
 
   /// Check if a download is currently active.
   @override
   Future<bool> isStatusDownloadActive(String id) async {
     await initialize();
-    final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
-
-    if (tasks == null || tasks.isEmpty) {
-      return false;
-    }
-
-    return tasks.any(
-      (t) =>
-          t.status == DownloadTaskStatus.running ||
-          t.status == DownloadTaskStatus.enqueued,
-    );
+    return _activeDownloadUrls.contains(id);
   }
 
   /// Get the current status of a download.
@@ -475,6 +493,7 @@ class DownloadServiceImpl implements DownloadService {
     } catch (_) {}
     _initialized = false;
     _taskIdToUrlMap.clear();
+    _activeDownloadUrls.clear();
   }
 
   /// Query tasks by URL from FlutterDownloader database.

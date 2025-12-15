@@ -105,6 +105,7 @@ void main() {
 
     // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
     DownloadQueueManager.reset();
+    DownloadServiceImpl.instance.resetForTesting();
 
     // Stub common methods to avoid MissingStubError
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((

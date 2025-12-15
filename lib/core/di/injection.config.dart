@@ -76,6 +76,8 @@ import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reci
     as _i748;
 import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart'
     as _i22;
+import 'package:muzakri/features/downloads/presentation/bloc/download_button/download_button_bloc.dart'
+    as _i144;
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i811;
 import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart'
@@ -338,6 +340,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i557.AnalyticsService>(
       () => _i557.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.factory<_i144.DownloadButtonBloc>(
+      () => _i144.DownloadButtonBloc(
+        url: gh<String>(),
+        reciterName: gh<String>(),
+        downloadsRepository: gh<_i775.DownloadsRepository>(),
+        initialIsDownloaded: gh<bool>(),
+        initialIsDownloading: gh<bool>(),
+        initialProgress: gh<double>(),
+      ),
     );
     gh.singleton<_i785.GetRecitersUseCase>(
       () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),

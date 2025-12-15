@@ -9,6 +9,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../core/di/injection.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../features/downloads/domain/entities/download_item.dart';
 import '../features/downloads/domain/repositories/downloads_repository.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
@@ -229,23 +230,26 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ),
           );
         }
-        return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-          builder: (context, audioState) {
-            return SliverPadding(
-              padding: EdgeInsets.only(
-                top: 16.h,
-                left: 16.w,
-                right: 16.w,
-                bottom: 30.h, // Space for bottom player
-              ),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final SurahEntity surah = state.surahList[index];
-                  return _buildSurahCard(surah, index, state, audioState);
-                }, childCount: state.surahList.length),
-              ),
-            );
-          },
+        // Removed wrapping BlocBuilder<AudioPlayerBloc> to prevent list-wide rebuilds
+        return SliverPadding(
+          padding: EdgeInsets.only(
+            top: 16.h,
+            left: 16.w,
+            right: 16.w,
+            bottom: 30.h, // Space for bottom player
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final SurahEntity surah = state.surahList[index];
+              return _SurahCard(
+                key: ValueKey('surah_${surah.id}'),
+                surah: surah,
+                index: index,
+                reciterName: widget.reciter.name,
+                onTap: () => _playSurah(surah, state),
+              );
+            }, childCount: state.surahList.length),
+          ),
         );
       case ReciterDetailsStatus.initial:
       case ReciterDetailsStatus.loading:
@@ -270,286 +274,107 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   Widget _buildSkeletonSurahCard() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(12.w),
-        child: Row(
-          children: [
-            // Circle placeholder for index
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  '1',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.sp,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            // Text placeholders
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Surah Name Placeholder',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'Reciter Name',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Button placeholders
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.download_outlined,
-                    color: Colors.grey,
-                    size: 20.sp,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.grey,
-                    size: 24.sp,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSurahCard(
-    SurahEntity surah,
-    int index,
-    ReciterDetailsState state,
-    AudioPlayerState audioState,
-  ) {
-    final MediaItem? currentMediaItem = audioState.mediaItem;
-    final PlaybackState? playbackState = audioState.playbackState;
-    final bool isCurrentlyPlaying =
-        currentMediaItem?.id == surah.id ||
-        // Also check if originalId in extras matches (for local files)
-        currentMediaItem?.extras?['originalId'] == surah.id;
-
-    final bool isPlaying =
-        isCurrentlyPlaying && (playbackState?.playing ?? false);
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: isCurrentlyPlaying
-            ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: isCurrentlyPlaying
-            ? Border.all(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-              )
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return RepaintBoundary(
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16.r),
-          onTap: () {
-            if (isCurrentlyPlaying) {
-              if (isPlaying) {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.pauseAudio(),
-                );
-              } else {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.playAudio(),
-                );
-              }
-            } else {
-              _playSurah(surah, state);
-            }
-          },
-          child: Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Row(
-              children: [
-                Container(
-                  width: 48.w,
-                  height: 48.w,
-                  decoration: BoxDecoration(
-                    color: isCurrentlyPlaying
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                    boxShadow: isCurrentlyPlaying
-                        ? [
-                            BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.4),
-                              blurRadius: 8.r,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    child: isCurrentlyPlaying
-                        ? Icon(
-                            Icons.graphic_eq_rounded,
-                            color: Colors.white,
-                            size: 24.sp,
-                          )
-                        : Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                  ),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(12.w),
+          child: Row(
+            children: [
+              // Circle placeholder for index
+              Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        surah.name,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isCurrentlyPlaying
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        surah.reciterName,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Download Status
-                    DownloadButton(
-                      surahId: surah.id,
-                      surahTitle: surah.name,
-                      reciterName: widget.reciter.name,
+                child: Center(
+                  child: Text(
+                    '1',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.sp,
                     ),
-
-                    SizedBox(width: 12.w),
-
-                    // Play Button Container
-                    Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        color: isCurrentlyPlaying
-                            ? Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.1)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: isCurrentlyPlaying
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey.withValues(alpha: 0.3),
-                        ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 16.w),
+              // Text placeholders
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Surah Name Placeholder',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: isCurrentlyPlaying
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey,
-                        size: 24.sp,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'Reciter Name',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              // Button placeholders
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.download_outlined,
+                      color: Colors.grey,
+                      size: 20.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.grey,
+                      size: 24.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -561,10 +386,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     try {
       final DownloadsRepository downloadsRepository =
           getIt<DownloadsRepository>();
-      // Extract surah ID from the title (assuming format like "001 Al-Fatiha")
-      final String surahId = surah.name.split(' ').first;
+      // Use surah.id which contains the download URL
       final String? filePath = await downloadsRepository.getDownloadedFilePath(
-        surahId,
+        surah.id,
         widget.reciter.name,
       );
 
@@ -651,27 +475,35 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       }
 
       if (surahIndex != -1) {
+        // Optimization: Fetch all downloads for this reciter ONCE to avoid N database queries
+        final DownloadsRepository downloadsRepository =
+            getIt<DownloadsRepository>();
+        final List<DownloadItem> reciterDownloads = await downloadsRepository
+            .getDownloadsForReciter(widget.reciter.name);
+
+        // Create a map of Surah ID -> File Path for fast lookup
+        final Map<String, String> downloadMap = {};
+        for (final item in reciterDownloads) {
+          if (item.status == DownloadStatus.completed) {
+            final file = File(item.filePath);
+            if (file.existsSync()) {
+              downloadMap[item.url] = item.filePath;
+            }
+          }
+        }
+
         // Create a list of surahs, using downloaded files when available
         final List<MediaItem> surahListWithDownloads = [];
         for (var i = 0; i < state.surahList.length; i++) {
           final SurahEntity currentSurah = state.surahList[i];
-          if (i == surahIndex && downloadedFilePath != null) {
-            // Use downloaded file for the selected surah
+          final String? localPath = downloadMap[currentSurah.id];
+
+          if (localPath != null) {
             surahListWithDownloads.add(
-              _createLocalMediaItem(currentSurah, downloadedFilePath),
+              _createLocalMediaItem(currentSurah, localPath),
             );
           } else {
-            // Check if this surah is also downloaded
-            final String? otherDownloadedPath = await _getDownloadedFilePath(
-              currentSurah,
-            );
-            if (otherDownloadedPath != null) {
-              surahListWithDownloads.add(
-                _createLocalMediaItem(currentSurah, otherDownloadedPath),
-              );
-            } else {
-              surahListWithDownloads.add(currentSurah.mediaItem);
-            }
+            surahListWithDownloads.add(currentSurah.mediaItem);
           }
         }
 
@@ -682,15 +514,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
         try {
           await audioHandler.updateQueue(surahListWithDownloads);
-
-          // Ensure we're paused before seeking to prevent unwanted playback
           await audioHandler.pause();
-
-          // Skip to the selected surah
-          logger.d('_playSurah: skipping to surah at index $surahIndex');
           await audioHandler.skipToQueueItem(surahIndex);
-
-          // Now start playing the selected surah
           await audioHandler.play();
         } catch (e) {
           logger.d(
@@ -734,5 +559,191 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         ToastUtils.showErrorToast('Error playing surah: $e');
       }
     }
+  }
+}
+
+class _SurahCard extends StatelessWidget {
+  const _SurahCard({
+    required super.key,
+    required this.surah,
+    required this.index,
+    required this.reciterName,
+    required this.onTap,
+  });
+
+  final SurahEntity surah;
+  final int index;
+  final String reciterName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Select specific values to minimize rebuilds
+    final bool isPlaying = context.select<AudioPlayerBloc, bool>((bloc) {
+      final MediaItem? currentMediaItem = bloc.state.mediaItem;
+      final PlaybackState? playbackState = bloc.state.playbackState;
+
+      final bool isCurrentlyPlaying =
+          currentMediaItem?.id == surah.id ||
+          currentMediaItem?.extras?['originalId'] == surah.id;
+
+      return isCurrentlyPlaying && (playbackState?.playing ?? false);
+    });
+
+    final bool isCurrentItem = context.select<AudioPlayerBloc, bool>((bloc) {
+      final MediaItem? currentMediaItem = bloc.state.mediaItem;
+      return currentMediaItem?.id == surah.id ||
+          currentMediaItem?.extras?['originalId'] == surah.id;
+    });
+
+    return RepaintBoundary(
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        decoration: BoxDecoration(
+          color: isCurrentItem
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16.r),
+          border: isCurrentItem
+              ? Border.all(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                )
+              : Border.all(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16.r),
+            onTap: () {
+              if (isCurrentItem) {
+                if (isPlaying) {
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.pauseAudio(),
+                  );
+                } else {
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.playAudio(),
+                  );
+                }
+              } else {
+                onTap();
+              }
+            },
+            child: Padding(
+              padding: EdgeInsets.all(12.w),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48.w,
+                    height: 48.w,
+                    decoration: BoxDecoration(
+                      color: isCurrentItem
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: isCurrentItem
+                          ? Icon(
+                              Icons.graphic_eq_rounded,
+                              color: Colors.white,
+                              size: 24.sp,
+                            )
+                          : Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          surah.name,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isCurrentItem
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          surah.reciterName,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Theme.of(context).textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.6),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Download Status
+                      DownloadButton(
+                        url: surah.id,
+                        surahTitle: surah.name,
+                        reciterName: reciterName,
+                        initialIsDownloaded: surah.isDownloaded,
+                        initialIsDownloading: surah.isDownloading,
+                        initialProgress: surah.downloadProgress,
+                      ),
+
+                      SizedBox(width: 12.w),
+
+                      // Play Button Container
+                      Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: BoxDecoration(
+                          color: isCurrentItem
+                              ? Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: isCurrentItem
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: isCurrentItem
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey,
+                          size: 24.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

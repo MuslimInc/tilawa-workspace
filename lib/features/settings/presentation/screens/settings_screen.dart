@@ -108,52 +108,73 @@ class SettingsScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            // Account Group
+            // Logout Button
             BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 if (state is AuthAuthenticated) {
-                  return _SettingsGroup(
-                    title: 'Account',
-                    children: [
-                      _SettingsTile(
-                        icon: FluentIcons.sign_out_24_regular,
-                        title: 'Logout',
-                        titleColor: Colors.redAccent,
-                        iconColor: Colors.redAccent,
-                        showArrow: false,
-                        showDivider: false,
-                        onTap: () {
-                          // Show confirmation dialog before logout
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Logout'),
-                              content: const Text(
-                                'Are you sure you want to logout?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    context.read<AuthBloc>().add(
-                                      const SignOutEvent(),
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Logout',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ),
-                              ],
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Logout'),
+                            content: const Text(
+                              'Are you sure you want to logout?',
                             ),
-                          );
-                        },
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  context.read<AuthBloc>().add(
+                                    const SignOutEvent(),
+                                  );
+                                },
+                                child: const Text(
+                                  'Logout',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: Colors.red.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              FluentIcons.sign_out_24_regular,
+                              color: Colors.red,
+                              size: 24.sp,
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'Logout',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   );
                 }
                 return const SizedBox.shrink();
@@ -416,9 +437,6 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.subtitle,
-    this.titleColor,
-    this.iconColor,
-    this.showArrow = true,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
   });
@@ -426,9 +444,6 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
-  final Color? titleColor;
-  final Color? iconColor;
-  final bool showArrow;
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
 
@@ -444,24 +459,18 @@ class _SettingsTile extends StatelessWidget {
             leading: Container(
               padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
-                color: (iconColor ?? Theme.of(context).primaryColor).withValues(
-                  alpha: 0.1,
-                ),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? Theme.of(context).primaryColor,
+                color: Theme.of(context).primaryColor,
                 size: 20.sp,
               ),
             ),
             title: Text(
               title,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16.sp,
-                color: titleColor,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
             ),
             subtitle: subtitle != null
                 ? Text(
@@ -472,13 +481,11 @@ class _SettingsTile extends StatelessWidget {
                     ),
                   )
                 : null,
-            trailing: showArrow
-                ? Icon(
-                    FluentIcons.chevron_right_24_regular,
-                    size: 18.sp,
-                    color: Colors.grey,
-                  )
-                : null,
+            trailing: Icon(
+              FluentIcons.chevron_right_24_regular,
+              size: 18.sp,
+              color: Colors.grey,
+            ),
           ),
         ),
         if (showDivider)

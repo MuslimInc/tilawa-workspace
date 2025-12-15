@@ -83,77 +83,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     return Scaffold(
       body: BlocBuilder<DownloadsBloc, DownloadsState>(
         builder: (context, state) {
-          final int totalBytes = state.totalDownloadsSize;
-          final String formattedSize = FileSizeFormatter.formatBytes(
-            totalBytes,
-          );
-
           return CustomScrollView(
             slivers: [
-              SliverAppBar(
-                expandedHeight: 120.0,
-                floating: true,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: EdgeInsetsDirectional.only(
-                    start: 16.w,
-                    bottom: 16.h,
-                  ),
-                  title: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.downloads,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.titleLarge?.color,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (state.status == DownloadsStateStatus.loaded &&
-                          state.downloads.isNotEmpty)
-                        Text(
-                          'Storage Used: $formattedSize',
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                    ],
-                  ),
-                  centerTitle: false,
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                          Theme.of(context).scaffoldBackgroundColor,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.refresh_rounded),
-                    onPressed: _loadDownloads,
-                    tooltip: AppLocalizations.of(context)!.refreshDownloads,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_sweep_rounded,
-                      color: Colors.redAccent,
-                    ),
-                    onPressed: () => _showClearAllDialog(context),
-                    tooltip: AppLocalizations.of(context)!.deleteAll,
-                  ),
-                ],
-              ),
+              _buildAppBar(context, state),
               _buildBody(context, state),
               // Add some bottom padding for floating action buttons or player
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -164,7 +96,74 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     );
   }
 
+  SliverAppBar _buildAppBar(BuildContext context, DownloadsState state) {
+    final int totalBytes = state.totalDownloadsSize;
+    final String formattedSize = FileSizeFormatter.formatBytes(totalBytes);
+
+    return SliverAppBar(
+      expandedHeight: 120.0,
+      floating: true,
+      pinned: true,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: EdgeInsetsDirectional.only(start: 16.w, bottom: 16.h),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.downloads,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.titleLarge?.color,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (state.status == DownloadsStateStatus.loaded &&
+                state.downloads.isNotEmpty)
+              Text(
+                'Storage Used: $formattedSize',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+          ],
+        ),
+        centerTitle: false,
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.1),
+                Theme.of(context).scaffoldBackgroundColor,
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _loadDownloads,
+          tooltip: AppLocalizations.of(context)!.refreshDownloads,
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+          onPressed: () => _showClearAllDialog(context),
+          tooltip: AppLocalizations.of(context)!.deleteAll,
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody(BuildContext context, DownloadsState state) {
+    print(
+      'DownloadsScreen BuildBody: status=${state.status}, downloads=${state.downloads.length}',
+    );
     switch (state.status) {
       case DownloadsStateStatus.initial:
       case DownloadsStateStatus.loading:
@@ -260,6 +259,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
+        print('SliverList Builder: index=$index');
         final String reciterName = downloadsByReciter.keys.elementAt(index);
         final Map<String, List<DownloadItem>> narrativeDownloads =
             downloadsByReciter[reciterName] ?? {};

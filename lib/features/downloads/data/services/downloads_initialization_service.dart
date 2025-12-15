@@ -21,6 +21,7 @@ class DownloadsInitializationService {
   Future<void> initialize() async {
     try {
       await _downloadNotificationService.initialize();
+      await _downloadsRepository.initialize();
       await _downloadsRepository.resumePendingDownloads();
       logger.d('DownloadsInitializationService: Initialization completed');
     } catch (e) {

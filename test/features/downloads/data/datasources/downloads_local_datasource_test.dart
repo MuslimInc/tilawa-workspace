@@ -338,9 +338,7 @@ void main() {
 
       test('should return false when file does not exist', () async {
         // Act
-        final bool result = dataSource.isFileExists(
-          '/non/existent/path.mp3',
-        );
+        final bool result = dataSource.isFileExists('/non/existent/path.mp3');
 
         // Assert
         expect(result, isFalse);

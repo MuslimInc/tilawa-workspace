@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
@@ -56,11 +57,17 @@ class AppProviders {
     ),
   ];
 
-  /// Creates a MultiBlocProvider widget with all the configured providers.
-  ///
-  /// This is a convenience method that wraps all providers in a MultiBlocProvider
-  /// and can be used directly in the widget tree.
+  static List<RepositoryProvider> get repositories => [
+    RepositoryProvider<DownloadsRepository>(
+      create: (context) => getIt<DownloadsRepository>(),
+    ),
+  ];
+
+  /// Creates a widget tree with all configured providers (Blocs and Repositories).
   static Widget create({required Widget child}) {
-    return MultiBlocProvider(providers: providers, child: child);
+    return MultiRepositoryProvider(
+      providers: repositories,
+      child: MultiBlocProvider(providers: providers, child: child),
+    );
   }
 }

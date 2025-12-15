@@ -436,4 +436,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationDownloadFailed => 'Download failed';
+
+  @override
+  String get resume => 'Resume';
 }

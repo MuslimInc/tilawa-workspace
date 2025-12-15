@@ -12,6 +12,7 @@ import 'package:muzakri/features/downloads/data/services/download_notification_s
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_item_card.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
@@ -28,6 +29,7 @@ DownloadsState provideDummyDownloadsState() => const DownloadsState();
   DownloadQueueManager,
   DownloadService,
   DownloadNotificationService,
+  DownloadsRepository,
 ])
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
@@ -35,15 +37,20 @@ void main() {
   late MockDownloadQueueManager mockDownloadQueueManager;
   late MockDownloadService mockDownloadService;
   late MockDownloadNotificationService mockDownloadNotificationService;
+  late MockDownloadsRepository mockDownloadsRepository;
+
+  setUpAll(() {
+    provideDummy(const DownloadsState());
+  });
 
   setUp(() {
     // Provide dummy value for Mockito before creating mocks
-    provideDummy(const DownloadsState());
 
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockDownloadQueueManager = MockDownloadQueueManager();
     mockDownloadService = MockDownloadService();
+    mockDownloadsRepository = MockDownloadsRepository();
 
     // Setup DownloadQueueManager.instance for older tests that might rely on it directly
     DownloadQueueManager.instance = mockDownloadQueueManager;
@@ -52,6 +59,7 @@ void main() {
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(mockDownloadService);
+    } else {
       getIt.unregister<DownloadService>();
       getIt.registerSingleton<DownloadService>(mockDownloadService);
     }
@@ -67,9 +75,9 @@ void main() {
         mockDownloadNotificationService,
       );
     }
-    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
-      return;
-    });
+    when(
+      mockDownloadNotificationService.initialize(),
+    ).thenAnswer((_) => Future.value());
     when(
       mockDownloadNotificationService.showDownloadProgress(
         downloadId: anyNamed('downloadId'),
@@ -82,28 +90,16 @@ void main() {
         completeMessage: anyNamed('completeMessage'),
         failedMessage: anyNamed('failedMessage'),
       ),
-    ).thenAnswer((_) async {
-      return;
-    });
-    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
-      _,
-    ) async {
-      return;
-    });
+    ).thenAnswer((_) => Future.value());
+    when(
+      mockDownloadNotificationService.cancelNotification(any),
+    ).thenAnswer((_) => Future.value());
 
     // Set up stream first (required for BlocProvider)
     when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
-    when(
-      mockDownloadsBloc.statusStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      mockDownloadsBloc.downloadProgressStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      mockDownloadsBloc.getDownloadProgressStream(any),
-    ).thenAnswer((_) => const Stream.empty());
-
-    // Provide default dummy values for state
+    // when(mockDownloadsBloc.statusStream).thenAnswer(
+    //   const Stream<DownloadsStatus>.empty(),
+    // ); // Provide default dummy values for state
     when(mockDownloadsBloc.state).thenReturn(const DownloadsState());
     when(
       mockAudioPlayerBloc.state,
@@ -116,6 +112,14 @@ void main() {
 
     // Stub queue manager
     when(mockDownloadQueueManager.getQueuePosition(any)).thenReturn(0);
+
+    // Stub repository
+    when(
+      mockDownloadsRepository.isSurahDownloaded(any, any),
+    ).thenAnswer((_) async => false);
+    when(
+      mockDownloadsRepository.isSurahDownloading(any, any),
+    ).thenAnswer((_) async => false);
 
     // Set screen size to larger value to avoid overflows
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -141,14 +145,17 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: MultiBlocProvider(
-          providers: [
-            BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
-            BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
-          ],
-          child: DownloadItemCard(
-            download: download,
-            onDelete: onDelete ?? () {},
+        body: RepositoryProvider<DownloadsRepository>.value(
+          value: mockDownloadsRepository,
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
+              BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+            ],
+            child: DownloadItemCard(
+              download: download,
+              onDelete: onDelete ?? () {},
+            ),
           ),
         ),
       ),
@@ -579,8 +586,8 @@ void main() {
       );
 
       // Mock playing state for this item
-      when(mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+      when(mockAudioPlayerBloc.state).thenAnswer(
+        (_) => AudioPlayerState(
           status: AudioPlayerStatus.success,
           mediaItem: const MediaItem(
             id: 'file:///path/to/test.mp3',
@@ -619,8 +626,8 @@ void main() {
       );
 
       // Mock playing state for DIFFERENT item
-      when(mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+      when(mockAudioPlayerBloc.state).thenAnswer(
+        (_) => AudioPlayerState(
           status: AudioPlayerStatus.success,
           mediaItem: const MediaItem(
             id: 'file:///path/to/OTHER.mp3',
@@ -653,8 +660,8 @@ void main() {
       );
 
       // Mock PAUSED state for this item
-      when(mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+      when(mockAudioPlayerBloc.state).thenAnswer(
+        (_) => AudioPlayerState(
           status: AudioPlayerStatus.success,
           mediaItem: const MediaItem(
             id: 'file:///path/to/test.mp3',
@@ -782,7 +789,9 @@ void main() {
     testWidgets('should show queue position when pending and position > 0', (
       WidgetTester tester,
     ) async {
-      when(mockDownloadQueueManager.getQueuePosition('test_id')).thenReturn(5);
+      when(
+        mockDownloadQueueManager.getQueuePosition('test_id'),
+      ).thenAnswer((_) => 5);
 
       final download = DownloadItem(
         id: 'test_id',

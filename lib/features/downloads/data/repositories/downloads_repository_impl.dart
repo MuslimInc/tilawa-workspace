@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -18,9 +19,29 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   final DownloadsLocalDataSource localDataSource;
   final DownloadService downloadService;
+  StreamSubscription? _progressSubscription;
 
   // Cache for the downloads directory to avoid repeated async calls
   String? _cachedDownloadsDir;
+
+  @override
+  Future<void> initialize() async {
+    _progressSubscription?.cancel();
+    _progressSubscription = downloadService.globalProgressStream.listen(
+      (progress) {
+        updateDownloadProgress(
+          progress.id,
+          progress.status,
+          progress.progress,
+          progress.downloadedSize,
+          progress.fileSize,
+        );
+      },
+      onError: (e) {
+        logger.e('[DownloadsRepository] Error in progress stream: $e');
+      },
+    );
+  }
 
   Future<String> _getDownloadsDir() async {
     if (_cachedDownloadsDir != null) {
@@ -119,8 +140,38 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       // Check for orphaned pending downloads (Pending in DB, but not in queue and not active)
       // This happens if app was killed while pending, or if queue manager lost track
       if (download.status == DownloadStatus.pending && !isQueued && !isActive) {
+        // Verify if it's really pending or if we missed a completion
+        DownloadStatus? actualStatus;
+        try {
+          actualStatus = await downloadService.getStatus(download.url);
+        } catch (e) {
+          logger.w(
+            '[DownloadsRepository] Error checking status for orphaned download: $e',
+          );
+        }
+
+        if (actualStatus == DownloadStatus.completed) {
+          // It's completed! Check file existence to be sure
+          final bool fileExists = localDataSource.isFileExists(
+            download.filePath,
+          );
+          if (fileExists) {
+            logger.i(
+              '[DownloadsRepository] Found orphaned pending download that is actually completed: id=${download.id} - Updating DB',
+            );
+            final DownloadItem updatedDownload = download.copyWith(
+              status: DownloadStatus.completed,
+              progress: 1.0,
+              completedAt: DateTime.now(),
+            );
+            updatedDownloads.add(updatedDownload);
+            hasChanges = true;
+            continue;
+          }
+        }
+
         logger.w(
-          '[DownloadsRepository] Found orphaned pending download: id=${download.id} isQueued=$isQueued isActive=$isActive - Re-enqueueing',
+          '[DownloadsRepository] Found orphaned pending download: id=${download.id} isQueued=$isQueued isActive=$isActive actualStatus=$actualStatus - Re-enqueueing',
         );
 
         // Re-enqueue (auto-resume)
@@ -481,8 +532,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> deleteDownload(String id) async {
     final DownloadItem? download = await getDownloadItem(id);
-    if (download != null &&
-        localDataSource.isFileExists(download.filePath)) {
+    if (download != null && localDataSource.isFileExists(download.filePath)) {
       await localDataSource.deleteFile(download.filePath);
     }
     await localDataSource.deleteDownload(id);
@@ -521,16 +571,16 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> startDownload(
-    String surahId,
+    String url,
     String surahTitle,
     String reciterName,
   ) async {
     // Validate inputs early to avoid creating invalid download entries
     // Note: in our app, surahId is the actual download URL
-    final String trimmedUrl = surahId.trim();
+    final String trimmedUrl = url.trim();
     if (trimmedUrl.isEmpty) {
       logger.e(
-        '[DownloadsRepositoryImpl] startDownload: empty URL for surahId=$surahId reciter="$reciterName"',
+        '[DownloadsRepositoryImpl] startDownload: empty URL for url=$url reciter="$reciterName"',
       );
       throw ArgumentError('Download URL is empty');
     }
@@ -670,11 +720,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   }
 
   @override
-  Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
+  Future<bool> isSurahDownloaded(String url, String reciterName) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     // surahId is the URL
     // We match by checking if the download's URL matches surahId AND reciter matches
-    final String trimmedUrl = surahId.trim();
+    final String trimmedUrl = url.trim();
     final String downloadsDir = await _getDownloadsDir();
 
     for (final rawDownload in downloads) {
@@ -691,8 +741,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   }
 
   @override
-  Future<bool> isSurahDownloading(String surahId, String reciterName) async {
-    final String trimmedUrl = surahId.trim();
+  Future<bool> isSurahDownloading(String url, String reciterName) async {
+    final String trimmedUrl = url.trim();
 
     // First check if there's a download item with downloading status
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
@@ -733,13 +783,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   }
 
   @override
-  Future<String?> getDownloadedFilePath(
-    String surahId,
-    String reciterName,
-  ) async {
+  Future<String?> getDownloadedFilePath(String url, String reciterName) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     // surahId is the URL
-    final String trimmedUrl = surahId.trim();
+    final String trimmedUrl = url.trim();
     final String downloadsDir = await _getDownloadsDir();
 
     try {

@@ -434,4 +434,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notificationDownloadFailed => 'فشل التحميل';
+
+  @override
+  String get resume => 'استئناف';
 }

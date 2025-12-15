@@ -46,6 +46,15 @@ class MockDownloadsRepository extends _i1.Mock
   }
 
   @override
+  _i4.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
   _i4.Future<Map<String, Map<String, List<_i5.DownloadItem>>>>
   getDownloadsByReciter() =>
       (super.noSuchMethod(
@@ -132,16 +141,12 @@ class MockDownloadsRepository extends _i1.Mock
 
   @override
   _i4.Future<void> startDownload(
-    String? surahId,
+    String? url,
     String? surahTitle,
     String? reciterName,
   ) =>
       (super.noSuchMethod(
-            Invocation.method(#startDownload, [
-              surahId,
-              surahTitle,
-              reciterName,
-            ]),
+            Invocation.method(#startDownload, [url, surahTitle, reciterName]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
@@ -175,28 +180,25 @@ class MockDownloadsRepository extends _i1.Mock
           as _i4.Future<void>);
 
   @override
-  _i4.Future<bool> isSurahDownloaded(String? surahId, String? reciterName) =>
+  _i4.Future<bool> isSurahDownloaded(String? url, String? reciterName) =>
       (super.noSuchMethod(
-            Invocation.method(#isSurahDownloaded, [surahId, reciterName]),
+            Invocation.method(#isSurahDownloaded, [url, reciterName]),
             returnValue: _i4.Future<bool>.value(false),
           )
           as _i4.Future<bool>);
 
   @override
-  _i4.Future<bool> isSurahDownloading(String? surahId, String? reciterName) =>
+  _i4.Future<bool> isSurahDownloading(String? url, String? reciterName) =>
       (super.noSuchMethod(
-            Invocation.method(#isSurahDownloading, [surahId, reciterName]),
+            Invocation.method(#isSurahDownloading, [url, reciterName]),
             returnValue: _i4.Future<bool>.value(false),
           )
           as _i4.Future<bool>);
 
   @override
-  _i4.Future<String?> getDownloadedFilePath(
-    String? surahId,
-    String? reciterName,
-  ) =>
+  _i4.Future<String?> getDownloadedFilePath(String? url, String? reciterName) =>
       (super.noSuchMethod(
-            Invocation.method(#getDownloadedFilePath, [surahId, reciterName]),
+            Invocation.method(#getDownloadedFilePath, [url, reciterName]),
             returnValue: _i4.Future<String?>.value(),
           )
           as _i4.Future<String?>);

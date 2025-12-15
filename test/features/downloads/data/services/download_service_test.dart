@@ -452,7 +452,7 @@ void main() {
 
           await Future.delayed(const Duration(milliseconds: 500));
 
-          verify(mockDownloader.loadTasks()).called(1);
+          verify(mockDownloader.loadTasks()).called(2);
 
           expect(progressEvents, isNotEmpty);
           expect(progressEvents.first.id, testUrl);

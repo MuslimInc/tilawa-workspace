@@ -1,190 +1,160 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../router/app_router_config.dart';
-import '../../../premium/presentation/widgets/premium_upgrade_dialog.dart';
-import '../../data/services/download_service.dart';
-import '../../domain/entities/download_item.dart';
-import '../bloc/downloads_bloc.dart';
-import '../bloc/downloads_state_extension.dart';
-import '../bloc/downloads_status.dart';
+import '../../domain/repositories/downloads_repository.dart';
+import '../bloc/download_button/download_button_bloc.dart';
 
-class DownloadButton extends StatefulWidget {
+/// Download button with independent state management
+///
+/// Each button creates its own [DownloadButtonBloc] for optimal performance.
+/// No longer coupled to global [DownloadsBloc] state, preventing unnecessary rebuilds.
+class DownloadButton extends StatelessWidget {
   const DownloadButton({
     super.key,
-    required this.surahId,
+    required this.url,
     required this.surahTitle,
     required this.reciterName,
+    this.initialIsDownloaded,
+    this.initialIsDownloading,
+    this.initialProgress,
   });
 
-  final String surahId;
+  final String url;
   final String surahTitle;
   final String reciterName;
-
-  @override
-  State<DownloadButton> createState() => _DownloadButtonState();
-}
-
-class _DownloadButtonState extends State<DownloadButton>
-    with SingleTickerProviderStateMixin {
-  StreamSubscription<DownloadsStatus>? _statusSubscription;
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    // Listen to status events
-    _statusSubscription = context.read<DownloadsBloc>().statusStream.listen((
-      status,
-    ) {
-      status.mapOrNull(
-        premiumRequired: (s) => _showPremiumUpgradeDialog(context, s.message),
-        error: (s) => ToastUtils.showToast(msg: s.message),
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _statusSubscription?.cancel();
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _downloadSurah(BuildContext context) {
-    context.read<DownloadsBloc>().add(
-      DownloadSurahEvent(
-        surahId: widget.surahId,
-        surahTitle: widget.surahTitle,
-        reciterName: widget.reciterName,
-      ),
-    );
-
-    ToastUtils.showToast(msg: 'Downloading ${widget.surahTitle}...');
-  }
-
-  void _showPremiumUpgradeDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => PremiumUpgradeDialog(
-        title: 'Premium Required',
-        message: message,
-        onUpgrade: () {
-          const PremiumRoute().push(context);
-        },
-      ),
-    );
-  }
+  final bool? initialIsDownloaded;
+  final bool? initialIsDownloading;
+  final double? initialProgress;
 
   @override
   Widget build(BuildContext context) {
-    // Use surahId (URL) as downloadId
-    final String downloadId = widget.surahId;
+    return BlocProvider(
+      create: (context) {
+        // Try provider first, fall back to GetIt if provider isn't available
+        DownloadsRepository repo;
+        try {
+          repo = context.read<DownloadsRepository>();
+        } catch (e) {
+          repo = getIt<DownloadsRepository>();
+        }
 
-    return BlocBuilder<DownloadsBloc, DownloadsState>(
-      buildWhen: (previous, current) {
-        // Only rebuild when this specific download's status changes
-        final DownloadItem? previousItem = previous.getDownload(
-          widget.surahId,
-          widget.reciterName,
+        final bloc = DownloadButtonBloc(
+          url: url,
+          reciterName: reciterName,
+          downloadsRepository: repo,
+          initialIsDownloaded: initialIsDownloaded,
+          initialIsDownloading: initialIsDownloading,
+          initialProgress: initialProgress,
         );
-        final DownloadItem? currentItem = current.getDownload(
-          widget.surahId,
-          widget.reciterName,
-        );
-
-        // Rebuild if download item changed (status, progress, etc.)
-        return previousItem?.status != currentItem?.status ||
-            previousItem?.progress != currentItem?.progress;
+        // Explicitly initialize after creation
+        bloc.add(const DownloadButtonEvent.initialize());
+        return bloc;
       },
-      builder: (context, state) {
-        // Check for download item in loaded state
-        final DownloadItem? downloadItem = state.getDownload(
-          widget.surahId,
-          widget.reciterName,
-        );
-        final DownloadStatus? status = downloadItem?.status;
-
-        // Route to appropriate state widget
-        return switch (status) {
-          DownloadStatus.completed => _CompletedDownloadButton(
-            animationController: _animationController,
-            scaleAnimation: _scaleAnimation,
-          ),
-
-          DownloadStatus.failed => _FailedDownloadButton(
-            onRetry: () => _downloadSurah(context),
-          ),
-
-          DownloadStatus.cancelled => _CancelledDownloadButton(
-            onRestart: () => _downloadSurah(context),
-          ),
-
-          DownloadStatus.pending => _PendingDownloadButton(
-            onCancel: () => context.read<DownloadsBloc>().add(
-              DeleteDownloadEvent(downloadId: downloadId),
+      child: BlocBuilder<DownloadButtonBloc, DownloadButtonState>(
+        buildWhen: (previous, current) {
+          // Throttle progress updates to reduce rebuilds
+          return current.maybeWhen(
+            downloading: (currProgress, _, __) {
+              return previous.maybeWhen(
+                downloading: (prevProgress, _, __) =>
+                    (currProgress - prevProgress).abs() > 0.02, // 2% threshold
+                orElse: () => true,
+              );
+            },
+            orElse: () => true,
+          );
+        },
+        builder: (context, state) {
+          return RepaintBoundary(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: state.when(
+                initial: () => const _LoadingDownloadButton(),
+                readyToDownload: () => _DefaultDownloadButton(
+                  onDownload: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                    );
+                    ToastUtils.showToast(msg: 'Downloading $surahTitle...');
+                  },
+                ),
+                pending: () => _PendingDownloadButton(
+                  onCancel: () {
+                    context.read<DownloadButtonBloc>().add(
+                      const DownloadButtonEvent.cancel(),
+                    );
+                  },
+                ),
+                downloading: (progress, downloadedBytes, totalBytes) =>
+                    _DownloadingProgressButton(
+                      progress: progress,
+                      onCancel: () {
+                        context.read<DownloadButtonBloc>().add(
+                          const DownloadButtonEvent.cancel(),
+                        );
+                      },
+                    ),
+                completed: () => const _CompletedDownloadButton(),
+                failed: (errorMessage) => _FailedDownloadButton(
+                  onRetry: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.retry(surahTitle: surahTitle),
+                    );
+                  },
+                  errorMessage: errorMessage,
+                ),
+                cancelled: () => _CancelledDownloadButton(
+                  onRestart: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                    );
+                  },
+                ),
+                paused: () => _PausedDownloadButton(
+                  onUnpause: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                    );
+                  },
+                ),
+                networkError: (errorMessage) => _FailedDownloadButton(
+                  onRetry: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.retry(surahTitle: surahTitle),
+                    );
+                  },
+                  errorMessage: errorMessage ?? 'Network error',
+                ),
+              ),
             ),
-          ),
-
-          DownloadStatus.downloading => _DownloadingProgressButton(
-            downloadId: downloadId,
-            downloadItem: downloadItem,
-          ),
-
-          _ => _DefaultDownloadButton(
-            onDownload: () => _downloadSurah(context),
-          ),
-        };
-      },
+          );
+        },
+      ),
     );
   }
 }
 
 /// Completed download state widget
 class _CompletedDownloadButton extends StatelessWidget {
-  const _CompletedDownloadButton({
-    required this.animationController,
-    required this.scaleAnimation,
-  });
-
-  final AnimationController animationController;
-  final Animation<double> scaleAnimation;
+  const _CompletedDownloadButton();
 
   @override
   Widget build(BuildContext context) {
-    animationController.forward();
-    return ScaleTransition(
-      scale: scaleAnimation,
-      child: SizedBox(
-        width: 48,
-        height: 48,
-        child: Center(
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 24,
-            ),
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(0.1),
+            shape: BoxShape.circle,
           ),
+          child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
         ),
       ),
     );
@@ -193,9 +163,10 @@ class _CompletedDownloadButton extends StatelessWidget {
 
 /// Failed download state widget
 class _FailedDownloadButton extends StatelessWidget {
-  const _FailedDownloadButton({required this.onRetry});
+  const _FailedDownloadButton({required this.onRetry, this.errorMessage});
 
   final VoidCallback onRetry;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +175,7 @@ class _FailedDownloadButton extends StatelessWidget {
       height: 48,
       child: IconButton(
         icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
-        tooltip: 'Retry download',
+        tooltip: errorMessage ?? 'Retry download',
         onPressed: onRetry,
       ),
     );
@@ -253,91 +224,84 @@ class _PendingDownloadButton extends StatelessWidget {
   }
 }
 
-/// Downloading progress state widget
-class _DownloadingProgressButton extends StatelessWidget {
-  const _DownloadingProgressButton({
-    required this.downloadId,
-    required this.downloadItem,
-  });
-
-  final String downloadId;
-  final DownloadItem? downloadItem;
+/// Loading state while checking download status
+class _LoadingDownloadButton extends StatelessWidget {
+  const _LoadingDownloadButton();
 
   @override
   Widget build(BuildContext context) {
-    final DownloadsBloc bloc = context.read<DownloadsBloc>();
+    return const SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+}
+
+/// Downloading progress state widget (simplified - no StreamBuilder!)
+class _DownloadingProgressButton extends StatelessWidget {
+  const _DownloadingProgressButton({required this.progress, this.onCancel});
+
+  final double progress;
+  final VoidCallback? onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
 
     return SizedBox(
       width: 48,
       height: 48,
-      child: StreamBuilder<DownloadProgress>(
-        // Listen to REAL-TIME progress updates via broadcast stream
-        stream: bloc.getDownloadProgressStream(downloadId),
-        initialData: downloadItem != null
-            ? DownloadProgress(
-                id: downloadId,
-                status: downloadItem!.status,
-                progress: downloadItem!.progress,
-                downloadedSize: downloadItem!.downloadedSize,
-                fileSize: downloadItem!.fileSize,
-              )
-            : null,
-        builder: (context, snapshot) {
-          final DownloadProgress? progress = snapshot.data;
-          final double progressValue =
-              progress?.progress ?? downloadItem?.progress ?? 0.0;
-
-          return Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background circle for better visibility
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).primaryColor.withValues(alpha: 0.05),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                // Circular progress indicator
-                SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: CircularProgressIndicator(
-                    value: progressValue > 0 ? progressValue : null,
-                    strokeWidth: 3,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).primaryColor.withValues(alpha: 0.15),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ),
-                // Percentage text or icon
-                if (progressValue > 0)
-                  Text(
-                    '${(progressValue * 100).toInt()}',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  )
-                else
-                  // Show indeterminate spinner icon
-                  Icon(
-                    Icons.downloading_rounded,
-                    size: 14,
-                    color: Theme.of(context).primaryColor,
-                  ),
-              ],
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Background circle for better visibility
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
             ),
-          );
-        },
+            // Circular progress indicator
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                value: progress > 0 ? progress : null,
+                strokeWidth: 3,
+                backgroundColor: theme.primaryColor.withOpacity(0.15),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+              ),
+            ),
+            // Percentage text or icon
+            if (progress > 0)
+              Text(
+                '${(progress * 100).toInt()}',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              )
+            else
+              // Show indeterminate spinner icon
+              Icon(
+                Icons.downloading_rounded,
+                size: 14,
+                color: theme.primaryColor,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -351,28 +315,15 @@ class _DefaultDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return SizedBox(
       width: 48,
       height: 48,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 300),
-        builder: (context, value, child) {
-          return Opacity(
-            opacity: value,
-            child: Transform.scale(
-              scale: 0.8 + (value * 0.2),
-              child: IconButton(
-                icon: Icon(
-                  Icons.download_rounded,
-                  color: Theme.of(context).primaryColor,
-                ),
-                tooltip: AppLocalizations.of(context)!.download,
-                onPressed: onDownload,
-              ),
-            ),
-          );
-        },
+      child: IconButton(
+        icon: Icon(Icons.download_rounded, color: theme.primaryColor),
+        tooltip: AppLocalizations.of(context)!.download,
+        onPressed: onDownload,
       ),
     );
   }
@@ -409,36 +360,56 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            // Pulsing circle
-            Opacity(
-              opacity: 1.0 - _animation.value,
-              child: Container(
+    final ThemeData theme = Theme.of(context);
+
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              // Pulsing circle
+              Container(
                 width: 24 + (_animation.value * 8),
                 height: 24 + (_animation.value * 8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Theme.of(context).primaryColor,
+                    color: theme.primaryColor.withOpacity(
+                      1.0 - _animation.value,
+                    ),
                     width: 2,
                   ),
                 ),
               ),
-            ),
-            // Hourglass icon
-            Icon(
-              Icons.hourglass_empty_rounded,
-              size: 20,
-              color: Theme.of(context).primaryColor,
-            ),
-          ],
-        );
-      },
+              // Hourglass icon (static)
+              child!,
+            ],
+          );
+        },
+        // Pass static child to builder to prevent rebuilding it
+        child: Icon(
+          Icons.hourglass_empty_rounded,
+          size: 20,
+          color: theme.primaryColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _PausedDownloadButton extends StatelessWidget {
+  const _PausedDownloadButton({required this.onUnpause});
+
+  final VoidCallback onUnpause;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.play_arrow_rounded),
+      tooltip: AppLocalizations.of(context)!.resume,
+      onPressed: onUnpause,
     );
   }
 }

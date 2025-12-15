@@ -76,8 +76,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       transformer: debounce(const Duration(milliseconds: 1000)),
     );
 
-    // Listen to download progress
-    _listenToProgress();
+    // Progress listening is now handled by DownloadButtonBloc for individual items
+    // DownloadsBloc only needs to refresh the list when a download completes/adds/removes
+    _listenToGlobalProgress();
   }
   final GetDownloadsByReciterUseCase _getDownloadsByReciter;
   final DownloadSurahUseCase _downloadSurah;
@@ -91,12 +92,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final AnalyticsService _analyticsService;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
-  Timer? _progressReloadTimer;
-
-  // Broadcast stream controller for download progress updates
-  // This allows multiple widgets to listen to individual download progress
-  final StreamController<DownloadProgress> _downloadProgressController =
-      StreamController<DownloadProgress>.broadcast();
 
   // Broadcast stream controller for one-time status events
   // This allows UI to react to events without changing the main state
@@ -106,145 +101,37 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   /// Exposes a broadcast stream of status events
   Stream<DownloadsStatus> get statusStream => _statusController.stream;
 
-  /// Exposes a broadcast stream of download progress updates.
+  /// Listens to global download progress updates to refresh the list when necessary.
   ///
-  /// Widgets can listen to this stream to get real-time progress updates
-  /// for all downloads without needing to reload the entire downloads list.
-  ///
-  /// Example usage:
-  /// ```dart
-  /// bloc.downloadProgressStream
-  ///   .where((progress) => progress.id == downloadId)
-  ///   .listen((progress) {
-  ///     // Update UI with progress
-  ///   });
-  /// ```
-  Stream<DownloadProgress> get downloadProgressStream =>
-      _downloadProgressController.stream;
-
-  /// Gets a filtered stream for a specific download ID.
-  ///
-  /// This is a convenience method that filters the broadcast stream
-  /// to only emit progress updates for the specified download.
-  ///
-  /// Example:
-  /// ```dart
-  /// bloc.getDownloadProgressStream(downloadId).listen((progress) {
-  ///   setState(() {
-  ///     _progress = progress.progress;
-  ///     _status = progress.status;
-  ///   });
-  /// });
-  /// ```
-  Stream<DownloadProgress> getDownloadProgressStream(String downloadId) {
-    return _downloadProgressController.stream.where(
-      (progress) => progress.id == downloadId,
-    );
-  }
-
-  /// Listens to download progress updates from the DownloadService.
-  ///
-  /// This method sets up a stream subscription to monitor download progress
-  /// and update the UI accordingly. It includes:
-  /// - Error handling for platform-specific exceptions
-  /// - Debouncing to prevent excessive UI updates
-  /// - Immediate updates for completion/failure states
-  /// - Proper cleanup on subscription cancellation
-  void _listenToProgress() {
+  /// This replaces the granular progress tracking. We only care about
+  /// refreshing the list when a download starts or completes, as the list view
+  /// shows the existence of downloads, not their real-time progress.
+  void _listenToGlobalProgress() {
     try {
-      _progressSubscription?.cancel(); // Cancel any existing subscription
-
+      _progressSubscription?.cancel();
       _progressSubscription = DownloadService.instance.globalProgressStream
           .listen(
-            _handleProgressUpdate,
-            onError: _handleProgressError,
-            onDone: _handleProgressDone,
-            cancelOnError: false, // Continue listening even after errors
+            _handleGlobalProgressUpdate,
+            onError: (e) =>
+                logger.e('[DownloadsBloc] Progress stream error: $e'),
+            cancelOnError: false,
           );
-
-      logger.d('[DownloadsBloc] Progress stream listener initialized');
-    } on MissingPluginException catch (e) {
-      // In test environment, platform channels are not available
-      // This is expected and should not cause the bloc to fail
-      logger.d(
-        '[DownloadsBloc] Progress stream listening skipped - '
-        'platform channels not available (test environment): $e',
-      );
-    } on StateError catch (e) {
-      // Stream has already been listened to or closed
-      logger.w('[DownloadsBloc] Progress stream state error: $e');
-    } catch (e, stackTrace) {
-      // Any other unexpected error
-      logger.e(
-        '[DownloadsBloc] Unexpected error setting up progress stream',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      logger.d('[DownloadsBloc] Global progress listener initialized');
+    } catch (e) {
+      // Ignore errors in test environment or setup failure
     }
   }
 
-  /// Handles a single progress update from the download service.
-  void _handleProgressUpdate(DownloadProgress progress) {
-    try {
-      // Broadcast progress update to all listeners
-      // This allows widgets to listen for specific download progress updates
-      if (!_downloadProgressController.isClosed) {
-        _downloadProgressController.add(progress);
-      }
+  /// Handles global progress updates to trigger list refreshes on state changes
+  void _handleGlobalProgressUpdate(DownloadProgress progress) {
+    // We only need to reload the list if the status implies a change in the
+    // "Have downloads" state or if a new download started/completed.
+    // Real-time progress is handled by DownloadButtonBloc.
 
-      // Update the download progress in the repository
-      _downloadsRepository.updateDownloadProgress(
-        progress.id,
-        progress.status,
-        progress.progress,
-        progress.downloadedSize,
-        progress.fileSize,
-      );
-
-      // Only reload if we're in a loaded state to avoid unnecessary reloads
-      if (state.status != DownloadsStateStatus.loaded) {
-        return;
-      }
-
-      // Immediate reload for terminal states (completed/failed/cancelled)
-      if (_isTerminalStatus(progress.status)) {
-        _cancelProgressTimer();
-        add(const LoadDownloads());
-        logger.d(
-          '[DownloadsBloc] Terminal status ${progress.status} for ${progress.id}, '
-          'triggering immediate reload',
-        );
-        return;
-      }
-
-      // Debounce in-progress updates to avoid excessive reloads
-      _scheduleProgressRefresh();
-    } catch (e, stackTrace) {
-      logger.e(
-        '[DownloadsBloc] Error handling progress update',
-        error: e,
-        stackTrace: stackTrace,
-      );
+    // Reload on terminal states to ensure list is up to date
+    if (_isTerminalStatus(progress.status)) {
+      add(const LoadDownloads());
     }
-  }
-
-  /// Handles errors from the progress stream.
-  void _handleProgressError(Object error, StackTrace stackTrace) {
-    logger.e(
-      '[DownloadsBloc] Progress stream error',
-      error: error,
-      stackTrace: stackTrace,
-    );
-    // Don't add error state here - we want downloads list to remain visible
-    // The stream will continue listening due to cancelOnError: false
-  }
-
-  /// Handles completion of the progress stream.
-  void _handleProgressDone() {
-    logger.d('[DownloadsBloc] Progress stream completed');
-    _cancelProgressTimer();
-    // Stream completed - might want to attempt reconnection
-    // For now, just log it
   }
 
   /// Checks if a download status is terminal (no more updates expected).
@@ -254,68 +141,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         status == DownloadStatus.cancelled;
   }
 
-  /// Schedules a refresh of the downloads list after a debounce period.
-  ///
-  /// This prevents excessive UI updates during rapid progress changes.
-  /// Cancels any pending refresh and schedules a new one.
-  void _scheduleProgressRefresh() {
-    _cancelProgressTimer();
-
-    // Debounce: wait 150ms after last progress update before reloading
-    // This provides smooth updates (~6-7 times per second)
-    _progressReloadTimer = Timer(const Duration(milliseconds: 150), () {
-      if (!isClosed) {
-        add(const DownloadsEvent.refreshDownloadsProgress());
-      }
-    });
-  }
-
-  /// Cancels the pending progress reload timer if it exists.
-  void _cancelProgressTimer() {
-    _progressReloadTimer?.cancel();
-    _progressReloadTimer = null;
-  }
-
-  Future<void> _onRefreshDownloadsProgress(
-    RefreshDownloadsProgress event,
-    Emitter<DownloadsState> emit,
-  ) async {
-    // Only refresh if we're in loaded state
-    if (state.status != DownloadsStateStatus.loaded) {
-      return;
-    }
-
-    final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
-        await _getDownloadsByReciter();
-    await result.fold(
-      (failure) {
-        // Don't show error for progress updates, just log it
-        logger.e('Failed to refresh downloads progress: ${failure.message}');
-      },
-      (downloads) async {
-        // Also fetch total size to keep it updated during download
-        final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
-          NoParams(),
-        );
-
-        emit(
-          state.copyWith(
-            status: DownloadsStateStatus.loaded,
-            downloads: downloads,
-            totalDownloadsSize: sizeResult.getOrElse(
-              () => state.totalDownloadsSize,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Future<void> close() async {
-    _progressReloadTimer?.cancel();
     await _progressSubscription?.cancel();
-    await _downloadProgressController.close();
     await _statusController.close();
     return super.close();
   }
@@ -998,6 +826,45 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         );
       }
     }
+  }
+
+  Future<void> _onRefreshDownloadsProgress(
+    RefreshDownloadsProgress event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    // Only refresh if we're already in loaded state
+    // This prevents refreshing during initial load or error states
+    if (state.status != DownloadsStateStatus.loaded) {
+      return;
+    }
+
+    final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
+        await _getDownloadsByReciter();
+    await result.fold(
+      (failure) async {
+        // On error, keep the current state but don't show error
+        // This is a background refresh, so we don't want to disrupt the UI
+        logger.w(
+          '[DownloadsBloc] Failed to refresh downloads: ${failure.message}',
+        );
+      },
+      (downloads) async {
+        // Also fetch total size
+        final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
+          NoParams(),
+        );
+
+        // Emit directly to loaded state without showing loading state
+        emit(
+          state.copyWith(
+            status: DownloadsStateStatus.loaded,
+            downloads: downloads,
+            totalDownloadsSize: sizeResult.getOrElse(() => 0),
+            errorMessage: null,
+          ),
+        );
+      },
+    );
   }
 
   @override

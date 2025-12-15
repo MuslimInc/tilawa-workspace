@@ -3,6 +3,9 @@ import 'package:audio_service/audio_service.dart';
 import '../entities/download_item.dart';
 
 abstract class DownloadsRepository {
+  /// Initialize the repository (start listening to progress updates)
+  Future<void> initialize();
+
   /// Get all downloads grouped by reciter and then by narrative
   Future<Map<String, Map<String, List<DownloadItem>>>> getDownloadsByReciter();
 
@@ -31,11 +34,7 @@ abstract class DownloadsRepository {
   Stream<DownloadItem> getDownloadProgress(String id);
 
   /// Start downloading a surah
-  Future<void> startDownload(
-    String surahId,
-    String surahTitle,
-    String reciterName,
-  );
+  Future<void> startDownload(String url, String surahTitle, String reciterName);
 
   /// Pause a download
   Future<void> pauseDownload(String id);
@@ -47,13 +46,13 @@ abstract class DownloadsRepository {
   Future<void> cancelDownload(String id);
 
   /// Check if a surah is already downloaded
-  Future<bool> isSurahDownloaded(String surahId, String reciterName);
+  Future<bool> isSurahDownloaded(String url, String reciterName);
 
   /// Check if a surah is currently downloading
-  Future<bool> isSurahDownloading(String surahId, String reciterName);
+  Future<bool> isSurahDownloading(String url, String reciterName);
 
   /// Get downloaded file path
-  Future<String?> getDownloadedFilePath(String surahId, String reciterName);
+  Future<String?> getDownloadedFilePath(String url, String reciterName);
 
   /// Update download progress
   Future<void> updateDownloadProgress(

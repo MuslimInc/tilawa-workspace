@@ -112,15 +112,6 @@ void main() {
         mockRecitersRepository.getReciters(),
       ).thenAnswer((_) async => const Right([reciterEntity]));
 
-      // Construct expected location
-      const expectedReciter = Reciter(
-        id: 1,
-        name: reciterName,
-        letter: 'A',
-        date: '2023',
-        moshaf: [],
-      );
-
       // Mock current location to match target PATH only (simulating user scenario)
       // The generated targetLocation will contain query params like /reciter/1?reciter=...
       // We return /reciter/1 to verify the path comparison logic

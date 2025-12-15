@@ -913,6 +913,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download failed'**
   String get notificationDownloadFailed;
+
+  /// Resume button text
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resume;
 }
 
 class _AppLocalizationsDelegate

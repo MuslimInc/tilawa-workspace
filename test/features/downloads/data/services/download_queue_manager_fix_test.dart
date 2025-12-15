@@ -51,6 +51,7 @@ void main() {
     ).thenAnswer((_) async => []);
 
     DownloadQueueManager.reset();
+    DownloadServiceImpl.instance.resetForTesting();
   });
 
   tearDown(() {
@@ -184,7 +185,7 @@ void main() {
       // Start download 1
       unawaited(
         DownloadQueueManager.instance.enqueue(
-          id: '1',
+          id: 'http://example.com/1.mp3',
           url: 'http://example.com/1.mp3',
           filePath: '${tempDir.path}/1.mp3',
           title: 'Title 1',

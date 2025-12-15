@@ -323,7 +323,9 @@ class DownloadQueueManager {
             _lastActivityTime[queuedDownload.id] = clock
                 .now(); // Initialize activity
             actualRunningCount++; // Increment our running count
-            _queue.removeAt(0); // Successfully started, remove from queue
+            if (_queue.isNotEmpty && _queue.first.id == queuedDownload.id) {
+              _queue.removeAt(0); // Successfully started, remove from queue
+            }
             _notifyQueueUpdate();
 
             // Notify user
@@ -341,7 +343,9 @@ class DownloadQueueManager {
             _lastActivityTime[queuedDownload.id] = clock
                 .now(); // Initialize activity
             actualRunningCount++;
-            _queue.removeAt(0); // Successfully enqueued, remove from queue
+            if (_queue.isNotEmpty && _queue.first.id == queuedDownload.id) {
+              _queue.removeAt(0); // Successfully enqueued, remove from queue
+            }
             _notifyQueueUpdate();
 
             logger.d(
@@ -349,7 +353,9 @@ class DownloadQueueManager {
             );
           } else if (actualStatus == DownloadStatus.completed) {
             // Download already completed - skip it
-            _queue.removeAt(0);
+            if (_queue.isNotEmpty && _queue.first.id == queuedDownload.id) {
+              _queue.removeAt(0);
+            }
             _notifyQueueUpdate();
 
             logger.d(
