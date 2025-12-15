@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/entities/reciter.dart' as entity;
+import '../../../../core/entities/reciter_entity.dart' as entity;
 import '../../../../core/errors/failures.dart';
 import '../../domain/usecases/get_reciters_use_case.dart';
 

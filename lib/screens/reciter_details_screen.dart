@@ -7,7 +7,8 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/di/injection.dart';
-import '../core/entities/reciter.dart';
+import '../core/entities/moshaf_entity.dart';
+import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -18,7 +19,6 @@ import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../main.dart';
-import '../shared/audio/audio_player_handler.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
@@ -456,8 +456,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
       }
 
-      final AudioPlayerHandler audioHandler = getIt<AudioPlayerHandler>();
-
       // Validate surah data
       if (surah.id.isEmpty) {
         throw Exception('Invalid surah: missing ID');
@@ -516,16 +514,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           '_playSurah: updating queue with ${surahListWithDownloads.length} surahs',
         );
 
-        try {
-          await audioHandler.playFromQueue(surahListWithDownloads, surahIndex);
-        } catch (e) {
-          logger.d(
-            '_playSurah: error playing with downloaded files, falling back to streaming',
-          );
-          // Fallback to original surah list if downloaded files fail
-          await audioHandler.playFromQueue(
-            state.surahList.map((s) => s.mediaItem).toList(),
-            surahIndex,
+        if (mounted) {
+          context.read<AudioPlayerBloc>().add(
+            AudioPlayerEvent.playFromQueue(surahListWithDownloads, surahIndex),
           );
         }
       } else {
@@ -535,14 +526,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ? _createLocalMediaItem(surah, downloadedFilePath)
             : surah.mediaItem;
 
-        try {
-          await audioHandler.playFromQueue([surahToPlay], 0);
-        } catch (e) {
-          logger.d(
-            '_playSurah: error playing single downloaded surah, falling back to streaming',
+        if (mounted) {
+          context.read<AudioPlayerBloc>().add(
+            AudioPlayerEvent.playFromQueue([surahToPlay], 0),
           );
-          // Fallback to original surah if downloaded file fails
-          await audioHandler.playFromQueue([surah.mediaItem], 0);
         }
       }
     } catch (e, stackTrace) {

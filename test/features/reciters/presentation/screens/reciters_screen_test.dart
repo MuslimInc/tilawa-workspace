@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/entities/reciter.dart';
+import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
 import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';

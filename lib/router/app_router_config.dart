@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/entities/reciter.dart';
+import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';

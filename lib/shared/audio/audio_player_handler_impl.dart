@@ -3,13 +3,14 @@ import 'dart:developer';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
-import 'package:dartz_plus/src/either.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/language_config.dart';
-import '../../core/entities/reciter.dart';
+import '../../core/entities/moshaf_entity.dart';
+import '../../core/entities/reciter_entity.dart';
 import '../../core/errors/failures.dart';
 import '../../core/services/analytics_service.dart';
 import '../../core/utils/surah_names.dart';

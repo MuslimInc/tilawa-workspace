@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/entities/reciter.dart';
+import '../../../../core/entities/moshaf_entity.dart';
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';

@@ -1,7 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 
 import '../core/di/injection.dart';
-import '../core/entities/reciter.dart';
+import '../core/entities/moshaf_entity.dart';
+import '../core/entities/reciter_entity.dart';
 import '../main.dart';
 import '../shared/audio/audio_player_handler.dart';
 

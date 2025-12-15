@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/entities/reciter.dart';
+
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../repositories/reciters_repository.dart';
 

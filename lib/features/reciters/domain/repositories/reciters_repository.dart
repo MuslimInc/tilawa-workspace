@@ -1,4 +1,4 @@
-import '../../../../core/entities/reciter.dart';
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/utils/typedefs.dart';
 
 abstract class RecitersRepository {

@@ -7,7 +7,8 @@ import 'dart:async' as _i4;
 
 import 'package:audio_service/audio_service.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:muzakri/core/entities/reciter.dart' as _i7;
+import 'package:muzakri/core/entities/moshaf_entity.dart' as _i8;
+import 'package:muzakri/core/entities/reciter_entity.dart' as _i7;
 import 'package:muzakri/shared/audio/audio_player_handler.dart' as _i3;
 import 'package:muzakri/shared/models/queue_state.dart' as _i5;
 import 'package:rxdart/rxdart.dart' as _i2;
@@ -350,7 +351,7 @@ class MockAudioPlayerHandler extends _i1.Mock
 
   @override
   _i4.Future<List<_i6.MediaItem>?> getSurahListForMoshaf(
-    _i7.MoshafEntity? moshaf, {
+    _i8.MoshafEntity? moshaf, {
     String? reciterName,
   }) =>
       (super.noSuchMethod(

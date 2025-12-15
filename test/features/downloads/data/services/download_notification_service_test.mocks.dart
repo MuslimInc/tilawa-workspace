@@ -8,7 +8,7 @@ import 'dart:async' as _i3;
 import 'package:dartz_plus/src/either.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
-import 'package:muzakri/core/entities/reciter.dart' as _i6;
+import 'package:muzakri/core/entities/reciter_entity.dart' as _i6;
 import 'package:muzakri/core/errors/failures.dart' as _i5;
 import 'package:muzakri/core/services/navigation_service.dart' as _i8;
 import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart'

@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart'; // for visibleForTesting
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/entities/reciter.dart';
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/navigation_service.dart';
 import '../../../../main.dart';

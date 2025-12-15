@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../core/entities/reciter.dart';
+
+import '../../../../core/entities/moshaf_entity.dart';
+import '../../../../core/entities/reciter_entity.dart';
 
 part 'reciter_model.freezed.dart';
 part 'reciter_model.g.dart';

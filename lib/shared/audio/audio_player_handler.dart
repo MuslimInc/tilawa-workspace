@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../core/entities/reciter.dart';
+import '../../core/entities/moshaf_entity.dart';
+import '../../core/entities/reciter_entity.dart';
 import '../models/queue_state.dart';
 
 abstract class AudioPlayerHandler implements AudioHandler {

@@ -25,6 +25,10 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
   const factory AudioPlayerEvent.setVolume(double volume) = SetVolume;
   const factory AudioPlayerEvent.setSpeed(double speed) = SetSpeed;
   const factory AudioPlayerEvent.skipToQueueItem(int index) = SkipToQueueItem;
+  const factory AudioPlayerEvent.playFromQueue(
+    List<MediaItem> queue,
+    int index,
+  ) = PlayFromQueue;
   const factory AudioPlayerEvent.updateQueue(List<MediaItem> queue) =
       UpdateQueue;
   const factory AudioPlayerEvent.addQueueItem(MediaItem item) = AddQueueItem;

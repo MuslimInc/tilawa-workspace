@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/entities/reciter.dart';
+import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/services/navigation_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';

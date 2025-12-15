@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/config/language_config.dart';
-import '../../../../core/entities/reciter.dart';
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../domain/repositories/reciters_repository.dart';

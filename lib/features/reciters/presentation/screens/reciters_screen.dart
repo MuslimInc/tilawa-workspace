@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
-import '../../../../core/entities/reciter.dart';
+import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';

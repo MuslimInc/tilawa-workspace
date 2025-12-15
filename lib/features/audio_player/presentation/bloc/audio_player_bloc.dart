@@ -38,6 +38,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     on<SetVolume>(_onSetVolume);
     on<SetSpeed>(_onSetSpeed);
     on<SkipToQueueItem>(_onSkipToQueueItem);
+    on<PlayFromQueue>(_onPlayFromQueue);
     on<UpdateQueue>(_onUpdateQueue);
     on<AddQueueItem>(_onAddQueueItem);
     on<RemoveQueueItem>(_onRemoveQueueItem);
@@ -324,31 +325,37 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   // Audio control event handlers
   void _onPlayAudio(PlayAudio event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received PlayAudio event');
     _audioHandler.play();
   }
 
   void _onPauseAudio(PauseAudio event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received PauseAudio event');
     _audioHandler.pause();
   }
 
   void _onStopAudio(StopAudio event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received StopAudio event');
     _audioHandler.stop();
   }
 
   void _onSkipToNext(SkipToNext event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received SkipToNext event');
     _audioHandler.skipToNext();
   }
 
   void _onSkipToPrevious(SkipToPrevious event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received SkipToPrevious event');
     _audioHandler.skipToPrevious();
   }
 
   void _onSeekTo(SeekTo event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received SeekTo event: ${event.position}');
     _audioHandler.seek(event.position);
   }
 
   void _onSetVolume(SetVolume event, Emitter<AudioPlayerState> emit) {
-    logger.d('Bloc received setVolume event: ${event.volume}');
+    logger.d('[AudioPlayerBloc] Received SetVolume event: ${event.volume}');
     _audioHandler.setVolume(event.volume);
     emit(
       state.copyWith(
@@ -361,10 +368,10 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         speed: state.speed,
       ),
     );
-    logger.d('Bloc emitted new state with volume: ${event.volume}');
   }
 
   void _onSetSpeed(SetSpeed event, Emitter<AudioPlayerState> emit) {
+    logger.d('[AudioPlayerBloc] Received SetSpeed event: ${event.speed}');
     _audioHandler.setSpeed(event.speed);
     emit(
       state.copyWith(
@@ -383,14 +390,30 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     SkipToQueueItem event,
     Emitter<AudioPlayerState> emit,
   ) {
+    logger.d(
+      '[AudioPlayerBloc] Received SkipToQueueItem event: ${event.index}',
+    );
     _audioHandler.skipToQueueItem(event.index);
   }
 
+  void _onPlayFromQueue(PlayFromQueue event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received PlayFromQueue event: index=${event.index}, queueLength=${event.queue.length}',
+    );
+    _audioHandler.playFromQueue(event.queue, event.index);
+  }
+
   void _onUpdateQueue(UpdateQueue event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received UpdateQueue event. Length: ${event.queue.length}',
+    );
     _audioHandler.updateQueue(event.queue);
   }
 
   void _onAddQueueItem(AddQueueItem event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received AddQueueItem event: ${event.item.title}',
+    );
     _audioHandler.addQueueItem(event.item);
   }
 
@@ -398,18 +421,30 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     RemoveQueueItem event,
     Emitter<AudioPlayerState> emit,
   ) {
+    logger.d(
+      '[AudioPlayerBloc] Received RemoveQueueItem event: ${event.item.title}',
+    );
     _audioHandler.removeQueueItem(event.item);
   }
 
   void _onMoveQueueItem(MoveQueueItem event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received MoveQueueItem event: ${event.currentIndex} -> ${event.newIndex}',
+    );
     _audioHandler.moveQueueItem(event.currentIndex, event.newIndex);
   }
 
   void _onSetRepeatMode(SetRepeatMode event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received SetRepeatMode event: ${event.repeatMode}',
+    );
     _audioHandler.setRepeatMode(event.repeatMode);
   }
 
   void _onSetShuffleMode(SetShuffleMode event, Emitter<AudioPlayerState> emit) {
+    logger.d(
+      '[AudioPlayerBloc] Received SetShuffleMode event: ${event.shuffleMode}',
+    );
     _audioHandler.setShuffleMode(event.shuffleMode);
   }
 
