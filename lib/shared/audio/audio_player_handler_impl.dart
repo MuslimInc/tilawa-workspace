@@ -216,7 +216,10 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       mediaItems.map(_itemToSource).toList();
 
   /// Safely sets audio sources with proper error handling
-  Future<void> _safeSetAudioSources(List<AudioSource> sources) async {
+  Future<void> _safeSetAudioSources(
+    List<AudioSource> sources, {
+    int initialIndex = 0,
+  }) async {
     if (_isLoadingAudio) {
       log('Audio is already loading, skipping...');
       return;
@@ -228,11 +231,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       // Stop current playback to prevent interruption
       await _player.stop();
 
-      // Wait a bit to ensure the stop operation completes
-      await Future.delayed(const Duration(milliseconds: 100));
-
       // Set new audio sources
-      await _player.setAudioSources(sources);
+      await _player.setAudioSources(sources, initialIndex: initialIndex);
 
       log('Successfully set ${sources.length} audio sources');
     } catch (e) {
@@ -938,6 +938,14 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     } finally {
       _currentLoadingArtist = null;
     }
+  }
+
+  @override
+  Future<void> playFromQueue(List<MediaItem> queue, int index) async {
+    _playlist.clear();
+    _playlist.addAll(_itemsToSources(queue));
+    await _safeSetAudioSources(_playlist, initialIndex: index);
+    await play();
   }
 }
 

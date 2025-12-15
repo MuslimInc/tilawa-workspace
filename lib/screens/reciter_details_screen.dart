@@ -514,21 +514,16 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         );
 
         try {
-          await audioHandler.updateQueue(surahListWithDownloads);
-          await audioHandler.pause();
-          await audioHandler.skipToQueueItem(surahIndex);
-          await audioHandler.play();
+          await audioHandler.playFromQueue(surahListWithDownloads, surahIndex);
         } catch (e) {
           logger.d(
             '_playSurah: error playing with downloaded files, falling back to streaming',
           );
           // Fallback to original surah list if downloaded files fail
-          await audioHandler.updateQueue(
+          await audioHandler.playFromQueue(
             state.surahList.map((s) => s.mediaItem).toList(),
+            surahIndex,
           );
-          await audioHandler.pause();
-          await audioHandler.skipToQueueItem(surahIndex);
-          await audioHandler.play();
         }
       } else {
         // Fallback: just play the single surah
@@ -538,19 +533,13 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             : surah.mediaItem;
 
         try {
-          await audioHandler.updateQueue([surahToPlay]);
-          await audioHandler.pause();
-          await audioHandler.skipToQueueItem(0);
-          await audioHandler.play();
+          await audioHandler.playFromQueue([surahToPlay], 0);
         } catch (e) {
           logger.d(
             '_playSurah: error playing single downloaded surah, falling back to streaming',
           );
           // Fallback to original surah if downloaded file fails
-          await audioHandler.updateQueue([surah.mediaItem]);
-          await audioHandler.pause();
-          await audioHandler.skipToQueueItem(0);
-          await audioHandler.play();
+          await audioHandler.playFromQueue([surah.mediaItem], 0);
         }
       }
     } catch (e, stackTrace) {
