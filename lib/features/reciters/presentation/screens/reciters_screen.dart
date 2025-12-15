@@ -59,7 +59,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
           return Scaffold(
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.reciters),
-              actions: const [LanguageSwitcher(), SizedBox(width: 8)],
             ),
             body: Column(
               children: [

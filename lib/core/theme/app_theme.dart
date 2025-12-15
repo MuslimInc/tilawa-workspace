@@ -1,5 +1,6 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -47,6 +48,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
+      fontFamily: GoogleFonts.alexandria().fontFamily,
     );
   }
 
@@ -63,6 +65,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
+      fontFamily: GoogleFonts.alexandria().fontFamily,
     );
   }
 
