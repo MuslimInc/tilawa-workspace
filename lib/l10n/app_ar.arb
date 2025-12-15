@@ -587,5 +587,143 @@
     "resume": "استئناف",
     "@resume": {
         "description": "Resume button text"
+    },
+    "appearance": "المظهر",
+    "@appearance": {
+        "description": "Appearance section title"
+    },
+    "theme": "السمة",
+    "@theme": {
+        "description": "Theme setting title"
+    },
+    "systemTheme": "النظام الافتراضي",
+    "@systemTheme": {
+        "description": "System theme option"
+    },
+    "lightTheme": "الوضع الفاتح",
+    "@lightTheme": {
+        "description": "Light theme option"
+    },
+    "darkTheme": "الوضع الداكن",
+    "@darkTheme": {
+        "description": "Dark theme option"
+    },
+    "chooseTheme": "اختر السمة",
+    "@chooseTheme": {
+        "description": "Choose theme dialog title"
+    },
+    "chooseLanguage": "اختر اللغة",
+    "@chooseLanguage": {
+        "description": "Choose language dialog title"
+    },
+    "manageStorage": "إدارة التخزين",
+    "@manageStorage": {
+        "description": "Manage storage setting title"
+    },
+    "manageStorageSubtitle": "عرض وإدارة المحتوى الذي تم تنزيله",
+    "@manageStorageSubtitle": {
+        "description": "Manage storage setting subtitle"
+    },
+    "concurrentDownloads": "تنزيلات متزامنة",
+    "@concurrentDownloads": {
+        "description": "Concurrent downloads setting title"
+    },
+    "concurrentDownloadsSubtitle": "{count} تنزيلات في وقت واحد",
+    "@concurrentDownloadsSubtitle": {
+        "description": "Concurrent downloads setting subtitle",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of concurrent downloads"
+            }
+        }
+    },
+    "guestUser": "زائر",
+    "@guestUser": {
+        "description": "Guest user display name"
+    },
+    "signInToSync": "سجل الدخول لمزامنة بياناتك",
+    "@signInToSync": {
+        "description": "Sign in prompt subtitle"
+    },
+    "logoutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+    "@logoutConfirmation": {
+        "description": "Logout confirmation dialog message"
+    },
+    "logout": "تسجيل خروج",
+    "@logout": {
+        "description": "Logout button text"
+    },
+    "storageUsed": "المساحة المستخدمة: {size}",
+    "@storageUsed": {
+        "description": "Storage used label",
+        "placeholders": {
+            "size": {
+                "type": "String",
+                "description": "Formatted file size"
+            }
+        }
+    },
+    "startFreeTrial": "ابدأ التجربة المجانية",
+    "@startFreeTrial": {
+        "description": "Start free trial button text"
+    },
+    "goHome": "الذهاب للرئيسية",
+    "@goHome": {
+        "description": "Go Home button text"
+    },
+    "pageNotFound": "الصفحة غير موجودة: {uri}",
+    "@pageNotFound": {
+        "description": "Page not found message",
+        "placeholders": {
+            "uri": {
+                "type": "String",
+                "description": "The URI that was not found"
+            }
+        }
+    },
+    "daysRemaining": "متبقي {days} أيام",
+    "@daysRemaining": {
+        "description": "Days remaining in subscription",
+        "placeholders": {
+            "days": {
+                "type": "int",
+                "description": "Number of days"
+            }
+        }
+    },
+    "premiumAccessMessage": "لديك وصول إلى جميع ميزات بريميوم!",
+    "@premiumAccessMessage": {
+        "description": "Message for premium users"
+    },
+    "upgradeMessage": "قم بالترقية لفتح ميزات بريميوم",
+    "@upgradeMessage": {
+        "description": "Message prompting upgrade"
+    },
+    "freeTrialTitle": "تجربة مجانية لمدة 7 أيام",
+    "@freeTrialTitle": {
+        "description": "Free trial section title"
+    },
+    "freeTrialDescription": "جرب جميع ميزات بريميوم لمدة 7 أيام مجانًا تمامًا!",
+    "@freeTrialDescription": {
+        "description": "Free trial description"
+    },
+    "anErrorOccurred": "حدث خطأ ما",
+    "@anErrorOccurred": {
+        "description": "Generic error message"
+    },
+    "reciterInfoNotAvailable": "معلومات القارئ غير متوفرة",
+    "@reciterInfoNotAvailable": {
+        "description": "Message when reciter info is missing"
+    },
+    "errorLoadingReciter": "خطأ في تحميل القارئ: {error}",
+    "@errorLoadingReciter": {
+        "description": "Error message when loading reciter fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "description": "The error message"
+            }
+        }
     }
 }

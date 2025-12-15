@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -122,7 +123,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             if (state.status == DownloadsStateStatus.loaded &&
                 state.downloads.isNotEmpty)
               Text(
-                'Storage Used: $formattedSize',
+                context.l10n.storageUsed(formattedSize),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodySmall?.color,
                   fontSize: 10.sp,

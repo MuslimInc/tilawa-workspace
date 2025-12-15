@@ -919,6 +919,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume'**
   String get resume;
+
+  /// Appearance section title
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// Theme setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// System theme option
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get systemTheme;
+
+  /// Light theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get lightTheme;
+
+  /// Dark theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get darkTheme;
+
+  /// Choose theme dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Theme'**
+  String get chooseTheme;
+
+  /// Choose language dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language'**
+  String get chooseLanguage;
+
+  /// Manage storage setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Storage'**
+  String get manageStorage;
+
+  /// Manage storage setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'View and manage downloaded content'**
+  String get manageStorageSubtitle;
+
+  /// Concurrent downloads setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrent Downloads'**
+  String get concurrentDownloads;
+
+  /// Concurrent downloads setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'{count} downloads at once'**
+  String concurrentDownloadsSubtitle(int count);
+
+  /// Guest user display name
+  ///
+  /// In en, this message translates to:
+  /// **'Guest User'**
+  String get guestUser;
+
+  /// Sign in prompt subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync your data'**
+  String get signInToSync;
+
+  /// Logout confirmation dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirmation;
+
+  /// Logout button text
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// Storage used label
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Used: {size}'**
+  String storageUsed(String size);
+
+  /// Start free trial button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Free Trial'**
+  String get startFreeTrial;
+
+  /// Go Home button text
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHome;
+
+  /// Page not found message
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found: {uri}'**
+  String pageNotFound(String uri);
+
+  /// Days remaining in subscription
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days remaining'**
+  String daysRemaining(int days);
+
+  /// Message for premium users
+  ///
+  /// In en, this message translates to:
+  /// **'You have access to all premium features!'**
+  String get premiumAccessMessage;
+
+  /// Message prompting upgrade
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to unlock premium features'**
+  String get upgradeMessage;
+
+  /// Free trial section title
+  ///
+  /// In en, this message translates to:
+  /// **'7-Day Free Trial'**
+  String get freeTrialTitle;
+
+  /// Free trial description
+  ///
+  /// In en, this message translates to:
+  /// **'Try all premium features for 7 days, completely free!'**
+  String get freeTrialDescription;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get anErrorOccurred;
+
+  /// Message when reciter info is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter information not available'**
+  String get reciterInfoNotAvailable;
+
+  /// Error message when loading reciter fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading reciter: {error}'**
+  String errorLoadingReciter(String error);
 }
 
 class _AppLocalizationsDelegate

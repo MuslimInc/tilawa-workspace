@@ -439,4 +439,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resume => 'Resume';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get systemTheme => 'System Default';
+
+  @override
+  String get lightTheme => 'Light Mode';
+
+  @override
+  String get darkTheme => 'Dark Mode';
+
+  @override
+  String get chooseTheme => 'Choose Theme';
+
+  @override
+  String get chooseLanguage => 'Choose Language';
+
+  @override
+  String get manageStorage => 'Manage Storage';
+
+  @override
+  String get manageStorageSubtitle => 'View and manage downloaded content';
+
+  @override
+  String get concurrentDownloads => 'Concurrent Downloads';
+
+  @override
+  String concurrentDownloadsSubtitle(int count) {
+    return '$count downloads at once';
+  }
+
+  @override
+  String get guestUser => 'Guest User';
+
+  @override
+  String get signInToSync => 'Sign in to sync your data';
+
+  @override
+  String get logoutConfirmation => 'Are you sure you want to logout?';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String storageUsed(String size) {
+    return 'Storage Used: $size';
+  }
+
+  @override
+  String get startFreeTrial => 'Start Free Trial';
+
+  @override
+  String get goHome => 'Go Home';
+
+  @override
+  String pageNotFound(String uri) {
+    return 'Page not found: $uri';
+  }
+
+  @override
+  String daysRemaining(int days) {
+    return '$days days remaining';
+  }
+
+  @override
+  String get premiumAccessMessage => 'You have access to all premium features!';
+
+  @override
+  String get upgradeMessage => 'Upgrade to unlock premium features';
+
+  @override
+  String get freeTrialTitle => '7-Day Free Trial';
+
+  @override
+  String get freeTrialDescription =>
+      'Try all premium features for 7 days, completely free!';
+
+  @override
+  String get anErrorOccurred => 'An error occurred';
+
+  @override
+  String get reciterInfoNotAvailable => 'Reciter information not available';
+
+  @override
+  String errorLoadingReciter(String error) {
+    return 'Error loading reciter: $error';
+  }
 }

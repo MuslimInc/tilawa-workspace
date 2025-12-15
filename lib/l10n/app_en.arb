@@ -587,5 +587,143 @@
     "resume": "Resume",
     "@resume": {
         "description": "Resume button text"
+    },
+    "appearance": "Appearance",
+    "@appearance": {
+        "description": "Appearance section title"
+    },
+    "theme": "Theme",
+    "@theme": {
+        "description": "Theme setting title"
+    },
+    "systemTheme": "System Default",
+    "@systemTheme": {
+        "description": "System theme option"
+    },
+    "lightTheme": "Light Mode",
+    "@lightTheme": {
+        "description": "Light theme option"
+    },
+    "darkTheme": "Dark Mode",
+    "@darkTheme": {
+        "description": "Dark theme option"
+    },
+    "chooseTheme": "Choose Theme",
+    "@chooseTheme": {
+        "description": "Choose theme dialog title"
+    },
+    "chooseLanguage": "Choose Language",
+    "@chooseLanguage": {
+        "description": "Choose language dialog title"
+    },
+    "manageStorage": "Manage Storage",
+    "@manageStorage": {
+        "description": "Manage storage setting title"
+    },
+    "manageStorageSubtitle": "View and manage downloaded content",
+    "@manageStorageSubtitle": {
+        "description": "Manage storage setting subtitle"
+    },
+    "concurrentDownloads": "Concurrent Downloads",
+    "@concurrentDownloads": {
+        "description": "Concurrent downloads setting title"
+    },
+    "concurrentDownloadsSubtitle": "{count} downloads at once",
+    "@concurrentDownloadsSubtitle": {
+        "description": "Concurrent downloads setting subtitle",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of concurrent downloads"
+            }
+        }
+    },
+    "guestUser": "Guest User",
+    "@guestUser": {
+        "description": "Guest user display name"
+    },
+    "signInToSync": "Sign in to sync your data",
+    "@signInToSync": {
+        "description": "Sign in prompt subtitle"
+    },
+    "logoutConfirmation": "Are you sure you want to logout?",
+    "@logoutConfirmation": {
+        "description": "Logout confirmation dialog message"
+    },
+    "logout": "Logout",
+    "@logout": {
+        "description": "Logout button text"
+    },
+    "storageUsed": "Storage Used: {size}",
+    "@storageUsed": {
+        "description": "Storage used label",
+        "placeholders": {
+            "size": {
+                "type": "String",
+                "description": "Formatted file size"
+            }
+        }
+    },
+    "startFreeTrial": "Start Free Trial",
+    "@startFreeTrial": {
+        "description": "Start free trial button text"
+    },
+    "goHome": "Go Home",
+    "@goHome": {
+        "description": "Go Home button text"
+    },
+    "pageNotFound": "Page not found: {uri}",
+    "@pageNotFound": {
+        "description": "Page not found message",
+        "placeholders": {
+            "uri": {
+                "type": "String",
+                "description": "The URI that was not found"
+            }
+        }
+    },
+    "daysRemaining": "{days} days remaining",
+    "@daysRemaining": {
+        "description": "Days remaining in subscription",
+        "placeholders": {
+            "days": {
+                "type": "int",
+                "description": "Number of days"
+            }
+        }
+    },
+    "premiumAccessMessage": "You have access to all premium features!",
+    "@premiumAccessMessage": {
+        "description": "Message for premium users"
+    },
+    "upgradeMessage": "Upgrade to unlock premium features",
+    "@upgradeMessage": {
+        "description": "Message prompting upgrade"
+    },
+    "freeTrialTitle": "7-Day Free Trial",
+    "@freeTrialTitle": {
+        "description": "Free trial section title"
+    },
+    "freeTrialDescription": "Try all premium features for 7 days, completely free!",
+    "@freeTrialDescription": {
+        "description": "Free trial description"
+    },
+    "anErrorOccurred": "An error occurred",
+    "@anErrorOccurred": {
+        "description": "Generic error message"
+    },
+    "reciterInfoNotAvailable": "Reciter information not available",
+    "@reciterInfoNotAvailable": {
+        "description": "Message when reciter info is missing"
+    },
+    "errorLoadingReciter": "Error loading reciter: {error}",
+    "@errorLoadingReciter": {
+        "description": "Error message when loading reciter fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "description": "The error message"
+            }
+        }
     }
 }

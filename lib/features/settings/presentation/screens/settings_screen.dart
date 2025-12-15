@@ -33,14 +33,14 @@ class SettingsScreen extends StatelessWidget {
 
             // Appearance Group
             _SettingsGroup(
-              title: 'Appearance',
+              title: context.l10n.appearance,
               children: [
                 BlocBuilder<ThemeCubit, ThemeState>(
                   builder: (context, state) {
                     return _SettingsTile(
                       icon: FluentIcons.dark_theme_24_regular,
-                      title: 'Theme',
-                      subtitle: _getThemeName(state.mode),
+                      title: context.l10n.theme,
+                      subtitle: _getThemeName(context, state.mode),
                       onTap: () => _showThemePicker(context, state.mode),
                       borderRadius: BorderRadiusGeometry.vertical(
                         top: Radius.circular(16.r),
@@ -52,12 +52,12 @@ class SettingsScreen extends StatelessWidget {
                   builder: (context, state) {
                     return _SettingsTile(
                       icon: FluentIcons.local_language_24_regular,
-                      title: 'Language',
+                      title: context.l10n.language,
                       subtitle:
                           state.locale.languageCode ==
                               LanguageConfig.defaultLanguageCode
-                          ? 'Arabic'
-                          : 'English',
+                          ? context.l10n.arabic
+                          : context.l10n.english,
                       onTap: () => _showLanguagePicker(context, state.locale),
                       showDivider: false,
                       borderRadius: BorderRadiusGeometry.vertical(
@@ -74,12 +74,12 @@ class SettingsScreen extends StatelessWidget {
             // Downloads Group
             // Downloads Group
             _SettingsGroup(
-              title: 'Downloads',
+              title: context.l10n.downloads,
               children: [
                 _SettingsTile(
                   icon: FluentIcons.folder_24_regular,
-                  title: 'Manage Storage',
-                  subtitle: 'View and manage downloaded content',
+                  title: context.l10n.manageStorage,
+                  subtitle: context.l10n.manageStorageSubtitle,
                   onTap: () => const DownloadsRoute().push(context),
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(16.r),
@@ -89,9 +89,10 @@ class SettingsScreen extends StatelessWidget {
                   builder: (context, state) {
                     return _SettingsTile(
                       icon: FluentIcons.arrow_download_24_regular,
-                      title: 'Concurrent Downloads',
-                      subtitle:
-                          '${state.maxConcurrentDownloads} downloads at once',
+                      title: context.l10n.concurrentDownloads,
+                      subtitle: context.l10n.concurrentDownloadsSubtitle(
+                        state.maxConcurrentDownloads,
+                      ),
                       onTap: () => _showConcurrentDownloadsPicker(
                         context,
                         state.maxConcurrentDownloads,
@@ -119,14 +120,12 @@ class SettingsScreen extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Logout'),
-                            content: const Text(
-                              'Are you sure you want to logout?',
-                            ),
+                            title: Text(context.l10n.logout),
+                            content: Text(context.l10n.logoutConfirmation),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
+                                child: Text(context.l10n.cancel),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -135,9 +134,9 @@ class SettingsScreen extends StatelessWidget {
                                     const SignOutEvent(),
                                   );
                                 },
-                                child: const Text(
-                                  'Logout',
-                                  style: TextStyle(color: Colors.red),
+                                child: Text(
+                                  context.l10n.logout,
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                             ],
@@ -164,7 +163,7 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              'Logout',
+                              context.l10n.logout,
                               style: TextStyle(
                                 color: Colors.red,
                                 fontSize: 16.sp,
@@ -218,7 +217,7 @@ class SettingsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.displayName ?? 'Guest User',
+                      user?.displayName ?? context.l10n.guestUser,
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
@@ -226,7 +225,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      user?.email ?? 'Sign in to sync your data',
+                      user?.email ?? context.l10n.signInToSync,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Theme.of(context).textTheme.bodySmall?.color,
@@ -242,14 +241,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getThemeName(ThemeMode mode) {
+  String _getThemeName(BuildContext context, ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        return 'System';
+        return context.l10n.systemTheme;
       case ThemeMode.light:
-        return 'Light';
+        return context.l10n.lightTheme;
       case ThemeMode.dark:
-        return 'Dark';
+        return context.l10n.darkTheme;
     }
   }
 
@@ -265,12 +264,12 @@ class SettingsScreen extends StatelessWidget {
           children: [
             SizedBox(height: 16.h),
             Text(
-              'Choose Theme',
+              context.l10n.chooseTheme,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.h),
             _ThemeOption(
-              title: 'System Default',
+              title: context.l10n.systemTheme,
               value: ThemeMode.system,
               groupValue: currentMode,
               onChanged: (val) {
@@ -279,7 +278,7 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             _ThemeOption(
-              title: 'Light Mode',
+              title: context.l10n.lightTheme,
               value: ThemeMode.light,
               groupValue: currentMode,
               onChanged: (val) {
@@ -288,7 +287,7 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             _ThemeOption(
-              title: 'Dark Mode',
+              title: context.l10n.darkTheme,
               value: ThemeMode.dark,
               groupValue: currentMode,
               onChanged: (val) {
@@ -315,12 +314,12 @@ class SettingsScreen extends StatelessWidget {
           children: [
             SizedBox(height: 16.h),
             Text(
-              'Choose Language',
+              context.l10n.chooseLanguage,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.h),
             ListTile(
-              title: const Text('English'),
+              title: Text(context.l10n.english),
               trailing: currentLocale.languageCode == 'en'
                   ? Icon(
                       FluentIcons.checkmark_24_regular,
@@ -335,7 +334,7 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('العربية'),
+              title: Text(context.l10n.arabic),
               trailing:
                   currentLocale.languageCode ==
                       LanguageConfig.defaultLanguageCode
@@ -372,7 +371,7 @@ class SettingsScreen extends StatelessWidget {
           children: [
             SizedBox(height: 16.h),
             Text(
-              'Concurrent Downloads',
+              context.l10n.concurrentDownloads,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.h),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/extensions.dart';
 import '../bloc/premium_bloc.dart';
 import '../bloc/premium_state.dart';
 
@@ -43,33 +45,36 @@ class PremiumUpgradeDialog extends StatelessWidget {
             children: [
               Text(message, style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 16),
-              const Text(
-                'Premium Features:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                context.l10n.premiumFeatures,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
-              const _PremiumFeatureItem(
+              _PremiumFeatureItem(
                 icon: Icons.download,
-                text: 'Unlimited Downloads',
+                text: context.l10n.unlimitedDownloads,
               ),
-              const _PremiumFeatureItem(
+              _PremiumFeatureItem(
                 icon: Icons.offline_bolt,
-                text: 'Offline Mode',
+                text: context.l10n.offlineMode,
               ),
-              const _PremiumFeatureItem(
+              _PremiumFeatureItem(
                 icon: Icons.high_quality,
-                text: 'High Quality Audio',
+                text: context.l10n.highQualityAudio,
               ),
-              const _PremiumFeatureItem(
+              _PremiumFeatureItem(
                 icon: Icons.block,
-                text: 'Ad-Free Experience',
+                text: context.l10n.adFreeExperience,
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Maybe Later'),
+              child: Text(context.l10n.maybeLater),
             ),
             ElevatedButton.icon(
               onPressed: () {
@@ -77,7 +82,7 @@ class PremiumUpgradeDialog extends StatelessWidget {
                 onUpgrade?.call();
               },
               icon: const Icon(Icons.star),
-              label: const Text('Upgrade Now'),
+              label: Text(context.l10n.upgradeNow),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
                 foregroundColor: Colors.black,

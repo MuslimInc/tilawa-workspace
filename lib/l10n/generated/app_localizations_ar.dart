@@ -437,4 +437,96 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resume => 'استئناف';
+
+  @override
+  String get appearance => 'المظهر';
+
+  @override
+  String get theme => 'السمة';
+
+  @override
+  String get systemTheme => 'النظام الافتراضي';
+
+  @override
+  String get lightTheme => 'الوضع الفاتح';
+
+  @override
+  String get darkTheme => 'الوضع الداكن';
+
+  @override
+  String get chooseTheme => 'اختر السمة';
+
+  @override
+  String get chooseLanguage => 'اختر اللغة';
+
+  @override
+  String get manageStorage => 'إدارة التخزين';
+
+  @override
+  String get manageStorageSubtitle => 'عرض وإدارة المحتوى الذي تم تنزيله';
+
+  @override
+  String get concurrentDownloads => 'تنزيلات متزامنة';
+
+  @override
+  String concurrentDownloadsSubtitle(int count) {
+    return '$count تنزيلات في وقت واحد';
+  }
+
+  @override
+  String get guestUser => 'زائر';
+
+  @override
+  String get signInToSync => 'سجل الدخول لمزامنة بياناتك';
+
+  @override
+  String get logoutConfirmation => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
+  String get logout => 'تسجيل خروج';
+
+  @override
+  String storageUsed(String size) {
+    return 'المساحة المستخدمة: $size';
+  }
+
+  @override
+  String get startFreeTrial => 'ابدأ التجربة المجانية';
+
+  @override
+  String get goHome => 'الذهاب للرئيسية';
+
+  @override
+  String pageNotFound(String uri) {
+    return 'الصفحة غير موجودة: $uri';
+  }
+
+  @override
+  String daysRemaining(int days) {
+    return 'متبقي $days أيام';
+  }
+
+  @override
+  String get premiumAccessMessage => 'لديك وصول إلى جميع ميزات بريميوم!';
+
+  @override
+  String get upgradeMessage => 'قم بالترقية لفتح ميزات بريميوم';
+
+  @override
+  String get freeTrialTitle => 'تجربة مجانية لمدة 7 أيام';
+
+  @override
+  String get freeTrialDescription =>
+      'جرب جميع ميزات بريميوم لمدة 7 أيام مجانًا تمامًا!';
+
+  @override
+  String get anErrorOccurred => 'حدث خطأ ما';
+
+  @override
+  String get reciterInfoNotAvailable => 'معلومات القارئ غير متوفرة';
+
+  @override
+  String errorLoadingReciter(String error) {
+    return 'خطأ في تحميل القارئ: $error';
+  }
 }

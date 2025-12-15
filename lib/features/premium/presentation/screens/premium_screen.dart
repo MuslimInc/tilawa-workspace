@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
@@ -28,7 +29,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Premium'),
+        title: Text(context.l10n.premium),
         backgroundColor: Colors.amber,
         foregroundColor: Colors.black,
       ),
@@ -151,18 +152,18 @@ class _PremiumScreenState extends State<PremiumScreen> {
             const SizedBox(height: 8),
             if (status.daysRemaining > 0)
               Text(
-                '${status.daysRemaining} days remaining',
+                context.l10n.daysRemaining(status.daysRemaining),
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
             if (canDownload)
-              const Text(
-                'You have access to all premium features!',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+              Text(
+                context.l10n.premiumAccessMessage,
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               )
             else
-              const Text(
-                'Upgrade to unlock premium features',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+              Text(
+                context.l10n.upgradeMessage,
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
           ],
         ),
@@ -171,27 +172,49 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Widget _buildFeaturesSection() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Premium Features',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 12),
-        _PremiumFeatureItem(icon: Icons.download, text: 'Unlimited Downloads'),
-        _PremiumFeatureItem(icon: Icons.offline_bolt, text: 'Offline Mode'),
-        _PremiumFeatureItem(
-          icon: Icons.high_quality,
-          text: 'High Quality Audio',
-        ),
-        _PremiumFeatureItem(icon: Icons.block, text: 'Ad-Free Experience'),
-        _PremiumFeatureItem(
-          icon: Icons.support_agent,
-          text: 'Priority Support',
-        ),
-        _PremiumFeatureItem(icon: Icons.star, text: 'Exclusive Content'),
-      ],
+    // We cannot use context here because it is not passed to the method.
+    // However, this method is called from _buildLoadedContent, which has context.
+    // Wait, I need to pass context or use a builder.
+    // The previous implementation did not use context.
+    // I will refactor to use context from the call site or pass it.
+    // But since I'm using multi_replace, I can't easily change signature and call site in one go IF the call site is far away.
+    // Fortunately, _buildFeaturesSection is called at line 95: _buildFeaturesSection(), inside _buildLoadedContent(context...).
+    // I will change the method to accept BuildContext context.
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.premiumFeatures,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _PremiumFeatureItem(
+            icon: Icons.download,
+            text: context.l10n.unlimitedDownloads,
+          ),
+          _PremiumFeatureItem(
+            icon: Icons.offline_bolt,
+            text: context.l10n.offlineMode,
+          ),
+          _PremiumFeatureItem(
+            icon: Icons.high_quality,
+            text: context.l10n.highQualityAudio,
+          ),
+          _PremiumFeatureItem(
+            icon: Icons.block,
+            text: context.l10n.adFreeExperience,
+          ),
+          _PremiumFeatureItem(
+            icon: Icons.support_agent,
+            text: context.l10n.prioritySupport,
+          ),
+          _PremiumFeatureItem(
+            icon: Icons.star,
+            text: context.l10n.exclusiveContent,
+          ),
+        ],
+      ),
     );
   }
 
@@ -202,9 +225,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Choose Your Plan',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Text(
+          context.l10n.chooseYourPlan,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         ...plans.map(
@@ -226,20 +249,23 @@ class _PremiumScreenState extends State<PremiumScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.free_breakfast, color: Colors.green),
-                SizedBox(width: 8),
+                const Icon(Icons.free_breakfast, color: Colors.green),
+                const SizedBox(width: 8),
                 Text(
-                  '7-Day Free Trial',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  context.l10n.freeTrialTitle,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Try all premium features for 7 days, completely free!',
-              style: TextStyle(fontSize: 14),
+            Text(
+              context.l10n.freeTrialDescription,
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -247,7 +273,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => _startTrial(context),
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('Start Free Trial'),
+                label: Text(context.l10n.startFreeTrial),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
@@ -277,7 +303,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             onPressed: () {
               context.read<PremiumBloc>().add(const LoadPremiumStatus());
             },
-            child: const Text('Retry'),
+            child: Text(context.l10n.retry),
           ),
         ],
       ),
@@ -301,7 +327,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             onPressed: () {
               context.read<PremiumBloc>().add(const LoadPremiumStatus());
             },
-            child: const Text('Continue'),
+            child: Text(context.l10n.continueButton),
           ),
         ],
       ),

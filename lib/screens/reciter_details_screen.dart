@@ -7,6 +7,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/di/injection.dart';
+import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/downloads/domain/entities/download_item.dart';
@@ -179,7 +180,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  state.errorMessage ?? 'An error occurred',
+                  state.errorMessage ?? context.l10n.anErrorOccurred,
                   style: TextStyle(fontSize: 16.sp),
                 ),
                 SizedBox(height: 16.h),
@@ -193,7 +194,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     );
                   },
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Retry'),
+                  label: Text(context.l10n.retry),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(
                       horizontal: 24.w,

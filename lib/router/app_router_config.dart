@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/extensions.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
@@ -108,11 +109,11 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
           children: [
             const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Page not found: ${state.uri}'),
+            Text(context.l10n.pageNotFound(state.uri.toString())),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => const HomeRoute().go(context),
-              child: const Text('Go Home'),
+              child: Text(context.l10n.goHome),
             ),
           ],
         ),

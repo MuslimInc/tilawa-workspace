@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../core/extensions.dart';
 import 'app_router_config.dart';
 
 class AppRouter {
@@ -18,11 +20,11 @@ class AppRouter {
           children: [
             const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Page not found: ${state.uri}'),
+            Text(context.l10n.pageNotFound(state.uri.toString())),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => const HomeRoute().go(context),
-              child: const Text('Go Home'),
+              child: Text(context.l10n.goHome),
             ),
           ],
         ),
