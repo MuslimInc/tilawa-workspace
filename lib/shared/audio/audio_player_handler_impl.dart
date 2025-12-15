@@ -337,14 +337,16 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> skipToNext() async {
     final int? currentIndex = _player.currentIndex;
     logger.d(
-      'skipToNext: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
+      '[AudioPlayerHandler] skipToNext: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
     if (currentIndex != null && currentIndex < _playlist.length - 1) {
-      logger.d('skipToNext: moving to index ${currentIndex + 1}');
+      logger.d(
+        '[AudioPlayerHandler] skipToNext: moving to index ${currentIndex + 1}',
+      );
       await skipToQueueItem(currentIndex + 1);
     } else {
       logger.d(
-        'skipToNext: cannot skip - at end of playlist or no current index',
+        '[AudioPlayerHandler] skipToNext: cannot skip - at end of playlist or no current index',
       );
     }
   }
@@ -353,14 +355,16 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> skipToPrevious() async {
     final int? currentIndex = _player.currentIndex;
     logger.d(
-      'skipToPrevious: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
+      '[AudioPlayerHandler] skipToPrevious: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
     );
     if (currentIndex != null && currentIndex > 0) {
-      logger.d('skipToPrevious: moving to index ${currentIndex - 1}');
+      logger.d(
+        '[AudioPlayerHandler] skipToPrevious: moving to index ${currentIndex - 1}',
+      );
       await skipToQueueItem(currentIndex - 1);
     } else {
       logger.d(
-        'skipToPrevious: cannot skip - at beginning of playlist or no current index',
+        '[AudioPlayerHandler] skipToPrevious: cannot skip - at beginning of playlist or no current index',
       );
     }
   }
