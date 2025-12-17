@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -10,6 +11,7 @@ import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../router/app_router_config.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 import 'playlists_screen.dart';
 
@@ -34,22 +36,22 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        // state.when(
-        //   initial: () {},
-        //   loading: () {},
-        //   authenticated: (user) {
-        //     // User is authenticated, stay on current screen
-        //   },
-        //   unauthenticated: () {
-        //     // Redirect to login if not authenticated
-        //     const LoginRoute().go(context);
-        //   },
-        //   error: (message) {
-        //     // Show error and redirect to login
-        //     ToastUtils.showErrorToast(message);
-        //     const LoginRoute().go(context);
-        //   },
-        // );
+        state.when(
+          initial: () {},
+          loading: () {},
+          authenticated: (user) {
+            // User is authenticated, stay on current screen
+          },
+          unauthenticated: () {
+            // Redirect to login if not authenticated
+            const LoginRoute().go(context);
+          },
+          error: (message) {
+            // Show error and redirect to login
+            ToastUtils.showErrorToast(message);
+            const LoginRoute().go(context);
+          },
+        );
       },
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
@@ -92,14 +94,6 @@ class _MainScreenState extends State<MainScreen> {
                 elevation: 0,
                 selectedItemColor: Theme.of(context).primaryColor,
                 unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
-                selectedLabelStyle: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12.sp,
-                ),
-                unselectedLabelStyle: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12.sp,
-                ),
                 items: [
                   BottomNavigationBarItem(
                     icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
