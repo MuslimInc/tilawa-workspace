@@ -163,7 +163,6 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -221,7 +220,6 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                                   mediaItem.title,
                                   style: TextStyle(
                                     fontSize: 24.sp,
-                                    fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
@@ -443,11 +441,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
             IconButton(
               icon: Text(
                 '${state.speed.toStringAsFixed(1)}x',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 14.sp),
               ),
               onPressed: () {
                 showSliderDialog(

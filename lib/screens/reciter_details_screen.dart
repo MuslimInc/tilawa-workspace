@@ -641,7 +641,6 @@ class _SurahCard extends StatelessWidget {
                           surah.name,
                           style: TextStyle(
                             fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
                             color: isCurrentItem
                                 ? theme.primaryColor
                                 : theme.textTheme.bodyLarge?.color,
