@@ -7,8 +7,8 @@ import '../models/position_data.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
 /// without any bloc dependencies.
-class BottomPlayerUI extends StatelessWidget {
-  const BottomPlayerUI({
+class BottomPlayerUi extends StatelessWidget {
+  const BottomPlayerUi({
     super.key,
     required this.mediaItem,
     required this.positionData,
@@ -109,7 +109,6 @@ class BottomPlayerUI extends StatelessWidget {
                           mediaItem.title,
                           style: TextStyle(
                             fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
                             color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           maxLines: 2,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/playlists/domain/entities/playlist.dart';
 import '../features/playlists/presentation/bloc/playlists_bloc.dart';
@@ -25,7 +26,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
@@ -243,12 +244,12 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   void _showEditPlaylistDialog(BuildContext context, Playlist playlist) {
     // TODO(username): Implement edit playlist dialog
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     ToastUtils.showToast(msg: l10n.editPlaylistComingSoon);
   }
 
   void _showDeletePlaylistDialog(BuildContext context, dynamic playlist) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     showDialog(
       context: context,
@@ -280,13 +281,13 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   void _navigateToPlaylistDetails(BuildContext context, Playlist playlist) {
     // TODO(username): Implement playlist details screen
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     ToastUtils.showToast(msg: l10n.playlistDetailsComingSoon);
   }
 
   void _playPlaylist(BuildContext context, Playlist playlist) {
     // TODO(username): Implement play playlist functionality
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     ToastUtils.showToast(msg: l10n.playPlaylistComingSoon);
   }
 }

@@ -199,7 +199,7 @@ class _CancelledDownloadButton extends StatelessWidget {
       height: 48,
       child: IconButton(
         icon: Icon(Icons.download_rounded, color: Colors.grey.shade400),
-        tooltip: AppLocalizations.of(context)!.download,
+        tooltip: context.l10n.download,
         onPressed: onRestart,
       ),
     );
@@ -326,7 +326,7 @@ class _DefaultDownloadButton extends StatelessWidget {
       height: 48,
       child: IconButton(
         icon: Icon(Icons.download_rounded, color: theme.primaryColor),
-        tooltip: AppLocalizations.of(context)!.download,
+        tooltip: context.l10n.download,
         onPressed: onDownload,
       ),
     );

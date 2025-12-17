@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/app_toast.dart';
@@ -12,7 +13,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.signIn)),
+      appBar: AppBar(title: Text(context.l10n.signIn)),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           state.when(
@@ -24,7 +25,7 @@ class LoginScreen extends StatelessWidget {
             },
             unauthenticated: () {},
             error: (message) {
-              final AppLocalizations l10n = AppLocalizations.of(context)!;
+              final AppLocalizations l10n = context.l10n;
               AppToast.show(
                 context,
                 message: l10n.unableToSignInWithThirdPartyAccount,
@@ -40,7 +41,7 @@ class LoginScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.welcomeToMuzakri,
+                  context.l10n.welcomeToMuzakri,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -49,7 +50,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  AppLocalizations.of(context)!.signInWithGoogleDescription,
+                  context.l10n.signInWithGoogleDescription,
                   style: const TextStyle(fontSize: 16, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -68,8 +69,8 @@ class LoginScreen extends StatelessWidget {
                         )
                       : const Icon(Icons.login),
                   label: state is AuthLoading
-                      ? Text(AppLocalizations.of(context)!.signingIn)
-                      : Text(AppLocalizations.of(context)!.continueWithGoogle),
+                      ? Text(context.l10n.signingIn)
+                      : Text(context.l10n.continueWithGoogle),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black87,

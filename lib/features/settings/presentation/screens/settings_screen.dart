@@ -448,6 +448,7 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Column(
       children: [
         Material(
@@ -458,32 +459,27 @@ class _SettingsTile extends StatelessWidget {
             leading: Container(
               padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                color: theme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
-                size: 20.sp,
-              ),
+              child: Icon(icon, color: theme.primaryColor, size: 20.sp),
             ),
-            title: Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
-            ),
+            title: Text(title, style: TextStyle(fontSize: 16.sp)),
             subtitle: subtitle != null
                 ? Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      color: theme.textTheme.bodySmall?.color?.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   )
                 : null,
             trailing: Icon(
               FluentIcons.chevron_right_24_regular,
               size: 18.sp,
-              color: Colors.grey,
+              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
             ),
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
@@ -106,7 +107,7 @@ class ReciterDownloadsSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${downloads.length} ${AppLocalizations.of(context)!.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
+                  '${downloads.length} ${context.l10n.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -139,8 +140,8 @@ class ReciterDownloadsSection extends StatelessWidget {
                       onPressed: () =>
                           _handlePlayAllPlayPause(context, audioState),
                       tooltip: isPlaying
-                          ? AppLocalizations.of(context)!.pauseAll
-                          : AppLocalizations.of(context)!.playAll,
+                          ? context.l10n.pauseAll
+                          : context.l10n.playAll,
                     );
                   },
                 ),
@@ -167,7 +168,7 @@ class ReciterDownloadsSection extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          AppLocalizations.of(context)!.deleteAll,
+                          context.l10n.deleteAll,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                           ),
@@ -285,7 +286,7 @@ class ReciterDownloadsSection extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteAll),
+        title: Text(context.l10n.deleteAll),
         content: Text(
           AppLocalizations.of(
             context,
@@ -294,7 +295,7 @@ class ReciterDownloadsSection extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -304,7 +305,7 @@ class ReciterDownloadsSection extends StatelessWidget {
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.deleteAll),
+            child: Text(context.l10n.deleteAll),
           ),
         ],
       ),

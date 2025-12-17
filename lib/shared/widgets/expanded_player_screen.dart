@@ -3,12 +3,13 @@ import 'dart:ui';
 import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../core/extensions.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
-import '../../l10n/generated/app_localizations.dart';
 import '../../main.dart';
 import '../models/position_data.dart';
 import '../models/queue_state.dart';
@@ -102,155 +103,164 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
           onVerticalDragEnd: _handleDragEnd,
           child: Transform.translate(
             offset: Offset(0, _dragOffset),
-            child: Scaffold(
-              backgroundColor: Colors.transparent, // Important for drag visual
-              body: Stack(
-                children: [
-                  // 1. Background Image with Blur
-                  if (mediaItem.artUri != null)
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness:
+                    Brightness.light, // Android: White icons
+                statusBarBrightness: Brightness.dark, // iOS: White icons
+              ),
+              child: Scaffold(
+                backgroundColor:
+                    Colors.transparent, // Important for drag visual
+                body: Stack(
+                  children: [
+                    // 1. Background Image with Blur
+                    if (mediaItem.artUri != null)
+                      Positioned.fill(
+                        child: Image.network(
+                          mediaItem.artUri.toString(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) =>
+                              Container(color: Colors.grey),
+                        ),
+                      )
+                    else
+                      Container(
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
+                      ),
+
+                    // 2. Blur Effect
                     Positioned.fill(
-                      child: Image.network(
-                        mediaItem.artUri.toString(),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            Container(color: Colors.grey),
-                      ),
-                    )
-                  else
-                    Container(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor.withValues(alpha: 0.1),
-                    ),
-
-                  // 2. Blur Effect
-                  Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.4),
-                      ),
-                    ),
-                  ),
-
-                  // 3. Content
-                  SafeArea(
-                    child: Column(
-                      children: [
-                        // AppBar
-                        AppBar(
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          leading: IconButton(
-                            icon: Icon(
-                              FluentIcons.chevron_down_24_regular,
-                              color: Colors.white,
-                              size: 28.sp,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                          title: Text(
-                            AppLocalizations.of(context)!.currentPlaying,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                        child: Container(
+                          color: Colors.black.withValues(alpha: 0.4),
                         ),
+                      ),
+                    ),
 
-                        SizedBox(height: 20.h),
+                    // 3. Content
+                    SafeArea(
+                      child: Column(
+                        children: [
+                          // AppBar
+                          AppBar(
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                            leading: IconButton(
+                              icon: Icon(
+                                FluentIcons.chevron_down_24_regular,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            title: Text(
+                              context.l10n.currentPlaying,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
 
-                        // Artwork
-                        Expanded(
-                          child: Center(
-                            child: Hero(
-                              tag: 'audio_player',
-                              child: Container(
-                                width: 280.w,
-                                height: 280.w,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.3,
+                          SizedBox(height: 20.h),
+
+                          // Artwork
+                          Expanded(
+                            child: Center(
+                              child: Hero(
+                                tag: 'audio_player',
+                                child: Container(
+                                  width: 280.w,
+                                  height: 280.w,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24.r),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 30.r,
+                                        offset: const Offset(0, 15),
                                       ),
-                                      blurRadius: 30.r,
-                                      offset: const Offset(0, 15),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24.r),
-                                  child: mediaItem.artUri != null
-                                      ? Image.network(
-                                          mediaItem.artUri.toString(),
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return _buildDefaultArt(
-                                                  context,
-                                                );
-                                              },
-                                        )
-                                      : _buildDefaultArt(context),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(24.r),
+                                    child: mediaItem.artUri != null
+                                        ? Image.network(
+                                            mediaItem.artUri.toString(),
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return _buildDefaultArt(
+                                                    context,
+                                                  );
+                                                },
+                                          )
+                                        : _buildDefaultArt(context),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-                        SizedBox(height: 40.h),
+                          SizedBox(height: 40.h),
 
-                        // Meta Data
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24.w),
-                          child: Column(
-                            children: [
-                              Text(
-                                mediaItem.title,
-                                style: TextStyle(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          // Meta Data
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 24.w),
+                            child: Column(
+                              children: [
+                                Text(
+                                  mediaItem.title,
+                                  style: TextStyle(
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                mediaItem.artist ??
-                                    mediaItem.album ??
-                                    'Unknown',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  mediaItem.artist ??
+                                      mediaItem.album ??
+                                      'Unknown',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
 
-                        SizedBox(height: 40.h),
+                          SizedBox(height: 40.h),
 
-                        // Progress
-                        _buildProgressBar(context, state),
+                          // Progress
+                          _buildProgressBar(context, state),
 
-                        SizedBox(height: 24.h),
+                          SizedBox(height: 24.h),
 
-                        // Controls
-                        _buildControls(context, state),
+                          // Controls
+                          _buildControls(context, state),
 
-                        SizedBox(height: 40.h),
-                      ],
+                          SizedBox(height: 40.h),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

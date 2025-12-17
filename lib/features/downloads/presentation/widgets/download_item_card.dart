@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -21,15 +22,12 @@ class DownloadItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildStatusIcon(context),
-      title: Text(
-        download.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
+      title: Text(download.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -38,14 +36,10 @@ class DownloadItemCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8, bottom: 4),
               child: LinearProgressIndicator(
                 value: download.progress,
-                backgroundColor: Theme.of(
-                  context,
-                ).dividerColor.withValues(alpha: 0.1),
+                backgroundColor: theme.dividerColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
                 minHeight: 4,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).primaryColor,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
               ),
             ),
           const SizedBox(height: 4),
@@ -69,7 +63,7 @@ class DownloadItemCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    color: theme.textTheme.bodySmall?.color,
                     fontSize: 12,
                   ),
                 ),
@@ -79,7 +73,7 @@ class DownloadItemCard extends StatelessWidget {
                 Text(
                   '•',
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    color: theme.textTheme.bodySmall?.color,
                     fontSize: 12,
                   ),
                 ),
@@ -90,7 +84,7 @@ class DownloadItemCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      color: theme.textTheme.bodySmall?.color,
                       fontSize: 12,
                     ),
                   ),
@@ -109,7 +103,7 @@ class DownloadItemCard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
               onPressed: () => _handleRetryDownload(context),
-              tooltip: AppLocalizations.of(context)!.retryDownloadTooltip,
+              tooltip: context.l10n.retryDownloadTooltip,
             ),
 
           // Downloading / Pending -> Cancel
@@ -118,7 +112,7 @@ class DownloadItemCard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.close_rounded, color: Colors.grey),
               onPressed: () => _showDeleteDialog(context),
-              tooltip: AppLocalizations.of(context)!.cancel,
+              tooltip: context.l10n.cancel,
             ),
 
           // Completed -> Play/Pause
@@ -129,11 +123,11 @@ class DownloadItemCard extends StatelessWidget {
                 return IconButton.filled(
                   style: IconButton.styleFrom(
                     backgroundColor: isCurrentlyPlaying
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        ? theme.primaryColor
+                        : theme.primaryColor.withValues(alpha: 0.1),
                     foregroundColor: isCurrentlyPlaying
                         ? Colors.white
-                        : Theme.of(context).primaryColor,
+                        : theme.primaryColor,
                   ),
                   icon: Icon(
                     isCurrentlyPlaying &&
@@ -145,8 +139,8 @@ class DownloadItemCard extends StatelessWidget {
                   tooltip:
                       isCurrentlyPlaying &&
                           (audioState.playbackState?.playing ?? false)
-                      ? AppLocalizations.of(context)!.pause
-                      : AppLocalizations.of(context)!.play,
+                      ? context.l10n.pause
+                      : context.l10n.play,
                 );
               },
             ),
@@ -169,15 +163,13 @@ class DownloadItemCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.delete_outline_rounded,
-                      color: Theme.of(context).colorScheme.error,
+                      color: theme.colorScheme.error,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      AppLocalizations.of(context)!.delete,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      context.l10n.delete,
+                      style: TextStyle(color: theme.colorScheme.error),
                     ),
                   ],
                 ),
@@ -270,26 +262,25 @@ class DownloadItemCard extends StatelessWidget {
 
   String _getStatusText(BuildContext context) {
     final int progress = (download.progress * 100).toInt();
-    final downloading =
-        '${AppLocalizations.of(context)!.downloading} $progress%';
+    final downloading = '${context.l10n.downloading} $progress%';
 
     if (download.status == DownloadStatus.pending) {
       final int queuePosition = DownloadQueueManager.instance.getQueuePosition(
         download.id,
       );
       if (queuePosition > 0) {
-        return '${AppLocalizations.of(context)!.pending} (#$queuePosition)';
+        return '${context.l10n.pending} (#$queuePosition)';
       }
-      return AppLocalizations.of(context)!.pending;
+      return context.l10n.pending;
     }
 
     return switch (download.status) {
-      DownloadStatus.pending => AppLocalizations.of(context)!.pending,
+      DownloadStatus.pending => context.l10n.pending,
       DownloadStatus.downloading => downloading,
-      DownloadStatus.completed => AppLocalizations.of(context)!.completed,
-      DownloadStatus.failed => AppLocalizations.of(context)!.error,
-      DownloadStatus.paused => AppLocalizations.of(context)!.pause,
-      DownloadStatus.cancelled => AppLocalizations.of(context)!.cancelled,
+      DownloadStatus.completed => context.l10n.completed,
+      DownloadStatus.failed => context.l10n.error,
+      DownloadStatus.paused => context.l10n.pause,
+      DownloadStatus.cancelled => context.l10n.cancelled,
     };
   }
 
@@ -318,7 +309,7 @@ class DownloadItemCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteDownload),
+        title: Text(context.l10n.deleteDownload),
         content: Text(
           AppLocalizations.of(
             context,
@@ -327,7 +318,7 @@ class DownloadItemCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -335,7 +326,7 @@ class DownloadItemCard extends StatelessWidget {
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context)!.delete),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),

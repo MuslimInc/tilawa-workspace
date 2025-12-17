@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:muzakri/shared/models/position_data.dart';
 import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -328,6 +329,141 @@ void main() {
           AudioPlayerStatus.success,
           reason: 'status should be success',
         );
+      },
+    );
+  });
+
+  group('AudioPlayerBloc - State Persistence', () {
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'toJson should persist queue, queueIndex, and position',
+      setUp: () {
+        const testMediaItem1 = MediaItem(
+          id: 'test-1',
+          title: 'Test Track 1',
+          artist: 'Test Artist',
+          duration: Duration(minutes: 3),
+        );
+        const testMediaItem2 = MediaItem(
+          id: 'test-2',
+          title: 'Test Track 2',
+          artist: 'Test Artist',
+          duration: Duration(minutes: 4),
+        );
+
+        final testPlaybackState = PlaybackState(
+          controls: [],
+          processingState: AudioProcessingState.ready,
+          playing: true,
+          updateTime: DateTime.now(),
+          queueIndex: 1,
+        );
+
+        const testQueueState = QueueState(
+          queue: [testMediaItem1, testMediaItem2],
+          queueIndex: 1,
+          shuffleIndices: null,
+          repeatMode: AudioServiceRepeatMode.none,
+        );
+
+        // Add values to subjects
+        mediaItemSubject.add(testMediaItem2);
+        playbackStateSubject.add(testPlaybackState);
+        queueStateSubject.add(testQueueState);
+      },
+      build: () => AudioPlayerBloc(mockAudioHandler),
+      wait: const Duration(milliseconds: 500),
+      verify: (bloc) {
+        // Get the serialized state
+        final Map<String, dynamic>? json = bloc.toJson(bloc.state);
+        expect(json, isNotNull);
+        expect(json!['queue'], isNotNull);
+        expect(json['queueIndex'], 1);
+        expect((json['queue'] as List).length, 2);
+      },
+    );
+
+    test('fromJson should restore queue and position', () {
+      final bloc = AudioPlayerBloc(mockAudioHandler);
+      final Map<String, Object> json = {
+        'volume': 0.8,
+        'speed': 1.5,
+        'queue': [
+          {
+            'id': 'restored-1',
+            'title': 'Restored Track 1',
+            'artist': 'Restored Artist',
+            'album': 'Test Album',
+            'duration': 180000, // 3 minutes in milliseconds
+          },
+          {
+            'id': 'restored-2',
+            'title': 'Restored Track 2',
+            'artist': 'Restored Artist',
+            'album': 'Test Album',
+            'duration': 240000, // 4 minutes in milliseconds
+          },
+        ],
+        'queueIndex': 1,
+        'position': 45000, // 45 seconds in milliseconds
+      };
+
+      final AudioPlayerState? state = bloc.fromJson(json);
+
+      expect(state, isNotNull);
+      expect(state!.volume, 0.8);
+      expect(state.speed, 1.5);
+      expect(state.queueState, isNotNull);
+      expect(state.queueState!.queue.length, 2);
+      expect(state.queueState!.queueIndex, 1);
+      expect(state.queueState!.queue[0].id, 'restored-1');
+      expect(state.queueState!.queue[1].title, 'Restored Track 2');
+      expect(state.positionData, isNotNull);
+      expect(state.positionData!.position, const Duration(seconds: 45));
+    });
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'loadAudioPlayerData should restore queue from persisted state',
+      setUp: () {
+        // Mock playFromQueue to track calls
+        when(mockAudioHandler.playFromQueue(any, any)).thenAnswer((_) async {});
+        when(mockAudioHandler.seek(any)).thenAnswer((_) async {});
+        when(mockAudioHandler.pause()).thenAnswer((_) async {});
+      },
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.initial,
+        queueState: QueueState(
+          queue: [
+            MediaItem(
+              id: 'persisted-1',
+              title: 'Persisted Track',
+              artist: 'Persisted Artist',
+            ),
+          ],
+          queueIndex: 0,
+          shuffleIndices: null,
+          repeatMode: AudioServiceRepeatMode.none,
+        ),
+        positionData: PositionData(
+          position: Duration(seconds: 30),
+          bufferedPosition: Duration.zero,
+          duration: Duration.zero,
+        ),
+      ),
+      build: () => AudioPlayerBloc(mockAudioHandler),
+      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
+      wait: const Duration(seconds: 1),
+      verify: (_) {
+        // Verify that playFromQueue was called with the persisted queue
+        verify(
+          mockAudioHandler.playFromQueue(
+            any,
+            0, // index from persisted state
+          ),
+        ).called(1);
+        // Verify that seek was called with the persisted position
+        verify(mockAudioHandler.seek(const Duration(seconds: 30))).called(1);
+        // Verify that pause was called (user needs to press play)
+        verify(mockAudioHandler.pause()).called(1);
       },
     );
   });

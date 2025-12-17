@@ -289,9 +289,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     SizedBox(height: 8.h),
                                 controller: _scrollController,
                                 itemCount: state.filteredReciters.length,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.w,
-                                  vertical: 8.h,
+                                padding: EdgeInsetsDirectional.only(
+                                  start: 16.w,
                                 ),
                                 itemBuilder: (context, index) {
                                   final ReciterEntity reciter =

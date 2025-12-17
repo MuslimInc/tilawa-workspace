@@ -17,7 +17,6 @@ import '../features/downloads/domain/repositories/downloads_repository.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
-import '../l10n/generated/app_localizations.dart';
 import '../main.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
@@ -61,35 +60,35 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 200.h,
       pinned: true,
       stretch: true,
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        title: Text(
-          widget.reciter.name,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18.sp,
-          ),
+      title: Text(
+        widget.reciter.name,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 18.sp,
         ),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                theme.primaryColor,
+                theme.primaryColor.withValues(alpha: 0.7),
               ],
             ),
           ),
           child: Stack(
             children: [
-              Positioned(
-                right: -50.w,
+              PositionedDirectional(
+                end: -50.w,
                 bottom: -50.h,
                 child: Icon(
                   Icons.mic_external_on,
@@ -120,54 +119,51 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         .toList();
     final MoshafEntity selectedMoshaf =
         state.selectedMoshaf ?? uniqueMoshaf.first;
+    final ThemeData theme = Theme.of(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10.r,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<MoshafEntity>(
-            isExpanded: true,
-            icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
-            value: uniqueMoshaf.contains(selectedMoshaf)
-                ? selectedMoshaf
-                : uniqueMoshaf.first,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-            items: uniqueMoshaf.map((moshaf) {
-              return DropdownMenuItem<MoshafEntity>(
-                value: moshaf,
-                child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
-              );
-            }).toList(),
-            onChanged: (MoshafEntity? moshaf) {
-              if (moshaf != null) {
-                context.read<ReciterDetailsBloc>().add(
-                  LoadSurahList(reciter: widget.reciter, moshaf: moshaf),
+      child: Material(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12.r),
+        child: ButtonTheme(
+          alignedDropdown: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<MoshafEntity>(
+              isExpanded: true,
+              dropdownColor: theme.cardColor,
+              borderRadius: BorderRadius.circular(12.r),
+              alignment: AlignmentDirectional.center,
+              icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
+              value: uniqueMoshaf.contains(selectedMoshaf)
+                  ? selectedMoshaf
+                  : uniqueMoshaf.first,
+              style: theme.textTheme.bodyMedium,
+              items: uniqueMoshaf.map((moshaf) {
+                return DropdownMenuItem<MoshafEntity>(
+                  value: moshaf,
+                  child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
                 );
-              }
-            },
+              }).toList(),
+              onChanged: (MoshafEntity? moshaf) {
+                if (moshaf != null) {
+                  context.read<ReciterDetailsBloc>().add(
+                    LoadSurahList(reciter: widget.reciter, moshaf: moshaf),
+                  );
+                }
+              },
+            ),
           ),
         ),
-      ),
+      ), // End Material
     );
   }
 
   Widget _buildContent(BuildContext context, ReciterDetailsState state) {
+    final ThemeData theme = Theme.of(context);
     switch (state.status) {
       case ReciterDetailsStatus.error:
         return SliverFillRemaining(
@@ -178,7 +174,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 Icon(
                   Icons.error_outline_rounded,
                   size: 64.sp,
-                  color: Theme.of(context).colorScheme.error,
+                  color: theme.colorScheme.error,
                 ),
                 SizedBox(height: 16.h),
                 Text(
@@ -225,7 +221,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                   ),
                   SizedBox(height: 16.h),
                   Text(
-                    AppLocalizations.of(context)!.noSurahsAvailable,
+                    context.l10n.noSurahsAvailable,
                     style: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   ),
                 ],
@@ -277,15 +273,14 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 
   Widget _buildSkeletonSurahCard() {
+    final ThemeData theme = Theme.of(context);
     return RepaintBoundary(
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-          ),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
         ),
         child: Padding(
           padding: EdgeInsets.all(12.w),
@@ -296,14 +291,14 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 width: 48.w,
                 height: 48.w,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  color: theme.primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     '1',
                     style: TextStyle(
-                      color: Theme.of(context).primaryColor,
+                      color: theme.primaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16.sp,
                     ),
@@ -557,6 +552,7 @@ class _SurahCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     // Select specific values to minimize rebuilds
     final bool isPlaying = context.select<AudioPlayerBloc, bool>((bloc) {
       final MediaItem? currentMediaItem = bloc.state.mediaItem;
@@ -580,16 +576,12 @@ class _SurahCard extends StatelessWidget {
         margin: EdgeInsets.only(bottom: 12.h),
         decoration: BoxDecoration(
           color: isCurrentItem
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
-              : Theme.of(context).cardColor,
+              ? theme.primaryColor.withValues(alpha: 0.05)
+              : theme.cardColor,
           borderRadius: BorderRadius.circular(16.r),
           border: isCurrentItem
-              ? Border.all(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                )
-              : Border.all(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                ),
+              ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
+              : Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -619,10 +611,8 @@ class _SurahCard extends StatelessWidget {
                     height: 48.w,
                     decoration: BoxDecoration(
                       color: isCurrentItem
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1),
+                          ? theme.primaryColor
+                          : theme.primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -635,7 +625,7 @@ class _SurahCard extends StatelessWidget {
                           : Text(
                               '${index + 1}',
                               style: TextStyle(
-                                color: Theme.of(context).primaryColor,
+                                color: theme.primaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16.sp,
                               ),
@@ -653,8 +643,8 @@ class _SurahCard extends StatelessWidget {
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                             color: isCurrentItem
-                                ? Theme.of(context).primaryColor
-                                : Theme.of(context).textTheme.bodyLarge?.color,
+                                ? theme.primaryColor
+                                : theme.textTheme.bodyLarge?.color,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -664,7 +654,7 @@ class _SurahCard extends StatelessWidget {
                           surah.reciterName,
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Theme.of(context).textTheme.bodyMedium?.color
+                            color: theme.textTheme.bodyMedium?.color
                                 ?.withValues(alpha: 0.6),
                           ),
                           maxLines: 1,
@@ -701,7 +691,7 @@ class _SurahCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10.r),
                           border: Border.all(
                             color: isCurrentItem
-                                ? Theme.of(context).primaryColor
+                                ? theme.primaryColor
                                 : Colors.grey.withValues(alpha: 0.3),
                           ),
                         ),
@@ -710,7 +700,7 @@ class _SurahCard extends StatelessWidget {
                               ? Icons.pause_rounded
                               : Icons.play_arrow_rounded,
                           color: isCurrentItem
-                              ? Theme.of(context).primaryColor
+                              ? theme.primaryColor
                               : Colors.grey,
                           size: 24.sp,
                         ),

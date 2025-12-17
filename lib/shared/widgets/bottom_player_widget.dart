@@ -11,7 +11,7 @@ import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
 import '../models/position_data.dart';
 import '../models/reciter_model.dart';
-import 'bottom_player_u_i.dart';
+import 'bottom_player_ui.dart';
 
 /// Bloc-connected wrapper for BottomPlayerUI that handles state management
 class BottomPlayerWidget extends StatefulWidget {
@@ -88,7 +88,7 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                 const AudioPlayerEvent.stopAudio(),
               );
             },
-            child: BottomPlayerUI(
+            child: BottomPlayerUi(
               mediaItem: mediaItem,
               positionData: position,
               isPlaying: state.isPlaying,

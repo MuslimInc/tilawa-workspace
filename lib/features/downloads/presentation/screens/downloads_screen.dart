@@ -99,46 +99,40 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   SliverAppBar _buildAppBar(BuildContext context, DownloadsState state) {
     final int totalBytes = state.totalDownloadsSize;
     final String formattedSize = FileSizeFormatter.formatBytes(totalBytes);
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
 
     return SliverAppBar(
       expandedHeight: 120.0,
       floating: true,
       pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsetsDirectional.only(start: 42.w, bottom: 16.h),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(context.l10n.downloads),
+          if (state.status == DownloadsStateStatus.loaded &&
+              state.downloads.isNotEmpty)
             Text(
-              context.l10n.downloads,
+              context.l10n.storageUsed(formattedSize),
               style: TextStyle(
-                color: Theme.of(context).textTheme.titleLarge?.color,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
+                color: textTheme.bodySmall?.color,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.normal,
               ),
             ),
-            if (state.status == DownloadsStateStatus.loaded &&
-                state.downloads.isNotEmpty)
-              Text(
-                context.l10n.storageUsed(formattedSize),
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-          ],
-        ),
+        ],
+      ),
+      flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                Theme.of(context).scaffoldBackgroundColor,
+                theme.primaryColor.withValues(alpha: 0.1),
+                theme.scaffoldBackgroundColor,
               ],
             ),
           ),

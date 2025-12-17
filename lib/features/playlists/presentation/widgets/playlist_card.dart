@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/playlist.dart';
 
@@ -23,7 +24,7 @@ class PlaylistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     final ThemeData theme = Theme.of(context);
 
     return Card(

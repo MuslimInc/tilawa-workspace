@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/shared/widgets/bottom_player_u_i.dart';
+import 'package:muzakri/shared/widgets/bottom_player_ui.dart';
 import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
 
 import 'bottom_player_widget_test.mocks.dart';
@@ -253,7 +253,7 @@ void main() {
       // The widget internal state `_manuallyDismissed` should be true, so it should rebuild as SizedBox.shrink
       await tester
           .pump(); // trigger rebuild based on setState inside onDismissed
-      expect(find.byType(BottomPlayerUI), findsNothing);
+      expect(find.byType(BottomPlayerUi), findsNothing);
       expect(find.byType(SizedBox), findsWidgets);
 
       // Cleanup

@@ -47,11 +47,8 @@ class DownloadNotificationService {
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher_monochrome',
       );
-      const iosSettings = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-      );
+      // Request all necessary permissions for iOS notifications
+      const iosSettings = DarwinInitializationSettings();
 
       const initSettings = InitializationSettings(
         android: androidSettings,
@@ -143,8 +140,15 @@ class DownloadNotificationService {
           largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         );
 
+        const iosDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: false,
+        );
+
         final notificationDetails = NotificationDetails(
           android: androidDetails,
+          iOS: iosDetails,
         );
 
         await _notifications.show(
@@ -195,7 +199,16 @@ class DownloadNotificationService {
       largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
     );
 
-    const notificationDetails = NotificationDetails(android: androidDetails);
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
 
     await _notifications.show(
       notificationId,
@@ -220,7 +233,16 @@ class DownloadNotificationService {
       largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
     );
 
-    const notificationDetails = NotificationDetails(android: androidDetails);
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
 
     await _notifications.show(
       notificationId,

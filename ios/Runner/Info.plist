@@ -57,6 +57,8 @@
 	<string>This app needs access to your music library to play audio content.</string>
 	<key>AVAudioSessionCategoryPlayback</key>
 	<true/>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>This app needs to send you notifications for download progress and completion.</string>
 	<key>GIDClientID</key>
 	<string>181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>

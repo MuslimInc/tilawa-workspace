@@ -85,15 +85,15 @@ class ReciterCard extends StatelessWidget {
 
   Widget _buildInfo(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
+      mainAxisSize: .min,
       children: [
         Text(
           reciter.name,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 16.sp,
-          ),
-          maxLines: 1,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontSize: 16.sp),
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 4.h),

@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../../main.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../../shared/models/media_item_json.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
 
@@ -142,6 +143,39 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     // Get current values to restore state after restart
     final double currentVolume = _audioHandler.volume.value;
     final double currentSpeed = _audioHandler.speed.value;
+
+    // Check if we have persisted queue data from previous session
+    if (state.queueState != null &&
+        state.queueState!.queue.isNotEmpty &&
+        state.queueState!.queueIndex != null) {
+      logger.d(
+        'Restoring persisted queue with ${state.queueState!.queue.length} items at index ${state.queueState!.queueIndex}',
+      );
+
+      try {
+        // Restore the queue using playFromQueue
+        await _audioHandler.playFromQueue(
+          state.queueState!.queue,
+          state.queueState!.queueIndex!,
+        );
+
+        // Restore the playback position if available
+        if (state.positionData != null &&
+            state.positionData!.position != Duration.zero) {
+          logger.d(
+            'Restoring playback position: ${state.positionData!.position}',
+          );
+          await _audioHandler.seek(state.positionData!.position);
+        }
+
+        // Pause playback - user needs to press play
+        await _audioHandler.pause();
+
+        logger.d('Successfully restored queue and position');
+      } catch (e) {
+        logger.d('Error restoring queue: $e');
+      }
+    }
 
     // Strategy: Get current item from queue using queueIndex from playbackState
     // This is more reliable than waiting for mediaItem stream which only emits on changes
@@ -454,20 +488,90 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       final double volume = (json['volume'] as num?)?.toDouble() ?? 1.0;
       final double speed = (json['speed'] as num?)?.toDouble() ?? 1.0;
 
+      // Restore queue if persisted
+      List<MediaItem>? queue;
+      int? queueIndex;
+      if (json['queue'] != null) {
+        try {
+          queue = MediaItemJson.fromJsonList(json['queue'] as List<dynamic>);
+          queueIndex = json['queueIndex'] as int?;
+          logger.d(
+            'Restored ${queue.length} items from persisted queue at index $queueIndex',
+          );
+        } catch (e) {
+          logger.d('Error deserializing queue: $e');
+        }
+      }
+
+      // Restore playback position if persisted
+      PositionData? positionData;
+      if (json['position'] != null) {
+        try {
+          final positionMs = json['position'] as int;
+          positionData = PositionData(
+            position: Duration(milliseconds: positionMs),
+            bufferedPosition: Duration.zero,
+            duration: Duration.zero,
+          );
+          logger.d('Restored playback position: ${positionData.position}');
+        } catch (e) {
+          logger.d('Error deserializing position: $e');
+        }
+      }
+
       return AudioPlayerState(
         status: AudioPlayerStatus.initial,
         volume: volume,
         speed: speed,
+        queueState: queue != null && queueIndex != null
+            ? QueueState(
+                queue: queue,
+                queueIndex: queueIndex,
+                shuffleIndices: null,
+                repeatMode: AudioServiceRepeatMode.none,
+              )
+            : null,
+        positionData: positionData,
       );
     } catch (e) {
+      logger.d('Error in fromJson: $e');
       return const AudioPlayerState(status: AudioPlayerStatus.initial);
     }
   }
 
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
-    // Only persist volume and speed settings
-    // MediaItem, PlaybackState, PositionData, and QueueState are ephemeral
-    return {'volume': state.volume, 'speed': state.speed};
+    try {
+      final json = <String, dynamic>{
+        'volume': state.volume,
+        'speed': state.speed,
+      };
+
+      // Persist queue if available
+      if (state.queueState != null &&
+          state.queueState!.queue.isNotEmpty &&
+          state.queueState!.queueIndex != null) {
+        json['queue'] = MediaItemJson.toJsonList(state.queueState!.queue);
+        json['queueIndex'] = state.queueState!.queueIndex;
+        logger.d(
+          'Persisting queue with ${state.queueState!.queue.length} items at index ${state.queueState!.queueIndex}',
+        );
+      }
+
+      // Persist current playback position if available
+      if (state.positionData != null &&
+          state.positionData!.position != Duration.zero) {
+        json['position'] = state.positionData!.position.inMilliseconds;
+        logger.d(
+          'Persisting playback position: ${state.positionData!.position}',
+        );
+      }
+
+      return json;
+    } catch (e) {
+      logger.d('Error in toJson: $e');
+      // Return minimal state if serialization fails
+      return {'volume': state.volume, 'speed': state.speed};
+    }
   }
 }

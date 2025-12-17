@@ -5,7 +5,7 @@ import 'package:flutter/widget_previews.dart';
 
 import 'core/theme/app_theme.dart';
 import 'shared/models/position_data.dart';
-import 'shared/widgets/bottom_player_u_i.dart';
+import 'shared/widgets/bottom_player_ui.dart';
 
 PreviewThemeData themeData() {
   return PreviewThemeData(
@@ -40,7 +40,7 @@ Widget preview() {
     body: Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
-        child: BottomPlayerUI(
+        child: BottomPlayerUi(
           mediaItem: mediaItem,
           positionData: positionData,
           isPlaying: true,
