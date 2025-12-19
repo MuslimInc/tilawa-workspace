@@ -26,10 +26,15 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     this.newList,
     this._analyticsService,
     this._prefs,
-    this._recitersRepository,
-  ) {
+    this._recitersRepository, {
+    AudioPlayer? player,
+    AudioSession? audioSession, // For testing
+  }) : _player = player ?? AudioPlayer(),
+       _testSession = audioSession {
     _init();
   }
+
+  final AudioSession? _testSession;
   final BehaviorSubject<List<MediaItem>> _recentSubject =
       BehaviorSubject.seeded(<MediaItem>[]);
   final List<MediaItem> newList;
@@ -37,7 +42,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final SharedPreferencesAsync _prefs;
   final RecitersRepository _recitersRepository;
   final _items = <String, List<MediaItem>>{};
-  final _player = AudioPlayer();
+  final AudioPlayer _player;
   final List<AudioSource> _playlist = [];
   @override
   final BehaviorSubject<double> volume = BehaviorSubject.seeded(1.0);
@@ -149,8 +154,12 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   Future<void> _init() async {
-    final AudioSession session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.speech());
+    try {
+      final AudioSession session = _testSession ?? await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.speech());
+    } catch (e) {
+      log('AudioSession initialization failed: $e');
+    }
 
     speed.debounceTime(const Duration(milliseconds: 250)).listen((speed) {
       playbackState.add(playbackState.value.copyWith(speed: speed));
@@ -176,8 +185,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
           _player.shuffleIndicesStream,
           _player.durationStream,
           (index, queue, shuffleModeEnabled, shuffleIndices, duration) {
+            final int? rawIndex = _isLoadingAudio && _pendingIndex != null
+                ? _pendingIndex
+                : index;
             final int? queueIndex = getQueueIndex(
-              index,
+              rawIndex,
               shuffleModeEnabled,
               shuffleIndices,
             );
@@ -201,15 +213,24 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       }
     });
 
-    await _effectiveSequence
+    _effectiveSequence
         .map(
-          (sequence) =>
-              sequence.map((source) => _mediaItemExpando[source]!).toList(),
+          (sequence) => sequence
+              .map((source) => _mediaItemExpando[source])
+              .whereType<MediaItem>()
+              .toList(),
         )
-        .pipe(queue);
+        .listen(queue.add);
 
-    _playlist.addAll(queue.value.map(_itemToSource).toList());
-    await _safeSetAudioSources(_playlist);
+    final List<AudioSource> initialSources = queue.value
+        .map(_itemToSource)
+        .toList();
+    _playlist.addAll(initialSources);
+
+    // Only set sources if we actually have items to avoid a default "index 0" jump
+    if (_playlist.isNotEmpty) {
+      await _safeSetAudioSources(_playlist);
+    }
   }
 
   AudioSource _itemToSource(MediaItem mediaItem) {
@@ -221,31 +242,48 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   List<AudioSource> _itemsToSources(List<MediaItem> mediaItems) =>
       mediaItems.map(_itemToSource).toList();
 
-  /// Safely sets audio sources with proper error handling
+  int? _pendingIndex;
+
   Future<void> _safeSetAudioSources(
     List<AudioSource> sources, {
-    int initialIndex = 0,
+    int? initialIndex,
   }) async {
-    if (_isLoadingAudio) {
-      log('Audio is already loading, skipping...');
-      return;
-    }
+    // TRACKING: We want to allow new requests to override old ones
+    // just_audio handles concurrency internally for setAudioSource
 
     _isLoadingAudio = true;
+    // If sources are empty, index should be null
+    final int? effectiveIndex = initialIndex ?? (sources.isEmpty ? null : 0);
+    _pendingIndex = effectiveIndex;
+
+    // IMMEDIATE FEEDBACK: Manually broadcast the target index so UI stays in sync
+    // before the player even finishes loading.
+    playbackState.add(
+      playbackState.value.copyWith(
+        processingState: AudioProcessingState.loading,
+        queueIndex: effectiveIndex,
+      ),
+    );
 
     try {
-      // Stop current playback to prevent interruption
-      await _player.stop();
+      // NOTE: We used to call _player.stop() here, but it's unnecessary
+      // and can cause extra state flickers. just_audio handles it.
 
       // Set new audio sources
       await _player.setAudioSources(sources, initialIndex: initialIndex);
 
-      log('Successfully set ${sources.length} audio sources');
+      log(
+        'Successfully set ${sources.length} audio sources at index $initialIndex',
+      );
     } catch (e) {
       log('Error setting audio sources: $e');
       rethrow;
     } finally {
-      _isLoadingAudio = false;
+      // Small delay to let the event stream stabilize with the new index
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _isLoadingAudio = false;
+        _pendingIndex = null;
+      });
     }
   }
 
@@ -255,6 +293,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     try {
       _isLoadingAudio = false;
       _currentLoadingArtist = null;
+      _pendingIndex = null;
       await _player.stop();
       _playlist.clear();
       log('Audio state cleared');
@@ -278,9 +317,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         final Stream<Map<String, dynamic>> stream = _recentSubject.map(
           (_) => <String, dynamic>{},
         );
-        return _recentSubject.hasValue
-            ? stream.shareValueSeeded(<String, dynamic>{})
-            : stream.shareValue();
+        return stream.shareValueSeeded(<String, dynamic>{});
       default:
         // return Stream.value(_mediaLibrary.items[parentMediaId])
         //     .map((_) => <String, dynamic>{})
@@ -431,8 +468,15 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   void _broadcastState(PlaybackEvent event) {
     final bool playing = _player.playing;
+
+    // USE PENDING INDEX: During loading transitions, use the target index
+    // instead of the player's stale currentIndex.
+    final int? rawIndex = _isLoadingAudio && _pendingIndex != null
+        ? _pendingIndex
+        : event.currentIndex;
+
     final int? queueIndex = getQueueIndex(
-      event.currentIndex,
+      rawIndex,
       _player.shuffleModeEnabled,
       _player.shuffleIndices,
     );
@@ -534,7 +578,6 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     final Either<Failure, List<ReciterEntity>> result =
         await _recitersRepository.getReciters();
     return result.fold((failure) {
-      log('Error getting reciters data: ${failure.message}');
       return null;
     }, (reciters) => reciters);
   }
@@ -658,7 +701,6 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         log('No reciters found.');
       }
     } catch (e) {
-      log('Error playing artist playlist: $e');
       rethrow;
     } finally {
       _currentLoadingArtist = null;
