@@ -80,9 +80,9 @@ class DownloadQueueManager {
   // Track URLs of active downloads to map IDs to URLs for sync
   final Map<String, String> _activeDownloadUrls = {};
 
-  // Track download metadata (title, reciter) for notifications
-  final Map<String, ({String title, String reciterName})> _downloadMetadata =
-      {};
+  // Track download metadata (title, reciter, reciterId) for notifications
+  final Map<String, ({String title, String reciterName, int? reciterId})>
+  _downloadMetadata = {};
 
   // Track last activity time for each active download to detect stuck ones
   final Map<String, DateTime> _lastActivityTime = {};
@@ -139,6 +139,7 @@ class DownloadQueueManager {
     required String filePath,
     required String title,
     required String reciterName,
+    int? reciterId,
   }) async {
     await initialize();
 
@@ -156,11 +157,16 @@ class DownloadQueueManager {
       filePath: filePath,
       title: title,
       reciterName: reciterName,
+      reciterId: reciterId,
       enqueuedAt: clock.now(),
     );
 
     _queue.add(queuedDownload);
-    _downloadMetadata[id] = (title: title, reciterName: reciterName);
+    _downloadMetadata[id] = (
+      title: title,
+      reciterName: reciterName,
+      reciterId: reciterId,
+    );
     _notifyQueueUpdate();
 
     logger.d(
@@ -285,6 +291,7 @@ class DownloadQueueManager {
           filePath: queuedDownload.filePath,
           title: queuedDownload.title,
           reciterName: queuedDownload.reciterName,
+          reciterId: queuedDownload.reciterId,
         );
 
         // Check if disposed after await
@@ -434,7 +441,9 @@ class DownloadQueueManager {
   }
 
   /// Find metadata for a download by matching against active download URLs
-  ({String title, String reciterName})? _findMetadataByUrl(String url) {
+  ({String title, String reciterName, int? reciterId})? _findMetadataByUrl(
+    String url,
+  ) {
     final String normalizedUrl = _normalizeUrlString(url);
     for (final MapEntry<String, String> entry in _activeDownloadUrls.entries) {
       if (_normalizeUrlString(entry.value) == normalizedUrl) {
@@ -447,7 +456,7 @@ class DownloadQueueManager {
   /// Handle download progress updates
   void _handleDownloadProgress(DownloadProgress progress) {
     // Find metadata for this download (could be by ID or URL)
-    final ({String reciterName, String title})? metadata =
+    final ({String reciterName, String title, int? reciterId})? metadata =
         _downloadMetadata[progress.id] ?? _findMetadataByUrl(progress.id);
 
     // Show notification with custom title format and localized messages
@@ -738,6 +747,7 @@ class QueuedDownload extends Equatable {
     required this.filePath,
     required this.title,
     required this.reciterName,
+    this.reciterId,
     required this.enqueuedAt,
   });
 
@@ -746,6 +756,7 @@ class QueuedDownload extends Equatable {
   final String filePath;
   final String title;
   final String reciterName;
+  final int? reciterId;
   final DateTime enqueuedAt;
 
   @override
@@ -755,6 +766,7 @@ class QueuedDownload extends Equatable {
     filePath,
     title,
     reciterName,
+    reciterId,
     enqueuedAt,
   ];
 }

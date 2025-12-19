@@ -182,6 +182,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             filePath: download.filePath,
             title: download.title,
             reciterName: download.reciterName,
+            reciterId: download.reciterId,
           );
           // Keep as pending in the list
           updatedDownloads.add(download);
@@ -574,6 +575,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     String url,
     String surahTitle,
     String reciterName,
+    int reciterId,
   ) async {
     // Validate inputs early to avoid creating invalid download entries
     // Note: in our app, surahId is the actual download URL
@@ -622,6 +624,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       url: trimmedUrl,
       filePath: filePath,
       reciterName: reciterName,
+      reciterId: reciterId,
       status: initialStatus,
       progress: 0.0,
       fileSize: 0,
@@ -645,6 +648,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         filePath: filePath,
         title: surahTitle,
         reciterName: reciterName,
+        reciterId: reciterId,
       );
 
       // Update status to pending if it was queued (not immediately started)

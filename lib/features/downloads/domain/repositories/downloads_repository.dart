@@ -33,8 +33,12 @@ abstract class DownloadsRepository {
   /// Get download progress stream
   Stream<DownloadItem> getDownloadProgress(String id);
 
-  /// Start downloading a surah
-  Future<void> startDownload(String url, String surahTitle, String reciterName);
+  Future<void> startDownload(
+    String url,
+    String surahTitle,
+    String reciterName,
+    int reciterId,
+  );
 
   /// Pause a download
   Future<void> pauseDownload(String id);

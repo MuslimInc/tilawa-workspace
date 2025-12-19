@@ -15,9 +15,15 @@ class DownloadSurahUseCase {
     required String surahId,
     required String surahTitle,
     required String reciterName,
+    required int reciterId,
   }) async {
     try {
-      await _repository.startDownload(surahId, surahTitle, reciterName);
+      await _repository.startDownload(
+        surahId,
+        surahTitle,
+        reciterName,
+        reciterId,
+      );
       return const Right(null);
     } catch (e) {
       return Left(AudioFailure(e.toString()));

@@ -35,6 +35,7 @@ abstract class DownloadService {
     required String filePath,
     required String title,
     required String reciterName,
+    int? reciterId,
   });
 
   /// Cancel a download by its ID.
@@ -74,12 +75,14 @@ abstract class DownloadService {
     required String filePath,
     required String title,
     required String reciterName,
+    int? reciterId,
   }) => DownloadServiceImpl.instance.download(
     id: id,
     url: url,
     filePath: filePath,
     title: title,
     reciterName: reciterName,
+    reciterId: reciterId,
   );
 
   static Future<void> cancelDownload(String id) =>
@@ -122,7 +125,7 @@ class DownloadServiceImpl implements DownloadService {
   static final DownloadServiceImpl _instance = DownloadServiceImpl();
   static DownloadServiceImpl get instance => _instance;
 
-  FlutterDownloaderWrapper _flutterDownloader;
+  final FlutterDownloaderWrapper _flutterDownloader;
   final DownloadFileHelper _fileHelper;
   final DownloadStatusMapper _statusMapper;
   final DownloadIsolateManager _isolateManager;
@@ -315,6 +318,7 @@ class DownloadServiceImpl implements DownloadService {
     required String filePath,
     required String title,
     required String reciterName,
+    int? reciterId,
   }) async {
     await initialize();
 

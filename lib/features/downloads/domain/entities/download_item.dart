@@ -7,6 +7,7 @@ class DownloadItem extends Equatable {
     required this.url,
     required this.filePath,
     required this.reciterName,
+    this.reciterId,
     required this.status,
     required this.progress,
     required this.fileSize,
@@ -22,6 +23,7 @@ class DownloadItem extends Equatable {
       url: json['url'] as String,
       filePath: json['filePath'] as String,
       reciterName: json['reciterName'] as String,
+      reciterId: json['reciterId'] as int?,
       status: DownloadStatus.values.firstWhere(
         (e) => e.name == json['status'],
         orElse: () => DownloadStatus.pending,
@@ -41,6 +43,7 @@ class DownloadItem extends Equatable {
   final String url;
   final String filePath;
   final String reciterName;
+  final int? reciterId;
   final DownloadStatus status;
   final double progress; // 0.0 to 1.0
   final int fileSize; // in bytes
@@ -55,6 +58,7 @@ class DownloadItem extends Equatable {
     url,
     filePath,
     reciterName,
+    reciterId,
     status,
     progress,
     fileSize,
@@ -69,6 +73,7 @@ class DownloadItem extends Equatable {
     String? url,
     String? filePath,
     String? reciterName,
+    int? reciterId,
     DownloadStatus? status,
     double? progress,
     int? fileSize,
@@ -82,6 +87,7 @@ class DownloadItem extends Equatable {
       url: url ?? this.url,
       filePath: filePath ?? this.filePath,
       reciterName: reciterName ?? this.reciterName,
+      reciterId: reciterId ?? this.reciterId,
       status: status ?? this.status,
       progress: progress ?? this.progress,
       fileSize: fileSize ?? this.fileSize,
@@ -98,6 +104,7 @@ class DownloadItem extends Equatable {
       'url': url,
       'filePath': filePath,
       'reciterName': reciterName,
+      'reciterId': reciterId,
       'status': status.name,
       'progress': progress,
       'fileSize': fileSize,

@@ -26,7 +26,7 @@ class AppWithBottomPlayer extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(
                   bottom: state.hasMediaItem
-                      ? 80.0
+                      ? 120.0
                       : 0.0, // Add padding when player is visible
                 ),
                 child: child,
