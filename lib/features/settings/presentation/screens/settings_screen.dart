@@ -31,7 +31,7 @@ class SettingsScreen extends StatelessWidget {
             _buildProfileSection(context),
             SizedBox(height: 32.h),
 
-            // Appearance Group
+            // General Group (Theme & Language)
             _SettingsGroup(
               title: context.l10n.appearance,
               children: [
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
                       title: context.l10n.theme,
                       subtitle: _getThemeName(context, state.mode),
                       onTap: () => _showThemePicker(context, state.mode),
-                      borderRadius: BorderRadiusGeometry.vertical(
+                      borderRadius: BorderRadius.vertical(
                         top: Radius.circular(16.r),
                       ),
                     );
@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                           : context.l10n.english,
                       onTap: () => _showLanguagePicker(context, state.locale),
                       showDivider: false,
-                      borderRadius: BorderRadiusGeometry.vertical(
+                      borderRadius: BorderRadius.vertical(
                         bottom: Radius.circular(16.r),
                       ),
                     );
@@ -71,7 +71,31 @@ class SettingsScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            // Downloads Group
+            // Audio Group
+            _SettingsGroup(
+              title: context.l10n.audioSettings,
+              children: [
+                BlocBuilder<SettingsCubit, SettingsState>(
+                  builder: (context, state) {
+                    return _SwitchSettingsTile(
+                      icon: FluentIcons.history_24_regular,
+                      title: context.l10n.restorePlaybackState,
+                      subtitle: context.l10n.restorePlaybackStateSubtitle,
+                      value: state.restorePlaybackState,
+                      onChanged: (value) {
+                        context
+                            .read<SettingsCubit>()
+                            .toggleRestorePlaybackState(value);
+                      },
+                      showDivider: false,
+                    );
+                  },
+                ),
+              ],
+            ),
+
+            SizedBox(height: 24.h),
+
             // Downloads Group
             _SettingsGroup(
               title: context.l10n.downloads,
@@ -107,70 +131,60 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 32.h),
 
             // Logout Button
             BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 if (state is AuthAuthenticated) {
-                  return Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(context.l10n.logout),
-                            content: Text(context.l10n.logoutConfirmation),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(context.l10n.cancel),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  context.read<AuthBloc>().add(
-                                    const SignOutEvent(),
-                                  );
-                                },
-                                child: Text(
-                                  context.l10n.logout,
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(16.r),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              FluentIcons.sign_out_24_regular,
-                              color: Colors.red,
-                              size: 24.sp,
+                  return InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(context.l10n.logout),
+                          content: Text(context.l10n.logoutConfirmation),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(context.l10n.cancel),
                             ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              context.l10n.logout,
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.read<AuthBloc>().add(
+                                  const SignOutEvent(),
+                                );
+                              },
+                              child: Text(
+                                context.l10n.logout,
+                                style: const TextStyle(color: Colors.red),
                               ),
                             ),
                           ],
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16.r),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Text(
+                        context.l10n.logout,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -179,6 +193,7 @@ class SettingsScreen extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
+            SizedBox(height: 32.h),
           ],
         ),
       ),
@@ -520,6 +535,79 @@ class _ThemeOption extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             )
           : null,
+    );
+  }
+}
+
+class _SwitchSettingsTile extends StatelessWidget {
+  const _SwitchSettingsTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.subtitle,
+    this.showDivider = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Icon(icon, color: theme.primaryColor, size: 20.sp),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: TextStyle(fontSize: 16.sp)),
+                      if (subtitle != null) ...[
+                        SizedBox(height: 4.h),
+                        Text(
+                          subtitle!,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: theme.textTheme.bodySmall?.color?.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: theme.primaryColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(height: 1, indent: 60.w, endIndent: 20.w, thickness: 0.5),
+      ],
     );
   }
 }

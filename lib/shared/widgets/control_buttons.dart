@@ -81,11 +81,11 @@ class ControlButtons extends StatelessWidget {
             final bool? playing = playbackState?.playing;
             if (processingState == AudioProcessingState.loading ||
                 processingState == AudioProcessingState.buffering) {
-              return Container(
-                margin: const EdgeInsets.all(8.0),
+              return const Container(
+                margin: EdgeInsets.all(8.0),
                 width: 64.0,
                 height: 64.0,
-                child: const CircularProgressIndicator(),
+                child: CircularProgressIndicator(),
               );
             } else if (playing != true) {
               return IconButton(

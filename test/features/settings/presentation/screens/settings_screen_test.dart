@@ -104,7 +104,10 @@ void main() {
     expect(find.byIcon(FluentIcons.dark_theme_24_regular), findsOneWidget);
     expect(find.byIcon(FluentIcons.local_language_24_regular), findsOneWidget);
     expect(find.byIcon(FluentIcons.arrow_download_24_regular), findsOneWidget);
-    expect(find.byIcon(FluentIcons.sign_out_24_regular), findsOneWidget);
+
+    // Verify Audio Section
+    expect(find.text('Audio'), findsOneWidget);
+    expect(find.text('Restore Last Playback'), findsOneWidget);
   });
 
   testWidgets('Tap on Theme tile opens bottom sheet', (tester) async {

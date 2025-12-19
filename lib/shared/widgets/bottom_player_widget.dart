@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
 import '../models/position_data.dart';
@@ -30,8 +31,14 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   void initState() {
     super.initState();
     // Initialize the AudioPlayerBloc
+    // Check if playback restoration is enabled in settings
+    final bool restorePlayback = context
+        .read<SettingsCubit>()
+        .state
+        .restorePlaybackState;
+
     context.read<AudioPlayerBloc>().add(
-      const AudioPlayerEvent.loadAudioPlayerData(),
+      AudioPlayerEvent.loadAudioPlayerData(restorePlayback: restorePlayback),
     );
   }
 

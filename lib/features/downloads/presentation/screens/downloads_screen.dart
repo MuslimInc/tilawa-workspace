@@ -154,9 +154,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   }
 
   Widget _buildBody(BuildContext context, DownloadsState state) {
-    print(
-      'DownloadsScreen BuildBody: status=${state.status}, downloads=${state.downloads.length}',
-    );
     switch (state.status) {
       case DownloadsStateStatus.initial:
       case DownloadsStateStatus.loading:
@@ -249,7 +246,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
-        print('SliverList Builder: index=$index');
         final String reciterName = downloadsByReciter.keys.elementAt(index);
         final Map<String, List<DownloadItem>> narrativeDownloads =
             downloadsByReciter[reciterName] ?? {};

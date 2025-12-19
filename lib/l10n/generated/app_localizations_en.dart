@@ -154,6 +154,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get audioSettings => 'Audio';
+
+  @override
   String get retryDownload => 'Retry Download';
 
   @override
@@ -534,6 +537,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String downloadingSurah(String surahTitle) {
-    return 'تحميل $surahTitle';
+    return 'Downloading $surahTitle';
   }
+
+  @override
+  String get restorePlaybackState => 'Restore Last Playback';
+
+  @override
+  String get restorePlaybackStateSubtitle =>
+      'Resume audio from where you left off';
 }

@@ -621,6 +621,23 @@ class MockRecitersRepository extends _i1.Mock
                 ),
           )
           as _i14.Future<_i15.Either<_i16.Failure, List<_i26.ReciterEntity>>>);
+
+  @override
+  _i14.Future<_i15.Either<_i16.Failure, _i26.ReciterEntity?>> getReciterById(
+    String? id,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getReciterById, [id]),
+            returnValue:
+                _i14.Future<
+                  _i15.Either<_i16.Failure, _i26.ReciterEntity?>
+                >.value(
+                  _i18.dummyValue<
+                    _i15.Either<_i16.Failure, _i26.ReciterEntity?>
+                  >(this, Invocation.method(#getReciterById, [id])),
+                ),
+          )
+          as _i14.Future<_i15.Either<_i16.Failure, _i26.ReciterEntity?>>);
 }
 
 /// A class which mocks [PremiumRepository].

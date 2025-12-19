@@ -85,4 +85,22 @@ class RecitersRepositoryImpl implements RecitersRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  ResultFuture<ReciterEntity?> getReciterById(String id) async {
+    try {
+      final List<ReciterModel> allReciters = await _getRecitersData();
+      final ReciterModel? match = allReciters
+          .where((reciter) => reciter.id.toString() == id)
+          .firstOrNull;
+
+      if (match != null) {
+        return Right(match.toEntity());
+      } else {
+        return const Right(null);
+      }
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

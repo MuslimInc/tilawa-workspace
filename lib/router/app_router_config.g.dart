@@ -49,7 +49,7 @@ mixin $ReciterDetailsRoute on GoRouteData {
   static ReciterDetailsRoute _fromState(GoRouterState state) =>
       ReciterDetailsRoute(
         reciterId: state.pathParameters['reciterId']!,
-        $extra: state.extra as ReciterEntity,
+        $extra: state.extra as ReciterEntity?,
       );
 
   ReciterDetailsRoute get _self => this as ReciterDetailsRoute;

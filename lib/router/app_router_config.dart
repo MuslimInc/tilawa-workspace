@@ -8,6 +8,7 @@ import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../screens/main_screen.dart';
+import '../screens/reciter_details_loader.dart';
 import '../screens/reciter_details_screen.dart';
 import '../shared/widgets/expanded_player_screen.dart';
 
@@ -25,14 +26,17 @@ class HomeRoute extends GoRouteData with $HomeRoute {
 
 @TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId')
 class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
-  const ReciterDetailsRoute({required this.$extra, required this.reciterId});
+  const ReciterDetailsRoute({this.$extra, required this.reciterId});
 
-  final ReciterEntity $extra;
+  final ReciterEntity? $extra;
   final String reciterId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ReciterDetailsScreen(reciter: $extra);
+    if ($extra == null) {
+      return ReciterDetailsLoader(reciterId: reciterId);
+    }
+    return ReciterDetailsScreen(reciter: $extra!);
   }
 }
 

@@ -158,6 +158,8 @@ import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc
     as _i447;
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart'
     as _i864;
+import 'package:muzakri/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart'
+    as _i574;
 import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart'
     as _i727;
 import 'package:muzakri/features/surah/data/repositories/surah_repository_impl.dart'
@@ -356,6 +358,9 @@ extension GetItInjectableX on _i174.GetIt {
         initialIsDownloading: gh<bool>(),
         initialProgress: gh<double>(),
       ),
+    );
+    gh.factory<_i574.ReciterDetailsLoaderCubit>(
+      () => _i574.ReciterDetailsLoaderCubit(gh<_i619.RecitersRepository>()),
     );
     gh.singleton<_i785.GetRecitersUseCase>(
       () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),

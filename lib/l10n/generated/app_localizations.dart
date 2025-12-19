@@ -386,6 +386,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// Audio settings section title
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get audioSettings;
+
   /// Retry download button text
   ///
   /// In en, this message translates to:
@@ -1085,8 +1091,20 @@ abstract class AppLocalizations {
   /// Downloading surah message
   ///
   /// In en, this message translates to:
-  /// **'تحميل {surahTitle}'**
+  /// **'Downloading {surahTitle}'**
   String downloadingSurah(String surahTitle);
+
+  /// Restore playback state setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Last Playback'**
+  String get restorePlaybackState;
+
+  /// Restore playback state setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Resume audio from where you left off'**
+  String get restorePlaybackStateSubtitle;
 }
 
 class _AppLocalizationsDelegate

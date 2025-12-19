@@ -177,6 +177,33 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     icon: const Icon(
                                       FluentIcons.dismiss_24_regular,
                                     ),
+                                    onLongPress: () {
+                                      final snackBar = SnackBar(
+                                        content: Text(
+                                          'l10n.clearSearch',
+                                          style: TextStyle(
+                                            color: theme.primaryColor,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                        action: SnackBarAction(
+                                          label: 'l10n.clear',
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            context.read<RecitersBloc>().add(
+                                              const ClearSearch(),
+                                            );
+                                            context
+                                                .read<AlphabetScrollbarBloc>()
+                                                .add(const ClearSelection());
+                                          },
+                                        ),
+                                      );
+
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(snackBar);
+                                    },
                                     onPressed: () {
                                       _searchController.clear();
                                       context.read<RecitersBloc>().add(

@@ -30,9 +30,6 @@ class ReciterDownloadsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<DownloadItem> downloads = _allDownloads;
-    print(
-      'ReciterDownloadsSection Build: reciter=$reciterName, downloads=${downloads.length}',
-    );
 
     return Card(
       elevation: 0,

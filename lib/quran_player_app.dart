@@ -46,6 +46,7 @@ class _PlayerApp extends StatelessWidget {
                 darkTheme: AppTheme.getDarkTheme(themeState.scheme),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
+                restorationScopeId: 'quran_player_app',
                 locale: locState.locale,
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,

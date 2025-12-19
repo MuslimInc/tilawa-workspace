@@ -192,6 +192,10 @@
     "@settings": {
         "description": "Settings section title"
     },
+    "audioSettings": "Audio",
+    "@audioSettings": {
+        "description": "Audio settings section title"
+    },
     "retryDownload": "Retry Download",
     "@retryDownload": {
         "description": "Retry download button text"
@@ -726,7 +730,7 @@
             }
         }
     },
-    "downloadingSurah": "تحميل {surahTitle}",
+    "downloadingSurah": "Downloading {surahTitle}",
     "@downloadingSurah": {
         "description": "Downloading surah message",
         "placeholders": {
@@ -735,5 +739,13 @@
                 "description": "The title of the surah"
             }
         }
+    },
+    "restorePlaybackState": "Restore Last Playback",
+    "@restorePlaybackState": {
+        "description": "Restore playback state setting title"
+    },
+    "restorePlaybackStateSubtitle": "Resume audio from where you left off",
+    "@restorePlaybackStateSubtitle": {
+        "description": "Restore playback state setting subtitle"
     }
 }

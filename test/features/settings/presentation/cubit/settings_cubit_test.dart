@@ -103,7 +103,10 @@ void main() {
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
-          cubit.fromJson({'maxConcurrentDownloads': 5}),
+          cubit.fromJson({
+            'maxConcurrentDownloads': 5,
+            'restorePlaybackState': true,
+          }),
           const SettingsState(maxConcurrentDownloads: 5),
         );
       });
@@ -118,6 +121,7 @@ void main() {
       test('toJson returns correct map', () {
         expect(cubit.toJson(const SettingsState(maxConcurrentDownloads: 3)), {
           'maxConcurrentDownloads': 3,
+          'restorePlaybackState': true,
         });
       });
     });

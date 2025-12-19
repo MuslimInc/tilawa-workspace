@@ -99,6 +99,8 @@ class _MainScreenState extends State<MainScreen> {
                     icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
                     activeIcon: Icon(FluentIcons.person_24_filled, size: 24.sp),
                     label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                    tooltip:
+                        AppLocalizations.of(context)?.reciters ?? 'Reciters',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(

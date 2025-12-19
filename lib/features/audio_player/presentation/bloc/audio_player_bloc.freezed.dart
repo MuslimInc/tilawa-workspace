@@ -182,10 +182,10 @@ return setShuffleMode(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadAudioPlayerData,TResult Function( MediaItem? mediaItem)?  updateMediaItem,TResult Function( PlaybackState playbackState)?  updatePlaybackState,TResult Function( PositionData positionData)?  updatePositionData,TResult Function( QueueState queueState)?  updateQueueState,TResult Function( double volume)?  updateVolume,TResult Function( double speed)?  updateSpeed,TResult Function()?  playAudio,TResult Function()?  pauseAudio,TResult Function()?  stopAudio,TResult Function()?  skipToNext,TResult Function()?  skipToPrevious,TResult Function( Duration position)?  seekTo,TResult Function( double volume)?  setVolume,TResult Function( double speed)?  setSpeed,TResult Function( int index)?  skipToQueueItem,TResult Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult Function( List<MediaItem> queue)?  updateQueue,TResult Function( MediaItem item)?  addQueueItem,TResult Function( MediaItem item)?  removeQueueItem,TResult Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool restorePlayback)?  loadAudioPlayerData,TResult Function( MediaItem? mediaItem)?  updateMediaItem,TResult Function( PlaybackState playbackState)?  updatePlaybackState,TResult Function( PositionData positionData)?  updatePositionData,TResult Function( QueueState queueState)?  updateQueueState,TResult Function( double volume)?  updateVolume,TResult Function( double speed)?  updateSpeed,TResult Function()?  playAudio,TResult Function()?  pauseAudio,TResult Function()?  stopAudio,TResult Function()?  skipToNext,TResult Function()?  skipToPrevious,TResult Function( Duration position)?  seekTo,TResult Function( double volume)?  setVolume,TResult Function( double speed)?  setSpeed,TResult Function( int index)?  skipToQueueItem,TResult Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult Function( List<MediaItem> queue)?  updateQueue,TResult Function( MediaItem item)?  addQueueItem,TResult Function( MediaItem item)?  removeQueueItem,TResult Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData();case UpdateMediaItem() when updateMediaItem != null:
+return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem() when updateMediaItem != null:
 return updateMediaItem(_that.mediaItem);case UpdatePlaybackState() when updatePlaybackState != null:
 return updatePlaybackState(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
 return updatePositionData(_that.positionData);case UpdateQueueState() when updateQueueState != null:
@@ -225,10 +225,10 @@ return setShuffleMode(_that.shuffleMode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadAudioPlayerData,required TResult Function( MediaItem? mediaItem)  updateMediaItem,required TResult Function( PlaybackState playbackState)  updatePlaybackState,required TResult Function( PositionData positionData)  updatePositionData,required TResult Function( QueueState queueState)  updateQueueState,required TResult Function( double volume)  updateVolume,required TResult Function( double speed)  updateSpeed,required TResult Function()  playAudio,required TResult Function()  pauseAudio,required TResult Function()  stopAudio,required TResult Function()  skipToNext,required TResult Function()  skipToPrevious,required TResult Function( Duration position)  seekTo,required TResult Function( double volume)  setVolume,required TResult Function( double speed)  setSpeed,required TResult Function( int index)  skipToQueueItem,required TResult Function( List<MediaItem> queue,  int index)  playFromQueue,required TResult Function( List<MediaItem> queue)  updateQueue,required TResult Function( MediaItem item)  addQueueItem,required TResult Function( MediaItem item)  removeQueueItem,required TResult Function( int currentIndex,  int newIndex)  moveQueueItem,required TResult Function( AudioServiceRepeatMode repeatMode)  setRepeatMode,required TResult Function( AudioServiceShuffleMode shuffleMode)  setShuffleMode,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool restorePlayback)  loadAudioPlayerData,required TResult Function( MediaItem? mediaItem)  updateMediaItem,required TResult Function( PlaybackState playbackState)  updatePlaybackState,required TResult Function( PositionData positionData)  updatePositionData,required TResult Function( QueueState queueState)  updateQueueState,required TResult Function( double volume)  updateVolume,required TResult Function( double speed)  updateSpeed,required TResult Function()  playAudio,required TResult Function()  pauseAudio,required TResult Function()  stopAudio,required TResult Function()  skipToNext,required TResult Function()  skipToPrevious,required TResult Function( Duration position)  seekTo,required TResult Function( double volume)  setVolume,required TResult Function( double speed)  setSpeed,required TResult Function( int index)  skipToQueueItem,required TResult Function( List<MediaItem> queue,  int index)  playFromQueue,required TResult Function( List<MediaItem> queue)  updateQueue,required TResult Function( MediaItem item)  addQueueItem,required TResult Function( MediaItem item)  removeQueueItem,required TResult Function( int currentIndex,  int newIndex)  moveQueueItem,required TResult Function( AudioServiceRepeatMode repeatMode)  setRepeatMode,required TResult Function( AudioServiceShuffleMode shuffleMode)  setShuffleMode,}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData():
-return loadAudioPlayerData();case UpdateMediaItem():
+return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem():
 return updateMediaItem(_that.mediaItem);case UpdatePlaybackState():
 return updatePlaybackState(_that.playbackState);case UpdatePositionData():
 return updatePositionData(_that.positionData);case UpdateQueueState():
@@ -264,10 +264,10 @@ return setShuffleMode(_that.shuffleMode);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadAudioPlayerData,TResult? Function( MediaItem? mediaItem)?  updateMediaItem,TResult? Function( PlaybackState playbackState)?  updatePlaybackState,TResult? Function( PositionData positionData)?  updatePositionData,TResult? Function( QueueState queueState)?  updateQueueState,TResult? Function( double volume)?  updateVolume,TResult? Function( double speed)?  updateSpeed,TResult? Function()?  playAudio,TResult? Function()?  pauseAudio,TResult? Function()?  stopAudio,TResult? Function()?  skipToNext,TResult? Function()?  skipToPrevious,TResult? Function( Duration position)?  seekTo,TResult? Function( double volume)?  setVolume,TResult? Function( double speed)?  setSpeed,TResult? Function( int index)?  skipToQueueItem,TResult? Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult? Function( List<MediaItem> queue)?  updateQueue,TResult? Function( MediaItem item)?  addQueueItem,TResult? Function( MediaItem item)?  removeQueueItem,TResult? Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult? Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult? Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool restorePlayback)?  loadAudioPlayerData,TResult? Function( MediaItem? mediaItem)?  updateMediaItem,TResult? Function( PlaybackState playbackState)?  updatePlaybackState,TResult? Function( PositionData positionData)?  updatePositionData,TResult? Function( QueueState queueState)?  updateQueueState,TResult? Function( double volume)?  updateVolume,TResult? Function( double speed)?  updateSpeed,TResult? Function()?  playAudio,TResult? Function()?  pauseAudio,TResult? Function()?  stopAudio,TResult? Function()?  skipToNext,TResult? Function()?  skipToPrevious,TResult? Function( Duration position)?  seekTo,TResult? Function( double volume)?  setVolume,TResult? Function( double speed)?  setSpeed,TResult? Function( int index)?  skipToQueueItem,TResult? Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult? Function( List<MediaItem> queue)?  updateQueue,TResult? Function( MediaItem item)?  addQueueItem,TResult? Function( MediaItem item)?  removeQueueItem,TResult? Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult? Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult? Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData();case UpdateMediaItem() when updateMediaItem != null:
+return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem() when updateMediaItem != null:
 return updateMediaItem(_that.mediaItem);case UpdatePlaybackState() when updatePlaybackState != null:
 return updatePlaybackState(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
 return updatePositionData(_that.positionData);case UpdateQueueState() when updateQueueState != null:
@@ -301,33 +301,67 @@ return setShuffleMode(_that.shuffleMode);case _:
 
 
 class LoadAudioPlayerData implements AudioPlayerEvent {
-  const LoadAudioPlayerData();
+  const LoadAudioPlayerData({this.restorePlayback = true});
   
 
+@JsonKey() final  bool restorePlayback;
 
-
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoadAudioPlayerDataCopyWith<LoadAudioPlayerData> get copyWith => _$LoadAudioPlayerDataCopyWithImpl<LoadAudioPlayerData>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadAudioPlayerData);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadAudioPlayerData&&(identical(other.restorePlayback, restorePlayback) || other.restorePlayback == restorePlayback));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,restorePlayback);
 
 @override
 String toString() {
-  return 'AudioPlayerEvent.loadAudioPlayerData()';
+  return 'AudioPlayerEvent.loadAudioPlayerData(restorePlayback: $restorePlayback)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $LoadAudioPlayerDataCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
+  factory $LoadAudioPlayerDataCopyWith(LoadAudioPlayerData value, $Res Function(LoadAudioPlayerData) _then) = _$LoadAudioPlayerDataCopyWithImpl;
+@useResult
+$Res call({
+ bool restorePlayback
+});
 
 
+
+
+}
+/// @nodoc
+class _$LoadAudioPlayerDataCopyWithImpl<$Res>
+    implements $LoadAudioPlayerDataCopyWith<$Res> {
+  _$LoadAudioPlayerDataCopyWithImpl(this._self, this._then);
+
+  final LoadAudioPlayerData _self;
+  final $Res Function(LoadAudioPlayerData) _then;
+
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? restorePlayback = null,}) {
+  return _then(LoadAudioPlayerData(
+restorePlayback: null == restorePlayback ? _self.restorePlayback : restorePlayback // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

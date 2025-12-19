@@ -145,7 +145,15 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final double currentSpeed = _audioHandler.speed.value;
 
     // Check if we have persisted queue data from previous session
-    if (state.queueState != null &&
+    // But FIRST, ensure we don't overwrite an already active session (e.g. from background)
+    final List<MediaItem> currentQueue = _audioHandler.queue.value;
+    if (currentQueue.isNotEmpty) {
+      logger.d(
+        'Audio handler already has ${currentQueue.length} items. Skipping queue restoration.',
+      );
+    } else if (!event.restorePlayback) {
+      logger.d('Playback restoration disabled via event parameter. Skipping.');
+    } else if (state.queueState != null &&
         state.queueState!.queue.isNotEmpty &&
         state.queueState!.queueIndex != null) {
       logger.d(
@@ -252,7 +260,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       // No media item, just update status and settings
       logger.d('No media item to restore, updating settings only');
       emit(
-        state.copyWith(
+        AudioPlayerState(
           status: AudioPlayerStatus.success,
           volume: currentVolume,
           speed: currentSpeed,

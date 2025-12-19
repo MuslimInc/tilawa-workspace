@@ -2,7 +2,9 @@ part of 'audio_player_bloc.dart';
 
 @freezed
 sealed class AudioPlayerEvent with _$AudioPlayerEvent {
-  const factory AudioPlayerEvent.loadAudioPlayerData() = LoadAudioPlayerData;
+  const factory AudioPlayerEvent.loadAudioPlayerData({
+    @Default(true) bool restorePlayback,
+  }) = LoadAudioPlayerData;
   const factory AudioPlayerEvent.updateMediaItem(MediaItem? mediaItem) =
       UpdateMediaItem;
   const factory AudioPlayerEvent.updatePlaybackState(
