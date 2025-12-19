@@ -265,6 +265,7 @@ void main() {
       const testSurahId = '001';
       const testSurahTitle = 'Al-Fatiha';
       const testReciterName = 'Abdul Rahman Al-Sudais';
+      const testReciterId = 1;
 
       test(
         'emits [DownloadStarted] in statusStream when download is initiated',
@@ -280,6 +281,7 @@ void main() {
               surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
             ),
           ).thenAnswer((_) async => const Right(null));
           when(
@@ -314,6 +316,7 @@ void main() {
               surahId: testSurahId,
               surahTitle: testSurahTitle,
               reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           );
         },
@@ -338,6 +341,7 @@ void main() {
               surahId: testSurahId,
               surahTitle: testSurahTitle,
               reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           );
         },
@@ -371,6 +375,7 @@ void main() {
               surahId: testSurahId,
               surahTitle: testSurahTitle,
               reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           );
         },
@@ -390,6 +395,7 @@ void main() {
               surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
             ),
           ).thenAnswer((_) async => const Left(AudioFailure('Network error')));
           when(
@@ -428,6 +434,7 @@ void main() {
               surahId: testSurahId,
               surahTitle: testSurahTitle,
               reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           );
         },
@@ -1305,6 +1312,7 @@ void main() {
             surahId: anyNamed('surahId'),
             surahTitle: anyNamed('surahTitle'),
             reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
           ),
         ).thenAnswer((_) async => const Right(null));
         when(
@@ -1357,6 +1365,7 @@ void main() {
             surahId: '001',
             surahTitle: 'Al-Fatiha',
             reciterName: 'Test Reciter',
+            reciterId: 1,
           ),
         );
         downloadsBloc.add(const CheckPremiumAccessEvent());

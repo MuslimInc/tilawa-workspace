@@ -61,23 +61,24 @@ class _RecitersScreenState extends State<RecitersScreen> {
       child: BlocBuilder<RecitersBloc, RecitersState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(title: Text(l10n.reciters)),
+            appBar: AppBar(
+              title: Text(
+                l10n.reciters,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp),
+              ),
+              centerTitle: true,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              backgroundColor: Colors.transparent,
+            ),
             body: Column(
               children: [
                 // Search bar and letter filter
-                Container(
-                  padding: EdgeInsets.all(4.r),
-                  margin: EdgeInsets.all(4.r),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: 0.1),
-                    ),
-                  ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
                   child: Column(
                     children: [
-                      // Letter filter indicator
+                      // Letter filter indicator (refined)
                       if (state is RecitersLoaded &&
                           state.selectedLetter != null)
                         Container(
@@ -85,146 +86,162 @@ class _RecitersScreenState extends State<RecitersScreen> {
                           margin: EdgeInsets.only(bottom: 12.h),
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
-                            vertical: 12.h,
+                            vertical: 10.h,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12.r),
+                            color: theme.primaryColor.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16.r),
                             border: Border.all(
-                              color: theme.primaryColor.withValues(alpha: 0.3),
+                              color: theme.primaryColor.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                Icons.filter_alt_rounded,
+                                FluentIcons.filter_24_filled,
                                 color: theme.primaryColor,
-                                size: 20.sp,
+                                size: 18.sp,
                               ),
-                              SizedBox(width: 8.w),
+                              SizedBox(width: 10.w),
                               Text(
                                 l10n.filteredByLetter,
                                 style: TextStyle(
                                   color: theme.primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13.sp,
                                 ),
                               ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                state.selectedLetter!,
-                                style: TextStyle(
+                              SizedBox(width: 6.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
                                   color: theme.primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18.sp,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  state.selectedLetter!,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.sp,
+                                  ),
                                 ),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.close_rounded),
-                                onPressed: _clearLetterFilter,
-                                color: theme.primaryColor,
-                                iconSize: 20.sp,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
+                              GestureDetector(
+                                onTap: _clearLetterFilter,
+                                child: Container(
+                                  padding: EdgeInsets.all(4.r),
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    color: theme.primaryColor,
+                                    size: 16.sp,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
                       // Search field
-                      Focus(
-                        onFocusChange: (hasFocus) {
-                          setState(() {});
-                        },
-                        child: TextField(
-                          focusNode: _focusNode,
-                          controller: _searchController,
-                          style: TextStyle(fontSize: 14.sp),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: theme.colorScheme.surface,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide.none,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide.none,
+                          ],
+                        ),
+                        child: Focus(
+                          onFocusChange: (hasFocus) {
+                            setState(() {});
+                          },
+                          child: TextField(
+                            focusNode: _focusNode,
+                            controller: _searchController,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide(
-                                color: theme.primaryColor,
-                                width: 1.5,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: theme.colorScheme.surface,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.r),
+                                borderSide: BorderSide.none,
                               ),
-                            ),
-                            hintText: l10n.searchReciters,
-                            prefixIcon: Icon(
-                              FluentIcons.search_24_regular,
-                              size: 22.sp,
-                              color: _focusNode.hasFocus
-                                  ? theme.primaryColor
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.r),
+                                borderSide: BorderSide(
+                                  color: theme.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.3),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.r),
+                                borderSide: BorderSide(
+                                  color: theme.primaryColor,
+                                  width: 1.5,
+                                ),
+                              ),
+                              hintText: l10n.searchReciters,
+                              hintStyle: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                                fontSize: 14.sp,
+                              ),
+                              prefixIcon: Icon(
+                                FluentIcons.search_24_regular,
+                                size: 20.sp,
+                                color: _focusNode.hasFocus
+                                    ? theme.primaryColor
+                                    : theme.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.7),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 16.h,
+                              ),
+                              suffixIcon:
+                                  (state is RecitersLoaded &&
+                                      state.searchQuery.isNotEmpty)
+                                  ? IconButton(
+                                      icon: Icon(
+                                        FluentIcons.dismiss_24_regular,
+                                        size: 20.sp,
+                                      ),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        context.read<RecitersBloc>().add(
+                                          const ClearSearch(),
+                                        );
+                                        context
+                                            .read<AlphabetScrollbarBloc>()
+                                            .add(const ClearSelection());
+                                      },
+                                    )
                                   : null,
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 14.h,
-                            ),
-                            suffixIcon:
-                                (state is RecitersLoaded &&
-                                    state.searchQuery.isNotEmpty)
-                                ? IconButton(
-                                    icon: const Icon(
-                                      FluentIcons.dismiss_24_regular,
-                                    ),
-                                    onLongPress: () {
-                                      final snackBar = SnackBar(
-                                        content: Text(
-                                          'l10n.clearSearch',
-                                          style: TextStyle(
-                                            color: theme.primaryColor,
-                                            fontSize: 14.sp,
-                                          ),
-                                        ),
-                                        action: SnackBarAction(
-                                          label: 'l10n.clear',
-                                          onPressed: () {
-                                            _searchController.clear();
-                                            context.read<RecitersBloc>().add(
-                                              const ClearSearch(),
-                                            );
-                                            context
-                                                .read<AlphabetScrollbarBloc>()
-                                                .add(const ClearSelection());
-                                          },
-                                        ),
-                                      );
-
-                                      ScaffoldMessenger.of(context)
-                                        ..hideCurrentSnackBar()
-                                        ..showSnackBar(snackBar);
-                                    },
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      context.read<RecitersBloc>().add(
-                                        const ClearSearch(),
-                                      );
-                                      context.read<AlphabetScrollbarBloc>().add(
-                                        const ClearSelection(),
-                                      );
-                                      // Keep focus or un-focus? Usually clear keeps focus if user wants to type again.
-                                    },
-                                  )
-                                : null,
+                            onChanged: (value) {
+                              context.read<RecitersBloc>().add(
+                                SearchRecitersEvent(value),
+                              );
+                            },
+                            onTapOutside: (event) {
+                              _focusNode.unfocus();
+                            },
                           ),
-                          onChanged: (value) {
-                            context.read<RecitersBloc>().add(
-                              SearchRecitersEvent(value),
-                            );
-                          },
-                          onTapOutside: (event) {
-                            _focusNode.unfocus();
-                          },
                         ),
                       ),
                     ],

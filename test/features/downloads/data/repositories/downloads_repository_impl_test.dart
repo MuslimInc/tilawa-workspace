@@ -156,6 +156,7 @@ void main() {
       const testSurahId = '001';
       const testSurahTitle = 'Al-Fatiha';
       const testReciterName = 'Abdul Rahman Al-Sudais';
+      const testReciterId = 1;
 
       test('should create download item and start download service', () async {
         // Arrange
@@ -175,6 +176,7 @@ void main() {
           testSurahId,
           testSurahTitle,
           testReciterName,
+          testReciterId,
         );
 
         // Assert
@@ -213,6 +215,7 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
+            testReciterId,
           ),
           throwsException,
         );
@@ -234,6 +237,7 @@ void main() {
             testSurahId,
             testSurahTitle,
             testReciterName,
+            testReciterId,
           ),
           throwsException,
         );
@@ -255,6 +259,7 @@ void main() {
           url: testUrl,
           filePath: '$tempPath/file.mp3',
           reciterName: 'Abdul Rahman Al-Sudais',
+          reciterId: 1,
           status: DownloadStatus.failed,
           progress: 0.0,
           fileSize: 0,
@@ -387,6 +392,7 @@ void main() {
         url: 'https://example.com/audio.mp3',
         filePath: '/path/to/file.mp3',
         reciterName: 'Abdul Rahman Al-Sudais',
+        reciterId: 1,
         status: DownloadStatus.completed,
         progress: 1.0,
         fileSize: 1024,
@@ -497,6 +503,7 @@ void main() {
           url: testSurahId,
           filePath: '/tmp/downloads/Abdul_Rahman_Al-Sudais/audio.mp3',
           reciterName: testReciterName,
+          reciterId: 1,
           status: DownloadStatus.failed,
           progress: 0.5,
           fileSize: 1024,
@@ -673,6 +680,7 @@ void main() {
           url: 'https://example.com/audio.mp3',
           filePath: '/path/to/file.mp3',
           reciterName: 'Test Reciter',
+          reciterId: 1,
           status: DownloadStatus.downloading, // Was downloading when app closed
           progress: 0.5, // 50% downloaded
           fileSize: 1000,
@@ -750,16 +758,18 @@ void main() {
 
       test('should not change status when download is not active', () async {
         // Arrange
+        const testDownloadId = 'test_download_id';
         final testDownload = DownloadItem(
-          id: 'test_id',
+          id: testDownloadId,
           title: 'Al-Fatiha',
           url: 'https://example.com/audio.mp3',
           filePath: '/path/to/file.mp3',
           reciterName: 'Abdul Rahman Al-Sudais',
-          status: DownloadStatus.completed,
-          progress: 1.0,
-          fileSize: 1024,
-          downloadedSize: 1024,
+          reciterId: 1,
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 1000,
+          downloadedSize: 500,
           createdAt: DateTime.now(),
         );
 
@@ -782,7 +792,7 @@ void main() {
             .expand((list) => list)
             .toList();
         expect(downloads.length, 1);
-        expect(downloads.first.status, DownloadStatus.completed);
+        expect(downloads.first.status, DownloadStatus.downloading);
       });
     });
 
@@ -796,10 +806,11 @@ void main() {
           url: 'https://example.com/audio.mp3',
           filePath: '/path/to/file.mp3',
           reciterName: 'Abdul Rahman Al-Sudais',
+          reciterId: 1,
           status: DownloadStatus.downloading,
-          progress: 0.0,
-          fileSize: 0,
-          downloadedSize: 0,
+          progress: 0.5,
+          fileSize: 1000,
+          downloadedSize: 500,
           createdAt: DateTime.now(),
         );
 
@@ -1142,7 +1153,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1173,7 +1184,7 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter);
+        await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1204,7 +1215,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1234,7 +1245,7 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter);
+        await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1266,7 +1277,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1296,7 +1307,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1325,7 +1336,7 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter);
+        await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1353,7 +1364,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1383,8 +1394,8 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act - Start both downloads
-        await repository.startDownload(testUrl1, testTitle, testReciter);
-        await repository.startDownload(testUrl2, testTitle, testReciter);
+        await repository.startDownload(testUrl1, testTitle, testReciter, 1);
+        await repository.startDownload(testUrl2, testTitle, testReciter, 1);
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1422,7 +1433,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1451,7 +1462,7 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter);
+      await repository.startDownload(testUrl, testTitle, testReciter, 1);
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1472,7 +1483,7 @@ void main() {
       await file.writeAsBytes(List.filled(1024, 0)); // 1 KB dummy file
 
       final download = DownloadItem(
-        id: 'test_id',
+        id: 'url_Test Reciter',
         title: 'Test Surah',
         url: 'url',
         filePath: file.path,

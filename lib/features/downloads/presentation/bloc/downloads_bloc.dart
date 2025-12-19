@@ -247,6 +247,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       title: event.surahTitle,
       url: event.surahId,
       reciterName: event.reciterName,
+      reciterId: event.reciterId,
       status: DownloadStatus.downloading,
       progress: 0.0,
       downloadedSize: 0,
@@ -282,6 +283,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       surahId: event.surahId,
       surahTitle: event.surahTitle,
       reciterName: event.reciterName,
+      reciterId: event.reciterId,
     );
 
     result.fold(

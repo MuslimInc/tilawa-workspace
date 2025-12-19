@@ -216,12 +216,14 @@ class MockDownloadSurahUseCase extends _i1.Mock
     required String? surahId,
     required String? surahTitle,
     required String? reciterName,
+    required int? reciterId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#call, [], {
               #surahId: surahId,
               #surahTitle: surahTitle,
               #reciterName: reciterName,
+              #reciterId: reciterId,
             }),
             returnValue: _i14.Future<_i15.Either<_i16.Failure, void>>.value(
               _i18.dummyValue<_i15.Either<_i16.Failure, void>>(
@@ -230,6 +232,7 @@ class MockDownloadSurahUseCase extends _i1.Mock
                   #surahId: surahId,
                   #surahTitle: surahTitle,
                   #reciterName: reciterName,
+                  #reciterId: reciterId,
                 }),
               ),
             ),
@@ -414,9 +417,15 @@ class MockDownloadsRepository extends _i1.Mock
     String? url,
     String? surahTitle,
     String? reciterName,
+    int? reciterId,
   ) =>
       (super.noSuchMethod(
-            Invocation.method(#startDownload, [url, surahTitle, reciterName]),
+            Invocation.method(#startDownload, [
+              url,
+              surahTitle,
+              reciterName,
+              reciterId,
+            ]),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),
           )
@@ -1684,6 +1693,7 @@ class MockDownloadService extends _i1.Mock implements _i32.DownloadService {
     required String? filePath,
     required String? title,
     required String? reciterName,
+    int? reciterId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#download, [], {
@@ -1692,6 +1702,7 @@ class MockDownloadService extends _i1.Mock implements _i32.DownloadService {
               #filePath: filePath,
               #title: title,
               #reciterName: reciterName,
+              #reciterId: reciterId,
             }),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),

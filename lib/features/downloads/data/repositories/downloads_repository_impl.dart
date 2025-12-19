@@ -423,6 +423,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
                   filePath: download.filePath,
                   title: download.title,
                   reciterName: download.reciterName,
+                  reciterId: download.reciterId,
                 );
 
                 // Update the download item with new timestamp
@@ -1210,6 +1211,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               filePath: download.filePath,
               title: download.title,
               reciterName: download.reciterName,
+              reciterId: download.reciterId,
             );
             resumedCount++;
           } catch (e) {

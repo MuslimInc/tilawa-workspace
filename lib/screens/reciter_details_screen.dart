@@ -245,6 +245,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 surah: surah,
                 index: index,
                 reciterName: widget.reciter.name,
+                reciterId: widget.reciter.id,
                 onTap: () => _playSurah(surah, state),
               );
             }, childCount: state.surahList.length),
@@ -542,12 +543,14 @@ class _SurahCard extends StatelessWidget {
     required this.surah,
     required this.index,
     required this.reciterName,
+    required this.reciterId,
     required this.onTap,
   });
 
   final SurahEntity surah;
   final int index;
   final String reciterName;
+  final int reciterId;
   final VoidCallback onTap;
 
   @override
@@ -670,6 +673,7 @@ class _SurahCard extends StatelessWidget {
                         url: surah.id,
                         surahTitle: surah.name,
                         reciterName: reciterName,
+                        reciterId: reciterId,
                         initialIsDownloaded: surah.isDownloaded,
                         initialIsDownloading: surah.isDownloading,
                         initialProgress: surah.downloadProgress,

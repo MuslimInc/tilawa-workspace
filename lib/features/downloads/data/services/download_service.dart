@@ -125,7 +125,7 @@ class DownloadServiceImpl implements DownloadService {
   static final DownloadServiceImpl _instance = DownloadServiceImpl();
   static DownloadServiceImpl get instance => _instance;
 
-  final FlutterDownloaderWrapper _flutterDownloader;
+  FlutterDownloaderWrapper _flutterDownloader;
   final DownloadFileHelper _fileHelper;
   final DownloadStatusMapper _statusMapper;
   final DownloadIsolateManager _isolateManager;

@@ -9,9 +9,13 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/position_data.dart';
 import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
+
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
@@ -22,6 +26,7 @@ class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
 void main() {
   late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockSettingsCubit mockSettingsCubit;
 
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
@@ -46,11 +51,16 @@ void main() {
 
   setUp(() {
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockSettingsCubit = MockSettingsCubit();
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
   });
 
   Widget createWidgetUnderTest() {
-    return BlocProvider<AudioPlayerBloc>.value(
-      value: mockAudioPlayerBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+      ],
       child: const ScreenUtilPlusInit(
         designSize: Size(375, 812),
         child: MaterialApp(
@@ -116,8 +126,8 @@ void main() {
     expect(find.text('Test Reciter'), findsOneWidget);
 
     // Verify Pause icon is shown (since playing: true)
-    expect(find.byIcon(FluentIcons.pause_24_filled), findsOneWidget);
-    expect(find.byIcon(FluentIcons.play_24_filled), findsNothing);
+    expect(find.byIcon(FluentIcons.pause_16_filled), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_16_filled), findsNothing);
   });
 
   testWidgets('BottomPlayer displays play icon when paused', (tester) async {
@@ -139,6 +149,6 @@ void main() {
     await tester.pump();
 
     // Verify Play icon is shown
-    expect(find.byIcon(FluentIcons.play_24_filled), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_16_filled), findsOneWidget);
   });
 }

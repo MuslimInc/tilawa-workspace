@@ -53,6 +53,7 @@ void main() {
         (url, reciterName) => DownloadButtonBloc(
           url: url,
           reciterName: reciterName,
+          reciterId: 0,
           downloadsRepository: mockDownloadsRepository,
         ),
       );
@@ -139,6 +140,7 @@ void main() {
               url: 'https://example.com/test.mp3',
               filePath: '/path/to/test.mp3',
               reciterName: 'Test Reciter',
+              reciterId: 0,
               status: DownloadStatus.downloading,
               progress: 0.5,
               fileSize: 1024,
@@ -313,6 +315,7 @@ void main() {
           url: 'https://example.com/test.mp3',
           filePath: '/path/to/test.mp3',
           reciterName: 'Test Reciter',
+          reciterId: 0,
           status: DownloadStatus.downloading,
           progress: 0.75,
           fileSize: 1000,

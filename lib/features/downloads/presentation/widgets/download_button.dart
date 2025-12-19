@@ -18,6 +18,7 @@ class DownloadButton extends StatelessWidget {
     required this.url,
     required this.surahTitle,
     required this.reciterName,
+    required this.reciterId,
     this.initialIsDownloaded,
     this.initialIsDownloading,
     this.initialProgress,
@@ -26,6 +27,7 @@ class DownloadButton extends StatelessWidget {
   final String url;
   final String surahTitle;
   final String reciterName;
+  final int reciterId;
   final bool? initialIsDownloaded;
   final bool? initialIsDownloading;
   final double? initialProgress;
@@ -46,6 +48,7 @@ class DownloadButton extends StatelessWidget {
         final bloc = DownloadButtonBloc(
           url: url,
           reciterName: reciterName,
+          reciterId: reciterId,
           downloadsRepository: repo,
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,

@@ -61,6 +61,7 @@ void main() {
   const surahUrl = 'https://example.com/001.mp3';
   const surahTitle = 'Al-Fatiha';
   const reciterName = 'Mishary Rashid Alafasy';
+  const reciterId = 1;
 
   testWidgets('shows download icon when not downloaded', (tester) async {
     when(
@@ -76,6 +77,7 @@ void main() {
           url: surahUrl,
           surahTitle: surahTitle,
           reciterName: reciterName,
+          reciterId: reciterId,
         ),
       ),
     );
@@ -100,6 +102,7 @@ void main() {
       url: surahUrl,
       filePath: 'path',
       reciterName: reciterName,
+      reciterId: reciterId,
       status: DownloadStatus.downloading,
       progress: 50,
       fileSize: 100,
@@ -122,6 +125,7 @@ void main() {
           url: surahUrl,
           surahTitle: surahTitle,
           reciterName: reciterName,
+          reciterId: reciterId,
         ),
       ),
     );
@@ -144,6 +148,7 @@ void main() {
           url: surahUrl,
           surahTitle: surahTitle,
           reciterName: reciterName,
+          reciterId: reciterId,
         ),
       ),
     );
@@ -164,7 +169,7 @@ void main() {
 
     // Stub startDownload
     when(
-      () => mockDownloadsRepository.startDownload(any(), any(), any()),
+      () => mockDownloadsRepository.startDownload(any(), any(), any(), any()),
     ).thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -173,6 +178,7 @@ void main() {
           url: surahUrl,
           surahTitle: surahTitle,
           reciterName: reciterName,
+          reciterId: reciterId,
         ),
       ),
     );
@@ -186,6 +192,7 @@ void main() {
         surahUrl,
         surahTitle,
         reciterName,
+        reciterId,
       ),
     );
     // Drain any pending timers (e.g. Toast)

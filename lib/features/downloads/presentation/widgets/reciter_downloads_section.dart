@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../router/app_router_config.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
@@ -61,123 +62,138 @@ class ReciterDownloadsSection extends StatelessWidget {
     BuildContext context,
     List<DownloadItem> downloads,
   ) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          // Reciter Avatar
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                width: 2,
-              ),
-            ),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: Theme.of(
-                context,
-              ).primaryColor.withValues(alpha: 0.1),
-              child: Text(
-                reciterName.isNotEmpty ? reciterName[0].toUpperCase() : 'R',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+    return InkWell(
+      onTap: () {
+        // Try to find a reciterId from the downloads
+        final int? id = downloads
+            .firstWhere(
+              (d) => d.reciterId != null,
+              orElse: () => downloads.first,
+            )
+            .reciterId;
+
+        if (id != null) {
+          ReciterDetailsRoute(reciterId: id.toString()).push(context);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Reciter Avatar
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                  width: 2,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  reciterName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColor.withValues(alpha: 0.1),
+                child: Text(
+                  reciterName.isNotEmpty ? reciterName[0].toUpperCase() : 'R',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${downloads.length} ${context.l10n.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+              ),
             ),
-          ),
-          // Actions
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_hasCompletedDownloads())
-                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                  builder: (context, audioState) {
-                    final bool isPlayingFromThisReciter =
-                        _isPlayingFromThisReciter(audioState);
-                    final bool isPlaying =
-                        isPlayingFromThisReciter &&
-                        (audioState.playbackState?.playing ?? false);
-
-                    return IconButton.filledTonal(
-                      style: IconButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.all(8),
-                      ),
-                      icon: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        size: 20,
-                      ),
-                      onPressed: () =>
-                          _handlePlayAllPlayPause(context, audioState),
-                      tooltip: isPlaying
-                          ? context.l10n.pauseAll
-                          : context.l10n.playAll,
-                    );
-                  },
-                ),
-              const SizedBox(width: 4),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert_rounded),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onSelected: (value) {
-                  if (value == 'delete_all') {
-                    _showDeleteReciterDialog(context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete_all',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_outline_rounded,
-                          color: Theme.of(context).colorScheme.error,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          context.l10n.deleteAll,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ],
+            const SizedBox(width: 16),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    reciterName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${downloads.length} ${context.l10n.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
-            ],
-          ),
-        ],
+            ),
+            // Actions
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_hasCompletedDownloads())
+                  BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                    builder: (context, audioState) {
+                      final bool isPlayingFromThisReciter =
+                          _isPlayingFromThisReciter(audioState);
+                      final bool isPlaying =
+                          isPlayingFromThisReciter &&
+                          (audioState.playbackState?.playing ?? false);
+
+                      return IconButton.filledTonal(
+                        style: IconButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.all(8),
+                        ),
+                        icon: Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            _handlePlayAllPlayPause(context, audioState),
+                        tooltip: isPlaying
+                            ? context.l10n.pauseAll
+                            : context.l10n.playAll,
+                      );
+                    },
+                  ),
+                const SizedBox(width: 4),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'delete_all') {
+                      _showDeleteReciterDialog(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'delete_all',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline_rounded,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            context.l10n.deleteAll,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

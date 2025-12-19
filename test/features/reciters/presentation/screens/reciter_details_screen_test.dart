@@ -16,10 +16,14 @@ import 'package:muzakri/features/downloads/domain/repositories/downloads_reposit
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
+
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
 
 class MockReciterDetailsBloc
     extends MockBloc<ReciterDetailsEvent, ReciterDetailsState>
@@ -39,6 +43,7 @@ void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockSettingsCubit mockSettingsCubit;
 
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
@@ -67,6 +72,9 @@ void main() {
     mockReciterDetailsBloc = MockReciterDetailsBloc();
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockSettingsCubit = MockSettingsCubit();
+
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
     // Stub MockDownloadsRepository (GetIt instance)
     final mockDownloadsRepository =
@@ -152,6 +160,7 @@ void main() {
           BlocProvider<ReciterDetailsBloc>.value(value: mockReciterDetailsBloc),
           BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
           BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+          BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
         child: const MaterialApp(
           localizationsDelegates: [

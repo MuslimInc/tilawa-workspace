@@ -19,6 +19,7 @@ void main() {
 
   const testUrl = 'https://example.com/001.mp3';
   const testReciterName = 'Abdul Rahman Al-Sudais';
+  const testReciterId = 1;
   const testSurahTitle = 'Al-Fatiha';
 
   setUp(() {
@@ -27,6 +28,7 @@ void main() {
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
       reciterName: testReciterName,
+      reciterId: testReciterId,
       downloadsRepository: mockDownloadsRepository,
     );
   });
@@ -65,6 +67,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -78,6 +81,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
             initialIsDownloaded: true,
           );
@@ -95,6 +99,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
             initialIsDownloading: true,
             initialProgress: 0.5,
@@ -123,6 +128,7 @@ void main() {
               url: testUrl,
               filePath: '/path/to/file.mp3',
               reciterName: testReciterName,
+              reciterId: testReciterId,
               status: DownloadStatus.pending,
               progress: 0.0,
               fileSize: 1024000,
@@ -133,6 +139,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -156,6 +163,7 @@ void main() {
               url: testUrl,
               filePath: '/path/to/file.mp3',
               reciterName: testReciterName,
+              reciterId: testReciterId,
               status: DownloadStatus.downloading,
               progress: 0.5,
               fileSize: 1024000,
@@ -166,6 +174,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -195,6 +204,7 @@ void main() {
               url: testUrl,
               filePath: '/path/to/file.mp3',
               reciterName: testReciterName,
+              reciterId: testReciterId,
               status: DownloadStatus.failed,
               progress: 0.3,
               fileSize: 1024000,
@@ -205,6 +215,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -221,6 +232,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -237,6 +249,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -259,11 +272,11 @@ void main() {
           when(
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
-          when(mockDownloadsRepository.startDownload(any, any, any)).thenAnswer(
-            (_) async {
-              return;
-            },
-          );
+          when(
+            mockDownloadsRepository.startDownload(any, any, any, any),
+          ).thenAnswer((_) async {
+            return;
+          });
           return downloadButtonBloc;
         },
         act: (bloc) => bloc.add(
@@ -282,7 +295,7 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any),
+            mockDownloadsRepository.startDownload(any, any, any, any),
           ).thenThrow(MissingPluginException('Platform channel not available'));
           return downloadButtonBloc;
         },
@@ -302,7 +315,7 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any),
+            mockDownloadsRepository.startDownload(any, any, any, any),
           ).thenThrow(Exception('Network error'));
           return downloadButtonBloc;
         },
@@ -328,11 +341,11 @@ void main() {
           when(
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
-          when(mockDownloadsRepository.startDownload(any, any, any)).thenAnswer(
-            (_) async {
-              return;
-            },
-          );
+          when(
+            mockDownloadsRepository.startDownload(any, any, any, any),
+          ).thenAnswer((_) async {
+            return;
+          });
           return downloadButtonBloc;
         },
         act: (bloc) => bloc.add(
@@ -483,6 +496,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },
@@ -505,6 +519,7 @@ void main() {
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
+            reciterId: testReciterId,
             downloadsRepository: mockDownloadsRepository,
           );
         },

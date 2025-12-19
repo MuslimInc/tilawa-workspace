@@ -152,11 +152,11 @@ return refreshDownloadsProgress(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadDownloads,TResult Function( String surahId,  String surahTitle,  String reciterName)?  downloadSurah,TResult Function( String downloadId)?  deleteDownload,TResult Function( String reciterName)?  deleteReciterDownloads,TResult Function()?  clearAllDownloads,TResult Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult Function( String downloadId)?  validateDownloadedFile,TResult Function( String reciterName)?  getValidCompletedDownloads,TResult Function( String downloadId)?  playDownloadedSurah,TResult Function( String reciterName)?  playAllDownloads,TResult Function()?  checkPremiumAccess,TResult Function( String downloadId)?  retryDownload,TResult Function()?  refreshDownloadsProgress,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadDownloads,TResult Function( String surahId,  String surahTitle,  String reciterName,  int reciterId)?  downloadSurah,TResult Function( String downloadId)?  deleteDownload,TResult Function( String reciterName)?  deleteReciterDownloads,TResult Function()?  clearAllDownloads,TResult Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult Function( String downloadId)?  validateDownloadedFile,TResult Function( String reciterName)?  getValidCompletedDownloads,TResult Function( String downloadId)?  playDownloadedSurah,TResult Function( String reciterName)?  playAllDownloads,TResult Function()?  checkPremiumAccess,TResult Function( String downloadId)?  retryDownload,TResult Function()?  refreshDownloadsProgress,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
 return loadDownloads();case DownloadSurahEvent() when downloadSurah != null:
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent() when deleteDownload != null:
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.reciterId);case DeleteDownloadEvent() when deleteDownload != null:
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads() when deleteReciterDownloads != null:
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads() when clearAllDownloads != null:
 return clearAllDownloads();case CheckSurahDownloadedEvent() when checkSurahDownloaded != null:
@@ -185,11 +185,11 @@ return refreshDownloadsProgress();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadDownloads,required TResult Function( String surahId,  String surahTitle,  String reciterName)  downloadSurah,required TResult Function( String downloadId)  deleteDownload,required TResult Function( String reciterName)  deleteReciterDownloads,required TResult Function()  clearAllDownloads,required TResult Function( String surahId,  String reciterName)  checkSurahDownloaded,required TResult Function( String downloadId)  validateDownloadedFile,required TResult Function( String reciterName)  getValidCompletedDownloads,required TResult Function( String downloadId)  playDownloadedSurah,required TResult Function( String reciterName)  playAllDownloads,required TResult Function()  checkPremiumAccess,required TResult Function( String downloadId)  retryDownload,required TResult Function()  refreshDownloadsProgress,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadDownloads,required TResult Function( String surahId,  String surahTitle,  String reciterName,  int reciterId)  downloadSurah,required TResult Function( String downloadId)  deleteDownload,required TResult Function( String reciterName)  deleteReciterDownloads,required TResult Function()  clearAllDownloads,required TResult Function( String surahId,  String reciterName)  checkSurahDownloaded,required TResult Function( String downloadId)  validateDownloadedFile,required TResult Function( String reciterName)  getValidCompletedDownloads,required TResult Function( String downloadId)  playDownloadedSurah,required TResult Function( String reciterName)  playAllDownloads,required TResult Function()  checkPremiumAccess,required TResult Function( String downloadId)  retryDownload,required TResult Function()  refreshDownloadsProgress,}) {final _that = this;
 switch (_that) {
 case LoadDownloads():
 return loadDownloads();case DownloadSurahEvent():
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent():
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.reciterId);case DeleteDownloadEvent():
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads():
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads():
 return clearAllDownloads();case CheckSurahDownloadedEvent():
@@ -214,11 +214,11 @@ return refreshDownloadsProgress();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadDownloads,TResult? Function( String surahId,  String surahTitle,  String reciterName)?  downloadSurah,TResult? Function( String downloadId)?  deleteDownload,TResult? Function( String reciterName)?  deleteReciterDownloads,TResult? Function()?  clearAllDownloads,TResult? Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult? Function( String downloadId)?  validateDownloadedFile,TResult? Function( String reciterName)?  getValidCompletedDownloads,TResult? Function( String downloadId)?  playDownloadedSurah,TResult? Function( String reciterName)?  playAllDownloads,TResult? Function()?  checkPremiumAccess,TResult? Function( String downloadId)?  retryDownload,TResult? Function()?  refreshDownloadsProgress,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadDownloads,TResult? Function( String surahId,  String surahTitle,  String reciterName,  int reciterId)?  downloadSurah,TResult? Function( String downloadId)?  deleteDownload,TResult? Function( String reciterName)?  deleteReciterDownloads,TResult? Function()?  clearAllDownloads,TResult? Function( String surahId,  String reciterName)?  checkSurahDownloaded,TResult? Function( String downloadId)?  validateDownloadedFile,TResult? Function( String reciterName)?  getValidCompletedDownloads,TResult? Function( String downloadId)?  playDownloadedSurah,TResult? Function( String reciterName)?  playAllDownloads,TResult? Function()?  checkPremiumAccess,TResult? Function( String downloadId)?  retryDownload,TResult? Function()?  refreshDownloadsProgress,}) {final _that = this;
 switch (_that) {
 case LoadDownloads() when loadDownloads != null:
 return loadDownloads();case DownloadSurahEvent() when downloadSurah != null:
-return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName);case DeleteDownloadEvent() when deleteDownload != null:
+return downloadSurah(_that.surahId,_that.surahTitle,_that.reciterName,_that.reciterId);case DeleteDownloadEvent() when deleteDownload != null:
 return deleteDownload(_that.downloadId);case DeleteReciterDownloads() when deleteReciterDownloads != null:
 return deleteReciterDownloads(_that.reciterName);case ClearAllDownloads() when clearAllDownloads != null:
 return clearAllDownloads();case CheckSurahDownloadedEvent() when checkSurahDownloaded != null:
@@ -273,12 +273,13 @@ String toString() {
 
 
 class DownloadSurahEvent implements DownloadsEvent {
-  const DownloadSurahEvent({required this.surahId, required this.surahTitle, required this.reciterName});
+  const DownloadSurahEvent({required this.surahId, required this.surahTitle, required this.reciterName, required this.reciterId});
   
 
  final  String surahId;
  final  String surahTitle;
  final  String reciterName;
+ final  int reciterId;
 
 /// Create a copy of DownloadsEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -290,16 +291,16 @@ $DownloadSurahEventCopyWith<DownloadSurahEvent> get copyWith => _$DownloadSurahE
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadSurahEvent&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahTitle, surahTitle) || other.surahTitle == surahTitle)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DownloadSurahEvent&&(identical(other.surahId, surahId) || other.surahId == surahId)&&(identical(other.surahTitle, surahTitle) || other.surahTitle == surahTitle)&&(identical(other.reciterName, reciterName) || other.reciterName == reciterName)&&(identical(other.reciterId, reciterId) || other.reciterId == reciterId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,surahId,surahTitle,reciterName);
+int get hashCode => Object.hash(runtimeType,surahId,surahTitle,reciterName,reciterId);
 
 @override
 String toString() {
-  return 'DownloadsEvent.downloadSurah(surahId: $surahId, surahTitle: $surahTitle, reciterName: $reciterName)';
+  return 'DownloadsEvent.downloadSurah(surahId: $surahId, surahTitle: $surahTitle, reciterName: $reciterName, reciterId: $reciterId)';
 }
 
 
@@ -310,7 +311,7 @@ abstract mixin class $DownloadSurahEventCopyWith<$Res> implements $DownloadsEven
   factory $DownloadSurahEventCopyWith(DownloadSurahEvent value, $Res Function(DownloadSurahEvent) _then) = _$DownloadSurahEventCopyWithImpl;
 @useResult
 $Res call({
- String surahId, String surahTitle, String reciterName
+ String surahId, String surahTitle, String reciterName, int reciterId
 });
 
 
@@ -327,12 +328,13 @@ class _$DownloadSurahEventCopyWithImpl<$Res>
 
 /// Create a copy of DownloadsEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? surahTitle = null,Object? reciterName = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? surahId = null,Object? surahTitle = null,Object? reciterName = null,Object? reciterId = null,}) {
   return _then(DownloadSurahEvent(
 surahId: null == surahId ? _self.surahId : surahId // ignore: cast_nullable_to_non_nullable
 as String,surahTitle: null == surahTitle ? _self.surahTitle : surahTitle // ignore: cast_nullable_to_non_nullable
 as String,reciterName: null == reciterName ? _self.reciterName : reciterName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,reciterId: null == reciterId ? _self.reciterId : reciterId // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

@@ -142,9 +142,15 @@ class MockDownloadsRepository extends _i1.Mock
     String? url,
     String? surahTitle,
     String? reciterName,
+    int? reciterId,
   ) =>
       (super.noSuchMethod(
-            Invocation.method(#startDownload, [url, surahTitle, reciterName]),
+            Invocation.method(#startDownload, [
+              url,
+              surahTitle,
+              reciterName,
+              reciterId,
+            ]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
@@ -345,6 +351,7 @@ class MockDownloadService extends _i1.Mock implements _i6.DownloadService {
     required String? filePath,
     required String? title,
     required String? reciterName,
+    int? reciterId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#download, [], {
@@ -353,6 +360,7 @@ class MockDownloadService extends _i1.Mock implements _i6.DownloadService {
               #filePath: filePath,
               #title: title,
               #reciterName: reciterName,
+              #reciterId: reciterId,
             }),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),

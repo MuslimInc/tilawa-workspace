@@ -8,8 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
+
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
@@ -18,12 +22,16 @@ class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
 void main() {
   late MockAudioPlayerBloc mockAudioPlayerBloc;
-
+  late MockSettingsCubit mockSettingsCubit;
   late MockAudioPlayerHandler mockAudioPlayerHandler;
 
   setUp(() {
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockSettingsCubit = MockSettingsCubit();
     mockAudioPlayerHandler = MockAudioPlayerHandler();
+
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
+
     GetIt.instance.registerSingleton<AudioPlayerHandler>(
       mockAudioPlayerHandler,
     );
@@ -39,8 +47,11 @@ void main() {
   });
 
   Widget createWidgetUnderTest() {
-    return BlocProvider<AudioPlayerBloc>.value(
-      value: mockAudioPlayerBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+      ],
       child: const ScreenUtilPlusInit(
         designSize: Size(375, 812),
         minTextAdapt: true,
@@ -110,7 +121,7 @@ void main() {
         // Assert
         expect(find.text('Surah Al-Fatiha'), findsOneWidget);
         expect(find.text('Mishary Rashid'), findsOneWidget);
-        expect(find.byIcon(FluentIcons.pause_24_filled), findsOneWidget);
+        expect(find.byIcon(FluentIcons.pause_16_filled), findsOneWidget);
       },
     );
 
@@ -139,8 +150,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert: Play icon should be visible
-      expect(find.byIcon(FluentIcons.play_24_filled), findsOneWidget);
-      expect(find.byIcon(FluentIcons.pause_24_filled), findsNothing);
+      expect(find.byIcon(FluentIcons.play_16_filled), findsOneWidget);
+      expect(find.byIcon(FluentIcons.pause_16_filled), findsNothing);
     });
 
     testWidgets('should add PlayAudio event when play button is tapped', (
@@ -168,7 +179,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find play button and tap
-      final Finder playButtonFinder = find.byIcon(FluentIcons.play_24_filled);
+      final Finder playButtonFinder = find.byIcon(FluentIcons.play_16_filled);
       await tester.tap(playButtonFinder);
       await tester.pump();
 
@@ -204,7 +215,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find pause button and tap
-      final Finder pauseButtonFinder = find.byIcon(FluentIcons.pause_24_filled);
+      final Finder pauseButtonFinder = find.byIcon(FluentIcons.pause_16_filled);
       await tester.tap(pauseButtonFinder);
       await tester.pump();
 

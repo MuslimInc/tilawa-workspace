@@ -163,7 +163,7 @@ void main() {
       );
 
       // Act: Start Download
-      await repository.startDownload(url, surahTitle, reciter);
+      await repository.startDownload(url, surahTitle, reciter, 1);
 
       // Verify: Download added to DB with Pending/Downloading status
       final List<dynamic> captured = verify(

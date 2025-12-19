@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../../main.dart';
 import '../../../data/services/download_service.dart';
@@ -23,18 +22,19 @@ part 'download_button_state.dart';
 /// - Easy to test in isolation
 /// - Scales well (can have 100+ buttons without performance issues)
 
-@injectable
 class DownloadButtonBloc
     extends Bloc<DownloadButtonEvent, DownloadButtonState> {
   DownloadButtonBloc({
     required String url,
     required String reciterName,
+    required int reciterId,
     required DownloadsRepository downloadsRepository,
     this.initialIsDownloaded,
     this.initialIsDownloading,
     this.initialProgress,
   }) : _url = url,
        _reciterName = reciterName,
+       _reciterId = reciterId,
        _downloadsRepository = downloadsRepository,
        super(const DownloadButtonState.initial()) {
     on<DownloadButtonEvent>((event, emit) async {
@@ -60,6 +60,7 @@ class DownloadButtonBloc
 
   final String _url;
   final String _reciterName;
+  final int _reciterId;
   final DownloadsRepository _downloadsRepository;
   final bool? initialIsDownloaded;
   final bool? initialIsDownloading;
@@ -185,7 +186,12 @@ class DownloadButtonBloc
 
       // Note: We don't await this - it will trigger progress updates
       // The actual download state changes will come through the progress stream
-      await _downloadsRepository.startDownload(_url, surahTitle, _reciterName);
+      await _downloadsRepository.startDownload(
+        _url,
+        surahTitle,
+        _reciterName,
+        _reciterId,
+      );
 
       logger.d(
         '[DownloadButtonBloc] Download started: url=$_url reciter=$_reciterName',
