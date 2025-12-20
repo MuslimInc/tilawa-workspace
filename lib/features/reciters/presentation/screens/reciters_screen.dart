@@ -69,8 +69,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
               appBar: AppBar(
                 actions: [
                   IconButton(
-                    onPressed: () {
-                      const FavoritesRoute().push(context);
+                    onPressed: () async {
+                      await const FavoritesRoute().push(context);
+                      if (context.mounted) {
+                        await context.read<FavoritesCubit>().loadFavorites();
+                      }
                     },
                     icon: const Icon(Icons.favorite_rounded, color: Colors.red),
                   ),

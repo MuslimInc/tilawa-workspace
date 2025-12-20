@@ -97,15 +97,30 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     StartQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
-    emit(state.copyWith(status: QiblaStatus.loading));
+    try {
+      emit(state.copyWith(status: QiblaStatus.loading));
 
-    await _qiblaSubscription?.cancel();
-    _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
-      (direction) => add(UpdateQiblaDirection(direction)),
-      onError: (error) {
-        add(QiblaErrorOccurred(error.toString()));
-      },
-    );
+      await _qiblaSubscription?.cancel();
+      _qiblaSubscription = _getQiblaDirection(const NoParams())
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: (sink) {
+              sink.addError(
+                'Sensors not responding. If you are on a Simulator, Compass is not supported.',
+              );
+            },
+          )
+          .listen(
+            (direction) => add(UpdateQiblaDirection(direction)),
+            onError: (error) {
+              add(QiblaErrorOccurred(error.toString()));
+            },
+          );
+    } catch (e) {
+      emit(
+        state.copyWith(status: QiblaStatus.error, errorMessage: e.toString()),
+      );
+    }
   }
 
   void _onUpdateQiblaDirection(

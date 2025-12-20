@@ -11,9 +11,11 @@ import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/reciter_details_loader.dart';
 import '../screens/reciter_details_screen.dart';
+import '../screens/route_list_screen.dart';
 import '../shared/widgets/expanded_player_screen.dart';
 
 part 'app_router_config.g.dart';
@@ -173,5 +175,25 @@ class QiblaRoute extends GoRouteData with $QiblaRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const QiblaScreen();
+  }
+}
+
+@TypedGoRoute<RouteListRoute>(path: '/routes')
+class RouteListRoute extends GoRouteData with $RouteListRoute {
+  const RouteListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RouteListScreen();
+  }
+}
+
+@TypedGoRoute<SplashRoute>(path: '/splash')
+class SplashRoute extends GoRouteData with $SplashRoute {
+  const SplashRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SplashScreen();
   }
 }

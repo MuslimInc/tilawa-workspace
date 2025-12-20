@@ -3,7 +3,7 @@ import UIKit
 
 public class SwiftQiblaPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "qibla", binaryMessenger: registrar.messenger())
+    let channel = FlutterMethodChannel(name: "ml.medyas.qibla", binaryMessenger: registrar.messenger())
     let instance = SwiftQiblaPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }

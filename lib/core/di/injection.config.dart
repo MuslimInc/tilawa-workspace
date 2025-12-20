@@ -191,6 +191,10 @@ import 'package:muzakri/features/reciters/presentation/cubit/reciter_details_loa
     as _i574;
 import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart'
     as _i727;
+import 'package:muzakri/features/splash/domain/usecases/get_splash_next_route_use_case.dart'
+    as _i935;
+import 'package:muzakri/features/splash/presentation/cubit/splash_cubit.dart'
+    as _i127;
 import 'package:muzakri/features/surah/data/repositories/surah_repository_impl.dart'
     as _i724;
 import 'package:muzakri/features/surah/domain/repositories/surah_repository.dart'
@@ -622,6 +626,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i852.GetAthkarCategoriesUseCase>(
       () => _i852.GetAthkarCategoriesUseCase(gh<_i496.AthkarRepository>()),
     );
+    gh.factory<_i935.GetSplashNextRouteUseCase>(
+      () => _i935.GetSplashNextRouteUseCase(gh<_i778.GetCurrentUserUseCase>()),
+    );
     gh.factory<_i504.PremiumBloc>(
       () => _i504.PremiumBloc(
         gh<_i29.GetPremiumStatusUseCase>(),
@@ -633,6 +640,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
       ),
+    );
+    gh.factory<_i127.SplashCubit>(
+      () => _i127.SplashCubit(gh<_i935.GetSplashNextRouteUseCase>()),
     );
     gh.factory<_i757.AthkarCubit>(
       () => _i757.AthkarCubit(

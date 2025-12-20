@@ -194,6 +194,17 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             SizedBox(height: 32.h),
+
+            // Route List (Dev)
+            _SettingsTile(
+              icon: Icons.list_alt_rounded,
+              title: 'Route List (Dev)',
+              onTap: () => const RouteListRoute().push(context),
+              borderRadius: BorderRadius.circular(16.r),
+              showDivider: false,
+            ),
+
+            SizedBox(height: 32.h),
           ],
         ),
       ),

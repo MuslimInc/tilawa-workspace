@@ -19,6 +19,8 @@ List<RouteBase> get $appRoutes => [
   $athkarCategoriesRoute,
   $athkarDetailsRoute,
   $qiblaRoute,
+  $routeListRoute,
+  $splashRoute,
 ];
 
 RouteBase get $homeRoute =>
@@ -318,6 +320,53 @@ mixin $QiblaRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/qibla');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $routeListRoute =>
+    GoRouteData.$route(path: '/routes', factory: $RouteListRoute._fromState);
+
+mixin $RouteListRoute on GoRouteData {
+  static RouteListRoute _fromState(GoRouterState state) =>
+      const RouteListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/routes');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $splashRoute =>
+    GoRouteData.$route(path: '/splash', factory: $SplashRoute._fromState);
+
+mixin $SplashRoute on GoRouteData {
+  static SplashRoute _fromState(GoRouterState state) => const SplashRoute();
+
+  @override
+  String get location => GoRouteData.$location('/splash');
 
   @override
   void go(BuildContext context) => context.go(location);
