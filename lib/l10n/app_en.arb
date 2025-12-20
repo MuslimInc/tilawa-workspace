@@ -773,5 +773,41 @@
     "reset": "Reset",
     "@reset": {
         "description": "Reset label for thikr"
+    },
+    "qibla": "Qibla",
+    "@qibla": {
+        "description": "Qibla tab label"
+    },
+    "qiblaDirection": "Qibla Direction",
+    "@qiblaDirection": {
+        "description": "Qibla direction screen title"
+    },
+    "locationServiceDisabled": "Location Service Disabled",
+    "@locationServiceDisabled": {
+        "description": "Error title when location service is disabled"
+    },
+    "enableLocationServiceMessage": "Please enable location services to find Qibla direction.",
+    "@enableLocationServiceMessage": {
+        "description": "Error message when location service is disabled"
+    },
+    "permissionDenied": "Permission Denied",
+    "@permissionDenied": {
+        "description": "Error title when location permission is denied"
+    },
+    "locationPermissionRequiredMessage": "Location permission is required to calculate the Qibla direction.",
+    "@locationPermissionRequiredMessage": {
+        "description": "Error message when location permission is denied"
+    },
+    "tryAgain": "Try Again",
+    "@tryAgain": {
+        "description": "Try again button text"
+    },
+    "openSettings": "Open Settings",
+    "@openSettings": {
+        "description": "Open settings button text"
+    },
+    "unableToFindQibla": "Unable to find Qibla",
+    "@unableToFindQibla": {
+        "description": "Generic error title for Qibla"
     }
 }

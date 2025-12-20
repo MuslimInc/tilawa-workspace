@@ -1135,6 +1135,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset'**
   String get reset;
+
+  /// Qibla tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get qibla;
+
+  /// Qibla direction screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Direction'**
+  String get qiblaDirection;
+
+  /// Error title when location service is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Location Service Disabled'**
+  String get locationServiceDisabled;
+
+  /// Error message when location service is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services to find Qibla direction.'**
+  String get enableLocationServiceMessage;
+
+  /// Error title when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Denied'**
+  String get permissionDenied;
+
+  /// Error message when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required to calculate the Qibla direction.'**
+  String get locationPermissionRequiredMessage;
+
+  /// Try again button text
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// Open settings button text
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// Generic error title for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to find Qibla'**
+  String get unableToFindQibla;
 }
 
 class _AppLocalizationsDelegate

@@ -18,6 +18,7 @@ List<RouteBase> get $appRoutes => [
   $favoritesRoute,
   $athkarCategoriesRoute,
   $athkarDetailsRoute,
+  $qiblaRoute,
 ];
 
 RouteBase get $homeRoute =>
@@ -294,6 +295,29 @@ mixin $AthkarDetailsRoute on GoRouteData {
     '/athkar/${Uri.encodeComponent(_self.categoryId.toString())}',
     queryParams: {'category-name': _self.categoryName},
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $qiblaRoute =>
+    GoRouteData.$route(path: '/qibla', factory: $QiblaRoute._fromState);
+
+mixin $QiblaRoute on GoRouteData {
+  static QiblaRoute _fromState(GoRouterState state) => const QiblaRoute();
+
+  @override
+  String get location => GoRouteData.$location('/qibla');
 
   @override
   void go(BuildContext context) => context.go(location);

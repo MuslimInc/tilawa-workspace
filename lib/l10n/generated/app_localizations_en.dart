@@ -563,4 +563,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reset => 'Reset';
+
+  @override
+  String get qibla => 'Qibla';
+
+  @override
+  String get qiblaDirection => 'Qibla Direction';
+
+  @override
+  String get locationServiceDisabled => 'Location Service Disabled';
+
+  @override
+  String get enableLocationServiceMessage =>
+      'Please enable location services to find Qibla direction.';
+
+  @override
+  String get permissionDenied => 'Permission Denied';
+
+  @override
+  String get locationPermissionRequiredMessage =>
+      'Location permission is required to calculate the Qibla direction.';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get unableToFindQibla => 'Unable to find Qibla';
 }

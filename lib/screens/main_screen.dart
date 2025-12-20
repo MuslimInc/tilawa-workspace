@@ -10,7 +10,7 @@ import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
-// import '../features/playlists/presentation/screens/playlists_screen.dart';
+import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -31,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     const RecitersScreen(),
     const DownloadsScreen(),
     const AthkarCategoriesScreen(),
+    const QiblaScreen(),
     const SettingsScreen(),
   ];
 
@@ -116,20 +117,6 @@ class _MainScreenState extends State<MainScreen> {
                     label:
                         AppLocalizations.of(context)?.downloads ?? 'Downloads',
                   ),
-                  /*
-                  BottomNavigationBarItem(
-                    icon: Icon(
-                      FluentIcons.music_note_2_24_regular,
-                      size: 24.sp,
-                    ),
-                    activeIcon: Icon(
-                      FluentIcons.music_note_2_24_filled,
-                      size: 24.sp,
-                    ),
-                    label:
-                        AppLocalizations.of(context)?.playlists ?? 'Playlists',
-                  ),
-*/
                   BottomNavigationBarItem(
                     icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
                     activeIcon: Icon(
@@ -137,6 +124,11 @@ class _MainScreenState extends State<MainScreen> {
                       size: 24.sp,
                     ),
                     label: context.l10n.athkar,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.explore_outlined, size: 24.sp),
+                    activeIcon: Icon(Icons.explore, size: 24.sp),
+                    label: context.l10n.qibla,
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),

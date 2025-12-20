@@ -13,8 +13,8 @@ abstract class AthkarLocalDataSource {
 
 @LazySingleton(as: AthkarLocalDataSource)
 class AthkarLocalDataSourceImpl implements AthkarLocalDataSource {
-  AthkarLocalDataSourceImpl({AssetBundle? assetBundle})
-    : _assetBundle = assetBundle ?? rootBundle;
+  AthkarLocalDataSourceImpl({required AssetBundle assetBundle})
+    : _assetBundle = assetBundle;
 
   final AssetBundle _assetBundle;
   static const String _assetPath = 'assets/data/athkar.json';
@@ -22,7 +22,7 @@ class AthkarLocalDataSourceImpl implements AthkarLocalDataSource {
   @override
   Future<List<AthkarCategoryModel>> getCategories() async {
     final String response = await _assetBundle.loadString(_assetPath);
-    final data = await json.decode(response);
+    final data = await json.decode(response) as Map<String, dynamic>;
     final categories = data['categories'] as List;
     return categories
         .map((e) => AthkarCategoryModel.fromJson(e as Map<String, dynamic>))
@@ -32,7 +32,7 @@ class AthkarLocalDataSourceImpl implements AthkarLocalDataSource {
   @override
   Future<List<AthkarItemModel>> getAthkarByCategory(int categoryId) async {
     final String response = await _assetBundle.loadString(_assetPath);
-    final data = await json.decode(response);
+    final data = await json.decode(response) as Map<String, dynamic>;
     final athkar = data['athkar'] as List;
     return athkar
         .map((e) => AthkarItemModel.fromJson(e as Map<String, dynamic>))

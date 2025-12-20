@@ -8,7 +8,6 @@ import '../repositories/reciters_repository.dart';
 @lazySingleton
 class GetFavoriteRecitersUseCase
     implements UseCase<List<ReciterEntity>, NoParams> {
-
   GetFavoriteRecitersUseCase(this._repository);
   final RecitersRepository _repository;
 

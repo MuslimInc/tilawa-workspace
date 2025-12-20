@@ -8,6 +8,7 @@ import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
+import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../screens/main_screen.dart';
@@ -162,5 +163,15 @@ class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
       categoryId: categoryId,
       categoryName: categoryName,
     );
+  }
+}
+
+@TypedGoRoute<QiblaRoute>(path: '/qibla')
+class QiblaRoute extends GoRouteData with $QiblaRoute {
+  const QiblaRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const QiblaScreen();
   }
 }

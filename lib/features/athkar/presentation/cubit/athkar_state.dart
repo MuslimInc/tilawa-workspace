@@ -15,7 +15,6 @@ class AthkarInitial extends AthkarState {}
 class AthkarLoading extends AthkarState {}
 
 class AthkarCategoriesLoaded extends AthkarState {
-
   const AthkarCategoriesLoaded(this.categories);
   final List<AthkarCategory> categories;
 
@@ -24,7 +23,6 @@ class AthkarCategoriesLoaded extends AthkarState {
 }
 
 class AthkarItemsLoaded extends AthkarState {
-
   const AthkarItemsLoaded({required this.items, required this.currentCounts});
   final List<AthkarItem> items;
   final Map<int, int> currentCounts;
@@ -34,7 +32,6 @@ class AthkarItemsLoaded extends AthkarState {
 }
 
 class AthkarError extends AthkarState {
-
   const AthkarError(this.message);
   final String message;
 

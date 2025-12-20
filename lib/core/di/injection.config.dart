@@ -155,6 +155,18 @@ import 'package:muzakri/features/premium/domain/usecases/start_trial_use_case.da
     as _i509;
 import 'package:muzakri/features/premium/presentation/bloc/premium_bloc.dart'
     as _i504;
+import 'package:muzakri/features/qibla/data/repositories/qibla_repository_impl.dart'
+    as _i130;
+import 'package:muzakri/features/qibla/domain/repositories/qibla_repository.dart'
+    as _i312;
+import 'package:muzakri/features/qibla/domain/usecases/check_location_service_use_case.dart'
+    as _i71;
+import 'package:muzakri/features/qibla/domain/usecases/get_qibla_direction_use_case.dart'
+    as _i263;
+import 'package:muzakri/features/qibla/domain/usecases/request_location_permission_use_case.dart'
+    as _i978;
+import 'package:muzakri/features/qibla/presentation/bloc/qibla_bloc.dart'
+    as _i239;
 import 'package:muzakri/features/reciters/data/datasources/reciters_local_datasource.dart'
     as _i500;
 import 'package:muzakri/features/reciters/data/datasources/reciters_remote_datasource.dart'
@@ -202,6 +214,7 @@ import 'package:muzakri/features/surah/presentation/bloc/surah_bloc.dart'
 import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart'
     as _i52;
 import 'package:muzakri/shared/audio/audio_player_handler.dart' as _i622;
+import 'package:muzakri/shared/services/audio_position_service.dart' as _i828;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -269,6 +282,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i4.RecitersRemoteDataSource>(
       () => _i4.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i828.AudioPositionService>(
+      () => _i828.AudioPositionServiceImpl(),
+    );
     gh.singleton<_i235.CrashlyticsService>(
       () =>
           _i235.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
@@ -297,6 +313,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i313.DownloadService>(),
       ),
     );
+    gh.lazySingleton<_i312.QiblaRepository>(() => _i130.QiblaRepositoryImpl());
     gh.lazySingleton<_i797.SurahRepository>(
       () => _i724.SurahRepositoryImpl(gh<_i775.DownloadsRepository>()),
     );
@@ -324,6 +341,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.factory<_i71.CheckLocationServiceUseCase>(
+      () => _i71.CheckLocationServiceUseCase(gh<_i312.QiblaRepository>()),
+    );
+    gh.factory<_i263.GetQiblaDirectionUseCase>(
+      () => _i263.GetQiblaDirectionUseCase(gh<_i312.QiblaRepository>()),
+    );
+    gh.factory<_i978.RequestLocationPermissionUseCase>(
+      () => _i978.RequestLocationPermissionUseCase(gh<_i312.QiblaRepository>()),
+    );
     gh.lazySingleton<_i906.PremiumRemoteDataSource>(
       () => _i906.PremiumRemoteDataSourceImpl(
         gh<_i974.FirebaseFirestore>(),
@@ -342,15 +368,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.GoogleSignIn>(),
       ),
     );
-    gh.lazySingleton<_i138.AthkarLocalDataSource>(
-      () =>
-          _i138.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
-    );
     gh.lazySingleton<_i619.RecitersRepository>(
       () => _i124.RecitersRepositoryImpl(
         gh<_i4.RecitersRemoteDataSource>(),
         gh<_i500.RecitersLocalDataSource>(),
         gh<_i460.SharedPreferencesAsync>(),
+      ),
+    );
+    gh.factory<_i239.QiblaBloc>(
+      () => _i239.QiblaBloc(
+        gh<_i263.GetQiblaDirectionUseCase>(),
+        gh<_i71.CheckLocationServiceUseCase>(),
+        gh<_i978.RequestLocationPermissionUseCase>(),
       ),
     );
     gh.lazySingleton<_i288.DownloadNotificationService>(
@@ -373,6 +402,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i557.AnalyticsService>(
       () => _i557.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.lazySingleton<_i138.AthkarLocalDataSource>(
+      () =>
+          _i138.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
     );
     gh.lazySingleton<_i821.GetFavoriteRecitersUseCase>(
       () => _i821.GetFavoriteRecitersUseCase(gh<_i619.RecitersRepository>()),

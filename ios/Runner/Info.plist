@@ -59,6 +59,10 @@
 	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>This app needs to send you notifications for download progress and completion.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to calculate the Qibla direction.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to calculate the Qibla direction.</string>
 	<key>GIDClientID</key>
 	<string>181575856185-eamub0dns4ickt7ke4l3afu60vgtlj4a.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>

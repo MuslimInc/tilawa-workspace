@@ -560,4 +560,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reset => 'إعادة ضبط';
+
+  @override
+  String get qibla => 'القبلة';
+
+  @override
+  String get qiblaDirection => 'اتجاه القبلة';
+
+  @override
+  String get locationServiceDisabled => 'خدمة الموقع معطلة';
+
+  @override
+  String get enableLocationServiceMessage =>
+      'يرجى تفعيل خدمات الموقع لتحديد اتجاه القبلة.';
+
+  @override
+  String get permissionDenied => 'تم رفض الإذن';
+
+  @override
+  String get locationPermissionRequiredMessage =>
+      'مطلوب إذن الموقع لحساب اتجاه القبلة.';
+
+  @override
+  String get tryAgain => 'حاول مرة أخرى';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get unableToFindQibla => 'تعذر العثور على القبلة';
 }

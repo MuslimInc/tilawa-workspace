@@ -773,5 +773,41 @@
     "reset": "إعادة ضبط",
     "@reset": {
         "description": "Reset label for thikr"
+    },
+    "qibla": "القبلة",
+    "@qibla": {
+        "description": "Qibla tab label"
+    },
+    "qiblaDirection": "اتجاه القبلة",
+    "@qiblaDirection": {
+        "description": "Qibla direction screen title"
+    },
+    "locationServiceDisabled": "خدمة الموقع معطلة",
+    "@locationServiceDisabled": {
+        "description": "Error title when location service is disabled"
+    },
+    "enableLocationServiceMessage": "يرجى تفعيل خدمات الموقع لتحديد اتجاه القبلة.",
+    "@enableLocationServiceMessage": {
+        "description": "Error message when location service is disabled"
+    },
+    "permissionDenied": "تم رفض الإذن",
+    "@permissionDenied": {
+        "description": "Error title when location permission is denied"
+    },
+    "locationPermissionRequiredMessage": "مطلوب إذن الموقع لحساب اتجاه القبلة.",
+    "@locationPermissionRequiredMessage": {
+        "description": "Error message when location permission is denied"
+    },
+    "tryAgain": "حاول مرة أخرى",
+    "@tryAgain": {
+        "description": "Try again button text"
+    },
+    "openSettings": "فتح الإعدادات",
+    "@openSettings": {
+        "description": "Open settings button text"
+    },
+    "unableToFindQibla": "تعذر العثور على القبلة",
+    "@unableToFindQibla": {
+        "description": "Generic error title for Qibla"
     }
 }

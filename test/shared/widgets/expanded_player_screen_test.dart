@@ -13,6 +13,7 @@ import 'package:muzakri/features/downloads/domain/repositories/downloads_reposit
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:muzakri/shared/models/position_data.dart';
+import 'package:muzakri/shared/services/audio_position_service.dart';
 import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
@@ -22,43 +23,68 @@ class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
+class MockAudioPositionService extends Mock implements AudioPositionService {}
+
 void main() {
   late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockAudioPositionService mockAudioPositionService;
+
+  Future<void> setScreenSize(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
 
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
-
-    if (!GetIt.instance.isRegistered<DownloadsRepository>()) {
-      GetIt.instance.registerSingleton<DownloadsRepository>(
-        MockDownloadsRepository(),
-      );
-    }
-    if (!GetIt.instance.isRegistered<AudioPlayerHandler>()) {
-      GetIt.instance.registerSingleton<AudioPlayerHandler>(
-        MockAudioPlayerHandler(),
-      );
-    }
   });
 
-  setUp(() {
+  setUp(() async {
+    await GetIt.instance.reset();
+    GetIt.instance.allowReassignment = true;
+
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockAudioPositionService = MockAudioPositionService();
+
+    // Register mocks
+    GetIt.instance.registerSingleton<AudioPositionService>(
+      mockAudioPositionService,
+    );
+    GetIt.instance.registerSingleton<DownloadsRepository>(
+      MockDownloadsRepository(),
+    );
+    GetIt.instance.registerSingleton<AudioPlayerHandler>(
+      MockAudioPlayerHandler(),
+    );
+
+    // Default Stubs
+    when(
+      () => mockAudioPositionService.position,
+    ).thenAnswer((_) => Stream.value(Duration.zero));
+  });
+
+  tearDown(() async {
+    await GetIt.instance.reset();
   });
 
   Widget createWidgetUnderTest() {
     return BlocProvider<AudioPlayerBloc>.value(
       value: mockAudioPlayerBloc,
-      child: const ScreenUtilPlusInit(
-        designSize: Size(375, 812),
+      child: ScreenUtilPlusInit(
+        designSize: const Size(375, 812),
         child: MaterialApp(
-          localizationsDelegates: [
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [Locale('en')],
-          locale: Locale('en'),
-          home: ExpandedPlayerScreen(),
+          supportedLocales: const [Locale('en')],
+          locale: const Locale('en'),
+          home: ExpandedPlayerScreen(
+            audioPositionService: mockAudioPositionService,
+          ),
         ),
       ),
     );
@@ -67,10 +93,18 @@ void main() {
   testWidgets('ExpandedPlayerScreen displays content when playing', (
     tester,
   ) async {
+    await setScreenSize(tester);
+
+    // Override stub
+    when(
+      () => mockAudioPositionService.position,
+    ).thenAnswer((_) => Stream.value(const Duration(minutes: 1)));
+
     const testMediaItem = MediaItem(
       id: '1',
       title: 'Test Surah',
       artist: 'Test Reciter',
+      duration: Duration(minutes: 5),
     );
 
     when(() => mockAudioPlayerBloc.state).thenReturn(
@@ -94,16 +128,18 @@ void main() {
     expect(find.text('Test Reciter'), findsOneWidget);
 
     // Verify Time
-    // 01:00 / 05:00
-    expect(find.text('01:00'), findsOneWidget);
-    expect(find.text('05:00'), findsOneWidget);
+    // 00:01:00 / 00:05:00
+    expect(find.text('00:01:00'), findsOneWidget);
+    expect(find.text('00:05:00'), findsOneWidget);
 
     // Verify Play/Pause (Playing -> Pause icon)
-    expect(find.byIcon(FluentIcons.pause_24_filled), findsOneWidget);
-    expect(find.byIcon(FluentIcons.play_24_filled), findsNothing);
+    expect(find.byIcon(FluentIcons.pause_24_regular), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_24_regular), findsNothing);
   });
 
   testWidgets('Play button triggers event when pressed', (tester) async {
+    await setScreenSize(tester);
+
     const testMediaItem = MediaItem(
       id: '1',
       title: 'Test Surah',
@@ -127,10 +163,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Play icon
-    expect(find.byIcon(FluentIcons.play_24_filled), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_24_regular), findsOneWidget);
 
     // Tap Play
-    await tester.tap(find.byIcon(FluentIcons.play_24_filled));
+    await tester.tap(find.byIcon(FluentIcons.play_24_regular));
     verify(
       () => mockAudioPlayerBloc.add(const AudioPlayerEvent.playAudio()),
     ).called(1);

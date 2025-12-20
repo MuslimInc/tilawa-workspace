@@ -96,8 +96,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                   color: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
-              const Container(
-                decoration: BoxDecoration(
+              Container(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
