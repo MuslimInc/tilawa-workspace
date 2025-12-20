@@ -43,3 +43,12 @@ class RefreshSurahDownloadStatus extends ReciterDetailsEvent {
   @override
   List<Object?> get props => [surahId, reciterName];
 }
+
+class DownloadAllSurahs extends ReciterDetailsEvent {
+  const DownloadAllSurahs({required this.reciter, required this.surahs});
+  final ReciterEntity reciter;
+  final List<SurahEntity> surahs;
+
+  @override
+  List<Object?> get props => [reciter, surahs];
+}

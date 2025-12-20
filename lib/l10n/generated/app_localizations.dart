@@ -1172,6 +1172,18 @@ abstract class AppLocalizations {
   /// **'Location permission is required to calculate the Qibla direction.'**
   String get locationPermissionRequiredMessage;
 
+  /// Button to download all surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Download All'**
+  String get downloadAll;
+
+  /// Toast message when batch download starts
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading all surahs...'**
+  String get downloadingAllSurahs;
+
   /// Try again button text
   ///
   /// In en, this message translates to:

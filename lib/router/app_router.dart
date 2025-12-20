@@ -12,6 +12,7 @@ class AppRouter {
     navigatorKey: navigatorKey,
     initialLocation: const SplashRoute().location,
     debugLogDiagnostics: true,
+    restorationScopeId: 'router',
     redirect: (context, state) {
       // For now, we'll handle auth redirects in the UI
       return null;

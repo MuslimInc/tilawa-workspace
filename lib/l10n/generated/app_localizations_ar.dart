@@ -582,6 +582,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'مطلوب إذن الموقع لحساب اتجاه القبلة.';
 
   @override
+  String get downloadAll => 'تحميل الكل';
+
+  @override
+  String get downloadingAllSurahs => 'جاري تحميل جميع السور...';
+
+  @override
   String get tryAgain => 'حاول مرة أخرى';
 
   @override

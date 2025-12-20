@@ -585,6 +585,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location permission is required to calculate the Qibla direction.';
 
   @override
+  String get downloadAll => 'Download All';
+
+  @override
+  String get downloadingAllSurahs => 'Downloading all surahs...';
+
+  @override
   String get tryAgain => 'Try Again';
 
   @override

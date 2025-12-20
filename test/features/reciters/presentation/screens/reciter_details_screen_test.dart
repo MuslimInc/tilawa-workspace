@@ -148,7 +148,7 @@ void main() {
     ),
   ];
 
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({String? restorationScopeId}) {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<DownloadsRepository>(
@@ -162,15 +162,16 @@ void main() {
           BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
-        child: const MaterialApp(
-          localizationsDelegates: [
+        child: MaterialApp(
+          restorationScopeId: restorationScopeId,
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [Locale('en')],
-          home: ScreenUtilPlusInit(
+          supportedLocales: const [Locale('en')],
+          home: const ScreenUtilPlusInit(
             designSize: Size(375, 812),
             child: ReciterDetailsScreen(reciter: testReciter),
           ),
@@ -265,5 +266,76 @@ void main() {
 
     // Verify event added (MockBloc usually doesn't track method calls like Mockito unless strict,
     // but bloc_test uses whenListen or verify if needed. Here we just ensure no crash)
+  });
+
+  testWidgets('ReciterDetailsScreen restores scroll position', (
+    WidgetTester tester,
+  ) async {
+    // Generate a long list of surahs to enable scrolling
+    final List<SurahEntity> longSurahList = List.generate(20, (index) {
+      return SurahEntity(
+        mediaItem: MediaItem(
+          id: 'surah_$index',
+          title: 'Surah $index',
+          artist: 'Test Reciter',
+        ),
+      );
+    });
+
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: longSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(
+      createWidgetUnderTest(restorationScopeId: 'test_app'),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify initial state
+    expect(find.text('Surah 0'), findsOneWidget);
+
+    // Scroll to the bottom
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    // Verify we scrolled (some items from top should be gone or offset changed)
+    // Note: In detailed tests, we might check precise scroll offset, but simply
+    // verifying a different item is visible is often enough.
+    // However, for restoration test, checking the scroll offset is better.
+
+    final ScrollController scrollController = PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView)),
+    );
+    final double initialOffset = scrollController.offset;
+    expect(initialOffset, greaterThan(0));
+
+    // Simulate state restoration (terminate and restart app)
+    await tester.restartAndRestore();
+    await tester.pumpAndSettle();
+
+    // Re-verify content loaded (mock state persists across widget rebuilds in test context)
+    // But we need to ensure the bloc still returns the correct state if the widget re-subscribes
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: longSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+
+    // Get the new scroll controller
+    final ScrollController newScrollController = PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView)),
+    );
+
+    expect(newScrollController.offset, equals(initialOffset));
   });
 }

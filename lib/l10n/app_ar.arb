@@ -798,6 +798,14 @@
     "@locationPermissionRequiredMessage": {
         "description": "Error message when location permission is denied"
     },
+    "downloadAll": "تحميل الكل",
+    "@downloadAll": {
+        "description": "Button to download all surahs"
+    },
+    "downloadingAllSurahs": "جاري تحميل جميع السور...",
+    "@downloadingAllSurahs": {
+        "description": "Toast message when batch download starts"
+    },
     "tryAgain": "حاول مرة أخرى",
     "@tryAgain": {
         "description": "Try again button text"

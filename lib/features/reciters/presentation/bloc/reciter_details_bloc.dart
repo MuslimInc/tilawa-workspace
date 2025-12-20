@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
 import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.dart';
@@ -19,16 +20,20 @@ class ReciterDetailsBloc
   ReciterDetailsBloc(
     this._audioHandler,
     this._convertMediaItemsToSurahs,
+
     this._refreshSurahDownloadStatusUseCase,
+    this._downloadAllSurahsUseCase,
   ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
     on<SelectSurah>(_onSelectSurah);
     on<RefreshSurahDownloadStatus>(_onRefreshSurahDownloadStatus);
+    on<DownloadAllSurahs>(_onDownloadAllSurahs);
   }
   final AudioPlayerHandler _audioHandler;
   final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
+  final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
 
   Future<void> _onLoadSurahList(
     LoadSurahList event,
@@ -106,6 +111,17 @@ class ReciterDetailsBloc
     } catch (e) {
       // Don't emit error for refresh, just keep current state
     }
+  }
+
+  Future<void> _onDownloadAllSurahs(
+    DownloadAllSurahs event,
+    Emitter<ReciterDetailsState> emit,
+  ) async {
+    await _downloadAllSurahsUseCase(
+      surahs: event.surahs,
+      reciterName: event.reciter.name,
+      reciterId: event.reciter.id,
+    );
   }
 
   @override

@@ -46,10 +46,16 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
         builder: (context, state) {
           return CustomScrollView(
+            restorationId: 'reciter_details_scroll_view',
             slivers: [
               _buildSliverAppBar(context),
               if (widget.reciter.moshaf.length > 1)
                 SliverToBoxAdapter(child: _buildMoshafSelector(context, state)),
+              if (state.status == ReciterDetailsStatus.loaded &&
+                  state.surahList.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: _buildDownloadAllButton(context, state),
+                ),
               _buildContent(context, state),
             ],
           );
@@ -159,6 +165,41 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           ),
         ),
       ), // End Material
+    );
+  }
+
+  Widget _buildDownloadAllButton(
+    BuildContext context,
+    ReciterDetailsState state,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 8.h),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            context.read<ReciterDetailsBloc>().add(
+              DownloadAllSurahs(
+                reciter: widget.reciter,
+                surahs: state.surahList,
+              ),
+            );
+            ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
+          },
+          icon: Icon(Icons.download_rounded, size: 20.sp),
+          label: Text(
+            context.l10n.downloadAll,
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+          ),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

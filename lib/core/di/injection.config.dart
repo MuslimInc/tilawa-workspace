@@ -83,6 +83,8 @@ import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_c
     as _i602;
 import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart'
     as _i242;
+import 'package:muzakri/features/downloads/domain/usecases/download_all_surahs_use_case.dart'
+    as _i317;
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart'
     as _i251;
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart'
@@ -334,6 +336,9 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i242.DeleteReciterDownloadsUseCase(gh<_i775.DownloadsRepository>()),
     );
+    gh.singleton<_i317.DownloadAllSurahsUseCase>(
+      () => _i317.DownloadAllSurahsUseCase(gh<_i775.DownloadsRepository>()),
+    );
     gh.singleton<_i251.DownloadSurahUseCase>(
       () => _i251.DownloadSurahUseCase(gh<_i775.DownloadsRepository>()),
     );
@@ -542,13 +547,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i748.UpdatePlaylistUseCase>(
       () => _i748.UpdatePlaylistUseCase(gh<_i908.PlaylistsRepository>()),
     );
-    gh.factory<_i447.ReciterDetailsBloc>(
-      () => _i447.ReciterDetailsBloc(
-        gh<_i622.AudioPlayerHandler>(),
-        gh<_i772.ConvertMediaItemsToSurahsUseCase>(),
-        gh<_i506.RefreshSurahDownloadStatusUseCase>(),
-      ),
-    );
     gh.singleton<_i528.AnalyticsInitializationService>(
       () => _i528.AnalyticsInitializationService(
         gh<_i557.AnalyticsService>(),
@@ -628,6 +626,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i935.GetSplashNextRouteUseCase>(
       () => _i935.GetSplashNextRouteUseCase(gh<_i778.GetCurrentUserUseCase>()),
+    );
+    gh.factory<_i447.ReciterDetailsBloc>(
+      () => _i447.ReciterDetailsBloc(
+        gh<_i622.AudioPlayerHandler>(),
+        gh<_i772.ConvertMediaItemsToSurahsUseCase>(),
+        gh<_i506.RefreshSurahDownloadStatusUseCase>(),
+        gh<_i317.DownloadAllSurahsUseCase>(),
+      ),
     );
     gh.factory<_i504.PremiumBloc>(
       () => _i504.PremiumBloc(
