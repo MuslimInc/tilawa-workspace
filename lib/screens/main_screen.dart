@@ -3,17 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
+import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
+// import '../features/playlists/presentation/screens/playlists_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../router/app_router_config.dart';
 import '../shared/widgets/bottom_player_widget.dart';
-import 'playlists_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const RecitersScreen(),
     const DownloadsScreen(),
-    const PlaylistsScreen(),
+    const AthkarCategoriesScreen(),
     const SettingsScreen(),
   ];
 
@@ -114,6 +116,7 @@ class _MainScreenState extends State<MainScreen> {
                     label:
                         AppLocalizations.of(context)?.downloads ?? 'Downloads',
                   ),
+                  /*
                   BottomNavigationBarItem(
                     icon: Icon(
                       FluentIcons.music_note_2_24_regular,
@@ -126,13 +129,22 @@ class _MainScreenState extends State<MainScreen> {
                     label:
                         AppLocalizations.of(context)?.playlists ?? 'Playlists',
                   ),
+*/
+                  BottomNavigationBarItem(
+                    icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
+                    activeIcon: Icon(
+                      FluentIcons.book_open_24_filled,
+                      size: 24.sp,
+                    ),
+                    label: context.l10n.athkar,
+                  ),
                   BottomNavigationBarItem(
                     icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
                     activeIcon: Icon(
                       FluentIcons.settings_24_filled,
                       size: 24.sp,
                     ),
-                    label: AppLocalizations.of(context)?.settings ?? 'Settings',
+                    label: context.l10n.settings,
                   ),
                 ],
               ),

@@ -747,5 +747,31 @@
     "restorePlaybackStateSubtitle": "استئناف الصوت من حيث توقفت",
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
+    },
+    "reciterRemovedFromFavorites": "تمت إزالة {reciterName} من المفضلة",
+    "@reciterRemovedFromFavorites": {
+        "description": "Message when a reciter is removed from favorites",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "undo": "تراجع",
+    "@undo": {
+        "description": "Undo button text"
+    },
+    "athkar": "الأذكار",
+    "@athkar": {
+        "description": "Athkar tab label"
+    },
+    "done": "تم",
+    "@done": {
+        "description": "Done label for thikr completion"
+    },
+    "reset": "إعادة ضبط",
+    "@reset": {
+        "description": "Reset label for thikr"
     }
 }

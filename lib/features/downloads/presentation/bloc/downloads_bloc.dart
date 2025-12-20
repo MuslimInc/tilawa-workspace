@@ -165,7 +165,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       (downloads) async {
         // Also fetch total size
         final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
-          NoParams(),
+          const NoParams(),
         );
 
         emit(
@@ -853,7 +853,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       (downloads) async {
         // Also fetch total size
         final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
-          NoParams(),
+          const NoParams(),
         );
 
         // Emit directly to loaded state without showing loading state

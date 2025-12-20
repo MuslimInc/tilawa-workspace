@@ -543,4 +543,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get restorePlaybackStateSubtitle => 'استئناف الصوت من حيث توقفت';
+
+  @override
+  String reciterRemovedFromFavorites(String reciterName) {
+    return 'تمت إزالة $reciterName من المفضلة';
+  }
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get athkar => 'الأذكار';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get reset => 'إعادة ضبط';
 }

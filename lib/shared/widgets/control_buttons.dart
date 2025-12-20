@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../../main.dart';

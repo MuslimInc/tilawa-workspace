@@ -747,5 +747,31 @@
     "restorePlaybackStateSubtitle": "Resume audio from where you left off",
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
+    },
+    "reciterRemovedFromFavorites": "Removed {reciterName} from favorites",
+    "@reciterRemovedFromFavorites": {
+        "description": "Message when a reciter is removed from favorites",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "undo": "Undo",
+    "@undo": {
+        "description": "Undo button text"
+    },
+    "athkar": "Athkar",
+    "@athkar": {
+        "description": "Athkar tab label"
+    },
+    "done": "Done",
+    "@done": {
+        "description": "Done label for thikr completion"
+    },
+    "reset": "Reset",
+    "@reset": {
+        "description": "Reset label for thikr"
     }
 }

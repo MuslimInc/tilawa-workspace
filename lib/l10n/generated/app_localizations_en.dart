@@ -546,4 +546,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get restorePlaybackStateSubtitle =>
       'Resume audio from where you left off';
+
+  @override
+  String reciterRemovedFromFavorites(String reciterName) {
+    return 'Removed $reciterName from favorites';
+  }
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get athkar => 'Athkar';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get reset => 'Reset';
 }

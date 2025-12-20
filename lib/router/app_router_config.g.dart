@@ -15,6 +15,9 @@ List<RouteBase> get $appRoutes => [
   $loginRoute,
   $downloadsRoute,
   $errorRoute,
+  $favoritesRoute,
+  $athkarCategoriesRoute,
+  $athkarDetailsRoute,
 ];
 
 RouteBase get $homeRoute =>
@@ -206,6 +209,90 @@ mixin $ErrorRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/error',
     queryParams: {if (_self.error != null) 'error': _self.error},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $favoritesRoute =>
+    GoRouteData.$route(path: '/favorites', factory: $FavoritesRoute._fromState);
+
+mixin $FavoritesRoute on GoRouteData {
+  static FavoritesRoute _fromState(GoRouterState state) =>
+      const FavoritesRoute();
+
+  @override
+  String get location => GoRouteData.$location('/favorites');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $athkarCategoriesRoute => GoRouteData.$route(
+  path: '/athkar',
+  factory: $AthkarCategoriesRoute._fromState,
+);
+
+mixin $AthkarCategoriesRoute on GoRouteData {
+  static AthkarCategoriesRoute _fromState(GoRouterState state) =>
+      const AthkarCategoriesRoute();
+
+  @override
+  String get location => GoRouteData.$location('/athkar');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $athkarDetailsRoute => GoRouteData.$route(
+  path: '/athkar/:categoryId',
+  factory: $AthkarDetailsRoute._fromState,
+);
+
+mixin $AthkarDetailsRoute on GoRouteData {
+  static AthkarDetailsRoute _fromState(GoRouterState state) =>
+      AthkarDetailsRoute(
+        categoryId: int.parse(state.pathParameters['categoryId']!),
+        categoryName: state.uri.queryParameters['category-name']!,
+      );
+
+  AthkarDetailsRoute get _self => this as AthkarDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/athkar/${Uri.encodeComponent(_self.categoryId.toString())}',
+    queryParams: {'category-name': _self.categoryName},
   );
 
   @override

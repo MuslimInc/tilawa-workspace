@@ -1105,6 +1105,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume audio from where you left off'**
   String get restorePlaybackStateSubtitle;
+
+  /// Message when a reciter is removed from favorites
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {reciterName} from favorites'**
+  String reciterRemovedFromFavorites(String reciterName);
+
+  /// Undo button text
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// Athkar tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar'**
+  String get athkar;
+
+  /// Done label for thikr completion
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// Reset label for thikr
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
 }
 
 class _AppLocalizationsDelegate

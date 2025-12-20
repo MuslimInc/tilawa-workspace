@@ -16,6 +16,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
+import 'package:flutter/services.dart' as _i281;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
@@ -31,6 +32,18 @@ import 'package:muzakri/core/services/notification_permission_service.dart'
     as _i4;
 import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
     as _i203;
+import 'package:muzakri/features/athkar/data/datasources/athkar_local_datasource.dart'
+    as _i138;
+import 'package:muzakri/features/athkar/data/repositories/athkar_repository_impl.dart'
+    as _i1031;
+import 'package:muzakri/features/athkar/domain/repositories/athkar_repository.dart'
+    as _i496;
+import 'package:muzakri/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart'
+    as _i982;
+import 'package:muzakri/features/athkar/domain/usecases/get_athkar_categories_use_case.dart'
+    as _i852;
+import 'package:muzakri/features/athkar/presentation/cubit/athkar_cubit.dart'
+    as _i757;
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart'
     as _i965;
 import 'package:muzakri/features/auth/data/providers/auth_provider_factory.dart'
@@ -150,12 +163,18 @@ import 'package:muzakri/features/reciters/data/repositories/reciters_repository_
     as _i124;
 import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart'
     as _i619;
+import 'package:muzakri/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart'
+    as _i821;
 import 'package:muzakri/features/reciters/domain/usecases/get_reciters_use_case.dart'
     as _i785;
+import 'package:muzakri/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart'
+    as _i495;
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i447;
 import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart'
     as _i864;
+import 'package:muzakri/features/reciters/presentation/cubit/favorites_cubit.dart'
+    as _i663;
 import 'package:muzakri/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart'
     as _i574;
 import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart'
@@ -222,6 +241,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i313.DownloadService>(
       () => externalDependenciesModule.downloadService,
     );
+    gh.singleton<_i281.AssetBundle>(
+      () => externalDependenciesModule.assetBundle,
+    );
     gh.singleton<_i361.Dio>(() => externalDependenciesModule.dioClient());
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
@@ -256,6 +278,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.lazySingleton<_i500.RecitersLocalDataSource>(
+      () =>
+          _i500.RecitersLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
+    );
     gh.lazySingleton<_i322.LocalizationLocalDataSource>(
       () => _i322.LocalizationLocalDataSourceImpl(
         gh<_i460.SharedPreferencesAsync>(),
@@ -264,9 +290,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i919.PremiumLocalDataSource>(
       () =>
           _i919.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
-    );
-    gh.lazySingleton<_i500.RecitersLocalDataSource>(
-      () => _i500.RecitersLocalDataSourceImpl(),
     );
     gh.lazySingleton<_i775.DownloadsRepository>(
       () => _i486.DownloadsRepositoryImpl(
@@ -319,6 +342,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.GoogleSignIn>(),
       ),
     );
+    gh.lazySingleton<_i138.AthkarLocalDataSource>(
+      () =>
+          _i138.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
+    );
     gh.lazySingleton<_i619.RecitersRepository>(
       () => _i124.RecitersRepositoryImpl(
         gh<_i4.RecitersRemoteDataSource>(),
@@ -346,6 +373,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i557.AnalyticsService>(
       () => _i557.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.lazySingleton<_i821.GetFavoriteRecitersUseCase>(
+      () => _i821.GetFavoriteRecitersUseCase(gh<_i619.RecitersRepository>()),
+    );
+    gh.lazySingleton<_i495.ToggleFavoriteReciterUseCase>(
+      () => _i495.ToggleFavoriteReciterUseCase(gh<_i619.RecitersRepository>()),
     );
     gh.factory<_i574.ReciterDetailsLoaderCubit>(
       () => _i574.ReciterDetailsLoaderCubit(gh<_i619.RecitersRepository>()),
@@ -413,6 +446,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i916.CheckSurahDownloadStatusUseCase>(),
         gh<_i119.RefreshSurahStatusUseCase>(),
       ),
+    );
+    gh.factory<_i663.FavoritesCubit>(
+      () => _i663.FavoritesCubit(
+        gh<_i821.GetFavoriteRecitersUseCase>(),
+        gh<_i495.ToggleFavoriteReciterUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i496.AthkarRepository>(
+      () => _i1031.AthkarRepositoryImpl(gh<_i138.AthkarLocalDataSource>()),
     );
     await gh.singletonAsync<_i622.AudioPlayerHandler>(
       () => externalDependenciesModule.audioPlayerHandler(
@@ -541,6 +583,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i965.AudioPlayerBloc>(
       () => _i965.AudioPlayerBloc(gh<_i622.AudioPlayerHandler>()),
     );
+    gh.lazySingleton<_i982.GetAthkarByCategoryUseCase>(
+      () => _i982.GetAthkarByCategoryUseCase(gh<_i496.AthkarRepository>()),
+    );
+    gh.lazySingleton<_i852.GetAthkarCategoriesUseCase>(
+      () => _i852.GetAthkarCategoriesUseCase(gh<_i496.AthkarRepository>()),
+    );
     gh.factory<_i504.PremiumBloc>(
       () => _i504.PremiumBloc(
         gh<_i29.GetPremiumStatusUseCase>(),
@@ -551,6 +599,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i415.GetAvailablePlansUseCase>(),
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i757.AthkarCubit>(
+      () => _i757.AthkarCubit(
+        gh<_i852.GetAthkarCategoriesUseCase>(),
+        gh<_i982.GetAthkarByCategoryUseCase>(),
       ),
     );
     return this;
