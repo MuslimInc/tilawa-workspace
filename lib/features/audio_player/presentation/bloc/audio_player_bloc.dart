@@ -521,9 +521,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
             bufferedPosition: Duration.zero,
             duration: Duration.zero,
           );
-          logger.d('Restored playback position: ${positionData.position}');
         } catch (e) {
-          logger.d('Error deserializing position: $e');
+          logger.d('[AudioPlayerBloc] Error deserializing position: $e');
         }
       }
 
@@ -542,7 +541,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         positionData: positionData,
       );
     } catch (e) {
-      logger.d('Error in fromJson: $e');
+      logger.d('[AudioPlayerBloc] Error in fromJson: $e');
       return const AudioPlayerState(status: AudioPlayerStatus.initial);
     }
   }
@@ -561,23 +560,17 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
           state.queueState!.queueIndex != null) {
         json['queue'] = MediaItemJson.toJsonList(state.queueState!.queue);
         json['queueIndex'] = state.queueState!.queueIndex;
-        logger.d(
-          'Persisting queue with ${state.queueState!.queue.length} items at index ${state.queueState!.queueIndex}',
-        );
       }
 
       // Persist current playback position if available
       if (state.positionData != null &&
           state.positionData!.position != Duration.zero) {
         json['position'] = state.positionData!.position.inMilliseconds;
-        logger.d(
-          'Persisting playback position: ${state.positionData!.position}',
-        );
       }
 
       return json;
     } catch (e) {
-      logger.d('Error in toJson: $e');
+      logger.d('[AudioPlayerBloc] Error in toJson: $e');
       // Return minimal state if serialization fails
       return {'volume': state.volume, 'speed': state.speed};
     }

@@ -55,6 +55,8 @@ class ExpandedPlayerRoute extends GoRouteData with $ExpandedPlayerRoute {
     return CustomTransitionPage<void>(
       key: state.pageKey,
       child: const ExpandedPlayerScreen(),
+      opaque: false,
+      barrierColor: Colors.transparent,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
