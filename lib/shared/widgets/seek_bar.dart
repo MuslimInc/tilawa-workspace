@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
 import '../../core/widgets/hidden_thumb_component_shape.dart';
 
 class SeekBar extends StatefulWidget {
@@ -31,7 +32,12 @@ class SeekBarState extends State<SeekBar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _sliderThemeData = SliderTheme.of(context).copyWith(trackHeight: 2.0);
+    _sliderThemeData = SliderTheme.of(context).copyWith(
+      trackHeight: 8.0,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
+      overlayShape: const RoundSliderOverlayShape(),
+      trackShape: const RoundedRectSliderTrackShape(),
+    );
   }
 
   @override
@@ -48,17 +54,18 @@ class SeekBarState extends State<SeekBar> {
       children: [
         // Progress bar
         Container(
-          height: 4,
+          height: 30, // Increased height for better touch target
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: Stack(
+            alignment: Alignment.center, // Center the sliders vertically
             clipBehavior: Clip.none,
             children: [
               // Buffered progress background
               SliderTheme(
                 data: _sliderThemeData.copyWith(
                   thumbShape: HiddenThumbComponentShape(),
-                  activeTrackColor: Colors.blue.shade100,
-                  inactiveTrackColor: Colors.grey.shade300,
+                  activeTrackColor: Colors.white.withValues(alpha: 0.3),
+                  inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
                 ),
                 child: ExcludeSemantics(
                   child: Slider(
@@ -75,6 +82,8 @@ class SeekBarState extends State<SeekBar> {
               SliderTheme(
                 data: _sliderThemeData.copyWith(
                   inactiveTrackColor: Colors.transparent,
+                  activeTrackColor: Colors.white,
+                  thumbColor: Colors.white,
                 ),
                 child: Slider(
                   max: widget.duration.inMilliseconds.toDouble(),

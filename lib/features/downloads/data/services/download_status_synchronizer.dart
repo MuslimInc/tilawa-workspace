@@ -76,11 +76,12 @@ class DownloadStatusSynchronizer {
 
       // Check for orphaned pending downloads (Pending in DB, but not in queue and not active)
       if (download.status == DownloadStatus.pending && !isQueued && !isActive) {
-        final DownloadItem recovered = await _recoveryService.handleOrphanedDownload(
-          download,
-          isQueued: isQueued,
-          isActive: isActive,
-        );
+        final DownloadItem recovered = await _recoveryService
+            .handleOrphanedDownload(
+              download,
+              isQueued: isQueued,
+              isActive: isActive,
+            );
 
         updatedDownloads.add(recovered);
         continue;
@@ -95,18 +96,16 @@ class DownloadStatusSynchronizer {
           updatedDownloads.add(updatedDownload);
         } else {
           // Check if stuck
-          final DownloadItem recovered = await _recoveryService.handleStuckDownload(
-            download,
-          );
+          final DownloadItem recovered = await _recoveryService
+              .handleStuckDownload(download);
 
           updatedDownloads.add(recovered);
         }
       } else {
         // NOT active in platform surface (getActiveDownloadIds)
         // Check background status or verify completion
-        final DownloadItem recovered = await _recoveryService.checkBackgroundStatus(
-          download,
-        );
+        final DownloadItem recovered = await _recoveryService
+            .checkBackgroundStatus(download);
 
         updatedDownloads.add(recovered);
       }

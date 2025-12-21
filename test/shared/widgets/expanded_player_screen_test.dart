@@ -71,20 +71,18 @@ void main() {
   Widget createWidgetUnderTest() {
     return BlocProvider<AudioPlayerBloc>.value(
       value: mockAudioPlayerBloc,
-      child: ScreenUtilPlusInit(
-        designSize: const Size(375, 812),
+      child: const ScreenUtilPlusInit(
+        designSize: Size(375, 812),
         child: MaterialApp(
-          localizationsDelegates: const [
+          localizationsDelegates: [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [Locale('en')],
-          locale: const Locale('en'),
-          home: ExpandedPlayerScreen(
-            audioPositionService: mockAudioPositionService,
-          ),
+          supportedLocales: [Locale('en')],
+          locale: Locale('en'),
+          home: ExpandedPlayerScreen(),
         ),
       ),
     );
@@ -94,11 +92,6 @@ void main() {
     tester,
   ) async {
     await setScreenSize(tester);
-
-    // Override stub
-    when(
-      () => mockAudioPositionService.position,
-    ).thenAnswer((_) => Stream.value(const Duration(minutes: 1)));
 
     const testMediaItem = MediaItem(
       id: '1',
@@ -128,13 +121,18 @@ void main() {
     expect(find.text('Test Reciter'), findsOneWidget);
 
     // Verify Time
-    // 00:01:00 / 00:05:00
-    expect(find.text('00:01:00'), findsOneWidget);
-    expect(find.text('00:05:00'), findsOneWidget);
+    // 01:00 / 05:00
+    // Note: The new UI logic for formatting might differ slightly
+    // but the test expects 01:00 and 05:00.
+    // User's code: _formatDuration logic is standard HH:MM:SS or MM:SS
+    // 1m = 01:00, 5m = 05:00. Should match.
+    expect(find.text('01:00'), findsOneWidget);
+    expect(find.text('05:00'), findsOneWidget);
 
     // Verify Play/Pause (Playing -> Pause icon)
-    expect(find.byIcon(FluentIcons.pause_24_regular), findsOneWidget);
-    expect(find.byIcon(FluentIcons.play_24_regular), findsNothing);
+    // Updated to filled icons as per new implementation
+    expect(find.byIcon(FluentIcons.pause_24_filled), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_24_filled), findsNothing);
   });
 
   testWidgets('Play button triggers event when pressed', (tester) async {
@@ -163,10 +161,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Play icon
-    expect(find.byIcon(FluentIcons.play_24_regular), findsOneWidget);
+    expect(find.byIcon(FluentIcons.play_24_filled), findsOneWidget);
 
     // Tap Play
-    await tester.tap(find.byIcon(FluentIcons.play_24_regular));
+    await tester.tap(find.byIcon(FluentIcons.play_24_filled));
     verify(
       () => mockAudioPlayerBloc.add(const AudioPlayerEvent.playAudio()),
     ).called(1);

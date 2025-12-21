@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -94,10 +95,12 @@ class BottomPlayerUi extends StatelessWidget {
                         child: mediaItem.artUri != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
-                                child: Image.network(
-                                  mediaItem.artUri.toString(),
+                                child: CachedNetworkImage(
+                                  imageUrl: mediaItem.artUri.toString(),
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
+                                  errorWidget: (context, error, stackTrace) =>
+                                      _buildDefaultIcon(context),
+                                  placeholder: (context, url) =>
                                       _buildDefaultIcon(context),
                                 ),
                               )
