@@ -78,7 +78,9 @@ void main() {
       verify(mockDownloader.initialize(debug: anyNamed('debug'))).called(1);
       verify(mockIsolateManager.registerPort()).called(1);
       verify(mockIsolateManager.updateStream).called(1);
-      verify(mockDownloader.registerCallback(any)).called(1);
+      verify(
+        mockDownloader.registerCallback(any, step: anyNamed('step')),
+      ).called(1);
     });
 
     test('download delegates to helpers and enqueues task', () async {
@@ -138,6 +140,7 @@ void main() {
           savedDir: anyNamed('savedDir'),
           fileName: anyNamed('fileName'),
           openFileFromNotification: anyNamed('openFileFromNotification'),
+          showNotification: anyNamed('showNotification'),
           title: anyNamed('title'),
         ),
       ).thenAnswer((_) async => taskId);
@@ -177,6 +180,78 @@ void main() {
 
       // Now wait for the expectation
       await expectation;
+    });
+
+    test('cancelAll cancels all tasks and clears active uploads', () async {
+      await downloadService.initialize();
+
+      const url1 = 'http://example.com/1';
+      const url2 = 'http://example.com/2';
+
+      // Setup active downloads
+      when(mockDownloader.loadTasks()).thenAnswer(
+        (_) async => [
+          DownloadTask(
+            taskId: 'task1',
+            status: DownloadTaskStatus.running,
+            url: url1,
+            savedDir: '',
+            filename: 'file1.mp3',
+            progress: 50,
+            timeCreated: 0,
+            allowCellular: true,
+          ),
+          DownloadTask(
+            taskId: 'task2',
+            status: DownloadTaskStatus.enqueued,
+            url: url2,
+            savedDir: '',
+            filename: 'file2.mp3',
+            progress: 0,
+            timeCreated: 0,
+            allowCellular: true,
+          ),
+        ],
+      );
+
+      // Re-initialize to populate active cache
+      downloadService.resetForTesting();
+      await downloadService.initialize();
+
+      expect(
+        await downloadService.getActiveDownloadIds(),
+        containsAll([url1, url2]),
+      );
+
+      // Setup cancel expectations
+      when(
+        mockDownloader.cancel(taskId: anyNamed('taskId')),
+      ).thenAnswer((_) async {});
+      when(
+        mockDownloader.remove(
+          taskId: anyNamed('taskId'),
+          shouldDeleteContent: anyNamed('shouldDeleteContent'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final Future<void> expectation = expectLater(
+        downloadService.globalProgressStream,
+        emitsInAnyOrder([
+          predicate<DownloadProgress>(
+            (p) => p.id == url1 && p.status == DownloadStatus.cancelled,
+          ),
+          predicate<DownloadProgress>(
+            (p) => p.id == url2 && p.status == DownloadStatus.cancelled,
+          ),
+        ]),
+      );
+
+      await downloadService.cancelAll();
+
+      await expectation;
+      expect(await downloadService.getActiveDownloadIds(), isEmpty);
+      verify(mockDownloader.cancel(taskId: 'task1')).called(1);
+      verify(mockDownloader.cancel(taskId: 'task2')).called(1);
     });
 
     test('rethrows initialization error', () async {

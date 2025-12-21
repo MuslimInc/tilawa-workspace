@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -9,6 +10,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
+import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -17,7 +19,11 @@ import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import '../services/download_service_test.mocks.dart';
 import 'downloads_repository_impl_test.mocks.dart';
 
-@GenerateMocks([DownloadsLocalDataSource, DownloadNotificationService])
+@GenerateMocks([
+  DownloadsLocalDataSource,
+  DownloadNotificationService,
+  BatchDownloadManager,
+])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -55,35 +61,45 @@ void main() {
   late DownloadsRepositoryImpl repository;
   late MockDownloadsLocalDataSource mockLocalDataSource;
   late MockFlutterDownloaderWrapper mockDownloader;
+  late MockBatchDownloadManager mockBatchDownloadManager;
+  late MockDownloadNotificationService mockNotificationService;
 
-  setUp(() {
+  setUp(() async {
+    // Setup mocks
     mockLocalDataSource = MockDownloadsLocalDataSource();
-    repository = DownloadsRepositoryImpl(
-      mockLocalDataSource,
-      DownloadService.instance,
-    );
-
-    // Mock FlutterDownloader for DownloadService
     mockDownloader = MockFlutterDownloaderWrapper();
+    mockBatchDownloadManager = MockBatchDownloadManager();
+    mockNotificationService = MockDownloadNotificationService();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-    // Register DownloadService in GetIt for DownloadQueueManager
+    // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(DownloadService.instance);
     }
-    final mockDownloadNotificationService = MockDownloadNotificationService();
-    if (!getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.registerSingleton<DownloadNotificationService>(
-        mockDownloadNotificationService,
-      );
-    }
 
-    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+    // Register NotificationService in GetIt
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
+    }
+    getIt.registerSingleton<DownloadNotificationService>(
+      mockNotificationService,
+    );
+    when(mockNotificationService.initialize()).thenAnswer((_) async {
       return;
     });
+
+    // Reset singleton
+    DownloadQueueManager.reset();
+    await DownloadQueueManager.instance.initialize();
+
+    repository = DownloadsRepositoryImpl(
+      mockLocalDataSource,
+      DownloadService.instance,
+      mockBatchDownloadManager,
+    );
     when(
-      mockDownloadNotificationService.showDownloadProgress(
+      mockNotificationService.showDownloadProgress(
         downloadId: anyNamed('downloadId'),
         title: anyNamed('title'),
         reciterName: anyNamed('reciterName'),
@@ -97,9 +113,7 @@ void main() {
     ).thenAnswer((_) async {
       return;
     });
-    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
-      _,
-    ) async {
+    when(mockNotificationService.cancelNotification(any)).thenAnswer((_) async {
       return;
     });
 
@@ -137,10 +151,14 @@ void main() {
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
-    // Stub getDownloadsDirectory globally as it is now used in many methods
     when(
       mockLocalDataSource.getDownloadsDirectory(),
     ).thenAnswer((_) async => '/tmp/downloads');
+
+    // Stub updateDownloads which is used for batch updates
+    when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {
+      return;
+    });
   });
 
   tearDown(() {
@@ -174,9 +192,10 @@ void main() {
         // The repository now handles this gracefully, so no exception should be thrown.
         await repository.startDownload(
           testSurahId,
-          testSurahTitle,
-          testReciterName,
-          testReciterId,
+          title: testSurahTitle,
+          surahTitle: testSurahTitle,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
         );
 
         // Assert
@@ -213,9 +232,10 @@ void main() {
         expect(
           () => repository.startDownload(
             testSurahId,
-            testSurahTitle,
-            testReciterName,
-            testReciterId,
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
           ),
           throwsException,
         );
@@ -235,15 +255,100 @@ void main() {
         expect(
           () => repository.startDownload(
             testSurahId,
-            testSurahTitle,
-            testReciterName,
-            testReciterId,
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
           ),
           throwsException,
         );
       });
     });
 
+    group('startDownloadBatch', () {
+      const testReciterName = 'Reciter';
+      const testReciterId = 1;
+
+      test('should enqueue batch of items', () async {
+        // Arrange
+        final String testDownloadsDir = Directory.systemTemp
+            .createTempSync()
+            .path;
+        when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => testDownloadsDir);
+        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+
+        final List<
+          ({int reciterId, String reciterName, String surahTitle, String url})
+        >
+        items = [
+          (
+            url: 'u1',
+            surahTitle: 't1',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+          ),
+          (
+            url: 'u2',
+            surahTitle: 't2',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+          ),
+        ];
+
+        // Act
+        await repository.startDownloadBatch(items);
+
+        // Assert
+        verify(mockLocalDataSource.addDownload(any)).called(2);
+        // We verify that queue enqueueBatch is called is implied if no errors
+        // Ideally we should mock QueueManager.instance but it's a singleton in the implementation
+        // The implementation skips enqueueBatch if MissingPluginException occurs, which is fine for unit test of repo
+      });
+
+      test('should emit updates to stream', () async {
+        // Arrange
+        final String testDownloadsDir = Directory.systemTemp
+            .createTempSync()
+            .path;
+        when(
+          mockLocalDataSource.getDownloadsDirectory(),
+        ).thenAnswer((_) async => testDownloadsDir);
+        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+
+        final List<
+          ({int reciterId, String reciterName, String surahTitle, String url})
+        >
+        items = [
+          (
+            url: 'u1',
+            surahTitle: 't1',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+          ),
+        ];
+
+        // Act
+        // Listen to stream
+        final emittedItems = <DownloadItem>[];
+        final StreamSubscription<DownloadItem> subscription = repository
+            .downloadUpdates
+            .listen(emittedItems.add);
+
+        await repository.startDownloadBatch(items);
+
+        await Future.delayed(
+          const Duration(milliseconds: 100),
+        ); // wait for stream
+
+        // Assert
+        expect(emittedItems.length, 1);
+        expect(emittedItems.first.url, 'u1');
+
+        await subscription.cancel();
+      });
+    });
     group('retryDownload', () {
       const testUrl = 'https://example.com/audio.mp3';
       const testDownloadId =
@@ -1153,7 +1258,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1184,7 +1295,13 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter, 1);
+        await repository.startDownload(
+          testUrl,
+          title: testTitle,
+          surahTitle: testTitle,
+          reciterName: testReciter,
+          reciterId: 1,
+        );
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1215,7 +1332,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1245,7 +1368,13 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter, 1);
+        await repository.startDownload(
+          testUrl,
+          title: testTitle,
+          surahTitle: testTitle,
+          reciterName: testReciter,
+          reciterId: 1,
+        );
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1277,7 +1406,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1307,7 +1442,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1336,7 +1477,13 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act
-        await repository.startDownload(testUrl, testTitle, testReciter, 1);
+        await repository.startDownload(
+          testUrl,
+          title: testTitle,
+          surahTitle: testTitle,
+          reciterName: testReciter,
+          reciterId: 1,
+        );
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1364,7 +1511,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1394,8 +1547,20 @@ void main() {
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
         // Act - Start both downloads
-        await repository.startDownload(testUrl1, testTitle, testReciter, 1);
-        await repository.startDownload(testUrl2, testTitle, testReciter, 1);
+        await repository.startDownload(
+          testUrl1,
+          title: testTitle,
+          surahTitle: testTitle,
+          reciterName: testReciter,
+          reciterId: 1,
+        );
+        await repository.startDownload(
+          testUrl2,
+          title: testTitle,
+          surahTitle: testTitle,
+          reciterName: testReciter,
+          reciterId: 1,
+        );
 
         // Assert
         final List<dynamic> captured = verify(
@@ -1433,7 +1598,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(
@@ -1462,7 +1633,13 @@ void main() {
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
       // Act
-      await repository.startDownload(testUrl, testTitle, testReciter, 1);
+      await repository.startDownload(
+        testUrl,
+        title: testTitle,
+        surahTitle: testTitle,
+        reciterName: testReciter,
+        reciterId: 1,
+      );
 
       // Assert
       final List<dynamic> captured = verify(

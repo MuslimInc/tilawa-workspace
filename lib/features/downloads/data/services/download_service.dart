@@ -36,10 +36,14 @@ abstract class DownloadService {
     required String title,
     required String reciterName,
     int? reciterId,
+    bool showNotification = true,
   });
 
   /// Cancel a download by its ID.
   Future<void> cancel(String id);
+
+  /// Cancel all active downloads.
+  Future<void> cancelAll();
 
   /// Dispose and cleanup the download service.
   Future<void> disposeService();
@@ -56,6 +60,10 @@ abstract class DownloadService {
 
   static Stream<DownloadProgress> get globalProgressStreamStatic =>
       DownloadServiceImpl.instance._globalProgressController.stream;
+
+  @visibleForTesting
+  static StreamController<DownloadProgress> get globalProgressController =>
+      DownloadServiceImpl.instance._globalProgressController;
 
   static Stream<DownloadProgress> progressStream(String id) =>
       DownloadServiceImpl.instance.getProgressStream(id);
@@ -76,6 +84,7 @@ abstract class DownloadService {
     required String title,
     required String reciterName,
     int? reciterId,
+    bool showNotification = true,
   }) => DownloadServiceImpl.instance.download(
     id: id,
     url: url,
@@ -83,10 +92,14 @@ abstract class DownloadService {
     title: title,
     reciterName: reciterName,
     reciterId: reciterId,
+    showNotification: showNotification,
   );
 
   static Future<void> cancelDownload(String id) =>
       DownloadServiceImpl.instance.cancel(id);
+
+  static Future<void> cancelAllDownloads() =>
+      DownloadServiceImpl.instance.cancelAll();
 
   static Future<void> dispose() =>
       DownloadServiceImpl.instance.disposeService();
@@ -218,8 +231,10 @@ class DownloadServiceImpl implements DownloadService {
       });
 
       // Register the static callback for platform layer
+      // Use step 3 to reduce frequency of updates (every 3%)
       await _flutterDownloader.registerCallback(
         DownloadServiceImpl._downloadCallback,
+        step: 3,
       );
 
       // Populate initial cache
@@ -319,6 +334,7 @@ class DownloadServiceImpl implements DownloadService {
     required String title,
     required String reciterName,
     int? reciterId,
+    bool showNotification = false,
   }) async {
     await initialize();
 
@@ -388,6 +404,7 @@ class DownloadServiceImpl implements DownloadService {
         url: url,
         savedDir: savedDir,
         fileName: fileName,
+        showNotification: showNotification,
         openFileFromNotification: false,
         title: title,
       );
@@ -452,6 +469,44 @@ class DownloadServiceImpl implements DownloadService {
         fileSize: 0,
       ),
     );
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    await initialize();
+
+    final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
+
+    if (tasks != null) {
+      for (final DownloadTask task in tasks) {
+        try {
+          await _flutterDownloader.cancel(taskId: task.taskId);
+          await _flutterDownloader.remove(
+            taskId: task.taskId,
+            shouldDeleteContent: true,
+          );
+        } catch (e) {
+          logger.w(
+            '[DownloadService] Error cancelling task ${task.taskId}: $e',
+          );
+        }
+      }
+    }
+
+    final List<String> urlsToNotify = _activeDownloadUrls.toList();
+    _activeDownloadUrls.clear();
+
+    for (final id in urlsToNotify) {
+      _globalProgressController.add(
+        DownloadProgress(
+          id: id,
+          status: DownloadStatus.cancelled,
+          progress: 0.0,
+          downloadedSize: 0,
+          fileSize: 0,
+        ),
+      );
+    }
   }
 
   /// Get a filtered stream for a specific download.

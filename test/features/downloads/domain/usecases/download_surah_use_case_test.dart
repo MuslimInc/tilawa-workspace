@@ -28,7 +28,13 @@ void main() {
       test('should return Right(null) when download is successful', () async {
         // Arrange
         when(
-          mockRepository.startDownload(any, any, any, any),
+          mockRepository.startDownload(
+            any,
+            title: anyNamed('title'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
         ).thenAnswer((_) async {});
 
         // Act
@@ -47,9 +53,10 @@ void main() {
         verify(
           mockRepository.startDownload(
             testSurahId,
-            testSurahTitle,
-            testReciterName,
-            testReciterId,
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
           ),
         ).called(1);
         verifyNoMoreInteractions(mockRepository);
@@ -61,7 +68,13 @@ void main() {
           // Arrange
           const errorMessage = 'Network error';
           when(
-            mockRepository.startDownload(any, any, any, any),
+            mockRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
           ).thenThrow(Exception(errorMessage));
 
           // Act
@@ -80,9 +93,10 @@ void main() {
           verify(
             mockRepository.startDownload(
               testSurahId,
-              testSurahTitle,
-              testReciterName,
-              testReciterId,
+              title: testSurahTitle,
+              surahTitle: testSurahTitle,
+              reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           ).called(1);
           verifyNoMoreInteractions(mockRepository);
@@ -94,7 +108,13 @@ void main() {
         () async {
           // Arrange
           when(
-            mockRepository.startDownload(any, any, any, any),
+            mockRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
           ).thenThrow('Generic error');
 
           // Act
@@ -113,9 +133,10 @@ void main() {
           verify(
             mockRepository.startDownload(
               testSurahId,
-              testSurahTitle,
-              testReciterName,
-              testReciterId,
+              title: testSurahTitle,
+              surahTitle: testSurahTitle,
+              reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
           ).called(1);
           verifyNoMoreInteractions(mockRepository);
@@ -125,7 +146,13 @@ void main() {
       test('should call repository with correct parameters', () async {
         // Arrange
         when(
-          mockRepository.startDownload(any, any, any, any),
+          mockRepository.startDownload(
+            any,
+            title: anyNamed('title'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
         ).thenAnswer((_) async {});
 
         // Act
@@ -140,9 +167,10 @@ void main() {
         verify(
           mockRepository.startDownload(
             testSurahId,
-            testSurahTitle,
-            testReciterName,
-            testReciterId,
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
           ),
         ).called(1);
         verifyNoMoreInteractions(mockRepository);
@@ -151,7 +179,13 @@ void main() {
       test('should handle empty strings as parameters', () async {
         // Arrange
         when(
-          mockRepository.startDownload(any, any, any, any),
+          mockRepository.startDownload(
+            any,
+            title: anyNamed('title'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
         ).thenAnswer((_) async {});
 
         // Act
@@ -167,7 +201,15 @@ void main() {
           (_) => fail('Expected Right but got Left'),
           (_) => expect(true, true), // Right with void
         );
-        verify(mockRepository.startDownload('', '', '', 0)).called(1);
+        verify(
+          mockRepository.startDownload(
+            any,
+            title: '',
+            surahTitle: '',
+            reciterName: '',
+            reciterId: 0,
+          ),
+        ).called(1);
         verifyNoMoreInteractions(mockRepository);
       });
 
@@ -178,7 +220,13 @@ void main() {
         const specialReciterName = 'عبد الرحمن السديس';
 
         when(
-          mockRepository.startDownload(any, any, any, any),
+          mockRepository.startDownload(
+            any,
+            title: anyNamed('title'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
         ).thenAnswer((_) async {});
 
         // Act
@@ -197,9 +245,10 @@ void main() {
         verify(
           mockRepository.startDownload(
             specialSurahId,
-            specialSurahTitle,
-            specialReciterName,
-            testReciterId,
+            title: specialSurahTitle,
+            surahTitle: specialSurahTitle,
+            reciterName: specialReciterName,
+            reciterId: testReciterId,
           ),
         ).called(1);
         verifyNoMoreInteractions(mockRepository);

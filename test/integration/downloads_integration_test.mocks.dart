@@ -11,6 +11,8 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart'
     as _i2;
+import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart'
+    as _i8;
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart'
     as _i6;
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
@@ -72,6 +74,15 @@ class MockDownloadsLocalDataSource extends _i1.Mock
   _i3.Future<void> updateDownload(_i4.DownloadItem? download) =>
       (super.noSuchMethod(
             Invocation.method(#updateDownload, [download]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> updateDownloads(List<_i4.DownloadItem>? downloads) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateDownloads, [downloads]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
@@ -174,6 +185,29 @@ class MockDownloadNotificationService extends _i1.Mock
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> showBatchDownloadProgress({
+    required String? batchId,
+    required String? title,
+    required int? progress,
+    required int? completedCount,
+    required int? totalCount,
+    required _i4.DownloadStatus? status,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#showBatchDownloadProgress, [], {
+              #batchId: batchId,
+              #title: title,
+              #progress: progress,
+              #completedCount: completedCount,
+              #totalCount: totalCount,
+              #status: status,
+            }),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<void> cancelNotification(String? downloadId) =>
       (super.noSuchMethod(
             Invocation.method(#cancelNotification, [downloadId]),
@@ -197,6 +231,39 @@ class MockDownloadNotificationService extends _i1.Mock
   ) =>
       (super.noSuchMethod(
             Invocation.method(#handleNotificationResponse, [response]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [BatchDownloadManager].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBatchDownloadManager extends _i1.Mock
+    implements _i8.BatchDownloadManager {
+  MockBatchDownloadManager() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  void startBatch({
+    required String? batchId,
+    required String? title,
+    required List<String>? downloadIds,
+  }) => super.noSuchMethod(
+    Invocation.method(#startBatch, [], {
+      #batchId: batchId,
+      #title: title,
+      #downloadIds: downloadIds,
+    }),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i3.Future<void> cancelBatch(String? batchId) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelBatch, [batchId]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

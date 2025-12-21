@@ -80,8 +80,11 @@ class DownloadQueueManager {
   // Track URLs of active downloads to map IDs to URLs for sync
   final Map<String, String> _activeDownloadUrls = {};
 
-  // Track download metadata (title, reciter, reciterId) for notifications
-  final Map<String, ({String title, String reciterName, int? reciterId})>
+  // Track download metadata (title, reciter, reciterId, showNotification) for notifications
+  final Map<
+    String,
+    ({String title, String reciterName, int? reciterId, bool showNotification})
+  >
   _downloadMetadata = {};
 
   // Track last activity time for each active download to detect stuck ones
@@ -140,6 +143,7 @@ class DownloadQueueManager {
     required String title,
     required String reciterName,
     int? reciterId,
+    bool showNotification = false,
   }) async {
     await initialize();
 
@@ -158,6 +162,7 @@ class DownloadQueueManager {
       title: title,
       reciterName: reciterName,
       reciterId: reciterId,
+      showNotification: showNotification,
       enqueuedAt: clock.now(),
     );
 
@@ -166,6 +171,7 @@ class DownloadQueueManager {
       title: title,
       reciterName: reciterName,
       reciterId: reciterId,
+      showNotification: showNotification,
     );
     _notifyQueueUpdate();
 
@@ -175,6 +181,61 @@ class DownloadQueueManager {
 
     // Try to process the queue
     await _processQueue();
+  }
+
+  /// Add multiple downloads to the queue efficiently
+  Future<void> enqueueBatch(
+    List<
+      ({
+        String id,
+        String url,
+        String filePath,
+        String title,
+        String reciterName,
+        int? reciterId,
+        bool showNotification,
+      })
+    >
+    items,
+  ) async {
+    await initialize();
+
+    var addedCount = 0;
+    for (final item in items) {
+      // Check if already in queue or active
+      if (_isInQueue(item.id) || _activeDownloads.contains(item.id)) {
+        continue;
+      }
+
+      final queuedDownload = QueuedDownload(
+        id: item.id,
+        url: item.url,
+        filePath: item.filePath,
+        title: item.title,
+        reciterName: item.reciterName,
+        reciterId: item.reciterId,
+        showNotification: item.showNotification,
+        enqueuedAt: clock.now(),
+      );
+
+      _queue.add(queuedDownload);
+      _downloadMetadata[item.id] = (
+        title: item.title,
+        reciterName: item.reciterName,
+        reciterId: item.reciterId,
+        showNotification: item.showNotification,
+      );
+      addedCount++;
+    }
+
+    if (addedCount > 0) {
+      _notifyQueueUpdate();
+      logger.d(
+        '[DownloadQueueManager] Enqueued batch of $addedCount downloads. New queue length: ${_queue.length}',
+      );
+      // Process queue once for the whole batch
+      await _processQueue();
+    }
   }
 
   /// Remove a download from the queue
@@ -292,6 +353,7 @@ class DownloadQueueManager {
           title: queuedDownload.title,
           reciterName: queuedDownload.reciterName,
           reciterId: queuedDownload.reciterId,
+          showNotification: queuedDownload.showNotification,
         );
 
         // Check if disposed after await
@@ -441,9 +503,8 @@ class DownloadQueueManager {
   }
 
   /// Find metadata for a download by matching against active download URLs
-  ({String title, String reciterName, int? reciterId})? _findMetadataByUrl(
-    String url,
-  ) {
+  ({String title, String reciterName, int? reciterId, bool showNotification})?
+  _findMetadataByUrl(String url) {
     final String normalizedUrl = _normalizeUrlString(url);
     for (final MapEntry<String, String> entry in _activeDownloadUrls.entries) {
       if (_normalizeUrlString(entry.value) == normalizedUrl) {
@@ -456,11 +517,17 @@ class DownloadQueueManager {
   /// Handle download progress updates
   void _handleDownloadProgress(DownloadProgress progress) {
     // Find metadata for this download (could be by ID or URL)
-    final ({String reciterName, String title, int? reciterId})? metadata =
+    final ({
+      String reciterName,
+      String title,
+      int? reciterId,
+      bool showNotification,
+    })?
+    metadata =
         _downloadMetadata[progress.id] ?? _findMetadataByUrl(progress.id);
 
-    // Show notification with custom title format and localized messages
-    if (metadata != null) {
+    // Show notification only if requested (usually for individual downloads, not batches)
+    if (metadata != null && metadata.showNotification) {
       // Get localized strings based on current locale
       final AppLocalizations l10n = lookupAppLocalizations(_currentLocale);
       final int progressPercent = (progress.progress * 100).round();
@@ -599,12 +666,28 @@ class DownloadQueueManager {
     logger.d('[Downloading Queue] Queue cleared');
   }
 
+  /// Stop all downloads and clear the queue
+  Future<void> stopAll() async {
+    _queue.clear();
+
+    // Cancel through service (this handles platform cancel + progress emission)
+    await _downloadService.cancelAll();
+
+    // Clear local state
+    _activeDownloads.clear();
+    _activeDownloadUrls.clear();
+    _downloadMetadata.clear();
+    _lastActivityTime.clear();
+
+    // Hide any batch notifications
+    await _notificationService.cancelAllNotifications();
+
+    _notifyQueueUpdate();
+    logger.d('[DownloadQueueManager] Stopped all downloads and cleared queue');
+  }
+
   /// Sync active downloads with DownloadService to remove stale entries
   Future<void> _syncActiveDownloads() async {
-    if (_activeDownloads.isEmpty) {
-      return;
-    }
-
     try {
       if (_isDisposed) {
         return;
@@ -748,6 +831,7 @@ class QueuedDownload extends Equatable {
     required this.title,
     required this.reciterName,
     this.reciterId,
+    this.showNotification = false,
     required this.enqueuedAt,
   });
 
@@ -757,6 +841,7 @@ class QueuedDownload extends Equatable {
   final String title;
   final String reciterName;
   final int? reciterId;
+  final bool showNotification;
   final DateTime enqueuedAt;
 
   @override
@@ -767,6 +852,7 @@ class QueuedDownload extends Equatable {
     title,
     reciterName,
     reciterId,
+    showNotification,
     enqueuedAt,
   ];
 }

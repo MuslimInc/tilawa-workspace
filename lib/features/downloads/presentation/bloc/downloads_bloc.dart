@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -59,7 +60,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
        _audioPlayerHandler = audioPlayerHandler,
        _analyticsService = analyticsService,
        super(const DownloadsState()) {
-    on<LoadDownloads>(_onLoadDownloads);
+    on<LoadDownloads>(_onLoadDownloads, transformer: droppable());
     on<DownloadSurahEvent>(_onDownloadSurah);
     on<DeleteDownloadEvent>(_onDeleteDownload);
     on<DeleteReciterDownloads>(_onDeleteReciterDownloads);
@@ -152,7 +153,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     LoadDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    emit(state.copyWith(status: DownloadsStateStatus.loading));
+    // Only show full loading spinner if we don't have data yet
+    if (state.status != DownloadsStateStatus.loaded) {
+      emit(state.copyWith(status: DownloadsStateStatus.loading));
+    }
     final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
     await result.fold(
@@ -430,29 +434,15 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     ClearAllDownloads event,
     Emitter<DownloadsState> emit,
   ) async {
-    // Cancel all active downloads before clearing
+    // Stop all active downloads and clear the queue
     try {
-      for (final Map<String, List<DownloadItem>> reciterDownloads
-          in state.downloads.values) {
-        for (final List<DownloadItem> downloads in reciterDownloads.values) {
-          for (final download in downloads) {
-            if (download.status == DownloadStatus.downloading ||
-                download.status == DownloadStatus.pending) {
-              await DownloadService.cancelDownload(download.url);
-            }
-          }
-        }
-      }
-      // Clear the entire pending queue
-      DownloadQueueManager.instance.clearQueue();
+      await DownloadQueueManager.instance.stopAll();
     } on MissingPluginException {
       logger.d(
-        '[DownloadsBloc] DownloadService.cancelDownload skipped - platform channels not available',
+        '[DownloadsBloc] DownloadQueueManager.stopAll skipped - platform channels not available',
       );
     } catch (e) {
-      logger.w(
-        '[DownloadsBloc] Error cancelling downloads before clearing: $e',
-      );
+      logger.w('[DownloadsBloc] Error stopping downloads before clearing: $e');
     }
 
     final Either<Failure, void> result = await _clearAllDownloads();

@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingReciters => 'Loading reciters...';
 
   @override
+  String get searchSurah => 'Search surah...';
+
+  @override
   String get noRecitersFound => 'No reciters found';
 
   @override
@@ -589,6 +592,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadingAllSurahs => 'Downloading all surahs...';
+
+  @override
+  String get completeDownloading => 'Complete Downloading';
 
   @override
   String get tryAgain => 'Try Again';

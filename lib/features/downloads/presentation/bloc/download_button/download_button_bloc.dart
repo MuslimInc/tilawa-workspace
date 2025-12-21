@@ -32,7 +32,7 @@ class DownloadButtonBloc
     this.initialIsDownloaded,
     this.initialIsDownloading,
     this.initialProgress,
-  }) : _url = url,
+  }) : _url = url.trim(),
        _reciterName = reciterName,
        _reciterId = reciterId,
        _downloadsRepository = downloadsRepository,
@@ -66,30 +66,50 @@ class DownloadButtonBloc
   final bool? initialIsDownloading;
   final double? initialProgress;
   StreamSubscription<DownloadProgress>? _progressSubscription;
+  StreamSubscription<DownloadItem>? _updatesSubscription;
+  bool _isFirstInit = true; // Track if this is the first initialization
 
   /// Initialize button state by checking current download status
   Future<void> _onInitialize(Emitter<DownloadButtonState> emit) async {
+    // Ensure we are listening to repository updates for batch operations
+    _updatesSubscription ??= _downloadsRepository.downloadUpdates.listen((
+      item,
+    ) {
+      if (item.url == _url && item.reciterName == _reciterName) {
+        add(const DownloadButtonEvent.initialize());
+      }
+    });
+
     try {
-      // optimization: Use initial state if provided
-      if (initialIsDownloaded ?? false) {
-        emit(const DownloadButtonState.completed());
-        return;
+      // optimization: Use initial state ONLY on first initialization
+      // After that, always query the actual state to ensure we sync with repository updates
+      if (_isFirstInit) {
+        _isFirstInit = false; // Mark that we've initialized once
+
+        if (initialIsDownloaded ?? false) {
+          emit(const DownloadButtonState.completed());
+          return;
+        }
+
+        if (initialIsDownloading ?? false) {
+          _listenToProgress();
+          emit(
+            DownloadButtonState.downloading(progress: initialProgress ?? 0.0),
+          );
+          return;
+        }
+
+        // If explicit FALSE was provided, we might still want to check just to be safe?
+        // Or trust the caller. If caller says false, it's false.
+        // But typically caller passes null if unknown.
+        if (initialIsDownloaded == false && initialIsDownloading == false) {
+          emit(const DownloadButtonState.readyToDownload());
+          return;
+        }
       }
 
-      if (initialIsDownloading ?? false) {
-        _listenToProgress();
-        emit(DownloadButtonState.downloading(progress: initialProgress ?? 0.0));
-        return;
-      }
-
-      // If explicit FALSE was provided, we might still want to check just to be safe?
-      // Or trust the caller. If caller says false, it's false.
-      // But typically caller passes null if unknown.
-      if (initialIsDownloaded == false && initialIsDownloading == false) {
-        emit(const DownloadButtonState.readyToDownload());
-        return;
-      }
-
+      // On subsequent initializations OR if no initial values provided,
+      // always check actual state from database/service
       // Check if already downloaded
       final bool isDownloaded = await _downloadsRepository.isSurahDownloaded(
         _url,
@@ -108,18 +128,12 @@ class DownloadButtonBloc
       );
 
       if (isDownloading) {
+        _listenToProgress();
         // Get current download item to get progress
         final DownloadItem? downloadItem = await _downloadsRepository
-            .getDownloadItem('${_url}_$_reciterName');
-
-        // Note: The above might fail if ID logic is different, better to depend on streams or generic status check
-        // But for getting initial progress, we need the item.
-        // Let's try to find it via URL if composed ID fails (handled in repo essentially, but let's be safe)
+            .getDownloadItem(_url);
 
         if (downloadItem != null) {
-          _listenToProgress();
-
-          // Emit current state based on download status
           switch (downloadItem.status) {
             case DownloadStatus.pending:
               emit(const DownloadButtonState.pending());
@@ -131,24 +145,21 @@ class DownloadButtonBloc
                   totalBytes: downloadItem.fileSize,
                 ),
               );
+            case DownloadStatus.completed:
+              emit(const DownloadButtonState.completed());
             case DownloadStatus.failed:
               emit(const DownloadButtonState.failed());
             case DownloadStatus.cancelled:
               emit(const DownloadButtonState.cancelled());
-            case DownloadStatus.completed:
-              // TODO: Handle this case.
-              throw UnimplementedError();
             case DownloadStatus.paused:
-              // TODO: Handle this case.
-              throw UnimplementedError();
+              emit(const DownloadButtonState.paused());
           }
-          return;
         } else {
-          // Fallback: if we know it is downloading but can't find item, start listening at least
-          _listenToProgress();
-          emit(const DownloadButtonState.pending());
-          return;
+          // If item is actively downloading in service but not yet found in DB with this ID,
+          // assume it's starting and show pending or 0%
+          emit(const DownloadButtonState.downloading(progress: 0.0));
         }
+        return;
       }
 
       // Default: ready to download
@@ -188,9 +199,10 @@ class DownloadButtonBloc
       // The actual download state changes will come through the progress stream
       await _downloadsRepository.startDownload(
         _url,
-        surahTitle,
-        _reciterName,
-        _reciterId,
+        title: surahTitle,
+        reciterName: _reciterName,
+        reciterId: _reciterId,
+        surahTitle: surahTitle,
       );
 
       logger.d(
@@ -230,7 +242,7 @@ class DownloadButtonBloc
       // We use the URL as ID mostly, but repo expects ID.
       // For now, let's assume usage of URL as ID is consistent.
       await _downloadsRepository.cancelDownload(_url);
-      _progressSubscription?.cancel();
+      await _progressSubscription?.cancel();
       emit(const DownloadButtonState.cancelled());
       logger.d('[DownloadButtonBloc] Download cancelled: url=$_url');
     } on MissingPluginException catch (e) {
@@ -364,6 +376,7 @@ class DownloadButtonBloc
   @override
   Future<void> close() {
     _progressSubscription?.cancel();
+    _updatesSubscription?.cancel();
     return super.close();
   }
 }

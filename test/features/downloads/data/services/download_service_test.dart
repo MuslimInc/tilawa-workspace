@@ -53,7 +53,11 @@ void main() {
           url: anyNamed('url'),
           savedDir: anyNamed('savedDir'),
           fileName: anyNamed('fileName'),
+          headers: anyNamed('headers'),
+          showNotification: anyNamed('showNotification'),
           openFileFromNotification: anyNamed('openFileFromNotification'),
+          requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+          saveInPublicStorage: anyNamed('saveInPublicStorage'),
           title: anyNamed('title'),
         ),
       ).thenAnswer((_) async => testTaskId);
@@ -89,7 +93,9 @@ void main() {
         await downloadService.initialize();
 
         verify(mockDownloader.initialize(debug: anyNamed('debug'))).called(1);
-        verify(mockDownloader.registerCallback(any)).called(1);
+        verify(
+          mockDownloader.registerCallback(any, step: anyNamed('step')),
+        ).called(1);
 
         final SendPort? port = IsolateNameServer.lookupPortByName(
           'downloader_send_port',
@@ -102,7 +108,9 @@ void main() {
         await downloadService.initialize();
 
         verify(mockDownloader.initialize(debug: anyNamed('debug'))).called(1);
-        verify(mockDownloader.registerCallback(any)).called(1);
+        verify(
+          mockDownloader.registerCallback(any, step: anyNamed('step')),
+        ).called(1);
       });
 
       test('concurrent initialize calls return same future', () async {
@@ -121,8 +129,9 @@ void main() {
         ).thenAnswer((_) async {});
 
         when(
-          localMock.registerCallback(any),
+          localMock.registerCallback(any, step: anyNamed('step')),
         ).thenThrow(Exception('Callback init failed'));
+        when(localMock.loadTasks()).thenAnswer((_) async => []);
 
         final localService = DownloadServiceImpl(flutterDownloader: localMock);
 
@@ -169,7 +178,11 @@ void main() {
             url: testUrl,
             savedDir: DownloadPathUtils.getDirectoryName(testFilePath),
             fileName: DownloadPathUtils.getFileName(testFilePath),
+            headers: anyNamed('headers'),
+            showNotification: anyNamed('showNotification'),
             openFileFromNotification: false,
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
             title: testTitle,
           ),
         ).called(1);
@@ -273,7 +286,11 @@ void main() {
               url: testUrl,
               savedDir: DownloadPathUtils.getDirectoryName(testFilePath),
               fileName: DownloadPathUtils.getFileName(testFilePath),
+              headers: anyNamed('headers'),
+              showNotification: anyNamed('showNotification'),
               openFileFromNotification: false,
+              requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+              saveInPublicStorage: anyNamed('saveInPublicStorage'),
               title: testTitle,
             ),
           ).called(1);
@@ -351,6 +368,7 @@ void main() {
         when(
           localMock.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => []);
+        when(localMock.loadTasks()).thenAnswer((_) async => []);
 
         // Override enqueue to return null
         when(
@@ -358,7 +376,11 @@ void main() {
             url: anyNamed('url'),
             savedDir: anyNamed('savedDir'),
             fileName: anyNamed('fileName'),
+            headers: anyNamed('headers'),
+            showNotification: anyNamed('showNotification'),
             openFileFromNotification: anyNamed('openFileFromNotification'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
             title: anyNamed('title'),
           ),
         ).thenAnswer((_) async => null);
@@ -492,12 +514,12 @@ void main() {
             url: anyNamed('url'),
             savedDir: anyNamed('savedDir'),
             fileName: anyNamed('fileName'),
+            headers: anyNamed('headers'),
             showNotification: anyNamed('showNotification'),
             openFileFromNotification: anyNamed('openFileFromNotification'),
-            title: anyNamed('title'),
-            headers: anyNamed('headers'),
             requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
             saveInPublicStorage: anyNamed('saveInPublicStorage'),
+            title: anyNamed('title'),
           ),
         ).thenAnswer((_) async => testTaskId);
 

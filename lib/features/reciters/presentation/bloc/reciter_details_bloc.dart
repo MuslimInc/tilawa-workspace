@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -6,6 +8,9 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../downloads/domain/entities/download_item.dart';
+import '../../../downloads/domain/repositories/downloads_repository.dart';
+import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
@@ -23,23 +28,52 @@ class ReciterDetailsBloc
 
     this._refreshSurahDownloadStatusUseCase,
     this._downloadAllSurahsUseCase,
+    this._cancelDownloadsForReciterUseCase,
+    this._downloadsRepository,
   ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
     on<SelectSurah>(_onSelectSurah);
     on<RefreshSurahDownloadStatus>(_onRefreshSurahDownloadStatus);
     on<DownloadAllSurahs>(_onDownloadAllSurahs);
+    on<FilterSurahs>(_onFilterSurahs);
+    on<CancelDownloadAllSurahs>(_onCancelDownloadAllSurahs);
+    on<UpdateDownloadProgress>(_onUpdateDownloadProgress);
   }
+
+  void _onFilterSurahs(FilterSurahs event, Emitter<ReciterDetailsState> emit) {
+    emit(state.copyWith(searchQuery: event.query));
+  }
+
   final AudioPlayerHandler _audioHandler;
   final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
   final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
+  final CancelDownloadsForReciterUseCase _cancelDownloadsForReciterUseCase;
+  final DownloadsRepository _downloadsRepository;
+
+  StreamSubscription? _downloadsSubscription;
+  String? _currentReciterName;
+  final Map<String, bool> _completedSurahs = {}; // surahId -> isDownloaded
+  final Set<String> _downloadingSurahs =
+      {}; // surahId (that are actively downloading)
 
   Future<void> _onLoadSurahList(
     LoadSurahList event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    emit(state.copyWith(status: ReciterDetailsStatus.loading));
+    emit(
+      state.copyWith(
+        status: ReciterDetailsStatus.loading,
+        downloadProgress: 0.0,
+        isDownloadingAll: false,
+        searchQuery: '',
+      ),
+    );
+    _currentReciterName = event.reciter.name;
+    _completedSurahs.clear();
+    _downloadingSurahs.clear();
+    _subscribeToDownloads();
     try {
       final List<MediaItem>? mediaItemList = await _audioHandler
           .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
@@ -57,6 +91,14 @@ class ReciterDetailsBloc
             selectedMoshaf: event.moshaf,
           ),
         );
+
+        // Initialize local status tracking from loaded list
+        for (final surah in surahList) {
+          if (surah.isDownloaded) {
+            _completedSurahs[surah.id] = true;
+          }
+        }
+        _updateProgressAndEmit();
       } else {
         emit(
           state.copyWith(
@@ -117,11 +159,97 @@ class ReciterDetailsBloc
     DownloadAllSurahs event,
     Emitter<ReciterDetailsState> emit,
   ) async {
+    // We don't optimistically update here to avoid massive rebuilds.
+    // Instead, we rely on the repository's event stream (watched by DownloadButtonBloc)
+    // to update individual button states efficiently.
+
     await _downloadAllSurahsUseCase(
       surahs: event.surahs,
       reciterName: event.reciter.name,
       reciterId: event.reciter.id,
     );
+    // The start of download will be picked up by the stream listener
+  }
+
+  Future<void> _onCancelDownloadAllSurahs(
+    CancelDownloadAllSurahs event,
+    Emitter<ReciterDetailsState> emit,
+  ) async {
+    await _cancelDownloadsForReciterUseCase(event.reciterName);
+    // Clearing local state will be handled by stream updates (cancelled/failed events)
+    // But we can eagerly clear downloading set to update UI immediately
+    _downloadingSurahs.clear();
+    _updateProgressAndEmit();
+  }
+
+  void _subscribeToDownloads() {
+    _downloadsSubscription?.cancel();
+    _downloadsSubscription = _downloadsRepository.downloadUpdates.listen((
+      item,
+    ) {
+      if (item.reciterName == _currentReciterName) {
+        var stateChanged = false;
+
+        if (item.status == DownloadStatus.completed) {
+          if (!_completedSurahs.containsKey(item.url)) {
+            _completedSurahs[item.url] = true;
+            stateChanged = true;
+          }
+          if (_downloadingSurahs.contains(item.url)) {
+            _downloadingSurahs.remove(item.url);
+            stateChanged = true;
+          }
+        } else if (item.status == DownloadStatus.downloading ||
+            item.status == DownloadStatus.pending) {
+          if (!_downloadingSurahs.contains(item.url)) {
+            _downloadingSurahs.add(item.url);
+            stateChanged = true;
+          }
+        } else if (item.status == DownloadStatus.failed ||
+            item.status == DownloadStatus.cancelled) {
+          if (_downloadingSurahs.contains(item.url)) {
+            _downloadingSurahs.remove(item.url);
+            stateChanged = true;
+          }
+        }
+
+        if (stateChanged) {
+          _updateProgressAndEmit();
+        }
+      }
+    });
+  }
+
+  void _updateProgressAndEmit() {
+    if (state.surahList.isEmpty) return;
+
+    final double progress = _completedSurahs.length / state.surahList.length;
+    final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
+
+    add(
+      UpdateDownloadProgress(
+        progress: progress,
+        isDownloading: isDownloadingAll,
+      ),
+    );
+  }
+
+  void _onUpdateDownloadProgress(
+    UpdateDownloadProgress event,
+    Emitter<ReciterDetailsState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        downloadProgress: event.progress,
+        isDownloadingAll: event.isDownloading,
+      ),
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _downloadsSubscription?.cancel();
+    return super.close();
   }
 
   @override

@@ -21,6 +21,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingReciters => 'جاري تحميل القراء...';
 
   @override
+  String get searchSurah => 'بحث عن سورة...';
+
+  @override
   String get noRecitersFound => 'لم يتم العثور على قراء';
 
   @override
@@ -586,6 +589,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get downloadingAllSurahs => 'جاري تحميل جميع السور...';
+
+  @override
+  String get completeDownloading => 'استكمال التحميل';
 
   @override
   String get tryAgain => 'حاول مرة أخرى';

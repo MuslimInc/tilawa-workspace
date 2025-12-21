@@ -16,6 +16,10 @@
     "@loadingReciters": {
         "description": "Loading reciters message"
     },
+    "searchSurah": "بحث عن سورة...",
+    "@searchSurah": {
+        "description": "Search surah hint text"
+    },
     "noRecitersFound": "لم يتم العثور على قراء",
     "@noRecitersFound": {
         "description": "No reciters found message"
@@ -804,7 +808,11 @@
     },
     "downloadingAllSurahs": "جاري تحميل جميع السور...",
     "@downloadingAllSurahs": {
-        "description": "Toast message when batch download starts"
+        "description": "Download progress message"
+    },
+    "completeDownloading": "استكمال التحميل",
+    "@completeDownloading": {
+        "description": "Button text to complete downloading remaining surahs"
     },
     "tryAgain": "حاول مرة أخرى",
     "@tryAgain": {

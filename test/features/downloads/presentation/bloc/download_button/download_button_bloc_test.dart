@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +26,9 @@ void main() {
 
   setUp(() {
     mockDownloadsRepository = MockDownloadsRepository();
+    when(
+      mockDownloadsRepository.downloadUpdates,
+    ).thenAnswer((_) => const Stream.empty());
 
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
@@ -273,7 +278,14 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any, any),
+            mockDownloadsRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+              surahTitle: anyNamed('surahTitle'),
+              showNotification: anyNamed('showNotification'),
+            ),
           ).thenAnswer((_) async {
             return;
           });
@@ -295,7 +307,13 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any, any),
+            mockDownloadsRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
           ).thenThrow(MissingPluginException('Platform channel not available'));
           return downloadButtonBloc;
         },
@@ -315,7 +333,13 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any, any),
+            mockDownloadsRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
           ).thenThrow(Exception('Network error'));
           return downloadButtonBloc;
         },
@@ -342,7 +366,13 @@ void main() {
             mockDownloadsRepository.isSurahDownloading(any, any),
           ).thenAnswer((_) async => false);
           when(
-            mockDownloadsRepository.startDownload(any, any, any, any),
+            mockDownloadsRepository.startDownload(
+              any,
+              title: anyNamed('title'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
           ).thenAnswer((_) async {
             return;
           });
@@ -525,6 +555,339 @@ void main() {
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.cancelled()),
         expect: () => [const DownloadButtonState.cancelled()],
+      );
+    });
+
+    group('Repository Updates', () {
+      test('re-initializes when receiving matching update', () async {
+        // Arrange
+        final updatesController = StreamController<DownloadItem>.broadcast();
+        when(
+          mockDownloadsRepository.downloadUpdates,
+        ).thenAnswer((_) => updatesController.stream);
+
+        // Initial check returns false
+        when(
+          mockDownloadsRepository.isSurahDownloaded(any, any),
+        ).thenAnswer((_) async => false);
+        when(
+          mockDownloadsRepository.isSurahDownloading(any, any),
+        ).thenAnswer((_) async => false);
+
+        final bloc = DownloadButtonBloc(
+          url: testUrl,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
+          downloadsRepository: mockDownloadsRepository,
+        );
+        bloc.add(const DownloadButtonEvent.initialize());
+
+        // Wait for first state
+        await expectLater(
+          bloc.stream,
+          emitsThrough(const DownloadButtonState.readyToDownload()),
+        );
+
+        // Act
+        // Setup mock for re-initialization to return true (downloading)
+        when(
+          mockDownloadsRepository.isSurahDownloading(any, any),
+        ).thenAnswer((_) async => true);
+        when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
+          (_) async => DownloadItem(
+            id: 'id',
+            title: 'title',
+            url: testUrl,
+            filePath: 'path',
+            reciterName: testReciterName,
+            reciterId: 1,
+            status: DownloadStatus.pending,
+            progress: 0,
+            fileSize: 0,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        // Assert
+        // Expect state to change to pending
+        final Future<void> future = expectLater(
+          bloc.stream,
+          emitsThrough(const DownloadButtonState.pending()),
+        );
+
+        // Emit update
+        updatesController.add(
+          DownloadItem(
+            id: 'id',
+            title: 'title',
+            url: testUrl,
+            filePath: 'path',
+            reciterName: testReciterName,
+            reciterId: 1,
+            status: DownloadStatus.pending,
+            progress: 0,
+            fileSize: 0,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        await future;
+
+        await bloc.close();
+        await updatesController.close();
+      });
+    });
+
+    group('_isFirstInit Flag Behavior (State Synchronization Fix)', () {
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'first initialization uses initialIsDownloaded without querying repository',
+        build: () {
+          // This should NOT call repository methods
+          return DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            downloadsRepository: mockDownloadsRepository,
+            initialIsDownloaded: true,
+          );
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [const DownloadButtonState.completed()],
+        verify: (_) {
+          // Verify repository was NOT queried (optimization)
+          verifyNever(mockDownloadsRepository.isSurahDownloaded(any, any));
+          verifyNever(mockDownloadsRepository.isSurahDownloading(any, any));
+        },
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'second initialization IGNORES initial values and queries repository',
+        build: () {
+          // Setup: Repository returns false (not downloaded)
+          when(
+            mockDownloadsRepository.isSurahDownloaded(any, any),
+          ).thenAnswer((_) async => false);
+          when(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).thenAnswer((_) async => false);
+
+          // Create bloc with initialIsDownloaded=true (stale value)
+          return DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            downloadsRepository: mockDownloadsRepository,
+            initialIsDownloaded: true, // Stale - says it's downloaded
+          );
+        },
+        act: (bloc) {
+          // First init - uses initial value
+          bloc.add(const DownloadButtonEvent.initialize());
+          // Second init - should query repository and get actual state
+          bloc.add(const DownloadButtonEvent.initialize());
+        },
+        expect: () => [
+          const DownloadButtonState.completed(), // First: uses initial value
+          const DownloadButtonState.readyToDownload(), // Second: queries repo, gets actual state
+        ],
+        verify: (_) {
+          // Verify repository was queried on SECOND initialization
+          verify(mockDownloadsRepository.isSurahDownloaded(any, any)).called(1);
+        },
+      );
+
+      test(
+        'repository update triggers re-initialization with actual state',
+        () async {
+          // Arrange
+          final updatesController = StreamController<DownloadItem>.broadcast();
+          when(
+            mockDownloadsRepository.downloadUpdates,
+          ).thenAnswer((_) => updatesController.stream);
+
+          // Initial state: not downloaded
+          when(
+            mockDownloadsRepository.isSurahDownloaded(any, any),
+          ).thenAnswer((_) async => false);
+          when(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).thenAnswer((_) async => false);
+
+          final bloc = DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            downloadsRepository: mockDownloadsRepository,
+            initialIsDownloaded: false, // Says not downloaded
+          );
+
+          // Act: First initialization
+          bloc.add(const DownloadButtonEvent.initialize());
+          await expectLater(
+            bloc.stream,
+            emitsThrough(const DownloadButtonState.readyToDownload()),
+          );
+
+          // Simulate batch download: repository now reports it as downloading
+          when(
+            mockDownloadsRepository.isSurahDownloaded(any, any),
+          ).thenAnswer((_) async => false);
+          when(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).thenAnswer((_) async => true);
+          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
+            (_) async => DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '/path/to/file.mp3',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.downloading,
+              progress: 0.3,
+              fileSize: 1024000,
+              downloadedSize: 307200,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          // Assert: Expect state change when repository emits update
+          final Future<void> future = expectLater(
+            bloc.stream,
+            emitsThrough(
+              const DownloadButtonState.downloading(
+                progress: 0.3,
+                downloadedBytes: 307200,
+                totalBytes: 1024000,
+              ),
+            ),
+          );
+
+          // Trigger update from repository (simulating batch download)
+          updatesController.add(
+            DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '/path/to/file.mp3',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.downloading,
+              progress: 0.3,
+              fileSize: 1024000,
+              downloadedSize: 307200,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          await future;
+
+          // Verify repository was queried on re-initialization
+          verify(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).called(greaterThan(1));
+
+          await bloc.close();
+          await updatesController.close();
+        },
+      );
+
+      test(
+        'batch download creates item -> button receives update -> queries actual state',
+        () async {
+          // This test simulates the exact scenario:
+          // 1. Button initialized with initialIsDownloaded=false
+          // 2. User clicks "Download All"
+          // 3. Repository creates download item and emits update
+          // 4. Button re-initializes and should show downloading state
+
+          final updatesController = StreamController<DownloadItem>.broadcast();
+          when(
+            mockDownloadsRepository.downloadUpdates,
+          ).thenAnswer((_) => updatesController.stream);
+
+          // Initial: not downloaded, not downloading
+          when(
+            mockDownloadsRepository.isSurahDownloaded(any, any),
+          ).thenAnswer((_) async => false);
+          when(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).thenAnswer((_) async => false);
+
+          final bloc = DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            downloadsRepository: mockDownloadsRepository,
+            initialIsDownloaded: false,
+            initialIsDownloading: false,
+          );
+
+          bloc.add(const DownloadButtonEvent.initialize());
+          await expectLater(
+            bloc.stream,
+            emitsThrough(const DownloadButtonState.readyToDownload()),
+          );
+
+          // Batch download starts: repository creates pending item
+          when(
+            mockDownloadsRepository.isSurahDownloaded(any, any),
+          ).thenAnswer((_) async => false);
+          when(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).thenAnswer((_) async => true);
+          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
+            (_) async => DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '/path/to/file.mp3',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.pending,
+              progress: 0.0,
+              fileSize: 0,
+              downloadedSize: 0,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          final Future<void> future = expectLater(
+            bloc.stream,
+            emitsThrough(const DownloadButtonState.pending()),
+          );
+
+          // Repository emits update (simulating batch download addDownload call)
+          updatesController.add(
+            DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '/path/to/file.mp3',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.pending,
+              progress: 0.0,
+              fileSize: 0,
+              downloadedSize: 0,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          await future;
+
+          // The fix ensures this works:
+          // - First init used initial values (fast, no repo query)
+          // - Second init (from update) queried repository once (correct state)
+          verify(
+            mockDownloadsRepository.isSurahDownloading(any, any),
+          ).called(1);
+
+          await bloc.close();
+          await updatesController.close();
+        },
       );
     });
   });

@@ -90,6 +90,10 @@ void main() {
     ).thenAnswer((_) => const Stream.empty());
 
     when(
+      () => mockDownloadsRepository.downloadUpdates,
+    ).thenAnswer((_) => const Stream.empty());
+
+    when(
       () => mockReciterDetailsBloc.state,
     ).thenAnswer((_) => const ReciterDetailsState());
 

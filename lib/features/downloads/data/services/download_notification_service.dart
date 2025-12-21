@@ -45,7 +45,7 @@ class DownloadNotificationService {
 
     try {
       const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher_monochrome',
+        'ic_launcher_monochrome',
       );
       // Request all necessary permissions for iOS notifications
       const iosSettings = DarwinInitializationSettings();
@@ -137,7 +137,7 @@ class DownloadNotificationService {
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
           color: const Color(0xFF1AADC5),
-          largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -184,6 +184,82 @@ class DownloadNotificationService {
     }
   }
 
+  /// Show a batch download progress notification
+  Future<void> showBatchDownloadProgress({
+    required String batchId,
+    required String title,
+    required int progress,
+    required int completedCount,
+    required int totalCount,
+    required DownloadStatus status,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    // Use a specific ID range for batches or hash
+    final int notificationId = _getNotificationId(batchId);
+
+    try {
+      if (status == DownloadStatus.downloading ||
+          status == DownloadStatus.pending) {
+        final androidDetails = AndroidNotificationDetails(
+          _downloadChannelId,
+          _downloadChannelName,
+          channelDescription: _downloadChannelDescription,
+          importance: Importance.low,
+          priority: Priority.low,
+          ongoing: true,
+          onlyAlertOnce: true,
+          showProgress: true,
+          maxProgress: 100,
+          progress: progress,
+          category: AndroidNotificationCategory.progress,
+          autoCancel: false,
+          color: const Color(0xFF1AADC5),
+          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
+        );
+
+        const iosDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: false,
+        );
+
+        final notificationDetails = NotificationDetails(
+          android: androidDetails,
+          iOS: iosDetails,
+        );
+
+        await _notifications.show(
+          notificationId,
+          title,
+          'Progress: $completedCount/$totalCount ($progress%)',
+          notificationDetails,
+        );
+      } else if (status == DownloadStatus.completed) {
+        await _showCompletedNotification(
+          notificationId: notificationId,
+          title: title,
+          message: 'All $totalCount files downloaded successfully',
+          reciterName: '', // Opens default screen or handled differently
+        );
+      } else if (status == DownloadStatus.failed) {
+        await _showFailedNotification(
+          notificationId: notificationId,
+          title: title,
+          message: 'Batch download failed',
+        );
+      } else if (status == DownloadStatus.cancelled) {
+        await cancelNotification(batchId);
+      }
+    } catch (e) {
+      logger.e(
+        '[DownloadNotificationService] Error showing batch notification: $e',
+      );
+    }
+  }
+
   /// Show a completed download notification
   Future<void> _showCompletedNotification({
     required int notificationId,
@@ -196,7 +272,7 @@ class DownloadNotificationService {
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
       color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -230,7 +306,7 @@ class DownloadNotificationService {
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
       color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
     );
 
     const iosDetails = DarwinNotificationDetails(

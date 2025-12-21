@@ -1,64 +1,42 @@
-import 'package:audio_service/audio_service.dart';
-
 import '../entities/download_item.dart';
+import 'batch_download_repository.dart';
+import 'download_query_repository.dart';
+import 'single_download_repository.dart';
 
-abstract class DownloadsRepository {
-  /// Initialize the repository (start listening to progress updates)
-  Future<void> initialize();
+/// Main downloads repository interface
+///
+/// This interface extends all specialized repository interfaces to maintain
+/// backward compatibility while following the Interface Segregation Principle (ISP).
+///
+/// For new code, prefer depending on the specific interface you need:
+/// - [SingleDownloadRepository] for individual download operations
+/// - [BatchDownloadRepository] for bulk download operations
+/// - [DownloadQueryRepository] for querying download data
+///
+/// This unified interface exists to:
+/// 1. Maintain backward compatibility with existing code
+/// 2. Provide a single implementation class
+/// 3. Enable gradual migration to segregated interfaces
+abstract class DownloadsRepository
+    implements
+        SingleDownloadRepository,
+        BatchDownloadRepository,
+        DownloadQueryRepository {
+  // No additional methods - this interface just combines the three specialized interfaces
+  // All methods are inherited from the parent interfaces
 
-  /// Get all downloads grouped by reciter and then by narrative
-  Future<Map<String, Map<String, List<DownloadItem>>>> getDownloadsByReciter();
+  /// Additional methods that don't fit neatly into the three categories
 
-  /// Get downloads for a specific reciter
-  Future<List<DownloadItem>> getDownloadsForReciter(String reciterName);
-
-  /// Get a specific download item
-  Future<DownloadItem?> getDownloadItem(String id);
-
-  /// Add a new download
+  /// Add a new download (internal use by repository implementation)
   Future<void> addDownload(DownloadItem downloadItem);
 
-  /// Update an existing download
+  /// Update an existing download (internal use by repository implementation)
   Future<void> updateDownload(DownloadItem downloadItem);
 
   /// Delete a download
   Future<void> deleteDownload(String id);
 
-  /// Delete all downloads for a reciter
-  Future<void> deleteDownloadsForReciter(String reciterName);
-
-  /// Clear all downloads
-  Future<void> clearAllDownloads();
-
-  /// Get download progress stream
-  Stream<DownloadItem> getDownloadProgress(String id);
-
-  Future<void> startDownload(
-    String url,
-    String surahTitle,
-    String reciterName,
-    int reciterId,
-  );
-
-  /// Pause a download
-  Future<void> pauseDownload(String id);
-
-  /// Resume a download
-  Future<void> resumeDownload(String id);
-
-  /// Cancel a download
-  Future<void> cancelDownload(String id);
-
-  /// Check if a surah is already downloaded
-  Future<bool> isSurahDownloaded(String url, String reciterName);
-
-  /// Check if a surah is currently downloading
-  Future<bool> isSurahDownloading(String url, String reciterName);
-
-  /// Get downloaded file path
-  Future<String?> getDownloadedFilePath(String url, String reciterName);
-
-  /// Update download progress
+  /// Update download progress (called by download service)
   Future<void> updateDownloadProgress(
     String id,
     DownloadStatus status,
@@ -66,25 +44,4 @@ abstract class DownloadsRepository {
     int downloadedSize,
     int fileSize,
   );
-
-  /// Create MediaItem from download
-  MediaItem createMediaItemFromDownload(DownloadItem download);
-
-  /// Validate if downloaded file exists
-  Future<bool> validateDownloadedFile(DownloadItem download);
-
-  /// Get valid completed downloads for a reciter
-  Future<List<DownloadItem>> getValidCompletedDownloads(String reciterName);
-
-  /// Retry a failed download
-  Future<void> retryDownload(String downloadId);
-
-  /// Create MediaItems from multiple downloads
-  List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads);
-
-  /// Resume any pending or stuck downloads on app start
-  Future<void> resumePendingDownloads();
-
-  /// Get total size of all downloads in bytes
-  Future<int> getTotalDownloadsSize();
 }

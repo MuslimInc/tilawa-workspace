@@ -31,10 +31,10 @@ void main() {
 
   final tSurahs = [tSurah1, tSurah2];
 
-  test('should call startDownload for each surah', () async {
+  test('should call startDownloadBatch for all surahs', () async {
     // Arrange
     when(
-      () => mockDownloadsRepository.startDownload(any(), any(), any(), any()),
+      () => mockDownloadsRepository.startDownloadBatch(any()),
     ).thenAnswer((_) async {});
 
     // Act
@@ -47,20 +47,33 @@ void main() {
     // Assert
     expect(result.isRight, true);
     verify(
-      () => mockDownloadsRepository.startDownload(
-        'url1',
-        'Al-Fatiha',
-        tReciterName,
-        tReciterId,
+      () => mockDownloadsRepository.startDownloadBatch(
+        any(
+          that:
+              isA<
+                    List<
+                      ({
+                        int reciterId,
+                        String reciterName,
+                        String surahTitle,
+                        String url,
+                      })
+                    >
+                  >()
+                  .having((l) => l.length, 'length', 2)
+                  .having((l) => l[0].url, 'url1', 'url1')
+                  .having((l) => l[1].url, 'url2', 'url2'),
+        ),
       ),
     ).called(1);
-    verify(
+    verifyNever(
       () => mockDownloadsRepository.startDownload(
-        'url2',
-        'Al-Baqarah',
-        tReciterName,
-        tReciterId,
+        any(),
+        title: any(named: 'title'),
+        surahTitle: any(named: 'surahTitle'),
+        reciterName: any(named: 'reciterName'),
+        reciterId: any(named: 'reciterId'),
       ),
-    ).called(1);
+    );
   });
 }

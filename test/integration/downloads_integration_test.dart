@@ -7,6 +7,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
+import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -14,7 +15,11 @@ import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
 import '../features/downloads/data/services/download_service_test.mocks.dart';
 // Generate mocks
-@GenerateMocks([DownloadsLocalDataSource, DownloadNotificationService])
+@GenerateMocks([
+  DownloadsLocalDataSource,
+  DownloadNotificationService,
+  BatchDownloadManager,
+])
 import 'downloads_integration_test.mocks.dart';
 
 void main() {
@@ -23,13 +28,16 @@ void main() {
   late DownloadsRepositoryImpl repository;
   late MockDownloadsLocalDataSource mockLocalDataSource;
   late MockFlutterDownloaderWrapper mockDownloader;
+  late MockBatchDownloadManager mockBatchDownloadManager;
   late Directory tempDir;
 
   setUp(() async {
     tempDir = Directory.systemTemp.createTempSync();
     // Setup mocks
+    // Setup mocks
     mockLocalDataSource = MockDownloadsLocalDataSource();
     mockDownloader = MockFlutterDownloaderWrapper();
+    mockBatchDownloadManager = MockBatchDownloadManager();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
     // Register DownloadService in GetIt
@@ -68,6 +76,7 @@ void main() {
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
       DownloadService.instance,
+      mockBatchDownloadManager,
     );
 
     // Default stubs
@@ -163,7 +172,13 @@ void main() {
       );
 
       // Act: Start Download
-      await repository.startDownload(url, surahTitle, reciter, 1);
+      await repository.startDownload(
+        url,
+        title: surahTitle,
+        surahTitle: surahTitle,
+        reciterName: reciter,
+        reciterId: 1,
+      );
 
       // Verify: Download added to DB with Pending/Downloading status
       final List<dynamic> captured = verify(

@@ -26,5 +26,21 @@ abstract class SurahEntity with _$SurahEntity {
   String get id => mediaItem.id;
   String get name => mediaItem.title;
   String get nameAr => mediaItem.extras?['nameAr'] as String? ?? '';
+  String get nameEn => mediaItem.extras?['nameEn'] as String? ?? '';
+  String get formattedId {
+    final fromExtras = mediaItem.extras?['formattedId'] as String?;
+    if (fromExtras != null && fromExtras.isNotEmpty) return fromExtras;
+
+    // Fallback: try to extract numeric part from ID if extras are missing (e.g. in tests)
+    try {
+      final String basename = id.split('/').last.split('.').first;
+      final int? num = int.tryParse(basename);
+      if (num != null) {
+        return basename.padLeft(3, '0');
+      }
+    } catch (_) {}
+    return '';
+  }
+
   String get reciterName => mediaItem.artist ?? '';
 }

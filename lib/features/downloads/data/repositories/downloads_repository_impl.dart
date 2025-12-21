@@ -7,19 +7,38 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/repositories/batch_download_repository.dart';
+import '../../domain/repositories/download_query_repository.dart';
 import '../../domain/repositories/downloads_repository.dart';
+import '../../domain/repositories/single_download_repository.dart';
 import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
+import '../services/batch_download_manager.dart';
 import '../services/download_queue_manager.dart';
 import '../services/download_service.dart';
 
+/// Repository implementation that handles all download operations
+///
+/// Registered for all segregated interfaces to support proper dependency injection:
+/// - Use cases can inject specific interfaces they need
+/// - Backward compatibility maintained via DownloadsRepository
 @LazySingleton(as: DownloadsRepository)
+@LazySingleton(as: SingleDownloadRepository)
+@LazySingleton(as: BatchDownloadRepository)
+@LazySingleton(as: DownloadQueryRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
-  DownloadsRepositoryImpl(this.localDataSource, this.downloadService);
+  DownloadsRepositoryImpl(
+    this.localDataSource,
+    this.downloadService,
+    this.batchDownloadManager,
+  );
 
   final DownloadsLocalDataSource localDataSource;
   final DownloadService downloadService;
+  final BatchDownloadManager batchDownloadManager;
   StreamSubscription? _progressSubscription;
+  final StreamController<DownloadItem> _downloadUpdatesController =
+      StreamController<DownloadItem>.broadcast();
 
   // Cache for the downloads directory to avoid repeated async calls
   String? _cachedDownloadsDir;
@@ -41,6 +60,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         logger.e('[DownloadsRepository] Error in progress stream: $e');
       },
     );
+    // Ensure queue manager has correct concurrency setting on init
+    DownloadQueueManager.instance.setMaxConcurrentDownloads(2);
   }
 
   Future<String> _getDownloadsDir() async {
@@ -457,9 +478,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     // Save updated downloads if there were any changes
     if (hasChanges) {
-      for (final download in updatedDownloads) {
-        await localDataSource.updateDownload(download);
-      }
+      await localDataSource.updateDownloads(updatedDownloads);
     }
 
     return _groupDownloadsByReciter(
@@ -524,11 +543,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> addDownload(DownloadItem downloadItem) async {
     await localDataSource.addDownload(downloadItem);
+    _downloadUpdatesController.add(downloadItem);
   }
 
   @override
   Future<void> updateDownload(DownloadItem downloadItem) async {
     await localDataSource.updateDownload(downloadItem);
+    _downloadUpdatesController.add(downloadItem);
   }
 
   @override
@@ -547,6 +568,55 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     );
     for (final download in downloads) {
       await deleteDownload(download.id);
+    }
+  }
+
+  @override
+  Future<void> cancelDownloadsForReciter(String reciterName) async {
+    final List<DownloadItem> downloads = await getDownloadsForReciter(
+      reciterName,
+    );
+    final List<DownloadItem> toCancel = downloads
+        .where(
+          (d) =>
+              d.status == DownloadStatus.downloading ||
+              d.status == DownloadStatus.pending,
+        )
+        .toList();
+
+    if (toCancel.isEmpty) return;
+
+    final List<DownloadItem> updatedItems = [];
+
+    for (final item in toCancel) {
+      // Remove from queue
+      DownloadQueueManager.instance.removeFromQueue(item.id);
+
+      // Cancel in download service
+      try {
+        await downloadService.cancel(item.url);
+      } catch (e) {
+        logger.w(
+          '[DownloadsRepository] Error canceling download ${item.id}: $e',
+        );
+      }
+
+      // Delete partial file if exists
+      if (localDataSource.isFileExists(item.filePath)) {
+        await localDataSource.deleteFile(item.filePath);
+      }
+
+      final DownloadItem updatedItem = item.copyWith(
+        status: DownloadStatus.cancelled,
+      );
+      updatedItems.add(updatedItem);
+    }
+
+    if (updatedItems.isNotEmpty) {
+      await localDataSource.updateDownloads(updatedItems);
+      for (final item in updatedItems) {
+        _downloadUpdatesController.add(item);
+      }
     }
   }
 
@@ -573,11 +643,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> startDownload(
-    String url,
-    String surahTitle,
-    String reciterName,
-    int reciterId,
-  ) async {
+    String url, {
+    required String title,
+    bool showNotification = true,
+    required String surahTitle,
+    required String reciterName,
+    required int reciterId,
+  }) async {
     // Validate inputs early to avoid creating invalid download entries
     // Note: in our app, surahId is the actual download URL
     final String trimmedUrl = url.trim();
@@ -650,6 +722,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         title: surahTitle,
         reciterName: reciterName,
         reciterId: reciterId,
+        showNotification: showNotification,
       );
 
       // Update status to pending if it was queued (not immediately started)
@@ -672,6 +745,101 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       // The actual download service call failed, but that's expected in tests
     }
   }
+
+  @override
+  Future<void> startDownloadBatch(
+    List<({String url, String surahTitle, String reciterName, int reciterId})>
+    items,
+  ) async {
+    if (items.isEmpty) return;
+    final String downloadsDir = await localDataSource.getDownloadsDirectory();
+    final List<
+      ({
+        String id,
+        String url,
+        String filePath,
+        String title,
+        String reciterName,
+        int? reciterId,
+        bool showNotification,
+      })
+    >
+    queueItems = [];
+
+    // Process items efficiently
+    for (final item in items) {
+      final String trimmedUrl = item.url.trim();
+      if (trimmedUrl.isEmpty) continue;
+
+      final downloadId = trimmedUrl;
+      final String safeFileName = DownloadPathUtils.calculateRelativePath(
+        trimmedUrl,
+        item.reciterName,
+      );
+      final String filePath = DownloadPathUtils.resolveFullPath(
+        downloadsDir,
+        safeFileName,
+      );
+
+      // Skip if already in queue or active (check both fast)
+      if (DownloadQueueManager.instance.isQueued(downloadId) ||
+          DownloadQueueManager.instance.isActive(downloadId)) {
+        continue;
+      }
+
+      final downloadItem = DownloadItem(
+        id: downloadId,
+        title: item.surahTitle,
+        url: trimmedUrl,
+        filePath: filePath,
+        reciterName: item.reciterName,
+        reciterId: item.reciterId,
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+      // Add to DB explicitly
+      await addDownload(downloadItem);
+
+      queueItems.add((
+        id: downloadId,
+        url: trimmedUrl,
+        filePath: filePath,
+        title: item.surahTitle,
+        reciterName: item.reciterName,
+        reciterId: item.reciterId,
+        showNotification:
+            false, // Batch downloads don't show individual notifications by default, managed by BatchDownloadManager
+      ));
+    }
+
+    if (queueItems.isNotEmpty) {
+      // Notify batch manager
+      final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';
+      batchDownloadManager.startBatch(
+        batchId: batchId,
+        title: 'Downloading ${queueItems.length} files',
+        downloadIds: queueItems.map((e) => e.id).toList(),
+      );
+
+      // Enqueue as a batch
+      try {
+        await DownloadQueueManager.instance.enqueueBatch(queueItems);
+        logger.d(
+          '[DownloadsRepositoryImpl] Started batch download of ${queueItems.length} items',
+        );
+      } on MissingPluginException {
+        logger.d(
+          '[DownloadsRepositoryImpl] enqueueBatch skipped (test environment)',
+        );
+      }
+    }
+  }
+
+  @override
+  Stream<DownloadItem> get downloadUpdates => _downloadUpdatesController.stream;
 
   @override
   Future<void> pauseDownload(String id) async {

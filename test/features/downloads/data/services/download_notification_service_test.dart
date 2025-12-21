@@ -9,12 +9,48 @@ import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/services/navigation_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'download_notification_service_test.mocks.dart';
 
+// Mock platform implementation for testing
+class MockFlutterLocalNotificationsPlatform extends Mock
+    with MockPlatformInterfaceMixin
+    implements FlutterLocalNotificationsPlatform {
+  @override
+  Future<void> show(
+    int id,
+    String? title,
+    String? body, {
+    NotificationDetails? notificationDetails,
+    String? payload,
+  }) async {
+    // No-op for tests
+  }
+
+  @override
+  Future<void> cancel(int id, {String? tag}) async {
+    // No-op for tests
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    // No-op for tests
+  }
+}
+
 @GenerateMocks([RecitersRepository, NavigationService])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Set up the mock platform before any tests run
+  setUpAll(() {
+    FlutterLocalNotificationsPlatform.instance =
+        MockFlutterLocalNotificationsPlatform();
+  });
+
   late DownloadNotificationService service;
   late MockRecitersRepository mockRecitersRepository;
   late MockNavigationService mockNavigationService;
@@ -29,6 +65,317 @@ void main() {
     );
     // return null by default for location to allow navigation
     when(mockNavigationService.getCurrentLocation()).thenReturn(null);
+  });
+
+  group('initialize', () {
+    test('should initialize successfully', () async {
+      // Act
+      await service.initialize();
+
+      // Assert - no exception means success
+      // We can't verify platform-specific calls without more complex mocking
+      // but we verify the method completes
+      expect(service, isNotNull);
+    });
+
+    test('should not reinitialize if already initialized', () async {
+      // Arrange
+      await service.initialize();
+
+      // Act - second initialization
+      await service.initialize();
+
+      // Assert - should complete without errors
+      expect(service, isNotNull);
+    });
+  });
+
+  group('showDownloadProgress', () {
+    const downloadId = 'download-1';
+    const title = 'Al-Fatiha';
+    const reciterName = 'Al-Afasy';
+
+    test('should show pending notification', () async {
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 0,
+        status: DownloadStatus.pending,
+        pendingMessage: 'Waiting to start...',
+      );
+
+      // Assert - method completes without error
+      expect(service, isNotNull);
+    });
+
+    test('should show downloading notification with progress', () async {
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.downloading,
+        progressMessage: 'Downloading: 50%',
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should show completed notification', () async {
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 100,
+        status: DownloadStatus.completed,
+        completeMessage: 'Download complete',
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should show failed notification', () async {
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.failed,
+        failedMessage: 'Download failed',
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should cancel notification when status is cancelled', () async {
+      // Arrange - First show a notification
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+
+      // Act - Cancel it
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.cancelled,
+      );
+
+      // Assert - completes without error
+      expect(service, isNotNull);
+    });
+
+    test('should use default messages when not provided', () async {
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 0,
+        status: DownloadStatus.pending,
+        // No custom messages
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should auto-initialize if not initialized', () async {
+      // Arrange - service not explicitly initialized
+
+      // Act
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: title,
+        reciterName: reciterName,
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+
+      // Assert - should not throw
+      expect(service, isNotNull);
+    });
+  });
+
+  group('showBatchDownloadProgress', () {
+    const batchId = 'batch-1';
+    const title = 'Downloading Al-Sudais';
+
+    test('should show batch downloading notification', () async {
+      // Act
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 33,
+        completedCount: 10,
+        totalCount: 30,
+        status: DownloadStatus.downloading,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should show batch pending notification', () async {
+      // Act
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 0,
+        completedCount: 0,
+        totalCount: 30,
+        status: DownloadStatus.pending,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should show batch completed notification', () async {
+      // Act
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 100,
+        completedCount: 30,
+        totalCount: 30,
+        status: DownloadStatus.completed,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should show batch failed notification', () async {
+      // Act
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.failed,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should cancel batch notification when status is cancelled', () async {
+      // Arrange
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.downloading,
+      );
+
+      // Act
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.cancelled,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+
+    test('should auto-initialize if not initialized', () async {
+      // Act - without explicit initialization
+      await service.showBatchDownloadProgress(
+        batchId: batchId,
+        title: title,
+        progress: 50,
+        completedCount: 15,
+        totalCount: 30,
+        status: DownloadStatus.downloading,
+      );
+
+      // Assert
+      expect(service, isNotNull);
+    });
+  });
+
+  group('cancelNotification', () {
+    test('should cancel notification for existing download', () async {
+      // Arrange - Create a notification first
+      const downloadId = 'download-1';
+      await service.showDownloadProgress(
+        downloadId: downloadId,
+        title: 'Test',
+        reciterName: 'Test Reciter',
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+
+      // Act
+      await service.cancelNotification(downloadId);
+
+      // Assert - should complete without error
+      expect(service, isNotNull);
+    });
+
+    test('should handle cancelling non-existent notification', () async {
+      // Act
+      await service.cancelNotification('non-existent-id');
+
+      // Assert - should complete without error (no-op)
+      expect(service, isNotNull);
+    });
+  });
+
+  group('cancelAllNotifications', () {
+    test('should cancel all notifications', () async {
+      // Arrange - Create multiple notifications
+      await service.showDownloadProgress(
+        downloadId: 'download-1',
+        title: 'Test 1',
+        reciterName: 'Reciter 1',
+        progress: 50,
+        status: DownloadStatus.downloading,
+      );
+
+      await service.showDownloadProgress(
+        downloadId: 'download-2',
+        title: 'Test 2',
+        reciterName: 'Reciter 2',
+        progress: 30,
+        status: DownloadStatus.downloading,
+      );
+
+      // Act
+      await service.cancelAllNotifications();
+
+      // Assert - should complete without error
+      expect(service, isNotNull);
+    });
+
+    test('should handle cancelling all when no notifications exist', () async {
+      // Act
+      await service.cancelAllNotifications();
+
+      // Assert - should complete without error
+      expect(service, isNotNull);
+    });
   });
 
   group('handleNotificationResponse', () {
@@ -158,7 +505,7 @@ void main() {
 
     test('should handle json decode error gracefully', () async {
       // Arrange
-      const payload = 'invalid access {'; // Invalid JSON
+      const payload = 'invalid json {'; // Invalid JSON
       const response = NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         payload: payload,

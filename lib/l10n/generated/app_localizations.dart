@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Loading reciters...'**
   String get loadingReciters;
 
+  /// Search surah hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search surah...'**
+  String get searchSurah;
+
   /// No reciters found message
   ///
   /// In en, this message translates to:
@@ -1178,11 +1184,17 @@ abstract class AppLocalizations {
   /// **'Download All'**
   String get downloadAll;
 
-  /// Toast message when batch download starts
+  /// Download progress message
   ///
   /// In en, this message translates to:
   /// **'Downloading all surahs...'**
   String get downloadingAllSurahs;
+
+  /// Button text to complete downloading remaining surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Downloading'**
+  String get completeDownloading;
 
   /// Try again button text
   ///

@@ -36,6 +36,11 @@ void main() {
       () => mockDownloadsBloc.statusStream,
     ).thenAnswer((_) => const Stream.empty());
 
+    // Stub downloadUpdates for DownloadButtonBloc
+    when(
+      () => mockDownloadsRepository.downloadUpdates,
+    ).thenAnswer((_) => const Stream.empty());
+
     // Mock fluttertoast channel
     const channel = MethodChannel('PonnamKarthik/fluttertoast');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -169,7 +174,13 @@ void main() {
 
     // Stub startDownload
     when(
-      () => mockDownloadsRepository.startDownload(any(), any(), any(), any()),
+      () => mockDownloadsRepository.startDownload(
+        any(),
+        title: any(named: 'title'),
+        surahTitle: any(named: 'surahTitle'),
+        reciterName: any(named: 'reciterName'),
+        reciterId: any(named: 'reciterId'),
+      ),
     ).thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -190,9 +201,10 @@ void main() {
     verify(
       () => mockDownloadsRepository.startDownload(
         surahUrl,
-        surahTitle,
-        reciterName,
-        reciterId,
+        title: surahTitle,
+        surahTitle: surahTitle,
+        reciterName: reciterName,
+        reciterId: reciterId,
       ),
     );
     // Drain any pending timers (e.g. Toast)
