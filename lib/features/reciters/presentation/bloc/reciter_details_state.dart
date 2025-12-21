@@ -11,6 +11,24 @@ class ReciterDetailsState extends Equatable {
     this.errorMessage,
   });
 
+  factory ReciterDetailsState.fromJson(Map<String, dynamic> json) {
+    return ReciterDetailsState(
+      status: ReciterDetailsStatus.values.byName(json['status'] as String),
+      surahList:
+          (json['surahList'] as List<dynamic>?)
+              ?.map((x) => SurahEntity.fromJson(x as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      selectedMoshaf: json['selectedMoshaf'] != null
+          ? MoshafEntity.fromJson(
+              json['selectedMoshaf'] as Map<String, dynamic>,
+            )
+          : null,
+      selectedSurahId: json['selectedSurahId'] as String?,
+      errorMessage: json['errorMessage'] as String?,
+    );
+  }
+
   final ReciterDetailsStatus status;
   final List<SurahEntity> surahList;
   final MoshafEntity? selectedMoshaf;

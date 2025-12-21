@@ -126,13 +126,54 @@ class ReciterDetailsBloc
 
   @override
   ReciterDetailsState? fromJson(Map<String, dynamic> json) {
-    // Reciter details should be loaded from repository, so we always start with initial state
-    return const ReciterDetailsState();
+    try {
+      final statusString = json['status'] as String?;
+      final ReciterDetailsStatus status = ReciterDetailsStatus.values
+          .firstWhere(
+            (e) => e.toString() == statusString,
+            orElse: () => ReciterDetailsStatus.initial,
+          );
+
+      final surahListJson = json['surahList'] as List<dynamic>?;
+      final List<SurahEntity> surahList =
+          surahListJson
+              ?.map((e) => SurahEntity.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+
+      final moshafJson = json['selectedMoshaf'] as Map<String, dynamic>?;
+      final MoshafEntity? selectedMoshaf = moshafJson != null
+          ? MoshafEntity.fromJson(moshafJson)
+          : null;
+
+      final selectedSurahId = json['selectedSurahId'] as String?;
+
+      // Only restore valid loaded state if we have data
+      if (status == ReciterDetailsStatus.loaded && surahList.isNotEmpty) {
+        return ReciterDetailsState(
+          status: status,
+          surahList: surahList,
+          selectedMoshaf: selectedMoshaf,
+          selectedSurahId: selectedSurahId,
+        );
+      }
+      return const ReciterDetailsState();
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
   Map<String, dynamic>? toJson(ReciterDetailsState state) {
-    // Don't persist complex reciter details data - will reload from repository
+    if (state.status == ReciterDetailsStatus.loaded &&
+        state.surahList.isNotEmpty) {
+      return {
+        'status': state.status.toString(),
+        'surahList': state.surahList.map((e) => e.toJson()).toList(),
+        'selectedMoshaf': state.selectedMoshaf?.toJson(),
+        'selectedSurahId': state.selectedSurahId,
+      };
+    }
     return null;
   }
 }

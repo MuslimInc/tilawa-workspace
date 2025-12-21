@@ -4,4 +4,3 @@ targets:
       json_serializable:
         options:
           explicit_to_json: true
-        enabled: true
