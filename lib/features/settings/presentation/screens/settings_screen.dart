@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -193,6 +194,19 @@ class SettingsScreen extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
+
+            // Route List (Dev)
+            if (kDebugMode) ...[
+              SizedBox(height: 32.h),
+              _SettingsTile(
+                icon: Icons.list_alt_rounded,
+                title: 'Route List (Dev)',
+                onTap: () => const RouteListRoute().push(context),
+                borderRadius: BorderRadius.circular(16.r),
+                showDivider: false,
+              ),
+            ],
+
             SizedBox(height: 32.h),
           ],
         ),

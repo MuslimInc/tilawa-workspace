@@ -43,3 +43,40 @@ class RefreshSurahDownloadStatus extends ReciterDetailsEvent {
   @override
   List<Object?> get props => [surahId, reciterName];
 }
+
+class DownloadAllSurahs extends ReciterDetailsEvent {
+  const DownloadAllSurahs({required this.reciter, required this.surahs});
+  final ReciterEntity reciter;
+  final List<SurahEntity> surahs;
+
+  @override
+  List<Object?> get props => [reciter, surahs];
+}
+
+class FilterSurahs extends ReciterDetailsEvent {
+  const FilterSurahs(this.query);
+  final String query;
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class CancelDownloadAllSurahs extends ReciterDetailsEvent {
+  const CancelDownloadAllSurahs(this.reciterName);
+  final String reciterName;
+
+  @override
+  List<Object?> get props => [reciterName];
+}
+
+class UpdateDownloadProgress extends ReciterDetailsEvent {
+  const UpdateDownloadProgress({
+    required this.progress,
+    required this.isDownloading,
+  });
+  final double progress;
+  final bool isDownloading;
+
+  @override
+  List<Object?> get props => [progress, isDownloading];
+}

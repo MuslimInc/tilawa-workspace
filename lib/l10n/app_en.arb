@@ -16,6 +16,10 @@
     "@loadingReciters": {
         "description": "Loading reciters message"
     },
+    "searchSurah": "Search surah...",
+    "@searchSurah": {
+        "description": "Search surah hint text"
+    },
     "noRecitersFound": "No reciters found",
     "@noRecitersFound": {
         "description": "No reciters found message"
@@ -747,5 +751,79 @@
     "restorePlaybackStateSubtitle": "Resume audio from where you left off",
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
+    },
+    "reciterRemovedFromFavorites": "Removed {reciterName} from favorites",
+    "@reciterRemovedFromFavorites": {
+        "description": "Message when a reciter is removed from favorites",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "The name of the reciter"
+            }
+        }
+    },
+    "undo": "Undo",
+    "@undo": {
+        "description": "Undo button text"
+    },
+    "athkar": "Athkar",
+    "@athkar": {
+        "description": "Athkar tab label"
+    },
+    "done": "Done",
+    "@done": {
+        "description": "Done label for thikr completion"
+    },
+    "reset": "Reset",
+    "@reset": {
+        "description": "Reset label for thikr"
+    },
+    "qibla": "Qibla",
+    "@qibla": {
+        "description": "Qibla tab label"
+    },
+    "qiblaDirection": "Qibla Direction",
+    "@qiblaDirection": {
+        "description": "Qibla direction screen title"
+    },
+    "locationServiceDisabled": "Location Service Disabled",
+    "@locationServiceDisabled": {
+        "description": "Error title when location service is disabled"
+    },
+    "enableLocationServiceMessage": "Please enable location services to find Qibla direction.",
+    "@enableLocationServiceMessage": {
+        "description": "Error message when location service is disabled"
+    },
+    "permissionDenied": "Permission Denied",
+    "@permissionDenied": {
+        "description": "Error title when location permission is denied"
+    },
+    "locationPermissionRequiredMessage": "Location permission is required to calculate the Qibla direction.",
+    "@locationPermissionRequiredMessage": {
+        "description": "Error message when location permission is denied"
+    },
+    "downloadAll": "Download All",
+    "@downloadAll": {
+        "description": "Button to download all surahs"
+    },
+    "downloadingAllSurahs": "Downloading all surahs...",
+    "@downloadingAllSurahs": {
+        "description": "Download progress message"
+    },
+    "completeDownloading": "Complete Downloading",
+    "@completeDownloading": {
+        "description": "Button text to complete downloading remaining surahs"
+    },
+    "tryAgain": "Try Again",
+    "@tryAgain": {
+        "description": "Try again button text"
+    },
+    "openSettings": "Open Settings",
+    "@openSettings": {
+        "description": "Open settings button text"
+    },
+    "unableToFindQibla": "Unable to find Qibla",
+    "@unableToFindQibla": {
+        "description": "Generic error title for Qibla"
     }
 }

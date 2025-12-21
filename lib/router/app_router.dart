@@ -10,9 +10,9 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
-    initialLocation: const HomeRoute().location,
-    restorationScopeId: 'router',
+    initialLocation: const SplashRoute().location,
     debugLogDiagnostics: true,
+    restorationScopeId: 'router',
     redirect: (context, state) {
       // For now, we'll handle auth redirects in the UI
       return null;

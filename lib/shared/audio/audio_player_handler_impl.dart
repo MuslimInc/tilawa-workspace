@@ -599,6 +599,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         final String formattedSurahId = surahId.padLeft(3, '0');
         final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
         final String surahName = await _getSurahName(surahNumber);
+        final String nameAr = SurahNames.getArabicSurahName(surahNumber);
+        final String nameEn = SurahNames.getEnglishSurahName(surahNumber);
 
         mediaItems.add(
           MediaItem(
@@ -607,6 +609,12 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
             album: moshaf.name,
             artist: reciterName ?? '', // Set reciter name if provided
             duration: const Duration(minutes: 5), // Default duration
+            extras: {
+              'nameAr': nameAr,
+              'nameEn': nameEn,
+              'surahNumber': surahNumber,
+              'formattedId': formattedSurahId,
+            },
           ),
         );
       }

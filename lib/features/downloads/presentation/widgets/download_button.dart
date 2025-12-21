@@ -6,6 +6,7 @@ import '../../../../core/extensions.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/repositories/downloads_repository.dart';
+import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
 
 /// Download button with independent state management
@@ -49,7 +50,10 @@ class DownloadButton extends StatelessWidget {
           url: url,
           reciterName: reciterName,
           reciterId: reciterId,
-          downloadsRepository: repo,
+          checkSurahDownloaded: getIt<CheckSurahDownloadedUseCase>(),
+          downloadSurah: getIt<DownloadSurahUseCase>(),
+          cancelDownload: CancelDownloadUseCase(repo),
+          observeDownloadProgress: ObserveDownloadProgressUseCase(repo),
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,
           initialProgress: initialProgress,

@@ -21,6 +21,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingReciters => 'جاري تحميل القراء...';
 
   @override
+  String get searchSurah => 'بحث عن سورة...';
+
+  @override
   String get noRecitersFound => 'لم يتم العثور على قراء';
 
   @override
@@ -543,4 +546,59 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get restorePlaybackStateSubtitle => 'استئناف الصوت من حيث توقفت';
+
+  @override
+  String reciterRemovedFromFavorites(String reciterName) {
+    return 'تمت إزالة $reciterName من المفضلة';
+  }
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get athkar => 'الأذكار';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get reset => 'إعادة ضبط';
+
+  @override
+  String get qibla => 'القبلة';
+
+  @override
+  String get qiblaDirection => 'اتجاه القبلة';
+
+  @override
+  String get locationServiceDisabled => 'خدمة الموقع معطلة';
+
+  @override
+  String get enableLocationServiceMessage =>
+      'يرجى تفعيل خدمات الموقع لتحديد اتجاه القبلة.';
+
+  @override
+  String get permissionDenied => 'تم رفض الإذن';
+
+  @override
+  String get locationPermissionRequiredMessage =>
+      'مطلوب إذن الموقع لحساب اتجاه القبلة.';
+
+  @override
+  String get downloadAll => 'تحميل الكل';
+
+  @override
+  String get downloadingAllSurahs => 'جاري تحميل جميع السور...';
+
+  @override
+  String get completeDownloading => 'استكمال التحميل';
+
+  @override
+  String get tryAgain => 'حاول مرة أخرى';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get unableToFindQibla => 'تعذر العثور على القبلة';
 }

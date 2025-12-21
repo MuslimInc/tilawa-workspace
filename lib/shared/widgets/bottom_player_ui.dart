@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -36,9 +37,8 @@ class BottomPlayerUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -82,26 +82,49 @@ class BottomPlayerUi extends StatelessWidget {
                     // Album Art
                     Hero(
                       tag: 'audio_player',
-                      child: Container(
-                        width: 48.w,
-                        height: 48.w,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.r),
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
+                      createRectTween: (begin, end) {
+                        return MaterialRectCenterArcTween(
+                          begin: begin,
+                          end: end,
+                        );
+                      },
+                      placeholderBuilder: (context, heroSize, child) {
+                        return Container(
+                          width: 48.w,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.r),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
+                          ),
+                        );
+                      },
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                          width: 48.w,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.r),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
+                          ),
+                          child: mediaItem.artUri != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  child: CachedNetworkImage(
+                                    imageUrl: mediaItem.artUri.toString(),
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, error, stackTrace) =>
+                                        _buildDefaultIcon(context),
+                                    placeholder: (context, url) =>
+                                        _buildDefaultIcon(context),
+                                  ),
+                                )
+                              : _buildDefaultIcon(context),
                         ),
-                        child: mediaItem.artUri != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12.r),
-                                child: Image.network(
-                                  mediaItem.artUri.toString(),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildDefaultIcon(context),
-                                ),
-                              )
-                            : _buildDefaultIcon(context),
                       ),
                     ),
 

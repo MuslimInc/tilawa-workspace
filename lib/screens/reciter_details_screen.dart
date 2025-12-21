@@ -29,13 +29,24 @@ class ReciterDetailsScreen extends StatefulWidget {
 }
 
 class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
+  late final TextEditingController _searchController;
+
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController(
+      text: context.read<ReciterDetailsBloc>().state.searchQuery,
+    );
     final MoshafEntity selectedMoshaf = widget.reciter.moshaf.first;
     context.read<ReciterDetailsBloc>().add(
       LoadSurahList(reciter: widget.reciter, moshaf: selectedMoshaf),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -44,339 +55,56 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     // so no need to listen to DownloadsBloc here and update surah list
     return Scaffold(
       body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+        buildWhen: (previous, current) {
+          return previous.status != current.status ||
+              previous.surahList != current.surahList ||
+              previous.selectedMoshaf != current.selectedMoshaf ||
+              previous.searchQuery != current.searchQuery ||
+              previous.errorMessage != current.errorMessage;
+        },
         builder: (context, state) {
-          return CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context),
-              if (widget.reciter.moshaf.length > 1)
-                SliverToBoxAdapter(child: _buildMoshafSelector(context, state)),
-              _buildContent(context, state),
-            ],
+          return BlocListener<ReciterDetailsBloc, ReciterDetailsState>(
+            listenWhen: (previous, current) =>
+                previous.searchQuery != current.searchQuery &&
+                current.searchQuery.isEmpty,
+            listener: (context, state) {
+              if (_searchController.text.isNotEmpty) {
+                _searchController.clear();
+              }
+            },
+            child: CustomScrollView(
+              restorationId: 'reciter_details_scroll_view',
+              slivers: [
+                _ReciterAppBar(reciter: widget.reciter),
+                SliverToBoxAdapter(
+                  child: _ReciterSearchField(controller: _searchController),
+                ),
+                if (widget.reciter.moshaf.length > 1)
+                  SliverToBoxAdapter(
+                    child: _MoshafSelector(
+                      reciter: widget.reciter,
+                      state: state,
+                    ),
+                  ),
+                if (state.status == ReciterDetailsStatus.loaded &&
+                    state.surahList.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: _DownloadAllButton(
+                      reciter: widget.reciter,
+                      parentState: state,
+                    ),
+                  ),
+                _ReciterDetailsContent(
+                  reciter: widget.reciter,
+                  state: state,
+                  onPlaySurah: (surah) => _playSurah(surah, state),
+                ),
+              ],
+            ),
           );
         },
       ),
       bottomNavigationBar: const BottomPlayerWidget(),
-    );
-  }
-
-  Widget _buildSliverAppBar(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return SliverAppBar(
-      expandedHeight: 200.h,
-      pinned: true,
-      stretch: true,
-      title: Text(
-        widget.reciter.name,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 18.sp,
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                theme.primaryColor,
-                theme.primaryColor.withValues(alpha: 0.7),
-              ],
-            ),
-          ),
-          child: Stack(
-            children: [
-              PositionedDirectional(
-                end: -50.w,
-                bottom: -50.h,
-                child: Icon(
-                  Icons.mic_external_on,
-                  size: 200.sp,
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black45],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMoshafSelector(BuildContext context, ReciterDetailsState state) {
-    // Remove duplicates and get unique moshaf list
-    final List<MoshafEntity> uniqueMoshaf = widget.reciter.moshaf
-        .toSet()
-        .toList();
-    final MoshafEntity selectedMoshaf =
-        state.selectedMoshaf ?? uniqueMoshaf.first;
-    final ThemeData theme = Theme.of(context);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      child: Material(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12.r),
-        child: ButtonTheme(
-          alignedDropdown: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<MoshafEntity>(
-              isExpanded: true,
-              dropdownColor: theme.cardColor,
-              borderRadius: BorderRadius.circular(12.r),
-              alignment: AlignmentDirectional.center,
-              icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
-              value: uniqueMoshaf.contains(selectedMoshaf)
-                  ? selectedMoshaf
-                  : uniqueMoshaf.first,
-              style: theme.textTheme.bodyMedium,
-              items: uniqueMoshaf.map((moshaf) {
-                return DropdownMenuItem<MoshafEntity>(
-                  value: moshaf,
-                  child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
-                );
-              }).toList(),
-              onChanged: (MoshafEntity? moshaf) {
-                if (moshaf != null) {
-                  context.read<ReciterDetailsBloc>().add(
-                    LoadSurahList(reciter: widget.reciter, moshaf: moshaf),
-                  );
-                }
-              },
-            ),
-          ),
-        ),
-      ), // End Material
-    );
-  }
-
-  Widget _buildContent(BuildContext context, ReciterDetailsState state) {
-    final ThemeData theme = Theme.of(context);
-    switch (state.status) {
-      case ReciterDetailsStatus.error:
-        return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  size: 64.sp,
-                  color: theme.colorScheme.error,
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  state.errorMessage ?? context.l10n.anErrorOccurred,
-                  style: TextStyle(fontSize: 16.sp),
-                ),
-                SizedBox(height: 16.h),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<ReciterDetailsBloc>().add(
-                      LoadSurahList(
-                        reciter: widget.reciter,
-                        moshaf: widget.reciter.moshaf.first,
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(context.l10n.retry),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 12.h,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      case ReciterDetailsStatus.loaded:
-        if (state.surahList.isEmpty) {
-          return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off_rounded,
-                    size: 64.sp,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    context.l10n.noSurahsAvailable,
-                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        // Removed wrapping BlocBuilder<AudioPlayerBloc> to prevent list-wide rebuilds
-        return SliverPadding(
-          padding: EdgeInsets.only(
-            top: 16.h,
-            left: 16.w,
-            right: 16.w,
-            bottom: 30.h, // Space for bottom player
-          ),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final SurahEntity surah = state.surahList[index];
-              return _SurahCard(
-                key: ValueKey('surah_${surah.id}'),
-                surah: surah,
-                index: index,
-                reciterName: widget.reciter.name,
-                reciterId: widget.reciter.id,
-                onTap: () => _playSurah(surah, state),
-              );
-            }, childCount: state.surahList.length),
-          ),
-        );
-      case ReciterDetailsStatus.initial:
-      case ReciterDetailsStatus.loading:
-        // Loading state - show skeleton
-        return SliverPadding(
-          padding: EdgeInsets.only(
-            top: 16.h,
-            left: 16.w,
-            right: 16.w,
-            bottom: 30.h,
-          ),
-          sliver: SliverSkeletonizer(
-            child: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildSkeletonSurahCard(),
-                childCount: 10, // Show 10 skeleton items
-              ),
-            ),
-          ),
-        );
-    }
-  }
-
-  Widget _buildSkeletonSurahCard() {
-    final ThemeData theme = Theme.of(context);
-    return RepaintBoundary(
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(12.w),
-          child: Row(
-            children: [
-              // Circle placeholder for index
-              Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '1',
-                    style: TextStyle(
-                      color: theme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.sp,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 16.w),
-              // Text placeholders
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Surah Name Placeholder',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'Reciter Name',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              // Button placeholders
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.download_outlined,
-                      color: Colors.grey,
-                      size: 20.sp,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: Colors.grey,
-                      size: 24.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -537,6 +265,445 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 }
 
+class _ReciterAppBar extends StatelessWidget {
+  const _ReciterAppBar({required this.reciter});
+  final ReciterEntity reciter;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 140.h,
+      pinned: true,
+      stretch: true,
+      backgroundColor: Theme.of(context).primaryColor,
+      centerTitle: true,
+      title: Text(
+        reciter.name,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 18.sp,
+        ),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withValues(alpha: 0.8),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.mic_none_outlined,
+              size: 80.sp,
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReciterSearchField extends StatelessWidget {
+  const _ReciterSearchField({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: context.l10n.searchSurah,
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: Theme.of(context).cardColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+          suffixIcon: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, child) {
+              if (value.text.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.clear_rounded),
+                onPressed: () {
+                  controller.clear();
+                  context.read<ReciterDetailsBloc>().add(
+                    const FilterSurahs(''),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        onChanged: (query) {
+          context.read<ReciterDetailsBloc>().add(FilterSurahs(query));
+        },
+      ),
+    );
+  }
+}
+
+class _MoshafSelector extends StatelessWidget {
+  const _MoshafSelector({required this.reciter, required this.state});
+  final ReciterEntity reciter;
+  final ReciterDetailsState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<MoshafEntity> uniqueMoshaf = reciter.moshaf.toSet().toList();
+    final MoshafEntity selectedMoshaf =
+        state.selectedMoshaf ?? uniqueMoshaf.first;
+    final ThemeData theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: Material(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12.r),
+        child: ButtonTheme(
+          alignedDropdown: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<MoshafEntity>(
+              isExpanded: true,
+              dropdownColor: theme.cardColor,
+              borderRadius: BorderRadius.circular(12.r),
+              alignment: AlignmentDirectional.center,
+              icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
+              value: uniqueMoshaf.contains(selectedMoshaf)
+                  ? selectedMoshaf
+                  : uniqueMoshaf.first,
+              style: theme.textTheme.bodyMedium,
+              items: uniqueMoshaf.map((moshaf) {
+                return DropdownMenuItem<MoshafEntity>(
+                  value: moshaf,
+                  child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
+                );
+              }).toList(),
+              onChanged: (MoshafEntity? moshaf) {
+                if (moshaf != null) {
+                  context.read<ReciterDetailsBloc>().add(
+                    LoadSurahList(reciter: reciter, moshaf: moshaf),
+                  );
+                }
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DownloadAllButton extends StatelessWidget {
+  const _DownloadAllButton({required this.reciter, required this.parentState});
+  final ReciterEntity reciter;
+  final ReciterDetailsState parentState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (parentState.surahList.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+        buildWhen: (previous, current) =>
+            previous.isDownloadingAll != current.isDownloadingAll ||
+            previous.downloadProgress != current.downloadProgress,
+        builder: (context, state) {
+          final bool isDownloading = state.isDownloadingAll;
+          final double progress = state.downloadProgress;
+
+          return ElevatedButton.icon(
+            onPressed: () {
+              if (isDownloading) {
+                context.read<ReciterDetailsBloc>().add(
+                  CancelDownloadAllSurahs(reciter.name),
+                );
+              } else {
+                context.read<ReciterDetailsBloc>().add(
+                  DownloadAllSurahs(
+                    reciter: reciter,
+                    surahs: state.filteredSurahs,
+                  ),
+                );
+                ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
+              }
+            },
+            icon: isDownloading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: CircularProgressIndicator(
+                      value: progress > 0 ? progress : null,
+                      strokeWidth: 2,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  )
+                : const Icon(Icons.download_rounded),
+            label: Text(
+              isDownloading
+                  ? '${context.l10n.cancel} ${(progress * 100).toInt()}%'
+                  : (progress > 0 && progress < 1.0)
+                  ? context.l10n.completeDownloading
+                  : context.l10n.downloadAll,
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).cardColor,
+              foregroundColor: Theme.of(context).primaryColor,
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: BorderSide(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ReciterDetailsContent extends StatelessWidget {
+  const _ReciterDetailsContent({
+    required this.reciter,
+    required this.state,
+    required this.onPlaySurah,
+  });
+  final ReciterEntity reciter;
+  final ReciterDetailsState state;
+  final Function(SurahEntity) onPlaySurah;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    switch (state.status) {
+      case ReciterDetailsStatus.error:
+        return SliverFillRemaining(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 64.sp,
+                  color: theme.colorScheme.error,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  state.errorMessage ?? context.l10n.anErrorOccurred,
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+                SizedBox(height: 16.h),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<ReciterDetailsBloc>().add(
+                      LoadSurahList(
+                        reciter: reciter,
+                        moshaf: reciter.moshaf.first,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(context.l10n.retry),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 12.h,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      case ReciterDetailsStatus.loaded:
+        if (state.surahList.isEmpty) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.music_off_rounded,
+                    size: 64.sp,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    context.l10n.noSurahsAvailable,
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final List<SurahEntity> filteredSurahs = state.filteredSurahs;
+        if (filteredSurahs.isEmpty) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off_rounded,
+                    size: 64.sp,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'No surahs found for "${state.searchQuery}"',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SliverPadding(
+          padding: EdgeInsets.only(
+            top: 16.h,
+            left: 16.w,
+            right: 16.w,
+            bottom: 30.h,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final SurahEntity surah = filteredSurahs[index];
+              return _SurahCard(
+                key: ValueKey('surah_${surah.id}'),
+                surah: surah,
+                index: index,
+                reciterName: reciter.name,
+                reciterId: reciter.id,
+                onTap: () => onPlaySurah(surah),
+              );
+            }, childCount: filteredSurahs.length),
+          ),
+        );
+      case ReciterDetailsStatus.initial:
+      case ReciterDetailsStatus.loading:
+        return SliverPadding(
+          padding: EdgeInsets.only(
+            top: 16.h,
+            left: 16.w,
+            right: 16.w,
+            bottom: 30.h,
+          ),
+          sliver: SliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => const _SkeletonSurahCard(),
+                childCount: 8,
+              ),
+            ),
+          ),
+        );
+    }
+  }
+}
+
+class _SkeletonSurahCard extends StatelessWidget {
+  const _SkeletonSurahCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(12.w),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 120.w,
+                    height: 16.h,
+                    decoration: BoxDecoration(
+                      color: theme.dividerColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    width: 80.w,
+                    height: 12.h,
+                    decoration: BoxDecoration(
+                      color: theme.dividerColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SurahCard extends StatelessWidget {
   const _SurahCard({
     required super.key,
@@ -556,23 +723,21 @@ class _SurahCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    // Select specific values to minimize rebuilds
-    final bool isPlaying = context.select<AudioPlayerBloc, bool>((bloc) {
-      final MediaItem? currentMediaItem = bloc.state.mediaItem;
-      final PlaybackState? playbackState = bloc.state.playbackState;
 
-      final bool isCurrentlyPlaying =
-          currentMediaItem?.id == surah.id ||
-          currentMediaItem?.extras?['originalId'] == surah.id;
+    // Combine selectors to reduce overhead and subscription count
+    final (bool isPlaying, bool isCurrentItem) = context
+        .select<AudioPlayerBloc, (bool, bool)>((bloc) {
+          final MediaItem? currentMediaItem = bloc.state.mediaItem;
+          final PlaybackState? playbackState = bloc.state.playbackState;
 
-      return isCurrentlyPlaying && (playbackState?.playing ?? false);
-    });
+          final bool isCurrent =
+              currentMediaItem?.id == surah.id ||
+              currentMediaItem?.extras?['originalId'] == surah.id;
 
-    final bool isCurrentItem = context.select<AudioPlayerBloc, bool>((bloc) {
-      final MediaItem? currentMediaItem = bloc.state.mediaItem;
-      return currentMediaItem?.id == surah.id ||
-          currentMediaItem?.extras?['originalId'] == surah.id;
-    });
+          final bool playing = isCurrent && (playbackState?.playing ?? false);
+
+          return (playing, isCurrent);
+        });
 
     return RepaintBoundary(
       child: Container(
@@ -626,7 +791,9 @@ class _SurahCard extends StatelessWidget {
                               size: 24.sp,
                             )
                           : Text(
-                              '${index + 1}',
+                              surah.formattedId.isNotEmpty
+                                  ? surah.formattedId
+                                  : '${index + 1}',
                               style: TextStyle(
                                 color: theme.primaryColor,
                                 fontWeight: FontWeight.bold,

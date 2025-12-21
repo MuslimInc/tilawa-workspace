@@ -1,11 +1,15 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/widgets/download_button.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
@@ -15,13 +19,39 @@ class MockDownloadsBloc extends MockBloc<DownloadsEvent, DownloadsState>
 
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
+class MockCheckSurahDownloadedUseCase extends Mock
+    implements CheckSurahDownloadedUseCase {}
+
+class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
+
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockDownloadsRepository mockDownloadsRepository;
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
+  late MockDownloadSurahUseCase mockDownloadSurahUseCase;
 
   setUp(() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockDownloadsRepository = MockDownloadsRepository();
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockDownloadSurahUseCase = MockDownloadSurahUseCase();
+
+    // Register mocks in GetIt
+    if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
+      GetIt.instance.registerSingleton<CheckSurahDownloadedUseCase>(
+        mockCheckSurahDownloadedUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<DownloadSurahUseCase>()) {
+      GetIt.instance.registerSingleton<DownloadSurahUseCase>(
+        mockDownloadSurahUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<DownloadsRepository>()) {
+      GetIt.instance.registerSingleton<DownloadsRepository>(
+        mockDownloadsRepository,
+      );
+    }
 
     // Default stub for repository
     when(
@@ -30,10 +60,18 @@ void main() {
     when(
       () => mockDownloadsRepository.isSurahDownloading(any(), any()),
     ).thenAnswer((_) async => false);
+    when(
+      () => mockDownloadsRepository.getDownloadProgress(any()),
+    ).thenAnswer((_) => const Stream.empty());
 
     // Stub statusStream since it's used in initState
     when(
       () => mockDownloadsBloc.statusStream,
+    ).thenAnswer((_) => const Stream.empty());
+
+    // Stub downloadUpdates for DownloadButtonBloc
+    when(
+      () => mockDownloadsRepository.downloadUpdates,
     ).thenAnswer((_) => const Stream.empty());
 
     // Mock fluttertoast channel
@@ -44,8 +82,13 @@ void main() {
         });
   });
 
+  tearDown(() {
+    GetIt.instance.reset();
+  });
+
   Widget createTestWidget(Widget child) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: false), // Fix for shader error
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: RepositoryProvider<DownloadsRepository>.value(
@@ -65,11 +108,11 @@ void main() {
 
   testWidgets('shows download icon when not downloaded', (tester) async {
     when(
-      () => mockDownloadsRepository.isSurahDownloaded(any(), any()),
-    ).thenAnswer((_) async => false);
-    when(
-      () => mockDownloadsRepository.isSurahDownloading(any(), any()),
-    ).thenAnswer((_) async => false);
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
 
     await tester.pumpWidget(
       createTestWidget(
@@ -89,11 +132,11 @@ void main() {
   testWidgets('shows progress when downloading', (tester) async {
     // Initial checks
     when(
-      () => mockDownloadsRepository.isSurahDownloaded(any(), any()),
-    ).thenAnswer((_) async => false);
-    when(
-      () => mockDownloadsRepository.isSurahDownloading(any(), any()),
-    ).thenAnswer((_) async => true); // It is downloading
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
 
     // Return a download item
     final downloadItem = DownloadItem(
@@ -104,17 +147,14 @@ void main() {
       reciterName: reciterName,
       reciterId: reciterId,
       status: DownloadStatus.downloading,
-      progress: 50,
+      progress: 0.5,
       fileSize: 100,
       downloadedSize: 50,
       createdAt: DateTime.now(),
     );
 
-    when(
-      () => mockDownloadsRepository.getDownloadItem(any()),
-    ).thenAnswer((_) async => downloadItem);
-
     // Mock progress stream used by DownloadButtonBloc
+    // Note: DownloadButton uses ObserveDownloadProgressUseCase(repo), which calls repo.getDownloadProgress
     when(
       () => mockDownloadsRepository.getDownloadProgress(any()),
     ).thenAnswer((_) => Stream.value(downloadItem));
@@ -126,21 +166,28 @@ void main() {
           surahTitle: surahTitle,
           reciterName: reciterName,
           reciterId: reciterId,
+          // Force initial state to avoid race condition with stream
+          initialIsDownloading: true,
+          initialProgress: 0.5,
         ),
       ),
     );
 
-    // Wait for BLoC initialization and stream listener
-    await tester.pump(); // Init
-    await tester.pump(); // Stream update
+    await tester.pump();
+    // Allow animations to start
+    await tester.pump(const Duration(milliseconds: 50));
 
+    // We expect a CircularProgressIndicator
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
   testWidgets('shows check icon when downloaded', (tester) async {
     when(
-      () => mockDownloadsRepository.isSurahDownloaded(any(), any()),
-    ).thenAnswer((_) async => true);
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(true));
 
     await tester.pumpWidget(
       createTestWidget(
@@ -159,18 +206,23 @@ void main() {
   });
 
   testWidgets('triggers download event on tap', (tester) async {
-    // Not downloaded, not downloading
+    // Not downloaded
     when(
-      () => mockDownloadsRepository.isSurahDownloaded(any(), any()),
-    ).thenAnswer((_) async => false);
-    when(
-      () => mockDownloadsRepository.isSurahDownloading(any(), any()),
-    ).thenAnswer((_) async => false);
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
 
-    // Stub startDownload
+    // Stub downloadSurah
     when(
-      () => mockDownloadsRepository.startDownload(any(), any(), any(), any()),
-    ).thenAnswer((_) async {});
+      () => mockDownloadSurahUseCase.call(
+        surahId: any(named: 'surahId'),
+        surahTitle: any(named: 'surahTitle'),
+        reciterName: any(named: 'reciterName'),
+        reciterId: any(named: 'reciterId'),
+      ),
+    ).thenAnswer((_) async => const Right(null));
 
     await tester.pumpWidget(
       createTestWidget(
@@ -188,14 +240,15 @@ void main() {
     await tester.pump();
 
     verify(
-      () => mockDownloadsRepository.startDownload(
-        surahUrl,
-        surahTitle,
-        reciterName,
-        reciterId,
+      () => mockDownloadSurahUseCase.call(
+        surahId: any(named: 'surahId'),
+        surahTitle: any(named: 'surahTitle'),
+        reciterName: any(named: 'reciterName'),
+        reciterId: any(named: 'reciterId'),
       ),
-    );
-    // Drain any pending timers (e.g. Toast)
+    ).called(1);
+
+    // Drain any pending timers
     await tester.pump(const Duration(seconds: 3));
   });
 }

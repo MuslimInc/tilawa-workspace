@@ -3,13 +3,19 @@ import 'package:go_router/go_router.dart';
 
 import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
+import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
+import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
+import '../features/qibla/presentation/screens/qibla_screen.dart';
+import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/reciter_details_loader.dart';
 import '../screens/reciter_details_screen.dart';
+import '../screens/route_list_screen.dart';
 import '../shared/widgets/expanded_player_screen.dart';
 
 part 'app_router_config.g.dart';
@@ -49,6 +55,8 @@ class ExpandedPlayerRoute extends GoRouteData with $ExpandedPlayerRoute {
     return CustomTransitionPage<void>(
       key: state.pageKey,
       child: const ExpandedPlayerScreen(),
+      opaque: false,
+      barrierColor: Colors.transparent,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
@@ -121,5 +129,73 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
         ),
       ),
     );
+  }
+}
+
+@TypedGoRoute<FavoritesRoute>(path: '/favorites')
+class FavoritesRoute extends GoRouteData with $FavoritesRoute {
+  const FavoritesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const FavoritesScreen();
+  }
+}
+
+@TypedGoRoute<AthkarCategoriesRoute>(path: '/athkar')
+class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
+  const AthkarCategoriesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AthkarCategoriesScreen();
+  }
+}
+
+@TypedGoRoute<AthkarDetailsRoute>(path: '/athkar/:categoryId')
+class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
+  const AthkarDetailsRoute({
+    required this.categoryId,
+    required this.categoryName,
+  });
+  final int categoryId;
+  final String categoryName;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AthkarDetailsScreen(
+      categoryId: categoryId,
+      categoryName: categoryName,
+    );
+  }
+}
+
+@TypedGoRoute<QiblaRoute>(path: '/qibla')
+class QiblaRoute extends GoRouteData with $QiblaRoute {
+  const QiblaRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const QiblaScreen();
+  }
+}
+
+@TypedGoRoute<RouteListRoute>(path: '/routes')
+class RouteListRoute extends GoRouteData with $RouteListRoute {
+  const RouteListRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RouteListScreen();
+  }
+}
+
+@TypedGoRoute<SplashRoute>(path: '/splash')
+class SplashRoute extends GoRouteData with $SplashRoute {
+  const SplashRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SplashScreen();
   }
 }

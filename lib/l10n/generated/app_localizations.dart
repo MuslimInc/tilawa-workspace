@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Loading reciters...'**
   String get loadingReciters;
 
+  /// Search surah hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search surah...'**
+  String get searchSurah;
+
   /// No reciters found message
   ///
   /// In en, this message translates to:
@@ -1105,6 +1111,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume audio from where you left off'**
   String get restorePlaybackStateSubtitle;
+
+  /// Message when a reciter is removed from favorites
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {reciterName} from favorites'**
+  String reciterRemovedFromFavorites(String reciterName);
+
+  /// Undo button text
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// Athkar tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar'**
+  String get athkar;
+
+  /// Done label for thikr completion
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// Reset label for thikr
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// Qibla tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get qibla;
+
+  /// Qibla direction screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Direction'**
+  String get qiblaDirection;
+
+  /// Error title when location service is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Location Service Disabled'**
+  String get locationServiceDisabled;
+
+  /// Error message when location service is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services to find Qibla direction.'**
+  String get enableLocationServiceMessage;
+
+  /// Error title when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Denied'**
+  String get permissionDenied;
+
+  /// Error message when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required to calculate the Qibla direction.'**
+  String get locationPermissionRequiredMessage;
+
+  /// Button to download all surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Download All'**
+  String get downloadAll;
+
+  /// Download progress message
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading all surahs...'**
+  String get downloadingAllSurahs;
+
+  /// Button text to complete downloading remaining surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Downloading'**
+  String get completeDownloading;
+
+  /// Try again button text
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// Open settings button text
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// Generic error title for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to find Qibla'**
+  String get unableToFindQibla;
 }
 
 class _AppLocalizationsDelegate

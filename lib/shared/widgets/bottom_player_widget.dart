@@ -4,6 +4,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -84,47 +85,20 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                 duration: Duration.zero,
               );
 
-          return Dismissible(
-            key: ValueKey('bottom_player_${mediaItem.id}'),
-            direction: DismissDirection.down,
-            onDismissed: (direction) {
-              setState(() {
-                _manuallyDismissed = true;
-              });
-              context.read<AudioPlayerBloc>().add(
-                const AudioPlayerEvent.stopAudio(),
-              );
-            },
-            child: BottomPlayerUi(
-              mediaItem: mediaItem,
-              positionData: position,
-              isPlaying: state.isPlaying,
-              canGoPrevious: state.canGoPrevious,
-              canGoNext: state.canGoNext,
-              onPlayPause: () {
-                if (state.isPlaying) {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.pauseAudio(),
-                  );
-                } else {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.playAudio(),
-                  );
-                }
-              },
-              onPrevious: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToPrevious(),
-                );
-              },
-              onNext: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToNext(),
-                );
-              },
-              onClose: () {
-                // Provide haptic feedback for consistency
-                HapticFeedback.lightImpact();
+          return Container(
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
+              border: Border(
+                top: BorderSide(color: Theme.of(context).colorScheme.surface),
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+            ),
+            child: Dismissible(
+              key: ValueKey('bottom_player_${mediaItem.id}'),
+              direction: DismissDirection.down,
+              onDismissed: (direction) {
                 setState(() {
                   _manuallyDismissed = true;
                 });
@@ -132,7 +106,48 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                   const AudioPlayerEvent.stopAudio(),
                 );
               },
-              onTap: () => const ExpandedPlayerRoute().push(context),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+                child: BottomPlayerUi(
+                  mediaItem: mediaItem,
+                  positionData: position,
+                  isPlaying: state.isPlaying,
+                  canGoPrevious: state.canGoPrevious,
+                  canGoNext: state.canGoNext,
+                  onPlayPause: () {
+                    if (state.isPlaying) {
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.pauseAudio(),
+                      );
+                    } else {
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.playAudio(),
+                      );
+                    }
+                  },
+                  onPrevious: () {
+                    context.read<AudioPlayerBloc>().add(
+                      const AudioPlayerEvent.skipToPrevious(),
+                    );
+                  },
+                  onNext: () {
+                    context.read<AudioPlayerBloc>().add(
+                      const AudioPlayerEvent.skipToNext(),
+                    );
+                  },
+                  onClose: () {
+                    // Provide haptic feedback for consistency
+                    HapticFeedback.lightImpact();
+                    setState(() {
+                      _manuallyDismissed = true;
+                    });
+                    context.read<AudioPlayerBloc>().add(
+                      const AudioPlayerEvent.stopAudio(),
+                    );
+                  },
+                  onTap: () => const ExpandedPlayerRoute().push(context),
+                ),
+              ),
             ),
           );
         },

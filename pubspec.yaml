@@ -61,6 +61,10 @@ dependencies:
   google_fonts: ^6.3.3
   hive_ce: ^2.16.0
   coverage: ^1.15.0
+  qibla:
+    path: ./packages/qibla
+  geolocator: ^14.0.2
+  plugin_platform_interface: ^2.1.8
 
 dev_dependencies:
   bloc_lint: ^0.3.5
@@ -83,3 +87,6 @@ flutter:
   assets:
     - assets/images/
     - assets/json/
+    - assets/data/
+    - assets/images/qibla_dial.png
+    - assets/images/qibla_needle.png

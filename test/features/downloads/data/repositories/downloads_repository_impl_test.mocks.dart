@@ -3,18 +3,26 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart'
-    as _i2;
+    as _i3;
+import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart'
+    as _i8;
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart'
     as _i6;
+import 'package:muzakri/features/downloads/data/services/download_path_resolver.dart'
+    as _i9;
+import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart'
+    as _i11;
+import 'package:muzakri/features/downloads/data/services/download_validator.dart'
+    as _i10;
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
-    as _i4;
+    as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -31,82 +39,105 @@ import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
+class _FakeDownloadItem_0 extends _i1.SmartFake implements _i2.DownloadItem {
+  _FakeDownloadItem_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [DownloadsLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadsLocalDataSource extends _i1.Mock
-    implements _i2.DownloadsLocalDataSource {
+    implements _i3.DownloadsLocalDataSource {
   MockDownloadsLocalDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<List<_i4.DownloadItem>> getDownloads() =>
+  _i4.Future<List<_i2.DownloadItem>> getDownloads() =>
       (super.noSuchMethod(
             Invocation.method(#getDownloads, []),
-            returnValue: _i3.Future<List<_i4.DownloadItem>>.value(
-              <_i4.DownloadItem>[],
+            returnValue: _i4.Future<List<_i2.DownloadItem>>.value(
+              <_i2.DownloadItem>[],
             ),
           )
-          as _i3.Future<List<_i4.DownloadItem>>);
+          as _i4.Future<List<_i2.DownloadItem>>);
 
   @override
-  _i3.Future<void> saveDownloads(List<_i4.DownloadItem>? downloads) =>
+  _i4.Future<void> saveDownloads(List<_i2.DownloadItem>? downloads) =>
       (super.noSuchMethod(
             Invocation.method(#saveDownloads, [downloads]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> addDownload(_i4.DownloadItem? download) =>
+  _i4.Future<void> addDownload(_i2.DownloadItem? download) =>
       (super.noSuchMethod(
             Invocation.method(#addDownload, [download]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> updateDownload(_i4.DownloadItem? download) =>
+  _i4.Future<void> addDownloads(List<_i2.DownloadItem>? downloads) =>
+      (super.noSuchMethod(
+            Invocation.method(#addDownloads, [downloads]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> updateDownload(_i2.DownloadItem? download) =>
       (super.noSuchMethod(
             Invocation.method(#updateDownload, [download]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> deleteDownload(String? id) =>
+  _i4.Future<void> updateDownloads(List<_i2.DownloadItem>? downloads) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateDownloads, [downloads]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> deleteDownload(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteDownload, [id]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> clearAllDownloads() =>
+  _i4.Future<void> clearAllDownloads() =>
       (super.noSuchMethod(
             Invocation.method(#clearAllDownloads, []),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<String> getDownloadsDirectory() =>
+  _i4.Future<String> getDownloadsDirectory() =>
       (super.noSuchMethod(
             Invocation.method(#getDownloadsDirectory, []),
-            returnValue: _i3.Future<String>.value(
+            returnValue: _i4.Future<String>.value(
               _i5.dummyValue<String>(
                 this,
                 Invocation.method(#getDownloadsDirectory, []),
               ),
             ),
           )
-          as _i3.Future<String>);
+          as _i4.Future<String>);
 
   @override
   bool isFileExists(String? filePath) =>
@@ -117,13 +148,13 @@ class MockDownloadsLocalDataSource extends _i1.Mock
           as bool);
 
   @override
-  _i3.Future<void> deleteFile(String? filePath) =>
+  _i4.Future<void> deleteFile(String? filePath) =>
       (super.noSuchMethod(
             Invocation.method(#deleteFile, [filePath]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [DownloadNotificationService].
@@ -136,21 +167,21 @@ class MockDownloadNotificationService extends _i1.Mock
   }
 
   @override
-  _i3.Future<void> initialize() =>
+  _i4.Future<void> initialize() =>
       (super.noSuchMethod(
             Invocation.method(#initialize, []),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> showDownloadProgress({
+  _i4.Future<void> showDownloadProgress({
     required String? downloadId,
     required String? title,
     required String? reciterName,
     required int? progress,
-    required _i4.DownloadStatus? status,
+    required _i2.DownloadStatus? status,
     String? pendingMessage,
     String? progressMessage,
     String? completeMessage,
@@ -168,37 +199,189 @@ class MockDownloadNotificationService extends _i1.Mock
               #completeMessage: completeMessage,
               #failedMessage: failedMessage,
             }),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> cancelNotification(String? downloadId) =>
+  _i4.Future<void> showBatchDownloadProgress({
+    required String? batchId,
+    required String? title,
+    required int? progress,
+    required int? completedCount,
+    required int? totalCount,
+    required _i2.DownloadStatus? status,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#showBatchDownloadProgress, [], {
+              #batchId: batchId,
+              #title: title,
+              #progress: progress,
+              #completedCount: completedCount,
+              #totalCount: totalCount,
+              #status: status,
+            }),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> cancelNotification(String? downloadId) =>
       (super.noSuchMethod(
             Invocation.method(#cancelNotification, [downloadId]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> cancelAllNotifications() =>
+  _i4.Future<void> cancelAllNotifications() =>
       (super.noSuchMethod(
             Invocation.method(#cancelAllNotifications, []),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<void> handleNotificationResponse(
+  _i4.Future<void> handleNotificationResponse(
     _i7.NotificationResponse? response,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#handleNotificationResponse, [response]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
+}
+
+/// A class which mocks [BatchDownloadManager].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBatchDownloadManager extends _i1.Mock
+    implements _i8.BatchDownloadManager {
+  MockBatchDownloadManager() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  void startBatch({
+    required String? batchId,
+    required String? title,
+    required List<String>? downloadIds,
+  }) => super.noSuchMethod(
+    Invocation.method(#startBatch, [], {
+      #batchId: batchId,
+      #title: title,
+      #downloadIds: downloadIds,
+    }),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i4.Future<void> cancelBatch(String? batchId) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelBatch, [batchId]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+}
+
+/// A class which mocks [DownloadPathResolver].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadPathResolver extends _i1.Mock
+    implements _i9.DownloadPathResolver {
+  MockDownloadPathResolver() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<String> getDownloadsDir() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDownloadsDir, []),
+            returnValue: _i4.Future<String>.value(
+              _i5.dummyValue<String>(
+                this,
+                Invocation.method(#getDownloadsDir, []),
+              ),
+            ),
+          )
+          as _i4.Future<String>);
+
+  @override
+  _i2.DownloadItem resolveDownloadPath(
+    _i2.DownloadItem? item,
+    String? downloadsDir,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#resolveDownloadPath, [item, downloadsDir]),
+            returnValue: _FakeDownloadItem_0(
+              this,
+              Invocation.method(#resolveDownloadPath, [item, downloadsDir]),
+            ),
+          )
+          as _i2.DownloadItem);
+}
+
+/// A class which mocks [DownloadValidator].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadValidator extends _i1.Mock implements _i10.DownloadValidator {
+  MockDownloadValidator() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<bool> verifyFileExists(String? filePath, {int? maxRetries = 1}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #verifyFileExists,
+              [filePath],
+              {#maxRetries: maxRetries},
+            ),
+            returnValue: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> verifyFileSize(String? filePath, int? expectedSize) =>
+      (super.noSuchMethod(
+            Invocation.method(#verifyFileSize, [filePath, expectedSize]),
+            returnValue: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<int?> getActualFileSize(String? filePath) =>
+      (super.noSuchMethod(
+            Invocation.method(#getActualFileSize, [filePath]),
+            returnValue: _i4.Future<int?>.value(),
+          )
+          as _i4.Future<int?>);
+}
+
+/// A class which mocks [DownloadStatusSynchronizer].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadStatusSynchronizer extends _i1.Mock
+    implements _i11.DownloadStatusSynchronizer {
+  MockDownloadStatusSynchronizer() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<List<_i2.DownloadItem>> syncDownloadStatuses(
+    List<_i2.DownloadItem>? downloads,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#syncDownloadStatuses, [downloads]),
+            returnValue: _i4.Future<List<_i2.DownloadItem>>.value(
+              <_i2.DownloadItem>[],
+            ),
+          )
+          as _i4.Future<List<_i2.DownloadItem>>);
 }

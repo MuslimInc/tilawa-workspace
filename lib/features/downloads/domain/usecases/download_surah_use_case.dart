@@ -3,13 +3,13 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../repositories/downloads_repository.dart';
+import '../repositories/single_download_repository.dart';
 
 @Singleton()
 class DownloadSurahUseCase {
   const DownloadSurahUseCase(this._repository);
 
-  final DownloadsRepository _repository;
+  final SingleDownloadRepository _repository;
 
   ResultFuture<void> call({
     required String surahId,
@@ -20,9 +20,10 @@ class DownloadSurahUseCase {
     try {
       await _repository.startDownload(
         surahId,
-        surahTitle,
-        reciterName,
-        reciterId,
+        title: surahTitle,
+        reciterName: reciterName,
+        reciterId: reciterId,
+        surahTitle: surahTitle,
       );
       return const Right(null);
     } catch (e) {

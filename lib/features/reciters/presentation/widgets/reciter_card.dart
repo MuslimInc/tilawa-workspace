@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
+import '../cubit/favorites_cubit.dart';
+import '../cubit/favorites_state.dart';
 
 class ReciterCard extends StatelessWidget {
   const ReciterCard({super.key, required this.reciter});
@@ -21,9 +24,9 @@ class ReciterCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
@@ -47,19 +50,32 @@ class ReciterCard extends StatelessWidget {
                 _buildAvatar(context),
                 SizedBox(width: 14.w),
                 Expanded(child: _buildInfo(context)),
-                Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.05),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.chevron_right_rounded,
-                    size:
-                        20, // Use static size if possible for const, otherwise leave dynamic
-                    color: Color(
-                      0xB22196F3,
-                    ), // Approximation or leave dynamic if theme dependent
+                GestureDetector(
+                  onTap: () {
+                    context.read<FavoritesCubit>().toggleFavorite(reciter);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, state) {
+                        final bool isFavorite =
+                            state is FavoritesLoaded &&
+                            state.favoriteIds.contains(reciter.id);
+                        return Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          size: 20.sp,
+                          color: isFavorite
+                              ? Colors.red
+                              : theme.colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -84,13 +100,6 @@ class ReciterCard extends StatelessWidget {
             Theme.of(context).primaryColor,
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Center(
         child: Text(
@@ -125,32 +134,38 @@ class ReciterCard extends StatelessWidget {
         SizedBox(height: 6.h),
         Row(
           children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.library_music_rounded,
-                    size: 12,
-                    color: Colors.blue, // Approximation or leave dynamic
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.recitationsAvailable(reciter.moshaf.length),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11.sp,
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.library_music_rounded,
+                      size: 12,
+                      color: Colors.blue,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 4.w),
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.recitationsAvailable(reciter.moshaf.length),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11.sp,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

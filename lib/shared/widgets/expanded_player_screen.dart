@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import '../../core/extensions.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
-import '../../main.dart';
 import '../models/position_data.dart';
 import '../models/queue_state.dart';
 import 'seek_bar.dart';
@@ -109,20 +109,24 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                 statusBarIconBrightness:
                     Brightness.light, // Android: White icons
                 statusBarBrightness: Brightness.dark, // iOS: White icons
+                systemNavigationBarColor: Colors.black, // Navigation bar color
+                systemNavigationBarIconBrightness: Brightness.light,
               ),
               child: Scaffold(
                 backgroundColor:
                     Colors.transparent, // Important for drag visual
+                resizeToAvoidBottomInset: false,
                 body: Stack(
                   children: [
                     // 1. Background Image with Blur
                     if (mediaItem.artUri != null)
                       Positioned.fill(
-                        child: Image.network(
-                          mediaItem.artUri.toString(),
+                        child: CachedNetworkImage(
+                          imageUrl: mediaItem.artUri.toString(),
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
+                          errorWidget: (_, _, _) =>
                               Container(color: Colors.grey),
+                          placeholder: (_, _) => Container(color: Colors.grey),
                         ),
                       )
                     else
@@ -174,35 +178,45 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                             child: Center(
                               child: Hero(
                                 tag: 'audio_player',
-                                child: Container(
-                                  width: 280.w,
-                                  height: 280.w,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24.r),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.3,
+                                createRectTween: (begin, end) {
+                                  return MaterialRectCenterArcTween(
+                                    begin: begin,
+                                    end: end,
+                                  );
+                                },
+                                child: Material(
+                                  type: MaterialType.transparency,
+                                  child: Container(
+                                    width: 280.w,
+                                    height: 280.w,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(24.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                          blurRadius: 30.r,
+                                          offset: const Offset(0, 15),
                                         ),
-                                        blurRadius: 30.r,
-                                        offset: const Offset(0, 15),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(24.r),
-                                    child: mediaItem.artUri != null
-                                        ? Image.network(
-                                            mediaItem.artUri.toString(),
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return _buildDefaultArt(
-                                                    context,
-                                                  );
-                                                },
-                                          )
-                                        : _buildDefaultArt(context),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(24.r),
+                                      child: mediaItem.artUri != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: mediaItem.artUri
+                                                  .toString(),
+                                              fit: BoxFit.cover,
+                                              errorWidget:
+                                                  (context, error, stackTrace) {
+                                                    return _buildDefaultArt(
+                                                      context,
+                                                    );
+                                                  },
+                                            )
+                                          : _buildDefaultArt(context),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -353,7 +367,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                   max: 1.0,
                   value: state.volume,
                   onChanged: (newVolume) {
-                    logger.d('Volume changed to: $newVolume');
+                    // logger.d('Volume changed to: $newVolume');
                     context.read<AudioPlayerBloc>().add(
                       AudioPlayerEvent.setVolume(newVolume),
                     );

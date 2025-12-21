@@ -108,12 +108,12 @@ void main() {
           url: anyNamed('url'),
           savedDir: anyNamed('savedDir'),
           fileName: anyNamed('fileName'),
+          headers: anyNamed('headers'),
           showNotification: anyNamed('showNotification'),
           openFileFromNotification: anyNamed('openFileFromNotification'),
-          title: anyNamed('title'),
-          headers: anyNamed('headers'),
           requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
           saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          title: anyNamed('title'),
         ),
       ).thenAnswer((_) async => 'uuid_4');
 
@@ -132,6 +132,7 @@ void main() {
           savedDir: anyNamed('savedDir'),
           fileName: anyNamed('fileName'),
           headers: anyNamed('headers'),
+          showNotification: anyNamed('showNotification'),
           openFileFromNotification: false,
           requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
           saveInPublicStorage: anyNamed('saveInPublicStorage'),

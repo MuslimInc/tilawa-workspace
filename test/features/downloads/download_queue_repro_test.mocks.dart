@@ -76,6 +76,29 @@ class MockDownloadNotificationService extends _i1.Mock
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> showBatchDownloadProgress({
+    required String? batchId,
+    required String? title,
+    required int? progress,
+    required int? completedCount,
+    required int? totalCount,
+    required _i4.DownloadStatus? status,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#showBatchDownloadProgress, [], {
+              #batchId: batchId,
+              #title: title,
+              #progress: progress,
+              #completedCount: completedCount,
+              #totalCount: totalCount,
+              #status: status,
+            }),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<void> cancelNotification(String? downloadId) =>
       (super.noSuchMethod(
             Invocation.method(#cancelNotification, [downloadId]),

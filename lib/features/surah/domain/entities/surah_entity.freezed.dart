@@ -11,10 +11,11 @@ part of 'surah_entity.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$SurahEntity {
 
- MediaItem get mediaItem; bool get isDownloaded; bool get isDownloading; double get downloadProgress;// 0.0 to 1.0
+@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem get mediaItem; bool get isDownloaded; bool get isDownloading; double get downloadProgress;// 0.0 to 1.0
  String? get downloadId;
 /// Create a copy of SurahEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -22,6 +23,8 @@ mixin _$SurahEntity {
 @pragma('vm:prefer-inline')
 $SurahEntityCopyWith<SurahEntity> get copyWith => _$SurahEntityCopyWithImpl<SurahEntity>(this as SurahEntity, _$identity);
 
+  /// Serializes this SurahEntity to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -29,7 +32,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is SurahEntity&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,mediaItem,isDownloaded,isDownloading,downloadProgress,downloadId);
 
@@ -46,7 +49,7 @@ abstract mixin class $SurahEntityCopyWith<$Res>  {
   factory $SurahEntityCopyWith(SurahEntity value, $Res Function(SurahEntity) _then) = _$SurahEntityCopyWithImpl;
 @useResult
 $Res call({
- MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
+@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
 });
 
 
@@ -155,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SurahEntity() when $default != null:
 return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
@@ -176,7 +179,7 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)  $default,) {final _that = this;
 switch (_that) {
 case _SurahEntity():
 return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
@@ -196,7 +199,7 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,) {final _that = this;
 switch (_that) {
 case _SurahEntity() when $default != null:
 return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
@@ -208,13 +211,13 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _SurahEntity extends SurahEntity {
-  const _SurahEntity({required this.mediaItem, this.isDownloaded = false, this.isDownloading = false, this.downloadProgress = 0.0, this.downloadId}): super._();
-  
+  const _SurahEntity({@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) required this.mediaItem, this.isDownloaded = false, this.isDownloading = false, this.downloadProgress = 0.0, this.downloadId}): super._();
+  factory _SurahEntity.fromJson(Map<String, dynamic> json) => _$SurahEntityFromJson(json);
 
-@override final  MediaItem mediaItem;
+@override@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) final  MediaItem mediaItem;
 @override@JsonKey() final  bool isDownloaded;
 @override@JsonKey() final  bool isDownloading;
 @override@JsonKey() final  double downloadProgress;
@@ -227,14 +230,17 @@ class _SurahEntity extends SurahEntity {
 @pragma('vm:prefer-inline')
 _$SurahEntityCopyWith<_SurahEntity> get copyWith => __$SurahEntityCopyWithImpl<_SurahEntity>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$SurahEntityToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _SurahEntity&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,mediaItem,isDownloaded,isDownloading,downloadProgress,downloadId);
 
@@ -251,7 +257,7 @@ abstract mixin class _$SurahEntityCopyWith<$Res> implements $SurahEntityCopyWith
   factory _$SurahEntityCopyWith(_SurahEntity value, $Res Function(_SurahEntity) _then) = __$SurahEntityCopyWithImpl;
 @override @useResult
 $Res call({
- MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
+@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
 });
 
 

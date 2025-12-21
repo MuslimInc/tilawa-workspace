@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/assertions.dart';
@@ -13,6 +14,7 @@ import 'package:muzakri/core/entities/moshaf_entity.dart';
 import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
@@ -39,15 +41,29 @@ class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
+class MockCheckSurahDownloadedUseCase extends Mock
+    implements CheckSurahDownloadedUseCase {}
+
+class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
+
+class MockCancelDownloadUseCase extends Mock implements CancelDownloadUseCase {}
+
+class MockObserveDownloadProgressUseCase extends Mock
+    implements ObserveDownloadProgressUseCase {}
+
 void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockSettingsCubit mockSettingsCubit;
 
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
+  late MockDownloadSurahUseCase mockDownloadSurahUseCase;
+  late MockCancelDownloadUseCase mockCancelDownloadUseCase;
+  late MockObserveDownloadProgressUseCase mockObserveDownloadProgressUseCase;
+
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
-    // Removed ReciterDetailsEvent.started fallback as it doesn't exist
 
     // Setup GetIt
     GetIt.instance.registerSingleton<DownloadsRepository>(
@@ -74,6 +90,44 @@ void main() {
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockSettingsCubit = MockSettingsCubit();
 
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockDownloadSurahUseCase = MockDownloadSurahUseCase();
+    mockCancelDownloadUseCase = MockCancelDownloadUseCase();
+    mockObserveDownloadProgressUseCase = MockObserveDownloadProgressUseCase();
+
+    // Register UseCases in GetIt
+    if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
+      GetIt.instance.registerSingleton<CheckSurahDownloadedUseCase>(
+        mockCheckSurahDownloadedUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<DownloadSurahUseCase>()) {
+      GetIt.instance.registerSingleton<DownloadSurahUseCase>(
+        mockDownloadSurahUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<CancelDownloadUseCase>()) {
+      GetIt.instance.registerSingleton<CancelDownloadUseCase>(
+        mockCancelDownloadUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<ObserveDownloadProgressUseCase>()) {
+      GetIt.instance.registerSingleton<ObserveDownloadProgressUseCase>(
+        mockObserveDownloadProgressUseCase,
+      );
+    }
+
+    when(
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
+
+    when(
+      () => mockObserveDownloadProgressUseCase.call(any()),
+    ).thenAnswer((_) => const Stream.empty());
+
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
     // Stub MockDownloadsRepository (GetIt instance)
@@ -87,6 +141,10 @@ void main() {
     ).thenAnswer((_) async => false);
     when(
       () => mockDownloadsRepository.getDownloadProgress(any()),
+    ).thenAnswer((_) => const Stream.empty());
+
+    when(
+      () => mockDownloadsRepository.downloadUpdates,
     ).thenAnswer((_) => const Stream.empty());
 
     when(
@@ -148,7 +206,7 @@ void main() {
     ),
   ];
 
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({String? restorationScopeId}) {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<DownloadsRepository>(
@@ -162,15 +220,17 @@ void main() {
           BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
-        child: const MaterialApp(
-          localizationsDelegates: [
+        child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          restorationScopeId: restorationScopeId,
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [Locale('en')],
-          home: ScreenUtilPlusInit(
+          supportedLocales: const [Locale('en')],
+          home: const ScreenUtilPlusInit(
             designSize: Size(375, 812),
             child: ReciterDetailsScreen(reciter: testReciter),
           ),
@@ -265,5 +325,76 @@ void main() {
 
     // Verify event added (MockBloc usually doesn't track method calls like Mockito unless strict,
     // but bloc_test uses whenListen or verify if needed. Here we just ensure no crash)
+  });
+
+  testWidgets('ReciterDetailsScreen restores scroll position', (
+    WidgetTester tester,
+  ) async {
+    // Generate a long list of surahs to enable scrolling
+    final List<SurahEntity> longSurahList = List.generate(20, (index) {
+      return SurahEntity(
+        mediaItem: MediaItem(
+          id: 'surah_$index',
+          title: 'Surah $index',
+          artist: 'Test Reciter',
+        ),
+      );
+    });
+
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: longSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(
+      createWidgetUnderTest(restorationScopeId: 'test_app'),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify initial state
+    expect(find.text('Surah 0'), findsOneWidget);
+
+    // Scroll to the bottom
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    // Verify we scrolled (some items from top should be gone or offset changed)
+    // Note: In detailed tests, we might check precise scroll offset, but simply
+    // verifying a different item is visible is often enough.
+    // However, for restoration test, checking the scroll offset is better.
+
+    final ScrollController scrollController = PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView)),
+    );
+    final double initialOffset = scrollController.offset;
+    expect(initialOffset, greaterThan(0));
+
+    // Simulate state restoration (terminate and restart app)
+    await tester.restartAndRestore();
+    await tester.pumpAndSettle();
+
+    // Re-verify content loaded (mock state persists across widget rebuilds in test context)
+    // But we need to ensure the bloc still returns the correct state if the widget re-subscribes
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: longSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+
+    // Get the new scroll controller
+    final ScrollController newScrollController = PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView)),
+    );
+
+    expect(newScrollController.offset, equals(initialOffset));
   });
 }

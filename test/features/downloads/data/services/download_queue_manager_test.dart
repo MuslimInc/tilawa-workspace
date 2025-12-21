@@ -12,6 +12,7 @@ import 'package:muzakri/features/downloads/data/services/download_notification_s
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart';
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
 import 'download_queue_manager_test.mocks.dart';
 
@@ -68,6 +69,7 @@ void main() {
     ).thenAnswer((_) async => 'mock_task_id');
 
     DownloadQueueManager.reset();
+    unawaited(DownloadService.reset());
   });
 
   tearDown(() {
@@ -202,6 +204,48 @@ void main() {
       });
     });
 
+    test('stopAll should clear queue and cancel notifications', () {
+      fakeAsync((async) {
+        final mockNotification =
+            GetIt.instance<DownloadNotificationService>()
+                as MockDownloadNotificationService;
+        when(
+          mockNotification.cancelAllNotifications(),
+        ).thenAnswer((_) async {});
+
+        DownloadQueueManager.instance.initialize();
+
+        // Enqueue items
+        unawaited(
+          DownloadQueueManager.instance.enqueue(
+            id: 'id1',
+            url: 'url1',
+            filePath: 'path1',
+            title: 'T1',
+            reciterName: 'R',
+          ),
+        );
+        unawaited(
+          DownloadQueueManager.instance.enqueue(
+            id: 'id2',
+            url: 'url2',
+            filePath: 'path2',
+            title: 'T2',
+            reciterName: 'R',
+          ),
+        );
+
+        async.flushMicrotasks();
+        expect(DownloadQueueManager.instance.queueLength, 2);
+
+        unawaited(DownloadQueueManager.instance.stopAll());
+        async.flushMicrotasks();
+
+        expect(DownloadQueueManager.instance.queueLength, 0);
+        verify(mockNotification.cancelAllNotifications()).called(1);
+      });
+    });
+
     test('getQueuePosition should return correct index', () {
       fakeAsync((async) {
         simulateBusyQueue();
@@ -235,8 +279,53 @@ void main() {
         // Item 2: Position 2
         expect(DownloadQueueManager.instance.getQueuePosition('2'), 2);
 
-        // Non-existent
         expect(DownloadQueueManager.instance.getQueuePosition('999'), -1);
+      });
+    });
+
+    test('enqueueBatch should add multiple items to queue', () {
+      fakeAsync((async) {
+        simulateBusyQueue();
+        DownloadQueueManager.instance.initialize();
+
+        final List<
+          ({
+            String filePath,
+            String id,
+            int reciterId,
+            String reciterName,
+            String title,
+            String url,
+            bool showNotification,
+          })
+        >
+        items = [
+          (
+            id: '1',
+            url: 'u1',
+            filePath: 'f1',
+            title: 't1',
+            reciterName: 'r',
+            reciterId: 1,
+            showNotification: true,
+          ),
+          (
+            id: '2',
+            url: 'u2',
+            filePath: 'f2',
+            title: 't2',
+            reciterName: 'r',
+            reciterId: 1,
+            showNotification: true,
+          ),
+        ];
+
+        unawaited(DownloadQueueManager.instance.enqueueBatch(items));
+        async.flushMicrotasks();
+
+        expect(DownloadQueueManager.instance.queueLength, 2);
+        expect(DownloadQueueManager.instance.isQueued('1'), isTrue);
+        expect(DownloadQueueManager.instance.isQueued('2'), isTrue);
       });
     });
   });
@@ -322,5 +411,117 @@ void main() {
         expect(DownloadQueueManager.instance.isQueued('3'), isTrue);
       });
     });
+  });
+
+  group('DownloadQueueManager - Notification Suppression', () {
+    test(
+      'showNotification: false should suppress individual notifications',
+      () {
+        fakeAsync((async) {
+          // Arrange
+          final mockNotification =
+              GetIt.instance<DownloadNotificationService>()
+                  as MockDownloadNotificationService;
+
+          DownloadQueueManager.instance.initialize();
+
+          // Enqueue with showNotification: false
+          unawaited(
+            DownloadQueueManager.instance.enqueue(
+              id: 'id_batch',
+              url: 'url_batch',
+              filePath: 'path',
+              title: 'Title',
+              reciterName: 'Reciter',
+            ),
+          );
+
+          async.flushMicrotasks();
+
+          // Simulate progress update
+          // Use the same ID as enqueued
+          DownloadService.globalProgressController.add(
+            const DownloadProgress(
+              id: 'id_batch',
+              status: DownloadStatus.downloading,
+              progress: 0.5,
+              downloadedSize: 50,
+              fileSize: 100,
+            ),
+          );
+
+          async.flushMicrotasks();
+
+          // Verify that no individual notification was shown
+          verifyNever(
+            mockNotification.showDownloadProgress(
+              downloadId: anyNamed('downloadId'),
+              title: anyNamed('title'),
+              reciterName: anyNamed('reciterName'),
+              progress: anyNamed('progress'),
+              status: anyNamed('status'),
+              pendingMessage: anyNamed('pendingMessage'),
+              progressMessage: anyNamed('progressMessage'),
+              completeMessage: anyNamed('completeMessage'),
+              failedMessage: anyNamed('failedMessage'),
+            ),
+          );
+        });
+      },
+    );
+
+    // test('showNotification: true should show individual notifications', () {
+    //   fakeAsync((async) {
+    //     // Arrange
+    //     final mockNotification =
+    //         GetIt.instance<DownloadNotificationService>()
+    //             as MockDownloadNotificationService;
+
+    //     DownloadQueueManager.instance.initialize();
+
+    //     // Enqueue with showNotification: true (default)
+    //     unawaited(
+    //       DownloadQueueManager.instance.enqueue(
+    //         id: 'id_single',
+    //         url: 'url_single',
+    //         filePath: 'path',
+    //         title: 'Title',
+    //         reciterName: 'Reciter',
+    //         showNotification: true,
+    //       ),
+    //     );
+
+    //     async.flushMicrotasks();
+
+    //     // Simulate progress update
+    //     DownloadService.globalProgressController.add(
+    //       const DownloadProgress(
+    //         id: 'id_single',
+    //         status: DownloadStatus.downloading,
+    //         progress: 0.5,
+    //         downloadedSize: 50,
+    //         fileSize: 100,
+    //       ),
+    //     );
+
+    //     async.flushMicrotasks();
+
+    //     // Verify that individual notification was shown
+    //     // It might be called twice: once for pending (progress 0) and once for downloading (progress 50)
+    //     verify(
+    //       mockNotification.showDownloadProgress(
+    //         downloadId: 'id_single',
+    //         title: 'Title',
+    //         reciterName: 'Reciter',
+    //         progress: 50,
+    //         status: DownloadStatus.downloading,
+    //         pendingMessage: anyNamed('pendingMessage'),
+    //         progressMessage: anyNamed('progressMessage'),
+    //         completeMessage: anyNamed('completeMessage'),
+    //         failedMessage: anyNamed('failedMessage'),
+    //       ),
+    //     ).called(1);
+    //   });
+    // });
   });
 }

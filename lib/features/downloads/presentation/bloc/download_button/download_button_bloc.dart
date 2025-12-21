@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../../core/errors/failures.dart';
 import '../../../../../main.dart';
-import '../../../data/services/download_service.dart';
 import '../../../domain/entities/download_item.dart';
-import '../../../domain/repositories/downloads_repository.dart';
+import '../../../domain/usecases/usecases.dart';
 
 part 'download_button_bloc.freezed.dart';
 part 'download_button_event.dart';
@@ -28,17 +28,25 @@ class DownloadButtonBloc
     required String url,
     required String reciterName,
     required int reciterId,
-    required DownloadsRepository downloadsRepository,
-    this.initialIsDownloaded,
-    this.initialIsDownloading,
-    this.initialProgress,
-  }) : _url = url,
+    required CheckSurahDownloadedUseCase checkSurahDownloaded,
+    required DownloadSurahUseCase downloadSurah,
+    required CancelDownloadUseCase cancelDownload,
+    required ObserveDownloadProgressUseCase observeDownloadProgress,
+    bool? initialIsDownloaded,
+    bool? initialIsDownloading,
+    double? initialProgress,
+  }) : _url = url.trim(),
        _reciterName = reciterName,
        _reciterId = reciterId,
-       _downloadsRepository = downloadsRepository,
+       _checkSurahDownloaded = checkSurahDownloaded,
+       _downloadSurah = downloadSurah,
+       _cancelDownload = cancelDownload,
+       _observeDownloadProgress = observeDownloadProgress,
+       _initialIsDownloaded = initialIsDownloaded,
+       _initialIsDownloading = initialIsDownloading,
+       _initialProgress = initialProgress,
        super(const DownloadButtonState.initial()) {
     on<DownloadButtonEvent>((event, emit) async {
-      // Use map instead of when for event handling
       await event.map(
         initialize: (_) async => _onInitialize(emit),
         startDownload: (e) async => _onStartDownload(e.surahTitle, emit),
@@ -61,198 +69,89 @@ class DownloadButtonBloc
   final String _url;
   final String _reciterName;
   final int _reciterId;
-  final DownloadsRepository _downloadsRepository;
-  final bool? initialIsDownloaded;
-  final bool? initialIsDownloading;
-  final double? initialProgress;
-  StreamSubscription<DownloadProgress>? _progressSubscription;
+  final CheckSurahDownloadedUseCase _checkSurahDownloaded;
+  final DownloadSurahUseCase _downloadSurah;
+  final CancelDownloadUseCase _cancelDownload;
+  final ObserveDownloadProgressUseCase _observeDownloadProgress;
 
-  /// Initialize button state by checking current download status
+  final bool? _initialIsDownloaded;
+  final bool? _initialIsDownloading;
+  final double? _initialProgress;
+  StreamSubscription<DownloadItem>? _progressSubscription;
+
   Future<void> _onInitialize(Emitter<DownloadButtonState> emit) async {
-    try {
-      // optimization: Use initial state if provided
-      if (initialIsDownloaded ?? false) {
-        emit(const DownloadButtonState.completed());
-        return;
-      }
+    // 1. If we have explicit initial state, use it immediately
+    if (_initialIsDownloaded ?? false) {
+      emit(const DownloadButtonState.completed());
+      return;
+    }
 
-      if (initialIsDownloading ?? false) {
-        _listenToProgress();
-        emit(DownloadButtonState.downloading(progress: initialProgress ?? 0.0));
-        return;
-      }
+    if (_initialIsDownloading ?? false) {
+      emit(DownloadButtonState.downloading(progress: _initialProgress ?? 0.0));
+      _listenToProgress();
+      return;
+    }
 
-      // If explicit FALSE was provided, we might still want to check just to be safe?
-      // Or trust the caller. If caller says false, it's false.
-      // But typically caller passes null if unknown.
-      if (initialIsDownloaded == false && initialIsDownloading == false) {
-        emit(const DownloadButtonState.readyToDownload());
-        return;
-      }
+    // 2. Otherwise, check if downloaded from repository (fallback)
+    final Either<Failure, bool> isDownloadedResult =
+        await _checkSurahDownloaded(surahId: _url, reciterName: _reciterName);
 
-      // Check if already downloaded
-      final bool isDownloaded = await _downloadsRepository.isSurahDownloaded(
-        _url,
-        _reciterName,
-      );
+    final bool isDownloaded = isDownloadedResult.getOrElse(() => false);
 
-      if (isDownloaded) {
-        emit(const DownloadButtonState.completed());
-        return;
-      }
-
-      // Check if currently downloading
-      final bool isDownloading = await _downloadsRepository.isSurahDownloading(
-        _url,
-        _reciterName,
-      );
-
-      if (isDownloading) {
-        // Get current download item to get progress
-        final DownloadItem? downloadItem = await _downloadsRepository
-            .getDownloadItem('${_url}_$_reciterName');
-
-        // Note: The above might fail if ID logic is different, better to depend on streams or generic status check
-        // But for getting initial progress, we need the item.
-        // Let's try to find it via URL if composed ID fails (handled in repo essentially, but let's be safe)
-
-        if (downloadItem != null) {
-          _listenToProgress();
-
-          // Emit current state based on download status
-          switch (downloadItem.status) {
-            case DownloadStatus.pending:
-              emit(const DownloadButtonState.pending());
-            case DownloadStatus.downloading:
-              emit(
-                DownloadButtonState.downloading(
-                  progress: downloadItem.progress,
-                  downloadedBytes: downloadItem.downloadedSize,
-                  totalBytes: downloadItem.fileSize,
-                ),
-              );
-            case DownloadStatus.failed:
-              emit(const DownloadButtonState.failed());
-            case DownloadStatus.cancelled:
-              emit(const DownloadButtonState.cancelled());
-            case DownloadStatus.completed:
-              // TODO: Handle this case.
-              throw UnimplementedError();
-            case DownloadStatus.paused:
-              // TODO: Handle this case.
-              throw UnimplementedError();
-          }
-          return;
-        } else {
-          // Fallback: if we know it is downloading but can't find item, start listening at least
-          _listenToProgress();
-          emit(const DownloadButtonState.pending());
-          return;
-        }
-      }
-
-      // Default: ready to download
+    if (isDownloaded) {
+      emit(const DownloadButtonState.completed());
+    } else {
+      // Start listening to progress to catch active downloads we might have missed
+      _listenToProgress();
       emit(const DownloadButtonState.readyToDownload());
-    } on MissingPluginException catch (e) {
-      // In test environment, platform channels are not available
-      logger.d(
-        '[DownloadButtonBloc] Initialize skipped - platform channels not available: $e',
-      );
-      emit(const DownloadButtonState.readyToDownload());
-    } catch (e, stackTrace) {
-      logger.e(
-        '[DownloadButtonBloc] Error initializing',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      emit(
-        const DownloadButtonState.failed(
-          errorMessage: 'Failed to check download status',
-        ),
-      );
     }
   }
 
-  /// Start download process
   Future<void> _onStartDownload(
     String surahTitle,
     Emitter<DownloadButtonState> emit,
   ) async {
-    try {
-      emit(const DownloadButtonState.pending());
+    emit(const DownloadButtonState.pending());
+    _listenToProgress();
 
-      // Listen to progress before starting download
-      _listenToProgress();
+    final Either<Failure, void> result = await _downloadSurah(
+      surahId: _url,
+      surahTitle: surahTitle,
+      reciterName: _reciterName,
+      reciterId: _reciterId,
+    );
 
-      // Note: We don't await this - it will trigger progress updates
-      // The actual download state changes will come through the progress stream
-      await _downloadsRepository.startDownload(
-        _url,
-        surahTitle,
-        _reciterName,
-        _reciterId,
-      );
-
-      logger.d(
-        '[DownloadButtonBloc] Download started: url=$_url reciter=$_reciterName',
-      );
-    } on MissingPluginException catch (e) {
-      logger.d(
-        '[DownloadButtonBloc] Download start skipped - platform channels not available: $e',
-      );
-      // In test environment, just stay in pending state
-    } catch (e, stackTrace) {
-      logger.e(
-        '[DownloadButtonBloc] Error starting download',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      emit(
-        DownloadButtonState.failed(
-          errorMessage: 'Failed to start download: $e',
-        ),
-      );
-    }
+    result.fold(
+      (failure) =>
+          emit(DownloadButtonState.failed(errorMessage: failure.message)),
+      (_) {
+        // Success means download started (enqueued).
+        // Stream will handle updates.
+        logger.d('[DownloadButtonBloc] Download started via UseCase');
+      },
+    );
   }
 
-  /// Retry a failed download
   Future<void> _onRetry(
     String surahTitle,
     Emitter<DownloadButtonState> emit,
   ) async {
-    // Same as starting download
     add(DownloadButtonEvent.startDownload(surahTitle: surahTitle));
   }
 
-  /// Cancel active download
   Future<void> _onCancel(Emitter<DownloadButtonState> emit) async {
-    try {
-      // We use the URL as ID mostly, but repo expects ID.
-      // For now, let's assume usage of URL as ID is consistent.
-      await _downloadsRepository.cancelDownload(_url);
-      _progressSubscription?.cancel();
-      emit(const DownloadButtonState.cancelled());
-      logger.d('[DownloadButtonBloc] Download cancelled: url=$_url');
-    } on MissingPluginException catch (e) {
-      logger.d(
-        '[DownloadButtonBloc] Cancel skipped - platform channels not available: $e',
-      );
-      emit(const DownloadButtonState.cancelled());
-    } catch (e, stackTrace) {
-      logger.e(
-        '[DownloadButtonBloc] Error cancelling download',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      emit(
-        const DownloadButtonState.failed(
-          errorMessage: 'Failed to cancel download',
-        ),
-      );
-    }
+    final Either<Failure, void> result = await _cancelDownload(_url);
+    result.fold(
+      (failure) => emit(
+        const DownloadButtonState.failed(errorMessage: 'Failed to cancel'),
+      ),
+      (_) {
+        emit(const DownloadButtonState.cancelled());
+        _progressSubscription?.cancel();
+      },
+    );
   }
 
-  /// Handle progress update
   void _onProgressUpdated(
     double progress,
     int downloadedBytes,
@@ -268,97 +167,67 @@ class DownloadButtonBloc
     );
   }
 
-  /// Handle completion
   void _onCompleted(Emitter<DownloadButtonState> emit) {
     _progressSubscription?.cancel();
     emit(const DownloadButtonState.completed());
-    logger.d('[DownloadButtonBloc] Download completed: url=$_url');
   }
 
-  /// Handle failure
   void _onFailed(String? errorMessage, Emitter<DownloadButtonState> emit) {
     _progressSubscription?.cancel();
     emit(DownloadButtonState.failed(errorMessage: errorMessage));
-    logger.w(
-      '[DownloadButtonBloc] Download failed: url=$_url error=$errorMessage',
-    );
   }
 
-  /// Handle cancellation
   void _onCancelled(Emitter<DownloadButtonState> emit) {
     _progressSubscription?.cancel();
     emit(const DownloadButtonState.cancelled());
   }
 
-  /// Handle pause
   void _onPaused(Emitter<DownloadButtonState> emit) {
     _progressSubscription?.cancel();
     emit(const DownloadButtonState.paused());
   }
 
-  /// Listen to progress updates for this specific download
   void _listenToProgress() {
-    try {
-      _progressSubscription?.cancel();
+    _progressSubscription?.cancel();
+    _progressSubscription = _observeDownloadProgress(_url).listen(
+      (item) {
+        // Filter by reciter name?
+        // The ID passed to observeDownloadProgress is the URL.
+        // The returned item SHOULD match.
+        if (item.reciterName != _reciterName) return;
 
-      _progressSubscription = DownloadService.instance
-          .getProgressStream(_url)
-          .listen(
-            (progress) {
-              switch (progress.status) {
-                case DownloadStatus.pending:
-                  // Pending is handled by initialization/start, but if we get explicit pending event, good to verify
-                  // For now, ignore to avoid flickering
-                  break;
-                case DownloadStatus.downloading:
-                  add(
-                    DownloadButtonEvent.progressUpdated(
-                      progress: progress.progress,
-                      downloadedBytes: progress.downloadedSize,
-                      totalBytes: progress.fileSize,
-                    ),
-                  );
-                case DownloadStatus.completed:
-                  add(const DownloadButtonEvent.completed());
-                case DownloadStatus.failed:
-                  add(
-                    const DownloadButtonEvent.failed(
-                      errorMessage: 'Download failed',
-                    ),
-                  );
-                case DownloadStatus.cancelled:
-                  add(const DownloadButtonEvent.cancelled());
-                case DownloadStatus.paused:
-                  add(const DownloadButtonEvent.paused());
-              }
-            },
-            onError: (error, stackTrace) {
-              logger.e(
-                '[DownloadButtonBloc] Progress stream error',
-                error: error,
-                stackTrace: stackTrace,
-              );
-              add(
-                DownloadButtonEvent.failed(
-                  errorMessage: 'Download error: $error',
-                ),
-              );
-            },
-            cancelOnError: false,
-          );
-
-      logger.d('[DownloadButtonBloc] Started listening to progress for $_url');
-    } on MissingPluginException catch (e) {
-      logger.d(
-        '[DownloadButtonBloc] Progress listening skipped - platform channels not available: $e',
-      );
-    } catch (e, stackTrace) {
-      logger.e(
-        '[DownloadButtonBloc] Error setting up progress listener',
-        error: e,
-        stackTrace: stackTrace,
-      );
-    }
+        switch (item.status) {
+          case DownloadStatus.pending:
+            // Optional: emit pending if not already
+            break;
+          case DownloadStatus.downloading:
+            add(
+              DownloadButtonEvent.progressUpdated(
+                progress: item.progress,
+                downloadedBytes: item.downloadedSize,
+                totalBytes: item.fileSize,
+              ),
+            );
+          case DownloadStatus.completed:
+            add(const DownloadButtonEvent.completed());
+          case DownloadStatus.failed:
+            add(
+              const DownloadButtonEvent.failed(errorMessage: 'Download failed'),
+            );
+          case DownloadStatus.cancelled:
+            add(const DownloadButtonEvent.cancelled());
+          case DownloadStatus.paused:
+            add(const DownloadButtonEvent.paused());
+        }
+      },
+      onError: (error) {
+        add(
+          const DownloadButtonEvent.failed(
+            errorMessage: 'Progress stream error',
+          ),
+        );
+      },
+    );
   }
 
   @override

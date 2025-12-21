@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui'; // or flutter/material.dart
 
 import 'package:dartz_plus/dartz_plus.dart';
@@ -26,7 +25,7 @@ class DownloadNotificationService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  bool _initialized = false;
+  final bool _initialized = false;
 
   /// Channel ID for download notifications
   static const String _downloadChannelId = 'download_progress';
@@ -39,13 +38,15 @@ class DownloadNotificationService {
 
   /// Initialize the notification service
   Future<void> initialize() async {
+    // Temporarily disabled
+    /*
     if (_initialized) {
       return;
     }
 
     try {
       const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher_monochrome',
+        'ic_launcher_monochrome',
       );
       // Request all necessary permissions for iOS notifications
       const iosSettings = DarwinInitializationSettings();
@@ -84,6 +85,7 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Initialization failed: $e');
     }
+    */
   }
 
   /// Get or create a notification ID for a download
@@ -112,6 +114,8 @@ class DownloadNotificationService {
     String? completeMessage,
     String? failedMessage,
   }) async {
+    // Temporarily disabled
+    /*
     if (!_initialized) {
       await initialize();
     }
@@ -137,7 +141,7 @@ class DownloadNotificationService {
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
           color: const Color(0xFF1AADC5),
-          largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -182,6 +186,86 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing notification: $e');
     }
+    */
+  }
+
+  /// Show a batch download progress notification
+  Future<void> showBatchDownloadProgress({
+    required String batchId,
+    required String title,
+    required int progress,
+    required int completedCount,
+    required int totalCount,
+    required DownloadStatus status,
+  }) async {
+    // Temporarily disabled
+    /*
+    if (!_initialized) {
+      await initialize();
+    }
+
+    // Use a specific ID range for batches or hash
+    final int notificationId = _getNotificationId(batchId);
+
+    try {
+      if (status == DownloadStatus.downloading ||
+          status == DownloadStatus.pending) {
+        final androidDetails = AndroidNotificationDetails(
+          _downloadChannelId,
+          _downloadChannelName,
+          channelDescription: _downloadChannelDescription,
+          importance: Importance.low,
+          priority: Priority.low,
+          ongoing: true,
+          onlyAlertOnce: true,
+          showProgress: true,
+          maxProgress: 100,
+          progress: progress,
+          category: AndroidNotificationCategory.progress,
+          autoCancel: false,
+          color: const Color(0xFF1AADC5),
+          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
+        );
+
+        const iosDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: false,
+        );
+
+        final notificationDetails = NotificationDetails(
+          android: androidDetails,
+          iOS: iosDetails,
+        );
+
+        await _notifications.show(
+          notificationId,
+          title,
+          'Progress: $completedCount/$totalCount ($progress%)',
+          notificationDetails,
+        );
+      } else if (status == DownloadStatus.completed) {
+        await _showCompletedNotification(
+          notificationId: notificationId,
+          title: title,
+          message: 'All $totalCount files downloaded successfully',
+          reciterName: '', // Opens default screen or handled differently
+        );
+      } else if (status == DownloadStatus.failed) {
+        await _showFailedNotification(
+          notificationId: notificationId,
+          title: title,
+          message: 'Batch download failed',
+        );
+      } else if (status == DownloadStatus.cancelled) {
+        await cancelNotification(batchId);
+      }
+    } catch (e) {
+      logger.e(
+        '[DownloadNotificationService] Error showing batch notification: $e',
+      );
+    }
+    */
   }
 
   /// Show a completed download notification
@@ -196,7 +280,7 @@ class DownloadNotificationService {
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
       color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -230,7 +314,7 @@ class DownloadNotificationService {
       _downloadChannelName,
       channelDescription: _downloadChannelDescription,
       color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -254,17 +338,23 @@ class DownloadNotificationService {
 
   /// Cancel a download notification
   Future<void> cancelNotification(String downloadId) async {
+    // Temporarily disabled
+    /*
     final int? notificationId = _notificationIds[downloadId];
     if (notificationId != null) {
       await _notifications.cancel(notificationId);
       _notificationIds.remove(downloadId);
     }
+    */
   }
 
   /// Cancel all download notifications
   Future<void> cancelAllNotifications() async {
+    // Temporarily disabled
+    /*
     await _notifications.cancelAll();
     _notificationIds.clear();
+    */
   }
 
   /// Handle notification tap

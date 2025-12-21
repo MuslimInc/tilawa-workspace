@@ -101,6 +101,49 @@ class MockRecitersRepository extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Either<_i5.Failure, _i6.ReciterEntity?>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, List<_i6.ReciterEntity>>>
+  getFavoriteReciters() =>
+      (super.noSuchMethod(
+            Invocation.method(#getFavoriteReciters, []),
+            returnValue:
+                _i3.Future<
+                  _i4.Either<_i5.Failure, List<_i6.ReciterEntity>>
+                >.value(
+                  _i7.dummyValue<
+                    _i4.Either<_i5.Failure, List<_i6.ReciterEntity>>
+                  >(this, Invocation.method(#getFavoriteReciters, [])),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, List<_i6.ReciterEntity>>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, void>> toggleFavoriteReciter(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleFavoriteReciter, [id]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, void>>(
+                this,
+                Invocation.method(#toggleFavoriteReciter, [id]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, List<String>>> getFavoriteReciterIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#getFavoriteReciterIds, []),
+            returnValue:
+                _i3.Future<_i4.Either<_i5.Failure, List<String>>>.value(
+                  _i7.dummyValue<_i4.Either<_i5.Failure, List<String>>>(
+                    this,
+                    Invocation.method(#getFavoriteReciterIds, []),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, List<String>>>);
 }
 
 /// A class which mocks [NavigationService].

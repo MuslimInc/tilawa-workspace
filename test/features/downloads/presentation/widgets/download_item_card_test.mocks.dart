@@ -459,6 +459,7 @@ class MockDownloadQueueManager extends _i1.Mock
     required String? title,
     required String? reciterName,
     int? reciterId,
+    bool? showNotification = false,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#enqueue, [], {
@@ -468,7 +469,30 @@ class MockDownloadQueueManager extends _i1.Mock
               #title: title,
               #reciterName: reciterName,
               #reciterId: reciterId,
+              #showNotification: showNotification,
             }),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> enqueueBatch(
+    List<
+      ({
+        String filePath,
+        String id,
+        int? reciterId,
+        String reciterName,
+        bool showNotification,
+        String title,
+        String url,
+      })
+    >?
+    items,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#enqueueBatch, [items]),
             returnValue: _i5.Future<void>.value(),
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
@@ -509,6 +533,15 @@ class MockDownloadQueueManager extends _i1.Mock
     Invocation.method(#clearQueue, []),
     returnValueForMissingStub: null,
   );
+
+  @override
+  _i5.Future<void> stopAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#stopAll, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 
   @override
   void dispose() => super.noSuchMethod(
@@ -573,6 +606,7 @@ class MockDownloadService extends _i1.Mock implements _i11.DownloadService {
     required String? title,
     required String? reciterName,
     int? reciterId,
+    bool? showNotification = true,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#download, [], {
@@ -582,6 +616,7 @@ class MockDownloadService extends _i1.Mock implements _i11.DownloadService {
               #title: title,
               #reciterName: reciterName,
               #reciterId: reciterId,
+              #showNotification: showNotification,
             }),
             returnValue: _i5.Future<void>.value(),
             returnValueForMissingStub: _i5.Future<void>.value(),
@@ -592,6 +627,15 @@ class MockDownloadService extends _i1.Mock implements _i11.DownloadService {
   _i5.Future<void> cancel(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#cancel, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> cancelAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelAll, []),
             returnValue: _i5.Future<void>.value(),
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
@@ -664,6 +708,29 @@ class MockDownloadNotificationService extends _i1.Mock
           as _i5.Future<void>);
 
   @override
+  _i5.Future<void> showBatchDownloadProgress({
+    required String? batchId,
+    required String? title,
+    required int? progress,
+    required int? completedCount,
+    required int? totalCount,
+    required _i12.DownloadStatus? status,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#showBatchDownloadProgress, [], {
+              #batchId: batchId,
+              #title: title,
+              #progress: progress,
+              #completedCount: completedCount,
+              #totalCount: totalCount,
+              #status: status,
+            }),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   _i5.Future<void> cancelNotification(String? downloadId) =>
       (super.noSuchMethod(
             Invocation.method(#cancelNotification, [downloadId]),
@@ -701,6 +768,186 @@ class MockDownloadsRepository extends _i1.Mock
   MockDownloadsRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i5.Stream<_i12.DownloadItem> get downloadUpdates =>
+      (super.noSuchMethod(
+            Invocation.getter(#downloadUpdates),
+            returnValue: _i5.Stream<_i12.DownloadItem>.empty(),
+          )
+          as _i5.Stream<_i12.DownloadItem>);
+
+  @override
+  _i5.Future<void> addDownload(_i12.DownloadItem? downloadItem) =>
+      (super.noSuchMethod(
+            Invocation.method(#addDownload, [downloadItem]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> updateDownload(_i12.DownloadItem? downloadItem) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateDownload, [downloadItem]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteDownload(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteDownload, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> updateDownloadProgress(
+    String? id,
+    _i12.DownloadStatus? status,
+    double? progress,
+    int? downloadedSize,
+    int? fileSize,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateDownloadProgress, [
+              id,
+              status,
+              progress,
+              downloadedSize,
+              fileSize,
+            ]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> startDownload(
+    String? url, {
+    required String? title,
+    bool? showNotification = true,
+    required String? surahTitle,
+    required String? reciterName,
+    required int? reciterId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #startDownload,
+              [url],
+              {
+                #title: title,
+                #showNotification: showNotification,
+                #surahTitle: surahTitle,
+                #reciterName: reciterName,
+                #reciterId: reciterId,
+              },
+            ),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> cancelDownload(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelDownload, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> pauseDownload(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#pauseDownload, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> resumeDownload(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#resumeDownload, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> retryDownload(String? downloadId) =>
+      (super.noSuchMethod(
+            Invocation.method(#retryDownload, [downloadId]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<bool> isSurahDownloaded(String? url, String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#isSurahDownloaded, [url, reciterName]),
+            returnValue: _i5.Future<bool>.value(false),
+          )
+          as _i5.Future<bool>);
+
+  @override
+  _i5.Future<bool> isSurahDownloading(String? url, String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#isSurahDownloading, [url, reciterName]),
+            returnValue: _i5.Future<bool>.value(false),
+          )
+          as _i5.Future<bool>);
+
+  @override
+  _i5.Future<String?> getDownloadedFilePath(String? url, String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDownloadedFilePath, [url, reciterName]),
+            returnValue: _i5.Future<String?>.value(),
+          )
+          as _i5.Future<String?>);
+
+  @override
+  _i5.Stream<_i12.DownloadItem> getDownloadProgress(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDownloadProgress, [id]),
+            returnValue: _i5.Stream<_i12.DownloadItem>.empty(),
+          )
+          as _i5.Stream<_i12.DownloadItem>);
+
+  @override
+  _i5.Future<void> startDownloadBatch(
+    List<({int reciterId, String reciterName, String surahTitle, String url})>?
+    items,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#startDownloadBatch, [items]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> cancelDownloadsForReciter(String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancelDownloadsForReciter, [reciterName]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteDownloadsForReciter(String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteDownloadsForReciter, [reciterName]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 
   @override
   _i5.Future<void> initialize() =>
@@ -744,148 +991,24 @@ class MockDownloadsRepository extends _i1.Mock
           as _i5.Future<_i12.DownloadItem?>);
 
   @override
-  _i5.Future<void> addDownload(_i12.DownloadItem? downloadItem) =>
-      (super.noSuchMethod(
-            Invocation.method(#addDownload, [downloadItem]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> updateDownload(_i12.DownloadItem? downloadItem) =>
-      (super.noSuchMethod(
-            Invocation.method(#updateDownload, [downloadItem]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> deleteDownload(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#deleteDownload, [id]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> deleteDownloadsForReciter(String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#deleteDownloadsForReciter, [reciterName]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> clearAllDownloads() =>
-      (super.noSuchMethod(
-            Invocation.method(#clearAllDownloads, []),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Stream<_i12.DownloadItem> getDownloadProgress(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#getDownloadProgress, [id]),
-            returnValue: _i5.Stream<_i12.DownloadItem>.empty(),
-          )
-          as _i5.Stream<_i12.DownloadItem>);
-
-  @override
-  _i5.Future<void> startDownload(
-    String? url,
-    String? surahTitle,
+  _i5.Future<List<_i12.DownloadItem>> getValidCompletedDownloads(
     String? reciterName,
-    int? reciterId,
   ) =>
       (super.noSuchMethod(
-            Invocation.method(#startDownload, [
-              url,
-              surahTitle,
-              reciterName,
-              reciterId,
-            ]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
+            Invocation.method(#getValidCompletedDownloads, [reciterName]),
+            returnValue: _i5.Future<List<_i12.DownloadItem>>.value(
+              <_i12.DownloadItem>[],
+            ),
           )
-          as _i5.Future<void>);
+          as _i5.Future<List<_i12.DownloadItem>>);
 
   @override
-  _i5.Future<void> pauseDownload(String? id) =>
+  _i5.Future<bool> validateDownloadedFile(_i12.DownloadItem? download) =>
       (super.noSuchMethod(
-            Invocation.method(#pauseDownload, [id]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> resumeDownload(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#resumeDownload, [id]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> cancelDownload(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancelDownload, [id]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
-  _i5.Future<bool> isSurahDownloaded(String? url, String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#isSurahDownloaded, [url, reciterName]),
+            Invocation.method(#validateDownloadedFile, [download]),
             returnValue: _i5.Future<bool>.value(false),
           )
           as _i5.Future<bool>);
-
-  @override
-  _i5.Future<bool> isSurahDownloading(String? url, String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#isSurahDownloading, [url, reciterName]),
-            returnValue: _i5.Future<bool>.value(false),
-          )
-          as _i5.Future<bool>);
-
-  @override
-  _i5.Future<String?> getDownloadedFilePath(String? url, String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#getDownloadedFilePath, [url, reciterName]),
-            returnValue: _i5.Future<String?>.value(),
-          )
-          as _i5.Future<String?>);
-
-  @override
-  _i5.Future<void> updateDownloadProgress(
-    String? id,
-    _i12.DownloadStatus? status,
-    double? progress,
-    int? downloadedSize,
-    int? fileSize,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#updateDownloadProgress, [
-              id,
-              status,
-              progress,
-              downloadedSize,
-              fileSize,
-            ]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
 
   @override
   _i4.MediaItem createMediaItemFromDownload(_i12.DownloadItem? download) =>
@@ -899,35 +1022,6 @@ class MockDownloadsRepository extends _i1.Mock
           as _i4.MediaItem);
 
   @override
-  _i5.Future<bool> validateDownloadedFile(_i12.DownloadItem? download) =>
-      (super.noSuchMethod(
-            Invocation.method(#validateDownloadedFile, [download]),
-            returnValue: _i5.Future<bool>.value(false),
-          )
-          as _i5.Future<bool>);
-
-  @override
-  _i5.Future<List<_i12.DownloadItem>> getValidCompletedDownloads(
-    String? reciterName,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#getValidCompletedDownloads, [reciterName]),
-            returnValue: _i5.Future<List<_i12.DownloadItem>>.value(
-              <_i12.DownloadItem>[],
-            ),
-          )
-          as _i5.Future<List<_i12.DownloadItem>>);
-
-  @override
-  _i5.Future<void> retryDownload(String? downloadId) =>
-      (super.noSuchMethod(
-            Invocation.method(#retryDownload, [downloadId]),
-            returnValue: _i5.Future<void>.value(),
-            returnValueForMissingStub: _i5.Future<void>.value(),
-          )
-          as _i5.Future<void>);
-
-  @override
   List<_i4.MediaItem> createMediaItemsFromDownloads(
     List<_i12.DownloadItem>? downloads,
   ) =>
@@ -938,6 +1032,23 @@ class MockDownloadsRepository extends _i1.Mock
           as List<_i4.MediaItem>);
 
   @override
+  _i5.Future<int> getTotalDownloadsSize() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTotalDownloadsSize, []),
+            returnValue: _i5.Future<int>.value(0),
+          )
+          as _i5.Future<int>);
+
+  @override
+  _i5.Future<void> clearAllDownloads() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearAllDownloads, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   _i5.Future<void> resumePendingDownloads() =>
       (super.noSuchMethod(
             Invocation.method(#resumePendingDownloads, []),
@@ -945,12 +1056,4 @@ class MockDownloadsRepository extends _i1.Mock
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
-
-  @override
-  _i5.Future<int> getTotalDownloadsSize() =>
-      (super.noSuchMethod(
-            Invocation.method(#getTotalDownloadsSize, []),
-            returnValue: _i5.Future<int>.value(0),
-          )
-          as _i5.Future<int>);
 }

@@ -103,4 +103,48 @@ class RecitersRepositoryImpl implements RecitersRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  ResultFuture<List<ReciterEntity>> getFavoriteReciters() async {
+    try {
+      final List<String> favoriteIds = await _localDataSource
+          .getFavoriteReciterIds();
+      final List<ReciterModel> allReciters = await _getRecitersData();
+
+      final List<ReciterEntity> favoriteReciters = allReciters
+          .where((reciter) => favoriteIds.contains(reciter.id.toString()))
+          .map((model) => model.toEntity())
+          .toList();
+
+      return Right(favoriteReciters);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<void> toggleFavoriteReciter(int id) async {
+    try {
+      final List<String> currentIds = await _localDataSource
+          .getFavoriteReciterIds();
+      if (currentIds.contains(id.toString())) {
+        await _localDataSource.removeFavoriteReciterId(id);
+      } else {
+        await _localDataSource.saveFavoriteReciterId(id);
+      }
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<String>> getFavoriteReciterIds() async {
+    try {
+      final List<String> ids = await _localDataSource.getFavoriteReciterIds();
+      return Right(ids);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
