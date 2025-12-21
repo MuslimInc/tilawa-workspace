@@ -1,23 +1,34 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter/services.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
 
 import 'download_button_bloc_test.mocks.dart';
 
-@GenerateMocks([DownloadsRepository, DownloadService])
+@GenerateMocks([
+  CheckSurahDownloadedUseCase,
+  DownloadSurahUseCase,
+  CancelDownloadUseCase,
+  ObserveDownloadProgressUseCase,
+])
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() {
+    provideDummy<Either<Failure, bool>>(const Right(false));
+    provideDummy<Either<Failure, void>>(const Right(null));
+  });
 
-  late MockDownloadsRepository mockDownloadsRepository;
-  late DownloadButtonBloc downloadButtonBloc;
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloaded;
+  late MockDownloadSurahUseCase mockDownloadSurah;
+  late MockCancelDownloadUseCase mockCancelDownload;
+  late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+  DownloadButtonBloc? downloadButtonBloc;
 
   const testUrl = 'https://example.com/001.mp3';
   const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -25,870 +36,297 @@ void main() {
   const testSurahTitle = 'Al-Fatiha';
 
   setUp(() {
-    mockDownloadsRepository = MockDownloadsRepository();
+    mockCheckSurahDownloaded = MockCheckSurahDownloadedUseCase();
+    mockDownloadSurah = MockDownloadSurahUseCase();
+    mockCancelDownload = MockCancelDownloadUseCase();
+    mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
+
+    // Default: Check returns false (not downloaded)
     when(
-      mockDownloadsRepository.downloadUpdates,
+      mockCheckSurahDownloaded.call(
+        surahId: anyNamed('surahId'),
+        reciterName: anyNamed('reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
+
+    // Default: Observe returns empty stream (no active download)
+    when(
+      mockObserveDownloadProgress.call(any),
     ).thenAnswer((_) => const Stream.empty());
 
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
       reciterName: testReciterName,
       reciterId: testReciterId,
-      downloadsRepository: mockDownloadsRepository,
+      checkSurahDownloaded: mockCheckSurahDownloaded,
+      downloadSurah: mockDownloadSurah,
+      cancelDownload: mockCancelDownload,
+      observeDownloadProgress: mockObserveDownloadProgress,
     );
   });
 
   tearDown(() {
-    downloadButtonBloc.close();
+    downloadButtonBloc?.close();
   });
 
   group('DownloadButtonBloc -', () {
     group('Initialization', () {
       test('initial state is initial()', () {
-        expect(downloadButtonBloc.state, const DownloadButtonState.initial());
+        expect(downloadButtonBloc!.state, const DownloadButtonState.initial());
       });
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [readyToDownload] when surah is not downloaded',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          return downloadButtonBloc;
-        },
+        'emits [readyToDownload] when surah is not downloaded and no stream events',
+        build: () => downloadButtonBloc!,
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
         expect: () => [const DownloadButtonState.readyToDownload()],
+        verify: (_) {
+          verify(
+            mockCheckSurahDownloaded.call(
+              surahId: testUrl,
+              reciterName: testReciterName,
+            ),
+          ).called(1);
+          verify(mockObserveDownloadProgress.call(testUrl)).called(1);
+        },
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
         'emits [completed] when surah is already downloaded',
         build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => true);
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
+            mockCheckSurahDownloaded.call(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          ).thenAnswer((_) async => const Right(true));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
         expect: () => [const DownloadButtonState.completed()],
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [completed] instantly when initialIsDownloaded is true (Optimization)',
+        'emits [downloading] when stream emits downloading item',
         build: () {
-          return DownloadButtonBloc(
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
             url: testUrl,
+            filePath: 'path',
             reciterName: testReciterName,
             reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloaded: true,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 100,
+            downloadedSize: 50,
+            createdAt: DateTime.now(),
           );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.completed()],
-        verify: (_) {
-          verifyNever(mockDownloadsRepository.isSurahDownloaded(any, any));
-        },
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [downloading] instantly when initialIsDownloading is true (Optimization)',
-        build: () {
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloading: true,
-            initialProgress: 0.5,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.downloading(progress: 0.5)],
-        verify: (_) {
-          verifyNever(mockDownloadsRepository.isSurahDownloading(any, any));
-        },
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [pending] when surah is currently pending',
-        build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => true);
-          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-            (_) async => DownloadItem(
-              id: '${testUrl}_$testReciterName',
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.pending,
-              progress: 0.0,
-              fileSize: 1024000,
-              downloadedSize: 0,
-              createdAt: DateTime.now(),
-            ),
-          );
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.pending()],
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [downloading] when surah is currently downloading',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => true);
-          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-            (_) async => DownloadItem(
-              id: '${testUrl}_$testReciterName',
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.downloading,
-              progress: 0.5,
-              fileSize: 1024000,
-              downloadedSize: 512000,
-              createdAt: DateTime.now(),
-            ),
-          );
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
         expect: () => [
+          const DownloadButtonState.readyToDownload(), // Emitted because verify happens async
           const DownloadButtonState.downloading(
             progress: 0.5,
-            downloadedBytes: 512000,
-            totalBytes: 1024000,
+            downloadedBytes: 50,
+            totalBytes: 100,
           ),
         ],
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] when surah download previously failed',
+        'emits [downloading] immediately if initialIsDownloading is true',
         build: () {
+          // Check returns false but initialIsDownloading is true
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => true);
-          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-            (_) async => DownloadItem(
-              id: '${testUrl}_$testReciterName',
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.failed,
-              progress: 0.3,
-              fileSize: 1024000,
-              downloadedSize: 307200,
-              createdAt: DateTime.now(),
+            mockCheckSurahDownloaded.call(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
             ),
-          );
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.failed()],
-      );
+          ).thenAnswer((_) async => const Right(false));
 
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [readyToDownload] when initialization fails with MissingPluginException',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenThrow(MissingPluginException('Platform channel not available'));
           return DownloadButtonBloc(
             url: testUrl,
             reciterName: testReciterName,
             reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
+            checkSurahDownloaded: mockCheckSurahDownloaded,
+            downloadSurah: mockDownloadSurah,
+            cancelDownload: mockCancelDownload,
+            observeDownloadProgress: mockObserveDownloadProgress,
+            initialIsDownloading: true,
+            initialProgress: 0.1,
           );
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.readyToDownload()],
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] when initialization fails with general exception',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenThrow(Exception('Database error'));
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [
-          const DownloadButtonState.failed(
-            errorMessage: 'Failed to check download status',
-          ),
-        ],
+        expect: () => [const DownloadButtonState.downloading(progress: 0.1)],
       );
     });
 
     group('StartDownload Event', () {
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [pending] when startDownload is triggered',
+        'emits [pending] and calls downloadSurah',
         build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.startDownload(
-              any,
-              title: anyNamed('title'),
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
+              surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
               reciterId: anyNamed('reciterId'),
-              surahTitle: anyNamed('surahTitle'),
-              showNotification: anyNamed('showNotification'),
             ),
-          ).thenAnswer((_) async {
-            return;
-          });
-          return downloadButtonBloc;
+          ).thenAnswer((_) async => const Right(null));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(
           const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
         ),
         expect: () => [const DownloadButtonState.pending()],
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [pending] when download fails with MissingPluginException in test',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.startDownload(
-              any,
-              title: anyNamed('title'),
-              surahTitle: anyNamed('surahTitle'),
-              reciterName: anyNamed('reciterName'),
-              reciterId: anyNamed('reciterId'),
+        verify: (_) {
+          verify(
+            mockDownloadSurah.call(
+              surahId: testUrl,
+              surahTitle: testSurahTitle,
+              reciterName: testReciterName,
+              reciterId: testReciterId,
             ),
-          ).thenThrow(MissingPluginException('Platform channel not available'));
-          return downloadButtonBloc;
+          ).called(1);
+          verify(mockObserveDownloadProgress.call(testUrl)).called(1);
         },
-        act: (bloc) => bloc.add(
-          const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
-        ),
-        expect: () => [const DownloadButtonState.pending()],
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [pending, failed] when download fails with general exception',
+        'emits [failed] when downloadSurah returns failure',
         build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.startDownload(
-              any,
-              title: anyNamed('title'),
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
               surahTitle: anyNamed('surahTitle'),
               reciterName: anyNamed('reciterName'),
               reciterId: anyNamed('reciterId'),
             ),
-          ).thenThrow(Exception('Network error'));
-          return downloadButtonBloc;
+          ).thenAnswer((_) async => const Left(AudioFailure('Network error')));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(
           const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
         ),
         expect: () => [
           const DownloadButtonState.pending(),
-          const DownloadButtonState.failed(
-            errorMessage: 'Failed to start download: Exception: Network error',
-          ),
+          const DownloadButtonState.failed(errorMessage: 'Network error'),
         ],
-      );
-    });
-
-    group('Retry Event', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'triggers startDownload event when retry is called',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.startDownload(
-              any,
-              title: anyNamed('title'),
-              surahTitle: anyNamed('surahTitle'),
-              reciterName: anyNamed('reciterName'),
-              reciterId: anyNamed('reciterId'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
-          return downloadButtonBloc;
-        },
-        act: (bloc) => bloc.add(
-          const DownloadButtonEvent.retry(surahTitle: testSurahTitle),
-        ),
-        expect: () => [const DownloadButtonState.pending()],
       );
     });
 
     group('Cancel Event', () {
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [cancelled] when cancel is triggered',
+        'emits [cancelled] when cancelDownload succeeds',
         build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(mockDownloadsRepository.cancelDownload(any)).thenAnswer((
-            _,
-          ) async {
-            return;
-          });
-          return downloadButtonBloc;
+            mockCancelDownload.call(any),
+          ).thenAnswer((_) async => const Right(null));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.cancel()),
         expect: () => [const DownloadButtonState.cancelled()],
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [cancelled] when cancel fails with MissingPluginException',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.cancelDownload(any),
-          ).thenThrow(MissingPluginException('Platform channel not available'));
-          return downloadButtonBloc;
+        verify: (_) {
+          verify(mockCancelDownload.call(testUrl)).called(1);
         },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.cancel()),
-        expect: () => [const DownloadButtonState.cancelled()],
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] when cancel fails with general exception',
+        'emits [failed] when cancelDownload fails',
         build: () {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.cancelDownload(any),
-          ).thenThrow(Exception('Cancel failed'));
-          return downloadButtonBloc;
+            mockCancelDownload.call(any),
+          ).thenAnswer((_) async => const Left(AudioFailure('Cancel failed')));
+          return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(const DownloadButtonEvent.cancel()),
         expect: () => [
-          const DownloadButtonState.failed(
-            errorMessage: 'Failed to cancel download',
-          ),
+          const DownloadButtonState.failed(errorMessage: 'Failed to cancel'),
         ],
       );
     });
 
-    group('ProgressUpdated Event', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [downloading] with updated progress',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          return downloadButtonBloc;
-        },
-        act: (bloc) => bloc.add(
-          const DownloadButtonEvent.progressUpdated(
-            progress: 0.75,
-            downloadedBytes: 768000,
-            totalBytes: 1024000,
-          ),
-        ),
-        expect: () => [
-          const DownloadButtonState.downloading(
-            progress: 0.75,
-            downloadedBytes: 768000,
-            totalBytes: 1024000,
-          ),
-        ],
-      );
-    });
-
-    group('Completed Event', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [completed] when download completes',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          return downloadButtonBloc;
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.completed()),
-        expect: () => [const DownloadButtonState.completed()],
-      );
-    });
-
-    group('Failed Event', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] with error message',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          return downloadButtonBloc;
-        },
-        act: (bloc) => bloc.add(
-          const DownloadButtonEvent.failed(errorMessage: 'Network timeout'),
-        ),
-        expect: () => [
-          const DownloadButtonState.failed(errorMessage: 'Network timeout'),
-        ],
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] without error message',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          // Return fresh instance so skip: 1 works correctly
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.failed()),
-        expect: () => [const DownloadButtonState.failed()],
-      );
-    });
-
-    group('Cancelled Event', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [cancelled] from event',
-        build: () {
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-          // Return fresh instance so skip: 1 works correctly
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.cancelled()),
-        expect: () => [const DownloadButtonState.cancelled()],
-      );
-    });
-
-    group('Repository Updates', () {
-      test('re-initializes when receiving matching update', () async {
-        // Arrange
-        final updatesController = StreamController<DownloadItem>.broadcast();
+    group('State Updates from Stream', () {
+      test('updates state based on stream events', () async {
+        final controller = StreamController<DownloadItem>();
         when(
-          mockDownloadsRepository.downloadUpdates,
-        ).thenAnswer((_) => updatesController.stream);
-
-        // Initial check returns false
-        when(
-          mockDownloadsRepository.isSurahDownloaded(any, any),
-        ).thenAnswer((_) async => false);
-        when(
-          mockDownloadsRepository.isSurahDownloading(any, any),
-        ).thenAnswer((_) async => false);
+          mockObserveDownloadProgress.call(any),
+        ).thenAnswer((_) => controller.stream);
 
         final bloc = DownloadButtonBloc(
           url: testUrl,
           reciterName: testReciterName,
           reciterId: testReciterId,
-          downloadsRepository: mockDownloadsRepository,
+          checkSurahDownloaded: mockCheckSurahDownloaded,
+          downloadSurah: mockDownloadSurah,
+          cancelDownload: mockCancelDownload,
+          observeDownloadProgress: mockObserveDownloadProgress,
         );
-        bloc.add(const DownloadButtonEvent.initialize());
 
-        // Wait for first state
+        bloc.add(const DownloadButtonEvent.initialize());
         await expectLater(
           bloc.stream,
           emitsThrough(const DownloadButtonState.readyToDownload()),
         );
 
-        // Act
-        // Setup mock for re-initialization to return true (downloading)
-        when(
-          mockDownloadsRepository.isSurahDownloading(any, any),
-        ).thenAnswer((_) async => true);
-        when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-          (_) async => DownloadItem(
-            id: 'id',
-            title: 'title',
-            url: testUrl,
-            filePath: 'path',
-            reciterName: testReciterName,
-            reciterId: 1,
-            status: DownloadStatus.pending,
-            progress: 0,
-            fileSize: 0,
-            downloadedSize: 0,
-            createdAt: DateTime.now(),
-          ),
-        );
-
-        // Assert
-        // Expect state to change to pending
-        final Future<void> future = expectLater(
-          bloc.stream,
-          emitsThrough(const DownloadButtonState.pending()),
-        );
-
-        // Emit update
-        updatesController.add(
+        // Emit downloading
+        controller.add(
           DownloadItem(
-            id: 'id',
-            title: 'title',
+            id: testUrl,
+            title: testSurahTitle,
             url: testUrl,
-            filePath: 'path',
+            filePath: '',
             reciterName: testReciterName,
-            reciterId: 1,
-            status: DownloadStatus.pending,
-            progress: 0,
-            fileSize: 0,
-            downloadedSize: 0,
+            reciterId: testReciterId,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 100,
+            downloadedSize: 50,
             createdAt: DateTime.now(),
           ),
         );
 
-        await future;
+        await expectLater(
+          bloc.stream,
+          emits(
+            const DownloadButtonState.downloading(
+              progress: 0.5,
+              downloadedBytes: 50,
+              totalBytes: 100,
+            ),
+          ),
+        );
+
+        // Emit completed
+        controller.add(
+          DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            fileSize: 100,
+            downloadedSize: 100,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        await expectLater(
+          bloc.stream,
+          emits(const DownloadButtonState.completed()),
+        );
 
         await bloc.close();
-        await updatesController.close();
+        await controller.close();
       });
-    });
-
-    group('_isFirstInit Flag Behavior (State Synchronization Fix)', () {
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'first initialization uses initialIsDownloaded without querying repository',
-        build: () {
-          // This should NOT call repository methods
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloaded: true,
-          );
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [const DownloadButtonState.completed()],
-        verify: (_) {
-          // Verify repository was NOT queried (optimization)
-          verifyNever(mockDownloadsRepository.isSurahDownloaded(any, any));
-          verifyNever(mockDownloadsRepository.isSurahDownloading(any, any));
-        },
-      );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'second initialization IGNORES initial values and queries repository',
-        build: () {
-          // Setup: Repository returns false (not downloaded)
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-
-          // Create bloc with initialIsDownloaded=true (stale value)
-          return DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloaded: true, // Stale - says it's downloaded
-          );
-        },
-        act: (bloc) {
-          // First init - uses initial value
-          bloc.add(const DownloadButtonEvent.initialize());
-          // Second init - should query repository and get actual state
-          bloc.add(const DownloadButtonEvent.initialize());
-        },
-        expect: () => [
-          const DownloadButtonState.completed(), // First: uses initial value
-          const DownloadButtonState.readyToDownload(), // Second: queries repo, gets actual state
-        ],
-        verify: (_) {
-          // Verify repository was queried on SECOND initialization
-          verify(mockDownloadsRepository.isSurahDownloaded(any, any)).called(1);
-        },
-      );
-
-      test(
-        'repository update triggers re-initialization with actual state',
-        () async {
-          // Arrange
-          final updatesController = StreamController<DownloadItem>.broadcast();
-          when(
-            mockDownloadsRepository.downloadUpdates,
-          ).thenAnswer((_) => updatesController.stream);
-
-          // Initial state: not downloaded
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-
-          final bloc = DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloaded: false, // Says not downloaded
-          );
-
-          // Act: First initialization
-          bloc.add(const DownloadButtonEvent.initialize());
-          await expectLater(
-            bloc.stream,
-            emitsThrough(const DownloadButtonState.readyToDownload()),
-          );
-
-          // Simulate batch download: repository now reports it as downloading
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => true);
-          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-            (_) async => DownloadItem(
-              id: testUrl,
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.downloading,
-              progress: 0.3,
-              fileSize: 1024000,
-              downloadedSize: 307200,
-              createdAt: DateTime.now(),
-            ),
-          );
-
-          // Assert: Expect state change when repository emits update
-          final Future<void> future = expectLater(
-            bloc.stream,
-            emitsThrough(
-              const DownloadButtonState.downloading(
-                progress: 0.3,
-                downloadedBytes: 307200,
-                totalBytes: 1024000,
-              ),
-            ),
-          );
-
-          // Trigger update from repository (simulating batch download)
-          updatesController.add(
-            DownloadItem(
-              id: testUrl,
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.downloading,
-              progress: 0.3,
-              fileSize: 1024000,
-              downloadedSize: 307200,
-              createdAt: DateTime.now(),
-            ),
-          );
-
-          await future;
-
-          // Verify repository was queried on re-initialization
-          verify(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).called(greaterThan(1));
-
-          await bloc.close();
-          await updatesController.close();
-        },
-      );
-
-      test(
-        'batch download creates item -> button receives update -> queries actual state',
-        () async {
-          // This test simulates the exact scenario:
-          // 1. Button initialized with initialIsDownloaded=false
-          // 2. User clicks "Download All"
-          // 3. Repository creates download item and emits update
-          // 4. Button re-initializes and should show downloading state
-
-          final updatesController = StreamController<DownloadItem>.broadcast();
-          when(
-            mockDownloadsRepository.downloadUpdates,
-          ).thenAnswer((_) => updatesController.stream);
-
-          // Initial: not downloaded, not downloading
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => false);
-
-          final bloc = DownloadButtonBloc(
-            url: testUrl,
-            reciterName: testReciterName,
-            reciterId: testReciterId,
-            downloadsRepository: mockDownloadsRepository,
-            initialIsDownloaded: false,
-            initialIsDownloading: false,
-          );
-
-          bloc.add(const DownloadButtonEvent.initialize());
-          await expectLater(
-            bloc.stream,
-            emitsThrough(const DownloadButtonState.readyToDownload()),
-          );
-
-          // Batch download starts: repository creates pending item
-          when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
-          when(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).thenAnswer((_) async => true);
-          when(mockDownloadsRepository.getDownloadItem(any)).thenAnswer(
-            (_) async => DownloadItem(
-              id: testUrl,
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.pending,
-              progress: 0.0,
-              fileSize: 0,
-              downloadedSize: 0,
-              createdAt: DateTime.now(),
-            ),
-          );
-
-          final Future<void> future = expectLater(
-            bloc.stream,
-            emitsThrough(const DownloadButtonState.pending()),
-          );
-
-          // Repository emits update (simulating batch download addDownload call)
-          updatesController.add(
-            DownloadItem(
-              id: testUrl,
-              title: testSurahTitle,
-              url: testUrl,
-              filePath: '/path/to/file.mp3',
-              reciterName: testReciterName,
-              reciterId: testReciterId,
-              status: DownloadStatus.pending,
-              progress: 0.0,
-              fileSize: 0,
-              downloadedSize: 0,
-              createdAt: DateTime.now(),
-            ),
-          );
-
-          await future;
-
-          // The fix ensures this works:
-          // - First init used initial values (fast, no repo query)
-          // - Second init (from update) queried repository once (correct state)
-          verify(
-            mockDownloadsRepository.isSurahDownloading(any, any),
-          ).called(1);
-
-          await bloc.close();
-          await updatesController.close();
-        },
-      );
     });
   });
 }

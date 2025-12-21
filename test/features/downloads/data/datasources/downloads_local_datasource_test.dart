@@ -230,6 +230,127 @@ void main() {
       });
     });
 
+    group('addDownloads', () {
+      test('should do nothing when list is empty', () async {
+        // Arrange
+        when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
+
+        // Act
+        await dataSource.addDownloads([]);
+
+        // Assert
+        verifyNever(mockPrefs.setStringList(any, any));
+      });
+
+      test('should add multiple new downloads to empty list', () async {
+        // Arrange
+        final List<DownloadItem> items = [
+          createTestDownload(id: 'id1'),
+          createTestDownload(id: 'id2'),
+        ];
+        when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+
+        // Act
+        await dataSource.addDownloads(items);
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockPrefs.setStringList('downloads', captureAny),
+        ).captured;
+        final savedList = captured.first as List<String>;
+        expect(savedList.length, 2);
+      });
+
+      test('should update existing and add new downloads', () async {
+        // Arrange
+        final DownloadItem existing = createTestDownload(
+          id: 'existing',
+          title: 'Old',
+        );
+        final List<DownloadItem> items = [
+          createTestDownload(id: 'existing', title: 'New'),
+          createTestDownload(id: 'new'),
+        ];
+        when(
+          mockPrefs.getStringList('downloads'),
+        ).thenAnswer((_) async => [jsonEncode(existing.toJson())]);
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+
+        // Act
+        await dataSource.addDownloads(items);
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockPrefs.setStringList('downloads', captureAny),
+        ).captured;
+        final savedList = captured.first as List<String>;
+        expect(savedList.length, 2);
+
+        final List<DownloadItem> decodedList = savedList
+            .map((e) => DownloadItem.fromJson(jsonDecode(e)))
+            .toList();
+        expect(decodedList.firstWhere((e) => e.id == 'existing').title, 'New');
+        expect(decodedList.any((e) => e.id == 'new'), isTrue);
+      });
+    });
+
+    group('updateDownloads', () {
+      test('should do nothing when list is empty', () async {
+        // Arrange
+        when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
+
+        // Act
+        await dataSource.updateDownloads([]);
+
+        // Assert
+        verifyNever(mockPrefs.setStringList(any, any));
+      });
+
+      test('should update matching items and save', () async {
+        // Arrange
+        final DownloadItem item1 = createTestDownload(id: 'id1', progress: 0.1);
+        final DownloadItem item2 = createTestDownload(id: 'id2', progress: 0.2);
+        final List<DownloadItem> updates = [createTestDownload(id: 'id1')];
+
+        when(mockPrefs.getStringList('downloads')).thenAnswer(
+          (_) async => [jsonEncode(item1.toJson()), jsonEncode(item2.toJson())],
+        );
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+
+        // Act
+        await dataSource.updateDownloads(updates);
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockPrefs.setStringList('downloads', captureAny),
+        ).captured;
+        final savedList = captured.first as List<String>;
+        final List<DownloadItem> decodedList = savedList
+            .map((e) => DownloadItem.fromJson(jsonDecode(e)))
+            .toList();
+
+        expect(decodedList.firstWhere((e) => e.id == 'id1').progress, 1.0);
+        expect(decodedList.firstWhere((e) => e.id == 'id2').progress, 0.2);
+      });
+
+      test('should not save if no items match', () async {
+        // Arrange
+        final DownloadItem item = createTestDownload(id: 'id1');
+        final List<DownloadItem> updates = [createTestDownload(id: 'unknown')];
+
+        when(
+          mockPrefs.getStringList('downloads'),
+        ).thenAnswer((_) async => [jsonEncode(item.toJson())]);
+
+        // Act
+        await dataSource.updateDownloads(updates);
+
+        // Assert
+        verifyNever(mockPrefs.setStringList(any, any));
+      });
+    });
+
     group('updateDownload', () {
       test('should update existing download', () async {
         // Arrange

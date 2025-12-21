@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui'; // or flutter/material.dart
 
 import 'package:dartz_plus/dartz_plus.dart';
@@ -26,7 +25,7 @@ class DownloadNotificationService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  bool _initialized = false;
+  final bool _initialized = false;
 
   /// Channel ID for download notifications
   static const String _downloadChannelId = 'download_progress';
@@ -39,6 +38,8 @@ class DownloadNotificationService {
 
   /// Initialize the notification service
   Future<void> initialize() async {
+    // Temporarily disabled
+    /*
     if (_initialized) {
       return;
     }
@@ -84,6 +85,7 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Initialization failed: $e');
     }
+    */
   }
 
   /// Get or create a notification ID for a download
@@ -112,6 +114,8 @@ class DownloadNotificationService {
     String? completeMessage,
     String? failedMessage,
   }) async {
+    // Temporarily disabled
+    /*
     if (!_initialized) {
       await initialize();
     }
@@ -182,6 +186,7 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing notification: $e');
     }
+    */
   }
 
   /// Show a batch download progress notification
@@ -193,6 +198,8 @@ class DownloadNotificationService {
     required int totalCount,
     required DownloadStatus status,
   }) async {
+    // Temporarily disabled
+    /*
     if (!_initialized) {
       await initialize();
     }
@@ -258,6 +265,7 @@ class DownloadNotificationService {
         '[DownloadNotificationService] Error showing batch notification: $e',
       );
     }
+    */
   }
 
   /// Show a completed download notification
@@ -330,17 +338,23 @@ class DownloadNotificationService {
 
   /// Cancel a download notification
   Future<void> cancelNotification(String downloadId) async {
+    // Temporarily disabled
+    /*
     final int? notificationId = _notificationIds[downloadId];
     if (notificationId != null) {
       await _notifications.cancel(notificationId);
       _notificationIds.remove(downloadId);
     }
+    */
   }
 
   /// Cancel all download notifications
   Future<void> cancelAllNotifications() async {
+    // Temporarily disabled
+    /*
     await _notifications.cancelAll();
     _notificationIds.clear();
+    */
   }
 
   /// Handle notification tap

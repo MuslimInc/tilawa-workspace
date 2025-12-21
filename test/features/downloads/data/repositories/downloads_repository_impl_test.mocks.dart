@@ -71,6 +71,15 @@ class MockDownloadsLocalDataSource extends _i1.Mock
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> addDownloads(List<_i4.DownloadItem>? downloads) =>
+      (super.noSuchMethod(
+            Invocation.method(#addDownloads, [downloads]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<void> updateDownload(_i4.DownloadItem? download) =>
       (super.noSuchMethod(
             Invocation.method(#updateDownload, [download]),

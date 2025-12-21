@@ -11,6 +11,7 @@ abstract class DownloadsLocalDataSource {
   Future<List<DownloadItem>> getDownloads();
   Future<void> saveDownloads(List<DownloadItem> downloads);
   Future<void> addDownload(DownloadItem download);
+  Future<void> addDownloads(List<DownloadItem> downloads);
   Future<void> updateDownload(DownloadItem download);
   Future<void> updateDownloads(List<DownloadItem> downloads);
   Future<void> deleteDownload(String id);
@@ -54,6 +55,21 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
       downloads[index] = download;
     } else {
       downloads.add(download);
+    }
+    await saveDownloads(downloads);
+  }
+
+  @override
+  Future<void> addDownloads(List<DownloadItem> items) async {
+    if (items.isEmpty) return;
+    final List<DownloadItem> downloads = await getDownloads();
+    for (final item in items) {
+      final int index = downloads.indexWhere((d) => d.id == item.id);
+      if (index != -1) {
+        downloads[index] = item;
+      } else {
+        downloads.add(item);
+      }
     }
     await saveDownloads(downloads);
   }

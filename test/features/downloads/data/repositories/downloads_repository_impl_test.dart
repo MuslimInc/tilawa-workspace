@@ -301,10 +301,9 @@ void main() {
         await repository.startDownloadBatch(items);
 
         // Assert
-        verify(mockLocalDataSource.addDownload(any)).called(2);
-        // We verify that queue enqueueBatch is called is implied if no errors
-        // Ideally we should mock QueueManager.instance but it's a singleton in the implementation
-        // The implementation skips enqueueBatch if MissingPluginException occurs, which is fine for unit test of repo
+        verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+        verify(mockLocalDataSource.addDownloads(any)).called(1);
+        verifyNever(mockLocalDataSource.addDownload(any));
       });
 
       test('should emit updates to stream', () async {
@@ -1993,6 +1992,7 @@ void main() {
       // Act
       final List<DownloadItem> results = await repository
           .getDownloadProgress(testId)
+          .take(1)
           .toList();
 
       // Assert

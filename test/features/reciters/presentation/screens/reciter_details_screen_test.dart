@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/assertions.dart';
@@ -13,6 +14,7 @@ import 'package:muzakri/core/entities/moshaf_entity.dart';
 import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
@@ -39,15 +41,29 @@ class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
+class MockCheckSurahDownloadedUseCase extends Mock
+    implements CheckSurahDownloadedUseCase {}
+
+class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
+
+class MockCancelDownloadUseCase extends Mock implements CancelDownloadUseCase {}
+
+class MockObserveDownloadProgressUseCase extends Mock
+    implements ObserveDownloadProgressUseCase {}
+
 void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockSettingsCubit mockSettingsCubit;
 
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
+  late MockDownloadSurahUseCase mockDownloadSurahUseCase;
+  late MockCancelDownloadUseCase mockCancelDownloadUseCase;
+  late MockObserveDownloadProgressUseCase mockObserveDownloadProgressUseCase;
+
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
-    // Removed ReciterDetailsEvent.started fallback as it doesn't exist
 
     // Setup GetIt
     GetIt.instance.registerSingleton<DownloadsRepository>(
@@ -73,6 +89,44 @@ void main() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockSettingsCubit = MockSettingsCubit();
+
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockDownloadSurahUseCase = MockDownloadSurahUseCase();
+    mockCancelDownloadUseCase = MockCancelDownloadUseCase();
+    mockObserveDownloadProgressUseCase = MockObserveDownloadProgressUseCase();
+
+    // Register UseCases in GetIt
+    if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
+      GetIt.instance.registerSingleton<CheckSurahDownloadedUseCase>(
+        mockCheckSurahDownloadedUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<DownloadSurahUseCase>()) {
+      GetIt.instance.registerSingleton<DownloadSurahUseCase>(
+        mockDownloadSurahUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<CancelDownloadUseCase>()) {
+      GetIt.instance.registerSingleton<CancelDownloadUseCase>(
+        mockCancelDownloadUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<ObserveDownloadProgressUseCase>()) {
+      GetIt.instance.registerSingleton<ObserveDownloadProgressUseCase>(
+        mockObserveDownloadProgressUseCase,
+      );
+    }
+
+    when(
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
+
+    when(
+      () => mockObserveDownloadProgressUseCase.call(any()),
+    ).thenAnswer((_) => const Stream.empty());
 
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
@@ -167,6 +221,7 @@ void main() {
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           restorationScopeId: restorationScopeId,
           localizationsDelegates: const [
             AppLocalizations.delegate,

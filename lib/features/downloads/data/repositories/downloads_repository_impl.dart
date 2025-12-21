@@ -7,10 +7,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
-import '../../domain/repositories/batch_download_repository.dart';
-import '../../domain/repositories/download_query_repository.dart';
 import '../../domain/repositories/downloads_repository.dart';
-import '../../domain/repositories/single_download_repository.dart';
 import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
 import '../services/batch_download_manager.dart';
@@ -23,9 +20,6 @@ import '../services/download_service.dart';
 /// - Use cases can inject specific interfaces they need
 /// - Backward compatibility maintained via DownloadsRepository
 @LazySingleton(as: DownloadsRepository)
-@LazySingleton(as: SingleDownloadRepository)
-@LazySingleton(as: BatchDownloadRepository)
-@LazySingleton(as: DownloadQueryRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
   DownloadsRepositoryImpl(
     this.localDataSource,
@@ -563,6 +557,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> deleteDownloadsForReciter(String reciterName) async {
+    // Cancel any active downloads first
+    await cancelDownloadsForReciter(reciterName);
+
     final List<DownloadItem> downloads = await getDownloadsForReciter(
       reciterName,
     );
@@ -622,6 +619,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> clearAllDownloads() async {
+    // Stop all active downloads first
+    try {
+      // ignore: missing_plugin_exception_catch
+      await DownloadQueueManager.instance.stopAll();
+    } catch (e) {
+      logger.w('[DownloadsRepository] Error stopping all downloads: $e');
+    }
+
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final download in downloads) {
       if (localDataSource.isFileExists(download.filePath)) {
@@ -633,12 +638,16 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Stream<DownloadItem> getDownloadProgress(String id) async* {
-    // This would typically be implemented with a download manager
-    // For now, we'll simulate progress updates
-    final DownloadItem? download = await getDownloadItem(id);
-    if (download != null) {
-      yield download;
+    // Yield current state first
+    final DownloadItem? current = await getDownloadItem(id);
+    if (current != null) {
+      yield current;
     }
+
+    // Then yield updates for this specific download
+    yield* _downloadUpdatesController.stream.where(
+      (item) => item.id == id || item.url == id,
+    );
   }
 
   @override
@@ -765,6 +774,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       })
     >
     queueItems = [];
+    final List<DownloadItem> dbItems = [];
 
     // Process items efficiently
     for (final item in items) {
@@ -800,8 +810,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         downloadedSize: 0,
         createdAt: DateTime.now(),
       );
-      // Add to DB explicitly
-      await addDownload(downloadItem);
+      dbItems.add(downloadItem);
 
       queueItems.add((
         id: downloadId,
@@ -816,6 +825,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
 
     if (queueItems.isNotEmpty) {
+      // Add all to DB in one batch to avoid O(N^2) SharedPreferences I/O
+      await localDataSource.addDownloads(dbItems);
+
+      // Also emit updates to the stream for each item so listeners (UI) know they are pending
+      for (final item in dbItems) {
+        _downloadUpdatesController.add(item);
+      }
+
       // Notify batch manager
       final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';
       batchDownloadManager.startBatch(

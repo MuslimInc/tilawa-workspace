@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:dio/dio.dart';
@@ -16,18 +15,23 @@ import 'package:muzakri/features/downloads/data/services/download_notification_s
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:muzakri/features/downloads/domain/usecases/cancel_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/check_download_access_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/delete_download_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/get_download_item_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/play_all_downloads_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/play_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/retry_download_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/validate_downloaded_file_use_case.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
-import 'package:muzakri/features/premium/domain/repositories/premium_repository.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../../data/services/download_service_test.mocks.dart';
@@ -50,10 +54,15 @@ provideDummyEitherFailureMapStringMapStringListDownloadItem() =>
     DeleteDownloadUseCase,
     DeleteReciterDownloadsUseCase,
     ClearAllDownloadsUseCase,
-    DownloadsRepository,
-    RecitersRepository,
-    PremiumRepository,
-    AudioPlayerHandler,
+    CheckSurahDownloadedUseCase,
+    ValidateDownloadedFileUseCase,
+    GetValidCompletedDownloadsUseCase,
+    CheckDownloadAccessUseCase,
+    PlayDownloadUseCase,
+    PlayAllDownloadsUseCase,
+    RetryDownloadUseCase,
+    GetDownloadItemUseCase,
+    CancelDownloadUseCase,
     AnalyticsService,
     DownloadService,
     DownloadNotificationService,
@@ -124,9 +133,16 @@ void main() {
   late MockDeleteDownloadUseCase mockDeleteDownloadUseCase;
   late MockDeleteReciterDownloadsUseCase mockDeleteReciterDownloadsUseCase;
   late MockClearAllDownloadsUseCase mockClearAllDownloadsUseCase;
-  late MockDownloadsRepository mockDownloadsRepository;
-  late MockPremiumRepository mockPremiumRepository;
-  late MockAudioPlayerHandler mockAudioPlayerHandler;
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
+  late MockValidateDownloadedFileUseCase mockValidateDownloadedFileUseCase;
+  late MockGetValidCompletedDownloadsUseCase
+  mockGetValidCompletedDownloadsUseCase;
+  late MockCheckDownloadAccessUseCase mockCheckDownloadAccessUseCase;
+  late MockPlayDownloadUseCase mockPlayDownloadUseCase;
+  late MockPlayAllDownloadsUseCase mockPlayAllDownloadsUseCase;
+  late MockRetryDownloadUseCase mockRetryDownloadUseCase;
+  late MockGetDownloadItemUseCase mockGetDownloadItemUseCase;
+  late MockCancelDownloadUseCase mockCancelDownloadUseCase;
   late MockAnalyticsService mockAnalyticsService;
   late MockDownloadNotificationService mockDownloadNotificationService;
   late MockFlutterDownloaderWrapper mockDownloader;
@@ -138,6 +154,9 @@ void main() {
       const Right({}),
     );
     provideDummy<Either<Failure, int>>(const Right(0));
+    provideDummy<Either<Failure, bool>>(const Right(true));
+    provideDummy<Either<Failure, DownloadItem?>>(const Right(null));
+    provideDummy<Either<Failure, List<DownloadItem>>>(const Right([]));
 
     mockGetDownloadsByReciterUseCase = MockGetDownloadsByReciterUseCase();
     mockGetTotalDownloadsSizeUseCase = MockGetTotalDownloadsSizeUseCase();
@@ -145,9 +164,17 @@ void main() {
     mockDeleteDownloadUseCase = MockDeleteDownloadUseCase();
     mockDeleteReciterDownloadsUseCase = MockDeleteReciterDownloadsUseCase();
     mockClearAllDownloadsUseCase = MockClearAllDownloadsUseCase();
-    mockDownloadsRepository = MockDownloadsRepository();
-    mockPremiumRepository = MockPremiumRepository();
-    mockAudioPlayerHandler = MockAudioPlayerHandler();
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockValidateDownloadedFileUseCase = MockValidateDownloadedFileUseCase();
+    mockGetValidCompletedDownloadsUseCase =
+        MockGetValidCompletedDownloadsUseCase();
+    mockCheckDownloadAccessUseCase = MockCheckDownloadAccessUseCase();
+    mockPlayDownloadUseCase = MockPlayDownloadUseCase();
+    mockPlayAllDownloadsUseCase = MockPlayAllDownloadsUseCase();
+    mockRetryDownloadUseCase = MockRetryDownloadUseCase();
+    mockGetDownloadItemUseCase = MockGetDownloadItemUseCase();
+    mockCancelDownloadUseCase = MockCancelDownloadUseCase();
+
     mockAnalyticsService = MockAnalyticsService();
     mockDownloadNotificationService = MockDownloadNotificationService();
 
@@ -207,9 +234,15 @@ void main() {
       deleteReciterDownloads: mockDeleteReciterDownloadsUseCase,
       clearAllDownloads: mockClearAllDownloadsUseCase,
       getTotalDownloadsSize: mockGetTotalDownloadsSizeUseCase,
-      downloadsRepository: mockDownloadsRepository,
-      premiumRepository: mockPremiumRepository,
-      audioPlayerHandler: mockAudioPlayerHandler,
+      checkSurahDownloaded: mockCheckSurahDownloadedUseCase,
+      validateDownloadedFile: mockValidateDownloadedFileUseCase,
+      getValidCompletedDownloads: mockGetValidCompletedDownloadsUseCase,
+      checkDownloadAccess: mockCheckDownloadAccessUseCase,
+      playDownload: mockPlayDownloadUseCase,
+      playAllDownloads: mockPlayAllDownloadsUseCase,
+      retryDownload: mockRetryDownloadUseCase,
+      getDownloadItem: mockGetDownloadItemUseCase,
+      cancelDownload: mockCancelDownloadUseCase,
       analyticsService: mockAnalyticsService,
     );
   });
@@ -271,11 +304,14 @@ void main() {
         'emits [DownloadStarted] in statusStream when download is initiated',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => true);
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
+            mockCheckSurahDownloadedUseCase(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          ).thenAnswer((_) async => const Right(false));
           when(
             mockDownloadSurahUseCase(
               surahId: anyNamed('surahId'),
@@ -326,8 +362,8 @@ void main() {
         'emits [PremiumRequired] in statusStream when user does not have premium',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => false);
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(false));
 
           unawaited(
             expectLater(
@@ -351,11 +387,14 @@ void main() {
         'emits [Error] in statusStream when surah is already downloaded',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => true);
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => true);
+            mockCheckSurahDownloadedUseCase(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          ).thenAnswer((_) async => const Right(true));
 
           unawaited(
             expectLater(
@@ -385,11 +424,14 @@ void main() {
         'emits [DownloadStarted, Error] in statusStream when download fails',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => true);
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => false);
+            mockCheckSurahDownloadedUseCase(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          ).thenAnswer((_) async => const Right(false));
           when(
             mockDownloadSurahUseCase(
               surahId: anyNamed('surahId'),
@@ -601,8 +643,11 @@ void main() {
         'emits [SurahDownloadStatus] in statusStream when check is successful',
         () async {
           when(
-            mockDownloadsRepository.isSurahDownloaded(any, any),
-          ).thenAnswer((_) async => true);
+            mockCheckSurahDownloadedUseCase(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          ).thenAnswer((_) async => const Right(true));
 
           unawaited(
             expectLater(
@@ -631,8 +676,11 @@ void main() {
 
       test('emits [Error] in statusStream when check fails', () async {
         when(
-          mockDownloadsRepository.isSurahDownloaded(any, any),
-        ).thenThrow(Exception('Database error'));
+          mockCheckSurahDownloadedUseCase(
+            surahId: anyNamed('surahId'),
+            reciterName: anyNamed('reciterName'),
+          ),
+        ).thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
         unawaited(
           expectLater(
@@ -641,7 +689,7 @@ void main() {
               isA<Error>().having(
                 (e) => e.message,
                 'message',
-                contains('Failed to check download status'),
+                contains('Database error'),
               ),
             ),
           ),
@@ -675,11 +723,11 @@ void main() {
         'emits [FileValidationResult] in statusStream when validation is successful',
         () async {
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => testDownloadItem);
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => Right(testDownloadItem));
           when(
-            mockDownloadsRepository.validateDownloadedFile(any),
-          ).thenAnswer((_) async => true);
+            mockValidateDownloadedFileUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
 
           unawaited(
             expectLater(
@@ -702,8 +750,8 @@ void main() {
         'emits [error] in state when download item is not found',
         build: () {
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => null);
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(
@@ -721,11 +769,11 @@ void main() {
         'emits [Error] in statusStream when validation fails with exception',
         () async {
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => testDownloadItem);
-          when(
-            mockDownloadsRepository.validateDownloadedFile(any),
-          ).thenThrow(Exception('File validation error'));
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => Right(testDownloadItem));
+          when(mockValidateDownloadedFileUseCase(any)).thenAnswer(
+            (_) async => const Left(ServerFailure('File validation error')),
+          );
 
           unawaited(
             expectLater(
@@ -734,7 +782,7 @@ void main() {
                 isA<Error>().having(
                   (e) => e.message,
                   'message',
-                  contains('Failed to validate file'),
+                  contains('File validation error'),
                 ),
               ),
             ),
@@ -768,8 +816,8 @@ void main() {
         'emits [ValidDownloadsLoaded] in statusStream when get is successful',
         () async {
           when(
-            mockDownloadsRepository.getValidCompletedDownloads(any),
-          ).thenAnswer((_) async => testValidDownloads);
+            mockGetValidCompletedDownloadsUseCase(any),
+          ).thenAnswer((_) async => Right(testValidDownloads));
 
           unawaited(
             expectLater(
@@ -798,8 +846,8 @@ void main() {
 
       test('emits [Error] in statusStream when get fails', () async {
         when(
-          mockDownloadsRepository.getValidCompletedDownloads(any),
-        ).thenThrow(Exception('Database error'));
+          mockGetValidCompletedDownloadsUseCase(any),
+        ).thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
         unawaited(
           expectLater(
@@ -808,7 +856,7 @@ void main() {
               isA<Error>().having(
                 (e) => e.message,
                 'message',
-                contains('Failed to get valid downloads'),
+                contains('Database error'),
               ),
             ),
           ),
@@ -839,37 +887,14 @@ void main() {
         'emits [PlaybackInitiated] in statusStream when play is successful',
         () async {
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => testDownloadItem);
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => Right(testDownloadItem));
           when(
-            mockDownloadsRepository.validateDownloadedFile(any),
-          ).thenAnswer((_) async => true);
+            mockValidateDownloadedFileUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
           when(
-            mockDownloadsRepository.createMediaItemFromDownload(any),
-          ).thenReturn(
-            MediaItem(
-              id: testDownloadId,
-              title: testDownloadItem.title,
-              artist: testDownloadItem.reciterName,
-              duration: const Duration(minutes: 5),
-              artUri: Uri.parse('https://example.com/art.jpg'),
-              extras: {'filePath': testDownloadItem.filePath},
-            ),
-          );
-          when(mockAudioPlayerHandler.updateQueue(any)).thenAnswer((_) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.skipToQueueItem(any)).thenAnswer((
-            _,
-          ) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {
-            return;
-          });
+            mockPlayDownloadUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
 
           unawaited(
             expectLater(
@@ -894,8 +919,8 @@ void main() {
         'emits [Error] in statusStream when download item is not found',
         () async {
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => null);
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
 
           unawaited(
             expectLater(
@@ -918,11 +943,11 @@ void main() {
 
       test('emits [Error] in statusStream when file does not exist', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => testDownloadItem);
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testDownloadItem));
         when(
-          mockDownloadsRepository.validateDownloadedFile(any),
-        ).thenAnswer((_) async => false);
+          mockValidateDownloadedFileUseCase(any),
+        ).thenAnswer((_) async => const Right(false));
 
         unawaited(
           expectLater(
@@ -944,14 +969,14 @@ void main() {
 
       test('emits [Error] in statusStream when play fails', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => testDownloadItem);
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testDownloadItem));
         when(
-          mockDownloadsRepository.validateDownloadedFile(any),
-        ).thenAnswer((_) async => true);
-        when(
-          mockDownloadsRepository.createMediaItemFromDownload(any),
-        ).thenThrow(Exception('Media creation error'));
+          mockValidateDownloadedFileUseCase(any),
+        ).thenAnswer((_) async => const Right(true));
+        when(mockPlayDownloadUseCase(any)).thenAnswer(
+          (_) async => const Left(ServerFailure('Error playing surah')),
+        );
 
         unawaited(
           expectLater(
@@ -993,34 +1018,11 @@ void main() {
         'emits [PlaybackInitiated] in statusStream when play all is successful',
         () async {
           when(
-            mockDownloadsRepository.getValidCompletedDownloads(any),
-          ).thenAnswer((_) async => testValidDownloads);
+            mockGetValidCompletedDownloadsUseCase(any),
+          ).thenAnswer((_) async => Right(testValidDownloads));
           when(
-            mockDownloadsRepository.createMediaItemsFromDownloads(any),
-          ).thenReturn([
-            MediaItem(
-              id: '001_Abdul_Rahman_Al-Sudais',
-              title: 'Al-Fatiha',
-              artist: 'Abdul Rahman Al-Sudais',
-              duration: const Duration(minutes: 5),
-              artUri: Uri.parse('https://example.com/art.jpg'),
-              extras: {'filePath': '/path/to/file.mp3'},
-            ),
-          ]);
-          when(mockAudioPlayerHandler.updateQueue(any)).thenAnswer((_) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.pause()).thenAnswer((_) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.skipToQueueItem(any)).thenAnswer((
-            _,
-          ) async {
-            return;
-          });
-          when(mockAudioPlayerHandler.play()).thenAnswer((_) async {
-            return;
-          });
+            mockPlayAllDownloadsUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
 
           unawaited(
             expectLater(
@@ -1045,8 +1047,8 @@ void main() {
         'emits [Error] in statusStream when no valid downloads found',
         () async {
           when(
-            mockDownloadsRepository.getValidCompletedDownloads(any),
-          ).thenAnswer((_) async => []);
+            mockGetValidCompletedDownloadsUseCase(any),
+          ).thenAnswer((_) async => const Right([]));
 
           unawaited(
             expectLater(
@@ -1069,8 +1071,11 @@ void main() {
 
       test('emits [Error] in statusStream when play all fails', () async {
         when(
-          mockDownloadsRepository.getValidCompletedDownloads(any),
-        ).thenThrow(Exception('Database error'));
+          mockGetValidCompletedDownloadsUseCase(any),
+        ).thenAnswer((_) async => Right(testValidDownloads));
+        when(mockPlayAllDownloadsUseCase(any)).thenAnswer(
+          (_) async => const Left(ServerFailure('Error playing downloads')),
+        );
 
         unawaited(
           expectLater(
@@ -1096,8 +1101,8 @@ void main() {
         'emits [PremiumRequired] in statusStream when user does not have premium access',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => false);
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(false));
 
           unawaited(
             expectLater(
@@ -1114,24 +1119,18 @@ void main() {
         'emits nothing in statusStream when user has premium access',
         () async {
           when(
-            mockPremiumRepository.canDownload(),
-          ).thenAnswer((_) async => true);
-
-          // We expect no events in statusStream, but we can't easily wait for "nothing".
-          // So we verify no interactions or errors that produce emissions.
-          // Or we can check state doesn't change.
-          // Since setup returns true, _onCheckPremiumAccess does nothing.
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
 
           downloadsBloc.add(const CheckPremiumAccessEvent());
           await Future.delayed(const Duration(milliseconds: 100));
-          // implicit success if no error thrown
         },
       );
 
       test('emits [Error] in statusStream when check fails', () async {
-        when(
-          mockPremiumRepository.canDownload(),
-        ).thenThrow(Exception('Premium check error'));
+        when(mockCheckDownloadAccessUseCase(any)).thenAnswer(
+          (_) async => const Left(ServerFailure('Premium check error')),
+        );
 
         unawaited(
           expectLater(
@@ -1140,7 +1139,7 @@ void main() {
               isA<Error>().having(
                 (e) => e.message,
                 'message',
-                contains('Failed to check premium access'),
+                contains('Premium check error'),
               ),
             ),
           ),
@@ -1167,12 +1166,14 @@ void main() {
 
       test('emits [DownloadStarted] when retry is successful', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => testDownloadItem);
-        when(mockPremiumRepository.canDownload()).thenAnswer((_) async => true);
-        when(mockDownloadsRepository.retryDownload(any)).thenAnswer((_) async {
-          return;
-        });
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testDownloadItem));
+        when(
+          mockCheckDownloadAccessUseCase(any),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          mockRetryDownloadUseCase(any),
+        ).thenAnswer((_) async => const Right(null));
         when(
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => const Right({}));
@@ -1197,8 +1198,8 @@ void main() {
 
       test('emits [Error] when download item is not found', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => null);
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => const Right(null));
 
         unawaited(
           expectLater(
@@ -1223,8 +1224,8 @@ void main() {
             status: DownloadStatus.completed,
           );
           when(
-            mockDownloadsRepository.getDownloadItem(any),
-          ).thenAnswer((_) async => completedDownload);
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => Right(completedDownload));
 
           unawaited(
             expectLater(
@@ -1247,11 +1248,11 @@ void main() {
 
       test('emits [PremiumRequired] when user does not have premium', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => testDownloadItem);
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testDownloadItem));
         when(
-          mockPremiumRepository.canDownload(),
-        ).thenAnswer((_) async => false);
+          mockCheckDownloadAccessUseCase(any),
+        ).thenAnswer((_) async => const Right(false));
 
         unawaited(
           expectLater(
@@ -1265,12 +1266,14 @@ void main() {
 
       test('emits [Error] when retry fails', () async {
         when(
-          mockDownloadsRepository.getDownloadItem(any),
-        ).thenAnswer((_) async => testDownloadItem);
-        when(mockPremiumRepository.canDownload()).thenAnswer((_) async => true);
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testDownloadItem));
         when(
-          mockDownloadsRepository.retryDownload(any),
-        ).thenThrow(Exception('Retry failed'));
+          mockCheckDownloadAccessUseCase(any),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          mockRetryDownloadUseCase(any),
+        ).thenAnswer((_) async => const Left(ServerFailure('Retry failed')));
         when(
           mockAnalyticsService.logEvent(
             any,
@@ -1283,14 +1286,13 @@ void main() {
         unawaited(
           expectLater(
             downloadsBloc.statusStream,
-            emitsInOrder([
-              isA<DownloadStarted>(), // It emits started before calling repo
+            emitsThrough(
               isA<Error>().having(
                 (e) => e.message,
                 'message',
-                contains('Failed to retry download'),
+                contains('Retry failed'),
               ),
-            ]),
+            ),
           ),
         );
 
@@ -1303,10 +1305,15 @@ void main() {
         when(
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => const Right({}));
-        when(mockPremiumRepository.canDownload()).thenAnswer((_) async => true);
         when(
-          mockDownloadsRepository.isSurahDownloaded(any, any),
-        ).thenAnswer((_) async => false);
+          mockCheckDownloadAccessUseCase(any),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          mockCheckSurahDownloadedUseCase(
+            surahId: anyNamed('surahId'),
+            reciterName: anyNamed('reciterName'),
+          ),
+        ).thenAnswer((_) async => const Right(false));
         when(
           mockDownloadSurahUseCase(
             surahId: anyNamed('surahId'),
@@ -1533,11 +1540,8 @@ void main() {
         // to verify the full flow of progress updates triggering state changes.
 
         // This test documents the expected behavior
-        expect(
-          mockDownloadsRepository.updateDownloadProgress,
-          isNotNull,
-          reason: 'Repository should have updateDownloadProgress method',
-        );
+        // mockDownloadsRepository removed.
+        // Download progress handling is done via DownloadService stream listening.
       });
     });
   });

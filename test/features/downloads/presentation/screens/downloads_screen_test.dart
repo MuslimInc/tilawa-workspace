@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -7,9 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
+import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
@@ -17,80 +20,94 @@ import 'package:muzakri/l10n/generated/app_localizations.dart';
 
 import 'downloads_screen_test.mocks.dart';
 
-// Provide dummy value for DownloadsState - Mockito will use this automatically
-// The function name must follow the pattern: provideDummy<TypeName>
-// This must be a top-level function in the same file as @GenerateMocks
+// Robust Mock Implementation avoiding noSuchMethod on getters
+class MockDownloadsBloc extends MockBloc<DownloadsEvent, DownloadsState>
+    implements DownloadsBloc {
+  final statusController = StreamController<DownloadsStatus>.broadcast();
+
+  @override
+  Stream<DownloadsStatus> get statusStream => statusController.stream;
+}
+
 @visibleForTesting
 DownloadsState provideDummyDownloadsState() => const DownloadsState();
 
-@GenerateMocks([DownloadsBloc, DownloadsRepository])
+@GenerateMocks([
+  DownloadsRepository,
+  CheckSurahDownloadedUseCase,
+  DownloadSurahUseCase,
+])
 void main() {
-  late MockDownloadsBloc mockDownloadsBloc;
+  MockDownloadsBloc? mockDownloadsBloc;
   late MockDownloadsRepository mockDownloadsRepository;
-  late StreamController<DownloadsState> stateController;
+  late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
+  late MockDownloadSurahUseCase mockDownloadSurahUseCase;
 
   setUpAll(() {
     provideDummy(const DownloadsState());
+    provideDummy<Future<void>>(Future.value());
+    provideDummy<Stream<DownloadsState>>(const Stream.empty());
+    provideDummy<Stream<DownloadsStatus>>(const Stream.empty());
+    // Provide dummy values for UseCase results
+    provideDummy<Either<Failure, bool>>(const Right(false));
+    provideDummy<Either<Failure, void>>(const Right(null));
   });
 
   setUp(() {
     // Create a fresh mock for each test
     mockDownloadsBloc = MockDownloadsBloc();
     mockDownloadsRepository = MockDownloadsRepository();
-    stateController = StreamController<DownloadsState>.broadcast();
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockDownloadSurahUseCase = MockDownloadSurahUseCase();
 
     // Register dependencies in GetIt for DownloadButtonBloc
     final GetIt getIt = GetIt.instance;
-    getIt.allowReassignment = true; // Allow overwriting for tests
+    getIt.allowReassignment = true;
 
     if (!getIt.isRegistered<DownloadsRepository>()) {
       getIt.registerSingleton<DownloadsRepository>(mockDownloadsRepository);
     }
-
-    // Register DownloadButtonBloc factory
-    if (!getIt.isRegistered<DownloadButtonBloc>()) {
-      getIt.registerFactoryParam<DownloadButtonBloc, String, String>(
-        (url, reciterName) => DownloadButtonBloc(
-          url: url,
-          reciterName: reciterName,
-          reciterId: 0,
-          downloadsRepository: mockDownloadsRepository,
-        ),
+    if (!getIt.isRegistered<CheckSurahDownloadedUseCase>()) {
+      getIt.registerSingleton<CheckSurahDownloadedUseCase>(
+        mockCheckSurahDownloadedUseCase,
       );
     }
+    if (!getIt.isRegistered<DownloadSurahUseCase>()) {
+      getIt.registerSingleton<DownloadSurahUseCase>(mockDownloadSurahUseCase);
+    }
 
-    // Set up stream to use our controller
-    when(mockDownloadsBloc.stream).thenAnswer((_) => stateController.stream);
-    when(mockDownloadsBloc.statusStream).thenAnswer(
-      (_) => const Stream<DownloadsStatus>.empty().asBroadcastStream(),
-    );
+    // Mock UseCase responses
+    when(
+      mockCheckSurahDownloadedUseCase.call(
+        surahId: anyNamed('surahId'),
+        reciterName: anyNamed('reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
 
-    // Set up default state (tests can override this)
-    when(mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      mockDownloadSurahUseCase.call(
+        surahId: anyNamed('surahId'),
+        surahTitle: anyNamed('surahTitle'),
+        reciterName: anyNamed('reciterName'),
+        reciterId: anyNamed('reciterId'),
+      ),
+    ).thenAnswer((_) async => const Right(null));
 
-    // Stub add() method to prevent errors when DownloadsScreen dispatches events
-    when(mockDownloadsBloc.add(any)).thenReturn(null);
-
-    // Stub close() method to prevent errors during widget disposal
-    when(mockDownloadsBloc.close()).thenAnswer((_) async {
-      await stateController.close();
-      return;
-    });
-
-    // Stub repository methods needed by DownloadButtonBloc
+    // Stub repository
     when(
       mockDownloadsRepository.isSurahDownloaded(any, any),
     ).thenAnswer((_) async => false);
     when(
       mockDownloadsRepository.isSurahDownloading(any, any),
     ).thenAnswer((_) async => false);
+    when(
+      mockDownloadsRepository.getDownloadProgress(any),
+    ).thenAnswer((_) => const Stream.empty());
   });
 
   tearDown(() {
-    // Close the controller if it's still open
-    if (!stateController.isClosed) {
-      stateController.close();
-    }
+    mockDownloadsBloc?.statusController.close();
+    mockDownloadsBloc?.close();
     GetIt.instance.reset();
   });
 
@@ -98,7 +115,7 @@ void main() {
     return RepositoryProvider<DownloadsRepository>.value(
       value: mockDownloadsRepository,
       child: BlocProvider<DownloadsBloc>.value(
-        value: mockDownloadsBloc,
+        value: mockDownloadsBloc!,
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -151,19 +168,21 @@ void main() {
         },
       };
 
-      // Set up state and emit it through the stream
+      // Set up state
       final loadedState = DownloadsState(
         status: DownloadsStateStatus.loaded,
         downloads: downloads,
       );
-      when(mockDownloadsBloc.state).thenReturn(loadedState);
 
-      // Emit state first so BlocBuilder can receive it when it subscribes
-      stateController.add(loadedState);
+      // Use whenListen for MockBloc state emission
+      whenListen(
+        mockDownloadsBloc!,
+        Stream.value(loadedState),
+        initialState: loadedState,
+      );
 
       // Act
       await tester.pumpWidget(createTestWidget());
-      // Pump a few frames to allow initState, postFrameCallback, and BlocBuilder to complete
       await tester.pumpAndSettle();
 
       // Assert
@@ -175,7 +194,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      var download = DownloadItem(
+      final download = DownloadItem(
         id: 'test_id',
         title: 'Test Surah',
         url: 'https://example.com/test.mp3',
@@ -188,7 +207,7 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      var loadedState = DownloadsState(
+      final initialState = DownloadsState(
         status: DownloadsStateStatus.loaded,
         downloads: {
           'Test Reciter': {
@@ -197,17 +216,20 @@ void main() {
         },
       );
 
-      // Emit state BEFORE building widget
-      when(mockDownloadsBloc.state).thenReturn(loadedState);
-      stateController.add(loadedState);
+      // Use a controller to update MockBloc state
+      final stateController = StreamController<DownloadsState>.broadcast();
+      whenListen(
+        mockDownloadsBloc!,
+        stateController.stream,
+        initialState: initialState,
+      );
 
-      // Stub repo to confirm downloading status so DownloadButtonBloc picks it up
+      // Stub repo
       when(
         mockDownloadsRepository.isSurahDownloading(any, any),
       ).thenAnswer((_) async => true);
-      when(
-        mockDownloadsRepository.getDownloadProgress(any),
-      ).thenAnswer((_) => const Stream.empty());
+
+      // We also need to stub getDownloadItem because DownloadButton might refresh
       when(
         mockDownloadsRepository.getDownloadItem(any),
       ).thenAnswer((_) async => download);
@@ -219,29 +241,37 @@ void main() {
       // Assert - Initial state
       expect(find.textContaining('0%'), findsOneWidget);
 
-      // Act - Update progress to 30%
-      download = download.copyWith(progress: 0.3, downloadedSize: 300);
-      loadedState = DownloadsState(
+      // Update progress
+      final DownloadItem updatedDownload = download.copyWith(
+        progress: 0.3,
+        downloadedSize: 300,
+      );
+      final updatedState = DownloadsState(
         status: DownloadsStateStatus.loaded,
         downloads: {
           'Test Reciter': {
-            'Default': [download],
+            'Default': [updatedDownload],
           },
         },
       );
-      when(mockDownloadsBloc.state).thenReturn(loadedState);
-      stateController.add(loadedState);
 
-      // Wait for rebuild - pump multiple times to ensure BlocBuilder processes the update
+      // Emit new state
+      stateController.add(updatedState);
+
+      // Pump frames to allow BlocListener/Builder to react
       await tester.pumpAndSettle();
 
-      // Assert - Updated state
+      // Assert
       expect(find.textContaining('30%'), findsOneWidget);
+
+      await stateController.close();
     });
 
     testWidgets('should reflect progress updates in real-time', (
       WidgetTester tester,
     ) async {
+      final stateController = StreamController<DownloadsState>.broadcast();
+
       // Arrange
       var download = DownloadItem(
         id: 'test_id',
@@ -265,8 +295,20 @@ void main() {
           },
         },
       );
-      when(mockDownloadsBloc.state).thenReturn(loadedState);
-      stateController.add(loadedState);
+
+      whenListen(
+        mockDownloadsBloc!,
+        stateController.stream,
+        initialState: loadedState,
+      );
+
+      // Stubs for DownloadButton
+      when(
+        mockDownloadsRepository.isSurahDownloading(any, any),
+      ).thenAnswer((_) async => true);
+      when(
+        mockDownloadsRepository.getDownloadItem(any),
+      ).thenAnswer((_) async => download);
 
       // Create widget once
       await tester.pumpWidget(createTestWidget());
@@ -288,8 +330,12 @@ void main() {
             },
           },
         );
-        when(mockDownloadsBloc.state).thenReturn(loadedState);
+
         stateController.add(loadedState);
+        // Update DownloadItem stub for the next loop/check
+        when(
+          mockDownloadsRepository.getDownloadItem(any),
+        ).thenAnswer((_) async => download);
 
         // Pump frames to allow BlocBuilder to receive and process the state
         await tester.pumpAndSettle();
@@ -302,12 +348,14 @@ void main() {
           reason: 'Should display $expectedPercentage% at second $second',
         );
       }
+      await stateController.close();
     });
 
-    // Modified test case with sequential assertions
     testWidgets(
       'should display correct status text for downloading with percentage',
       (WidgetTester tester) async {
+        final stateController = StreamController<DownloadsState>.broadcast();
+
         // Arrange
         final download = DownloadItem(
           id: 'test_id',
@@ -331,8 +379,12 @@ void main() {
             },
           },
         );
-        when(mockDownloadsBloc.state).thenReturn(loadedState);
-        stateController.add(loadedState);
+
+        whenListen(
+          mockDownloadsBloc!,
+          stateController.stream,
+          initialState: loadedState,
+        );
 
         // Stub repo for DownloadButtonBloc
         when(
@@ -392,6 +444,7 @@ void main() {
           findsOneWidget,
           reason: 'Percentage text missing',
         );
+        await stateController.close();
       },
     );
   });
