@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_public_methods_on_bloc_instances
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -121,7 +122,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       StreamController<DownloadsStatus>.broadcast();
 
   /// Exposes a broadcast stream of status events
-  // ignore: avoid_public_methods_on_bloc_instances
   Stream<DownloadsStatus> get statusStream => _statusController.stream;
 
   /// Listens to global download progress updates to refresh the list when necessary.

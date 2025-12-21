@@ -9,8 +9,11 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
+import 'package:muzakri/features/downloads/data/services/download_path_resolver.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart';
+import 'package:muzakri/features/downloads/data/services/download_validator.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
 import '../features/downloads/data/services/download_service_test.mocks.dart';
@@ -19,6 +22,9 @@ import '../features/downloads/data/services/download_service_test.mocks.dart';
   DownloadsLocalDataSource,
   DownloadNotificationService,
   BatchDownloadManager,
+  DownloadPathResolver,
+  DownloadValidator,
+  DownloadStatusSynchronizer,
 ])
 import 'downloads_integration_test.mocks.dart';
 
@@ -29,6 +35,9 @@ void main() {
   late MockDownloadsLocalDataSource mockLocalDataSource;
   late MockFlutterDownloaderWrapper mockDownloader;
   late MockBatchDownloadManager mockBatchDownloadManager;
+  late MockDownloadPathResolver mockPathResolver;
+  late MockDownloadValidator mockValidator;
+  late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late Directory tempDir;
 
   setUp(() async {
@@ -38,6 +47,9 @@ void main() {
     mockLocalDataSource = MockDownloadsLocalDataSource();
     mockDownloader = MockFlutterDownloaderWrapper();
     mockBatchDownloadManager = MockBatchDownloadManager();
+    mockPathResolver = MockDownloadPathResolver();
+    mockValidator = MockDownloadValidator();
+    mockStatusSynchronizer = MockDownloadStatusSynchronizer();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
     // Register DownloadService in GetIt
@@ -51,6 +63,10 @@ void main() {
         mockDownloadNotificationService,
       );
     }
+
+    // Reset DownloadService state
+    DownloadServiceImpl.instance.resetForTesting();
+
     when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
     when(
       mockDownloadNotificationService.showDownloadProgress(
@@ -69,17 +85,20 @@ void main() {
       mockDownloadNotificationService.cancelNotification(any),
     ).thenAnswer((_) async {});
 
-    // Reset singleton
-    DownloadQueueManager.reset();
-    await DownloadQueueManager.instance.initialize();
+    // Stub logging to avoid noise
+    // setupLogger(); // Assuming logger is accessible or mocked if needed
 
-    repository = DownloadsRepositoryImpl(
-      mockLocalDataSource,
-      DownloadService.instance,
-      mockBatchDownloadManager,
+    // Setup default stubs BEFORE initializing services that use them
+    when(
+      mockPathResolver.getDownloadsDir(),
+    ).thenAnswer((_) async => tempDir.path);
+    when(mockPathResolver.resolveDownloadPath(any, any)).thenAnswer(
+      (invocation) => invocation.positionalArguments[0] as DownloadItem,
     );
+    when(
+      mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+    ).thenAnswer((_) async => true);
 
-    // Default stubs
     when(
       mockLocalDataSource.getDownloadsDirectory(),
     ).thenAnswer((_) async => tempDir.path);
@@ -90,10 +109,28 @@ void main() {
     when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
       return;
     });
+    when(mockStatusSynchronizer.syncDownloadStatuses(any)).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments[0] as List<DownloadItem>,
+    );
+
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
     when(
       mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
     ).thenAnswer((_) async => []);
+
+    // Reset singleton
+    DownloadQueueManager.reset();
+    await DownloadQueueManager.instance.initialize();
+
+    repository = DownloadsRepositoryImpl(
+      mockLocalDataSource,
+      DownloadService.instance,
+      mockBatchDownloadManager,
+      mockPathResolver,
+      mockValidator,
+      mockStatusSynchronizer,
+    );
 
     // Stub logging to avoid noise
     // setupLogger(); // Assuming logger is accessible or mocked if needed

@@ -9,9 +9,9 @@ import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../downloads/domain/entities/download_item.dart';
-import '../../../downloads/domain/repositories/downloads_repository.dart';
 import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
+import '../../../downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
 import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.dart';
@@ -29,7 +29,7 @@ class ReciterDetailsBloc
     this._refreshSurahDownloadStatusUseCase,
     this._downloadAllSurahsUseCase,
     this._cancelDownloadsForReciterUseCase,
-    this._downloadsRepository,
+    this._observeReciterDownloads,
   ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
@@ -50,7 +50,7 @@ class ReciterDetailsBloc
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
   final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
   final CancelDownloadsForReciterUseCase _cancelDownloadsForReciterUseCase;
-  final DownloadsRepository _downloadsRepository;
+  final ObserveReciterDownloadsUseCase _observeReciterDownloads;
 
   StreamSubscription? _downloadsSubscription;
   String? _currentReciterName;
@@ -184,40 +184,39 @@ class ReciterDetailsBloc
 
   void _subscribeToDownloads() {
     _downloadsSubscription?.cancel();
-    _downloadsSubscription = _downloadsRepository.downloadUpdates.listen((
-      item,
-    ) {
-      if (item.reciterName == _currentReciterName) {
-        var stateChanged = false;
+    if (_currentReciterName == null) return;
 
-        if (item.status == DownloadStatus.completed) {
-          if (!_completedSurahs.containsKey(item.url)) {
-            _completedSurahs[item.url] = true;
-            stateChanged = true;
-          }
-          if (_downloadingSurahs.contains(item.url)) {
-            _downloadingSurahs.remove(item.url);
-            stateChanged = true;
-          }
-        } else if (item.status == DownloadStatus.downloading ||
-            item.status == DownloadStatus.pending) {
-          if (!_downloadingSurahs.contains(item.url)) {
-            _downloadingSurahs.add(item.url);
-            stateChanged = true;
-          }
-        } else if (item.status == DownloadStatus.failed ||
-            item.status == DownloadStatus.cancelled) {
-          if (_downloadingSurahs.contains(item.url)) {
-            _downloadingSurahs.remove(item.url);
-            stateChanged = true;
-          }
-        }
+    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!)
+        .listen((item) {
+          var stateChanged = false;
 
-        if (stateChanged) {
-          _updateProgressAndEmit();
-        }
-      }
-    });
+          if (item.status == DownloadStatus.completed) {
+            if (!_completedSurahs.containsKey(item.url)) {
+              _completedSurahs[item.url] = true;
+              stateChanged = true;
+            }
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.downloading ||
+              item.status == DownloadStatus.pending) {
+            if (!_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.add(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.failed ||
+              item.status == DownloadStatus.cancelled) {
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          }
+
+          if (stateChanged) {
+            _updateProgressAndEmit();
+          }
+        });
   }
 
   void _updateProgressAndEmit() {

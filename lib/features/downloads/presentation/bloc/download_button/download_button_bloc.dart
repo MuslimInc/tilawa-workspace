@@ -74,39 +74,36 @@ class DownloadButtonBloc
   final CancelDownloadUseCase _cancelDownload;
   final ObserveDownloadProgressUseCase _observeDownloadProgress;
 
-  // ignore: unused_field
   final bool? _initialIsDownloaded;
   final bool? _initialIsDownloading;
   final double? _initialProgress;
   StreamSubscription<DownloadItem>? _progressSubscription;
 
   Future<void> _onInitialize(Emitter<DownloadButtonState> emit) async {
-    // 1. Check if downloaded
-    final Either<Failure, bool>
-    isDownloadedResult = await _checkSurahDownloaded(
-      surahId:
-          _url, // URL is used as ID in repo logic for checking downloaded file
-      reciterName: _reciterName,
-    );
+    // 1. If we have explicit initial state, use it immediately
+    if (_initialIsDownloaded ?? false) {
+      emit(const DownloadButtonState.completed());
+      return;
+    }
 
-    // Initial check result
+    if (_initialIsDownloading ?? false) {
+      emit(DownloadButtonState.downloading(progress: _initialProgress ?? 0.0));
+      _listenToProgress();
+      return;
+    }
+
+    // 2. Otherwise, check if downloaded from repository (fallback)
+    final Either<Failure, bool> isDownloadedResult =
+        await _checkSurahDownloaded(surahId: _url, reciterName: _reciterName);
+
     final bool isDownloaded = isDownloadedResult.getOrElse(() => false);
 
     if (isDownloaded) {
       emit(const DownloadButtonState.completed());
     } else {
-      // Start listening to progress immediately to catch active downloads
+      // Start listening to progress to catch active downloads we might have missed
       _listenToProgress();
-
-      // If we have explicit initial state saying it's downloading, emit that temporarily
-      if (_initialIsDownloading ?? false) {
-        emit(
-          DownloadButtonState.downloading(progress: _initialProgress ?? 0.0),
-        );
-      } else {
-        // Default to ready, stream will update if it's actually downloading
-        emit(const DownloadButtonState.readyToDownload());
-      }
+      emit(const DownloadButtonState.readyToDownload());
     }
   }
 

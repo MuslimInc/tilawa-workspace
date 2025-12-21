@@ -12,8 +12,11 @@ import 'package:muzakri/features/downloads/data/datasources/downloads_local_data
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
+import 'package:muzakri/features/downloads/data/services/download_path_resolver.dart';
 import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
+import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart';
+import 'package:muzakri/features/downloads/data/services/download_validator.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 
 import '../services/download_service_test.mocks.dart';
@@ -23,6 +26,9 @@ import 'downloads_repository_impl_test.mocks.dart';
   DownloadsLocalDataSource,
   DownloadNotificationService,
   BatchDownloadManager,
+  DownloadPathResolver,
+  DownloadValidator,
+  DownloadStatusSynchronizer,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +68,9 @@ void main() {
   late MockDownloadsLocalDataSource mockLocalDataSource;
   late MockFlutterDownloaderWrapper mockDownloader;
   late MockBatchDownloadManager mockBatchDownloadManager;
+  late MockDownloadPathResolver mockPathResolver;
+  late MockDownloadValidator mockValidator;
+  late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
 
   setUp(() async {
@@ -70,58 +79,28 @@ void main() {
     mockDownloader = MockFlutterDownloaderWrapper();
     mockBatchDownloadManager = MockBatchDownloadManager();
     mockNotificationService = MockDownloadNotificationService();
+    mockPathResolver = MockDownloadPathResolver();
+    mockPathResolver = MockDownloadPathResolver();
+    mockValidator = MockDownloadValidator();
+    mockStatusSynchronizer = MockDownloadStatusSynchronizer();
     DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-    // Register DownloadService in GetIt
-    final GetIt getIt = GetIt.instance;
-    if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(DownloadService.instance);
-    }
-
-    // Register NotificationService in GetIt
-    if (getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.unregister<DownloadNotificationService>();
-    }
-    getIt.registerSingleton<DownloadNotificationService>(
-      mockNotificationService,
-    );
-    when(mockNotificationService.initialize()).thenAnswer((_) async {
-      return;
-    });
-
-    // Reset singleton
-    DownloadQueueManager.reset();
-    await DownloadQueueManager.instance.initialize();
-
-    repository = DownloadsRepositoryImpl(
-      mockLocalDataSource,
-      DownloadService.instance,
-      mockBatchDownloadManager,
+    // Default stubs for new services
+    when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
+    when(mockPathResolver.resolveDownloadPath(any, any)).thenAnswer(
+      (invocation) => invocation.positionalArguments[0] as DownloadItem,
     );
     when(
-      mockNotificationService.showDownloadProgress(
-        downloadId: anyNamed('downloadId'),
-        title: anyNamed('title'),
-        reciterName: anyNamed('reciterName'),
-        progress: anyNamed('progress'),
-        status: anyNamed('status'),
-        pendingMessage: anyNamed('pendingMessage'),
-        progressMessage: anyNamed('progressMessage'),
-        completeMessage: anyNamed('completeMessage'),
-        failedMessage: anyNamed('failedMessage'),
-      ),
-    ).thenAnswer((_) async {
-      return;
-    });
-    when(mockNotificationService.cancelNotification(any)).thenAnswer((_) async {
-      return;
-    });
+      mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+    ).thenAnswer((_) async => true);
+    when(mockValidator.verifyFileSize(any, any)).thenAnswer((_) async => true);
+    when(mockValidator.getActualFileSize(any)).thenAnswer((_) async => 0);
+    when(mockStatusSynchronizer.syncDownloadStatuses(any)).thenAnswer(
+      (invocation) async =>
+          invocation.positionalArguments[0] as List<DownloadItem>,
+    );
 
-    // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
-    DownloadQueueManager.reset();
-    DownloadServiceImpl.instance.resetForTesting();
-
-    // Stub common methods to avoid MissingStubError
+    // Stub common methods to avoid MissingStubError during initialization
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
       _,
     ) async {
@@ -149,10 +128,61 @@ void main() {
       mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
     ).thenAnswer((_) async => []);
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
-    when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+
+    // Register DownloadService in GetIt
+    final GetIt getIt = GetIt.instance;
+    if (!getIt.isRegistered<DownloadService>()) {
+      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    }
+
+    // Register NotificationService in GetIt
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
+    }
+    getIt.registerSingleton<DownloadNotificationService>(
+      mockNotificationService,
+    );
+    when(mockNotificationService.initialize()).thenAnswer((_) async {
+      return;
+    });
+
+    // Reset singleton
+    DownloadQueueManager.reset();
+    await DownloadQueueManager.instance.initialize();
+
+    repository = DownloadsRepositoryImpl(
+      mockLocalDataSource,
+      DownloadService.instance,
+      mockBatchDownloadManager,
+      mockPathResolver,
+      mockValidator,
+      mockStatusSynchronizer,
+    );
+    when(
+      mockNotificationService.showDownloadProgress(
+        downloadId: anyNamed('downloadId'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        progress: anyNamed('progress'),
+        status: anyNamed('status'),
+        pendingMessage: anyNamed('pendingMessage'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockNotificationService.cancelNotification(any)).thenAnswer((_) async {
+      return;
+    });
+
+    // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
+    DownloadQueueManager.reset();
+    DownloadServiceImpl.instance.resetForTesting();
 
     when(
-      mockLocalDataSource.getDownloadsDirectory(),
+      mockPathResolver.getDownloadsDir(),
     ).thenAnswer((_) async => '/tmp/downloads');
 
     // Stub updateDownloads which is used for batch updates
@@ -182,7 +212,7 @@ void main() {
             .createTempSync()
             .path;
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -199,7 +229,7 @@ void main() {
         );
 
         // Assert
-        verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+        verify(mockPathResolver.getDownloadsDir()).called(1);
 
         // Verify that the download item is created
         // With the queue system, downloads are created with 'pending' status
@@ -225,7 +255,7 @@ void main() {
       test('should handle directory creation failure', () async {
         // Arrange
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenThrow(Exception('Failed to create downloads directory'));
 
         // Act & Assert
@@ -245,7 +275,7 @@ void main() {
         // Arrange
         const testDownloadsDir = '/test/downloads';
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(
           mockLocalDataSource.addDownload(any),
@@ -275,7 +305,7 @@ void main() {
             .createTempSync()
             .path;
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
 
@@ -301,7 +331,7 @@ void main() {
         await repository.startDownloadBatch(items);
 
         // Assert
-        verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+        verify(mockPathResolver.getDownloadsDir()).called(1);
         verify(mockLocalDataSource.addDownloads(any)).called(1);
         verifyNever(mockLocalDataSource.addDownload(any));
       });
@@ -312,7 +342,7 @@ void main() {
             .createTempSync()
             .path;
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
 
@@ -511,6 +541,12 @@ void main() {
         final DownloadItem invalidDownloadItem = testDownloadItem.copyWith(
           filePath: '/invalid/path/with/special/chars/\x00',
         );
+        when(
+          mockValidator.verifyFileExists(
+            invalidDownloadItem.filePath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => false);
 
         // Act
         final bool result = await repository.validateDownloadedFile(
@@ -551,8 +587,11 @@ void main() {
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [testDownload]);
         when(
-          mockLocalDataSource.isFileExists(expectedPath),
-        ).thenAnswer((_) => true);
+          mockValidator.verifyFileExists(
+            expectedPath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act
         final bool result = await repository.isSurahDownloaded(
@@ -563,12 +602,24 @@ void main() {
         // Assert
         expect(result, true);
         verify(mockLocalDataSource.getDownloads()).called(1);
-        verify(mockLocalDataSource.isFileExists(expectedPath)).called(1);
+        verify(
+          mockValidator.verifyFileExists(
+            expectedPath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).called(1);
       });
 
       test('should return false when surah is not downloaded', () async {
         // Arrange
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => false);
 
         // Act
         final bool result = await repository.isSurahDownloaded(
@@ -726,8 +777,11 @@ void main() {
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [testDownload]);
         when(
-          mockLocalDataSource.isFileExists(expectedPath),
-        ).thenAnswer((_) => true);
+          mockValidator.verifyFileExists(
+            expectedPath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act
         final String? result = await repository.getDownloadedFilePath(
@@ -738,7 +792,12 @@ void main() {
         // Assert
         expect(result, expectedPath);
         verify(mockLocalDataSource.getDownloads()).called(1);
-        verify(mockLocalDataSource.isFileExists(expectedPath)).called(1);
+        verify(
+          mockValidator.verifyFileExists(
+            expectedPath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).called(1);
       });
 
       test('should return null when surah is not downloaded', () async {
@@ -984,7 +1043,7 @@ void main() {
 
         // Override global mock to use the real temp dir for this test
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => tempDir.path);
 
         when(
@@ -994,7 +1053,12 @@ void main() {
           mockLocalDataSource.updateDownload(any),
         ).thenAnswer((_) async => {});
         // Stub file existence check for completed status validation
-        when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act - Mark as completed
         await repository.updateDownloadProgress(
@@ -1054,7 +1118,7 @@ void main() {
         );
 
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => tempDir.path);
 
         when(
@@ -1065,15 +1129,12 @@ void main() {
           mockLocalDataSource.updateDownload(any),
         ).thenAnswer((_) async => {});
 
-        // Mock file existence: false first, then true
-        var callCount = 0;
-        when(mockLocalDataSource.isFileExists(testFilePath)).thenAnswer((_) {
-          callCount++;
-          if (callCount < 2) {
-            return false;
-          }
-          return true;
-        });
+        when(
+          mockValidator.verifyFileExists(
+            testFilePath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
 
         // Act
         await repository.updateDownloadProgress(
@@ -1085,7 +1146,12 @@ void main() {
         );
 
         // Assert
-        expect(callCount, greaterThanOrEqualTo(2));
+        verify(
+          mockValidator.verifyFileExists(
+            testFilePath,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).called(1);
 
         final List<dynamic> captured = verify(
           mockLocalDataSource.updateDownload(captureAny),
@@ -1180,15 +1246,23 @@ void main() {
 
       // Mock the current directory to be different (simulating app relaunch on iOS)
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => newDownloadsDir);
+
+      when(
+        mockPathResolver.resolveDownloadPath(itemWithOldPath, newDownloadsDir),
+      ).thenReturn(
+        itemWithOldPath.copyWith(
+          filePath: '$newDownloadsDir/$expectedRelativePath',
+        ),
+      );
 
       // Act
       final Map<String, Map<String, List<DownloadItem>>> result =
           await repository.getDownloadsByReciter();
 
       // Assert
-      verify(mockLocalDataSource.getDownloadsDirectory()).called(1);
+      verify(mockPathResolver.getDownloadsDir()).called(1);
 
       final Map<String, List<DownloadItem>>? narrativeMap =
           result['Test Reciter'];
@@ -1229,8 +1303,16 @@ void main() {
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [itemWithOldPath]);
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => newDownloadsDir);
+
+      when(
+        mockPathResolver.resolveDownloadPath(itemWithOldPath, newDownloadsDir),
+      ).thenReturn(
+        itemWithOldPath.copyWith(
+          filePath: '$newDownloadsDir/$expectedRelativePath',
+        ),
+      );
 
       // Act
       final DownloadItem? result = await repository.getDownloadItem('test_id');
@@ -1252,7 +1334,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1289,7 +1371,7 @@ void main() {
             .path;
 
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1326,7 +1408,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1362,7 +1444,7 @@ void main() {
             .path;
 
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1400,7 +1482,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1436,7 +1518,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1471,7 +1553,7 @@ void main() {
             .path;
 
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1505,7 +1587,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1541,7 +1623,7 @@ void main() {
             .path;
 
         when(
-          mockLocalDataSource.getDownloadsDirectory(),
+          mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1592,7 +1674,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1627,7 +1709,7 @@ void main() {
           .path;
 
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => testDownloadsDir);
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
 
@@ -1674,6 +1756,7 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
+      when(mockValidator.getActualFileSize(any)).thenAnswer((_) async => 1024);
       when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
         return;
       });
@@ -1773,7 +1856,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => true);
       when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
       when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
 
@@ -1804,7 +1889,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => false);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => false);
       when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
 
       // Act
@@ -1918,7 +2005,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => downloads);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => true);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => true);
       when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {
         return;
       });
@@ -1952,7 +2041,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.isFileExists(any)).thenAnswer((_) => false);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => false);
       when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
         return;
       });
@@ -1986,18 +2077,17 @@ void main() {
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
       when(
-        mockLocalDataSource.getDownloadsDirectory(),
+        mockPathResolver.getDownloadsDir(),
       ).thenAnswer((_) async => '/tmp/downloads');
 
       // Act
-      final List<DownloadItem> results = await repository
+      final DownloadItem result = await repository
           .getDownloadProgress(testId)
-          .take(1)
-          .toList();
+          .first
+          .timeout(const Duration(seconds: 5));
 
       // Assert
-      expect(results.length, 1);
-      expect(results.first.id, testId);
+      expect(result.id, testId);
     });
   });
 }

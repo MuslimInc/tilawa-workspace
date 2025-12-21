@@ -10,6 +10,7 @@ class ToastUtils {
     Color? backgroundColor,
     Color? textColor,
   }) {
+    // Fire and forget, but catch errors to avoid crashes/test failures from missing plugins
     Fluttertoast.showToast(
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
@@ -17,7 +18,10 @@ class ToastUtils {
       backgroundColor: backgroundColor,
       textColor: textColor,
       fontSize: 16.0,
-    );
+    ).catchError((_) {
+      // Ignore errors (e.g. MissingPluginException in tests)
+      return null;
+    });
   }
 
   static void showErrorToast(String msg) {

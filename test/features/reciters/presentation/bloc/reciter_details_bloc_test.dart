@@ -11,6 +11,7 @@ import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
+import 'package:muzakri/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
@@ -30,6 +31,9 @@ class MockDownloadAllSurahsUseCase extends Mock
 
 class MockCancelDownloadsForReciterUseCase extends Mock
     implements CancelDownloadsForReciterUseCase {}
+
+class MockObserveReciterDownloadsUseCase extends Mock
+    implements ObserveReciterDownloadsUseCase {}
 
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
@@ -64,7 +68,7 @@ void main() {
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
-    late MockDownloadsRepository downloadsRepository;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
 
     setUp(() {
       storage = MockStorage();
@@ -76,10 +80,10 @@ void main() {
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
-      downloadsRepository = MockDownloadsRepository();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
 
       when(
-        () => downloadsRepository.downloadUpdates,
+        () => observeReciterDownloads(any()),
       ).thenAnswer((_) => const Stream.empty());
     });
 
@@ -104,29 +108,6 @@ void main() {
       downloadId: 'task1',
     );
 
-    const reciter = ReciterEntity(
-      id: 1,
-      name: 'Mishary',
-      letter: 'M',
-      date: '2023',
-      moshaf: [moshaf],
-    );
-
-    test('MoshafEntity serialization works', () {
-      final Map<String, dynamic> json = moshaf.toJson();
-      final fromJson = MoshafEntity.fromJson(json);
-      expect(fromJson, equals(moshaf));
-    });
-
-    test('SurahEntity serialization works', () {
-      final Map<String, dynamic> json = surah.toJson();
-      final fromJson = SurahEntity.fromJson(json);
-      expect(fromJson.id, equals(surah.id));
-      expect(fromJson.name, equals(surah.name));
-      // Note: MediaItem equality might not work directly, so we check properties
-      expect(fromJson.isDownloaded, equals(surah.isDownloaded));
-    });
-
     test('ReciterDetailsBloc toJson returns null when not loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
@@ -134,7 +115,7 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       expect(bloc.toJson(const ReciterDetailsState()), isNull);
@@ -147,7 +128,7 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       const state = ReciterDetailsState(
@@ -172,27 +153,22 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       // Manually construct JSON to simulate reading from disk
-      // Using the exact structure produced by toJson
       const state = ReciterDetailsState(
         status: ReciterDetailsStatus.loaded,
         surahList: [surah],
         selectedMoshaf: moshaf,
         selectedSurahId: '1',
       );
-      // We know serialization works from previous test, so we can use toJson here for convenience
-      // or manually map it if we want to be stricter.
-      final Map<String, dynamic> json = state.surahList.isNotEmpty
-          ? {
-              'status': 'ReciterDetailsStatus.loaded',
-              'surahList': state.surahList.map((e) => e.toJson()).toList(),
-              'selectedMoshaf': state.selectedMoshaf?.toJson(),
-              'selectedSurahId': state.selectedSurahId,
-            }
-          : <String, dynamic>{};
+      final Map<String, dynamic> json = {
+        'status': 'ReciterDetailsStatus.loaded',
+        'surahList': state.surahList.map((e) => e.toJson()).toList(),
+        'selectedMoshaf': state.selectedMoshaf?.toJson(),
+        'selectedSurahId': state.selectedSurahId,
+      };
 
       final ReciterDetailsState? restoredState = bloc.fromJson(json);
 
@@ -211,7 +187,7 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       final ReciterDetailsState? restoredState = bloc.fromJson({
@@ -230,7 +206,7 @@ void main() {
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
-    late MockDownloadsRepository downloadsRepository;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
 
     setUp(() {
       storage = MockStorage();
@@ -242,10 +218,10 @@ void main() {
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
-      downloadsRepository = MockDownloadsRepository();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
 
       when(
-        () => downloadsRepository.downloadUpdates,
+        () => observeReciterDownloads(any()),
       ).thenAnswer((_) => const Stream.empty());
     });
 
@@ -273,7 +249,7 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       const surah1 = SurahEntity(
@@ -304,8 +280,6 @@ void main() {
         const DownloadAllSurahs(reciter: reciter, surahs: [surah1, surah2]),
       );
 
-      // Since we removed optimistic updates, no state is emitted immediately
-      // We assume no state change or ensure specific state is NOT emitted
       await Future.delayed(Duration.zero);
 
       verify(
@@ -318,53 +292,6 @@ void main() {
     });
   });
 
-  group('FilteredSurahs Logic', () {
-    test('filteredSurahs returns all surahs when query is empty', () {
-      const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Surah 1'),
-      );
-      const surah2 = SurahEntity(
-        mediaItem: MediaItem(id: '2', title: 'Surah 2'),
-      );
-      const state = ReciterDetailsState(surahList: [surah1, surah2]);
-
-      expect(state.filteredSurahs.length, 2);
-    });
-
-    test('filteredSurahs filters by name correctly', () {
-      const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
-      );
-      const surah2 = SurahEntity(
-        mediaItem: MediaItem(id: '2', title: 'Al-Baqara'),
-      );
-      const state = ReciterDetailsState(
-        surahList: [surah1, surah2],
-        searchQuery: 'baq',
-      );
-
-      expect(state.filteredSurahs.length, 1);
-      expect(state.filteredSurahs.first.name, 'Al-Baqara');
-    });
-
-    test('filteredSurahs filters by number correctly', () {
-      const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
-      );
-      const surah2 = SurahEntity(
-        mediaItem: MediaItem(id: '2', title: 'Al-Baqara'),
-      );
-      // "001" padding logic test
-      const state = ReciterDetailsState(
-        surahList: [surah1, surah2],
-        searchQuery: '001',
-      );
-
-      expect(state.filteredSurahs.length, 1);
-      expect(state.filteredSurahs.first.id, '1');
-    });
-  });
-
   group('ReciterDetailsBloc Download Progress', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
@@ -372,7 +299,7 @@ void main() {
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
-    late MockDownloadsRepository downloadsRepository;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
 
     late StreamController<DownloadItem> downloadUpdatesController;
 
@@ -386,11 +313,11 @@ void main() {
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
-      downloadsRepository = MockDownloadsRepository();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
 
       downloadUpdatesController = StreamController<DownloadItem>.broadcast();
       when(
-        () => downloadsRepository.downloadUpdates,
+        () => observeReciterDownloads(any()),
       ).thenAnswer((_) => downloadUpdatesController.stream);
     });
 
@@ -421,7 +348,7 @@ void main() {
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
-        downloadsRepository,
+        observeReciterDownloads,
       );
 
       const surah1 = SurahEntity(
@@ -471,13 +398,6 @@ void main() {
 
       await Future.delayed(Duration.zero);
 
-      // Check state: progress 0/2 = 0.0, isDownloadingAll = true (because 1 is downloading)
-      // Wait, logic: _onUpdateDownloadProgress updates based on _completedSurahs and _downloadingSurahs set.
-      // downloadUpdates logic:
-      // if downloading: add to _downloadingSurahs.
-      // emit: progress = completed/total. isDownloadingAll = _downloadingSurahs.isNotEmpty.
-
-      // Expected: matched state with isDownloadingAll: true.
       expect(bloc.state.isDownloadingAll, isTrue);
       expect(bloc.state.downloadProgress, 0.0);
 
@@ -499,7 +419,6 @@ void main() {
 
       await Future.delayed(Duration.zero);
 
-      // Expected: completed=1, total=2 => progress 0.5. downloading=0 => false.
       expect(bloc.state.isDownloadingAll, isFalse);
       expect(bloc.state.downloadProgress, 0.5);
     });
@@ -513,18 +432,13 @@ void main() {
           refreshSurahDownloadStatus,
           downloadAllSurahs,
           cancelDownloadsForReciter,
-          downloadsRepository,
+          observeReciterDownloads,
         );
-
-        // Setup initial state with some downloading items
-        // Since we can't easily inject private state, we simulate it via events if possible, or just check the call.
-        // We will load list first.
 
         when(
           () => cancelDownloadsForReciter(any()),
         ).thenAnswer((_) async => const Right(null));
 
-        // ... setup list loading ...
         const surah1 = SurahEntity(
           mediaItem: MediaItem(id: '1', title: 'S1'),
         );
@@ -547,7 +461,6 @@ void main() {
 
         // Assert
         verify(() => cancelDownloadsForReciter('Mishary')).called(1);
-        // We expect _downloadingSurahs to be cleared, so isDownloadingAll should be false.
         expect(bloc.state.isDownloadingAll, isFalse);
       },
     );

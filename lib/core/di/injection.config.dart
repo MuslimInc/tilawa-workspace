@@ -71,8 +71,16 @@ import 'package:muzakri/features/downloads/data/services/batch_download_manager.
     as _i864;
 import 'package:muzakri/features/downloads/data/services/download_notification_service.dart'
     as _i288;
+import 'package:muzakri/features/downloads/data/services/download_path_resolver.dart'
+    as _i54;
+import 'package:muzakri/features/downloads/data/services/download_recovery_service.dart'
+    as _i855;
 import 'package:muzakri/features/downloads/data/services/download_service.dart'
     as _i313;
+import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart'
+    as _i104;
+import 'package:muzakri/features/downloads/data/services/download_validator.dart'
+    as _i198;
 import 'package:muzakri/features/downloads/data/services/downloads_initialization_service.dart'
     as _i473;
 import 'package:muzakri/features/downloads/di/downloads_module.dart' as _i537;
@@ -112,6 +120,8 @@ import 'package:muzakri/features/downloads/domain/usecases/get_valid_completed_d
     as _i35;
 import 'package:muzakri/features/downloads/domain/usecases/observe_download_progress_use_case.dart'
     as _i396;
+import 'package:muzakri/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart'
+    as _i634;
 import 'package:muzakri/features/downloads/domain/usecases/play_all_downloads_use_case.dart'
     as _i786;
 import 'package:muzakri/features/downloads/domain/usecases/play_download_use_case.dart'
@@ -349,6 +359,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.lazySingleton<_i54.DownloadPathResolver>(
+      () => _i54.DownloadPathResolver(gh<_i811.DownloadsLocalDataSource>()),
+    );
+    gh.lazySingleton<_i198.DownloadValidator>(
+      () => _i198.DownloadValidator(gh<_i811.DownloadsLocalDataSource>()),
+    );
     gh.factory<_i71.CheckLocationServiceUseCase>(
       () => _i71.CheckLocationServiceUseCase(gh<_i312.QiblaRepository>()),
     );
@@ -396,6 +412,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i681.NavigationService>(),
       ),
     );
+    gh.lazySingleton<_i855.DownloadRecoveryService>(
+      () => _i855.DownloadRecoveryService(
+        gh<_i313.DownloadService>(),
+        gh<_i198.DownloadValidator>(),
+      ),
+    );
     gh.lazySingleton<_i870.LocalizationRepository>(
       () => _i319.LocalizationRepositoryImpl(
         gh<_i322.LocalizationLocalDataSource>(),
@@ -426,6 +448,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i785.GetRecitersUseCase>(
       () => _i785.GetRecitersUseCase(gh<_i619.RecitersRepository>()),
+    );
+    gh.lazySingleton<_i104.DownloadStatusSynchronizer>(
+      () => _i104.DownloadStatusSynchronizer(
+        gh<_i313.DownloadService>(),
+        gh<_i855.DownloadRecoveryService>(),
+      ),
     );
     gh.singleton<_i724.GetCurrentLanguageUseCase>(
       () => _i724.GetCurrentLanguageUseCase(gh<_i870.LocalizationRepository>()),
@@ -571,6 +599,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i811.DownloadsLocalDataSource>(),
         gh<_i313.DownloadService>(),
         gh<_i864.BatchDownloadManager>(),
+        gh<_i54.DownloadPathResolver>(),
+        gh<_i198.DownloadValidator>(),
+        gh<_i104.DownloadStatusSynchronizer>(),
       ),
     );
     gh.lazySingleton<_i982.GetAthkarByCategoryUseCase>(
@@ -722,6 +753,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i377.SingleDownloadRepository>(),
       ),
     );
+    gh.factory<_i634.ObserveReciterDownloadsUseCase>(
+      () => _i634.ObserveReciterDownloadsUseCase(
+        gh<_i377.SingleDownloadRepository>(),
+      ),
+    );
     gh.singleton<_i251.DownloadSurahUseCase>(
       () => _i251.DownloadSurahUseCase(gh<_i377.SingleDownloadRepository>()),
     );
@@ -735,7 +771,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i506.RefreshSurahDownloadStatusUseCase>(),
         gh<_i317.DownloadAllSurahsUseCase>(),
         gh<_i242.CancelDownloadsForReciterUseCase>(),
-        gh<_i775.DownloadsRepository>(),
+        gh<_i634.ObserveReciterDownloadsUseCase>(),
       ),
     );
     gh.factory<_i811.DownloadsBloc>(

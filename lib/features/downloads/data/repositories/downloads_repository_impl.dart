@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
@@ -11,8 +10,11 @@ import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
 import '../services/batch_download_manager.dart';
+import '../services/download_path_resolver.dart';
 import '../services/download_queue_manager.dart';
 import '../services/download_service.dart';
+import '../services/download_status_synchronizer.dart';
+import '../services/download_validator.dart';
 
 /// Repository implementation that handles all download operations
 ///
@@ -25,17 +27,20 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.localDataSource,
     this.downloadService,
     this.batchDownloadManager,
+    this.pathResolver,
+    this.validator,
+    this.statusSynchronizer,
   );
 
   final DownloadsLocalDataSource localDataSource;
   final DownloadService downloadService;
   final BatchDownloadManager batchDownloadManager;
+  final DownloadPathResolver pathResolver;
+  final DownloadValidator validator;
+  final DownloadStatusSynchronizer statusSynchronizer;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
       StreamController<DownloadItem>.broadcast();
-
-  // Cache for the downloads directory to avoid repeated async calls
-  String? _cachedDownloadsDir;
 
   @override
   Future<void> initialize() async {
@@ -58,426 +63,52 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     DownloadQueueManager.instance.setMaxConcurrentDownloads(2);
   }
 
-  Future<String> _getDownloadsDir() async {
-    if (_cachedDownloadsDir != null) {
-      return _cachedDownloadsDir!;
-    }
-    _cachedDownloadsDir = await localDataSource.getDownloadsDirectory();
-    return _cachedDownloadsDir!;
-  }
-
-  /// Resolves the file path for a download item dynamically.
-  /// This fixes issues where absolute paths persist in DB but become invalid
-  /// when the app's container path changes, while preserving the subdirectory structure.
-  DownloadItem _resolveDownloadPath(DownloadItem item, String downloadsDir) {
-    if (item.filePath.isEmpty) {
-      return item;
-    }
-
-    // Recalculate relative path to ensure structure is preserved
-    final String relativePath = DownloadPathUtils.calculateRelativePath(
-      item.url,
-      item.reciterName,
-    );
-    final String resolvedPath = DownloadPathUtils.resolveFullPath(
-      downloadsDir,
-      relativePath,
-    );
-
-    // Only update if the path has actually changed
-    if (resolvedPath != item.filePath) {
-      return item.copyWith(filePath: resolvedPath);
-    }
-    return item;
-  }
-
   @override
   Future<Map<String, Map<String, List<DownloadItem>>>>
   getDownloadsByReciter() async {
     final List<DownloadItem> rawDownloads = await localDataSource
         .getDownloads();
-    final String downloadsDir = await _getDownloadsDir();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
 
     // Resolve paths for all downloads
     final List<DownloadItem> downloads = rawDownloads
-        .map((item) => _resolveDownloadPath(item, downloadsDir))
+        .map((item) => pathResolver.resolveDownloadPath(item, downloadsDir))
         .toList();
 
-    // Sync status with active downloads in DownloadService and queue manager
-    // This ensures that downloads that are actively downloading or queued show the correct status
-    // Note: In test environments, this may throw MissingPluginException,
-    // so we handle it gracefully
-    List<String> activeDownloadIds;
-    try {
-      activeDownloadIds = await downloadService.getActiveDownloadIds();
-    } on MissingPluginException {
-      // In test environment, platform channels are not available
-      // Skip status syncing and return downloads as-is
-      logger.d(
-        '[DownloadsRepository] Skipping status sync - platform channels not available (test environment)',
-      );
-      return _groupDownloadsByReciter(downloads);
-    } catch (e) {
-      // Any other error - log and continue without syncing
-      logger.w('[DownloadsRepository] Error getting active downloads: $e');
-      return _groupDownloadsByReciter(downloads);
-    }
+    // Synchronize statuses using the new service
+    final List<DownloadItem> updatedDownloads = await statusSynchronizer
+        .syncDownloadStatuses(downloads);
 
-    // Get queued download IDs from queue manager
-    final Set<String> queuedIds = {};
-    try {
-      for (final download in downloads) {
-        if (DownloadQueueManager.instance.isQueued(download.id)) {
-          queuedIds.add(download.id);
-        }
-      }
-    } catch (e) {
-      logger.w('[DownloadsRepository] Error checking queue status: $e');
-    }
-
-    final updatedDownloads = <DownloadItem>[];
-    var hasChanges = false;
-
-    for (final download in downloads) {
-      final bool isActive = activeDownloadIds.contains(download.url);
-      final bool isQueued = queuedIds.contains(download.id);
-
-      // Update status for queued downloads
-      if (isQueued && download.status != DownloadStatus.pending) {
-        final DownloadItem updatedDownload = download.copyWith(
-          status: DownloadStatus.pending,
-        );
-        updatedDownloads.add(updatedDownload);
-        hasChanges = true;
-        continue;
-      }
-
-      // Check for orphaned pending downloads (Pending in DB, but not in queue and not active)
-      // This happens if app was killed while pending, or if queue manager lost track
-      if (download.status == DownloadStatus.pending && !isQueued && !isActive) {
-        // Verify if it's really pending or if we missed a completion
-        DownloadStatus? actualStatus;
-        try {
-          actualStatus = await downloadService.getStatus(download.url);
-        } catch (e) {
-          logger.w(
-            '[DownloadsRepository] Error checking status for orphaned download: $e',
-          );
-        }
-
-        if (actualStatus == DownloadStatus.completed) {
-          // It's completed! Check file existence to be sure
-          final bool fileExists = localDataSource.isFileExists(
-            download.filePath,
-          );
-          if (fileExists) {
-            logger.i(
-              '[DownloadsRepository] Found orphaned pending download that is actually completed: id=${download.id} - Updating DB',
-            );
-            final DownloadItem updatedDownload = download.copyWith(
-              status: DownloadStatus.completed,
-              progress: 1.0,
-              completedAt: DateTime.now(),
-            );
-            updatedDownloads.add(updatedDownload);
-            hasChanges = true;
-            continue;
-          }
-        }
-
-        logger.w(
-          '[DownloadsRepository] Found orphaned pending download: id=${download.id} isQueued=$isQueued isActive=$isActive actualStatus=$actualStatus - Re-enqueueing',
-        );
-
-        // Re-enqueue (auto-resume)
-        try {
-          await DownloadQueueManager.instance.enqueue(
-            id: download.id,
-            url: download.url,
-            filePath: download.filePath,
-            title: download.title,
-            reciterName: download.reciterName,
-            reciterId: download.reciterId,
-          );
-          // Keep as pending in the list
-          updatedDownloads.add(download);
-          // No need to set hasChanges unless we changed the item itself, but enqueue might trigger updates later
-          continue;
-        } catch (e) {
-          logger.e(
-            '[DownloadsRepository] Failed to re-enqueue orphaned download: $e',
-          );
-          // Fallthrough to regular processing
-        }
-      }
-
-      if (isActive) {
-        // If download is active in DownloadService but status is not downloading,
-        // update it to downloading
-        if (download.status != DownloadStatus.downloading) {
-          final DownloadItem updatedDownload = download.copyWith(
-            status: DownloadStatus.downloading,
-          );
-          updatedDownloads.add(updatedDownload);
+    // Identify if any changes occurred during sync
+    var hasChanges = updatedDownloads.length != downloads.length;
+    if (!hasChanges) {
+      for (var i = 0; i < downloads.length; i++) {
+        if (updatedDownloads[i] != downloads[i]) {
           hasChanges = true;
-        } else {
-          // Check if download is stuck at 0% for too long even though it's active
-          final Duration timeSinceCreated = DateTime.now().difference(
-            download.createdAt,
-          );
-          final bool isStuck =
-              download.progress == 0.0 && timeSinceCreated.inSeconds > 30;
-
-          if (isStuck) {
-            // Check the actual task status
-            DownloadStatus? actualStatus;
-            try {
-              actualStatus = await downloadService.getStatus(download.url);
-            } on MissingPluginException {
-              actualStatus = null;
-            } catch (e) {
-              logger.w(
-                '[DownloadsRepository] Error getting status for stuck active download: $e',
-              );
-              actualStatus = null;
-            }
-
-            // If task is pending/enqueued but not running, retry it
-            if (actualStatus == DownloadStatus.pending) {
-              logger.w(
-                '[DownloadsRepository] Active download stuck at 0% with pending status: id=${download.id} title="${download.title}" - retrying',
-              );
-              try {
-                // Cancel the existing task
-                try {
-                  await downloadService.cancel(download.url);
-                } catch (e) {
-                  logger.d(
-                    '[DownloadsRepository] Error canceling stuck active download: $e',
-                  );
-                }
-
-                // Remove from queue if it's there
-                DownloadQueueManager.instance.removeFromQueue(download.id);
-
-                // Wait a bit before retrying
-                await Future.delayed(const Duration(milliseconds: 500));
-
-                // Retry the download using queue manager
-                await DownloadQueueManager.instance.enqueue(
-                  id: download.id,
-                  url: download.url,
-                  filePath: download.filePath,
-                  title: download.title,
-                  reciterName: download.reciterName,
-                );
-
-                // Update the download item with new timestamp
-                final DownloadItem updatedDownload = download.copyWith(
-                  createdAt: DateTime.now(),
-                  progress: 0.0,
-                );
-                updatedDownloads.add(updatedDownload);
-                hasChanges = true;
-              } catch (e) {
-                // If retry fails, mark as failed
-                logger.e(
-                  '[DownloadsRepository] Failed to retry stuck active download: id=${download.id} error=$e',
-                );
-                final DownloadItem updatedDownload = download.copyWith(
-                  status: DownloadStatus.failed,
-                );
-                updatedDownloads.add(updatedDownload);
-                hasChanges = true;
-              }
-            } else {
-              // Still active and not pending, keep as is
-              updatedDownloads.add(download);
-            }
-          } else {
-            updatedDownloads.add(download);
-          }
-        }
-      } else {
-        // Download is NOT active in DownloadService
-        // Check if it's actually still downloading in background_downloader
-        // (background downloads continue even when app is closed)
-        DownloadStatus? backgroundStatus;
-        try {
-          backgroundStatus = await downloadService.getStatus(download.url);
-        } on MissingPluginException {
-          // In test environment, skip status check
-          backgroundStatus = null;
-        } catch (e) {
-          // Any other error - log and continue
-          logger.w(
-            '[DownloadsRepository] Error getting download status for ${download.id}: $e',
-          );
-          backgroundStatus = null;
-        }
-
-        if (backgroundStatus == DownloadStatus.downloading) {
-          // Download is still active in background, update status
-          if (download.status != DownloadStatus.downloading) {
-            final DownloadItem updatedDownload = download.copyWith(
-              status: DownloadStatus.downloading,
-            );
-            updatedDownloads.add(updatedDownload);
-            hasChanges = true;
-          } else {
-            updatedDownloads.add(download);
-          }
-        } else if (download.status == DownloadStatus.downloading) {
-          // Was downloading but not active anymore - check if it completed or failed
-          if (backgroundStatus == DownloadStatus.completed) {
-            // Download reported as completed - verify before marking as such
-            // Check if file exists
-            final bool fileExists = localDataSource.isFileExists(
-              download.filePath,
-            );
-
-            if (!fileExists) {
-              logger.w(
-                '[DownloadsRepository] Download reported as completed but file not found: id=${download.id} - marking as failed',
-              );
-              final DownloadItem failedDownload = download.copyWith(
-                status: DownloadStatus.failed,
-              );
-              updatedDownloads.add(failedDownload);
-              hasChanges = true;
-              continue;
-            }
-
-            // Verify file size if we have it
-            if (download.fileSize > 0) {
-              try {
-                final file = File(download.filePath);
-                final int actualFileSize = await file.length();
-                final int tolerance = (download.fileSize * 0.01).round();
-                final int sizeDiff = (actualFileSize - download.fileSize).abs();
-
-                if (sizeDiff > tolerance) {
-                  logger.w(
-                    '[DownloadsRepository] Download reported as completed but file size mismatch: '
-                    'expected=${download.fileSize} actual=$actualFileSize - marking as failed',
-                  );
-                  final DownloadItem failedDownload = download.copyWith(
-                    status: DownloadStatus.failed,
-                  );
-                  updatedDownloads.add(failedDownload);
-                  hasChanges = true;
-                  continue;
-                }
-              } catch (e) {
-                logger.e(
-                  '[DownloadsRepository] Error verifying file size: $e - keeping as downloading',
-                );
-                updatedDownloads.add(download);
-                continue;
-              }
-            }
-
-            // All checks passed - mark as completed
-            logger.d(
-              '[DownloadsRepository] Download verified and marked as completed in sync: id=${download.id}',
-            );
-            final DownloadItem updatedDownload = download.copyWith(
-              status: DownloadStatus.completed,
-              progress: 1.0,
-              completedAt: DateTime.now(),
-            );
-            updatedDownloads.add(updatedDownload);
-            hasChanges = true;
-          } else if (backgroundStatus == DownloadStatus.failed) {
-            // Download failed in background
-            logger.w(
-              '[DownloadsRepository] Download failed in background: id=${download.id} title="${download.title}"',
-            );
-            final DownloadItem updatedDownload = download.copyWith(
-              status: DownloadStatus.failed,
-            );
-            updatedDownloads.add(updatedDownload);
-            hasChanges = true;
-          } else {
-            // Check if download is stuck at 0% for too long (more than 30 seconds)
-            final Duration timeSinceCreated = DateTime.now().difference(
-              download.createdAt,
-            );
-            final bool isStuck =
-                download.progress == 0.0 &&
-                timeSinceCreated.inSeconds > 30 &&
-                (backgroundStatus == null ||
-                    backgroundStatus == DownloadStatus.pending);
-
-            if (isStuck) {
-              // Download is stuck - retry it
-              logger.w(
-                '[DownloadsRepository] Download stuck at 0%: id=${download.id} title="${download.title}" - retrying',
-              );
-              try {
-                // Cancel the existing task if it exists
-                try {
-                  await downloadService.cancel(download.url);
-                } catch (e) {
-                  // Ignore errors when canceling (task might not exist)
-                  logger.d(
-                    '[DownloadsRepository] Error canceling stuck download: $e',
-                  );
-                }
-
-                // Remove from queue if it's there
-                DownloadQueueManager.instance.removeFromQueue(download.id);
-
-                // Wait a bit before retrying
-                await Future.delayed(const Duration(milliseconds: 500));
-
-                // Retry the download using queue manager
-                await DownloadQueueManager.instance.enqueue(
-                  id: download.id,
-                  url: download.url,
-                  filePath: download.filePath,
-                  title: download.title,
-                  reciterName: download.reciterName,
-                  reciterId: download.reciterId,
-                );
-
-                // Update the download item with new timestamp
-                final DownloadItem updatedDownload = download.copyWith(
-                  createdAt: DateTime.now(),
-                  progress: 0.0,
-                );
-                updatedDownloads.add(updatedDownload);
-                hasChanges = true;
-              } catch (e) {
-                // If retry fails, mark as failed
-                logger.e(
-                  '[DownloadsRepository] Failed to retry stuck download: id=${download.id} error=$e',
-                );
-                final DownloadItem updatedDownload = download.copyWith(
-                  status: DownloadStatus.failed,
-                );
-                updatedDownloads.add(updatedDownload);
-                hasChanges = true;
-              }
-            } else {
-              // Status unknown or null - keep as is for now
-              updatedDownloads.add(download);
-            }
-          }
-        } else {
-          updatedDownloads.add(download);
+          break;
         }
       }
     }
 
     // Save updated downloads if there were any changes
     if (hasChanges) {
-      await localDataSource.updateDownloads(updatedDownloads);
+      final List<DownloadItem> changedItems = [];
+      if (updatedDownloads.length == downloads.length) {
+        for (var i = 0; i < updatedDownloads.length; i++) {
+          if (updatedDownloads[i] != downloads[i]) {
+            changedItems.add(updatedDownloads[i]);
+          }
+        }
+      } else {
+        changedItems.addAll(updatedDownloads);
+      }
+
+      if (changedItems.isNotEmpty) {
+        await localDataSource.updateDownloads(changedItems);
+      }
     }
 
-    return _groupDownloadsByReciter(
-      updatedDownloads.isEmpty ? downloads : updatedDownloads,
-    );
+    return _groupDownloadsByReciter(updatedDownloads);
   }
 
   /// Groups downloads by reciter name and then by narrative
@@ -513,11 +144,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<List<DownloadItem>> getDownloadsForReciter(String reciterName) async {
     final List<DownloadItem> rawDownloads = await localDataSource
         .getDownloads();
-    final String downloadsDir = await _getDownloadsDir();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
 
     return rawDownloads
         .where((d) => d.reciterName == reciterName)
-        .map((item) => _resolveDownloadPath(item, downloadsDir))
+        .map((item) => pathResolver.resolveDownloadPath(item, downloadsDir))
         .toList();
   }
 
@@ -525,9 +156,11 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<DownloadItem?> getDownloadItem(String id) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     try {
-      final DownloadItem item = downloads.firstWhere((d) => d.id == id);
-      final String downloadsDir = await _getDownloadsDir();
-      return _resolveDownloadPath(item, downloadsDir);
+      final DownloadItem item = downloads.firstWhere(
+        (item) => item.id == id || item.url == id,
+      );
+      final String downloadsDir = await pathResolver.getDownloadsDir();
+      return pathResolver.resolveDownloadPath(item, downloadsDir);
       // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       return null;
@@ -549,7 +182,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> deleteDownload(String id) async {
     final DownloadItem? download = await getDownloadItem(id);
-    if (download != null && localDataSource.isFileExists(download.filePath)) {
+    final bool fileExists =
+        download != null && await validator.verifyFileExists(download.filePath);
+    if (download != null && fileExists) {
       await localDataSource.deleteFile(download.filePath);
     }
     await localDataSource.deleteDownload(id);
@@ -599,7 +234,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
 
       // Delete partial file if exists
-      if (localDataSource.isFileExists(item.filePath)) {
+      final bool fileExists = await validator.verifyFileExists(item.filePath);
+      if (fileExists) {
         await localDataSource.deleteFile(item.filePath);
       }
 
@@ -629,7 +265,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     for (final download in downloads) {
-      if (localDataSource.isFileExists(download.filePath)) {
+      final bool fileExists = await validator.verifyFileExists(
+        download.filePath,
+      );
+      if (fileExists) {
         await localDataSource.deleteFile(download.filePath);
       }
     }
@@ -669,7 +308,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw ArgumentError('Download URL is empty');
     }
 
-    final String downloadsDir = await localDataSource.getDownloadsDirectory();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
 
     // Use the URL as download ID (uniqueness is maintained through filename)
     final downloadId = trimmedUrl;
@@ -761,7 +400,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     items,
   ) async {
     if (items.isEmpty) return;
-    final String downloadsDir = await localDataSource.getDownloadsDirectory();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
     final List<
       ({
         String id,
@@ -903,7 +542,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         status: DownloadStatus.cancelled,
       );
       await updateDownload(updatedDownload);
-      if (localDataSource.isFileExists(download.filePath)) {
+      final bool fileExists = await validator.verifyFileExists(
+        download.filePath,
+      );
+      if (fileExists) {
         await localDataSource.deleteFile(download.filePath);
       }
     }
@@ -915,11 +557,15 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // surahId is the URL
     // We match by checking if the download's URL matches surahId AND reciter matches
     final String trimmedUrl = url.trim();
-    final String downloadsDir = await _getDownloadsDir();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
 
     for (final rawDownload in downloads) {
-      final DownloadItem d = _resolveDownloadPath(rawDownload, downloadsDir);
-      final bool isFileExists = localDataSource.isFileExists(d.filePath);
+      final DownloadItem d = pathResolver.resolveDownloadPath(
+        rawDownload,
+        downloadsDir,
+      );
+      // Use 1 retry (instant check) during list loading
+      final bool isFileExists = await validator.verifyFileExists(d.filePath);
       if (d.reciterName == reciterName &&
           d.url == trimmedUrl &&
           d.status == DownloadStatus.completed &&
@@ -977,7 +623,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     // surahId is the URL
     final String trimmedUrl = url.trim();
-    final String downloadsDir = await _getDownloadsDir();
+    final String downloadsDir = await pathResolver.getDownloadsDir();
 
     try {
       final DownloadItem rawDownload = downloads.firstWhere(
@@ -987,12 +633,15 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             d.status == DownloadStatus.completed,
       );
 
-      final DownloadItem download = _resolveDownloadPath(
+      final DownloadItem download = pathResolver.resolveDownloadPath(
         rawDownload,
         downloadsDir,
       );
 
-      if (localDataSource.isFileExists(download.filePath)) {
+      final bool fileExists = await validator.verifyFileExists(
+        download.filePath,
+      );
+      if (fileExists) {
         return download.filePath;
       }
       return null;
@@ -1013,236 +662,123 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   ) async {
     DownloadItem? download = await getDownloadItem(id);
 
-    // If not found by exact ID, it might be that DownloadService is reporting the URL
-    // instead of the composite ID (e.g. after app restart or if mapping was lost).
-    // Try to find the download by matching the URL.
     if (download == null) {
       try {
         final List<DownloadItem> allDownloads = await localDataSource
             .getDownloads();
-        // Find a download where key url matches the ID reported by service
-        // We prioritize active downloads if there are multiple matches (rare)
         download = allDownloads.firstWhere((d) => d.url == id);
-      } catch (_) {
-        // Still not found, ignore update
-      }
+      } catch (_) {}
     }
 
     if (download != null) {
-      // Special handling for completed status:
-      // Only mark as completed if:
-      // 1. Progress is 100% (1.0)
-      // 2. File actually exists on disk
-      // 3. File size matches expected size (if available)
       if (status == DownloadStatus.completed) {
-        // Verify progress is actually 100%
         if (progress < 1.0) {
           logger.w(
             '[DownloadsRepository] Download reported as completed but progress is ${(progress * 100).toStringAsFixed(1)}% - keeping as downloading',
           );
-          // Keep status as downloading until progress reaches 100%
-          final DownloadItem updatedDownload = download.copyWith(
-            status: DownloadStatus.downloading,
-            progress: progress,
-            downloadedSize: downloadedSize,
-            fileSize: fileSize,
-          );
-          await updateDownload(updatedDownload);
-          return;
-        }
-
-        // Verify file actually exists with retry mechanism
-        // Sometimes the file system has not fully committed the move from temp to final path
-        var fileExists = false;
-        // Increase retries to 10 (approx 5 seconds) to account for slower IO/devices
-        for (var i = 0; i < 10; i++) {
-          fileExists = localDataSource.isFileExists(download.filePath);
-          if (fileExists) {
-            break;
-          }
-          // Wait a bit before retrying
-          if (i < 9) {
-            await Future.delayed(const Duration(milliseconds: 500));
-          }
-        }
-
-        if (!fileExists) {
-          logger.w(
-            '[DownloadsRepository] Download reported as completed but file not found at ${download.filePath} after retries - marking as failed',
-          );
-
-          // Diagnostic: List contents of the parent directory to see what's there
-          try {
-            final String parentDirPath = DownloadPathUtils.getDirectoryName(
-              download.filePath,
-            );
-            final parentDir = Directory(parentDirPath);
-            if (parentDir.existsSync()) {
-              final List<FileSystemEntity> contents = await parentDir
-                  .list()
-                  .toList();
-              final String fileNames = contents
-                  .map((e) => e.path.split(Platform.pathSeparator).last)
-                  .join(', ');
-              logger.d(
-                '[DownloadsRepository] Contents of $parentDirPath: [$fileNames]',
-              );
-            } else {
-              logger.w(
-                '[DownloadsRepository] Parent directory does not exist: $parentDirPath',
-              );
-            }
-          } catch (e) {
-            logger.e(
-              '[DownloadsRepository] Failed to list directory contents: $e',
-            );
-          }
-
-          // File doesn't exist yet, mark as failed
-          final DownloadItem updatedDownload = download.copyWith(
-            status: DownloadStatus.failed,
-            progress: progress,
-            downloadedSize: downloadedSize,
-            fileSize: fileSize,
-          );
-          await updateDownload(updatedDownload);
-          return;
-        }
-
-        // Verify file size if available
-        if (fileSize > 0) {
-          try {
-            final file = File(download.filePath);
-            final int actualFileSize = await file.length();
-
-            // Allow some tolerance (1%) for file size differences due to metadata
-            final int tolerance = (fileSize * 0.01).round();
-            final int sizeDiff = (actualFileSize - fileSize).abs();
-
-            if (sizeDiff > tolerance) {
-              logger.w(
-                '[DownloadsRepository] Download reported as completed but file size mismatch: '
-                'expected=$fileSize actual=$actualFileSize diff=$sizeDiff - marking as failed',
-              );
-              // File size doesn't match, mark as failed
-              final DownloadItem updatedDownload = download.copyWith(
-                status: DownloadStatus.failed,
-                progress: progress,
-                downloadedSize: downloadedSize,
-                fileSize: fileSize,
-              );
-              await updateDownload(updatedDownload);
-              return;
-            }
-          } catch (e) {
-            logger.e(
-              '[DownloadsRepository] Error verifying file size for completed download: $e',
-            );
-            // If we can't verify, keep as downloading to be safe
-            final DownloadItem updatedDownload = download.copyWith(
+          await updateDownload(
+            download.copyWith(
               status: DownloadStatus.downloading,
               progress: progress,
               downloadedSize: downloadedSize,
               fileSize: fileSize,
+            ),
+          );
+          return;
+        }
+
+        final bool fileExists = await validator.verifyFileExists(
+          download.filePath,
+          maxRetries: 10, // Wait for I/O after completion
+        );
+        if (!fileExists) {
+          logger.w(
+            '[DownloadsRepository] Completed download file not found at ${download.filePath}',
+          );
+          await updateDownload(
+            download.copyWith(
+              status: DownloadStatus.failed,
+              progress: progress,
+            ),
+          );
+          return;
+        }
+
+        if (fileSize > 0) {
+          final bool isSizeValid = await validator.verifyFileSize(
+            download.filePath,
+            fileSize,
+          );
+          if (!isSizeValid) {
+            await updateDownload(
+              download.copyWith(
+                status: DownloadStatus.failed,
+                progress: progress,
+              ),
             );
-            await updateDownload(updatedDownload);
             return;
           }
         } else {
-          // File size is 0 or unknown - try to get it from disk since we are completed
-          try {
-            final file = File(download.filePath);
-            // ignore: avoid_slow_async_io
-            if (await file.exists()) {
-              final int actualFileSize = await file.length();
-              if (actualFileSize > 0) {
-                // Update the file size with the actual size on disk
-                final DownloadItem updatedDownload = download.copyWith(
-                  status: DownloadStatus.completed,
-                  progress: 1.0,
-                  downloadedSize: actualFileSize,
-                  fileSize: actualFileSize,
-                  completedAt: DateTime.now(),
-                );
-                await updateDownload(updatedDownload);
-                return;
-              }
-            }
-          } catch (e) {
-            logger.w(
-              '[DownloadsRepository] Failed to update file size from disk: $e',
+          final int? actualSize = await validator.getActualFileSize(
+            download.filePath,
+          );
+          if (actualSize != null && actualSize > 0) {
+            await updateDownload(
+              download.copyWith(
+                status: DownloadStatus.completed,
+                progress: 1.0,
+                downloadedSize: actualSize,
+                fileSize: actualSize,
+                completedAt: DateTime.now(),
+              ),
             );
+            return;
           }
         }
 
-        // All checks passed - mark as completed
-        logger.d(
-          '[DownloadsRepository] Download verified and marked as completed: '
-          'id=${download.id} file=${download.filePath} size=$fileSize',
+        await updateDownload(
+          download.copyWith(
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            downloadedSize: downloadedSize,
+            fileSize: fileSize,
+            completedAt: DateTime.now(),
+          ),
         );
-        final DownloadItem updatedDownload = download.copyWith(
-          status: DownloadStatus.completed,
-          progress: 1.0, // Ensure progress is exactly 1.0
-          downloadedSize: downloadedSize,
-          fileSize: fileSize,
-          completedAt: DateTime.now(),
-        );
-        await updateDownload(updatedDownload);
       } else {
-        // Use existing file size if incoming is 0 (DownloadService often sends 0)
         final int effectiveFileSize = fileSize > 0
             ? fileSize
             : download.fileSize;
 
-        // Special check: if downloading and progress is at 100%, check if we should mark as completed
-        // This handles cases where FlutterDownloader might be stuck or late in sending completion event
         if (status == DownloadStatus.downloading && progress >= 1.0) {
-          final bool fileExists = localDataSource.isFileExists(
+          final bool fileExists = await validator.verifyFileExists(
             download.filePath,
           );
           if (fileExists) {
-            // If file exists and we are at 100%, trust it is completed
-            logger.d(
-              '[DownloadsRepository] Download at 100% with downloading status - auto-marking as completed: id=${download.id}',
+            final int? actualSize = await validator.getActualFileSize(
+              download.filePath,
             );
-
-            // Try to get actual file size from disk if current size is invalid
-            var finalFileSize = effectiveFileSize;
-            if (finalFileSize <= 0) {
-              try {
-                final file = File(download.filePath);
-                // ignore: avoid_slow_async_io
-                final int actualSize = await file.length();
-                if (actualSize > 0) {
-                  finalFileSize = actualSize;
-                }
-              } catch (e) {
-                // Ignore error, keep existing size
-              }
-            }
-
-            final DownloadItem updatedDownload = download.copyWith(
-              status: DownloadStatus.completed,
-              progress: 1.0,
-              downloadedSize: finalFileSize > 0
-                  ? finalFileSize
-                  : downloadedSize,
-              fileSize: finalFileSize,
-              completedAt: DateTime.now(),
+            await updateDownload(
+              download.copyWith(
+                status: DownloadStatus.completed,
+                progress: 1.0,
+                downloadedSize: actualSize ?? downloadedSize,
+                fileSize: actualSize ?? effectiveFileSize,
+                completedAt: DateTime.now(),
+              ),
             );
-            await updateDownload(updatedDownload);
             return;
           }
         }
 
-        // For non-completed statuses, update normally
-        final DownloadItem updatedDownload = download.copyWith(
-          status: status,
-          progress: progress,
-          downloadedSize: downloadedSize,
-          fileSize: effectiveFileSize,
+        await updateDownload(
+          download.copyWith(
+            status: status,
+            progress: progress,
+            downloadedSize: downloadedSize,
+            fileSize: effectiveFileSize,
+          ),
         );
-        await updateDownload(updatedDownload);
       }
     }
   }
@@ -1267,12 +803,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<bool> validateDownloadedFile(DownloadItem download) async {
-    try {
-      final file = File(download.filePath);
-      return file.existsSync();
-    } catch (e) {
-      return false;
-    }
+    return validator.verifyFileExists(download.filePath);
   }
 
   @override
@@ -1426,19 +957,18 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         } else {
           // Self-heal: Check actual file size if database says 0
           try {
-            final file = File(download.filePath);
-            if (file.existsSync()) {
-              final int actualSize = await file.length();
-              if (actualSize > 0) {
-                totalBytes += actualSize;
-                // Update database with correct size to avoid future checks
-                await localDataSource.updateDownload(
-                  download.copyWith(
-                    fileSize: actualSize,
-                    downloadedSize: actualSize,
-                  ),
-                );
-              }
+            final int? actualSize = await validator.getActualFileSize(
+              download.filePath,
+            );
+            if (actualSize != null && actualSize > 0) {
+              totalBytes += actualSize;
+              // Update database with correct size to avoid future checks
+              await localDataSource.updateDownload(
+                download.copyWith(
+                  fileSize: actualSize,
+                  downloadedSize: actualSize,
+                ),
+              );
             }
           } catch (e) {
             logger.w(

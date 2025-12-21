@@ -372,6 +372,7 @@ class DownloadServiceImpl implements DownloadService {
           task.status == DownloadTaskStatus.enqueued) {
         // Already active, map it
         _taskIdToUrlMap[task.taskId] = id;
+        _activeDownloadUrls.add(id);
         return;
       }
     }

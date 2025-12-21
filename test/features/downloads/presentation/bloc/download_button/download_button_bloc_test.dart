@@ -164,6 +164,33 @@ void main() {
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
         expect: () => [const DownloadButtonState.downloading(progress: 0.1)],
       );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [completed] immediately if initialIsDownloaded is true',
+        build: () {
+          return DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            checkSurahDownloaded: mockCheckSurahDownloaded,
+            downloadSurah: mockDownloadSurah,
+            cancelDownload: mockCancelDownload,
+            observeDownloadProgress: mockObserveDownloadProgress,
+            initialIsDownloaded: true,
+          );
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [const DownloadButtonState.completed()],
+        verify: (_) {
+          // verify that checkSurahDownloaded was NOT called
+          verifyNever(
+            mockCheckSurahDownloaded.call(
+              surahId: anyNamed('surahId'),
+              reciterName: anyNamed('reciterName'),
+            ),
+          );
+        },
+      );
     });
 
     group('StartDownload Event', () {

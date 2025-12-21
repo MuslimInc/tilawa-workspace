@@ -4,13 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../router/app_router_config.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import 'download_item_card.dart';
 
-class ReciterDownloadsSection extends StatelessWidget {
+class ReciterDownloadsSection extends StatefulWidget {
   const ReciterDownloadsSection({
     super.key,
     required this.reciterName,
@@ -20,14 +19,21 @@ class ReciterDownloadsSection extends StatelessWidget {
   final String reciterName;
   final Map<String, List<DownloadItem>> downloadsByNarrative;
 
+  @override
+  State<ReciterDownloadsSection> createState() =>
+      _ReciterDownloadsSectionState();
+}
+
+class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
+  bool _isExpanded = false;
+
   // Get all downloads (flatten map)
   List<DownloadItem> get _allDownloads {
-    return downloadsByNarrative.values
+    return widget.downloadsByNarrative.values
         .expand((downloads) => downloads)
         .toList();
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     final List<DownloadItem> downloads = _allDownloads;
@@ -48,11 +54,22 @@ class ReciterDownloadsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildReciterHeader(context, downloads),
-          Divider(
-            height: 1,
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          AnimatedCrossFade(
+            firstChild: const SizedBox(height: 0, width: double.infinity),
+            secondChild: Column(
+              children: [
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                ),
+                _buildDownloadsList(context),
+              ],
+            ),
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 300),
           ),
-          _buildDownloadsList(context),
         ],
       ),
     );
@@ -64,17 +81,9 @@ class ReciterDownloadsSection extends StatelessWidget {
   ) {
     return InkWell(
       onTap: () {
-        // Try to find a reciterId from the downloads
-        final int? id = downloads
-            .firstWhere(
-              (d) => d.reciterId != null,
-              orElse: () => downloads.first,
-            )
-            .reciterId;
-
-        if (id != null) {
-          ReciterDetailsRoute(reciterId: id.toString()).push(context);
-        }
+        setState(() {
+          _isExpanded = !_isExpanded;
+        });
       },
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -96,7 +105,9 @@ class ReciterDownloadsSection extends StatelessWidget {
                   context,
                 ).primaryColor.withValues(alpha: 0.1),
                 child: Text(
-                  reciterName.isNotEmpty ? reciterName[0].toUpperCase() : 'R',
+                  widget.reciterName.isNotEmpty
+                      ? widget.reciterName[0].toUpperCase()
+                      : 'R',
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
@@ -112,14 +123,14 @@ class ReciterDownloadsSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    reciterName,
+                    widget.reciterName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${downloads.length} ${context.l10n.surahs}${downloadsByNarrative.length > 1 ? " • ${downloadsByNarrative.length} narratives" : ""}',
+                    '${downloads.length} ${context.l10n.surahs}${widget.downloadsByNarrative.length > 1 ? " • ${widget.downloadsByNarrative.length} narratives" : ""}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -157,6 +168,16 @@ class ReciterDownloadsSection extends StatelessWidget {
                       );
                     },
                   ),
+                const SizedBox(width: 8),
+                // Expand Icon
+                AnimatedRotation(
+                  turns: _isExpanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(
+                    Icons.expand_more_rounded,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert_rounded),
@@ -199,9 +220,10 @@ class ReciterDownloadsSection extends StatelessWidget {
   }
 
   Widget _buildDownloadsList(BuildContext context) {
-    if (downloadsByNarrative.length == 1) {
+    if (widget.downloadsByNarrative.length == 1) {
       // Single narrative: just show the list
-      final List<DownloadItem> downloads = downloadsByNarrative.values.first;
+      final List<DownloadItem> downloads =
+          widget.downloadsByNarrative.values.first;
       return Column(
         children: downloads.asMap().entries.map((entry) {
           final int index = entry.key;
@@ -234,7 +256,7 @@ class ReciterDownloadsSection extends StatelessWidget {
 
     // Multiple narratives: Show header for each narrative
     return Column(
-      children: downloadsByNarrative.entries.map((entry) {
+      children: widget.downloadsByNarrative.entries.map((entry) {
         final String narrativeName = entry.key;
         final List<DownloadItem> narrativeDownloads = entry.value;
 
@@ -283,7 +305,7 @@ class ReciterDownloadsSection extends StatelessWidget {
               );
             }),
             // Divider between narrative sections (except after the last one)
-            if (entry.key != downloadsByNarrative.keys.last)
+            if (entry.key != widget.downloadsByNarrative.keys.last)
               Divider(
                 height: 1,
                 thickness: 4,
@@ -303,7 +325,7 @@ class ReciterDownloadsSection extends StatelessWidget {
         content: Text(
           AppLocalizations.of(
             context,
-          )!.deleteAllDownloadsConfirmation(reciterName),
+          )!.deleteAllDownloadsConfirmation(widget.reciterName),
         ),
         actions: [
           TextButton(
@@ -314,7 +336,7 @@ class ReciterDownloadsSection extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               context.read<DownloadsBloc>().add(
-                DeleteReciterDownloads(reciterName: reciterName),
+                DeleteReciterDownloads(reciterName: widget.reciterName),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -340,7 +362,7 @@ class ReciterDownloadsSection extends StatelessWidget {
     }
 
     // Check if the current media item is from this reciter
-    return currentMediaItem.artist == reciterName;
+    return currentMediaItem.artist == widget.reciterName;
   }
 
   /// Handle play all/pause all button press
@@ -368,7 +390,7 @@ class ReciterDownloadsSection extends StatelessWidget {
   /// Play all completed downloads for this reciter
   void _playAllDownloads(BuildContext context) {
     context.read<DownloadsBloc>().add(
-      DownloadsEvent.playAllDownloads(reciterName: reciterName),
+      DownloadsEvent.playAllDownloads(reciterName: widget.reciterName),
     );
   }
 }

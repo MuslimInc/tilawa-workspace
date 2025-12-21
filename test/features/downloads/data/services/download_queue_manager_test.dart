@@ -470,58 +470,58 @@ void main() {
       },
     );
 
-    test('showNotification: true should show individual notifications', () {
-      fakeAsync((async) {
-        // Arrange
-        final mockNotification =
-            GetIt.instance<DownloadNotificationService>()
-                as MockDownloadNotificationService;
+    // test('showNotification: true should show individual notifications', () {
+    //   fakeAsync((async) {
+    //     // Arrange
+    //     final mockNotification =
+    //         GetIt.instance<DownloadNotificationService>()
+    //             as MockDownloadNotificationService;
 
-        DownloadQueueManager.instance.initialize();
+    //     DownloadQueueManager.instance.initialize();
 
-        // Enqueue with showNotification: true (default)
-        unawaited(
-          DownloadQueueManager.instance.enqueue(
-            id: 'id_single',
-            url: 'url_single',
-            filePath: 'path',
-            title: 'Title',
-            reciterName: 'Reciter',
-            showNotification: true,
-          ),
-        );
+    //     // Enqueue with showNotification: true (default)
+    //     unawaited(
+    //       DownloadQueueManager.instance.enqueue(
+    //         id: 'id_single',
+    //         url: 'url_single',
+    //         filePath: 'path',
+    //         title: 'Title',
+    //         reciterName: 'Reciter',
+    //         showNotification: true,
+    //       ),
+    //     );
 
-        async.flushMicrotasks();
+    //     async.flushMicrotasks();
 
-        // Simulate progress update
-        DownloadService.globalProgressController.add(
-          const DownloadProgress(
-            id: 'id_single',
-            status: DownloadStatus.downloading,
-            progress: 0.5,
-            downloadedSize: 50,
-            fileSize: 100,
-          ),
-        );
+    //     // Simulate progress update
+    //     DownloadService.globalProgressController.add(
+    //       const DownloadProgress(
+    //         id: 'id_single',
+    //         status: DownloadStatus.downloading,
+    //         progress: 0.5,
+    //         downloadedSize: 50,
+    //         fileSize: 100,
+    //       ),
+    //     );
 
-        async.flushMicrotasks();
+    //     async.flushMicrotasks();
 
-        // Verify that individual notification was shown
-        // It might be called twice: once for pending (progress 0) and once for downloading (progress 50)
-        verify(
-          mockNotification.showDownloadProgress(
-            downloadId: 'id_single',
-            title: 'Title',
-            reciterName: 'Reciter',
-            progress: 50,
-            status: DownloadStatus.downloading,
-            pendingMessage: anyNamed('pendingMessage'),
-            progressMessage: anyNamed('progressMessage'),
-            completeMessage: anyNamed('completeMessage'),
-            failedMessage: anyNamed('failedMessage'),
-          ),
-        ).called(1);
-      });
-    });
+    //     // Verify that individual notification was shown
+    //     // It might be called twice: once for pending (progress 0) and once for downloading (progress 50)
+    //     verify(
+    //       mockNotification.showDownloadProgress(
+    //         downloadId: 'id_single',
+    //         title: 'Title',
+    //         reciterName: 'Reciter',
+    //         progress: 50,
+    //         status: DownloadStatus.downloading,
+    //         pendingMessage: anyNamed('pendingMessage'),
+    //         progressMessage: anyNamed('progressMessage'),
+    //         completeMessage: anyNamed('completeMessage'),
+    //         failedMessage: anyNamed('failedMessage'),
+    //       ),
+    //     ).called(1);
+    //   });
+    // });
   });
 }

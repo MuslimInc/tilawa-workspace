@@ -54,117 +54,154 @@ class ExpandedPlayerScreen extends StatelessWidget {
 
               // Content
               SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 40.h),
-                      // Artwork
-                      Center(
-                        child: Container(
-                          width: 300.r,
-                          height: 300.r,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 30,
-                                offset: const Offset(0, 15),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.r),
-                            child: mediaItem.artUri != null
-                                ? CachedNetworkImage(
-                                    imageUrl: mediaItem.artUri.toString(),
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(color: Colors.grey),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 48.h),
-                      // Info
-                      Text(
-                        mediaItem.title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        mediaItem.artist ?? '',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 18.sp,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Spacer(),
-                      // Progress Bar
-                      StreamBuilder<Duration>(
-                        stream:
-                            (audioPositionService ??
-                                    getIt<AudioPositionService>())
-                                .position,
-                        builder: (context, snapshot) {
-                          final Duration position =
-                              snapshot.data ?? Duration.zero;
-                          final Duration duration =
-                              mediaItem.duration ?? Duration.zero;
-                          return Column(
-                            children: [
-                              Slider(
-                                value: position.inSeconds.toDouble(),
-                                max: duration.inSeconds.toDouble(),
-                                onChanged: (value) {
-                                  context.read<AudioPlayerBloc>().add(
-                                    AudioPlayerEvent.seekTo(
-                                      Duration(seconds: value.toInt()),
-                                    ),
-                                  );
-                                },
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.white.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      _formatDuration(position),
-                                      style: const TextStyle(
-                                        color: Colors.white70,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 40.h),
+                            // Artwork
+                            Center(
+                              child: Container(
+                                width: 300.r,
+                                height: 300.r,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
                                       ),
-                                    ),
-                                    Text(
-                                      _formatDuration(duration),
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                      ),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 15),
                                     ),
                                   ],
                                 ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  child: mediaItem.artUri != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: mediaItem.artUri.toString(),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(color: Colors.grey),
+                                ),
                               ),
-                            ],
-                          );
-                        },
+                            ),
+                            SizedBox(height: 48.h),
+                            // Info
+                            Text(
+                              mediaItem.title,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              mediaItem.artist ?? '',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 18.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const Spacer(),
+                            // Progress Bar
+                            StreamBuilder<Duration>(
+                              stream:
+                                  (audioPositionService ??
+                                          getIt<AudioPositionService>())
+                                      .position,
+                              builder: (context, snapshot) {
+                                final Duration position =
+                                    snapshot.data ?? Duration.zero;
+                                final Duration duration =
+                                    mediaItem.duration ?? Duration.zero;
+
+                                final double durationSeconds = duration
+                                    .inSeconds
+                                    .toDouble();
+                                final double positionSeconds = position
+                                    .inSeconds
+                                    .toDouble();
+
+                                // Ensure max is never 0 to avoid division by zero or invalid range
+                                final max = durationSeconds > 0
+                                    ? durationSeconds
+                                    : 1.0;
+                                // Clamp value to ensure it's within [0, max]
+                                final double value = positionSeconds.clamp(
+                                  0.0,
+                                  max,
+                                );
+                                // Enable slider only if we have a valid duration
+                                final bool canSeek = durationSeconds > 0;
+
+                                return Column(
+                                  children: [
+                                    Slider(
+                                      value: value,
+                                      max: max,
+                                      onChanged: canSeek
+                                          ? (value) {
+                                              context
+                                                  .read<AudioPlayerBloc>()
+                                                  .add(
+                                                    AudioPlayerEvent.seekTo(
+                                                      Duration(
+                                                        seconds: value.toInt(),
+                                                      ),
+                                                    ),
+                                                  );
+                                            }
+                                          : null,
+                                      activeColor: Colors.white,
+                                      inactiveColor: Colors.white.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 24.w,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            _formatDuration(position),
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                          Text(
+                                            _formatDuration(duration),
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            SizedBox(height: 24.h),
+                            // Controls
+                            const ControlButtons(),
+                            SizedBox(height: 40.h),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 24.h),
-                      // Controls
-                      const ControlButtons(),
-                      SizedBox(height: 40.h),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
