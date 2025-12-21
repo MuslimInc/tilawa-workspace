@@ -122,7 +122,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                           mediaItem.artUri.toString(),
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) =>
-                              const Container(color: Colors.grey),
+                              Container(color: Colors.grey),
                         ),
                       )
                     else

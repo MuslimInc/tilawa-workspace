@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../../main.dart';
@@ -81,11 +82,11 @@ class ControlButtons extends StatelessWidget {
             final bool? playing = playbackState?.playing;
             if (processingState == AudioProcessingState.loading ||
                 processingState == AudioProcessingState.buffering) {
-              return const Container(
-                margin: EdgeInsets.all(8.0),
+              return Container(
+                margin: const EdgeInsets.all(8.0),
                 width: 64.0,
                 height: 64.0,
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               );
             } else if (playing != true) {
               return IconButton(
