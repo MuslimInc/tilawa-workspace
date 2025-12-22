@@ -30,12 +30,12 @@ class _PlayerApp extends StatelessWidget {
     return BlocListener<LocalizationBloc, LocalizationState>(
       listener: (context, state) {
         // Update download notification locale when app locale changes
-        DownloadQueueManager.instance.setLocale(state.locale);
+        DownloadQueueManager.instance.locale = state.locale;
       },
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, locState) {
           // Set initial locale for download notifications
-          DownloadQueueManager.instance.setLocale(locState.locale);
+          DownloadQueueManager.instance.locale = locState.locale;
 
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {

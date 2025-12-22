@@ -14,38 +14,33 @@ import 'utils.dart';
 /// Get current  location
 /// Get Qibla direction
 class Qibla {
-  factory Qibla() => _instance;
+  factory Qibla() => instance;
 
   @visibleForTesting
   Qibla.internal();
-  static const _channel = MethodChannel('ml.medyas.qibla');
+  static Qibla instance = Qibla.internal();
 
-  static Qibla _instance = Qibla.internal();
+  static const _channel = MethodChannel('ml.medyas.qibla');
 
   Stream<QiblaDirection>? _qiblaStream;
 
-  /// Allows to set a custom instance for testing
-  static void setInstance(Qibla instance) {
-    _instance = instance;
-  }
-
   /// Check Android device sensor support
   static Future<bool?> androidDeviceSensorSupport() =>
-      _instance.checkAndroidDeviceSensorSupport();
+      instance.checkAndroidDeviceSensorSupport();
 
   /// Request Location permission, return GeolocationStatus object
   static Future<LocationPermission> requestPermissions() =>
-      _instance.requestLocationPermission();
+      instance.requestLocationPermission();
 
   /// get location status: GPS enabled and the permission status with GeolocationStatus
   static Future<LocationStatus> checkLocationStatus() =>
-      _instance.getLocationStatus();
+      instance.getLocationStatus();
 
   /// Provides a stream of Map with current compass and Qibla direction
   /// {"qibla": QIBLA, "direction": DIRECTION}
   /// Direction varies from 0-360, 0 being north.
   /// Qibla varies from 0-360, offset from direction(North)
-  static Stream<QiblaDirection> get qiblaStream => _instance.getQiblaStream();
+  static Stream<QiblaDirection> get qiblaStream => instance.getQiblaStream();
 
   /* Instance methods that can be overridden for testing */
 

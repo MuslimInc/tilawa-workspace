@@ -65,8 +65,7 @@ class SettingsCubit extends HydratedCubit<SettingsState> {
   }
 
   void _updateQueueManager() {
-    DownloadQueueManager.instance.setMaxConcurrentDownloads(
-      state.maxConcurrentDownloads,
-    );
+    DownloadQueueManager.instance.maxConcurrentDownloads =
+        state.maxConcurrentDownloads;
   }
 }

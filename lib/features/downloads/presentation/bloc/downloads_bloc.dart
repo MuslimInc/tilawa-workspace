@@ -871,7 +871,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final Either<Failure, void> retryResult = await _retryDownload(
         event.downloadId,
       );
-      retryResult.fold(
+      await retryResult.fold(
         (failure) async {
           // Log analytics event for retry failure
           await _analyticsService.logEvent(

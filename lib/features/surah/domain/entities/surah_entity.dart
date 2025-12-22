@@ -29,7 +29,9 @@ abstract class SurahEntity with _$SurahEntity {
   String get nameEn => mediaItem.extras?['nameEn'] as String? ?? '';
   String get formattedId {
     final fromExtras = mediaItem.extras?['formattedId'] as String?;
-    if (fromExtras != null && fromExtras.isNotEmpty) return fromExtras;
+    if (fromExtras != null && fromExtras.isNotEmpty) {
+      return fromExtras;
+    }
 
     // Fallback: try to extract numeric part from ID if extras are missing (e.g. in tests)
     try {

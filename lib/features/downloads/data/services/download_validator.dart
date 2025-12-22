@@ -28,7 +28,9 @@ class DownloadValidator {
   /// Verifies if the file size on disk matches the expected file size.
   /// Allows for a small tolerance (1%) to account for minor metadata differences.
   Future<bool> verifyFileSize(String filePath, int expectedSize) async {
-    if (expectedSize <= 0) return true;
+    if (expectedSize <= 0) {
+      return true;
+    }
 
     try {
       final file = File(filePath);

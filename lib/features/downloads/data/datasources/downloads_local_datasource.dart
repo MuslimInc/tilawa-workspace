@@ -31,7 +31,9 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<List<DownloadItem>> getDownloads() async {
-    if (_cache != null) return List.from(_cache!);
+    if (_cache != null) {
+      return List.from(_cache!);
+    }
 
     final List<String> downloadsJson =
         await _prefs.getStringList(_downloadsKey) ?? [];
@@ -67,7 +69,9 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<void> addDownloads(List<DownloadItem> items) async {
-    if (items.isEmpty) return;
+    if (items.isEmpty) {
+      return;
+    }
     final List<DownloadItem> downloads = await getDownloads();
     for (final item in items) {
       final int index = downloads.indexWhere((d) => d.id == item.id);
@@ -92,7 +96,9 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
 
   @override
   Future<void> updateDownloads(List<DownloadItem> items) async {
-    if (items.isEmpty) return;
+    if (items.isEmpty) {
+      return;
+    }
     final List<DownloadItem> downloads = await getDownloads();
     var changed = false;
     for (final item in items) {

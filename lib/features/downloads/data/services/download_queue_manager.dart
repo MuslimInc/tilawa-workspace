@@ -46,7 +46,7 @@ class DownloadQueueManager {
   int _maxConcurrentDownloads = 2; // Default to 2
 
   /// Set the maximum number of concurrent downloads
-  void setMaxConcurrentDownloads(int count) {
+  set maxConcurrentDownloads(int count) {
     if (count < 1) {
       return;
     }
@@ -64,12 +64,7 @@ class DownloadQueueManager {
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
   // Current locale for localized notification messages
-  Locale _currentLocale = const Locale('en');
-
-  /// Set the current locale for notification messages
-  void setLocale(Locale locale) {
-    _currentLocale = locale;
-  }
+  Locale locale = const Locale('en');
 
   // Queue of pending downloads
   final List<QueuedDownload> _queue = [];
@@ -545,7 +540,7 @@ class DownloadQueueManager {
     // Show notification only if requested (usually for individual downloads, not batches)
     if (metadata != null && metadata.showNotification) {
       // Get localized strings based on current locale
-      final AppLocalizations l10n = lookupAppLocalizations(_currentLocale);
+      final AppLocalizations l10n = lookupAppLocalizations(locale);
       final int progressPercent = (progress.progress * 100).round();
 
       _notificationService.showDownloadProgress(

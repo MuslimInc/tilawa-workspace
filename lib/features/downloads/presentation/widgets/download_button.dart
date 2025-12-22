@@ -162,7 +162,7 @@ class _CompletedDownloadButton extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
+            color: Colors.green.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
@@ -278,7 +278,7 @@ class _DownloadingProgressButton extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.05),
+                color: theme.primaryColor.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -289,7 +289,7 @@ class _DownloadingProgressButton extends StatelessWidget {
               child: CircularProgressIndicator(
                 value: progress > 0 ? progress : null,
                 strokeWidth: 3,
-                backgroundColor: theme.primaryColor.withOpacity(0.15),
+                backgroundColor: theme.primaryColor.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
               ),
             ),
@@ -387,8 +387,8 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: theme.primaryColor.withOpacity(
-                      1.0 - _animation.value,
+                    color: theme.primaryColor.withValues(
+                      alpha: 1.0 - _animation.value,
                     ),
                     width: 2,
                   ),

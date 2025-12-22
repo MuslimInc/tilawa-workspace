@@ -74,27 +74,23 @@ void main() {
 
     // Mock Shared Preferences to avoid late initialization error in ScreenUtil
     SharedPreferences.setMockInitialValues({});
-
-    final TestWidgetsFlutterBinding binding =
-        TestWidgetsFlutterBinding.ensureInitialized();
-    binding.window.physicalSizeTestValue = const Size(
-      1200 * 3,
-      1600 * 3,
-    ); // Large tablet
-    binding.window.devicePixelRatioTestValue = 3;
   });
 
   tearDown(() {
-    final TestWidgetsFlutterBinding binding =
-        TestWidgetsFlutterBinding.ensureInitialized();
-    binding.window.clearPhysicalSizeTestValue();
-    binding.window.clearDevicePixelRatioTestValue();
-
     // Unregister from getIt
     if (getIt.isRegistered<FavoritesCubit>()) {
       getIt.unregister<FavoritesCubit>();
     }
   });
+
+  void setupView(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1200 * 3, 1600 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+  }
 
   Widget createWidgetUnderTest() {
     return MultiBlocProvider(
@@ -130,6 +126,7 @@ void main() {
       initialState: const RecitersInitial(),
     );
 
+    setupView(tester);
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
@@ -164,6 +161,7 @@ void main() {
         initialState: const RecitersInitial(),
       );
 
+      setupView(tester);
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
 
@@ -183,6 +181,7 @@ void main() {
         initialState: const RecitersInitial(),
       );
 
+      setupView(tester);
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
 

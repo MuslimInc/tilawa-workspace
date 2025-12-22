@@ -53,16 +53,16 @@ void main() {
       final mock = MockFlutterQibla();
       final original = Qibla();
 
-      Qibla.setInstance(mock);
+      Qibla.instance = mock;
       expect(Qibla(), same(mock));
 
       // Cleanup
-      Qibla.setInstance(original);
+      Qibla.instance = original;
     });
 
     test('requestPermissions calls instance method', () async {
       final mock = MockFlutterQibla();
-      Qibla.setInstance(mock);
+      Qibla.instance = mock;
 
       when(
         () => mock.requestLocationPermission(),
@@ -75,7 +75,7 @@ void main() {
 
     test('checkLocationStatus calls instance method', () async {
       final mock = MockFlutterQibla();
-      Qibla.setInstance(mock);
+      Qibla.instance = mock;
 
       when(() => mock.getLocationStatus()).thenAnswer(
         (_) async => const LocationStatus(true, LocationPermission.whileInUse),
@@ -96,7 +96,7 @@ void main() {
         locationController.stream,
       );
 
-      Qibla.setInstance(testable);
+      Qibla.instance = testable;
 
       final Stream<QiblaDirection> stream = Qibla.qiblaStream;
 
@@ -134,9 +134,9 @@ void main() {
       // qibla = 90 + (360 - 119) = 90 + 241 = 331
       expect(results[1].qibla, closeTo(331, 1));
 
-      subscription.cancel();
-      compassController.close();
-      locationController.close();
+      await subscription.cancel();
+      await compassController.close();
+      await locationController.close();
     });
 
     test(
@@ -147,7 +147,7 @@ void main() {
           const Stream.empty(),
           const Stream.empty(),
         );
-        Qibla.setInstance(testable);
+        Qibla.instance = testable;
 
         // On macOS/iOS this should be true.
         // If we are strictly on a host machine that is not Android.
@@ -164,7 +164,7 @@ void main() {
         compassController.stream,
         locationController.stream,
       );
-      Qibla.setInstance(testable);
+      Qibla.instance = testable;
 
       final Stream<QiblaDirection> stream1 = Qibla.qiblaStream;
       final Stream<QiblaDirection> stream2 = Qibla.qiblaStream;

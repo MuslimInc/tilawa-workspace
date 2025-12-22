@@ -1,4 +1,4 @@
-import 'package:dartz_plus/src/either.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 

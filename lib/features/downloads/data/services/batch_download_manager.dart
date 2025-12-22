@@ -27,7 +27,9 @@ class BatchDownloadManager {
     required String title,
     required List<String> downloadIds,
   }) {
-    if (downloadIds.isEmpty) return;
+    if (downloadIds.isEmpty) {
+      return;
+    }
 
     // Create batch info
     final batchInfo = _BatchInfo(
@@ -53,7 +55,9 @@ class BatchDownloadManager {
   /// Cancel a batch
   Future<void> cancelBatch(String batchId) async {
     final _BatchInfo? batch = _activeBatches[batchId];
-    if (batch == null) return;
+    if (batch == null) {
+      return;
+    }
 
     logger.d('[BatchDownloadManager] Cancelling batch $batchId');
 
@@ -67,7 +71,9 @@ class BatchDownloadManager {
   }
 
   void _ensureListening() {
-    if (_progressSubscription != null) return;
+    if (_progressSubscription != null) {
+      return;
+    }
 
     _progressSubscription = _downloadService.globalProgressStream.listen(
       (progress) {
@@ -80,7 +86,9 @@ class BatchDownloadManager {
   }
 
   void _handleProgressUpdate(DownloadProgress progress) {
-    if (_activeBatches.isEmpty) return;
+    if (_activeBatches.isEmpty) {
+      return;
+    }
 
     final List<String> batchesToRemove = [];
 
@@ -107,16 +115,16 @@ class BatchDownloadManager {
     }
 
     // Remove finished batches from active tracking
-    for (final id in batchesToRemove) {
-      _activeBatches.remove(id);
-    }
+    batchesToRemove.forEach(_activeBatches.remove);
 
     _checkCleanup();
   }
 
   void _updateNotification(String batchId) {
     final _BatchInfo? batch = _activeBatches[batchId];
-    if (batch == null) return;
+    if (batch == null) {
+      return;
+    }
 
     _notificationService.showBatchDownloadProgress(
       batchId: batch.id,
@@ -183,7 +191,9 @@ class _BatchInfo {
   }
 
   int get overallProgress {
-    if (totalItems == 0) return 0;
+    if (totalItems == 0) {
+      return 0;
+    }
 
     double totalProgressSum = 0;
 
@@ -206,7 +216,9 @@ class _BatchInfo {
 
   DownloadStatus get status {
     if (isFinished) {
-      if (failedCount > 0 && completedCount == 0) return DownloadStatus.failed;
+      if (failedCount > 0 && completedCount == 0) {
+        return DownloadStatus.failed;
+      }
       return DownloadStatus.completed;
     }
     return DownloadStatus.downloading;

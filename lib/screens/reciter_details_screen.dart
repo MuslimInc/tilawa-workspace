@@ -333,7 +333,9 @@ class _ReciterSearchField extends StatelessWidget {
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, child) {
-              if (value.text.isEmpty) return const SizedBox.shrink();
+              if (value.text.isEmpty) {
+                return const SizedBox.shrink();
+              }
               return IconButton(
                 icon: const Icon(Icons.clear_rounded),
                 onPressed: () {
@@ -415,7 +417,9 @@ class _DownloadAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (parentState.surahList.isEmpty) return const SizedBox.shrink();
+    if (parentState.surahList.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

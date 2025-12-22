@@ -184,7 +184,9 @@ class ReciterDetailsBloc
 
   void _subscribeToDownloads() {
     _downloadsSubscription?.cancel();
-    if (_currentReciterName == null) return;
+    if (_currentReciterName == null) {
+      return;
+    }
 
     _downloadsSubscription = _observeReciterDownloads(_currentReciterName!)
         .listen((item) {
@@ -220,7 +222,9 @@ class ReciterDetailsBloc
   }
 
   void _updateProgressAndEmit() {
-    if (state.surahList.isEmpty) return;
+    if (state.surahList.isEmpty) {
+      return;
+    }
 
     final double progress = _completedSurahs.length / state.surahList.length;
     final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;

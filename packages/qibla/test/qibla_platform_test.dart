@@ -46,7 +46,7 @@ void main() {
     GeolocatorPlatform.instance = MockGeolocatorPlatform();
 
     // Reset singleton to real implementation
-    Qibla.setInstance(Qibla.internal());
+    Qibla.instance = Qibla.internal();
   });
 
   tearDown(() {
@@ -88,7 +88,7 @@ void main() {
       // Use the new testing hook to force Android path
       final instance = Qibla.internal();
       instance.platformIsAndroid = true;
-      Qibla.setInstance(instance);
+      Qibla.instance = instance;
 
       final bool? result = await Qibla.androidDeviceSensorSupport();
 

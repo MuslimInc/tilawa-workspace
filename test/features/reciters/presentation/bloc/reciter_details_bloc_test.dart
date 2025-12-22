@@ -8,7 +8,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/core/entities/moshaf_entity.dart';
 import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
 import 'package:muzakri/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
@@ -34,8 +33,6 @@ class MockCancelDownloadsForReciterUseCase extends Mock
 
 class MockObserveReciterDownloadsUseCase extends Mock
     implements ObserveReciterDownloadsUseCase {}
-
-class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
 class MockStorage extends Mock implements Storage {}
 

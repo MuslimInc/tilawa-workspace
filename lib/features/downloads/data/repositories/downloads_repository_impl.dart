@@ -44,7 +44,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> initialize() async {
-    _progressSubscription?.cancel();
+    await _progressSubscription?.cancel();
     _progressSubscription = downloadService.globalProgressStream.listen(
       (progress) {
         updateDownloadProgress(
@@ -60,7 +60,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       },
     );
     // Ensure queue manager has correct concurrency setting on init
-    DownloadQueueManager.instance.setMaxConcurrentDownloads(2);
+    DownloadQueueManager.instance.maxConcurrentDownloads = 2;
   }
 
   @override
@@ -216,7 +216,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         )
         .toList();
 
-    if (toCancel.isEmpty) return;
+    if (toCancel.isEmpty) {
+      return;
+    }
 
     final List<DownloadItem> updatedItems = [];
 
@@ -247,9 +249,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     if (updatedItems.isNotEmpty) {
       await localDataSource.updateDownloads(updatedItems);
-      for (final item in updatedItems) {
-        _downloadUpdatesController.add(item);
-      }
+      updatedItems.forEach(_downloadUpdatesController.add);
     }
   }
 
@@ -399,7 +399,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     List<({String url, String surahTitle, String reciterName, int reciterId})>
     items,
   ) async {
-    if (items.isEmpty) return;
+    if (items.isEmpty) {
+      return;
+    }
     final String downloadsDir = await pathResolver.getDownloadsDir();
     final List<
       ({
@@ -418,7 +420,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // Process items efficiently
     for (final item in items) {
       final String trimmedUrl = item.url.trim();
-      if (trimmedUrl.isEmpty) continue;
+      if (trimmedUrl.isEmpty) {
+        continue;
+      }
 
       final downloadId = trimmedUrl;
       final String safeFileName = DownloadPathUtils.calculateRelativePath(
@@ -468,9 +472,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       await localDataSource.addDownloads(dbItems);
 
       // Also emit updates to the stream for each item so listeners (UI) know they are pending
-      for (final item in dbItems) {
-        _downloadUpdatesController.add(item);
-      }
+      dbItems.forEach(_downloadUpdatesController.add);
 
       // Notify batch manager
       final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';

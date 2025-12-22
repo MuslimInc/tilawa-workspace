@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui'; // or flutter/material.dart
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart'; // for visibleForTesting
@@ -22,19 +21,7 @@ class DownloadNotificationService {
   final RecitersRepository _recitersRepository;
   final NavigationService _navigator;
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
-
-  final bool _initialized = false;
-
   /// Channel ID for download notifications
-  static const String _downloadChannelId = 'download_progress';
-  static const String _downloadChannelName = 'Download Progress';
-  static const String _downloadChannelDescription =
-      'Shows download progress for Quran audio files';
-
-  /// Map to store notification IDs for each download (using hash of download ID)
-  final Map<String, int> _notificationIds = {};
 
   /// Initialize the notification service
   Future<void> initialize() async {
@@ -86,15 +73,6 @@ class DownloadNotificationService {
       logger.e('[DownloadNotificationService] Initialization failed: $e');
     }
     */
-  }
-
-  /// Get or create a notification ID for a download
-  int _getNotificationId(String downloadId) {
-    if (!_notificationIds.containsKey(downloadId)) {
-      // Use hashCode modulo a large number to get a unique-ish ID
-      _notificationIds[downloadId] = downloadId.hashCode.abs() % 100000;
-    }
-    return _notificationIds[downloadId]!;
   }
 
   /// Show a download progress notification
@@ -266,74 +244,6 @@ class DownloadNotificationService {
       );
     }
     */
-  }
-
-  /// Show a completed download notification
-  Future<void> _showCompletedNotification({
-    required int notificationId,
-    required String title,
-    required String message,
-    required String reciterName,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      _downloadChannelId,
-      _downloadChannelName,
-      channelDescription: _downloadChannelDescription,
-      color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _notifications.show(
-      notificationId,
-      title,
-      message,
-      notificationDetails,
-      payload: jsonEncode({'reciterName': reciterName}),
-    );
-  }
-
-  /// Show a failed download notification
-  Future<void> _showFailedNotification({
-    required int notificationId,
-    required String title,
-    required String message,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      _downloadChannelId,
-      _downloadChannelName,
-      channelDescription: _downloadChannelDescription,
-      color: Color(0xFF1AADC5),
-      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _notifications.show(
-      notificationId,
-      title,
-      message,
-      notificationDetails,
-    );
   }
 
   /// Cancel a download notification
