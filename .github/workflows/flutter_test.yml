@@ -71,6 +71,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Configure Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEY_PROPERTIES" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+          fi
+
       - name: Build APK (ARM64 only)
         run: flutter build apk --release --target-platform android-arm64
 
