@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import 'flutter_downloader_wrapper.dart';
@@ -52,7 +54,8 @@ abstract class DownloadService {
   Future<void> initialize();
 
   /// Static instance for backward compatibility - delegates to DownloadServiceImpl
-  static DownloadService get instance => DownloadServiceImpl.instance;
+  /// DEPRECATED: Use Dependency Injection
+  static DownloadService get instance => getIt<DownloadService>();
 
   // --------------------------------------------------------------------------
   // Static Compatibility Layer - DEPRECATED: PREFER INSTANCE methods via DI
@@ -120,6 +123,7 @@ abstract class DownloadService {
 }
 
 @pragma('vm:entry-point')
+@LazySingleton(as: DownloadService)
 class DownloadServiceImpl implements DownloadService {
   /// Create a new DownloadServiceImpl.
   ///
@@ -134,9 +138,9 @@ class DownloadServiceImpl implements DownloadService {
        _statusMapper = statusMapper ?? DownloadStatusMapper(),
        _isolateManager = isolateManager ?? DownloadIsolateManager();
 
-  /// Singleton instance
-  static final DownloadServiceImpl _instance = DownloadServiceImpl();
-  static DownloadServiceImpl get instance => _instance;
+  /// Singleton instance accessor using GetIt
+  static DownloadServiceImpl get instance =>
+      getIt<DownloadService>() as DownloadServiceImpl;
 
   FlutterDownloaderWrapper _flutterDownloader;
   final DownloadFileHelper _fileHelper;

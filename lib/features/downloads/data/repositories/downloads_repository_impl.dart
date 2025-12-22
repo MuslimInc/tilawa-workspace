@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../main.dart';
+import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';
@@ -30,6 +34,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.pathResolver,
     this.validator,
     this.statusSynchronizer,
+    this.recitersRepository,
+    this.queueManager,
   );
 
   final DownloadsLocalDataSource localDataSource;
@@ -38,6 +44,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   final DownloadPathResolver pathResolver;
   final DownloadValidator validator;
   final DownloadStatusSynchronizer statusSynchronizer;
+  final RecitersRepository recitersRepository;
+  final DownloadQueueManager queueManager;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
       StreamController<DownloadItem>.broadcast();
@@ -60,7 +68,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       },
     );
     // Ensure queue manager has correct concurrency setting on init
-    DownloadQueueManager.instance.maxConcurrentDownloads = 2;
+    queueManager.maxConcurrentDownloads = 2;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _progressSubscription?.cancel();
+    _progressSubscription = null;
   }
 
   @override
@@ -108,17 +122,32 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
     }
 
-    return _groupDownloadsByReciter(updatedDownloads);
+    // Get localized reciter names
+    final Either<Failure, List<ReciterEntity>> recitersResult =
+        await recitersRepository.getReciters();
+    final List<ReciterEntity> reciters = recitersResult.getOrElse(() => []);
+    final Map<int, String> reciterNameLookup = {
+      for (final r in reciters) r.id: r.name,
+    };
+
+    return _groupDownloadsByReciter(updatedDownloads, reciterNameLookup);
   }
 
   /// Groups downloads by reciter name and then by narrative
   Map<String, Map<String, List<DownloadItem>>> _groupDownloadsByReciter(
     List<DownloadItem> downloads,
+    Map<int, String> reciterNameLookup,
   ) {
     final Map<String, Map<String, List<DownloadItem>>> grouped = {};
 
     for (final download in downloads) {
-      final String reciterName = download.reciterName;
+      // Use localized name from lookup if available, otherwise fallback to saved name
+      String reciterName = download.reciterName;
+      if (download.reciterId != null &&
+          reciterNameLookup.containsKey(download.reciterId)) {
+        reciterName = reciterNameLookup[download.reciterId!]!;
+      }
+
       final String narrative = DownloadPathUtils.extractNarrativeFromPath(
         download.filePath,
       );
@@ -146,8 +175,29 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         .getDownloads();
     final String downloadsDir = await pathResolver.getDownloadsDir();
 
+    // Try to find the reciter by name (could be localized or original)
+    // to get its ID for more accurate filtering
+    final Either<Failure, List<ReciterEntity>> recitersResult =
+        await recitersRepository.getReciters();
+    final List<ReciterEntity> reciters = recitersResult.getOrElse(() => []);
+
+    int? targetReciterId;
+    for (final reciter in reciters) {
+      if (reciter.name == reciterName) {
+        targetReciterId = reciter.id;
+        break;
+      }
+    }
+
     return rawDownloads
-        .where((d) => d.reciterName == reciterName)
+        .where((d) {
+          // Priority 1: Match by ID if we found it
+          if (targetReciterId != null && d.reciterId == targetReciterId) {
+            return true;
+          }
+          // Priority 2: Match by name (fallback for legacy data without ID)
+          return d.reciterName == reciterName;
+        })
         .map((item) => pathResolver.resolveDownloadPath(item, downloadsDir))
         .toList();
   }
@@ -224,7 +274,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     for (final item in toCancel) {
       // Remove from queue
-      DownloadQueueManager.instance.removeFromQueue(item.id);
+      queueManager.removeFromQueue(item.id);
 
       // Cancel in download service
       try {
@@ -258,7 +308,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // Stop all active downloads first
     try {
       // ignore: missing_plugin_exception_catch
-      await DownloadQueueManager.instance.stopAll();
+      await queueManager.stopAll();
     } catch (e) {
       logger.w('[DownloadsRepository] Error stopping all downloads: $e');
     }
@@ -326,8 +376,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     );
 
     // Check if download is already queued or active
-    final bool isQueued = DownloadQueueManager.instance.isQueued(downloadId);
-    final bool isActive = DownloadQueueManager.instance.isActive(downloadId);
+    final bool isQueued = queueManager.isQueued(downloadId);
+    final bool isActive = queueManager.isActive(downloadId);
 
     if (isQueued || isActive) {
       logger.d(
@@ -363,7 +413,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     // Note: In test environments, this may throw MissingPluginException,
     // which is expected and should be handled by the caller
     try {
-      await DownloadQueueManager.instance.enqueue(
+      await queueManager.enqueue(
         id: downloadId,
         url: trimmedUrl,
         filePath: filePath,
@@ -435,8 +485,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       );
 
       // Skip if already in queue or active (check both fast)
-      if (DownloadQueueManager.instance.isQueued(downloadId) ||
-          DownloadQueueManager.instance.isActive(downloadId)) {
+      if (queueManager.isQueued(downloadId) ||
+          queueManager.isActive(downloadId)) {
         continue;
       }
 
@@ -484,7 +534,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
       // Enqueue as a batch
       try {
-        await DownloadQueueManager.instance.enqueueBatch(queueItems);
+        await queueManager.enqueueBatch(queueItems);
         logger.d(
           '[DownloadsRepositoryImpl] Started batch download of ${queueItems.length} items',
         );
@@ -528,7 +578,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> cancelDownload(String id) async {
     // Remove from queue if it's there
-    DownloadQueueManager.instance.removeFromQueue(id);
+    queueManager.removeFromQueue(id);
 
     final DownloadItem? item = await getDownloadItem(id);
     if (item != null) {
@@ -856,13 +906,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw Exception('Only failed or stuck downloads can be retried');
     }
 
-    // Cancel the existing task if it exists
-    try {
-      await DownloadService.cancelDownload(downloadId);
-    } catch (e) {
-      // Ignore errors when canceling (task might not exist)
-      logger.d('[DownloadsRepository] Error canceling download for retry: $e');
-    }
+    await downloadService.cancel(downloadId);
 
     // Wait a bit before retrying
     await Future.delayed(const Duration(milliseconds: 500));
@@ -878,7 +922,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     await updateDownload(updatedDownload);
 
     // Enqueue the download again using the queue manager
-    await DownloadQueueManager.instance.enqueue(
+    await queueManager.enqueue(
       id: downloadItem.id,
       url: downloadItem.url,
       filePath: downloadItem.filePath,
@@ -902,7 +946,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         // Check if it's already active in the service
         var isActive = false;
         try {
-          isActive = await DownloadService.isDownloadActive(download.url);
+          isActive = await downloadService.isStatusDownloadActive(download.url);
         } catch (e) {
           logger.w(
             '[DownloadsRepository] Error checking active status for ${download.url}: $e',
@@ -922,21 +966,15 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             );
           }
 
-          try {
-            await DownloadQueueManager.instance.enqueue(
-              id: download.id,
-              url: download.url,
-              filePath: download.filePath,
-              title: download.title,
-              reciterName: download.reciterName,
-              reciterId: download.reciterId,
-            );
-            resumedCount++;
-          } catch (e) {
-            logger.e(
-              '[DownloadsRepository] Failed to resume download ${download.id}: $e',
-            );
-          }
+          await queueManager.enqueue(
+            id: download.id,
+            url: download.url,
+            filePath: download.filePath,
+            title: download.title,
+            reciterName: download.reciterName,
+            reciterId: download.reciterId,
+          );
+          resumedCount++;
         }
       }
     }

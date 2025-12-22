@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:muzakri/core/entities/reciter_entity.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
@@ -15,6 +18,7 @@ import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart';
 import 'package:muzakri/features/downloads/data/services/download_validator.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
 
 import '../features/downloads/data/services/download_service_test.mocks.dart';
 // Generate mocks
@@ -25,10 +29,12 @@ import '../features/downloads/data/services/download_service_test.mocks.dart';
   DownloadPathResolver,
   DownloadValidator,
   DownloadStatusSynchronizer,
+  RecitersRepository,
 ])
 import 'downloads_integration_test.mocks.dart';
 
 void main() {
+  provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late DownloadsRepositoryImpl repository;
@@ -38,6 +44,7 @@ void main() {
   late MockDownloadPathResolver mockPathResolver;
   late MockDownloadValidator mockValidator;
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
+  late MockRecitersRepository mockRecitersRepository;
   late Directory tempDir;
 
   setUp(() async {
@@ -50,12 +57,17 @@ void main() {
     mockPathResolver = MockDownloadPathResolver();
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
-    DownloadService.flutterDownloaderTestOverride = mockDownloader;
+    mockRecitersRepository = MockRecitersRepository();
 
     // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+      // Create the real service with the mock downloader injected
+      // This avoids using DownloadService.instance which would fail before registration
+      final downloadService = DownloadServiceImpl(
+        flutterDownloader: mockDownloader,
+      );
+      getIt.registerSingleton<DownloadService>(downloadService);
     }
     final mockDownloadNotificationService = MockDownloadNotificationService();
     if (!getIt.isRegistered<DownloadNotificationService>()) {
@@ -65,7 +77,8 @@ void main() {
     }
 
     // Reset DownloadService state
-    DownloadServiceImpl.instance.resetForTesting();
+    // We can cast because we know we registered the Impl in this test
+    (getIt<DownloadService>() as DownloadServiceImpl).resetForTesting();
 
     when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
     when(
@@ -113,6 +126,9 @@ void main() {
       (invocation) async =>
           invocation.positionalArguments[0] as List<DownloadItem>,
     );
+    when(
+      mockRecitersRepository.getReciters(),
+    ).thenAnswer((_) async => const Right([]));
 
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
     when(
@@ -121,7 +137,12 @@ void main() {
 
     // Reset singleton
     DownloadQueueManager.reset();
-    await DownloadQueueManager.instance.initialize();
+    final queueManager = DownloadQueueManager(
+      getIt<DownloadService>(),
+      getIt<DownloadNotificationService>(),
+    );
+    getIt.registerSingleton<DownloadQueueManager>(queueManager);
+    await queueManager.initialize();
 
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
@@ -130,6 +151,8 @@ void main() {
       mockPathResolver,
       mockValidator,
       mockStatusSynchronizer,
+      mockRecitersRepository,
+      DownloadQueueManager.instance,
     );
 
     // Stub logging to avoid noise

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../../../../../main.dart'; // For logger
+import '../../../../../main.dart'; // For logger
 import '../../../utils/download_path_utils.dart';
 
 class DownloadFileHelper {

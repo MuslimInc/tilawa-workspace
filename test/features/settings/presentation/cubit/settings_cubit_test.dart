@@ -33,7 +33,20 @@ void main() {
     late MockDownloadNotificationService mockDownloadNotificationService;
 
     setUp(() {
-      getIt.reset();
+      // Clean up GetIt manually
+      if (getIt.isRegistered<DownloadQueueManager>()) {
+        getIt.unregister<DownloadQueueManager>();
+      }
+      if (getIt.isRegistered<DownloadService>()) {
+        getIt.unregister<DownloadService>();
+      }
+      if (getIt.isRegistered<DownloadsRepository>()) {
+        getIt.unregister<DownloadsRepository>();
+      }
+      if (getIt.isRegistered<DownloadNotificationService>()) {
+        getIt.unregister<DownloadNotificationService>();
+      }
+
       mockDownloadService = MockDownloadService();
       mockDownloadsRepository = MockDownloadsRepository();
       mockDownloadNotificationService = MockDownloadNotificationService();
@@ -41,6 +54,9 @@ void main() {
       when(
         () => mockDownloadService.getActiveDownloadIds(),
       ).thenAnswer((_) async => []);
+      when(
+        () => mockDownloadService.globalProgressStream,
+      ).thenAnswer((_) => const Stream.empty());
 
       getIt.registerSingleton<DownloadService>(mockDownloadService);
       getIt.registerSingleton<DownloadsRepository>(mockDownloadsRepository);
@@ -69,6 +85,12 @@ void main() {
       ).thenAnswer((_) async {});
 
       DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
+
+      // We must initialize the QueueManager because SettingsCubit might access it
+      // or set values on it. Note that initForTesting registers the lazy singleton,
+      // but doesn't initialize it until accessed or called.
+      // SettingsCubit calls instance.maxConcurrentDownloads getter/setter.
+
       cubit = SettingsCubit();
     });
 

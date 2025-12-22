@@ -44,4 +44,7 @@ abstract class DownloadsRepository
     int downloadedSize,
     int fileSize,
   );
+
+  /// Dispose resources
+  Future<void> dispose();
 }

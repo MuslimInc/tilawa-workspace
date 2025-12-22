@@ -124,6 +124,14 @@ void main() {
     if (getIt.isRegistered<DownloadNotificationService>()) {
       await getIt.unregister<DownloadNotificationService>();
     }
+    if (getIt.isRegistered<DownloadService>()) {
+      await getIt.unregister<DownloadService>();
+    }
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      try {
+        await getIt.unregister<DownloadQueueManager>();
+      } catch (_) {}
+    }
   });
 
   late DownloadsBloc downloadsBloc;
@@ -178,11 +186,21 @@ void main() {
     mockAnalyticsService = MockAnalyticsService();
     mockDownloadNotificationService = MockDownloadNotificationService();
 
-    if (!GetIt.I.isRegistered<DownloadNotificationService>()) {
-      GetIt.I.registerSingleton<DownloadNotificationService>(
-        mockDownloadNotificationService,
-      );
+    // Explicitly unregister potential conflicts first
+    if (GetIt.I.isRegistered<DownloadNotificationService>()) {
+      GetIt.I.unregister<DownloadNotificationService>();
     }
+    if (GetIt.I.isRegistered<DownloadService>()) {
+      GetIt.I.unregister<DownloadService>();
+    }
+    if (GetIt.I.isRegistered<DownloadQueueManager>()) {
+      GetIt.I.unregister<DownloadQueueManager>();
+    }
+
+    GetIt.I.registerSingleton<DownloadNotificationService>(
+      mockDownloadNotificationService,
+    );
+
     when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
     when(
       mockDownloadNotificationService.showDownloadProgress(
@@ -203,9 +221,15 @@ void main() {
 
     // Mock FlutterDownloader for DownloadService
     mockDownloader = MockFlutterDownloaderWrapper();
-    DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-    DownloadQueueManager.reset();
+    // Register mocked DownloadService
+    final mockDownloadService = DownloadServiceImpl(
+      flutterDownloader: mockDownloader,
+    );
+    GetIt.I.registerSingleton<DownloadService>(mockDownloadService);
+
+    // Initialize DownloadQueueManager for testing with mocked service
+    DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
 
     // Stub common methods to avoid MissingStubError
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -1528,21 +1552,6 @@ void main() {
           ),
         ],
       );
-    });
-
-    group('Progress Updates', () {
-      test('should have updateDownloadProgress method in repository', () {
-        // This test verifies that the repository has the updateDownloadProgress method
-        // which is called when progress updates are received from DownloadService
-
-        // Note: We can't easily test the stream listener directly in unit tests,
-        // as it's set up in the bloc constructor. Integration tests would be needed
-        // to verify the full flow of progress updates triggering state changes.
-
-        // This test documents the expected behavior
-        // mockDownloadsRepository removed.
-        // Download progress handling is done via DownloadService stream listening.
-      });
     });
   });
 }

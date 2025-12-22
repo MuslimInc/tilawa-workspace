@@ -23,23 +23,38 @@ void main() {
   late MockFlutterDownloaderWrapper mockDownloader;
   late Directory tempDir;
 
-  setUp(() {
+  setUp(() async {
     tempDir = Directory.systemTemp.createTempSync('dqm_test');
     mockDownloader = MockFlutterDownloaderWrapper();
-    DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-    // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
-    if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+
+    // Reset dependencies cleanly
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt.unregister<DownloadQueueManager>();
     }
-    if (!getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.registerSingleton<DownloadNotificationService>(
-        MockDownloadNotificationService(),
-      );
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
+    }
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
     }
 
-    // Default stubbing
+    // Register Notification Service Mock
+    getIt.registerSingleton<DownloadNotificationService>(
+      MockDownloadNotificationService(),
+    );
+
+    // Register DownloadService (Implementation) with mocked downloader
+    final downloadService = DownloadServiceImpl(
+      flutterDownloader: mockDownloader,
+    );
+    getIt.registerSingleton<DownloadService>(downloadService);
+
+    // Register DownloadQueueManager using the registered services
+    DownloadQueueManager.initForTesting(downloadService: downloadService);
+
+    // Mock Downloader behaviors
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
       _,
     ) async {
@@ -67,14 +82,21 @@ void main() {
         title: anyNamed('title'),
       ),
     ).thenAnswer((_) async => 'mock_task_id');
+    when(
+      mockDownloader.cancel(taskId: anyNamed('taskId')),
+    ).thenAnswer((_) async {});
 
-    DownloadQueueManager.reset();
-    unawaited(DownloadService.reset());
+    // We cannot set this static override if the instance relies on GetIt which we just reset
+    // But since we registered DownloadService, DownloadServiceImpl.instance might work if it resolves via GetIt.
+    // However, we just injected mockDownloader via constructor, so we don't need the override unless something else uses it.
   });
 
   tearDown(() {
     IsolateNameServer.removePortNameMapping('downloader_send_port');
-    DownloadQueueManager.instance.dispose();
+    if (GetIt.instance.isRegistered<DownloadQueueManager>()) {
+      DownloadQueueManager.instance.dispose();
+      GetIt.instance.unregister<DownloadQueueManager>();
+    }
     if (tempDir.existsSync()) {
       tempDir.deleteSync(recursive: true);
     }
@@ -523,5 +545,230 @@ void main() {
     //     ).called(1);
     //   });
     // });
+  });
+
+  group('DownloadQueueManager - Robustness', () {
+    test('should remove download from queue if it fails to start (status null)', () {
+      fakeAsync((async) {
+        // Arrange
+        // Mock enqueue to return a task ID, simulating successful "request"
+        when(
+          mockDownloader.enqueue(
+            url: anyNamed('url'),
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            title: anyNamed('title'),
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          ),
+        ).thenAnswer((_) async => 'fake_task_id');
+
+        // Mock loadTasksWithRawQuery to ALWAYS return empty list
+        // This simulates "status == null" because DownloadService.getDownloadStatus returns null if no task found
+        when(
+          mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+        ).thenAnswer((_) async => []);
+
+        // Act
+        DownloadQueueManager.instance.initialize();
+        // Don't await enqueue because it waits for _processQueue which waits for time
+        // We just want to trigger it
+        unawaited(
+          DownloadQueueManager.instance.enqueue(
+            id: 'test_id',
+            url: 'http://example.com/test.mp3',
+            filePath: '${tempDir.path}/test.mp3',
+            title: 'Test Title',
+            reciterName: 'Reciter',
+          ),
+        );
+
+        // Verify added to queue (enqueue adds to list before awaiting process)
+        // We process microtasks to ensure the async function starts
+        async.flushMicrotasks();
+
+        expect(DownloadQueueManager.instance.queueLength, 1);
+
+        // DQM will try to start download, then enter the retry loop (10 retries * 500ms = 5s)
+        // We explicitly advance time to cover the retry period
+        // 5.5 seconds should be enough to exhaust 10 retries
+        async.elapse(const Duration(milliseconds: 6000));
+
+        // Assert
+        // Should satisfy: queueLength == 0 (removed because it failed)
+        expect(
+          DownloadQueueManager.instance.queueLength,
+          0,
+          reason: 'Failed download should be removed from queue',
+        );
+        expect(DownloadQueueManager.instance.activeDownloadsCount, 0);
+      });
+    });
+
+    test('watchdog should cancel stuck downloads after 30 seconds', () {
+      fakeAsync((async) {
+        // Arrange
+        // 1. Enqueue task 1 - starts successfully
+        when(
+          mockDownloader.enqueue(
+            url: 'http://example.com/1.mp3',
+            savedDir: anyNamed('savedDir'),
+            fileName: anyNamed('fileName'),
+            showNotification: anyNamed('showNotification'),
+            openFileFromNotification: anyNamed('openFileFromNotification'),
+            title: anyNamed('title'),
+            headers: anyNamed('headers'),
+            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+            saveInPublicStorage: anyNamed('saveInPublicStorage'),
+          ),
+        ).thenAnswer((_) async => 'task_1');
+
+        final runningTask = DownloadTask(
+          taskId: 'task_1',
+          status: DownloadTaskStatus.running,
+          progress: 0,
+          url: 'http://example.com/1.mp3',
+          filename: '1.mp3',
+          savedDir: tempDir.path,
+          timeCreated: DateTime.now().millisecondsSinceEpoch,
+          allowCellular: true,
+        );
+        when(
+          mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+        ).thenAnswer((_) async => [runningTask]);
+        when(mockDownloader.loadTasks()).thenAnswer((_) async => [runningTask]);
+
+        // Mock cancel
+        when(mockDownloader.cancel(taskId: 'task_1')).thenAnswer((_) async {});
+        when(
+          mockDownloader.remove(taskId: 'task_1', shouldDeleteContent: true),
+        ).thenAnswer((_) async {});
+
+        // Act
+        DownloadQueueManager.instance.initialize();
+        // Start download 1
+        unawaited(
+          DownloadQueueManager.instance.enqueue(
+            id: 'http://example.com/1.mp3',
+            url: 'http://example.com/1.mp3',
+            filePath: '${tempDir.path}/1.mp3',
+            title: 'Title 1',
+            reciterName: 'Reciter',
+          ),
+        );
+        async.flushMicrotasks();
+
+        // Verify started
+        expect(
+          DownloadQueueManager.instance.activeDownloadsCount,
+          1,
+          reason: 'Download 1 should be active',
+        );
+
+        // Advance time by 20s - should still be active
+        async.elapse(const Duration(seconds: 20));
+        expect(
+          DownloadQueueManager.instance.activeDownloadsCount,
+          1,
+          reason: 'Download 1 should still be active',
+        );
+
+        // Advance time by another 15s (total 35s) - watchdog (runs every 5s) should catch it
+        async.elapse(const Duration(seconds: 15));
+
+        // Assert
+        // Download 1 should be cancelled and removed because no progress updates were received for >30s
+        verify(mockDownloader.cancel(taskId: 'task_1')).called(1);
+        expect(
+          DownloadQueueManager.instance.activeDownloadsCount,
+          0,
+          reason: 'Stuck download should be removed by watchdog',
+        );
+      });
+    });
+
+    test(
+      'should handle duplicate URLs in active list by deduplicating count',
+      () {
+        fakeAsync((async) {
+          // Arrange
+          // 1. Mock 3 active tasks for the SAME URL (simulating zombies)
+          final task1 = DownloadTask(
+            taskId: '1',
+            status: DownloadTaskStatus.running,
+            progress: 10,
+            url: 'http://example.com/same.mp3',
+            filename: 'same.mp3',
+            savedDir: tempDir.path,
+            timeCreated: DateTime.now().millisecondsSinceEpoch,
+            allowCellular: true,
+          );
+
+          final mockTasks = <DownloadTask>[task1, task1, task1];
+
+          when(mockDownloader.loadTasks()).thenAnswer((_) async => mockTasks);
+          when(
+            mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+          ).thenAnswer(
+            (_) async => mockTasks
+                .where((t) => t.url == 'http://example.com/same.mp3')
+                .toList(),
+          );
+
+          // Act
+          DownloadQueueManager.instance.initialize();
+          // Enqueue a new item
+          when(
+            mockDownloader.enqueue(
+              url: anyNamed('url'),
+              savedDir: anyNamed('savedDir'),
+              fileName: anyNamed('fileName'),
+              showNotification: anyNamed('showNotification'),
+              openFileFromNotification: anyNamed('openFileFromNotification'),
+              title: anyNamed('title'),
+              headers: anyNamed('headers'),
+              requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+              saveInPublicStorage: anyNamed('saveInPublicStorage'),
+            ),
+          ).thenAnswer((invocation) async {
+            final url = invocation.namedArguments[#url] as String;
+            final newTask = DownloadTask(
+              taskId: 'task_new',
+              status: DownloadTaskStatus.running,
+              progress: 0,
+              url: url,
+              filename: 'new.mp3',
+              savedDir: tempDir.path,
+              timeCreated: DateTime.now().millisecondsSinceEpoch,
+              allowCellular: true,
+            );
+            mockTasks.add(newTask);
+            return 'task_new';
+          });
+
+          unawaited(
+            DownloadQueueManager.instance.enqueue(
+              id: 'new',
+              url: 'http://example.com/new.mp3',
+              filePath: '${tempDir.path}/new.mp3',
+              title: 'New Title',
+              reciterName: 'Reciter',
+            ),
+          );
+          async.flushMicrotasks();
+
+          // Assert
+          // We expect 2 active downloads logic
+          expect(
+            DownloadQueueManager.instance.activeDownloadsCount,
+            greaterThanOrEqualTo(1),
+            reason: 'Queue should process despite duplicates',
+          );
+        });
+      },
+    );
   });
 }

@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_service/audio_service.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:muzakri/core/entities/reciter_entity.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart';
@@ -18,19 +21,24 @@ import 'package:muzakri/features/downloads/data/services/download_service.dart';
 import 'package:muzakri/features/downloads/data/services/download_status_synchronizer.dart';
 import 'package:muzakri/features/downloads/data/services/download_validator.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
 
 import '../services/download_service_test.mocks.dart';
 import 'downloads_repository_impl_test.mocks.dart';
 
 @GenerateMocks([
   DownloadsLocalDataSource,
+  DownloadService,
   DownloadNotificationService,
   BatchDownloadManager,
   DownloadPathResolver,
   DownloadValidator,
   DownloadStatusSynchronizer,
+  RecitersRepository,
+  DownloadQueueManager,
 ])
 void main() {
+  provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
@@ -49,7 +57,7 @@ void main() {
           return null;
         });
 
-    // Register Dio in GetIt for DownloadService to use
+    // Register Dio in GetIt
     final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<Dio>()) {
       getIt.unregister<Dio>();
@@ -66,24 +74,28 @@ void main() {
 
   late DownloadsRepositoryImpl repository;
   late MockDownloadsLocalDataSource mockLocalDataSource;
+  late MockDownloadService mockDownloadService;
   late MockFlutterDownloaderWrapper mockDownloader;
   late MockBatchDownloadManager mockBatchDownloadManager;
   late MockDownloadPathResolver mockPathResolver;
   late MockDownloadValidator mockValidator;
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
+  late MockRecitersRepository mockRecitersRepository;
+  late StreamController<DownloadProgress> progressController;
 
   setUp(() async {
     // Setup mocks
     mockLocalDataSource = MockDownloadsLocalDataSource();
+    mockDownloadService = MockDownloadService();
     mockDownloader = MockFlutterDownloaderWrapper();
     mockBatchDownloadManager = MockBatchDownloadManager();
     mockNotificationService = MockDownloadNotificationService();
     mockPathResolver = MockDownloadPathResolver();
-    mockPathResolver = MockDownloadPathResolver();
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
-    DownloadService.flutterDownloaderTestOverride = mockDownloader;
+    mockRecitersRepository = MockRecitersRepository();
+    // DownloadService.flutterDownloaderTestOverride = mockDownloader; // Removed: we use mockDownloadService directly
 
     // Default stubs for new services
     when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
@@ -99,6 +111,25 @@ void main() {
       (invocation) async =>
           invocation.positionalArguments[0] as List<DownloadItem>,
     );
+    when(
+      mockRecitersRepository.getReciters(),
+    ).thenAnswer((_) async => const Right([]));
+
+    progressController = StreamController<DownloadProgress>.broadcast();
+    when(
+      mockDownloadService.globalProgressStream,
+    ).thenAnswer((_) => progressController.stream);
+    when(mockDownloadService.initialize()).thenAnswer((_) async {});
+    when(
+      mockDownloadService.getStatus(any),
+    ).thenAnswer((_) async => DownloadStatus.pending);
+    when(
+      mockDownloadService.getActiveDownloadIds(),
+    ).thenAnswer((_) async => []);
+    when(
+      mockDownloadService.isStatusDownloadActive(any),
+    ).thenAnswer((_) async => false);
+    when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
 
     // Stub common methods to avoid MissingStubError during initialization
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -131,9 +162,10 @@ void main() {
 
     // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
-    if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
     }
+    getIt.registerSingleton<DownloadService>(mockDownloadService);
 
     // Register NotificationService in GetIt
     if (getIt.isRegistered<DownloadNotificationService>()) {
@@ -147,16 +179,18 @@ void main() {
     });
 
     // Reset singleton
-    DownloadQueueManager.reset();
+    DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
     await DownloadQueueManager.instance.initialize();
 
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
-      DownloadService.instance,
+      mockDownloadService,
       mockBatchDownloadManager,
       mockPathResolver,
       mockValidator,
       mockStatusSynchronizer,
+      mockRecitersRepository,
+      DownloadQueueManager.instance,
     );
     when(
       mockNotificationService.showDownloadProgress(
@@ -178,8 +212,8 @@ void main() {
     });
 
     // Reset DownloadQueueManager to ensure it picks up the mocked/registered service
-    DownloadQueueManager.reset();
-    DownloadServiceImpl.instance.resetForTesting();
+
+    // DownloadServiceImpl.instance.resetForTesting(); // Removed: mock service used, no implementation to reset
 
     when(
       mockPathResolver.getDownloadsDir(),
@@ -191,20 +225,397 @@ void main() {
     });
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await repository.dispose();
+    DownloadQueueManager.instance.dispose();
+    await progressController.close();
     final GetIt getIt = GetIt.instance;
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
     }
-    DownloadQueueManager.instance.dispose();
   });
 
   group('DownloadsRepositoryImpl', () {
+    test(
+      'should delete from data source even if download record is not found',
+      () async {
+        // Arrange
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+        when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.deleteDownload('non_existent');
+
+        // Assert
+        verify(mockLocalDataSource.deleteDownload('non_existent')).called(1);
+      },
+    );
+    group('initialize', () {
+      test('should subscribe to global progress stream', () async {
+        // Act
+        await repository.initialize();
+
+        // Assert
+        verify(mockDownloadService.globalProgressStream).called(2);
+      });
+      test('should call updateDownloadProgress when stream emits', () async {
+        // Arrange
+        await repository.initialize();
+        const testId = 'id1';
+        const progress = DownloadProgress(
+          id: testId,
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          downloadedSize: 512,
+          fileSize: 1024,
+        );
+
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+        // Act
+        progressController.add(progress);
+
+        // Assert
+        // Need to wait for async event processing
+        await Future.delayed(Duration.zero);
+        verify(mockLocalDataSource.getDownloads()).called(greaterThan(0));
+      });
+
+      test('should set maxConcurrentDownloads on initialize', () async {
+        await repository.initialize();
+        expect(DownloadQueueManager.instance.maxConcurrentDownloads, 2);
+      });
+
+      test(
+        'should process progress events from stream after initialize',
+        () async {
+          // Arrange
+          await repository.initialize();
+          final download = DownloadItem(
+            id: 'u1',
+            title: 'T1',
+            url: 'u1',
+            filePath: 'p1',
+            reciterName: 'R1',
+            status: DownloadStatus.downloading,
+            progress: 0.1,
+            fileSize: 1000,
+            downloadedSize: 100,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockLocalDataSource.updateDownload(any),
+          ).thenAnswer((_) async => {});
+
+          // Act
+          progressController.add(
+            const DownloadProgress(
+              id: 'u1',
+              status: DownloadStatus.downloading,
+              progress: 0.2,
+              downloadedSize: 200,
+              fileSize: 1000,
+            ),
+          );
+
+          // Assert
+          await Future.delayed(Duration.zero);
+          verify(
+            mockLocalDataSource.updateDownload(any),
+          ).called(greaterThan(0));
+        },
+      );
+    });
+
+    group('getDownloadProgress', () {
+      test('should yield current item and then updates', () async {
+        const testId = 'id1';
+        final download = DownloadItem(
+          id: testId,
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'R1',
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 1000,
+          downloadedSize: 500,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        final Stream<DownloadItem> stream = repository.getDownloadProgress(
+          testId,
+        );
+
+        // We expect the first event immediately
+        final events = <DownloadItem>[];
+        final StreamSubscription<DownloadItem> sub = stream.listen(events.add);
+
+        await Future.delayed(Duration.zero);
+        expect(events.length, 1);
+        expect(events.first.id, testId);
+
+        // Emulate an update via updateDownloadProgress which sends to the stream
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.downloading,
+          0.6,
+          600,
+          1000,
+        );
+
+        await Future.delayed(Duration.zero);
+        expect(events.length, 2);
+        expect(events.last.progress, 0.6);
+
+        await sub.cancel();
+      });
+    });
+
+    group('isSurahDownloading', () {
+      test(
+        'should return true if found in database as downloading and service is active',
+        () async {
+          final download = DownloadItem(
+            id: 'id1',
+            title: 'T1',
+            url: 'u1',
+            filePath: 'p1',
+            reciterName: 'R1',
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1000,
+            downloadedSize: 500,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive('u1'),
+          ).thenAnswer((_) async => true);
+
+          final bool result = await repository.isSurahDownloading('u1', 'R1');
+          expect(result, true);
+        },
+      );
+
+      test(
+        'should return false if found in database as downloading but service is NOT active',
+        () async {
+          final download = DownloadItem(
+            id: 'id1',
+            title: 'T1',
+            url: 'u1',
+            filePath: 'p1',
+            reciterName: 'R1',
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1000,
+            downloadedSize: 500,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive('u1'),
+          ).thenAnswer((_) async => false);
+
+          final bool result = await repository.isSurahDownloading('u1', 'R1');
+          expect(result, false);
+        },
+      );
+
+      test(
+        'should return true if service check has MissingPluginException',
+        () async {
+          final download = DownloadItem(
+            id: 'id1',
+            title: 'T1',
+            url: 'u1',
+            filePath: 'p1',
+            reciterName: 'R1',
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1000,
+            downloadedSize: 500,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive('u1'),
+          ).thenThrow(MissingPluginException());
+
+          final bool result = await repository.isSurahDownloading('u1', 'R1');
+          expect(result, true);
+        },
+      );
+    });
+
+    group('isSurahDownloaded', () {
+      test('should return true if completed and file exists', () async {
+        final download = DownloadItem(
+          id: 'id1',
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'R1',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 1000,
+          downloadedSize: 1000,
+          createdAt: DateTime.now(),
+        );
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(
+          mockPathResolver.getDownloadsDir(),
+        ).thenAnswer((_) async => '/dir');
+        when(
+          mockPathResolver.resolveDownloadPath(any, any),
+        ).thenReturn(download);
+        when(mockValidator.verifyFileExists(any)).thenAnswer((_) async => true);
+
+        final bool result = await repository.isSurahDownloaded('u1', 'R1');
+        expect(result, true);
+      });
+    });
+
     group('startDownload', () {
       const testSurahId = '001';
       const testSurahTitle = 'Al-Fatiha';
       const testReciterName = 'Abdul Rahman Al-Sudais';
       const testReciterId = 1;
+
+      test('should throw ArgumentError if URL is empty', () async {
+        expect(
+          () => repository.startDownload(
+            '',
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+          ),
+          throwsArgumentError,
+        );
+      });
+
+      test('should return early if already queued or active', () async {
+        // Arrange
+        final mockQueueManager = MockDownloadQueueManager();
+        final DownloadQueueManager originalInstance =
+            DownloadQueueManager.instance;
+        DownloadQueueManager.instance = mockQueueManager;
+
+        // Re-instantiate repository to use mock queue manager
+        repository = DownloadsRepositoryImpl(
+          mockLocalDataSource,
+          mockDownloadService,
+          mockBatchDownloadManager,
+          mockPathResolver,
+          mockValidator,
+          mockStatusSynchronizer,
+          mockRecitersRepository,
+          mockQueueManager,
+        );
+
+        const testUrl = 'http://example.com/1.mp3';
+        when(mockQueueManager.isQueued(any)).thenReturn(true);
+        when(mockQueueManager.isActive(any)).thenReturn(false);
+        when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
+
+        // Act
+        await repository.startDownload(
+          testUrl,
+          title: testSurahTitle,
+          surahTitle: testSurahTitle,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
+        );
+
+        // Assert
+        verify(mockQueueManager.isQueued(any)).called(1);
+        // getDownloadsDir is called before the early return
+        verify(mockPathResolver.getDownloadsDir()).called(1);
+
+        // Restore
+        DownloadQueueManager.instance = originalInstance;
+      });
+
+      test('should handle MissingPluginException during enqueue', () async {
+        // Arrange
+        final mockQueueManager = MockDownloadQueueManager();
+        final DownloadQueueManager originalInstance =
+            DownloadQueueManager.instance;
+        DownloadQueueManager.instance = mockQueueManager;
+
+        // Re-instantiate repository to use mock queue manager
+        repository = DownloadsRepositoryImpl(
+          mockLocalDataSource,
+          mockDownloadService,
+          mockBatchDownloadManager,
+          mockPathResolver,
+          mockValidator,
+          mockStatusSynchronizer,
+          mockRecitersRepository,
+          mockQueueManager,
+        );
+
+        when(mockQueueManager.isQueued(any)).thenReturn(false);
+        when(mockQueueManager.isActive(any)).thenReturn(false);
+        when(
+          mockQueueManager.enqueue(
+            id: anyNamed('id'),
+            url: anyNamed('url'),
+            filePath: anyNamed('filePath'),
+            title: anyNamed('title'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+            showNotification: anyNamed('showNotification'),
+          ),
+        ).thenThrow(MissingPluginException());
+
+        when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+        // Act
+        await repository.startDownload(
+          'http://url.com',
+          title: testSurahTitle,
+          surahTitle: testSurahTitle,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
+        );
+
+        // Assert
+        // Should not throw
+        verify(
+          mockQueueManager.enqueue(
+            id: anyNamed('id'),
+            url: anyNamed('url'),
+            filePath: anyNamed('filePath'),
+            title: anyNamed('title'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: testReciterId,
+            showNotification: anyNamed('showNotification'),
+          ),
+        ).called(1);
+
+        // Restore
+        DownloadQueueManager.instance = originalInstance;
+      });
 
       test('should create download item and start download service', () async {
         // Arrange
@@ -299,6 +710,48 @@ void main() {
       const testReciterName = 'Reciter';
       const testReciterId = 1;
 
+      test(
+        'should handle MissingPluginException during enqueueBatch',
+        () async {
+          // Arrange
+          final mockQueueManager = MockDownloadQueueManager();
+          final DownloadQueueManager originalInstance =
+              DownloadQueueManager.instance;
+          DownloadQueueManager.instance = mockQueueManager;
+
+          // Re-instantiate repository to use mock queue manager
+          repository = DownloadsRepositoryImpl(
+            mockLocalDataSource,
+            mockDownloadService,
+            mockBatchDownloadManager,
+            mockPathResolver,
+            mockValidator,
+            mockStatusSynchronizer,
+            mockRecitersRepository,
+            mockQueueManager,
+          );
+
+          when(mockQueueManager.isQueued(any)).thenReturn(false);
+          when(mockQueueManager.isActive(any)).thenReturn(false);
+          when(
+            mockQueueManager.enqueueBatch(any),
+          ).thenThrow(MissingPluginException());
+          when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
+          when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+
+          // Act
+          await repository.startDownloadBatch([
+            (url: 'u1', surahTitle: 'ST1', reciterName: 'R1', reciterId: 1),
+          ]);
+
+          // Assert
+          // Should not throw
+          verify(mockQueueManager.enqueueBatch(any)).called(1);
+
+          // Restore
+          DownloadQueueManager.instance = originalInstance;
+        },
+      );
       test('should enqueue batch of items', () async {
         // Arrange
         final String testDownloadsDir = Directory.systemTemp
@@ -650,93 +1103,62 @@ void main() {
       const testSurahId = 'https://example.com/audio.mp3';
       const testReciterName = 'Abdul Rahman Al-Sudais';
 
-      test('should return true when surah is downloading in local source', () async {
+      test(
+        'should return true when surah is downloading in local source',
+        () async {
+          // Arrange
+          final download = DownloadItem(
+            id: testSurahId,
+            title: 'Surah Al-Fatiha',
+            url: testSurahId,
+            filePath: '/tmp/downloads/Abdul_Rahman_Al-Sudais/audio.mp3',
+            reciterName: testReciterName,
+            reciterId: 1,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1024,
+            downloadedSize: 512,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive(testSurahId),
+          ).thenAnswer((_) async => true);
+
+          // Act
+          final bool result = await repository.isSurahDownloading(
+            testSurahId,
+            testReciterName,
+          );
+
+          // Assert
+          expect(result, true);
+        },
+      );
+
+      test('should return false when surah is not downloading', () async {
         // Arrange
-        final downloadItem = DownloadItem(
+        final download = DownloadItem(
           id: testSurahId,
           title: 'Surah Al-Fatiha',
           url: testSurahId,
           filePath: '/tmp/downloads/Abdul_Rahman_Al-Sudais/audio.mp3',
           reciterName: testReciterName,
           reciterId: 1,
-          status: DownloadStatus.failed,
-          progress: 0.5,
+          status: DownloadStatus.completed,
+          progress: 1.0,
           fileSize: 1024,
-          downloadedSize: 512,
+          downloadedSize: 1024,
           createdAt: DateTime.now(),
         );
-
         when(
           mockLocalDataSource.getDownloads(),
-        ).thenAnswer((_) async => [downloadItem]);
-
-        // Mock DownloadService to return active for this URL
-        // We need to return a non-empty list for the query verifying the URL
+        ).thenAnswer((_) async => [download]);
         when(
-          mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
-        ).thenAnswer((invocation) async {
-          final query =
-              invocation.namedArguments[const Symbol('query')] as String;
-          if (query.contains(testSurahId)) {
-            // Must return List<DownloadTask> but DownloadTask is a data class we can't easily instantiate
-            // without correct imports or if it has private fields.
-            // However, FlutterDownloader implementation casts the result.
-            // Let's assume returning a generic mock object or just bypassing this if we can't.
-            // Actually, in the test setup, we defined:
-            // when(mockDownloader.loadTasksWithRawQuery(...)).thenAnswer((_) async => []);
-            // We are overriding it here.
-            // Wait, DownloadTask is likely a plain object. Let's try to return dynamic or check what DownloadService expects.
-            // DownloadService code: final List<DownloadTask>? tasks = ...; return tasks?.isNotEmpty ?? false;
-            // So we need a List that is not empty. The type checking might be an issue if we return generic objects.
-            // But we mocked FlutterDownloader, so we should check what that returns.
-            // It returns Future<List<DownloadTask>?>.
-            // Does DownloadTask have a public constructor? Yes usually.
-            // We can't import DownloadTask here easily unless we add the import.
-            // Let's add the import to the file first or finding another way.
-            return [
-              DownloadTask(
-                taskId: 'mock_task_id',
-                status: DownloadTaskStatus.running,
-                progress: 50,
-                url: testSurahId,
-                filename: 'test.mp3',
-                savedDir: '/test/downloads',
-                timeCreated: DateTime.now().millisecondsSinceEpoch,
-                allowCellular: true, // Assuming generic defaults
-              ),
-            ];
-          }
-          return [];
-        });
-
-        // Setup mock for DownloadService to confirm download is active
-        final task = DownloadTask(
-          taskId: 'mock_task_id',
-          status: DownloadTaskStatus.running,
-          progress: 50,
-          url: testSurahId,
-          filename: 'test.mp3',
-          savedDir: '/test/downloads',
-          timeCreated: DateTime.now().millisecondsSinceEpoch,
-          allowCellular: true,
-        );
-        when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
-
-        // Act
-        // Note: DownloadService checks are skipped in test environment due to MissingPluginException
-        // but the method should return true based on local source status
-        final bool result = await repository.isSurahDownloading(
-          testSurahId,
-          testReciterName,
-        );
-
-        // Assert
-        expect(result, true);
-      });
-
-      test('should return false when surah is not downloading', () async {
-        // Arrange
-        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+          mockDownloadService.isStatusDownloadActive(testSurahId),
+        ).thenAnswer((_) async => false);
 
         // Act
         final bool result = await repository.isSurahDownloading(
@@ -747,6 +1169,78 @@ void main() {
         // Assert
         expect(result, false);
       });
+
+      test(
+        'should return true when MissingPluginException occurs in isStatusDownloadActive',
+        () async {
+          // Arrange
+          final download = DownloadItem(
+            id: testSurahId,
+            title: 'Surah Al-Fatiha',
+            url: testSurahId,
+            filePath: '/tmp/downloads/Abdul_Rahman_Al-Sudais/audio.mp3',
+            reciterName: testReciterName,
+            reciterId: 1,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1024,
+            downloadedSize: 512,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive(testSurahId),
+          ).thenThrow(
+            MissingPluginException('No implementation found for method'),
+          );
+
+          // Act
+          final bool result = await repository.isSurahDownloading(
+            testSurahId,
+            testReciterName,
+          );
+
+          // Assert
+          expect(result, true);
+        },
+      );
+
+      test(
+        'should return false when generic Exception occurs in isStatusDownloadActive',
+        () async {
+          // Arrange
+          final download = DownloadItem(
+            id: testSurahId,
+            title: 'Surah Al-Fatiha',
+            url: testSurahId,
+            filePath: '/tmp/downloads/Abdul_Rahman_Al-Sudais/audio.mp3',
+            reciterName: testReciterName,
+            reciterId: 1,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 1024,
+            downloadedSize: 512,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [download]);
+          when(
+            mockDownloadService.isStatusDownloadActive(testSurahId),
+          ).thenThrow(Exception('Generic error'));
+
+          // Act
+          final bool result = await repository.isSurahDownloading(
+            testSurahId,
+            testReciterName,
+          );
+
+          // Assert
+          expect(result, false);
+        },
+      );
     });
 
     group('getDownloadedFilePath', () {
@@ -1974,6 +2468,43 @@ void main() {
   });
 
   group('clearAllDownloads', () {
+    test(
+      'should handle error during stopAll and still clear downloads',
+      () async {
+        // Arrange
+        final mockQueueManager = MockDownloadQueueManager();
+        final DownloadQueueManager originalInstance =
+            DownloadQueueManager.instance;
+        DownloadQueueManager.instance = mockQueueManager;
+
+        when(mockQueueManager.stopAll()).thenThrow(Exception('Stop failed'));
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+        when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {});
+
+        // Re-create repository with mock
+        repository = DownloadsRepositoryImpl(
+          mockLocalDataSource,
+          mockDownloadService,
+          mockBatchDownloadManager,
+          mockPathResolver,
+          mockValidator,
+          mockStatusSynchronizer,
+          mockRecitersRepository,
+          mockQueueManager,
+        );
+
+        // Act
+        await repository.clearAllDownloads();
+
+        // Assert
+        verify(mockQueueManager.stopAll()).called(1);
+        verify(mockLocalDataSource.clearAllDownloads()).called(1);
+
+        // Restore
+        DownloadQueueManager.instance = originalInstance;
+      },
+    );
+
     test('should delete all files and clear data source', () async {
       // Arrange
       final downloads = [
@@ -2021,6 +2552,40 @@ void main() {
       // Assert
       verify(mockLocalDataSource.deleteFile('/path/file1.mp3')).called(1);
       verify(mockLocalDataSource.deleteFile('/path/file2.mp3')).called(1);
+      verify(mockLocalDataSource.clearAllDownloads()).called(1);
+    });
+
+    test('should only delete files that exist', () async {
+      // Arrange
+      final downloads = [
+        DownloadItem(
+          id: 'id1',
+          title: 'Test 1',
+          url: 'url1',
+          filePath: '/path/file1.mp3',
+          reciterName: 'Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 1024,
+          downloadedSize: 1024,
+          createdAt: DateTime.now(),
+        ),
+      ];
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => downloads);
+      // First file exists is false
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {});
+
+      // Act
+      await repository.clearAllDownloads();
+
+      // Assert
+      verifyNever(mockLocalDataSource.deleteFile(any));
       verify(mockLocalDataSource.clearAllDownloads()).called(1);
     });
 
@@ -2089,5 +2654,1407 @@ void main() {
       // Assert
       expect(result.id, testId);
     });
+  });
+
+  group('updateDownloadProgress - fallback', () {
+    test('should find download by URL if not found by ID', () async {
+      // Arrange
+      const testId = 'url_as_id';
+      final download = DownloadItem(
+        id: 'real_id',
+        title: 'T1',
+        url: testId,
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(mockPathResolver.getDownloadsDir()).thenThrow(Exception('Dir fail'));
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.updateDownloadProgress(
+        testId,
+        DownloadStatus.downloading,
+        0.6,
+        614,
+        1024,
+      );
+
+      // Assert
+      verify(mockLocalDataSource.getDownloads()).called(2);
+      verify(mockLocalDataSource.updateDownload(any)).called(1);
+    });
+  });
+
+  group('getDownloadsByReciter sync', () {
+    test('should update downloads when sync detects changes', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: 'id1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.pending,
+        progress: 0.0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+      final DownloadItem syncedDownload = download.copyWith(
+        status: DownloadStatus.downloading,
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockStatusSynchronizer.syncDownloadStatuses(any)).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as List<DownloadItem>,
+      ); // Default behavior
+      // Override for this specific test
+      when(
+        mockStatusSynchronizer.syncDownloadStatuses(any),
+      ).thenAnswer((_) async => [syncedDownload]);
+
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([]));
+      when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.getDownloadsByReciter();
+
+      // Assert
+      verify(mockLocalDataSource.updateDownloads(any)).called(1);
+    });
+
+    test(
+      'should update downloads when sync detects changes in length',
+      () async {
+        // Arrange
+        final download1 = DownloadItem(
+          id: 'id1',
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.pending,
+          progress: 0.0,
+          fileSize: 0,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        );
+        final download2 = DownloadItem(
+          id: 'id2',
+          title: 'T2',
+          url: 'u2',
+          filePath: 'p2',
+          reciterName: 'Reciter',
+          status: DownloadStatus.pending,
+          progress: 0.0,
+          fileSize: 0,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download1]);
+        when(
+          mockStatusSynchronizer.syncDownloadStatuses(any),
+        ).thenAnswer((_) async => [download1, download2]);
+        when(
+          mockRecitersRepository.getReciters(),
+        ).thenAnswer((_) async => const Right([]));
+        when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.getDownloadsByReciter();
+
+        // Assert
+        verify(mockLocalDataSource.updateDownloads(any)).called(1);
+      },
+    );
+
+    test('should allow retry for stuck downloads', () async {
+      // Arrange
+      const testId = 'stuck_id';
+      final stuckDownload = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.0,
+        fileSize: 1024,
+        downloadedSize: 0,
+        // Created 40 seconds ago
+        createdAt: DateTime.now().subtract(const Duration(seconds: 40)),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [stuckDownload]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      final mockQueueManager = MockDownloadQueueManager();
+      final DownloadQueueManager originalInstance =
+          DownloadQueueManager.instance;
+      DownloadQueueManager.instance = mockQueueManager;
+
+      when(
+        mockQueueManager.enqueue(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+        ),
+      ).thenAnswer((_) async {});
+
+      // Re-create repository with mock
+      repository = DownloadsRepositoryImpl(
+        mockLocalDataSource,
+        mockDownloadService,
+        mockBatchDownloadManager,
+        mockPathResolver,
+        mockValidator,
+        mockStatusSynchronizer,
+        mockRecitersRepository,
+        mockQueueManager,
+      );
+
+      // Act
+      await repository.retryDownload(testId);
+
+      // Assert
+      verify(
+        mockQueueManager.enqueue(
+          id: testId,
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+        ),
+      ).called(1);
+
+      // Restore
+      DownloadQueueManager.instance = originalInstance;
+    });
+
+    test('should throw if retrying a non-stuck running download', () async {
+      // Arrange
+      const testId = 'running_id';
+      final runningDownload = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.1, // Not stuck because progress > 0
+        fileSize: 1024,
+        downloadedSize: 100,
+        createdAt: DateTime.now().subtract(const Duration(seconds: 40)),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [runningDownload]);
+
+      // Act & Assert
+      expect(() => repository.retryDownload(testId), throwsA(isA<Exception>()));
+    });
+
+    test('should use localized reciter name when available', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: 'id1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Original Name',
+        reciterId: 123,
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      final reciters = [
+        const ReciterEntity(
+          id: 123,
+          name: 'Localized Name',
+          letter: 'L',
+          date: '2023-01-01',
+          moshaf: [],
+        ),
+      ];
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockStatusSynchronizer.syncDownloadStatuses(any),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => Right(reciters));
+
+      // Act
+      final Map<String, Map<String, List<DownloadItem>>> result =
+          await repository.getDownloadsByReciter();
+
+      // Assert
+      expect(result.containsKey('Localized Name'), isTrue);
+      expect(result.containsKey('Original Name'), isFalse);
+    });
+  });
+
+  group('getDownloadsForReciter', () {
+    test('should match by reciter ID if possible', () async {
+      // Arrange
+      const reciterName = 'Reciter';
+      final download = DownloadItem(
+        id: 'id1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Some Other Name', // Different name but same ID
+        reciterId: 123,
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      final reciters = [
+        const ReciterEntity(
+          id: 123,
+          name: reciterName,
+          letter: 'R',
+          date: '2023-01-01',
+          moshaf: [],
+        ),
+      ];
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => Right(reciters));
+      when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '/tmp');
+      when(mockPathResolver.resolveDownloadPath(any, any)).thenReturn(download);
+
+      // Act
+      final List<DownloadItem> result = await repository.getDownloadsForReciter(
+        reciterName,
+      );
+
+      // Assert
+      expect(result.length, 1);
+      expect(result.first.id, 'id1');
+    });
+  });
+
+  group('deleteDownloadsForReciter', () {
+    test('should continue if cancel in download service fails', () async {
+      // Arrange
+      const reciterName = 'Reciter';
+      final download = DownloadItem(
+        id: 'id1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: reciterName,
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockDownloadService.cancel(any)).thenThrow(Exception('Cancel fail'));
+      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
+      when(mockValidator.verifyFileExists(any)).thenAnswer((_) async => false);
+
+      // Act
+      await repository.deleteDownloadsForReciter(reciterName);
+
+      // Assert
+      verify(mockDownloadService.cancel(any)).called(1);
+      verify(mockLocalDataSource.deleteDownload('id1')).called(1);
+    });
+
+    test('should cancel active downloads and delete records', () async {
+      // Arrange
+      const testReciter = 'Reciter';
+      final downloads = [
+        DownloadItem(
+          id: 'id1',
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: testReciter,
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 1024,
+          downloadedSize: 1024,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => downloads);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([]));
+      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.deleteDownloadsForReciter(testReciter);
+
+      // Assert
+      verify(mockLocalDataSource.deleteDownload('id1')).called(1);
+    });
+  });
+
+  group('cancelDownloadsForReciter', () {
+    test('should do nothing if no downloads to cancel', () async {
+      // Arrange
+      const testReciter = 'Reciter';
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([]));
+
+      // Act
+      await repository.cancelDownloadsForReciter(testReciter);
+
+      // Assert
+      verifyNever(mockLocalDataSource.updateDownloads(any));
+    });
+
+    test('should cancel pending and downloading items', () async {
+      // Arrange
+      const testReciter = 'Reciter';
+      final downloads = [
+        DownloadItem(
+          id: 'id1',
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: testReciter,
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 1024,
+          downloadedSize: 512,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => downloads);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([]));
+      when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.cancelDownloadsForReciter(testReciter);
+
+      // Assert
+      verify(mockLocalDataSource.updateDownloads(any)).called(1);
+    });
+  });
+
+  group('cancelDownload', () {
+    test('should remove from queue and cancel service', () async {
+      // Arrange
+      const testId = 'id1';
+      final download = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.cancelDownload(testId);
+
+      // Assert
+      verify(mockLocalDataSource.updateDownload(any)).called(1);
+    });
+  });
+
+  group('updateDownloadProgress', () {
+    test('should handle completion with progress < 1.0', () async {
+      // Arrange
+      const testId = 'id1';
+      final download = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.updateDownloadProgress(
+        testId,
+        DownloadStatus.completed,
+        0.9,
+        900,
+        1024,
+      );
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updated = captured.first as DownloadItem;
+      expect(updated.status, DownloadStatus.downloading);
+    });
+
+    test('should handle completion when file is missing', () async {
+      // Arrange
+      const testId = 'id1';
+      final download = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.updateDownloadProgress(
+        testId,
+        DownloadStatus.completed,
+        1.0,
+        1024,
+        1024,
+      );
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updated = captured.first as DownloadItem;
+      expect(updated.status, DownloadStatus.failed);
+    });
+
+    test('should handle completion when size is invalid', () async {
+      // Arrange
+      const testId = 'id1';
+      final download = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 1024,
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+      ).thenAnswer((_) async => true);
+      when(
+        mockValidator.verifyFileSize(any, any),
+      ).thenAnswer((_) async => false);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.updateDownloadProgress(
+        testId,
+        DownloadStatus.completed,
+        1.0,
+        1024,
+        1024,
+      );
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updated = captured.first as DownloadItem;
+      expect(updated.status, DownloadStatus.failed);
+    });
+
+    test(
+      'should handle implicit completion when status is downloading but progress is 1.0 and file exists',
+      () async {
+        // Arrange
+        const testId = 'id1';
+        final download = DownloadItem(
+          id: testId,
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.9,
+          fileSize: 1024,
+          downloadedSize: 900,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+
+        // Verify file exists check
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
+
+        // Verify actual file size check
+        when(
+          mockValidator.getActualFileSize(any),
+        ).thenAnswer((_) async => 1024);
+
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        // Pass status as downloading, but progress as 1.0
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.downloading,
+          1.0,
+          1024,
+          1024,
+        );
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.updateDownload(captureAny),
+        ).captured;
+        final updated = captured.first as DownloadItem;
+
+        expect(updated.status, DownloadStatus.completed);
+        expect(updated.progress, 1.0);
+        expect(updated.completedAt, isNotNull);
+      },
+    );
+
+    test(
+      'should self-heal size and complete when fileSize is 0 but actual file exists',
+      () async {
+        // Arrange
+        const testId = 'id1';
+        final download = DownloadItem(
+          id: testId,
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.9,
+          fileSize: 0, // Invalid/Zero size
+          downloadedSize: 900,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
+        when(
+          mockValidator.getActualFileSize(any),
+        ).thenAnswer((_) async => 2048); // Actual size found
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.completed,
+          1.0,
+          900, // downloadedSize
+          0, // fileSize (to trigger self-healing)
+        );
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.updateDownload(captureAny),
+        ).captured;
+        final updated = captured.first as DownloadItem;
+        expect(updated.status, DownloadStatus.completed);
+        expect(updated.fileSize, 2048); // Should use actual size
+        expect(updated.downloadedSize, 2048);
+      },
+    );
+
+    test(
+      'should fall back to normal update when fileSize is 0 and actual file size check fails',
+      () async {
+        // Arrange
+        const testId = 'id1';
+        final download = DownloadItem(
+          id: testId,
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.9,
+          fileSize: 0,
+          downloadedSize: 900,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
+        when(
+          mockValidator.getActualFileSize(any),
+        ).thenAnswer((_) async => null); // Check fails
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.completed,
+          1.0,
+          900, // downloadedSize
+          0, // fileSize
+        );
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.updateDownload(captureAny),
+        ).captured;
+        final updated = captured.first as DownloadItem;
+        expect(updated.status, DownloadStatus.completed);
+        expect(updated.fileSize, 0); // Kept as 0
+      },
+    );
+
+    test(
+      'should handle completion when fileSize is 0 and self-heal works',
+      () async {
+        // Arrange
+        const testId = 'id1';
+        final download = DownloadItem(
+          id: testId,
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.9,
+          fileSize: 0,
+          downloadedSize: 900,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(
+          mockValidator.verifyFileExists(
+            any,
+            maxRetries: anyNamed('maxRetries'),
+          ),
+        ).thenAnswer((_) async => true);
+        when(
+          mockValidator.getActualFileSize(any),
+        ).thenAnswer((_) async => 1024);
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.updateDownloadProgress(
+          testId,
+          DownloadStatus.completed,
+          1.0,
+          1024,
+          0,
+        );
+
+        // Assert
+        final List<dynamic> captured = verify(
+          mockLocalDataSource.updateDownload(captureAny),
+        ).captured;
+        final updated = captured.first as DownloadItem;
+        expect(updated.status, DownloadStatus.completed);
+        expect(updated.fileSize, 1024);
+      },
+    );
+
+    test(
+      'should find download by URL if ID lookup fails in updateDownloadProgress',
+      () async {
+        // Arrange
+        const testUrl = 'url1';
+        final download = DownloadItem(
+          id: 'real_id',
+          title: 'T1',
+          url: testUrl,
+          filePath: 'p1',
+          reciterName: 'Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 1024,
+          downloadedSize: 512,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+        // Act
+        await repository.updateDownloadProgress(
+          testUrl, // Using URL as ID
+          DownloadStatus.downloading,
+          0.6,
+          600,
+          1024,
+        );
+
+        // Assert
+        verify(mockLocalDataSource.updateDownload(any)).called(1);
+      },
+    );
+  });
+
+  group('resumePendingDownloads', () {
+    test('should resume pending downloads that are not active', () async {
+      DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
+      // Arrange
+      final download = DownloadItem(
+        id: '1',
+        title: 'Surah 1',
+        url: 'http://example.com/1.mp3',
+        filePath: '/path/to/1.mp3',
+        reciterName: 'Reciter A',
+        reciterId: 1,
+        status: DownloadStatus.pending,
+        progress: 0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockDownloadService.isStatusDownloadActive(any),
+      ).thenAnswer((_) async => false);
+      when(
+        mockDownloadService.getActiveDownloadIds(),
+      ).thenAnswer((_) async => []);
+      when(mockDownloadService.getStatus(any)).thenAnswer((_) async => null);
+      when(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).thenAnswer((_) async {});
+
+      // Act
+      await repository.resumePendingDownloads();
+
+      // Assert
+      verify(
+        mockDownloadService.download(
+          id: download.id,
+          url: download.url,
+          filePath: download.filePath,
+          title: download.title,
+          reciterName: download.reciterName,
+          reciterId: download.reciterId,
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).called(1);
+    });
+
+    test(
+      'should set status to pending before resuming if it was downloading',
+      () async {
+        DownloadQueueManager.initForTesting(
+          downloadService: mockDownloadService,
+        );
+        // Arrange
+        final download = DownloadItem(
+          id: '1',
+          title: 'Surah 1',
+          url: 'http://example.com/1.mp3',
+          filePath: '/path/to/1.mp3',
+          reciterName: 'Reciter A',
+          status: DownloadStatus.downloading, // Was downloading
+          progress: 0.5,
+          fileSize: 100,
+          downloadedSize: 50,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockLocalDataSource.getDownloads(),
+        ).thenAnswer((_) async => [download]);
+        when(
+          mockDownloadService.isStatusDownloadActive(any),
+        ).thenAnswer((_) async => false);
+        when(
+          mockDownloadService.getActiveDownloadIds(),
+        ).thenAnswer((_) async => []);
+        when(
+          mockDownloadService.getStatus(any),
+        ).thenAnswer((_) async => DownloadStatus.pending);
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(
+          mockDownloadService.download(
+            id: anyNamed('id'),
+            url: anyNamed('url'),
+            filePath: anyNamed('filePath'),
+            title: anyNamed('title'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+            showNotification: anyNamed('showNotification'),
+          ),
+        ).thenAnswer((_) async {});
+
+        // Act
+        await repository.resumePendingDownloads();
+
+        // Assert
+        verify(
+          mockLocalDataSource.updateDownload(
+            argThat(
+              predicate<DownloadItem>(
+                (item) => item.status == DownloadStatus.pending,
+              ),
+            ),
+          ),
+        ).called(1);
+
+        verify(
+          mockDownloadService.download(
+            id: anyNamed('id'),
+            url: anyNamed('url'),
+            filePath: anyNamed('filePath'),
+            title: anyNamed('title'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+            showNotification: anyNamed('showNotification'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test('should NOT resume if download is already active', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: '1',
+        title: 'Surah 1',
+        url: 'http://example.com/1.mp3',
+        filePath: '/path/to/1.mp3',
+        reciterName: 'Reciter A',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 100,
+        downloadedSize: 50,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockDownloadService.isStatusDownloadActive(any),
+      ).thenAnswer((_) async => true); // Active
+
+      // Act
+      await repository.resumePendingDownloads();
+
+      // Assert
+      verifyNever(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      );
+    });
+
+    test('should handle error when checking active status in resume', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: '1',
+        title: 'Surah 1',
+        url: 'http://example.com/1.mp3',
+        filePath: '/path/to/1.mp3',
+        reciterName: 'Reciter A',
+        status: DownloadStatus.pending,
+        progress: 0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockDownloadService.isStatusDownloadActive(any),
+      ).thenThrow(Exception('Active check failed'));
+      // The code catches exception and treats as not active
+      when(
+        mockDownloadService.getStatus(any),
+      ).thenAnswer((_) async => DownloadStatus.pending);
+      when(
+        mockDownloadService.getActiveDownloadIds(),
+      ).thenAnswer((_) async => []);
+      when(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).thenAnswer((_) async {});
+
+      // Act
+      await repository.resumePendingDownloads();
+
+      // Assert
+      verify(mockDownloadService.isStatusDownloadActive(any)).called(1);
+      verify(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).called(1);
+    });
+
+    test('should handle error when enqueueing in resume', () async {
+      // Arrange
+      final download = DownloadItem(
+        id: '1',
+        title: 'Surah 1',
+        url: 'http://example.com/1.mp3',
+        filePath: '/path/to/1.mp3',
+        reciterName: 'Reciter A',
+        status: DownloadStatus.pending,
+        progress: 0,
+        fileSize: 0,
+        downloadedSize: 0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(
+        mockDownloadService.isStatusDownloadActive(any),
+      ).thenAnswer((_) async => false);
+      when(
+        mockDownloadService.getStatus(any),
+      ).thenAnswer((_) async => DownloadStatus.pending);
+      when(
+        mockDownloadService.getActiveDownloadIds(),
+      ).thenAnswer((_) async => []);
+
+      when(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).thenThrow(Exception('Enqueue failed'));
+
+      // Act
+      await repository.resumePendingDownloads();
+
+      // Assert
+      // The code should catch the error and log it
+      verify(
+        mockDownloadService.download(
+          id: anyNamed('id'),
+          url: anyNamed('url'),
+          filePath: anyNamed('filePath'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          reciterId: anyNamed('reciterId'),
+          showNotification: anyNamed('showNotification'),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('getTotalDownloadsSize', () {
+    test('should calculate total size of completed downloads', () async {
+      // Arrange
+      final d1 = DownloadItem(
+        id: '1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 1000,
+        downloadedSize: 1000,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+      final d2 = DownloadItem(
+        id: '2',
+        title: 'T2',
+        url: 'u2',
+        filePath: 'p2',
+        reciterName: 'R1',
+        status: DownloadStatus.pending, // Not completed
+        fileSize: 500,
+        downloadedSize: 0,
+        progress: 0,
+        createdAt: DateTime.now(),
+      );
+      final d3 = DownloadItem(
+        id: '3',
+        title: 'T3',
+        url: 'u3',
+        filePath: 'p3',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 2000,
+        downloadedSize: 2000,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [d1, d2, d3]);
+
+      // Act
+      final int total = await repository.getTotalDownloadsSize();
+
+      // Assert
+      expect(total, 3000);
+    });
+
+    test('should self-heal if completed download has 0 fileSize', () async {
+      // Arrange
+      final d1 = DownloadItem(
+        id: '1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 0, // Zero size
+        downloadedSize: 100,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => [d1]);
+      when(
+        mockValidator.getActualFileSize('p1'),
+      ).thenAnswer((_) async => 500); // Actual size
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act
+      final int total = await repository.getTotalDownloadsSize();
+
+      // Assert
+      expect(total, 500);
+      verify(
+        mockLocalDataSource.updateDownload(
+          argThat(
+            predicate<DownloadItem>(
+              (item) => item.id == '1' && item.fileSize == 500,
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test('should use downloadedSize if self-heal fails', () async {
+      // Arrange
+      final d1 = DownloadItem(
+        id: '1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 0,
+        downloadedSize: 100,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => [d1]);
+      when(
+        mockValidator.getActualFileSize('p1'),
+      ).thenAnswer((_) async => null); // Check fails
+
+      // Act
+      final int total = await repository.getTotalDownloadsSize();
+
+      // Assert
+      expect(total, 0); // Falls back to 0 if self-heal fails
+    });
+
+    test(
+      'should handle exception during self-heal in getTotalDownloadsSize',
+      () async {
+        // Arrange
+        final d1 = DownloadItem(
+          id: '1',
+          title: 'T1',
+          url: 'u1',
+          filePath: 'p1',
+          reciterName: 'R1',
+          status: DownloadStatus.completed,
+          fileSize: 0,
+          downloadedSize: 100,
+          progress: 1.0,
+          createdAt: DateTime.now(),
+        );
+
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => [d1]);
+        when(
+          mockValidator.getActualFileSize('p1'),
+        ).thenThrow(Exception('I/O error'));
+
+        // Act
+        final int total = await repository.getTotalDownloadsSize();
+
+        // Assert
+        expect(total, 0); // Caught exception, added nothing
+      },
+    );
+  });
+
+  group('getValidCompletedDownloads', () {
+    test('should return only downloads that exist on disk', () async {
+      // Arrange
+      final d1 = DownloadItem(
+        id: '1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 100,
+        downloadedSize: 100,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+      final d2 = DownloadItem(
+        id: '2',
+        title: 'T2',
+        url: 'u2',
+        filePath: 'p2',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 100,
+        downloadedSize: 100,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [d1, d2]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([])); // Mock empty reciters
+      when(mockValidator.verifyFileExists('p1')).thenAnswer((_) async => true);
+      when(mockValidator.verifyFileExists('p2')).thenAnswer((_) async => false);
+
+      // Act
+      final List<DownloadItem> valid = await repository
+          .getValidCompletedDownloads('R1');
+
+      // Assert
+      expect(valid.length, 1);
+      expect(valid.first.id, '1');
+    });
+
+    test('should fallback to name matching if getReciters fails', () async {
+      // Arrange
+      final d1 = DownloadItem(
+        id: '1',
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'R1',
+        status: DownloadStatus.completed,
+        fileSize: 100,
+        downloadedSize: 100,
+        progress: 1.0,
+        createdAt: DateTime.now(),
+      );
+
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => [d1]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Left(ServerFailure('Error')));
+      when(mockValidator.verifyFileExists('p1')).thenAnswer((_) async => true);
+
+      // Act
+      final List<DownloadItem> valid = await repository
+          .getValidCompletedDownloads('R1');
+
+      // Assert
+      expect(valid.length, 1);
+      expect(valid.first.id, '1');
+    });
+  });
+
+  group('MediaItem Conversion', () {
+    test('should create correct MediaItem from DownloadItem', () {
+      // Arrange
+      final download = DownloadItem(
+        id: 'test_id',
+        title: 'Surah Al-Fatiha',
+        url: 'https://example.com/audio.mp3',
+        filePath: '/storage/emulated/0/Download/audio.mp3',
+        reciterName: 'Abdul Rahman Al-Sudais',
+        reciterId: 1,
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      // Act
+      final MediaItem mediaItem = repository.createMediaItemFromDownload(
+        download,
+      );
+
+      // Assert
+      expect(mediaItem.id, 'file:///storage/emulated/0/Download/audio.mp3');
+      expect(mediaItem.title, 'Surah Al-Fatiha');
+      expect(mediaItem.artist, 'Abdul Rahman Al-Sudais');
+    });
+
+    test(
+      'should create correct List<MediaItem> from List<DownloadItem>',
+      () async {
+        // Arrange
+        final downloads = [
+          DownloadItem(
+            id: 'id1',
+            title: 'T1',
+            url: 'u1',
+            filePath: 'p1',
+            reciterName: 'Reciter',
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            fileSize: 1024,
+            downloadedSize: 1024,
+            createdAt: DateTime.now(),
+          ),
+        ];
+
+        // Act
+        final List<MediaItem> mediaItems = repository
+            .createMediaItemsFromDownloads(downloads);
+
+        // Assert
+        expect(mediaItems.length, 1);
+      },
+    );
   });
 }

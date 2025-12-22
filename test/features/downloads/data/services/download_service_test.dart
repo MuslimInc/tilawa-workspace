@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/services/download_service.dart';
@@ -73,14 +74,22 @@ void main() {
       ).thenAnswer((_) async {});
       when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
-      // Override the singleton instance to use our mock
-      DownloadService.flutterDownloaderTestOverride = mockDownloader;
+      // Clean registration
+      final GetIt getIt = GetIt.instance;
+      if (getIt.isRegistered<DownloadService>()) {
+        getIt.unregister<DownloadService>();
+      }
 
       downloadService = DownloadServiceImpl(flutterDownloader: mockDownloader);
+      getIt.registerSingleton<DownloadService>(downloadService);
     });
 
     tearDown(() async {
       await downloadService.disposeService();
+      final GetIt getIt = GetIt.instance;
+      if (getIt.isRegistered<DownloadService>()) {
+        await getIt.unregister<DownloadService>();
+      }
       if (tempDir.existsSync()) {
         try {
           tempDir.deleteSync(recursive: true);

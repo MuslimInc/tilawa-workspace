@@ -24,27 +24,40 @@ void main() {
 
   late Directory tempDir;
 
-  setUp(() {
+  setUp(() async {
     tempDir = Directory.systemTemp.createTempSync('dqm_test');
     mockDownloader = MockFlutterDownloaderWrapper();
-    DownloadService.flutterDownloaderTestOverride = mockDownloader;
 
-    // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
-    if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(DownloadService.instance);
+
+    // Reset dependencies cleanly
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt.unregister<DownloadQueueManager>();
     }
-    final mockDownloadNotificationService = MockDownloadNotificationService();
-    if (!getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.registerSingleton<DownloadNotificationService>(
-        mockDownloadNotificationService,
-      );
+    if (getIt.isRegistered<DownloadService>()) {
+      getIt.unregister<DownloadService>();
     }
-    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
-      return;
-    });
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      getIt.unregister<DownloadNotificationService>();
+    }
+
+    // Register Notification Service Mock
+    final mockNotification = MockDownloadNotificationService();
+    getIt.registerSingleton<DownloadNotificationService>(mockNotification);
+
+    // Register DownloadService (Implementation) with mocked downloader
+    final downloadService = DownloadServiceImpl(
+      flutterDownloader: mockDownloader,
+    );
+    getIt.registerSingleton<DownloadService>(downloadService);
+
+    // Register DownloadQueueManager using the registered services
+    DownloadQueueManager.initForTesting(downloadService: downloadService);
+
+    // Mock notification behaviors
+    when(mockNotification.initialize()).thenAnswer((_) async {});
     when(
-      mockDownloadNotificationService.showDownloadProgress(
+      mockNotification.showDownloadProgress(
         downloadId: anyNamed('downloadId'),
         title: anyNamed('title'),
         reciterName: anyNamed('reciterName'),
@@ -55,14 +68,8 @@ void main() {
         completeMessage: anyNamed('completeMessage'),
         failedMessage: anyNamed('failedMessage'),
       ),
-    ).thenAnswer((_) async {
-      return;
-    });
-    when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
-      _,
-    ) async {
-      return;
-    });
+    ).thenAnswer((_) async {});
+    when(mockNotification.cancelNotification(any)).thenAnswer((_) async {});
 
     // Setup Service basics
     when(
@@ -71,6 +78,12 @@ void main() {
     when(
       mockDownloader.registerCallback(any, step: anyNamed('step')),
     ).thenAnswer((_) async {});
+
+    // Default empty tasks
+    when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+    when(
+      mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+    ).thenAnswer((_) async => []);
 
     // Track enqueued tasks by wrapper
     final List<DownloadTask> enqueuedTasks = [];
@@ -92,20 +105,18 @@ void main() {
       final url = invocation.namedArguments[const Symbol('url')] as String;
       final taskId = 'task_$url'; // Fake ID derived from URL for tracing
 
-      enqueuedTasks.add(
-        DownloadTask(
-          taskId: taskId,
-          status: DownloadTaskStatus.enqueued,
-          progress: 0,
-          url: url,
-          filename:
-              invocation.namedArguments[const Symbol('fileName')] as String?,
-          savedDir:
-              invocation.namedArguments[const Symbol('savedDir')] as String,
-          timeCreated: DateTime.now().millisecondsSinceEpoch,
-          allowCellular: true,
-        ),
+      final task = DownloadTask(
+        taskId: taskId,
+        status: DownloadTaskStatus.enqueued,
+        progress: 0,
+        url: url,
+        filename:
+            invocation.namedArguments[const Symbol('fileName')] as String?,
+        savedDir: invocation.namedArguments[const Symbol('savedDir')] as String,
+        timeCreated: DateTime.now().millisecondsSinceEpoch,
+        allowCellular: true,
       );
+      enqueuedTasks.add(task);
       return taskId;
     });
 
@@ -139,26 +150,31 @@ void main() {
     });
 
     when(mockDownloader.loadTasks()).thenAnswer((_) async => enqueuedTasks);
-
-    // Reset DQM
-    DownloadQueueManager.reset();
   });
 
   tearDown(() async {
     IsolateNameServer.removePortNameMapping('downloader_send_port');
-    DownloadQueueManager.instance.dispose();
+    final GetIt getIt = GetIt.instance;
+
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      try {
+        DownloadQueueManager.instance.dispose();
+      } catch (_) {}
+      await getIt.unregister<DownloadQueueManager>();
+    }
+
+    if (getIt.isRegistered<DownloadService>()) {
+      await getIt.unregister<DownloadService>();
+    }
+
+    if (getIt.isRegistered<DownloadNotificationService>()) {
+      await getIt.unregister<DownloadNotificationService>();
+    }
+
     if (tempDir.existsSync()) {
       try {
         tempDir.deleteSync(recursive: true);
       } catch (_) {}
-    }
-
-    final GetIt getIt = GetIt.instance;
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
-    }
-    if (getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.unregister<DownloadNotificationService>();
     }
   });
 

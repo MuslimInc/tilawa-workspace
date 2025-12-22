@@ -5,10 +5,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:dartz_plus/dartz_plus.dart' as _i13;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
+import 'package:muzakri/core/entities/reciter_entity.dart' as _i15;
+import 'package:muzakri/core/errors/failures.dart' as _i14;
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart'
     as _i3;
 import 'package:muzakri/features/downloads/data/services/batch_download_manager.dart'
@@ -23,6 +26,8 @@ import 'package:muzakri/features/downloads/data/services/download_validator.dart
     as _i10;
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart'
     as _i2;
+import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart'
+    as _i12;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -384,4 +389,122 @@ class MockDownloadStatusSynchronizer extends _i1.Mock
             ),
           )
           as _i4.Future<List<_i2.DownloadItem>>);
+}
+
+/// A class which mocks [RecitersRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockRecitersRepository extends _i1.Mock
+    implements _i12.RecitersRepository {
+  MockRecitersRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>
+  getReciters() =>
+      (super.noSuchMethod(
+            Invocation.method(#getReciters, []),
+            returnValue:
+                _i4.Future<
+                  _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                >.value(
+                  _i5.dummyValue<
+                    _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                  >(this, Invocation.method(#getReciters, [])),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>
+  searchReciters(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchReciters, [query]),
+            returnValue:
+                _i4.Future<
+                  _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                >.value(
+                  _i5.dummyValue<
+                    _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                  >(this, Invocation.method(#searchReciters, [query])),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>
+  getRecitersByLetter(String? letter) =>
+      (super.noSuchMethod(
+            Invocation.method(#getRecitersByLetter, [letter]),
+            returnValue:
+                _i4.Future<
+                  _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                >.value(
+                  _i5.dummyValue<
+                    _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                  >(this, Invocation.method(#getRecitersByLetter, [letter])),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, _i15.ReciterEntity?>> getReciterById(
+    String? id,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getReciterById, [id]),
+            returnValue:
+                _i4.Future<
+                  _i13.Either<_i14.Failure, _i15.ReciterEntity?>
+                >.value(
+                  _i5.dummyValue<
+                    _i13.Either<_i14.Failure, _i15.ReciterEntity?>
+                  >(this, Invocation.method(#getReciterById, [id])),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, _i15.ReciterEntity?>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>
+  getFavoriteReciters() =>
+      (super.noSuchMethod(
+            Invocation.method(#getFavoriteReciters, []),
+            returnValue:
+                _i4.Future<
+                  _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                >.value(
+                  _i5.dummyValue<
+                    _i13.Either<_i14.Failure, List<_i15.ReciterEntity>>
+                  >(this, Invocation.method(#getFavoriteReciters, [])),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, List<_i15.ReciterEntity>>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, void>> toggleFavoriteReciter(int? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleFavoriteReciter, [id]),
+            returnValue: _i4.Future<_i13.Either<_i14.Failure, void>>.value(
+              _i5.dummyValue<_i13.Either<_i14.Failure, void>>(
+                this,
+                Invocation.method(#toggleFavoriteReciter, [id]),
+              ),
+            ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, void>>);
+
+  @override
+  _i4.Future<_i13.Either<_i14.Failure, List<String>>> getFavoriteReciterIds() =>
+      (super.noSuchMethod(
+            Invocation.method(#getFavoriteReciterIds, []),
+            returnValue:
+                _i4.Future<_i13.Either<_i14.Failure, List<String>>>.value(
+                  _i5.dummyValue<_i13.Either<_i14.Failure, List<String>>>(
+                    this,
+                    Invocation.method(#getFavoriteReciterIds, []),
+                  ),
+                ),
+          )
+          as _i4.Future<_i13.Either<_i14.Failure, List<String>>>);
 }
