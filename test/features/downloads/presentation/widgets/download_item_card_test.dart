@@ -52,11 +52,17 @@ void main() {
     mockDownloadService = MockDownloadService();
     mockDownloadsRepository = MockDownloadsRepository();
 
-    // Setup DownloadQueueManager.instance for older tests that might rely on it directly
-    DownloadQueueManager.instance = mockDownloadQueueManager;
-
-    // Register mock DownloadService in GetIt for DownloadQueueManager internal use
+    // Register mock DownloadQueueManager in GetIt
     final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt.unregister<DownloadQueueManager>();
+    }
+    getIt.registerSingleton<DownloadQueueManager>(mockDownloadQueueManager);
+
+    // Check internal usages
+    // The widget under test uses getIt<DownloadQueueManager>() now.
+
+    // Register mock DownloadService in GetIt
     if (!getIt.isRegistered<DownloadService>()) {
       getIt.registerSingleton<DownloadService>(mockDownloadService);
     } else {
@@ -130,8 +136,10 @@ void main() {
   });
 
   tearDown(() {
-    DownloadQueueManager.reset();
     final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt.unregister<DownloadQueueManager>();
+    }
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
     }
@@ -140,10 +148,15 @@ void main() {
     }
   });
 
-  Widget createTestWidget(DownloadItem download, {VoidCallback? onDelete}) {
+  Widget createTestWidget(
+    DownloadItem download, {
+    VoidCallback? onDelete,
+    Locale? locale,
+  }) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale,
       home: Scaffold(
         body: RepositoryProvider<DownloadsRepository>.value(
           value: mockDownloadsRepository,
@@ -1003,6 +1016,83 @@ void main() {
           reason: 'Progress should increase over time',
         );
       }
+    });
+  });
+
+  group('DownloadItemCard - Localization', () {
+    testWidgets('should display English Surah name when locale is English', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          DownloadItem(
+            id: '1',
+            title: 'Original Title',
+            url: 'https://example.com/001.mp3', // Valid URL with surah ID 1
+            reciterName: 'Reciter Name',
+            reciterId: 1,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            downloadedSize: 100,
+            fileSize: 100,
+            filePath: '/path/to/file',
+            createdAt: DateTime.now(),
+          ),
+          locale: const Locale('en'),
+        ),
+      );
+
+      expect(find.text('Al-Fatihah'), findsOneWidget);
+    });
+
+    testWidgets('should display Arabic Surah name when locale is Arabic', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          DownloadItem(
+            id: '1',
+            title: 'Original Title',
+            url: 'https://example.com/001.mp3', // Valid URL with surah ID 1
+            reciterName: 'Reciter Name',
+            reciterId: 1,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            downloadedSize: 100,
+            fileSize: 100,
+            filePath: '/path/to/file',
+            createdAt: DateTime.now(),
+          ),
+          locale: const Locale('ar'),
+        ),
+      );
+
+      expect(find.text('سورة الفاتحة'), findsOneWidget);
+    });
+
+    testWidgets('should fallback to title when Surah ID is invalid', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          DownloadItem(
+            id: '1',
+            title: 'Original Title',
+            url: 'https://example.com/invalid.mp3', // Invalid URL
+            reciterName: 'Reciter Name',
+            reciterId: 1,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            downloadedSize: 100,
+            fileSize: 100,
+            filePath: '/path/to/file',
+            createdAt: DateTime.now(),
+          ),
+          locale: const Locale('en'),
+        ),
+      );
+
+      expect(find.text('Original Title'), findsOneWidget);
     });
   });
 }

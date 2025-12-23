@@ -11,10 +11,15 @@ import 'download_service.dart';
 /// active downloads and the download queue.
 @LazySingleton()
 class DownloadStatusSynchronizer {
-  DownloadStatusSynchronizer(this._downloadService, this._recoveryService);
+  DownloadStatusSynchronizer(
+    this._downloadService,
+    this._recoveryService,
+    this._downloadQueueManager,
+  );
 
   final DownloadService _downloadService;
   final DownloadRecoveryService _recoveryService;
+  final DownloadQueueManager _downloadQueueManager;
 
   /// Synchronizes a list of downloads with the current state of the download service
   /// and queue manager.
@@ -50,7 +55,7 @@ class DownloadStatusSynchronizer {
     final Set<String> queuedIds = {};
     try {
       for (final download in downloads) {
-        if (DownloadQueueManager.instance.isQueued(download.id)) {
+        if (_downloadQueueManager.isQueued(download.id)) {
           queuedIds.add(download.id);
         }
       }

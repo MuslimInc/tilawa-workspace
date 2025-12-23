@@ -173,7 +173,7 @@ class DownloadButtonBloc
   }
 
   void _onFailed(String? errorMessage, Emitter<DownloadButtonState> emit) {
-    _progressSubscription?.cancel();
+    // Keep listening in case of auto-retry or external recovery
     emit(DownloadButtonState.failed(errorMessage: errorMessage));
   }
 
@@ -183,7 +183,7 @@ class DownloadButtonBloc
   }
 
   void _onPaused(Emitter<DownloadButtonState> emit) {
-    _progressSubscription?.cancel();
+    // Keep listening to detect resume events
     emit(const DownloadButtonState.paused());
   }
 

@@ -22,7 +22,9 @@ import 'package:muzakri/features/reciters/domain/repositories/reciters_repositor
 
 import '../features/downloads/data/services/download_service_test.mocks.dart';
 // Generate mocks
+
 @GenerateMocks([
+  DownloadService,
   DownloadsLocalDataSource,
   DownloadNotificationService,
   BatchDownloadManager,
@@ -136,23 +138,25 @@ void main() {
     ).thenAnswer((_) async => []);
 
     // Reset singleton
-    DownloadQueueManager.reset();
+    if (GetIt.instance.isRegistered<DownloadQueueManager>()) {
+      GetIt.instance.unregister<DownloadQueueManager>();
+    }
     final queueManager = DownloadQueueManager(
-      getIt<DownloadService>(),
-      getIt<DownloadNotificationService>(),
+      GetIt.instance<DownloadService>(),
+      GetIt.instance<DownloadNotificationService>(),
     );
-    getIt.registerSingleton<DownloadQueueManager>(queueManager);
+    GetIt.instance.registerSingleton<DownloadQueueManager>(queueManager);
     await queueManager.initialize();
 
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
-      DownloadService.instance,
+      GetIt.instance<DownloadService>(),
       mockBatchDownloadManager,
       mockPathResolver,
       mockValidator,
       mockStatusSynchronizer,
       mockRecitersRepository,
-      DownloadQueueManager.instance,
+      queueManager,
     );
 
     // Stub logging to avoid noise
@@ -250,8 +254,8 @@ void main() {
 
       // Verify: Queued or Active in Manager (since it starts immediately)
       expect(
-        DownloadQueueManager.instance.isQueued(url) ||
-            DownloadQueueManager.instance.isActive(url),
+        GetIt.instance<DownloadQueueManager>().isQueued(url) ||
+            GetIt.instance<DownloadQueueManager>().isActive(url),
         isTrue,
         reason: 'Download should be either queued or active',
       );

@@ -5,10 +5,14 @@ import '../../../downloads/domain/entities/download_item.dart';
 import '../../domain/repositories/surah_repository.dart';
 
 class SurahDownloadService {
+  SurahDownloadService({required this.downloadService});
+
+  final DownloadService downloadService;
+
   static final Map<String, StreamSubscription> _progressSubscriptions = {};
 
   /// Start listening to download progress for a surah
-  static void startListeningToProgress(
+  void startListeningToProgress(
     String surahId,
     String reciterName,
     SurahRepository surahRepository,
@@ -18,9 +22,7 @@ class SurahDownloadService {
     // Cancel existing subscription if any
     _progressSubscriptions[downloadId]?.cancel();
 
-    _progressSubscriptions[downloadId] = DownloadService
-        .instance
-        .globalProgressStream
+    _progressSubscriptions[downloadId] = downloadService.globalProgressStream
         .where((progress) => progress.id == downloadId)
         .listen((progress) async {
           await surahRepository.updateSurahDownloadProgress(

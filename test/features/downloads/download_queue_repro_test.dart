@@ -28,31 +28,33 @@ void main() {
     tempDir = Directory.systemTemp.createTempSync('dqm_test');
     mockDownloader = MockFlutterDownloaderWrapper();
 
-    final GetIt getIt = GetIt.instance;
-
     // Reset dependencies cleanly
-    if (getIt.isRegistered<DownloadQueueManager>()) {
-      getIt.unregister<DownloadQueueManager>();
+    if (GetIt.I.isRegistered<DownloadQueueManager>()) {
+      GetIt.I.unregister<DownloadQueueManager>();
     }
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (GetIt.I.isRegistered<DownloadService>()) {
+      GetIt.I.unregister<DownloadService>();
     }
-    if (getIt.isRegistered<DownloadNotificationService>()) {
-      getIt.unregister<DownloadNotificationService>();
+    if (GetIt.I.isRegistered<DownloadNotificationService>()) {
+      GetIt.I.unregister<DownloadNotificationService>();
     }
 
     // Register Notification Service Mock
     final mockNotification = MockDownloadNotificationService();
-    getIt.registerSingleton<DownloadNotificationService>(mockNotification);
+    GetIt.I.registerSingleton<DownloadNotificationService>(mockNotification);
 
     // Register DownloadService (Implementation) with mocked downloader
     final downloadService = DownloadServiceImpl(
       flutterDownloader: mockDownloader,
     );
-    getIt.registerSingleton<DownloadService>(downloadService);
+    GetIt.I.registerSingleton<DownloadService>(downloadService);
 
     // Register DownloadQueueManager using the registered services
-    DownloadQueueManager.initForTesting(downloadService: downloadService);
+    final downloadQueueManager = DownloadQueueManager(
+      downloadService,
+      mockNotification,
+    );
+    GetIt.I.registerSingleton<DownloadQueueManager>(downloadQueueManager);
 
     // Mock notification behaviors
     when(mockNotification.initialize()).thenAnswer((_) async {});
@@ -154,21 +156,20 @@ void main() {
 
   tearDown(() async {
     IsolateNameServer.removePortNameMapping('downloader_send_port');
-    final GetIt getIt = GetIt.instance;
 
-    if (getIt.isRegistered<DownloadQueueManager>()) {
+    if (GetIt.I.isRegistered<DownloadQueueManager>()) {
       try {
-        DownloadQueueManager.instance.dispose();
+        GetIt.I<DownloadQueueManager>().dispose();
       } catch (_) {}
-      await getIt.unregister<DownloadQueueManager>();
+      await GetIt.I.unregister<DownloadQueueManager>();
     }
 
-    if (getIt.isRegistered<DownloadService>()) {
-      await getIt.unregister<DownloadService>();
+    if (GetIt.I.isRegistered<DownloadService>()) {
+      await GetIt.I.unregister<DownloadService>();
     }
 
-    if (getIt.isRegistered<DownloadNotificationService>()) {
-      await getIt.unregister<DownloadNotificationService>();
+    if (GetIt.I.isRegistered<DownloadNotificationService>()) {
+      await GetIt.I.unregister<DownloadNotificationService>();
     }
 
     if (tempDir.existsSync()) {
@@ -186,11 +187,11 @@ void main() {
     // We enqueue 5 items.
 
     // Act
-    await DownloadQueueManager.instance.initialize();
+    await GetIt.I<DownloadQueueManager>().initialize();
 
     for (var i = 1; i <= 5; i++) {
       final filePath = '${tempDir.path}/$i.mp3';
-      await DownloadQueueManager.instance.enqueue(
+      await GetIt.I<DownloadQueueManager>().enqueue(
         id: 'http://example.com/$i.mp3', // ID is URL in our refactor
         url: 'http://example.com/$i.mp3',
         filePath: filePath,
@@ -215,13 +216,13 @@ void main() {
     // If DQM listens to DS.globalProgressStream, it sees 'pending'.
 
     expect(
-      DownloadQueueManager.instance.queueLength,
+      GetIt.I<DownloadQueueManager>().queueLength,
       3,
       reason: 'DQM queue should hold 3 tasks',
     );
 
     expect(
-      DownloadQueueManager.instance.activeDownloadsCount,
+      GetIt.I<DownloadQueueManager>().activeDownloadsCount,
       2,
       reason: 'DQM active count should be 2',
     );

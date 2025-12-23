@@ -751,10 +751,12 @@ void main() {
       test('progressStream returns filtered stream', () async {
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription =
-            DownloadService.progressStream(testUrl).listen(progressEvents.add);
+            downloadService
+                .getProgressStream(testUrl)
+                .listen(progressEvents.add);
 
         // Enqueue to get a taskId - use instance to match the static progressStream
-        await DownloadService.instance.download(
+        await downloadService.download(
           id: testUrl,
           url: testUrl,
           filePath: testFilePath,
@@ -885,7 +887,7 @@ void main() {
 
       test('globalProgressStream provides broadcast stream', () {
         final Stream<DownloadProgress> stream =
-            DownloadService.instance.globalProgressStream;
+            DownloadServiceImpl.instance.globalProgressStream;
         expect(stream, isNotNull);
         expect(stream.isBroadcast, isTrue);
       });
@@ -931,7 +933,7 @@ void main() {
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription =
-            DownloadService.instance.globalProgressStream.listen(
+            DownloadServiceImpl.instance.globalProgressStream.listen(
               progressEvents.add,
             );
 
@@ -1067,8 +1069,8 @@ void main() {
 
     group('Singleton Instance', () {
       test('instance returns same singleton', () {
-        final DownloadService instance1 = DownloadService.instance;
-        final DownloadService instance2 = DownloadService.instance;
+        final DownloadService instance1 = DownloadServiceImpl.instance;
+        final DownloadService instance2 = DownloadServiceImpl.instance;
         expect(identical(instance1, instance2), isTrue);
       });
 
@@ -1081,7 +1083,7 @@ void main() {
           identical(DownloadService.flutterDownloaderTestOverride, testMock),
           isTrue,
         );
-        expect(DownloadService.instance, isNotNull);
+        expect(DownloadServiceImpl.instance, isNotNull);
       });
     });
   });

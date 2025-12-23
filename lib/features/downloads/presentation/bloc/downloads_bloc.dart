@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -13,7 +12,6 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../../main.dart';
-import '../../data/services/download_queue_manager.dart';
 import '../../data/services/download_service.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/usecases/cancel_download_use_case.dart';
@@ -24,11 +22,14 @@ import '../../domain/usecases/delete_download_use_case.dart';
 import '../../domain/usecases/delete_reciter_downloads_use_case.dart';
 import '../../domain/usecases/download_surah_use_case.dart';
 import '../../domain/usecases/get_download_item_use_case.dart';
+import '../../domain/usecases/get_download_status_use_case.dart';
 import '../../domain/usecases/get_downloads_by_reciter_use_case.dart';
 import '../../domain/usecases/get_total_downloads_size_use_case.dart';
 import '../../domain/usecases/get_valid_completed_downloads_use_case.dart';
+import '../../domain/usecases/observe_global_download_progress_use_case.dart';
 import '../../domain/usecases/play_all_downloads_use_case.dart';
 import '../../domain/usecases/play_download_use_case.dart';
+import '../../domain/usecases/remove_from_download_queue_use_case.dart';
 import '../../domain/usecases/retry_download_use_case.dart';
 import '../../domain/usecases/validate_downloaded_file_use_case.dart';
 import 'downloads_status.dart';
@@ -61,6 +62,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     required GetDownloadItemUseCase getDownloadItem,
     required CancelDownloadUseCase cancelDownload,
     required AnalyticsService analyticsService,
+    required ObserveGlobalDownloadProgressUseCase observeGlobalDownloadProgress,
+    required GetDownloadStatusUseCase getDownloadStatus,
+    required RemoveFromDownloadQueueUseCase removeFromDownloadQueue,
   }) : _getDownloadsByReciter = getDownloadsByReciter,
        _downloadSurah = downloadSurah,
        _deleteDownload = deleteDownload,
@@ -77,6 +81,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
        _getDownloadItem = getDownloadItem,
        _cancelDownload = cancelDownload,
        _analyticsService = analyticsService,
+       _observeGlobalDownloadProgress = observeGlobalDownloadProgress,
+       _getDownloadStatus = getDownloadStatus,
+       _removeFromDownloadQueue = removeFromDownloadQueue,
        super(const DownloadsState()) {
     on<LoadDownloads>(_onLoadDownloads, transformer: droppable());
     on<DownloadSurahEvent>(_onDownloadSurah);
@@ -113,6 +120,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final GetDownloadItemUseCase _getDownloadItem;
   final CancelDownloadUseCase _cancelDownload;
   final AnalyticsService _analyticsService;
+  final ObserveGlobalDownloadProgressUseCase _observeGlobalDownloadProgress;
+  final GetDownloadStatusUseCase _getDownloadStatus;
+  final RemoveFromDownloadQueueUseCase _removeFromDownloadQueue;
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
@@ -132,13 +142,11 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   void _listenToGlobalProgress() {
     try {
       _progressSubscription?.cancel();
-      _progressSubscription = DownloadService.instance.globalProgressStream
-          .listen(
-            _handleGlobalProgressUpdate,
-            onError: (e) =>
-                logger.e('[DownloadsBloc] Progress stream error: $e'),
-            cancelOnError: false,
-          );
+      _progressSubscription = _observeGlobalDownloadProgress().listen(
+        _handleGlobalProgressUpdate,
+        onError: (e) => logger.e('[DownloadsBloc] Progress stream error: $e'),
+        cancelOnError: false,
+      );
       logger.d('[DownloadsBloc] Global progress listener initialized');
     } catch (e) {
       // Ignore errors in test environment or setup failure
@@ -206,11 +214,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
   }
 
-  Future<void> _onDownloadSurah(
-    DownloadSurahEvent event,
-    Emitter<DownloadsState> emit,
-  ) async {
-    // Check premium access before allowing download
+  /// Helper to check if a download can proceed (Premium check + Active check)
+  Future<bool> _canStartDownload({
+    required String downloadId,
+    required String title,
+    required String reciterName,
+  }) async {
+    // 1. Check premium access
     final Either<Failure, bool> accessResult = await _checkDownloadAccess(
       const NoParams(),
     );
@@ -225,19 +235,45 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           ),
         );
       }
-      return;
+      return false;
     }
 
-    // Check if surah is already downloaded
+    // 2. Check if active
+    try {
+      final DownloadStatus? status = await _getDownloadStatus(downloadId);
+      final bool isActive =
+          status == DownloadStatus.downloading ||
+          status == DownloadStatus.pending ||
+          status == DownloadStatus.paused;
+
+      if (isActive) {
+        if (!_statusController.isClosed) {
+          _statusController.add(
+            DownloadsStatus.error(
+              message:
+                  'Surah "$title" by $reciterName is already being downloaded',
+            ),
+          );
+        }
+        return false;
+      }
+    } catch (e) {
+      logger.w('[DownloadsBloc] Error checking if download is active: $e');
+    }
+
+    return true;
+  }
+
+  Future<void> _onDownloadSurah(
+    DownloadSurahEvent event,
+    Emitter<DownloadsState> emit,
+  ) async {
+    // Check duplication (unique to new downloads)
     final Either<Failure, bool> downloadedResult = await _checkSurahDownloaded(
       surahId: event.surahId,
       reciterName: event.reciterName,
     );
-
-    // Capture current downloads before potential state change
-    final bool isAlreadyDownloaded = downloadedResult.getOrElse(() => false);
-
-    if (isAlreadyDownloaded) {
+    if (downloadedResult.getOrElse(() => false)) {
       if (!_statusController.isClosed) {
         _statusController.add(
           DownloadsStatus.error(
@@ -249,29 +285,15 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       return;
     }
 
-    // Check if download is currently in progress
-    // Note: surahId is the URL, and DownloadService uses URL as the task ID
-    try {
-      if (await DownloadService.isDownloadActive(event.surahId)) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message:
-                  'Surah "${event.surahTitle}" by ${event.reciterName} is already being downloaded',
-            ),
-          );
-        }
-        return;
-      }
-    } on MissingPluginException {
-      // In test environment, platform channels are not available
-      // Skip the check and continue with download
-      logger.d(
-        '[DownloadsBloc] DownloadService.isDownloadActive skipped - platform channels not available (test environment)',
-      );
-    } catch (e) {
-      // Any other error - log and continue
-      logger.w('[DownloadsBloc] Error checking if download is active: $e');
+    // Use consolidated validation check
+    // SurahId is URL, which is used as TaskId
+    final bool canProceed = await _canStartDownload(
+      downloadId: event.surahId,
+      title: event.surahTitle,
+      reciterName: event.reciterName,
+    );
+    if (!canProceed) {
+      return;
     }
 
     // Create a temporary DownloadItem to represent the download in progress
@@ -357,9 +379,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   ) async {
     // Cancel the download if it's active in the queue
     try {
-      final DownloadStatus? status = await DownloadService.getDownloadStatus(
-        event.downloadId,
-      );
+      final DownloadStatus? status = await _getDownloadStatus(event.downloadId);
 
       // Only cancel if it's actually running or pending
       // Cancelling a completed download might trigger a 'cancelled' event
@@ -377,17 +397,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           (r) => null,
         );
       }
-    } on MissingPluginException {
-      // In test environment, platform channels are not available
-      logger.d(
-        '[DownloadsBloc] DownloadService.cancelDownload skipped - platform channels not available',
-      );
     } catch (e) {
       logger.w('[DownloadsBloc] Error cancelling download before deletion: $e');
     }
 
     // Also remove from the pending queue if present
-    DownloadQueueManager.instance.removeFromQueue(event.downloadId);
+    _removeFromDownloadQueue(event.downloadId);
 
     final Either<Failure, void> result = await _deleteDownload(
       event.downloadId,
@@ -448,6 +463,9 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     // Note: Stopping active downloads is handled by the repository/usecase layer
+
+    // Show loading state immediately to indicate ongoing operation
+    emit(state.copyWith(status: DownloadsStateStatus.loading));
 
     final Either<Failure, void> result = await _clearAllDownloads();
     result.fold(
@@ -805,45 +823,14 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         return;
       }
 
-      // Check premium access before allowing retry
-      final Either<Failure, bool> accessResult = await _checkDownloadAccess(
-        const NoParams(),
+      // Use consolidated validation check
+      final bool canProceed = await _canStartDownload(
+        downloadId: event.downloadId,
+        title: downloadItem.title,
+        reciterName: downloadItem.reciterName,
       );
-      final bool canDownload = accessResult.getOrElse(() => false);
-      if (!canDownload) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.premiumRequired(
-              message:
-                  'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-            ),
-          );
-        }
+      if (!canProceed) {
         return;
-      }
-
-      // Check if download is currently in progress
-      try {
-        if (await DownloadService.isDownloadActive(event.downloadId)) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message:
-                    'Download "${downloadItem.title}" is already being downloaded',
-              ),
-            );
-          }
-          return;
-        }
-      } on MissingPluginException {
-        // In test environment, platform channels are not available
-        // Skip the check and continue with retry
-        logger.d(
-          '[DownloadsBloc] DownloadService.isDownloadActive skipped - platform channels not available (test environment)',
-        );
-      } catch (e) {
-        // Any other error - log and continue
-        logger.w('[DownloadsBloc] Error checking if download is active: $e');
       }
 
       // Emit download started state

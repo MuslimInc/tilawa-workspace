@@ -3,10 +3,8 @@ import 'dart:ui';
 
 import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
@@ -20,48 +18,8 @@ import 'download_service.dart';
 class DownloadQueueManager {
   DownloadQueueManager(this._downloadService, this._notificationService);
 
-  static DownloadQueueManager get instance => getIt<DownloadQueueManager>();
-
-  /// Setter for testing purposes only
-  /// Allows tests to inject a mock instance via the legacy static setter API
-  @visibleForTesting
-  static set instance(DownloadQueueManager value) {
-    if (getIt.isRegistered<DownloadQueueManager>()) {
-      getIt.unregister<DownloadQueueManager>();
-    }
-    getIt.registerSingleton<DownloadQueueManager>(value);
-  }
-
   final DownloadService _downloadService;
   final DownloadNotificationService _notificationService;
-
-  /// Reset the instance for testing
-  @visibleForTesting
-  static void reset() {
-    if (getIt.isRegistered<DownloadQueueManager>()) {
-      instance.dispose();
-      getIt.unregister<DownloadQueueManager>();
-      // Re-register a fresh instance using getIt defaults (will trigger new build)
-      // Actually we need to force re-creation. lazySingleton typically doesn't auto-reset state unless disposed.
-      // But we removed the field.
-      // Easiest way in tests is often to just re-register the factory.
-      // For now, let's just allow unregister and let next call re-create if needed or rely on setUp
-    }
-  }
-
-  /// Initialize the instance with a mock service for testing
-  @visibleForTesting
-  static void initForTesting({required DownloadService downloadService}) {
-    if (getIt.isRegistered<DownloadQueueManager>()) {
-      getIt.unregister<DownloadQueueManager>();
-    }
-    getIt.registerLazySingleton<DownloadQueueManager>(
-      () => DownloadQueueManager(
-        downloadService,
-        getIt<DownloadNotificationService>(),
-      ),
-    );
-  }
 
   // Maximum number of concurrent downloads
   // Maximum number of concurrent downloads

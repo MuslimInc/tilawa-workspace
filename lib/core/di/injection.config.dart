@@ -122,6 +122,8 @@ import 'package:muzakri/features/downloads/domain/usecases/download_surah_use_ca
     as _i251;
 import 'package:muzakri/features/downloads/domain/usecases/get_download_item_use_case.dart'
     as _i702;
+import 'package:muzakri/features/downloads/domain/usecases/get_download_status_use_case.dart'
+    as _i820;
 import 'package:muzakri/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart'
     as _i748;
 import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart'
@@ -130,12 +132,16 @@ import 'package:muzakri/features/downloads/domain/usecases/get_valid_completed_d
     as _i35;
 import 'package:muzakri/features/downloads/domain/usecases/observe_download_progress_use_case.dart'
     as _i396;
+import 'package:muzakri/features/downloads/domain/usecases/observe_global_download_progress_use_case.dart'
+    as _i636;
 import 'package:muzakri/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart'
     as _i634;
 import 'package:muzakri/features/downloads/domain/usecases/play_all_downloads_use_case.dart'
     as _i786;
 import 'package:muzakri/features/downloads/domain/usecases/play_download_use_case.dart'
     as _i802;
+import 'package:muzakri/features/downloads/domain/usecases/remove_from_download_queue_use_case.dart'
+    as _i846;
 import 'package:muzakri/features/downloads/domain/usecases/retry_download_use_case.dart'
     as _i749;
 import 'package:muzakri/features/downloads/domain/usecases/validate_downloaded_file_use_case.dart'
@@ -284,7 +290,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i203.AlphabetScrollbarBloc>(
       () => _i203.AlphabetScrollbarBloc(),
     );
-    gh.factory<_i727.SettingsCubit>(() => _i727.SettingsCubit());
     gh.factory<_i52.ThemeCubit>(() => _i52.ThemeCubit());
     gh.singleton<_i974.FirebaseFirestore>(
       () => externalDependenciesModule.firestore,
@@ -313,6 +318,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i361.Dio>(() => externalDependenciesModule.dioClient());
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
+    );
+    gh.lazySingleton<_i903.FlutterDownloaderWrapper>(
+      () => _i903.FlutterDownloaderWrapper(),
+    );
+    gh.lazySingleton<_i149.DownloadFileHelper>(
+      () => _i149.DownloadFileHelper(),
+    );
+    gh.lazySingleton<_i341.DownloadIsolateManager>(
+      () => _i341.DownloadIsolateManager(),
+    );
+    gh.lazySingleton<_i873.DownloadStatusMapper>(
+      () => _i873.DownloadStatusMapper(),
     );
     gh.lazySingleton<_i892.CredentialManagerAuthProvider>(
       () => _i892.CredentialManagerAuthProvider(
@@ -446,6 +463,14 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i138.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
     );
+    gh.singleton<_i820.GetDownloadStatusUseCase>(
+      () => _i820.GetDownloadStatusUseCase(gh<_i313.DownloadService>()),
+    );
+    gh.singleton<_i636.ObserveGlobalDownloadProgressUseCase>(
+      () => _i636.ObserveGlobalDownloadProgressUseCase(
+        gh<_i313.DownloadService>(),
+      ),
+    );
     gh.lazySingleton<_i821.GetFavoriteRecitersUseCase>(
       () => _i821.GetFavoriteRecitersUseCase(gh<_i619.RecitersRepository>()),
     );
@@ -546,6 +571,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i855.DownloadRecoveryService(
         gh<_i313.DownloadService>(),
         gh<_i198.DownloadValidator>(),
+        gh<_i124.DownloadQueueManager>(),
       ),
     );
     gh.factory<_i559.PlaylistsBloc>(
@@ -560,6 +586,11 @@ extension GetItInjectableX on _i174.GetIt {
         searchPlaylistsUseCase: gh<_i813.SearchPlaylistsUseCase>(),
         toggleFavoritePlaylistUseCase:
             gh<_i813.ToggleFavoritePlaylistUseCase>(),
+      ),
+    );
+    gh.singleton<_i846.RemoveFromDownloadQueueUseCase>(
+      () => _i846.RemoveFromDownloadQueueUseCase(
+        gh<_i124.DownloadQueueManager>(),
       ),
     );
     gh.singleton<_i811.CancelSubscriptionUseCase>(
@@ -592,18 +623,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i131.SetLanguageUseCase>(),
       ),
     );
-    gh.lazySingleton<_i104.DownloadStatusSynchronizer>(
-      () => _i104.DownloadStatusSynchronizer(
-        gh<_i313.DownloadService>(),
-        gh<_i855.DownloadRecoveryService>(),
-      ),
-    );
     gh.factory<_i95.SignOut>(() => _i95.SignOut(gh<_i538.AuthRepository>()));
     gh.singleton<_i778.GetCurrentUserUseCase>(
       () => _i778.GetCurrentUserUseCase(gh<_i538.AuthRepository>()),
     );
     gh.singleton<_i922.SignInWithGoogleUseCase>(
       () => _i922.SignInWithGoogleUseCase(gh<_i538.AuthRepository>()),
+    );
+    gh.factory<_i727.SettingsCubit>(
+      () => _i727.SettingsCubit(gh<_i124.DownloadQueueManager>()),
     );
     gh.factory<_i253.AuthBloc>(
       () => _i253.AuthBloc(
@@ -634,6 +662,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i415.GetAvailablePlansUseCase>(),
         gh<_i128.CheckFeatureAccessUseCase>(),
         gh<_i557.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_i104.DownloadStatusSynchronizer>(
+      () => _i104.DownloadStatusSynchronizer(
+        gh<_i313.DownloadService>(),
+        gh<_i855.DownloadRecoveryService>(),
+        gh<_i124.DownloadQueueManager>(),
       ),
     );
     gh.factory<_i127.SplashCubit>(
@@ -806,6 +841,10 @@ extension GetItInjectableX on _i174.GetIt {
         getDownloadItem: gh<_i702.GetDownloadItemUseCase>(),
         cancelDownload: gh<_i531.CancelDownloadUseCase>(),
         analyticsService: gh<_i557.AnalyticsService>(),
+        observeGlobalDownloadProgress:
+            gh<_i636.ObserveGlobalDownloadProgressUseCase>(),
+        getDownloadStatus: gh<_i820.GetDownloadStatusUseCase>(),
+        removeFromDownloadQueue: gh<_i846.RemoveFromDownloadQueueUseCase>(),
       ),
     );
     gh.factory<_i447.ReciterDetailsBloc>(

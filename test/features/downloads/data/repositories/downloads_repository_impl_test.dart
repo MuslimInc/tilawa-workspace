@@ -178,9 +178,18 @@ void main() {
       return;
     });
 
-    // Reset singleton
-    DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
-    await DownloadQueueManager.instance.initialize();
+    // Initialize DownloadQueueManager
+    final downloadQueueManager = DownloadQueueManager(
+      mockDownloadService,
+      mockNotificationService,
+    );
+
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt.unregister<DownloadQueueManager>();
+    }
+    getIt.registerSingleton<DownloadQueueManager>(downloadQueueManager);
+
+    await downloadQueueManager.initialize();
 
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
@@ -190,7 +199,7 @@ void main() {
       mockValidator,
       mockStatusSynchronizer,
       mockRecitersRepository,
-      DownloadQueueManager.instance,
+      downloadQueueManager,
     );
     when(
       mockNotificationService.showDownloadProgress(
@@ -227,9 +236,12 @@ void main() {
 
   tearDown(() async {
     await repository.dispose();
-    DownloadQueueManager.instance.dispose();
-    await progressController.close();
     final GetIt getIt = GetIt.instance;
+    if (getIt.isRegistered<DownloadQueueManager>()) {
+      getIt<DownloadQueueManager>().dispose();
+      getIt.unregister<DownloadQueueManager>();
+    }
+    await progressController.close();
     if (getIt.isRegistered<DownloadService>()) {
       getIt.unregister<DownloadService>();
     }
@@ -281,9 +293,10 @@ void main() {
         verify(mockLocalDataSource.getDownloads()).called(greaterThan(0));
       });
 
-      test('should set maxConcurrentDownloads on initialize', () async {
-        await repository.initialize();
-        expect(DownloadQueueManager.instance.maxConcurrentDownloads, 2);
+      test('initialization should sync correctly', () async {
+        final GetIt getIt = GetIt.instance;
+        // Assert
+        expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 2);
       });
 
       test(
@@ -514,10 +527,13 @@ void main() {
 
       test('should return early if already queued or active', () async {
         // Arrange
+        final GetIt getIt = GetIt.instance;
         final mockQueueManager = MockDownloadQueueManager();
-        final DownloadQueueManager originalInstance =
-            DownloadQueueManager.instance;
-        DownloadQueueManager.instance = mockQueueManager;
+
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
 
         // Re-instantiate repository to use mock queue manager
         repository = DownloadsRepositoryImpl(
@@ -551,15 +567,23 @@ void main() {
         verify(mockPathResolver.getDownloadsDir()).called(1);
 
         // Restore
-        DownloadQueueManager.instance = originalInstance;
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(
+          DownloadQueueManager(mockDownloadService, mockNotificationService),
+        );
       });
 
       test('should handle MissingPluginException during enqueue', () async {
         // Arrange
+        final GetIt getIt = GetIt.instance;
         final mockQueueManager = MockDownloadQueueManager();
-        final DownloadQueueManager originalInstance =
-            DownloadQueueManager.instance;
-        DownloadQueueManager.instance = mockQueueManager;
+
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
 
         // Re-instantiate repository to use mock queue manager
         repository = DownloadsRepositoryImpl(
@@ -614,7 +638,12 @@ void main() {
         ).called(1);
 
         // Restore
-        DownloadQueueManager.instance = originalInstance;
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(
+          DownloadQueueManager(mockDownloadService, mockNotificationService),
+        );
       });
 
       test('should create download item and start download service', () async {
@@ -714,10 +743,13 @@ void main() {
         'should handle MissingPluginException during enqueueBatch',
         () async {
           // Arrange
+          final GetIt getIt = GetIt.instance;
           final mockQueueManager = MockDownloadQueueManager();
-          final DownloadQueueManager originalInstance =
-              DownloadQueueManager.instance;
-          DownloadQueueManager.instance = mockQueueManager;
+
+          if (getIt.isRegistered<DownloadQueueManager>()) {
+            getIt.unregister<DownloadQueueManager>();
+          }
+          getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
 
           // Re-instantiate repository to use mock queue manager
           repository = DownloadsRepositoryImpl(
@@ -749,7 +781,12 @@ void main() {
           verify(mockQueueManager.enqueueBatch(any)).called(1);
 
           // Restore
-          DownloadQueueManager.instance = originalInstance;
+          if (getIt.isRegistered<DownloadQueueManager>()) {
+            getIt.unregister<DownloadQueueManager>();
+          }
+          getIt.registerSingleton<DownloadQueueManager>(
+            DownloadQueueManager(mockDownloadService, mockNotificationService),
+          );
         },
       );
       test('should enqueue batch of items', () async {
@@ -2472,10 +2509,13 @@ void main() {
       'should handle error during stopAll and still clear downloads',
       () async {
         // Arrange
+        final GetIt getIt = GetIt.instance;
         final mockQueueManager = MockDownloadQueueManager();
-        final DownloadQueueManager originalInstance =
-            DownloadQueueManager.instance;
-        DownloadQueueManager.instance = mockQueueManager;
+
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
 
         when(mockQueueManager.stopAll()).thenThrow(Exception('Stop failed'));
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
@@ -2501,7 +2541,12 @@ void main() {
         verify(mockLocalDataSource.clearAllDownloads()).called(1);
 
         // Restore
-        DownloadQueueManager.instance = originalInstance;
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(
+          DownloadQueueManager(mockDownloadService, mockNotificationService),
+        );
       },
     );
 
@@ -2807,10 +2852,13 @@ void main() {
       ).thenAnswer((_) async => [stuckDownload]);
       when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
 
+      final GetIt getIt = GetIt.instance;
       final mockQueueManager = MockDownloadQueueManager();
-      final DownloadQueueManager originalInstance =
-          DownloadQueueManager.instance;
-      DownloadQueueManager.instance = mockQueueManager;
+
+      if (getIt.isRegistered<DownloadQueueManager>()) {
+        getIt.unregister<DownloadQueueManager>();
+      }
+      getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
 
       when(
         mockQueueManager.enqueue(
@@ -2849,7 +2897,12 @@ void main() {
       ).called(1);
 
       // Restore
-      DownloadQueueManager.instance = originalInstance;
+      if (getIt.isRegistered<DownloadQueueManager>()) {
+        getIt.unregister<DownloadQueueManager>();
+      }
+      getIt.registerSingleton<DownloadQueueManager>(
+        DownloadQueueManager(mockDownloadService, mockNotificationService),
+      );
     });
 
     test('should throw if retrying a non-stuck running download', () async {
@@ -3494,7 +3547,6 @@ void main() {
 
   group('resumePendingDownloads', () {
     test('should resume pending downloads that are not active', () async {
-      DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
       // Arrange
       final download = DownloadItem(
         id: '1',
@@ -3552,8 +3604,12 @@ void main() {
     test(
       'should set status to pending before resuming if it was downloading',
       () async {
-        DownloadQueueManager.initForTesting(
-          downloadService: mockDownloadService,
+        final GetIt getIt = GetIt.instance;
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(
+          DownloadQueueManager(mockDownloadService, mockNotificationService),
         );
         // Arrange
         final download = DownloadItem(
@@ -3656,7 +3712,6 @@ void main() {
           title: anyNamed('title'),
           reciterName: anyNamed('reciterName'),
           reciterId: anyNamed('reciterId'),
-          showNotification: anyNamed('showNotification'),
         ),
       );
     });

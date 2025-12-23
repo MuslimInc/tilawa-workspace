@@ -1,9 +1,11 @@
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:injectable/injectable.dart';
 
 /// Wrapper around [FlutterDownloader] to facilitate unit testing.
 ///
 /// [FlutterDownloader] uses static methods which makes it hard to mock.
 /// This wrapper exposes those methods as instance methods.
+@lazySingleton
 class FlutterDownloaderWrapper {
   Future<void> initialize({bool debug = true, bool ignoreSsl = false}) {
     return FlutterDownloader.initialize(debug: debug, ignoreSsl: ignoreSsl);

@@ -15,10 +15,15 @@ import 'download_validator.dart';
 /// - Background download verification
 @LazySingleton()
 class DownloadRecoveryService {
-  DownloadRecoveryService(this._downloadService, this._validator);
+  DownloadRecoveryService(
+    this._downloadService,
+    this._validator,
+    this._downloadQueueManager,
+  );
 
   final DownloadService _downloadService;
   final DownloadValidator _validator;
+  final DownloadQueueManager _downloadQueueManager;
 
   /// Handle a download that is marked as pending/downloading in DB
   /// but is NOT in the active queue or active list of DownloadService.
@@ -60,7 +65,7 @@ class DownloadRecoveryService {
         '[DownloadRecoveryService] Found orphaned pending download that is already active in platform: id=${download.id} status=$actualStatus - Tracking in manager',
       );
       // Don't re-enqueue, just ensure the manager knows about it
-      await DownloadQueueManager.instance.enqueue(
+      await _downloadQueueManager.enqueue(
         id: download.id,
         url: download.url,
         filePath: download.filePath,
@@ -77,7 +82,7 @@ class DownloadRecoveryService {
 
     // Re-enqueue (auto-resume)
     try {
-      await DownloadQueueManager.instance.enqueue(
+      await _downloadQueueManager.enqueue(
         id: download.id,
         url: download.url,
         filePath: download.filePath,
@@ -137,13 +142,13 @@ class DownloadRecoveryService {
         }
 
         // Remove from queue if it's there
-        DownloadQueueManager.instance.removeFromQueue(download.id);
+        _downloadQueueManager.removeFromQueue(download.id);
 
         // Wait a bit before retrying
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Retry the download using queue manager
-        await DownloadQueueManager.instance.enqueue(
+        await _downloadQueueManager.enqueue(
           id: download.id,
           url: download.url,
           filePath: download.filePath,
@@ -295,13 +300,13 @@ class DownloadRecoveryService {
       }
 
       // Remove from queue if it's there
-      DownloadQueueManager.instance.removeFromQueue(download.id);
+      _downloadQueueManager.removeFromQueue(download.id);
 
       // Wait a bit before retrying
       await Future.delayed(const Duration(milliseconds: 500));
 
       // Retry the download using queue manager
-      await DownloadQueueManager.instance.enqueue(
+      await _downloadQueueManager.enqueue(
         id: download.id,
         url: download.url,
         filePath: download.filePath,

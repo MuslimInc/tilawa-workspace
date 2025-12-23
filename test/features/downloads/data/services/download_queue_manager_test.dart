@@ -52,7 +52,11 @@ void main() {
     getIt.registerSingleton<DownloadService>(downloadService);
 
     // Register DownloadQueueManager using the registered services
-    DownloadQueueManager.initForTesting(downloadService: downloadService);
+    final downloadQueueManager = DownloadQueueManager(
+      downloadService,
+      getIt<DownloadNotificationService>(),
+    );
+    getIt.registerSingleton<DownloadQueueManager>(downloadQueueManager);
 
     // Mock Downloader behaviors
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -94,7 +98,7 @@ void main() {
   tearDown(() {
     IsolateNameServer.removePortNameMapping('downloader_send_port');
     if (GetIt.instance.isRegistered<DownloadQueueManager>()) {
-      DownloadQueueManager.instance.dispose();
+      GetIt.instance<DownloadQueueManager>().dispose();
       GetIt.instance.unregister<DownloadQueueManager>();
     }
     if (tempDir.existsSync()) {
@@ -144,10 +148,10 @@ void main() {
       fakeAsync((async) {
         simulateBusyQueue();
 
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '1',
             url: 'new_url',
             filePath: 'path',
@@ -158,19 +162,19 @@ void main() {
 
         async.flushMicrotasks();
 
-        expect(DownloadQueueManager.instance.queueLength, 1);
-        expect(DownloadQueueManager.instance.isQueued('1'), isTrue);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('1'), isTrue);
       });
     });
 
     test('removeFromQueue should remove item', () {
       fakeAsync((async) {
         simulateBusyQueue();
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         // Enqueue items
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '1',
             url: 'u1',
             filePath: 'f1',
@@ -179,7 +183,7 @@ void main() {
           ),
         );
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '2',
             url: 'u2',
             filePath: 'f2',
@@ -190,25 +194,25 @@ void main() {
         async.flushMicrotasks();
 
         // Verify added
-        expect(DownloadQueueManager.instance.queueLength, 2);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 2);
 
         // Remove one
-        DownloadQueueManager.instance.removeFromQueue('1');
+        GetIt.instance<DownloadQueueManager>().removeFromQueue('1');
 
         // Verify removed
-        expect(DownloadQueueManager.instance.isQueued('1'), isFalse);
-        expect(DownloadQueueManager.instance.queueLength, 1);
-        expect(DownloadQueueManager.instance.isQueued('2'), isTrue);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('1'), isFalse);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('2'), isTrue);
       });
     });
 
     test('clearQueue should remove all pending items', () {
       fakeAsync((async) {
         simulateBusyQueue();
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '1',
             url: 'u1',
             filePath: 'f1',
@@ -218,11 +222,11 @@ void main() {
         );
         async.flushMicrotasks();
 
-        expect(DownloadQueueManager.instance.queueLength, 1);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
 
-        DownloadQueueManager.instance.clearQueue();
+        GetIt.instance<DownloadQueueManager>().clearQueue();
 
-        expect(DownloadQueueManager.instance.queueLength, 0);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
       });
     });
 
@@ -235,11 +239,11 @@ void main() {
           mockNotification.cancelAllNotifications(),
         ).thenAnswer((_) async {});
 
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         // Enqueue items
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: 'id1',
             url: 'url1',
             filePath: 'path1',
@@ -248,7 +252,7 @@ void main() {
           ),
         );
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: 'id2',
             url: 'url2',
             filePath: 'path2',
@@ -258,12 +262,12 @@ void main() {
         );
 
         async.flushMicrotasks();
-        expect(DownloadQueueManager.instance.queueLength, 2);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 2);
 
-        unawaited(DownloadQueueManager.instance.stopAll());
+        unawaited(GetIt.instance<DownloadQueueManager>().stopAll());
         async.flushMicrotasks();
 
-        expect(DownloadQueueManager.instance.queueLength, 0);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
         verify(mockNotification.cancelAllNotifications()).called(1);
       });
     });
@@ -271,11 +275,11 @@ void main() {
     test('getQueuePosition should return correct index', () {
       fakeAsync((async) {
         simulateBusyQueue();
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         // Enqueue 2 items
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '1',
             url: 'u1',
             filePath: 'f1',
@@ -284,7 +288,7 @@ void main() {
           ),
         );
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '2',
             url: 'u2',
             filePath: 'f2',
@@ -296,19 +300,22 @@ void main() {
 
         // Verify positions
         // Item 1: Position 1
-        expect(DownloadQueueManager.instance.getQueuePosition('1'), 1);
+        expect(GetIt.instance<DownloadQueueManager>().getQueuePosition('1'), 1);
 
         // Item 2: Position 2
-        expect(DownloadQueueManager.instance.getQueuePosition('2'), 2);
+        expect(GetIt.instance<DownloadQueueManager>().getQueuePosition('2'), 2);
 
-        expect(DownloadQueueManager.instance.getQueuePosition('999'), -1);
+        expect(
+          GetIt.instance<DownloadQueueManager>().getQueuePosition('999'),
+          -1,
+        );
       });
     });
 
     test('enqueueBatch should add multiple items to queue', () {
       fakeAsync((async) {
         simulateBusyQueue();
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
 
         final List<
           ({
@@ -342,12 +349,12 @@ void main() {
           ),
         ];
 
-        unawaited(DownloadQueueManager.instance.enqueueBatch(items));
+        unawaited(GetIt.instance<DownloadQueueManager>().enqueueBatch(items));
         async.flushMicrotasks();
 
-        expect(DownloadQueueManager.instance.queueLength, 2);
-        expect(DownloadQueueManager.instance.isQueued('1'), isTrue);
-        expect(DownloadQueueManager.instance.isQueued('2'), isTrue);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 2);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('1'), isTrue);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('2'), isTrue);
       });
     });
   });
@@ -399,10 +406,10 @@ void main() {
         );
 
         // Act
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
         // Try to start a 3rd
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: '3',
             url: 'u3',
             filePath: 'f3',
@@ -430,7 +437,7 @@ void main() {
         );
 
         // Should be in queue
-        expect(DownloadQueueManager.instance.isQueued('3'), isTrue);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('3'), isTrue);
       });
     });
   });
@@ -445,11 +452,11 @@ void main() {
               GetIt.instance<DownloadNotificationService>()
                   as MockDownloadNotificationService;
 
-          DownloadQueueManager.instance.initialize();
+          GetIt.instance<DownloadQueueManager>().initialize();
 
           // Enqueue with showNotification: false
           unawaited(
-            DownloadQueueManager.instance.enqueue(
+            GetIt.instance<DownloadQueueManager>().enqueue(
               id: 'id_batch',
               url: 'url_batch',
               filePath: 'path',
@@ -499,11 +506,11 @@ void main() {
     //         GetIt.instance<DownloadNotificationService>()
     //             as MockDownloadNotificationService;
 
-    //     DownloadQueueManager.instance.initialize();
+    //     GetIt.instance<DownloadQueueManager>().initialize();
 
     //     // Enqueue with showNotification: true (default)
     //     unawaited(
-    //       DownloadQueueManager.instance.enqueue(
+    //       GetIt.instance<DownloadQueueManager>().enqueue(
     //         id: 'id_single',
     //         url: 'url_single',
     //         filePath: 'path',
@@ -573,11 +580,11 @@ void main() {
         ).thenAnswer((_) async => []);
 
         // Act
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
         // Don't await enqueue because it waits for _processQueue which waits for time
         // We just want to trigger it
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: 'test_id',
             url: 'http://example.com/test.mp3',
             filePath: '${tempDir.path}/test.mp3',
@@ -590,7 +597,7 @@ void main() {
         // We process microtasks to ensure the async function starts
         async.flushMicrotasks();
 
-        expect(DownloadQueueManager.instance.queueLength, 1);
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
 
         // DQM will try to start download, then enter the retry loop (10 retries * 500ms = 5s)
         // We explicitly advance time to cover the retry period
@@ -600,11 +607,11 @@ void main() {
         // Assert
         // Should satisfy: queueLength == 0 (removed because it failed)
         expect(
-          DownloadQueueManager.instance.queueLength,
+          GetIt.instance<DownloadQueueManager>().queueLength,
           0,
           reason: 'Failed download should be removed from queue',
         );
-        expect(DownloadQueueManager.instance.activeDownloadsCount, 0);
+        expect(GetIt.instance<DownloadQueueManager>().activeDownloadsCount, 0);
       });
     });
 
@@ -648,10 +655,10 @@ void main() {
         ).thenAnswer((_) async {});
 
         // Act
-        DownloadQueueManager.instance.initialize();
+        GetIt.instance<DownloadQueueManager>().initialize();
         // Start download 1
         unawaited(
-          DownloadQueueManager.instance.enqueue(
+          GetIt.instance<DownloadQueueManager>().enqueue(
             id: 'http://example.com/1.mp3',
             url: 'http://example.com/1.mp3',
             filePath: '${tempDir.path}/1.mp3',
@@ -663,7 +670,7 @@ void main() {
 
         // Verify started
         expect(
-          DownloadQueueManager.instance.activeDownloadsCount,
+          GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
           1,
           reason: 'Download 1 should be active',
         );
@@ -671,7 +678,7 @@ void main() {
         // Advance time by 20s - should still be active
         async.elapse(const Duration(seconds: 20));
         expect(
-          DownloadQueueManager.instance.activeDownloadsCount,
+          GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
           1,
           reason: 'Download 1 should still be active',
         );
@@ -683,7 +690,7 @@ void main() {
         // Download 1 should be cancelled and removed because no progress updates were received for >30s
         verify(mockDownloader.cancel(taskId: 'task_1')).called(1);
         expect(
-          DownloadQueueManager.instance.activeDownloadsCount,
+          GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
           0,
           reason: 'Stuck download should be removed by watchdog',
         );
@@ -719,7 +726,7 @@ void main() {
           );
 
           // Act
-          DownloadQueueManager.instance.initialize();
+          GetIt.instance<DownloadQueueManager>().initialize();
           // Enqueue a new item
           when(
             mockDownloader.enqueue(
@@ -750,7 +757,7 @@ void main() {
           });
 
           unawaited(
-            DownloadQueueManager.instance.enqueue(
+            GetIt.instance<DownloadQueueManager>().enqueue(
               id: 'new',
               url: 'http://example.com/new.mp3',
               filePath: '${tempDir.path}/new.mp3',
@@ -763,7 +770,7 @@ void main() {
           // Assert
           // We expect 2 active downloads logic
           expect(
-            DownloadQueueManager.instance.activeDownloadsCount,
+            GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
             greaterThanOrEqualTo(1),
             reason: 'Queue should process despite duplicates',
           );

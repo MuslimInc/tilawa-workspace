@@ -1,7 +1,9 @@
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../domain/entities/download_item.dart';
 
+@lazySingleton
 class DownloadStatusMapper {
   /// Map FlutterDownloader task status to app-level status.
   DownloadStatus mapTaskStatusToDownloadStatus(DownloadTaskStatus status) {

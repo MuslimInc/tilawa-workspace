@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import 'core/di/injection.dart';
 import 'core/providers/providers.dart';
 import 'core/theme/app_theme.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
@@ -30,12 +31,12 @@ class _PlayerApp extends StatelessWidget {
     return BlocListener<LocalizationBloc, LocalizationState>(
       listener: (context, state) {
         // Update download notification locale when app locale changes
-        DownloadQueueManager.instance.locale = state.locale;
+        getIt<DownloadQueueManager>().locale = state.locale;
       },
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, locState) {
           // Set initial locale for download notifications
-          DownloadQueueManager.instance.locale = locState.locale;
+          getIt<DownloadQueueManager>().locale = locState.locale;
 
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {

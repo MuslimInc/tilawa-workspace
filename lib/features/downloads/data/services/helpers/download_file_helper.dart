@@ -1,8 +1,11 @@
 import 'dart:io';
 
+import 'package:injectable/injectable.dart';
+
 import '../../../../../main.dart'; // For logger
 import '../../../utils/download_path_utils.dart';
 
+@lazySingleton
 class DownloadFileHelper {
   /// Extract directory name from file path
   String getDirectoryName(String filePath) {

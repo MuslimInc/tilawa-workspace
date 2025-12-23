@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -9,6 +10,7 @@ import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../data/services/download_queue_manager.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
+import '../extensions/download_item_extensions.dart';
 
 class DownloadItemCard extends StatelessWidget {
   const DownloadItemCard({
@@ -24,10 +26,12 @@ class DownloadItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
+    final String surahName = download.getLocalizedSurahName(context);
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildStatusIcon(context),
-      title: Text(download.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+      title: Text(surahName, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -265,7 +269,7 @@ class DownloadItemCard extends StatelessWidget {
     final downloading = '${context.l10n.downloading} $progress%';
 
     if (download.status == DownloadStatus.pending) {
-      final int queuePosition = DownloadQueueManager.instance.getQueuePosition(
+      final int queuePosition = getIt<DownloadQueueManager>().getQueuePosition(
         download.id,
       );
       if (queuePosition > 0) {

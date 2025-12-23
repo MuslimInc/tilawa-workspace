@@ -30,10 +30,12 @@ class SettingsState extends Equatable {
 
 @injectable
 class SettingsCubit extends HydratedCubit<SettingsState> {
-  SettingsCubit() : super(const SettingsState()) {
+  SettingsCubit(this._downloadQueueManager) : super(const SettingsState()) {
     // Initialize DownloadQueueManager with persisted value
     _updateQueueManager();
   }
+
+  final DownloadQueueManager _downloadQueueManager;
 
   @override
   SettingsState? fromJson(Map<String, dynamic> json) {
@@ -65,7 +67,6 @@ class SettingsCubit extends HydratedCubit<SettingsState> {
   }
 
   void _updateQueueManager() {
-    DownloadQueueManager.instance.maxConcurrentDownloads =
-        state.maxConcurrentDownloads;
+    _downloadQueueManager.maxConcurrentDownloads = state.maxConcurrentDownloads;
   }
 }

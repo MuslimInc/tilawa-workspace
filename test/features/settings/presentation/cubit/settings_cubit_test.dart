@@ -32,7 +32,7 @@ void main() {
     late MockDownloadsRepository mockDownloadsRepository;
     late MockDownloadNotificationService mockDownloadNotificationService;
 
-    setUp(() {
+    setUp(() async {
       // Clean up GetIt manually
       if (getIt.isRegistered<DownloadQueueManager>()) {
         getIt.unregister<DownloadQueueManager>();
@@ -84,14 +84,22 @@ void main() {
         () => mockDownloadNotificationService.cancelNotification(any()),
       ).thenAnswer((_) async {});
 
-      DownloadQueueManager.initForTesting(downloadService: mockDownloadService);
+      final dqm = DownloadQueueManager(
+        mockDownloadService,
+        mockDownloadNotificationService,
+      );
+      dqm.maxConcurrentDownloads = 2; // Default for test
+
+      if (getIt.isRegistered<DownloadQueueManager>()) {
+        getIt.unregister<DownloadQueueManager>();
+      }
+      getIt.registerSingleton<DownloadQueueManager>(dqm);
 
       // We must initialize the QueueManager because SettingsCubit might access it
-      // or set values on it. Note that initForTesting registers the lazy singleton,
-      // but doesn't initialize it until accessed or called.
+      await dqm.initialize();
       // SettingsCubit calls instance.maxConcurrentDownloads getter/setter.
 
-      cubit = SettingsCubit();
+      cubit = SettingsCubit(getIt<DownloadQueueManager>());
     });
 
     tearDown(() {
@@ -100,7 +108,7 @@ void main() {
 
     test('initial state has default maxConcurrentDownloads of 2', () {
       expect(cubit.state, const SettingsState());
-      expect(DownloadQueueManager.instance.maxConcurrentDownloads, 2);
+      expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 2);
     });
 
     blocTest<SettingsCubit, SettingsState>(
@@ -109,7 +117,7 @@ void main() {
       act: (cubit) => cubit.setMaxConcurrentDownloads(4),
       expect: () => [const SettingsState(maxConcurrentDownloads: 4)],
       verify: (_) {
-        expect(DownloadQueueManager.instance.maxConcurrentDownloads, 4);
+        expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 4);
       },
     );
 
@@ -118,7 +126,7 @@ void main() {
       build: () => cubit,
       act: (cubit) => cubit.setMaxConcurrentDownloads(3),
       verify: (_) {
-        expect(DownloadQueueManager.instance.maxConcurrentDownloads, 3);
+        expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 3);
       },
     );
 

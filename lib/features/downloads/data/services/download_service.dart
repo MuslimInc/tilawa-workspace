@@ -53,10 +53,6 @@ abstract class DownloadService {
   /// Initialize the download service and set up update listeners.
   Future<void> initialize();
 
-  /// Static instance for backward compatibility - delegates to DownloadServiceImpl
-  /// DEPRECATED: Use Dependency Injection
-  static DownloadService get instance => getIt<DownloadService>();
-
   // --------------------------------------------------------------------------
   // Static Compatibility Layer - DEPRECATED: PREFER INSTANCE methods via DI
   // --------------------------------------------------------------------------
