@@ -52,3 +52,5 @@ pubspec.lock
 # Background Downloader Database
 /backgroundDownloaderDatabase/
 /backgroundDownloaderResumeData/
+/coverage/*
+!/coverage/lcov.info

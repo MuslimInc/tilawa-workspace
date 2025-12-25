@@ -130,6 +130,26 @@ void main() {
       },
     );
 
+    blocTest<SettingsCubit, SettingsState>(
+      'toggleRestorePlaybackState updates state',
+      build: () => cubit,
+      act: (cubit) => cubit.toggleRestorePlaybackState(false),
+      expect: () => [const SettingsState(restorePlaybackState: false)],
+    );
+
+    blocTest<SettingsCubit, SettingsState>(
+      'toggleRestorePlaybackState can be toggled back to true',
+      build: () => cubit,
+      act: (cubit) async {
+        await cubit.toggleRestorePlaybackState(false);
+        await cubit.toggleRestorePlaybackState(true);
+      },
+      expect: () => [
+        const SettingsState(restorePlaybackState: false),
+        const SettingsState(),
+      ],
+    );
+
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
@@ -153,6 +173,14 @@ void main() {
           'maxConcurrentDownloads': 3,
           'restorePlaybackState': true,
         });
+      });
+
+      test('SettingsState.copyWith preserves values when null is passed', () {
+        const originalState = SettingsState(maxConcurrentDownloads: 5);
+        // Call copyWith with null to test the ?? fallback on line 22
+        final SettingsState newState = originalState.copyWith();
+        expect(newState.maxConcurrentDownloads, 5);
+        expect(newState.restorePlaybackState, true);
       });
     });
   });

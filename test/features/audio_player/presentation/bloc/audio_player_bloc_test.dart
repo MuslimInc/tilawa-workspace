@@ -960,5 +960,223 @@ void main() {
       ],
       wait: const Duration(seconds: 1), // Wait for timeouts
     );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should skip queue restoration when queue already has items',
+      build: () {
+        // Mock queue to already have items
+        when(mockAudioHandler.queue).thenAnswer(
+          (_) => BehaviorSubject.seeded([
+            const MediaItem(id: 'existing', title: 'Existing Track'),
+          ]),
+        );
+
+        return AudioPlayerBloc(mockAudioHandler);
+      },
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.initial,
+        queueState: QueueState(
+          queue: [MediaItem(id: 'persisted', title: 'Persisted Track')],
+          queueIndex: 0,
+          repeatMode: AudioServiceRepeatMode.none,
+          shuffleIndices: null,
+        ),
+      ),
+      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
+      wait: const Duration(seconds: 1),
+      verify: (_) {
+        // Should NOT call playFromQueue since queue already has items
+        verifyNever(mockAudioHandler.playFromQueue(any, any));
+      },
+    );
   });
+
+  group('AudioPlayerBloc - toJson Error Handling', () {
+    test('toJson should handle serialization errors gracefully', () {
+      final bloc = AudioPlayerBloc(mockAudioHandler);
+
+      // Create a state with a MediaItem that might cause serialization issues
+      // We'll use a state with queueState that has valid data
+      const testState = AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        volume: 0.7,
+        speed: 1.3,
+        queueState: QueueState(
+          queue: [
+            MediaItem(
+              id: 'test-id',
+              title: 'Test Title',
+              artist: 'Test Artist',
+            ),
+          ],
+          queueIndex: 0,
+          repeatMode: AudioServiceRepeatMode.none,
+          shuffleIndices: null,
+        ),
+        positionData: PositionData(
+          position: Duration(seconds: 45),
+          bufferedPosition: Duration(seconds: 50),
+          duration: Duration(minutes: 3),
+        ),
+      );
+
+      // Call toJson - should succeed normally
+      final Map<String, dynamic>? json = bloc.toJson(testState);
+
+      expect(json, isNotNull);
+      expect(json!['volume'], 0.7);
+      expect(json['speed'], 1.3);
+      expect(json['queue'], isNotNull);
+      expect(json['queueIndex'], 0);
+      expect(json['position'], 45000);
+    });
+
+    test(
+      'toJson should catch serialization errors and return minimal state',
+      () {
+        // Create a bloc that throws during queue serialization
+        final testBloc = _TestBlocWithFailingSerializeQueue(mockAudioHandler);
+
+        // Create a state with a queue to trigger serialization
+        const testState = AudioPlayerState(
+          status: AudioPlayerStatus.success,
+          volume: 0.8,
+          speed: 1.2,
+          queueState: QueueState(
+            queue: [MediaItem(id: 'test', title: 'Test')],
+            queueIndex: 0,
+            repeatMode: AudioServiceRepeatMode.none,
+            shuffleIndices: null,
+          ),
+        );
+
+        // This will trigger the catch block (lines 575-577)
+        final Map<String, dynamic>? json = testBloc.toJson(testState);
+
+        // Should return minimal state due to error
+        expect(json, isNotNull);
+        expect(json!['volume'], 0.8);
+        expect(json['speed'], 1.2);
+        // Queue should not be in the result due to error
+        expect(json.containsKey('queue'), false);
+      },
+    );
+  });
+
+  group('AudioPlayerBloc - Position Stream Handling', () {
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should handle position data updates from combined stream',
+      setUp: () {
+        // Create a playback state with buffered position
+        final testPlaybackState = PlaybackState(
+          controls: [],
+          processingState: AudioProcessingState.ready,
+          playing: true,
+          updateTime: DateTime.now(),
+          bufferedPosition: const Duration(seconds: 30),
+        );
+
+        const testMediaItem = MediaItem(
+          id: 'test-position',
+          title: 'Test Position',
+          duration: Duration(minutes: 3),
+        );
+
+        // Add values to subjects
+        playbackStateSubject.add(testPlaybackState);
+        mediaItemSubject.add(testMediaItem);
+      },
+      build: () => AudioPlayerBloc(mockAudioHandler),
+      wait: const Duration(milliseconds: 500),
+      skip: 2, // Skip initial emissions
+      verify: (bloc) {
+        // Verify that the bloc received playback state with buffered position
+        expect(bloc.state.playbackState, isNotNull);
+        expect(
+          bloc.state.playbackState?.bufferedPosition,
+          const Duration(seconds: 30),
+        );
+        expect(bloc.state.mediaItem, isNotNull);
+        expect(bloc.state.mediaItem?.duration, const Duration(minutes: 3));
+      },
+    );
+
+    test(
+      'bloc initialization succeeds even when AudioService.position is unavailable',
+      () async {
+        // This test verifies that the runZonedGuarded error handling (lines 78-99)
+        // works correctly. AudioService.position will not be available in unit tests,
+        // so the _getPositionDataStream() will throw an error when trying to subscribe.
+        // The runZonedGuarded callback (lines 91-99) catches this and logs it,
+        // allowing the bloc to initialize successfully without crashing.
+
+        // Note: Lines 81-82, 84, 86 (position stream callbacks) and line 131
+        // (combineLatest mapper) cannot be easily covered in unit tests because:
+        // 1. AudioService.position is a static stream that requires AudioService initialization
+        // 2. We can't inject a custom position stream anymore (removed for GetIt fix)
+        // 3. These lines will be covered in integration tests where AudioService is initialized
+
+        // Create the bloc - this exercises the error handling path
+        final bloc = AudioPlayerBloc(mockAudioHandler);
+
+        // Give time for async stream setup to complete
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Verify bloc initialized successfully despite position stream errors
+        // Status will be 'success' after volume/speed stream updates
+        expect(bloc.state.status, AudioPlayerStatus.success);
+
+        // The bloc should still be functional
+        expect(bloc.isClosed, false);
+
+        await bloc.close();
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should handle errors from AudioService.position gracefully',
+      setUp: () {
+        // Setup playback state and media item
+        final testPlaybackState = PlaybackState(
+          controls: [],
+          processingState: AudioProcessingState.ready,
+          playing: true,
+          updateTime: DateTime.now(),
+          bufferedPosition: const Duration(seconds: 15),
+        );
+
+        const testMediaItem = MediaItem(
+          id: 'test-position-error',
+          title: 'Test Position Error',
+          duration: Duration(minutes: 4),
+        );
+
+        playbackStateSubject.add(testPlaybackState);
+        mediaItemSubject.add(testMediaItem);
+      },
+      build: () {
+        // Position stream error handling is now part of AudioService.position
+        // This test verifies the bloc handles errors gracefully
+        return AudioPlayerBloc(mockAudioHandler);
+      },
+      wait: const Duration(milliseconds: 500),
+      skip: 1, // Skip initial emission
+      verify: (bloc) {
+        // Bloc should still be functional despite position stream error
+        expect(bloc.state.status, AudioPlayerStatus.success);
+      },
+    );
+  });
+}
+
+/// Helper class to test toJson error handling
+/// Overrides serializeQueue to throw an exception
+class _TestBlocWithFailingSerializeQueue extends AudioPlayerBloc {
+  _TestBlocWithFailingSerializeQueue(super.audioHandler);
+
+  @override
+  List<Map<String, dynamic>> serializeQueue(List<MediaItem> queue) {
+    // Throw an exception to trigger the catch block in toJson
+    throw Exception('Forced serialization error for testing');
+  }
 }

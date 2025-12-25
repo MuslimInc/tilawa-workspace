@@ -66,11 +66,9 @@ class ReciterHelper {
   /// Check if a MediaItem has valid reciter information
   static bool hasReciterInfo(MediaItem mediaItem) {
     final String? artist = mediaItem.artist;
-    if (artist == null || artist.isEmpty) {
-      return false;
-    }
+
     // Check if artist field has reciter name
-    if (artist.isNotEmpty) {
+    if (artist != null && artist.isNotEmpty) {
       return true;
     }
 

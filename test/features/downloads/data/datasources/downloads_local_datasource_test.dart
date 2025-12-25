@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:muzakri/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'downloads_local_datasource_test.mocks.dart';
@@ -48,23 +48,6 @@ void main() {
   setUp(() {
     mockPrefs = MockSharedPreferencesAsync();
     dataSource = DownloadsLocalDataSourceImpl(mockPrefs);
-
-    // Setup path_provider mock
-    const pathProviderChannel = MethodChannel(
-      'plugins.flutter.io/path_provider',
-    );
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(pathProviderChannel, (
-          MethodCall methodCall,
-        ) async {
-          if (methodCall.method == 'getApplicationDocumentsDirectory') {
-            return Directory.systemTemp.path;
-          }
-          if (methodCall.method == 'getExternalStorageDirectory') {
-            return Directory.systemTemp.path;
-          }
-          return null;
-        });
   });
 
   group('DownloadsLocalDataSourceImpl', () {
@@ -125,6 +108,26 @@ void main() {
         expect(result.length, 2);
         expect(result[0].id, 'id1');
         expect(result[1].id, 'id2');
+      });
+
+      test('should return cached downloads on second call', () async {
+        // Arrange
+        final DownloadItem download = createTestDownload();
+        final String jsonString = jsonEncode(download.toJson());
+        when(
+          mockPrefs.getStringList('downloads'),
+        ).thenAnswer((_) async => [jsonString]);
+
+        // Act - First call loads from prefs
+        final List<DownloadItem> result1 = await dataSource.getDownloads();
+        // Second call should use cache (line 35)
+        final List<DownloadItem> result2 = await dataSource.getDownloads();
+
+        // Assert
+        expect(result1.length, 1);
+        expect(result2.length, 1);
+        // Verify prefs was only called once (second call used cache)
+        verify(mockPrefs.getStringList('downloads')).called(1);
       });
     });
 
@@ -493,23 +496,155 @@ void main() {
     });
 
     group('getDownloadsDirectory', () {
-      test('should return downloads directory path', () async {
+      test('should get external storage directory (covers line 133)', () async {
+        // Arrange - Setup mock that returns external storage path
+        final Directory tempExternal = Directory.systemTemp.createTempSync(
+          'external',
+        );
+        PathProviderPlatform.instance = _FakePathProvider(
+          externalStoragePath: tempExternal.path,
+          applicationDocumentsPath: Directory.systemTemp.path,
+        );
+
         // Act
         final String result = await dataSource.getDownloadsDirectory();
 
-        // Assert
-        expect(result, isNotEmpty);
+        // Assert - Should end with downloads subdirectory
         expect(result, endsWith('downloads'));
+        expect(Directory(result).existsSync(), isTrue);
+
+        // Cleanup
+        if (tempExternal.existsSync()) {
+          await tempExternal.delete(recursive: true);
+        }
       });
 
-      test('should create directory if it does not exist', () async {
+      test(
+        'should fallback to application documents when external storage is null',
+        () async {
+          // Arrange - Mock scenario without external storage (e.g., iOS)
+          final Directory appDocsPath = Directory.systemTemp.createTempSync(
+            'app_docs',
+          );
+          PathProviderPlatform.instance = _FakePathProvider(
+            externalStoragePath: null,
+            applicationDocumentsPath: appDocsPath.path,
+          );
+
+          // Act
+          final String result = await dataSource.getDownloadsDirectory();
+
+          // Assert - Should use application documents path
+          expect(result, contains(appDocsPath.path));
+          expect(result, endsWith('downloads'));
+          expect(Directory(result).existsSync(), isTrue);
+
+          // Cleanup
+          if (appDocsPath.existsSync()) {
+            await appDocsPath.delete(recursive: true);
+          }
+        },
+      );
+
+      test(
+        'should create downloads directory if it does not exist (line 141)',
+        () async {
+          // Arrange - Use a completely fresh temp directory
+          final Directory tempBase = Directory.systemTemp.createTempSync(
+            'test_create',
+          );
+          final downloadsPath = '${tempBase.path}/downloads';
+
+          PathProviderPlatform.instance = _FakePathProvider(
+            externalStoragePath: null,
+            applicationDocumentsPath: tempBase.path,
+          );
+
+          // Ensure downloads directory doesn't exist
+          final downloadsDir = Directory(downloadsPath);
+          if (downloadsDir.existsSync()) {
+            await downloadsDir.delete(recursive: true);
+          }
+
+          // Verify it doesn't exist before calling
+          expect(
+            downloadsDir.existsSync(),
+            isFalse,
+            reason: 'Downloads directory should not exist before test',
+          );
+
+          // Act - This should trigger line 141 (directory creation)
+          final String result = await dataSource.getDownloadsDirectory();
+
+          // Assert - Directory should now be created
+          expect(result, equals(downloadsPath));
+          expect(
+            Directory(result).existsSync(),
+            isTrue,
+            reason: 'Directory should exist after getDownloadsDirectory()',
+          );
+
+          // Cleanup
+          if (tempBase.existsSync()) {
+            await tempBase.delete(recursive: true);
+          }
+        },
+      );
+
+      test('should return existing directory if it already exists', () async {
+        // Arrange - Pre-create the downloads directory
+        final Directory tempBase = Directory.systemTemp.createTempSync(
+          'test_existing',
+        );
+        final downloadsPath = '${tempBase.path}/downloads';
+        final downloadsDir = Directory(downloadsPath);
+        await downloadsDir.create(recursive: true);
+
+        PathProviderPlatform.instance = _FakePathProvider(
+          externalStoragePath: null,
+          applicationDocumentsPath: tempBase.path,
+        );
+
+        // Verify it exists before calling
+        expect(
+          downloadsDir.existsSync(),
+          isTrue,
+          reason: 'Downloads directory should exist before test',
+        );
+
         // Act
         final String result = await dataSource.getDownloadsDirectory();
 
-        // Assert
-        final dir = Directory(result);
-        expect(dir.existsSync(), isTrue);
+        // Assert - Should return the same path
+        expect(result, equals(downloadsPath));
+        expect(Directory(result).existsSync(), isTrue);
+
+        // Cleanup
+        if (tempBase.existsSync()) {
+          await tempBase.delete(recursive: true);
+        }
       });
     });
   });
+}
+
+/// Fake PathProviderPlatform for testing
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider({
+    required this.externalStoragePath,
+    required this.applicationDocumentsPath,
+  });
+
+  final String? externalStoragePath;
+  final String applicationDocumentsPath;
+
+  @override
+  Future<String?> getExternalStoragePath() async {
+    return externalStoragePath;
+  }
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    return applicationDocumentsPath;
+  }
 }

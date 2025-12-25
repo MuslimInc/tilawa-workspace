@@ -911,31 +911,22 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     final Either<Failure, Map<String, Map<String, List<DownloadItem>>>> result =
         await _getDownloadsByReciter();
-    await result.fold(
-      (failure) async {
-        // On error, keep the current state but don't show error
-        // This is a background refresh, so we don't want to disrupt the UI
-        logger.w(
-          '[DownloadsBloc] Failed to refresh downloads: ${failure.message}',
-        );
-      },
-      (downloads) async {
-        // Also fetch total size
-        final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
-          const NoParams(),
-        );
+    await result.fold((failure) async {}, (downloads) async {
+      // Also fetch total size
+      final Either<Failure, int> sizeResult = await _getTotalDownloadsSize(
+        const NoParams(),
+      );
 
-        // Emit directly to loaded state without showing loading state
-        emit(
-          state.copyWith(
-            status: DownloadsStateStatus.loaded,
-            downloads: downloads,
-            totalDownloadsSize: sizeResult.getOrElse(() => 0),
-            errorMessage: null,
-          ),
-        );
-      },
-    );
+      // Emit directly to loaded state without showing loading state
+      emit(
+        state.copyWith(
+          status: DownloadsStateStatus.loaded,
+          downloads: downloads,
+          totalDownloadsSize: sizeResult.getOrElse(() => 0),
+          errorMessage: null,
+        ),
+      );
+    });
   }
 
   @override

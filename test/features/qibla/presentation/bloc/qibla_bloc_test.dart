@@ -4,6 +4,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:muzakri/core/errors/failures.dart';
 import 'package:muzakri/core/usecases/usecase.dart';
 import 'package:muzakri/features/qibla/domain/entities/qibla_direction_entity.dart';
 import 'package:muzakri/features/qibla/domain/usecases/check_location_service_use_case.dart';
@@ -140,6 +141,24 @@ void main() {
         ),
       ],
     );
+
+    blocTest<QiblaBloc, QiblaState>(
+      'should emit [error] when location service check fails',
+      setUp: () {
+        when(() => mockCheckLocationServiceUseCase(any())).thenAnswer(
+          (_) async => const Left(ServerFailure('Service check failed')),
+        );
+      },
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const CheckLocationService()),
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage: 'Service check failed',
+        ),
+      ],
+    );
   });
 
   group('RequestLocationPermission', () {
@@ -174,6 +193,65 @@ void main() {
       build: () => qiblaBloc,
       act: (bloc) => bloc.add(const RequestLocationPermission()),
       expect: () => [const QiblaState(status: QiblaStatus.permissionDenied)],
+    );
+
+    blocTest<QiblaBloc, QiblaState>(
+      'should emit [error] when permission request fails',
+      setUp: () {
+        when(() => mockRequestLocationPermissionUseCase(any())).thenAnswer(
+          (_) async => const Left(ServerFailure('Permission request failed')),
+        );
+      },
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const RequestLocationPermission()),
+      expect: () => [
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage: 'Permission request failed',
+        ),
+      ],
+    );
+  });
+
+  group('StartQiblaStream', () {
+    blocTest<QiblaBloc, QiblaState>(
+      'should emit [error] when stream times out',
+      setUp: () {
+        when(() => mockGetQiblaDirectionUseCase(any())).thenAnswer(
+          (_) => Stream<QiblaDirectionEntity>.fromFuture(
+            Completer<QiblaDirectionEntity>().future,
+          ),
+        );
+      },
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const StartQiblaStream()),
+      wait: const Duration(seconds: 4),
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage:
+              'Sensors not responding. If you are on a Simulator, Compass is not supported.',
+        ),
+      ],
+    );
+
+    blocTest<QiblaBloc, QiblaState>(
+      'should emit [error] when stream setup fails',
+      setUp: () {
+        when(
+          () => mockGetQiblaDirectionUseCase(any()),
+        ).thenThrow(Exception('Setup failed'));
+      },
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const StartQiblaStream()),
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(
+          status: QiblaStatus.error,
+          errorMessage: 'Exception: Setup failed',
+        ),
+      ],
     );
   });
 }

@@ -115,5 +115,68 @@ void main() {
         const FavoritesLoaded(favorites: [], favoriteIds: {}),
       ],
     );
+
+    blocTest<FavoritesCubit, FavoritesState>(
+      'optimistically removes from state and calls usecase',
+      build: () {
+        when(
+          mockGetFavorites(any),
+        ).thenAnswer((_) async => const Right([tReciter]));
+        when(
+          mockToggleFavorite(any),
+        ).thenAnswer((_) async => const Right(null));
+        return cubit;
+      },
+      seed: () =>
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      act: (cubit) => cubit.toggleFavorite(tReciter),
+      expect: () => [
+        // Expect optimistic update: removed from favorites
+        const FavoritesLoaded(favorites: [], favoriteIds: {}),
+      ],
+      verify: (_) {
+        verify(mockToggleFavorite(1)).called(1);
+      },
+    );
+
+    blocTest<FavoritesCubit, FavoritesState>(
+      'reverts removal from state on failure',
+      build: () {
+        when(
+          mockGetFavorites(any),
+        ).thenAnswer((_) async => const Right([tReciter])); // Re-sync
+        when(
+          mockToggleFavorite(any),
+        ).thenAnswer((_) async => const Left(ServerFailure('Fail')));
+        return cubit;
+      },
+      seed: () =>
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      act: (cubit) => cubit.toggleFavorite(tReciter),
+      expect: () => [
+        // Optimistic remove
+        const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        FavoritesLoading(),
+        const FavoritesError('Fail'),
+        const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      ],
+    );
+
+    blocTest<FavoritesCubit, FavoritesState>(
+      'handles toggle when state is not FavoritesLoaded (covers fallback)',
+      build: () {
+        when(
+          mockToggleFavorite(any),
+        ).thenAnswer((_) async => const Right(null));
+        return cubit;
+      },
+      // State is FavoritesInitial
+      act: (cubit) => cubit.toggleFavorite(tReciter),
+      expect: () =>
+          [], // No state change emitted because it's not FavoritesLoaded
+      verify: (_) {
+        verify(mockToggleFavorite(1)).called(1);
+      },
+    );
   });
 }

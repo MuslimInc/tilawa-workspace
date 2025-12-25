@@ -159,6 +159,87 @@ void main() {
         },
         expect: () => [const LocalizationState(locale: Locale('en'))],
       );
+
+      blocTest<LocalizationBloc, LocalizationState>(
+        'ensures SharedPreferences has the current language value when loading fails',
+        build: () {
+          reset(mockGetCurrentLanguageUseCase);
+          reset(mockSetLanguageUseCase);
+
+          // Mock GetCurrentLanguageUseCase to return failure
+          when(
+            mockGetCurrentLanguageUseCase(),
+          ).thenAnswer((_) async => const Left(CacheFailure()));
+
+          // Mock SetLanguageUseCase to return success
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+
+          return LocalizationBloc(
+            mockGetCurrentLanguageUseCase,
+            mockSetLanguageUseCase,
+          );
+        },
+        act: (bloc) async {
+          await Future.delayed(const Duration(milliseconds: 50));
+          reset(mockSetLanguageUseCase);
+          when(
+            mockSetLanguageUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+          bloc.add(const LoadLanguage());
+        },
+        verify: (_) {
+          // Verify that SetLanguageUseCase was called with the default language
+          // because it defaults to the current state's locale on failure
+          verify(mockSetLanguageUseCase(LanguageConfig.defaultLanguageCode));
+        },
+        expect: () => [],
+      );
+    });
+
+    group('fromJson', () {
+      test('should return LocalizationState with correct locale from JSON', () {
+        final json = {'languageCode': 'en'};
+        final LocalizationState? result = bloc.fromJson(json);
+
+        expect(result, const LocalizationState(locale: Locale('en')));
+      });
+
+      test('should return LocalizationState with default locale when null', () {
+        final json = {'languageCode': null};
+        final LocalizationState? result = bloc.fromJson(json);
+
+        expect(
+          result,
+          const LocalizationState(
+            locale: Locale(LanguageConfig.defaultLanguageCode),
+          ),
+        );
+      });
+
+      test('should return LocalizationState with default locale on error', () {
+        // Passing something that will cause a cast error if tried to be cast as Map
+        final LocalizationState? result = bloc.fromJson({
+          'languageCode': 123, // Should throw cast error
+        });
+
+        expect(
+          result,
+          const LocalizationState(
+            locale: Locale(LanguageConfig.defaultLanguageCode),
+          ),
+        );
+      });
+    });
+
+    group('toJson', () {
+      test('should return correct map', () {
+        const state = LocalizationState(locale: Locale('en'));
+        final Map<String, dynamic>? result = bloc.toJson(state);
+
+        expect(result, {'languageCode': 'en'});
+      });
     });
 
     group('ChangeLanguage', () {

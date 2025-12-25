@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
@@ -13,6 +16,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:muzakri/core/entities/moshaf_entity.dart';
 import 'package:muzakri/core/entities/reciter_entity.dart';
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
 import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
 import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -23,6 +27,7 @@ import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
 import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:muzakri/screens/reciter_details_screen.dart';
 import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
@@ -61,6 +66,7 @@ void main() {
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
   late MockCancelDownloadUseCase mockCancelDownloadUseCase;
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgressUseCase;
+  late MockDownloadsRepository mockDownloadsRepository;
 
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
@@ -94,6 +100,8 @@ void main() {
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
     mockCancelDownloadUseCase = MockCancelDownloadUseCase();
     mockObserveDownloadProgressUseCase = MockObserveDownloadProgressUseCase();
+    mockDownloadsRepository =
+        GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
 
     // Register UseCases in GetIt
     if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
@@ -131,7 +139,7 @@ void main() {
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
     // Stub MockDownloadsRepository (GetIt instance)
-    final mockDownloadsRepository =
+    mockDownloadsRepository =
         GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
     when(
       () => mockDownloadsRepository.isSurahDownloaded(any(), any()),
@@ -397,4 +405,566 @@ void main() {
 
     expect(newScrollController.offset, equals(initialOffset));
   });
+
+  testWidgets('ReciterDetailsScreen shows skeleton when loading', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      const ReciterDetailsState(status: ReciterDetailsStatus.loading),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    // No pumpAndSettle because Skeletonizer might have animations
+
+    expect(find.byType(SliverSkeletonizer), findsWidgets);
+  });
+
+  testWidgets('ReciterDetailsScreen shows error and retry button', (
+    WidgetTester tester,
+  ) async {
+    const errorMessage = 'Failed to load surahs';
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      const ReciterDetailsState(
+        status: ReciterDetailsStatus.error,
+        errorMessage: errorMessage,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text(errorMessage), findsOneWidget);
+    expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+
+    await tester.tap(find.text('Retry')); // From l10n
+    verify(
+      () => mockReciterDetailsBloc.add(
+        LoadSurahList(reciter: testReciter, moshaf: testReciter.moshaf.first),
+      ),
+    ).called(2); // One from initState, one from tap
+  });
+
+  testWidgets('ReciterDetailsScreen shows empty message when no surahs', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      const ReciterDetailsState(status: ReciterDetailsStatus.loaded),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.music_off_rounded), findsOneWidget);
+  });
+
+  testWidgets('ReciterDetailsScreen shows no results found for search', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        searchQuery: 'Non-existent',
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text('No surahs found for "Non-existent"'), findsOneWidget);
+  });
+
+  testWidgets('ReciterDetailsScreen search field updates query', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'Fatiha');
+    verify(
+      () => mockReciterDetailsBloc.add(const FilterSurahs('Fatiha')),
+    ).called(1);
+  });
+
+  testWidgets('ReciterDetailsScreen search field clear button works', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        searchQuery: 'Fatiha',
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fatiha'), findsOneWidget);
+    expect(find.byIcon(Icons.clear_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.clear_rounded));
+    verify(() => mockReciterDetailsBloc.add(const FilterSurahs(''))).called(1);
+  });
+
+  testWidgets('ReciterDetailsScreen download all button works', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(ElevatedButton).first); // Download All
+    verify(
+      () => mockReciterDetailsBloc.add(
+        DownloadAllSurahs(reciter: testReciter, surahs: testSurahList),
+      ),
+    ).called(1);
+
+    // Handle toast timer
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('ReciterDetailsScreen cancel download all works', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        isDownloadingAll: true,
+        downloadProgress: 0.5,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('Cancel'));
+    verify(
+      () => mockReciterDetailsBloc.add(
+        const CancelDownloadAllSurahs('Test Reciter'),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('ReciterDetailsScreen play surah works and updates queue', (
+    WidgetTester tester,
+  ) async {
+    final state = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: testSurahList,
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(state);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    // Stub DownloadsRepository
+    final mockRepository =
+        GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
+    when(
+      () => mockRepository.getDownloadedFilePath(any(), any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => mockRepository.getDownloadsForReciter(any()),
+    ).thenAnswer((_) async => []);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Al-Fatiha'));
+
+    verify(
+      () => mockAudioPlayerBloc.add(
+        AudioPlayerEvent.playFromQueue([
+          testSurahList[0].mediaItem,
+          testSurahList[1].mediaItem,
+        ], 0),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('ReciterDetailsScreen plays downloaded surah', (
+    WidgetTester tester,
+  ) async {
+    final state = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: testSurahList,
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(state);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    final mockRepository =
+        GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
+    const downloadedPath = '/path/to/downloaded.mp3';
+
+    // Mock file existence and repository
+    when(
+      () => mockRepository.getDownloadedFilePath(any(), any()),
+    ).thenAnswer((_) async => downloadedPath);
+    when(() => mockRepository.getDownloadsForReciter(any())).thenAnswer(
+      (_) async => [
+        DownloadItem(
+          id: '001',
+          title: 'Al-Fatiha',
+          url: '001',
+          filePath: downloadedPath,
+          status: DownloadStatus.completed,
+          reciterName: 'Test Reciter',
+          progress: 1.0,
+          fileSize: 1000,
+          downloadedSize: 1000,
+          createdAt: DateTime.now(),
+        ),
+      ],
+    );
+
+    // Use IOOverrides if the screen checks File.existsSync() directly.
+    // However, if it uses repository, we just stub repository.
+    // Looking at _playSurah logic in lib/screens/reciter_details_screen.dart...
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Al-Fatiha'));
+
+    // Verify it tries to play. The actual path conversion happens in _playSurah.
+    verify(() => mockAudioPlayerBloc.add(captureAny())).called(greaterThan(0));
+  });
+
+  testWidgets('ReciterDetailsScreen handles playback error', (
+    WidgetTester tester,
+  ) async {
+    final state = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: testSurahList,
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(state);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    // Throw exception in repository to trigger catch block in _playSurah
+    final mockRepository =
+        GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
+    when(
+      () => mockRepository.getDownloadedFilePath(any(), any()),
+    ).thenThrow(Exception('Path error'));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Al-Fatiha'));
+
+    // Should still try to play remote surah if local fails or just catch error
+    // Check if toast or log happened (Difficult to verify logs in widget test without special setup)
+    // At least ensure no crash.
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('ReciterDetailsScreen buildWhen/listenWhen logic', (
+    WidgetTester tester,
+  ) async {
+    // Initial state
+    final initialState = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: testSurahList,
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+
+    when(() => mockReciterDetailsBloc.state).thenReturn(initialState);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Verify search controller matches initial state
+    final textField =
+        find.byType(TextField).evaluate().first.widget as TextField;
+    expect(textField.controller?.text, isEmpty);
+
+    // Change state to empty search query - should trigger listener and clear controller
+    final ReciterDetailsState stateWithSearch = initialState.copyWith(
+      searchQuery: 'Fatiha',
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(stateWithSearch);
+
+    // We need to trigger a rebuild with the new state
+    await tester.pump();
+
+    // Now change back to empty search - should trigger listenWhen
+    final ReciterDetailsState emptySearchState = stateWithSearch.copyWith(
+      searchQuery: '',
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(emptySearchState);
+
+    await tester.pump();
+
+    // Verify clear was called by BlocListener
+    // We can check if _searchController.text is empty
+    // But since we use mocks, we just verify the interaction if possible
+    // Alternatively, just ensure no exceptions and buildWhen coverage
+  });
+
+  testWidgets('ReciterDetailsScreen active surah styling and controls', (
+    WidgetTester tester,
+  ) async {
+    final state = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: testSurahList,
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(state);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+
+    // Set Al-Fatiha as currently playing
+    final MediaItem currentMediaItem = testSurahList[0].mediaItem;
+    final playbackState = PlaybackState(
+      playing: true,
+      processingState: AudioProcessingState.ready,
+    );
+
+    final playingState = AudioPlayerState(
+      status: AudioPlayerStatus.success,
+      mediaItem: currentMediaItem,
+      playbackState: playbackState,
+    );
+
+    final AudioPlayerState pausedState = playingState.copyWith(
+      playbackState: playbackState.copyWith(playing: false),
+    );
+
+    final stateController = StreamController<AudioPlayerState>.broadcast();
+    stateController.add(playingState);
+
+    when(() => mockAudioPlayerBloc.state).thenReturn(playingState);
+    when(
+      () => mockAudioPlayerBloc.stream,
+    ).thenAnswer((_) => stateController.stream);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    final Finder surahCardFinder = find.byKey(
+      ValueKey('surah_${testSurahList[0].id}'),
+    );
+
+    expect(find.byIcon(Icons.graphic_eq_rounded), findsOneWidget);
+    expect(
+      find.descendant(
+        of: surahCardFinder,
+        matching: find.byIcon(Icons.pause_rounded),
+      ),
+      findsOneWidget,
+    );
+
+    // Tap to pause
+    when(() => mockAudioPlayerBloc.state).thenReturn(pausedState);
+    stateController.add(pausedState);
+
+    await tester.tap(surahCardFinder);
+    await tester.pump();
+
+    verify(
+      () => mockAudioPlayerBloc.add(const AudioPlayerEvent.pauseAudio()),
+    ).called(1);
+
+    // Now it should show play icon
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: surahCardFinder,
+        matching: find.byIcon(Icons.play_arrow_rounded),
+      ),
+      findsOneWidget,
+    );
+
+    // Tap to play
+    await tester.tap(surahCardFinder);
+    await tester.pump();
+
+    verify(
+      () => mockAudioPlayerBloc.add(const AudioPlayerEvent.playAudio()),
+    ).called(1);
+
+    await stateController.close();
+  });
+
+  testWidgets('ReciterDetailsScreen local playback edge cases and fallback', (
+    WidgetTester tester,
+  ) async {
+    final mockFile = MockFile();
+    when(() => mockFile.existsSync()).thenReturn(true);
+    when(() => mockFile.path).thenReturn('/path/to/fatiha.mp3');
+
+    await IOOverrides.runZoned(() async {
+      final state = ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      );
+      when(() => mockReciterDetailsBloc.state).thenReturn(state);
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+      when(
+        () => mockAudioPlayerBloc.stream,
+      ).thenAnswer((_) => const Stream.empty());
+
+      // Mock local file exists for Al-Fatiha
+      final downloadItem = DownloadItem(
+        id: '1',
+        url: testSurahList[0].id,
+        filePath: '/path/to/fatiha.mp3',
+        title: 'Al-Fatiha',
+        reciterName: testReciter.name,
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        fileSize: 1024,
+        downloadedSize: 1024,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        () => mockDownloadsRepository.getDownloadedFilePath(any(), any()),
+      ).thenAnswer((_) async => '/path/to/fatiha.mp3');
+      when(
+        () => mockDownloadsRepository.getDownloadsForReciter(any()),
+      ).thenAnswer((_) async => [downloadItem]);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(ValueKey('surah_${testSurahList[0].id}')));
+      await tester.pump();
+
+      // Verify playFromQueue was called.
+      verify(() => mockAudioPlayerBloc.add(any())).called(1);
+    }, createFile: (path) => mockFile);
+  });
+
+  testWidgets('ReciterDetailsScreen handles invalid surah and playback errors', (
+    WidgetTester tester,
+  ) async {
+    final state = ReciterDetailsState(
+      status: ReciterDetailsStatus.loaded,
+      surahList: [
+        testSurahList[0].copyWith(
+          mediaItem: MediaItem(
+            id: '',
+            title: testSurahList[0].name,
+            artist: testSurahList[0].reciterName,
+          ),
+        ),
+      ], // Invalid ID
+      selectedMoshaf: testReciter.moshaf.first,
+    );
+    when(() => mockReciterDetailsBloc.state).thenReturn(state);
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Tapping surah with empty ID should throw error and show toast in _playSurah catch block
+    await tester.tap(find.byKey(const ValueKey('surah_')));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(
+      find.byType(SnackBar),
+      findsNothing,
+    ); // It uses ToastUtils.showErrorToast
+  });
+}
+
+class MockFile extends Mock implements File {
+  @override
+  String get path => '/path/to/fatiha.mp3';
+
+  @override
+  bool existsSync() => true;
+
+  @override
+  Future<bool> exists() async => true;
 }

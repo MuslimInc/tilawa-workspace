@@ -48,7 +48,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final BehaviorSubject<double> volume = BehaviorSubject.seeded(1.0);
   @override
   final BehaviorSubject<double> speed = BehaviorSubject.seeded(1.0);
-  final _mediaItemExpando = Expando<MediaItem>();
+  final _mediaItemMap = <String, MediaItem>{};
 
   // Caching and pagination
   List<MediaItem>? _cachedMediaItems;
@@ -71,7 +71,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
             _player.shuffleIndicesStream,
             _player.shuffleModeEnabledStream,
             (sequence, shuffleIndices, shuffleModeEnabled) {
-              if (sequence == null) {
+              if (sequence == null || sequence.isEmpty) {
                 return [];
               }
               if (!shuffleModeEnabled) {
@@ -216,7 +216,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     _effectiveSequence
         .map(
           (sequence) => sequence
-              .map((source) => _mediaItemExpando[source])
+              .map((source) => _mediaItemMap[source.tag])
               .whereType<MediaItem>()
               .toList(),
         )
@@ -234,8 +234,11 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   AudioSource _itemToSource(MediaItem mediaItem) {
-    final UriAudioSource audioSource = AudioSource.uri(Uri.parse(mediaItem.id));
-    _mediaItemExpando[audioSource] = mediaItem;
+    final UriAudioSource audioSource = AudioSource.uri(
+      Uri.parse(mediaItem.id),
+      tag: mediaItem.id,
+    );
+    _mediaItemMap[mediaItem.id] = mediaItem;
     return audioSource;
   }
 
@@ -353,15 +356,29 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   @override
   Future<void> updateMediaItem(MediaItem mediaItem) async {
-    final int index = queue.value.indexWhere((item) => item.id == mediaItem.id);
-    _mediaItemExpando[_player.sequence[index]] = mediaItem;
+    _mediaItemMap[mediaItem.id] = mediaItem;
+    final List<MediaItem> currentQueue = queue.value;
+    final List<MediaItem> newQueue = currentQueue
+        .map((item) => item.id == mediaItem.id ? mediaItem : item)
+        .toList();
+    queue.add(newQueue);
   }
 
   @override
   Future<void> removeQueueItem(MediaItem mediaItem) async {
-    final int index = queue.value.indexOf(mediaItem);
-    _playlist.removeAt(index);
-    await _safeSetAudioSources(_playlist);
+    final int index = _playlist.indexWhere((s) {
+      // Safe check for tag
+      if (s is UriAudioSource) {
+        return s.tag == mediaItem.id;
+      }
+      return false;
+    });
+
+    if (index != -1) {
+      _playlist.removeAt(index);
+      _mediaItemMap.remove(mediaItem.id);
+      await _safeSetAudioSources(_playlist);
+    }
   }
 
   @override

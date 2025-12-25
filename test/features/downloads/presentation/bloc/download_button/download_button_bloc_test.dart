@@ -354,6 +354,194 @@ void main() {
         await bloc.close();
         await controller.close();
       });
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [failed] when stream emits failed status',
+        build: () {
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.failed,
+            progress: 0.0,
+            fileSize: 100,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          const DownloadButtonState.failed(errorMessage: 'Download failed'),
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [cancelled] when stream emits cancelled status',
+        build: () {
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.cancelled,
+            progress: 0.0,
+            fileSize: 100,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          const DownloadButtonState.cancelled(),
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [paused] when stream emits paused status',
+        build: () {
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.paused,
+            progress: 0.3,
+            fileSize: 100,
+            downloadedSize: 30,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          const DownloadButtonState.paused(),
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'handles pending status from stream (no state change)',
+        build: () {
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.pending,
+            progress: 0.0,
+            fileSize: 100,
+            downloadedSize: 0,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          // No additional state emission for pending status
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [failed] when stream encounters error',
+        build: () {
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.error(Exception('Stream error')));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          const DownloadButtonState.failed(
+            errorMessage: 'Progress stream error',
+          ),
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'ignores stream items with different reciter name',
+        build: () {
+          final item = DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: 'Different Reciter', // Different reciter name
+            reciterId: 999,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 100,
+            downloadedSize: 50,
+            createdAt: DateTime.now(),
+          );
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => Stream.value(item));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
+        expect: () => [
+          const DownloadButtonState.readyToDownload(),
+          // No state change because reciter name doesn't match
+        ],
+      );
+    });
+
+    group('Retry Event', () {
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'retry event dispatches startDownload event',
+        build: () {
+          when(
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
+          ).thenAnswer((_) async => const Right(null));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(
+          const DownloadButtonEvent.retry(surahTitle: testSurahTitle),
+        ),
+        expect: () => [const DownloadButtonState.pending()],
+        verify: (_) {
+          verify(
+            mockDownloadSurah.call(
+              surahId: testUrl,
+              surahTitle: testSurahTitle,
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+            ),
+          ).called(1);
+        },
+      );
     });
   });
 }

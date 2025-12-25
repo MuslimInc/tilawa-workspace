@@ -3168,6 +3168,20 @@ void main() {
       // Assert
       verify(mockLocalDataSource.updateDownload(any)).called(1);
     });
+
+    test('should use ID as fallback when download item not found', () async {
+      // Arrange
+      const testId = 'id1';
+
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+      when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+
+      // Act
+      await repository.cancelDownload(testId);
+
+      // Assert - should call cancel with ID as fallback (line 588)
+      verify(mockDownloadService.cancel(testId)).called(1);
+    });
   });
 
   group('updateDownloadProgress', () {
@@ -3543,6 +3557,45 @@ void main() {
         verify(mockLocalDataSource.updateDownload(any)).called(1);
       },
     );
+
+    test('should use download.fileSize when fileSize parameter is 0', () async {
+      // Arrange
+      const testId = 'id1';
+      final download = DownloadItem(
+        id: testId,
+        title: 'T1',
+        url: 'u1',
+        filePath: 'p1',
+        reciterName: 'Reciter',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        fileSize: 2048, // Existing file size
+        downloadedSize: 512,
+        createdAt: DateTime.now(),
+      );
+
+      when(
+        mockLocalDataSource.getDownloads(),
+      ).thenAnswer((_) async => [download]);
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+
+      // Act - pass fileSize as 0 to trigger fallback (line 803)
+      await repository.updateDownloadProgress(
+        testId,
+        DownloadStatus.downloading,
+        0.6,
+        600,
+        0, // fileSize = 0, should use download.fileSize (2048)
+      );
+
+      // Assert
+      final List<dynamic> captured = verify(
+        mockLocalDataSource.updateDownload(captureAny),
+      ).captured;
+      final updatedDownload = captured.first as DownloadItem;
+      // Should use the existing fileSize (2048) not the parameter (0)
+      expect(updatedDownload.fileSize, 2048);
+    });
   });
 
   group('resumePendingDownloads', () {

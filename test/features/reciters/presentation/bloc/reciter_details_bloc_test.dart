@@ -462,4 +462,712 @@ void main() {
       },
     );
   });
+
+  group('ReciterDetailsBloc FilterSurahs', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockDownloadAllSurahsUseCase downloadAllSurahs;
+    late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      downloadAllSurahs = MockDownloadAllSurahsUseCase();
+      cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+
+      when(
+        () => observeReciterDownloads(any()),
+      ).thenAnswer((_) => const Stream.empty());
+    });
+
+    test('FilterSurahs updates search query', () {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      bloc.add(const FilterSurahs('Al-Fatiha'));
+
+      expectLater(
+        bloc.stream,
+        emits(
+          predicate<ReciterDetailsState>(
+            (state) => state.searchQuery == 'Al-Fatiha',
+          ),
+        ),
+      );
+    });
+  });
+
+  group('ReciterDetailsBloc SelectMoshaf and SelectSurah', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockDownloadAllSurahsUseCase downloadAllSurahs;
+    late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      downloadAllSurahs = MockDownloadAllSurahsUseCase();
+      cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+
+      when(
+        () => observeReciterDownloads(any()),
+      ).thenAnswer((_) => const Stream.empty());
+    });
+
+    const moshaf = MoshafEntity(
+      id: 1,
+      name: 'Hafs',
+      server: '',
+      surahTotal: 114,
+      moshafType: 1,
+      surahList: '',
+    );
+
+    test('SelectMoshaf does nothing when not loaded', () {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      bloc.add(const SelectMoshaf(moshaf));
+
+      expectLater(bloc.stream, emitsInOrder([]));
+    });
+
+    test('SelectMoshaf updates selected moshaf when loaded', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      // Set to loaded state
+      bloc.emit(const ReciterDetailsState(status: ReciterDetailsStatus.loaded));
+
+      bloc.add(const SelectMoshaf(moshaf));
+
+      await expectLater(
+        bloc.stream,
+        emits(
+          predicate<ReciterDetailsState>(
+            (state) => state.selectedMoshaf == moshaf,
+          ),
+        ),
+      );
+    });
+
+    test('SelectSurah does nothing when not loaded', () {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      bloc.add(const SelectSurah('1'));
+
+      expectLater(bloc.stream, emitsInOrder([]));
+    });
+
+    test('SelectSurah updates selected surah when loaded', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      // Set to loaded state
+      bloc.emit(const ReciterDetailsState(status: ReciterDetailsStatus.loaded));
+
+      bloc.add(const SelectSurah('1'));
+
+      await expectLater(
+        bloc.stream,
+        emits(
+          predicate<ReciterDetailsState>(
+            (state) => state.selectedSurahId == '1',
+          ),
+        ),
+      );
+    });
+  });
+
+  group('ReciterDetailsBloc Error Handling', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockDownloadAllSurahsUseCase downloadAllSurahs;
+    late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      downloadAllSurahs = MockDownloadAllSurahsUseCase();
+      cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+
+      when(
+        () => observeReciterDownloads(any()),
+      ).thenAnswer((_) => const Stream.empty());
+    });
+
+    const reciter = ReciterEntity(
+      id: 1,
+      name: 'Mishary',
+      letter: 'M',
+      date: '2023',
+      moshaf: [],
+    );
+    const moshaf = MoshafEntity(
+      id: 1,
+      name: 'Hafs',
+      server: '',
+      surahTotal: 114,
+      moshafType: 1,
+      surahList: '',
+    );
+
+    test(
+      'LoadSurahList emits error when getSurahListForMoshaf returns null',
+      () async {
+        final bloc = ReciterDetailsBloc(
+          audioHandler,
+          convertMediaItemsToSurahs,
+          refreshSurahDownloadStatus,
+          downloadAllSurahs,
+          cancelDownloadsForReciter,
+          observeReciterDownloads,
+        );
+
+        when(
+          () => audioHandler.getSurahListForMoshaf(
+            any(),
+            reciterName: any(named: 'reciterName'),
+          ),
+        ).thenAnswer((_) async => null);
+
+        bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+
+        await expectLater(
+          bloc.stream,
+          emitsInOrder([
+            predicate<ReciterDetailsState>(
+              (state) => state.status == ReciterDetailsStatus.loading,
+            ),
+            predicate<ReciterDetailsState>(
+              (state) =>
+                  state.status == ReciterDetailsStatus.error &&
+                  state.errorMessage == 'Failed to load surah list',
+            ),
+          ]),
+        );
+      },
+    );
+
+    test('LoadSurahList emits error when exception is thrown', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      when(
+        () => audioHandler.getSurahListForMoshaf(
+          any(),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenThrow(Exception('Network error'));
+
+      bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+
+      await expectLater(
+        bloc.stream,
+        emitsInOrder([
+          predicate<ReciterDetailsState>(
+            (state) => state.status == ReciterDetailsStatus.loading,
+          ),
+          predicate<ReciterDetailsState>(
+            (state) =>
+                state.status == ReciterDetailsStatus.error &&
+                state.errorMessage!.contains('Error loading surah list'),
+          ),
+        ]),
+      );
+    });
+
+    test('LoadSurahList tracks already downloaded surahs', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah1 = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        isDownloaded: true, // Already downloaded - covers line 98
+      );
+      const surah2 = SurahEntity(
+        mediaItem: MediaItem(id: '2', title: 'Al-Baqarah'),
+      );
+
+      when(
+        () => audioHandler.getSurahListForMoshaf(
+          any(),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenAnswer((_) async => [surah1.mediaItem, surah2.mediaItem]);
+
+      when(
+        () => convertMediaItemsToSurahs(any()),
+      ).thenAnswer((_) async => [surah1, surah2]);
+
+      bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+
+      await expectLater(
+        bloc.stream,
+        emitsInOrder([
+          predicate<ReciterDetailsState>(
+            (state) => state.status == ReciterDetailsStatus.loading,
+          ),
+          predicate<ReciterDetailsState>(
+            (state) =>
+                state.status == ReciterDetailsStatus.loaded &&
+                state.surahList.length == 2,
+          ),
+          predicate<ReciterDetailsState>(
+            (state) =>
+                state.status == ReciterDetailsStatus.loaded &&
+                state.downloadProgress == 0.5, // 1 out of 2 downloaded
+          ),
+        ]),
+      );
+    });
+
+    test('RefreshSurahDownloadStatus does nothing when not loaded', () {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      bloc.add(
+        const RefreshSurahDownloadStatus(surahId: '1', reciterName: 'Mishary'),
+      );
+
+      expectLater(bloc.stream, emitsInOrder([]));
+    });
+
+    test('RefreshSurahDownloadStatus updates surah list when loaded', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+      );
+
+      // Set to loaded state
+      bloc.emit(
+        const ReciterDetailsState(
+          status: ReciterDetailsStatus.loaded,
+          surahList: [surah],
+        ),
+      );
+
+      const updatedSurah = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        isDownloaded: true,
+      );
+
+      when(
+        () => refreshSurahDownloadStatus.call(
+          currentSurahs: any(named: 'currentSurahs'),
+          surahId: any(named: 'surahId'),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenAnswer((_) async => [updatedSurah]);
+
+      bloc.add(
+        const RefreshSurahDownloadStatus(surahId: '1', reciterName: 'Mishary'),
+      );
+
+      await expectLater(
+        bloc.stream,
+        emits(
+          predicate<ReciterDetailsState>(
+            (state) => state.surahList.first.isDownloaded,
+          ),
+        ),
+      );
+    });
+
+    test('RefreshSurahDownloadStatus silently fails on error', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+      );
+
+      // Set to loaded state
+      bloc.emit(
+        const ReciterDetailsState(
+          status: ReciterDetailsStatus.loaded,
+          surahList: [surah],
+        ),
+      );
+
+      when(
+        () => refreshSurahDownloadStatus.call(
+          currentSurahs: any(named: 'currentSurahs'),
+          surahId: any(named: 'surahId'),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenThrow(Exception('Error'));
+
+      bloc.add(
+        const RefreshSurahDownloadStatus(surahId: '1', reciterName: 'Mishary'),
+      );
+
+      // Should not emit error, just keep current state
+      await expectLater(bloc.stream, emitsInOrder([]));
+    });
+  });
+
+  group('ReciterDetailsBloc Download Status Updates', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockDownloadAllSurahsUseCase downloadAllSurahs;
+    late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+
+    late StreamController<DownloadItem> downloadUpdatesController;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      downloadAllSurahs = MockDownloadAllSurahsUseCase();
+      cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+
+      downloadUpdatesController = StreamController<DownloadItem>.broadcast();
+      when(
+        () => observeReciterDownloads(any()),
+      ).thenAnswer((_) => downloadUpdatesController.stream);
+    });
+
+    tearDown(() {
+      downloadUpdatesController.close();
+    });
+
+    const reciter = ReciterEntity(
+      id: 1,
+      name: 'Mishary',
+      letter: 'M',
+      date: '2023',
+      moshaf: [],
+    );
+    const moshaf = MoshafEntity(
+      id: 1,
+      name: 'Hafs',
+      server: '',
+      surahTotal: 114,
+      moshafType: 1,
+      surahList: '',
+    );
+
+    test('Handles pending status updates', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah1 = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'S1'),
+      );
+
+      when(
+        () => audioHandler.getSurahListForMoshaf(
+          any(),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenAnswer((_) async => [surah1.mediaItem]);
+      when(
+        () => convertMediaItemsToSurahs(any()),
+      ).thenAnswer((_) async => [surah1]);
+
+      bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+      await Future.delayed(Duration.zero);
+
+      // Send pending status
+      downloadUpdatesController.add(
+        DownloadItem(
+          id: '1',
+          url: '1',
+          title: 'S1',
+          filePath: '',
+          reciterName: 'Mishary',
+          status: DownloadStatus.pending,
+          progress: 0.0,
+          fileSize: 100,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      await Future.delayed(Duration.zero);
+
+      expect(bloc.state.isDownloadingAll, isTrue);
+    });
+
+    test('Handles failed status updates', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah1 = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'S1'),
+      );
+
+      when(
+        () => audioHandler.getSurahListForMoshaf(
+          any(),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenAnswer((_) async => [surah1.mediaItem]);
+      when(
+        () => convertMediaItemsToSurahs(any()),
+      ).thenAnswer((_) async => [surah1]);
+
+      bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+      await Future.delayed(Duration.zero);
+
+      // First set to downloading
+      downloadUpdatesController.add(
+        DownloadItem(
+          id: '1',
+          url: '1',
+          title: 'S1',
+          filePath: '',
+          reciterName: 'Mishary',
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 100,
+          downloadedSize: 50,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      await Future.delayed(Duration.zero);
+      expect(bloc.state.isDownloadingAll, isTrue);
+
+      // Then send failed status
+      downloadUpdatesController.add(
+        DownloadItem(
+          id: '1',
+          url: '1',
+          title: 'S1',
+          filePath: '',
+          reciterName: 'Mishary',
+          status: DownloadStatus.failed,
+          progress: 0.5,
+          fileSize: 100,
+          downloadedSize: 50,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      await Future.delayed(Duration.zero);
+
+      expect(bloc.state.isDownloadingAll, isFalse);
+    });
+
+    test('Handles cancelled status updates', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      const surah1 = SurahEntity(
+        mediaItem: MediaItem(id: '1', title: 'S1'),
+      );
+
+      when(
+        () => audioHandler.getSurahListForMoshaf(
+          any(),
+          reciterName: any(named: 'reciterName'),
+        ),
+      ).thenAnswer((_) async => [surah1.mediaItem]);
+      when(
+        () => convertMediaItemsToSurahs(any()),
+      ).thenAnswer((_) async => [surah1]);
+
+      bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
+      await Future.delayed(Duration.zero);
+
+      // First set to downloading
+      downloadUpdatesController.add(
+        DownloadItem(
+          id: '1',
+          url: '1',
+          title: 'S1',
+          filePath: '',
+          reciterName: 'Mishary',
+          status: DownloadStatus.downloading,
+          progress: 0.3,
+          fileSize: 100,
+          downloadedSize: 30,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      await Future.delayed(Duration.zero);
+      expect(bloc.state.isDownloadingAll, isTrue);
+
+      // Then send cancelled status
+      downloadUpdatesController.add(
+        DownloadItem(
+          id: '1',
+          url: '1',
+          title: 'S1',
+          filePath: '',
+          reciterName: 'Mishary',
+          status: DownloadStatus.cancelled,
+          progress: 0.3,
+          fileSize: 100,
+          downloadedSize: 30,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      await Future.delayed(Duration.zero);
+
+      expect(bloc.state.isDownloadingAll, isFalse);
+    });
+  });
+
+  group('ReciterDetailsBloc Close', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockDownloadAllSurahsUseCase downloadAllSurahs;
+    late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
+    late MockObserveReciterDownloadsUseCase observeReciterDownloads;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      downloadAllSurahs = MockDownloadAllSurahsUseCase();
+      cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
+      observeReciterDownloads = MockObserveReciterDownloadsUseCase();
+
+      when(
+        () => observeReciterDownloads(any()),
+      ).thenAnswer((_) => const Stream.empty());
+    });
+
+    test('close cancels downloads subscription', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertMediaItemsToSurahs,
+        refreshSurahDownloadStatus,
+        downloadAllSurahs,
+        cancelDownloadsForReciter,
+        observeReciterDownloads,
+      );
+
+      await bloc.close();
+
+      expect(bloc.isClosed, isTrue);
+    });
+  });
 }

@@ -302,6 +302,14 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
           as _i3.AudioPlayerState?);
 
   @override
+  List<Map<String, dynamic>> serializeQueue(List<_i5.MediaItem>? queue) =>
+      (super.noSuchMethod(
+            Invocation.method(#serializeQueue, [queue]),
+            returnValue: <Map<String, dynamic>>[],
+          )
+          as List<Map<String, dynamic>>);
+
+  @override
   Map<String, dynamic>? toJson(_i3.AudioPlayerState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);

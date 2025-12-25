@@ -634,6 +634,53 @@ void main() {
           const DeleteDownloadEvent(downloadId: testDownloadId),
         );
       });
+
+      test('handles cancel download error before deletion', () async {
+        when(
+          mockGetDownloadStatusUseCase(any),
+        ).thenAnswer((_) async => DownloadStatus.downloading);
+        when(
+          mockCancelDownloadUseCase(any),
+        ).thenAnswer((_) async => const Left(AudioFailure('Cancel failed')));
+        when(
+          mockDeleteDownloadUseCase(any),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => const Right({}));
+
+        // Should still proceed with deletion even if cancel fails
+        downloadsBloc.add(
+          const DeleteDownloadEvent(downloadId: testDownloadId),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 100));
+        verify(mockCancelDownloadUseCase(any)).called(1);
+        verify(mockDeleteDownloadUseCase(any)).called(1);
+      });
+
+      test(
+        'handles exception when checking download status before deletion',
+        () async {
+          when(
+            mockGetDownloadStatusUseCase(any),
+          ).thenThrow(Exception('Status check failed'));
+          when(
+            mockDeleteDownloadUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+          when(
+            mockGetDownloadsByReciterUseCase(),
+          ).thenAnswer((_) async => const Right({}));
+
+          // Should still proceed with deletion even if status check throws
+          downloadsBloc.add(
+            const DeleteDownloadEvent(downloadId: testDownloadId),
+          );
+
+          await Future.delayed(const Duration(milliseconds: 100));
+          verify(mockDeleteDownloadUseCase(any)).called(1);
+        },
+      );
     });
 
     group('DeleteReciterDownloads', () {
@@ -2006,6 +2053,71 @@ void main() {
           verify(mockRetryDownloadUseCase(any)).called(1);
         },
       );
+
+      test(
+        'RetryDownloadEvent allows retry for stuck downloads (0% after 30s)',
+        () async {
+          // Arrange - Create a download that's stuck at 0% for >30 seconds
+          final stuckItem = DownloadItem(
+            id: '123_Mishary',
+            url: '001',
+            title: 'Al-Fatiha',
+            reciterId: 1,
+            reciterName: 'Mishary',
+            status: DownloadStatus.downloading,
+            progress: 0.0,
+            downloadedSize: 0,
+            fileSize: 100,
+            filePath: '',
+            createdAt: DateTime.now().subtract(const Duration(seconds: 35)),
+          );
+          when(
+            mockGetDownloadItemUseCase(any),
+          ).thenAnswer((_) async => Right(stuckItem));
+          when(
+            mockCheckDownloadAccessUseCase(any),
+          ).thenAnswer((_) async => const Right(true));
+          when(
+            mockGetDownloadStatusUseCase(any),
+          ).thenAnswer((_) async => null); // Not active, allow retry
+          when(
+            mockRetryDownloadUseCase(any),
+          ).thenAnswer((_) async => const Right(null));
+          when(
+            mockGetDownloadsByReciterUseCase(),
+          ).thenAnswer((_) async => const Right({}));
+          when(
+            mockAnalyticsService.logEvent(
+              any,
+              parameters: anyNamed('parameters'),
+            ),
+          ).thenAnswer((_) async {});
+
+          // Act
+          downloadsBloc.add(
+            const RetryDownloadEvent(downloadId: '123_Mishary'),
+          );
+
+          // Assert - Should allow retry for stuck download
+          await expectLater(
+            downloadsBloc.statusStream,
+            emitsThrough(
+              isA<DownloadsStatus>().having(
+                (s) => s.maybeMap(
+                  downloadStarted: (_) => true,
+                  orElse: () => false,
+                ),
+                'is downloadStarted',
+                true,
+              ),
+            ),
+          ).timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => fail('Test timed out waiting for downloadStarted'),
+          );
+          verify(mockRetryDownloadUseCase(any)).called(1);
+        },
+      );
     });
 
     group('Validate Download', () {
@@ -2282,6 +2394,313 @@ void main() {
           );
         },
       );
+    });
+
+    // Phase 1: Exception Handling Tests
+    group('Exception Handling', () {
+      test('CheckSurahDownloadedEvent handles exceptions', () async {
+        when(
+          mockCheckSurahDownloadedUseCase(
+            surahId: anyNamed('surahId'),
+            reciterName: anyNamed('reciterName'),
+          ),
+        ).thenThrow(Exception('Database connection failed'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Failed to check download status'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(
+          const CheckSurahDownloadedEvent(
+            surahId: '001',
+            reciterName: 'Test Reciter',
+          ),
+        );
+      });
+
+      test('ValidateDownloadedFileEvent handles exceptions', () async {
+        final testItem = DownloadItem(
+          id: '123',
+          url: '001',
+          title: 'Al-Fatiha',
+          reciterId: 1,
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          downloadedSize: 100,
+          fileSize: 100,
+          filePath: '/path/to/file.mp3',
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testItem));
+        when(
+          mockValidateDownloadedFileUseCase(any),
+        ).thenThrow(Exception('File system error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Failed to validate file'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(const ValidateDownloadedFileEvent(downloadId: '123'));
+      });
+
+      test('GetValidCompletedDownloadsEvent handles exceptions', () async {
+        when(
+          mockGetValidCompletedDownloadsUseCase(any),
+        ).thenThrow(Exception('Repository error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Failed to get valid downloads'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(
+          const GetValidCompletedDownloadsEvent(reciterName: 'Test Reciter'),
+        );
+      });
+
+      test('PlayDownloadedSurahEvent handles exceptions', () async {
+        final testItem = DownloadItem(
+          id: '123',
+          url: '001',
+          title: 'Al-Fatiha',
+          reciterId: 1,
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          downloadedSize: 100,
+          fileSize: 100,
+          filePath: '/path/to/file.mp3',
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testItem));
+        when(
+          mockValidateDownloadedFileUseCase(any),
+        ).thenThrow(Exception('Validation error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Error playing surah'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(const PlayDownloadedSurahEvent(downloadId: '123'));
+      });
+
+      test('PlayAllDownloadsEvent handles exceptions', () async {
+        when(
+          mockGetValidCompletedDownloadsUseCase(any),
+        ).thenThrow(Exception('Repository error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Error playing downloads'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(
+          const PlayAllDownloadsEvent(reciterName: 'Test Reciter'),
+        );
+      });
+
+      test('CheckPremiumAccessEvent handles exceptions', () async {
+        when(
+          mockCheckDownloadAccessUseCase(any),
+        ).thenThrow(Exception('Auth service error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Failed to check premium access'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(const CheckPremiumAccessEvent());
+      });
+
+      test('RetryDownloadEvent handles exceptions', () async {
+        final testItem = DownloadItem(
+          id: '123',
+          url: '001',
+          title: 'Al-Fatiha',
+          reciterId: 1,
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.failed,
+          progress: 0.0,
+          downloadedSize: 0,
+          fileSize: 100,
+          filePath: '/path/to/file.mp3',
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          mockGetDownloadItemUseCase(any),
+        ).thenAnswer((_) async => Right(testItem));
+        when(
+          mockCheckDownloadAccessUseCase(any),
+        ).thenThrow(Exception('Premium check error'));
+
+        unawaited(
+          expectLater(
+            downloadsBloc.statusStream,
+            emits(
+              isA<Error>().having(
+                (e) => e.message,
+                'message',
+                contains('Failed to retry download'),
+              ),
+            ),
+          ),
+        );
+
+        downloadsBloc.add(const RetryDownloadEvent(downloadId: '123'));
+      });
+
+      test('DownloadSurahEvent handles active download check error', () async {
+        when(
+          mockCheckDownloadAccessUseCase(any),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          mockCheckSurahDownloadedUseCase(
+            surahId: anyNamed('surahId'),
+            reciterName: anyNamed('reciterName'),
+          ),
+        ).thenAnswer((_) async => const Right(false));
+        when(
+          mockGetDownloadStatusUseCase(any),
+        ).thenThrow(Exception('Status check failed'));
+        when(
+          mockDownloadSurahUseCase(
+            surahId: anyNamed('surahId'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => const Right({}));
+        when(
+          mockAnalyticsService.logDownloadStart(
+            any,
+            fileName: anyNamed('fileName'),
+          ),
+        ).thenAnswer((_) async {});
+
+        // Should proceed with download even if active check throws
+        downloadsBloc.add(
+          const DownloadSurahEvent(
+            surahId: '001',
+            surahTitle: 'Al-Fatiha',
+            reciterName: 'Test Reciter',
+            reciterId: 1,
+          ),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 100));
+        verify(
+          mockDownloadSurahUseCase(
+            surahId: anyNamed('surahId'),
+            surahTitle: anyNamed('surahTitle'),
+            reciterName: anyNamed('reciterName'),
+            reciterId: anyNamed('reciterId'),
+          ),
+        ).called(1);
+      });
+    });
+
+    group('RefreshDownloadsProgress', () {
+      test('logs error when refresh fails', () async {
+        // First, successfully load downloads to get into loaded state
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => const Right({}));
+
+        downloadsBloc.add(const LoadDownloads());
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Verify we're in loaded state
+        expect(downloadsBloc.state.status, DownloadsStateStatus.loaded);
+
+        // Now make the next call fail to trigger the error logging
+        when(
+          mockGetDownloadsByReciterUseCase(),
+        ).thenAnswer((_) async => const Left(AudioFailure('Refresh failed')));
+
+        downloadsBloc.add(const RefreshDownloadsProgress());
+
+        // Wait for the refresh to complete
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // State should remain loaded (error is logged, not emitted)
+        expect(downloadsBloc.state.status, DownloadsStateStatus.loaded);
+      });
+    });
+
+    group('Hydrated Bloc', () {
+      test('fromJson returns initial state', () {
+        final Map<String, Object> json = {'status': 'loaded', 'downloads': {}};
+        final DownloadsState? state = downloadsBloc.fromJson(json);
+        expect(state, const DownloadsState());
+      });
+
+      test('toJson returns null for non-initial states', () {
+        const state = DownloadsState(status: DownloadsStateStatus.loaded);
+        final Map<String, dynamic>? json = downloadsBloc.toJson(state);
+        expect(json, isNull);
+      });
     });
   });
 }

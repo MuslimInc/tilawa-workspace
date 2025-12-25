@@ -5,7 +5,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
-import 'package:hydrated_bloc/hydrated_bloc.dart' as _i6;
+import 'package:audio_service/audio_service.dart' as _i6;
+import 'package:hydrated_bloc/hydrated_bloc.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart'
@@ -107,6 +108,14 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
           as _i2.AudioPlayerState?);
 
   @override
+  List<Map<String, dynamic>> serializeQueue(List<_i6.MediaItem>? queue) =>
+      (super.noSuchMethod(
+            Invocation.method(#serializeQueue, [queue]),
+            returnValue: <Map<String, dynamic>>[],
+          )
+          as List<Map<String, dynamic>>);
+
+  @override
   Map<String, dynamic>? toJson(_i2.AudioPlayerState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);
@@ -131,8 +140,8 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void on<E extends _i2.AudioPlayerEvent>(
-    _i6.EventHandler<E, _i2.AudioPlayerState>? handler, {
-    _i6.EventTransformer<E>? transformer,
+    _i7.EventHandler<E, _i2.AudioPlayerState>? handler, {
+    _i7.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -140,7 +149,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void onTransition(
-    _i6.Transition<_i2.AudioPlayerEvent, _i2.AudioPlayerState>? transition,
+    _i7.Transition<_i2.AudioPlayerEvent, _i2.AudioPlayerState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -166,7 +175,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
           as _i4.Future<void>);
 
   @override
-  void onChange(_i6.Change<_i2.AudioPlayerState>? change) => super.noSuchMethod(
+  void onChange(_i7.Change<_i2.AudioPlayerState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -185,8 +194,8 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i2.AudioPlayerBloc {
 
   @override
   void hydrate({
-    _i6.Storage? storage,
-    _i6.OnHydrationError? onError = _i6.defaultOnHydrationError,
+    _i7.Storage? storage,
+    _i7.OnHydrationError? onError = _i7.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
@@ -296,7 +305,7 @@ class MockSettingsCubit extends _i1.Mock implements _i3.SettingsCubit {
   );
 
   @override
-  void onChange(_i6.Change<_i3.SettingsState>? change) => super.noSuchMethod(
+  void onChange(_i7.Change<_i3.SettingsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -324,8 +333,8 @@ class MockSettingsCubit extends _i1.Mock implements _i3.SettingsCubit {
 
   @override
   void hydrate({
-    _i6.Storage? storage,
-    _i6.OnHydrationError? onError = _i6.defaultOnHydrationError,
+    _i7.Storage? storage,
+    _i7.OnHydrationError? onError = _i7.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,

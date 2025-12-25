@@ -208,7 +208,7 @@ class DownloadServiceImpl implements DownloadService {
       if (!completer.isCompleted) {
         completer.completeError(e);
       }
-      rethrow;
+      return completer.future;
     } finally {
       _initializationCompleter = null;
     }
@@ -232,10 +232,7 @@ class DownloadServiceImpl implements DownloadService {
 
       // Register the static callback for platform layer
       // Use step 3 to reduce frequency of updates (every 3%)
-      await _flutterDownloader.registerCallback(
-        DownloadServiceImpl._downloadCallback,
-        step: 3,
-      );
+      await _flutterDownloader.registerCallback(downloadCallback, step: 3);
 
       // Populate initial cache
       try {
@@ -603,7 +600,7 @@ class DownloadServiceImpl implements DownloadService {
   /// Static callback registered with FlutterDownloader.
   /// Called by the platform layer when download status/progress changes.
   @pragma('vm:entry-point')
-  static void _downloadCallback(String id, int status, int progress) {
+  static void downloadCallback(String id, int status, int progress) {
     DownloadIsolateManager.forwardDownloadUpdate(id, status, progress);
   }
 }

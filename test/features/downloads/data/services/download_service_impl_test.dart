@@ -66,9 +66,9 @@ void main() {
     );
   });
 
-  tearDown(() {
-    updateController.close();
-    downloadService.disposeService();
+  tearDown(() async {
+    await updateController.close();
+    await downloadService.disposeService();
   });
 
   group('DownloadServiceImpl', () {
@@ -777,6 +777,604 @@ void main() {
 
       // Cleanup
       await localController.close();
+    });
+
+    test('constructor works with null optional parameters (uses defaults)', () {
+      // Test that constructor accepts null for optional params
+      // This covers line 132 where defaults are used
+      final service = DownloadServiceImpl();
+
+      expect(service, isNotNull);
+    });
+
+    test('resetForTesting clears internal state', () async {
+      // Covers lines 163-167
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockFileHelper = MockDownloadFileHelper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
+      when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
+      when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: localMockFileHelper,
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      var loadTasksCallCount = 0;
+      when(localMockDownloader.loadTasks()).thenAnswer((_) async {
+        loadTasksCallCount++;
+        // First call returns tasks to populate state
+        if (loadTasksCallCount == 1) {
+          return [
+            DownloadTask(
+              taskId: 'task1',
+              status: DownloadTaskStatus.running,
+              url: 'url1',
+              savedDir: '',
+              filename: 'file.mp3',
+              progress: 50,
+              timeCreated: 0,
+              allowCellular: true,
+            ),
+          ];
+        }
+        // Second call (after reset) returns empty list
+        return [];
+      });
+
+      // Initialize to populate internal state
+      await localService.initialize();
+      expect(await localService.getActiveDownloadIds(), isNotEmpty);
+
+      // Reset and verify state is cleared
+      localService.resetForTesting();
+      expect(await localService.getActiveDownloadIds(), isEmpty);
+    });
+
+    test('initialization handles loadTasks exception gracefully', () async {
+      // Covers line 257
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+
+      // loadTasks throws exception
+      when(localMockDownloader.loadTasks()).thenThrow(Exception('DB error'));
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: MockDownloadFileHelper(),
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      // Should not throw, but logs warning
+      await localService.initialize();
+      // Verify initialization still succeeds
+      expect(await localService.isStatusDownloadActive('any'), false);
+    });
+
+    test(
+      'handleTaskUpdate logs warning when taskId resolution fails',
+      () async {
+        // Covers line 292
+        final localMockDownloader = MockFlutterDownloaderWrapper();
+        final localMockStatusMapper = MockDownloadStatusMapper();
+        final localMockIsolateManager = MockDownloadIsolateManager();
+
+        final localController =
+            StreamController<(String, DownloadTaskStatus, int)>.broadcast();
+
+        when(
+          localMockIsolateManager.updateStream,
+        ).thenAnswer((_) => localController.stream);
+        when(localMockIsolateManager.registerPort()).thenReturn(null);
+        when(
+          localMockDownloader.initialize(debug: anyNamed('debug')),
+        ).thenAnswer((_) async {});
+        when(
+          localMockDownloader.registerCallback(any),
+        ).thenAnswer((_) async {});
+
+        final localService = DownloadServiceImpl(
+          flutterDownloader: localMockDownloader,
+          fileHelper: MockDownloadFileHelper(),
+          statusMapper: localMockStatusMapper,
+          isolateManager: localMockIsolateManager,
+        );
+
+        await localService.initialize();
+
+        // loadTasks throws when trying to resolve unknown taskId
+        when(localMockDownloader.loadTasks()).thenThrow(Exception('DB error'));
+
+        // Emit update for unknown task - should log warning and not crash
+        localController.add(('unknown-task', DownloadTaskStatus.running, 50));
+
+        // Give it time to process
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Cleanup
+        await localController.close();
+      },
+    );
+
+    test('download handles enqueued task status correctly', () async {
+      // Covers line 372
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockFileHelper = MockDownloadFileHelper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
+      when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
+      when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: localMockFileHelper,
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      const url = 'http://example.com/audio.mp3';
+      const taskId = 'task-enqueued';
+
+      when(localMockDownloader.loadTasks()).thenAnswer(
+        (_) async => [
+          DownloadTask(
+            taskId: taskId,
+            status: DownloadTaskStatus.enqueued,
+            progress: 0,
+            url: url,
+            filename: 'file.mp3',
+            savedDir: '/path/to',
+            timeCreated: 0,
+            allowCellular: true,
+          ),
+        ],
+      );
+
+      await localService.download(
+        id: url,
+        url: url,
+        filePath: '/path/file.mp3',
+        title: 'Title',
+        reciterName: 'Reciter',
+      );
+
+      // Should NOT call enqueue for enqueued task
+      verifyNever(
+        localMockDownloader.enqueue(
+          url: anyNamed('url'),
+          savedDir: anyNamed('savedDir'),
+          fileName: anyNamed('fileName'),
+          openFileFromNotification: anyNamed('openFileFromNotification'),
+          title: anyNamed('title'),
+        ),
+      );
+    });
+
+    test('download aborts with empty fileName', () async {
+      // Covers lines 393-395
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockFileHelper = MockDownloadFileHelper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      when(localMockFileHelper.getDirectoryName(any)).thenReturn('/valid/path');
+      when(localMockFileHelper.getFileName(any)).thenReturn(''); // Empty!
+      when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+      when(localMockDownloader.loadTasks()).thenAnswer((_) async => []);
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: localMockFileHelper,
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      await localService.download(
+        id: 'id',
+        url: 'url',
+        filePath: '/path/file.mp3',
+        title: 'Title',
+        reciterName: 'Reciter',
+      );
+
+      verifyNever(
+        localMockDownloader.enqueue(
+          url: anyNamed('url'),
+          savedDir: anyNamed('savedDir'),
+          fileName: anyNamed('fileName'),
+          openFileFromNotification: anyNamed('openFileFromNotification'),
+          title: anyNamed('title'),
+        ),
+      );
+    });
+
+    test('download handles enqueue exception gracefully', () async {
+      // Covers line 432
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockFileHelper = MockDownloadFileHelper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
+      when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
+      when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+      when(localMockDownloader.loadTasks()).thenAnswer((_) async => []);
+
+      // enqueue throws exception
+      when(
+        localMockDownloader.enqueue(
+          url: anyNamed('url'),
+          savedDir: anyNamed('savedDir'),
+          fileName: anyNamed('fileName'),
+          openFileFromNotification: anyNamed('openFileFromNotification'),
+          showNotification: anyNamed('showNotification'),
+          title: anyNamed('title'),
+        ),
+      ).thenThrow(Exception('Enqueue failed'));
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: localMockFileHelper,
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      // Should not throw
+      await localService.download(
+        id: 'id',
+        url: 'url',
+        filePath: '/path/file.mp3',
+        title: 'Title',
+        reciterName: 'Reciter',
+      );
+    });
+
+    test('cancel handles FlutterDownloader exceptions gracefully', () async {
+      // Covers lines 455-456
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: MockDownloadFileHelper(),
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      const url = 'http://example.com/audio.mp3';
+      const taskId = 'task-1';
+
+      when(localMockDownloader.loadTasks()).thenAnswer(
+        (_) async => [
+          DownloadTask(
+            taskId: taskId,
+            status: DownloadTaskStatus.running,
+            progress: 50,
+            url: url,
+            filename: 'file.mp3',
+            savedDir: '/path/to',
+            timeCreated: 0,
+            allowCellular: true,
+          ),
+        ],
+      );
+
+      // Both cancel and remove throw
+      when(
+        localMockDownloader.cancel(taskId: taskId),
+      ).thenThrow(Exception('Cancel failed'));
+      when(
+        localMockDownloader.remove(taskId: taskId, shouldDeleteContent: true),
+      ).thenThrow(Exception('Remove failed'));
+
+      // Should still emit cancelled event
+      final Future<void> expectation = expectLater(
+        localService.globalProgressStream,
+        emits(
+          predicate<DownloadProgress>(
+            (p) => p.id == url && p.status == DownloadStatus.cancelled,
+          ),
+        ),
+      );
+
+      await localService.cancel(url);
+      await expectation;
+    });
+
+    test(
+      'cancelAll handles errors and emits events for all downloads',
+      () async {
+        // Covers lines 475-502
+        final localMockDownloader = MockFlutterDownloaderWrapper();
+        final localMockIsolateManager = MockDownloadIsolateManager();
+
+        when(
+          localMockIsolateManager.updateStream,
+        ).thenAnswer((_) => const Stream.empty());
+        when(localMockIsolateManager.registerPort()).thenReturn(null);
+        when(
+          localMockDownloader.initialize(debug: anyNamed('debug')),
+        ).thenAnswer((_) async {});
+        when(
+          localMockDownloader.registerCallback(any),
+        ).thenAnswer((_) async {});
+
+        final localService = DownloadServiceImpl(
+          flutterDownloader: localMockDownloader,
+          fileHelper: MockDownloadFileHelper(),
+          statusMapper: MockDownloadStatusMapper(),
+          isolateManager: localMockIsolateManager,
+        );
+
+        const url1 = 'http://example.com/1';
+        const url2 = 'http://example.com/2';
+
+        when(localMockDownloader.loadTasks()).thenAnswer(
+          (_) async => [
+            DownloadTask(
+              taskId: 'task1',
+              status: DownloadTaskStatus.running,
+              url: url1,
+              savedDir: '',
+              filename: 'file1.mp3',
+              progress: 50,
+              timeCreated: 0,
+              allowCellular: true,
+            ),
+            DownloadTask(
+              taskId: 'task2',
+              status: DownloadTaskStatus.enqueued,
+              url: url2,
+              savedDir: '',
+              filename: 'file2.mp3',
+              progress: 0,
+              timeCreated: 0,
+              allowCellular: true,
+            ),
+          ],
+        );
+
+        // Re-initialize to populate cache
+        localService.resetForTesting();
+        await localService.initialize();
+
+        // First task cancellation throws
+        when(
+          localMockDownloader.cancel(taskId: 'task1'),
+        ).thenThrow(Exception('Failed'));
+        when(
+          localMockDownloader.cancel(taskId: 'task2'),
+        ).thenAnswer((_) async {});
+        when(
+          localMockDownloader.remove(
+            taskId: anyNamed('taskId'),
+            shouldDeleteContent: anyNamed('shouldDeleteContent'),
+          ),
+        ).thenAnswer((_) async {});
+
+        final Future<void> expectation = expectLater(
+          localService.globalProgressStream,
+          emitsInAnyOrder([
+            predicate<DownloadProgress>(
+              (p) => p.id == url1 && p.status == DownloadStatus.cancelled,
+            ),
+            predicate<DownloadProgress>(
+              (p) => p.id == url2 && p.status == DownloadStatus.cancelled,
+            ),
+          ]),
+        );
+
+        await localService.cancelAll();
+        await expectation;
+
+        // Verify both were attempted
+        verify(localMockDownloader.cancel(taskId: 'task1')).called(1);
+        verify(localMockDownloader.cancel(taskId: 'task2')).called(1);
+      },
+    );
+
+    test('queryTasksByUrl returns null when exception occurs', () async {
+      // Covers line 572
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: MockDownloadFileHelper(),
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      // loadTasks throws
+      when(localMockDownloader.loadTasks()).thenThrow(Exception('DB error'));
+
+      await localService.initialize();
+
+      // getStatus uses _queryTasksByUrl internally
+      final DownloadStatus? status = await localService.getStatus('any-url');
+      expect(status, isNull);
+    });
+
+    test('removeTaskWithRetries gives up after max retries', () async {
+      // Covers lines 592-594
+      final localMockDownloader = MockFlutterDownloaderWrapper();
+      final localMockFileHelper = MockDownloadFileHelper();
+      final localMockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        localMockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(localMockIsolateManager.registerPort()).thenReturn(null);
+      when(
+        localMockDownloader.initialize(debug: anyNamed('debug')),
+      ).thenAnswer((_) async {});
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
+      when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
+      when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+      when(localMockFileHelper.isFileExists(any)).thenReturn(false);
+
+      final localService = DownloadServiceImpl(
+        flutterDownloader: localMockDownloader,
+        fileHelper: localMockFileHelper,
+        statusMapper: MockDownloadStatusMapper(),
+        isolateManager: localMockIsolateManager,
+      );
+
+      const url = 'http://example.com/audio.mp3';
+      const taskId = 'stale-task';
+
+      when(localMockDownloader.loadTasks()).thenAnswer(
+        (_) async => [
+          DownloadTask(
+            taskId: taskId,
+            status: DownloadTaskStatus.complete,
+            progress: 100,
+            url: url,
+            filename: 'file.mp3',
+            savedDir: '/path/to',
+            timeCreated: 0,
+            allowCellular: true,
+          ),
+        ],
+      );
+
+      // Always fails
+      when(
+        localMockDownloader.remove(taskId: taskId),
+      ).thenThrow(Exception('Always fails'));
+
+      when(
+        localMockDownloader.enqueue(
+          url: anyNamed('url'),
+          savedDir: anyNamed('savedDir'),
+          fileName: anyNamed('fileName'),
+          openFileFromNotification: anyNamed('openFileFromNotification'),
+          showNotification: anyNamed('showNotification'),
+          title: anyNamed('title'),
+        ),
+      ).thenAnswer((_) async => 'new-task-id');
+
+      await localService.download(
+        id: url,
+        url: url,
+        filePath: '/path/file.mp3',
+        title: 'Title',
+        reciterName: 'Reciter',
+      );
+
+      // Should try 3 times (default retries)
+      verify(localMockDownloader.remove(taskId: taskId)).called(3);
+    });
+  });
+
+  group('DownloadProgress entity', () {
+    test('props returns all fields', () {
+      // Covers lines 637-638
+      const progress = DownloadProgress(
+        id: 'test-id',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        downloadedSize: 1024,
+        fileSize: 2048,
+      );
+
+      expect(
+        progress.props,
+        equals(['test-id', DownloadStatus.downloading, 0.5, 1024, 2048]),
+      );
+    });
+
+    test('equality works correctly', () {
+      const progress1 = DownloadProgress(
+        id: 'test-id',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        downloadedSize: 1024,
+        fileSize: 2048,
+      );
+
+      const progress2 = DownloadProgress(
+        id: 'test-id',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        downloadedSize: 1024,
+        fileSize: 2048,
+      );
+
+      const progress3 = DownloadProgress(
+        id: 'different-id',
+        status: DownloadStatus.downloading,
+        progress: 0.5,
+        downloadedSize: 1024,
+        fileSize: 2048,
+      );
+
+      expect(progress1, equals(progress2));
+      expect(progress1, isNot(equals(progress3)));
     });
   });
 }

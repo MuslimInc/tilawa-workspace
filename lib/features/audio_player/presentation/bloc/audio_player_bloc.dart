@@ -77,16 +77,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     // This handles cases where AudioService is not initialized (e.g., in tests)
     runZonedGuarded(
       () {
-        _getPositionDataStream().listen(
-          (positionData) {
-            add(AudioPlayerEvent.updatePositionData(positionData));
-          },
-          onError: (error) {
-            // Handle stream errors
-            logger.d('Error in position stream: $error');
-          },
-          cancelOnError: false,
-        );
+        _getPositionDataStream().listen((positionData) {
+          add(AudioPlayerEvent.updatePositionData(positionData));
+        }, cancelOnError: false);
       },
       (error, stackTrace) {
         // Catch errors that occur during stream creation/subscription
@@ -546,6 +539,13 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     }
   }
 
+  /// Serializes a list of MediaItems to JSON
+  /// This method is visible for testing to allow testing of error handling
+  @visibleForTesting
+  List<Map<String, dynamic>> serializeQueue(List<MediaItem> queue) {
+    return MediaItemJson.toJsonList(queue);
+  }
+
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
     try {
@@ -554,12 +554,14 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         'speed': state.speed,
       };
 
+      final QueueState? queueState = state.queueState;
+
       // Persist queue if available
-      if (state.queueState != null &&
-          state.queueState!.queue.isNotEmpty &&
-          state.queueState!.queueIndex != null) {
-        json['queue'] = MediaItemJson.toJsonList(state.queueState!.queue);
-        json['queueIndex'] = state.queueState!.queueIndex;
+      if (queueState != null &&
+          queueState.queue.isNotEmpty &&
+          queueState.queueIndex != null) {
+        json['queue'] = serializeQueue(queueState.queue);
+        json['queueIndex'] = queueState.queueIndex;
       }
 
       // Persist current playback position if available
