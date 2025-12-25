@@ -55,8 +55,12 @@ import 'package:tilawa/features/auth/data/providers/google_auth_provider_impl.da
     as _i342;
 import 'package:tilawa/features/auth/data/repositories/auth_repository_impl.dart'
     as _i946;
+import 'package:tilawa/features/auth/data/repositories/user_repository_impl.dart'
+    as _i504;
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart'
     as _i742;
+import 'package:tilawa/features/auth/domain/repositories/user_repository.dart'
+    as _i307;
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart'
     as _i561;
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart'
@@ -466,9 +470,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.lazySingleton<_i307.UserRepository>(
+      () => _i504.UserRepositoryImpl(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i67.LocalizationRepository>(
       () => _i116.LocalizationRepositoryImpl(
         gh<_i678.LocalizationLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i742.AuthRepository>(
+      () => _i946.AuthRepositoryImpl(
+        gh<_i399.AuthProviderFactory>(),
+        gh<_i307.UserRepository>(),
       ),
     );
     gh.lazySingleton<_i662.PlaylistsRepository>(
@@ -524,9 +537,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i652.AthkarRepository>(
       () => _i150.AthkarRepositoryImpl(gh<_i650.AthkarLocalDataSource>()),
-    );
-    gh.lazySingleton<_i742.AuthRepository>(
-      () => _i946.AuthRepositoryImpl(gh<_i399.AuthProviderFactory>()),
     );
     gh.factory<_i275.QiblaBloc>(
       () => _i275.QiblaBloc(

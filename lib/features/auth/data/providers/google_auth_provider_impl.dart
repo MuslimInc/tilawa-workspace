@@ -38,6 +38,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       // Create a new credential
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
+        // accessToken: googleAuth.accessToken, // Not available in newer google_sign_in?
       );
 
       // Once signed in, return the UserCredential
@@ -45,6 +46,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
           .signInWithCredential(credential);
 
       final UserEntity user = _mapFirebaseUserToUser(userCredential.user!);
+
       return AuthResult.success(user: user);
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
