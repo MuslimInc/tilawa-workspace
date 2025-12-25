@@ -4,38 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_item_card.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
-import 'download_item_card_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
 // Provide dummy value for DownloadsState - Mockito will use this automatically
 @visibleForTesting
 DownloadsState provideDummyDownloadsState() => const DownloadsState();
 
-@GenerateMocks([
-  DownloadsBloc,
-  AudioPlayerBloc,
-  DownloadQueueManager,
-  DownloadService,
-  DownloadNotificationService,
-  DownloadsRepository,
-])
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockDownloadQueueManager mockDownloadQueueManager;
-  late MockDownloadService mockDownloadService;
+  late MockDownloadServiceInterface mockDownloadService;
   late MockDownloadNotificationService mockDownloadNotificationService;
   late MockDownloadsRepository mockDownloadsRepository;
 
@@ -49,7 +40,7 @@ void main() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockDownloadQueueManager = MockDownloadQueueManager();
-    mockDownloadService = MockDownloadService();
+    mockDownloadService = MockDownloadServiceInterface();
     mockDownloadsRepository = MockDownloadsRepository();
 
     // Register mock DownloadQueueManager in GetIt
@@ -63,11 +54,11 @@ void main() {
     // The widget under test uses getIt<DownloadQueueManager>() now.
 
     // Register mock DownloadService in GetIt
-    if (!getIt.isRegistered<DownloadService>()) {
-      getIt.registerSingleton<DownloadService>(mockDownloadService);
+    if (!getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.registerSingleton<DownloadServiceInterface>(mockDownloadService);
     } else {
-      getIt.unregister<DownloadService>();
-      getIt.registerSingleton<DownloadService>(mockDownloadService);
+      getIt.unregister<DownloadServiceInterface>();
+      getIt.registerSingleton<DownloadServiceInterface>(mockDownloadService);
     }
 
     mockDownloadNotificationService = MockDownloadNotificationService();
@@ -140,8 +131,8 @@ void main() {
     if (getIt.isRegistered<DownloadQueueManager>()) {
       getIt.unregister<DownloadQueueManager>();
     }
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
     if (getIt.isRegistered<DownloadNotificationService>()) {
       getIt.unregister<DownloadNotificationService>();

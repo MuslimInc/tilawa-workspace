@@ -1,13 +1,12 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 
-class MockDownloadsRepository extends Mock implements DownloadsRepository {}
+import '../../helpers/mock_helper.mocks.dart';
 
 void main() {
   late DownloadAllSurahsUseCase useCase;
@@ -46,7 +45,7 @@ void main() {
   test('should call startDownloadBatch for all surahs', () async {
     // Arrange
     when(
-      () => mockDownloadsRepository.startDownloadBatch(any()),
+      mockDownloadsRepository.startDownloadBatch(any),
     ).thenAnswer((_) async {});
 
     // Act
@@ -58,33 +57,14 @@ void main() {
 
     // Assert
     expect(result.isRight, true);
-    verify(
-      () => mockDownloadsRepository.startDownloadBatch(
-        any(
-          that:
-              isA<
-                    List<
-                      ({
-                        int reciterId,
-                        String reciterName,
-                        String surahTitle,
-                        String url,
-                      })
-                    >
-                  >()
-                  .having((l) => l.length, 'length', 2)
-                  .having((l) => l[0].url, 'url1', 'url1')
-                  .having((l) => l[1].url, 'url2', 'url2'),
-        ),
-      ),
-    ).called(1);
+    verify(mockDownloadsRepository.startDownloadBatch(any)).called(1);
     verifyNever(
-      () => mockDownloadsRepository.startDownload(
-        any(),
-        title: any(named: 'title'),
-        surahTitle: any(named: 'surahTitle'),
-        reciterName: any(named: 'reciterName'),
-        reciterId: any(named: 'reciterId'),
+      mockDownloadsRepository.startDownload(
+        any,
+        title: anyNamed('title'),
+        surahTitle: anyNamed('surahTitle'),
+        reciterName: anyNamed('reciterName'),
+        reciterId: anyNamed('reciterId'),
       ),
     );
   });

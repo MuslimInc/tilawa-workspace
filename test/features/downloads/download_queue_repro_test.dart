@@ -4,16 +4,13 @@ import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 
-import 'data/services/flutter_downloader_wrapper_test.mocks.dart';
-@GenerateMocks([DownloadNotificationService])
-import 'download_queue_repro_test.mocks.dart';
+import 'helpers/mock_helper.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +27,8 @@ void main() {
     if (GetIt.I.isRegistered<DownloadQueueManager>()) {
       GetIt.I.unregister<DownloadQueueManager>();
     }
-    if (GetIt.I.isRegistered<DownloadService>()) {
-      GetIt.I.unregister<DownloadService>();
+    if (GetIt.I.isRegistered<DownloadServiceInterface>()) {
+      GetIt.I.unregister<DownloadServiceInterface>();
     }
     if (GetIt.I.isRegistered<DownloadNotificationService>()) {
       GetIt.I.unregister<DownloadNotificationService>();
@@ -45,7 +42,7 @@ void main() {
     final downloadService = DownloadServiceImpl(
       flutterDownloader: mockDownloader,
     );
-    GetIt.I.registerSingleton<DownloadService>(downloadService);
+    GetIt.I.registerSingleton<DownloadServiceInterface>(downloadService);
 
     // Register DownloadQueueManager using the registered services
     final downloadQueueManager = DownloadQueueManager(
@@ -166,8 +163,8 @@ void main() {
       await GetIt.I.unregister<DownloadQueueManager>();
     }
 
-    if (GetIt.I.isRegistered<DownloadService>()) {
-      await GetIt.I.unregister<DownloadService>();
+    if (GetIt.I.isRegistered<DownloadServiceInterface>()) {
+      await GetIt.I.unregister<DownloadServiceInterface>();
     }
 
     if (GetIt.I.isRegistered<DownloadNotificationService>()) {

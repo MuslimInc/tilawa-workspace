@@ -6,19 +6,16 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
-import 'package:tilawa/features/downloads/data/services/flutter_downloader_wrapper.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
-import 'download_queue_manager_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([FlutterDownloaderWrapper, DownloadNotificationService])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -35,8 +32,8 @@ void main() {
     if (getIt.isRegistered<DownloadQueueManager>()) {
       getIt.unregister<DownloadQueueManager>();
     }
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
     if (getIt.isRegistered<DownloadNotificationService>()) {
       getIt.unregister<DownloadNotificationService>();
@@ -51,7 +48,7 @@ void main() {
     final downloadService = DownloadServiceImpl(
       flutterDownloader: mockDownloader,
     );
-    getIt.registerSingleton<DownloadService>(downloadService);
+    getIt.registerSingleton<DownloadServiceInterface>(downloadService);
 
     // Register DownloadQueueManager using the registered services
     final downloadQueueManager = DownloadQueueManager(
@@ -108,8 +105,8 @@ void main() {
     }
 
     final GetIt getIt = GetIt.instance;
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
     if (getIt.isRegistered<DownloadNotificationService>()) {
       getIt.unregister<DownloadNotificationService>();
@@ -471,7 +468,7 @@ void main() {
 
           // Simulate progress update
           // Use the same ID as enqueued
-          (GetIt.instance<DownloadService>() as DownloadServiceImpl)
+          (GetIt.instance<DownloadServiceInterface>() as DownloadServiceImpl)
               .globalProgressControllerInternal
               .add(
                 const DownloadProgress(

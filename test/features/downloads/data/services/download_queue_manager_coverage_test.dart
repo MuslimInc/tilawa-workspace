@@ -12,11 +12,11 @@ import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
-import 'download_queue_manager_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ void main() {
   late MockFlutterDownloaderWrapper mockDownloader;
   late Directory tempDir;
   late DownloadQueueManager queueManager;
-  late DownloadService downloadService;
+  late DownloadServiceInterface downloadService;
 
   setUp(() async {
     tempDir = Directory.systemTemp.createTempSync('coverage_test');
@@ -36,8 +36,8 @@ void main() {
     if (getIt.isRegistered<DownloadQueueManager>()) {
       getIt.unregister<DownloadQueueManager>();
     }
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
     if (getIt.isRegistered<MockDownloadNotificationService>()) {
       getIt.unregister<MockDownloadNotificationService>();
@@ -71,7 +71,7 @@ void main() {
     ).thenAnswer((_) async => 'task_id');
 
     downloadService = DownloadServiceImpl(flutterDownloader: mockDownloader);
-    getIt.registerSingleton<DownloadService>(downloadService);
+    getIt.registerSingleton<DownloadServiceInterface>(downloadService);
 
     queueManager = DownloadQueueManager(
       downloadService,

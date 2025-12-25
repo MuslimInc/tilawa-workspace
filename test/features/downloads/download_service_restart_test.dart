@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 
-import 'data/services/flutter_downloader_wrapper_test.mocks.dart';
+import 'helpers/mock_helper.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

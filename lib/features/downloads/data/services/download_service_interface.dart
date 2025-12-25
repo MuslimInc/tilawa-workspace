@@ -4,7 +4,7 @@ import '../../domain/entities/download_item.dart';
 import '../models/download_progress.dart';
 
 /// Abstract interface for download service.
-abstract class DownloadService {
+abstract class DownloadServiceInterface {
   /// Stream for monitoring all download progress updates globally.
   Stream<DownloadProgress> get globalProgressStream;
 

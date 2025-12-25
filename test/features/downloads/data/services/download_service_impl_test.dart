@@ -2,24 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
-import 'package:tilawa/features/downloads/data/services/flutter_downloader_wrapper.dart';
-import 'package:tilawa/features/downloads/data/services/helpers/download_file_helper.dart';
-import 'package:tilawa/features/downloads/data/services/helpers/download_isolate_manager.dart';
-import 'package:tilawa/features/downloads/data/services/helpers/download_status_mapper.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
-import 'download_service_impl_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([
-  FlutterDownloaderWrapper,
-  DownloadFileHelper,
-  DownloadStatusMapper,
-  DownloadIsolateManager,
-])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

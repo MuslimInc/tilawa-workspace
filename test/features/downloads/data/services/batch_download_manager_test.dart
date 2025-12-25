@@ -1,25 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
-import 'batch_download_manager_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([DownloadService, DownloadNotificationService])
 void main() {
   late BatchDownloadManager manager;
-  late MockDownloadService mockDownloadService;
+  late MockDownloadServiceInterface mockDownloadService;
   late MockDownloadNotificationService mockNotificationService;
   late StreamController<DownloadProgress> progressController;
 
   setUp(() {
-    mockDownloadService = MockDownloadService();
+    mockDownloadService = MockDownloadServiceInterface();
     mockNotificationService = MockDownloadNotificationService();
     progressController = StreamController<DownloadProgress>.broadcast();
 

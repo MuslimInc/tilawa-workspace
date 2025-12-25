@@ -7,37 +7,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
-import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
-import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
-import 'package:tilawa/features/downloads/data/services/download_status_synchronizer.dart';
-import 'package:tilawa/features/downloads/data/services/download_validator.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
-import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
-import '../services/flutter_downloader_wrapper_test.mocks.dart';
-import 'downloads_repository_impl_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([
-  DownloadsLocalDataSource,
-  DownloadService,
-  DownloadNotificationService,
-  BatchDownloadManager,
-  DownloadPathResolver,
-  DownloadValidator,
-  DownloadStatusSynchronizer,
-  RecitersRepository,
-  DownloadQueueManager,
-])
 void main() {
   provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +56,7 @@ void main() {
 
   late DownloadsRepositoryImpl repository;
   late MockDownloadsLocalDataSource mockLocalDataSource;
-  late MockDownloadService mockDownloadService;
+  late MockDownloadServiceInterface mockDownloadService;
   late MockFlutterDownloaderWrapper mockDownloader;
   late MockBatchDownloadManager mockBatchDownloadManager;
   late MockDownloadPathResolver mockPathResolver;
@@ -88,7 +69,7 @@ void main() {
   setUp(() async {
     // Setup mocks
     mockLocalDataSource = MockDownloadsLocalDataSource();
-    mockDownloadService = MockDownloadService();
+    mockDownloadService = MockDownloadServiceInterface();
     mockDownloader = MockFlutterDownloaderWrapper();
     mockBatchDownloadManager = MockBatchDownloadManager();
     mockNotificationService = MockDownloadNotificationService();
@@ -163,10 +144,10 @@ void main() {
 
     // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
-    getIt.registerSingleton<DownloadService>(mockDownloadService);
+    getIt.registerSingleton<DownloadServiceInterface>(mockDownloadService);
 
     // Register NotificationService in GetIt
     if (getIt.isRegistered<DownloadNotificationService>()) {
@@ -243,8 +224,8 @@ void main() {
       getIt.unregister<DownloadQueueManager>();
     }
     await progressController.close();
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
   });
 

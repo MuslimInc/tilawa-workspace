@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/download_item.dart';
-import '../services/download_service.dart';
+import '../services/download_service_interface.dart';
 
 /// Download progress information.
 ///
-/// Emitted by [DownloadService] to notify about download state changes.
+/// Emitted by [DownloadServiceInterface] to notify about download state changes.
 ///
 /// Fields:
 /// - `id`: The download identifier (typically the URL).

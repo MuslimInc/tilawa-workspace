@@ -3,21 +3,13 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
-import 'package:tilawa/features/downloads/domain/usecases/usecases.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
 
-import 'download_button_bloc_test.mocks.dart';
+import '../../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([
-  CheckSurahDownloadedUseCase,
-  DownloadSurahUseCase,
-  CancelDownloadUseCase,
-  ObserveDownloadProgressUseCase,
-])
 void main() {
   setUpAll(() {
     provideDummy<Either<Failure, bool>>(const Right(false));

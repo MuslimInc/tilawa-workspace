@@ -7,15 +7,15 @@ import 'package:injectable/injectable.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../models/download_progress.dart';
-import 'download_service.dart';
+import 'download_service_interface.dart';
 import 'flutter_downloader_wrapper.dart';
 import 'helpers/download_file_helper.dart';
 import 'helpers/download_isolate_manager.dart';
 import 'helpers/download_status_mapper.dart';
 
 @pragma('vm:entry-point')
-@LazySingleton(as: DownloadService)
-class DownloadServiceImpl implements DownloadService {
+@LazySingleton(as: DownloadServiceInterface)
+class DownloadServiceImpl implements DownloadServiceInterface {
   /// Create a new DownloadServiceImpl.
   ///
   /// [flutterDownloader] can be provided for testing purposes.

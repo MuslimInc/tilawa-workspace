@@ -1,13 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
-import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 
-import 'downloads_initialization_service_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([DownloadsRepository, DownloadNotificationService])
 void main() {
   late DownloadsInitializationService service;
   late MockDownloadsRepository mockRepository;

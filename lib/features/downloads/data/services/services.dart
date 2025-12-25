@@ -1,1 +1,1 @@
-export 'download_service.dart';
+export 'download_service_interface.dart';

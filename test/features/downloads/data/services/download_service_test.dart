@@ -8,12 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/utils/download_path_utils.dart';
 
-import 'flutter_downloader_wrapper_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -97,22 +97,22 @@ void main() {
 
       // Clean registration
       final GetIt getIt = GetIt.instance;
-      if (getIt.isRegistered<DownloadService>()) {
-        getIt.unregister<DownloadService>();
+      if (getIt.isRegistered<DownloadServiceInterface>()) {
+        getIt.unregister<DownloadServiceInterface>();
       }
 
       downloadService = DownloadServiceImpl(
         flutterDownloader: mockDownloader,
         isolateManager: mockIsolateManager,
       );
-      getIt.registerSingleton<DownloadService>(downloadService);
+      getIt.registerSingleton<DownloadServiceInterface>(downloadService);
     });
 
     tearDown(() async {
       await downloadService.disposeService();
       final GetIt getIt = GetIt.instance;
-      if (getIt.isRegistered<DownloadService>()) {
-        await getIt.unregister<DownloadService>();
+      if (getIt.isRegistered<DownloadServiceInterface>()) {
+        await getIt.unregister<DownloadServiceInterface>();
       }
       if (tempDir.existsSync()) {
         try {

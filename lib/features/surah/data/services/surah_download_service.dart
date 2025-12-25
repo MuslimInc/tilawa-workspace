@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import '../../../downloads/data/services/download_service.dart';
+import '../../../downloads/data/services/download_service_interface.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../domain/repositories/surah_repository.dart';
 
 class SurahDownloadService {
   SurahDownloadService({required this.downloadService});
 
-  final DownloadService downloadService;
+  final DownloadServiceInterface downloadService;
 
   static final Map<String, StreamSubscription> _progressSubscriptions = {};
 

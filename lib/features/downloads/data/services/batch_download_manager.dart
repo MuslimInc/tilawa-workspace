@@ -6,14 +6,14 @@ import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../models/download_progress.dart';
 import 'download_notification_service.dart';
-import 'download_service.dart';
+import 'download_service_interface.dart';
 
 /// Manages batch downloads and their notifications
 @lazySingleton
 class BatchDownloadManager {
   BatchDownloadManager(this._downloadService, this._notificationService);
 
-  final DownloadService _downloadService;
+  final DownloadServiceInterface _downloadService;
   final DownloadNotificationService _notificationService;
 
   // Track active batches

@@ -18,7 +18,7 @@ import '../datasources/downloads_local_datasource.dart';
 import '../services/batch_download_manager.dart';
 import '../services/download_path_resolver.dart';
 import '../services/download_queue_manager.dart';
-import '../services/download_service.dart';
+import '../services/download_service_interface.dart';
 import '../services/download_status_synchronizer.dart';
 import '../services/download_validator.dart';
 
@@ -41,7 +41,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   );
 
   final DownloadsLocalDataSource localDataSource;
-  final DownloadService downloadService;
+  final DownloadServiceInterface downloadService;
   final BatchDownloadManager batchDownloadManager;
   final DownloadPathResolver pathResolver;
   final DownloadValidator validator;
