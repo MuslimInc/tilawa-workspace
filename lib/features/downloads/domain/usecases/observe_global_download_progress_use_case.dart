@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 
+import '../../data/models/download_progress.dart';
 import '../../data/services/download_service.dart';
 
 @Singleton()

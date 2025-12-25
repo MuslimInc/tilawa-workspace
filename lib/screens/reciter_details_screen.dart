@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/di/injection.dart';
+import '../core/entities/audio.dart';
 import '../core/entities/moshaf_entity.dart';
 import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
@@ -138,34 +138,32 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     }
   }
 
-  /// Create a MediaItem with local file path for downloaded surahs
-  MediaItem _createLocalMediaItem(SurahEntity originalSurah, String filePath) {
+  /// Create an AudioEntity with local file path for downloaded surahs
+  AudioEntity _createLocalAudioEntity(
+    SurahEntity originalSurah,
+    String filePath,
+  ) {
     try {
       // Convert file path to proper file:// URI
       final fileUri = Uri.file(filePath).toString();
 
-      logger.d('_createLocalMediaItem: original file path: $filePath');
-      logger.d('_createLocalMediaItem: file URI: $fileUri');
+      logger.d('_createLocalAudioEntity: original file path: $filePath');
+      logger.d('_createLocalAudioEntity: file URI: $fileUri');
 
-      return MediaItem(
+      return AudioEntity(
         id: fileUri, // Use file URI as ID for local files
         title: originalSurah.name,
         artist: originalSurah.reciterName,
         album: originalSurah.reciterName,
-        duration: originalSurah.mediaItem.duration,
-        artUri: originalSurah.mediaItem.artUri,
-        extras: {
-          ...?originalSurah.mediaItem.extras,
-          'isDownloaded': true,
-          'originalId': originalSurah.id, // Keep original ID for reference
-          'localFilePath': filePath, // Keep original file path for reference
-        },
+        url: fileUri,
+        duration: originalSurah.audio.duration,
+        artUri: originalSurah.audio.artUri,
       );
     } catch (e) {
-      logger.d('_createLocalMediaItem error: $e');
-      logger.d('_createLocalMediaItem: falling back to original surah');
+      logger.d('_createLocalAudioEntity error: $e');
+      logger.d('_createLocalAudioEntity: falling back to original surah');
       // Fallback to original surah if file URI creation fails
-      return originalSurah.mediaItem;
+      return originalSurah.audio;
     }
   }
 
@@ -218,17 +216,17 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         }
 
         // Create a list of surahs, using downloaded files when available
-        final List<MediaItem> surahListWithDownloads = [];
+        final List<AudioEntity> surahListWithDownloads = [];
         for (var i = 0; i < state.surahList.length; i++) {
           final SurahEntity currentSurah = state.surahList[i];
           final String? localPath = downloadMap[currentSurah.id];
 
           if (localPath != null) {
             surahListWithDownloads.add(
-              _createLocalMediaItem(currentSurah, localPath),
+              _createLocalAudioEntity(currentSurah, localPath),
             );
           } else {
-            surahListWithDownloads.add(currentSurah.mediaItem);
+            surahListWithDownloads.add(currentSurah.audio);
           }
         }
 
@@ -245,9 +243,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       } else {
         // Fallback: just play the single surah
         logger.d('_playSurah: surah not found in list, playing single surah');
-        final MediaItem surahToPlay = downloadedFilePath != null
-            ? _createLocalMediaItem(surah, downloadedFilePath)
-            : surah.mediaItem;
+        final AudioEntity surahToPlay = downloadedFilePath != null
+            ? _createLocalAudioEntity(surah, downloadedFilePath)
+            : surah.audio;
 
         if (mounted) {
           context.read<AudioPlayerBloc>().add(
@@ -729,19 +727,20 @@ class _SurahCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     // Combine selectors to reduce overhead and subscription count
-    final (bool isPlaying, bool isCurrentItem) = context
-        .select<AudioPlayerBloc, (bool, bool)>((bloc) {
-          final MediaItem? currentMediaItem = bloc.state.mediaItem;
-          final PlaybackState? playbackState = bloc.state.playbackState;
+    final (
+      bool isPlaying,
+      bool isCurrentItem,
+    ) = context.select<AudioPlayerBloc, (bool, bool)>((bloc) {
+      final AudioEntity? currentAudio = bloc.state.currentAudio;
+      final PlaybackStateEntity? playbackState = bloc.state.playbackState;
 
-          final bool isCurrent =
-              currentMediaItem?.id == surah.id ||
-              currentMediaItem?.extras?['originalId'] == surah.id;
+      final bool isCurrent =
+          currentAudio?.id == surah.id || currentAudio?.url == surah.audio.url;
 
-          final bool playing = isCurrent && (playbackState?.playing ?? false);
+      final bool playing = isCurrent && (playbackState?.isPlaying ?? false);
 
-          return (playing, isCurrent);
-        });
+      return (playing, isCurrent);
+    });
 
     return RepaintBoundary(
       child: Container(

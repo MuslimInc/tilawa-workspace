@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 void main() {

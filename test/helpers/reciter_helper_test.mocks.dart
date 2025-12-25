@@ -8,8 +8,9 @@ import 'dart:async' as _i4;
 import 'package:audio_service/audio_service.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:rxdart/rxdart.dart' as _i2;
-import 'package:tilawa/core/entities/moshaf_entity.dart' as _i8;
-import 'package:tilawa/core/entities/reciter_entity.dart' as _i7;
+import 'package:tilawa/core/entities/audio.dart' as _i7;
+import 'package:tilawa/core/entities/moshaf_entity.dart' as _i9;
+import 'package:tilawa/core/entities/reciter_entity.dart' as _i8;
 import 'package:tilawa/shared/audio/audio_player_handler.dart' as _i3;
 import 'package:tilawa/shared/models/queue_state.dart' as _i5;
 
@@ -330,28 +331,39 @@ class MockAudioPlayerHandler extends _i1.Mock
           as _i4.Future<void>);
 
   @override
-  _i4.Future<List<_i6.MediaItem>?> getReciters({String? languageCode}) =>
+  _i4.Future<void> loadAudioPlayerData({bool? restorePlayback = true}) =>
       (super.noSuchMethod(
-            Invocation.method(#getReciters, [], {#languageCode: languageCode}),
-            returnValue: _i4.Future<List<_i6.MediaItem>?>.value(),
+            Invocation.method(#loadAudioPlayerData, [], {
+              #restorePlayback: restorePlayback,
+            }),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i4.Future<List<_i6.MediaItem>?>);
+          as _i4.Future<void>);
 
   @override
-  _i4.Future<List<_i7.ReciterEntity>?> getRecitersData({
+  _i4.Future<List<_i7.AudioEntity>?> getReciters({String? languageCode}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getReciters, [], {#languageCode: languageCode}),
+            returnValue: _i4.Future<List<_i7.AudioEntity>?>.value(),
+          )
+          as _i4.Future<List<_i7.AudioEntity>?>);
+
+  @override
+  _i4.Future<List<_i8.ReciterEntity>?> getRecitersData({
     String? languageCode,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getRecitersData, [], {
               #languageCode: languageCode,
             }),
-            returnValue: _i4.Future<List<_i7.ReciterEntity>?>.value(),
+            returnValue: _i4.Future<List<_i8.ReciterEntity>?>.value(),
           )
-          as _i4.Future<List<_i7.ReciterEntity>?>);
+          as _i4.Future<List<_i8.ReciterEntity>?>);
 
   @override
-  _i4.Future<List<_i6.MediaItem>?> getSurahListForMoshaf(
-    _i8.MoshafEntity? moshaf, {
+  _i4.Future<List<_i7.AudioEntity>?> getSurahListForMoshaf(
+    _i9.MoshafEntity? moshaf, {
     String? reciterName,
   }) =>
       (super.noSuchMethod(
@@ -360,9 +372,9 @@ class MockAudioPlayerHandler extends _i1.Mock
               [moshaf],
               {#reciterName: reciterName},
             ),
-            returnValue: _i4.Future<List<_i6.MediaItem>?>.value(),
+            returnValue: _i4.Future<List<_i7.AudioEntity>?>.value(),
           )
-          as _i4.Future<List<_i6.MediaItem>?>);
+          as _i4.Future<List<_i7.AudioEntity>?>);
 
   @override
   _i4.Future<void> playArtistPlaylist(String? artistId) =>

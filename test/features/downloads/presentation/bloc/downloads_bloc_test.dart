@@ -11,9 +11,11 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/services/analytics_service.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_download_access_use_case.dart';
@@ -37,7 +39,7 @@ import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart'
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
-import '../../data/services/download_service_test.mocks.dart';
+import '../../data/services/flutter_downloader_wrapper_test.mocks.dart';
 import 'downloads_bloc_test.mocks.dart';
 
 // Provide dummy values for Either types that Mockito can't generate automatically

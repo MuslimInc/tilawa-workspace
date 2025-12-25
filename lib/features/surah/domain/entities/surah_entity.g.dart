@@ -7,7 +7,7 @@ part of 'surah_entity.dart';
 // **************************************************************************
 
 _SurahEntity _$SurahEntityFromJson(Map<String, dynamic> json) => _SurahEntity(
-  mediaItem: MediaItemJson.fromJson(json['mediaItem'] as Map<String, dynamic>),
+  audio: AudioEntity.fromJson(json['audio'] as Map<String, dynamic>),
   isDownloaded: json['isDownloaded'] as bool? ?? false,
   isDownloading: json['isDownloading'] as bool? ?? false,
   downloadProgress: (json['downloadProgress'] as num?)?.toDouble() ?? 0.0,
@@ -16,7 +16,7 @@ _SurahEntity _$SurahEntityFromJson(Map<String, dynamic> json) => _SurahEntity(
 
 Map<String, dynamic> _$SurahEntityToJson(_SurahEntity instance) =>
     <String, dynamic>{
-      'mediaItem': MediaItemJson.toJson(instance.mediaItem),
+      'audio': instance.audio.toJson(),
       'isDownloaded': instance.isDownloaded,
       'isDownloading': instance.isDownloading,
       'downloadProgress': instance.downloadProgress,

@@ -1,15 +1,17 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../core/entities/audio.dart';
+import '../../features/audio_player/domain/entities/audio_modes.dart';
 
 part 'queue_state.freezed.dart';
 
 @freezed
 abstract class QueueState with _$QueueState {
   const factory QueueState({
-    required List<MediaItem> queue,
+    required List<AudioEntity> queue,
     required int? queueIndex,
     required List<int>? shuffleIndices,
-    required AudioServiceRepeatMode repeatMode,
+    required AudioRepeatMode repeatMode,
   }) = _QueueState;
 
   const QueueState._();
@@ -18,13 +20,13 @@ abstract class QueueState with _$QueueState {
     queue: [],
     queueIndex: 0,
     shuffleIndices: [],
-    repeatMode: AudioServiceRepeatMode.none,
+    repeatMode: AudioRepeatMode.none,
   );
 
   bool get hasPrevious =>
-      repeatMode != AudioServiceRepeatMode.none || (queueIndex ?? 0) > 0;
+      repeatMode != AudioRepeatMode.none || (queueIndex ?? 0) > 0;
   bool get hasNext =>
-      repeatMode != AudioServiceRepeatMode.none ||
+      repeatMode != AudioRepeatMode.none ||
       (queueIndex ?? 0) + 1 < queue.length;
 
   List<int> get indices =>

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:audio_service/audio_service.dart';
+import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:audio_session/audio_session.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:just_audio/just_audio.dart';
@@ -9,18 +9,20 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config/language_config.dart';
+import '../../core/entities/audio.dart';
 import '../../core/entities/moshaf_entity.dart';
 import '../../core/entities/reciter_entity.dart';
 import '../../core/errors/failures.dart';
 import '../../core/services/analytics_service.dart';
 import '../../core/utils/surah_names.dart';
+import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
 import '../models/queue_state.dart';
 import 'audio_player_handler.dart';
 
-class AudioPlayerHandlerImpl extends BaseAudioHandler
-    with SeekHandler
+class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
+    with audio_service.SeekHandler
     implements AudioPlayerHandler {
   AudioPlayerHandlerImpl(
     this.newList,
@@ -35,25 +37,24 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   final AudioSession? _testSession;
-  final BehaviorSubject<List<MediaItem>> _recentSubject =
-      BehaviorSubject.seeded(<MediaItem>[]);
-  final List<MediaItem> newList;
+  final BehaviorSubject<List<audio_service.MediaItem>> _recentSubject =
+      BehaviorSubject.seeded(<audio_service.MediaItem>[]);
+  final List<audio_service.MediaItem> newList;
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
   final RecitersRepository _recitersRepository;
-  final _items = <String, List<MediaItem>>{};
+  final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
   final List<AudioSource> _playlist = [];
   @override
   final BehaviorSubject<double> volume = BehaviorSubject.seeded(1.0);
   @override
   final BehaviorSubject<double> speed = BehaviorSubject.seeded(1.0);
-  final _mediaItemMap = <String, MediaItem>{};
+  final _mediaItemMap = <String, audio_service.MediaItem>{};
 
   // Caching and pagination
-  List<MediaItem>? _cachedMediaItems;
 
-  final Map<String, List<MediaItem>> _artistPlaylists = {};
+  final Map<String, List<audio_service.MediaItem>> _artistPlaylists = {};
   bool _isLoadingReciters = false;
 
   // Audio loading management
@@ -106,28 +107,70 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   @override
   Stream<QueueState> get queueState =>
-      Rx.combineLatest3<List<MediaItem>, PlaybackState, List<int>, QueueState>(
-        queue,
-        playbackState,
-        _player.shuffleIndicesStream.whereType<List<int>>(),
-        (queue, playbackState, shuffleIndices) => QueueState(
-          queue: queue,
-          queueIndex: playbackState.queueIndex,
-          shuffleIndices:
-              playbackState.shuffleMode == AudioServiceShuffleMode.all
-              ? shuffleIndices
-              : null,
-          repeatMode: playbackState.repeatMode,
-        ),
-      ).where(
-        (state) =>
-            state.shuffleIndices == null ||
-            state.queue.length == state.shuffleIndices!.length,
-      );
+      Rx.combineLatest3<
+            List<audio_service.MediaItem>,
+            audio_service.PlaybackState,
+            List<int>,
+            QueueState
+          >(
+            queue,
+            playbackState,
+            _player.shuffleIndicesStream.whereType<List<int>>(),
+            (queue, playbackState, shuffleIndices) => QueueState(
+              queue: queue.map(_mapMediaItemToAudioEntity).toList(),
+              queueIndex: playbackState.queueIndex,
+              shuffleIndices:
+                  playbackState.shuffleMode ==
+                      audio_service.AudioServiceShuffleMode.all
+                  ? shuffleIndices
+                  : null,
+              repeatMode: _mapRepeatMode(playbackState.repeatMode),
+            ),
+          )
+          .where(
+            (state) =>
+                state.shuffleIndices == null ||
+                state.queue.length == state.shuffleIndices!.length,
+          );
+
+  AudioEntity _mapMediaItemToAudioEntity(audio_service.MediaItem item) {
+    return AudioEntity(
+      id: item.id,
+      title: item.title,
+      url: item.extras?['url'] ?? item.id,
+      duration: item.duration ?? Duration.zero,
+      artist: item.artist,
+      album: item.album,
+      artUri: item.artUri?.toString(),
+    );
+  }
+
+  AudioRepeatMode _mapRepeatMode(audio_service.AudioServiceRepeatMode mode) {
+    switch (mode) {
+      case audio_service.AudioServiceRepeatMode.none:
+        return AudioRepeatMode.none;
+      case audio_service.AudioServiceRepeatMode.one:
+        return AudioRepeatMode.one;
+      case audio_service.AudioServiceRepeatMode.all:
+        return AudioRepeatMode.all;
+      case audio_service.AudioServiceRepeatMode.group:
+        return AudioRepeatMode.all;
+    }
+  }
 
   @override
-  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
-    final enabled = shuffleMode == AudioServiceShuffleMode.all;
+  Future<void> loadAudioPlayerData({bool restorePlayback = true}) async {
+    // Implementation for loading audio player data (e.g. from local storage)
+    // This was previously handled by HydratedBloc, but now moved to UseCase/Repository/Handler
+    log('Loading audio player data (restorePlayback: $restorePlayback)');
+    // Add logic here if needed to restore state from SharedPreferences or similar
+  }
+
+  @override
+  Future<void> setShuffleMode(
+    audio_service.AudioServiceShuffleMode shuffleMode,
+  ) async {
+    final enabled = shuffleMode == audio_service.AudioServiceShuffleMode.all;
     if (enabled) {
       await _player.shuffle();
     }
@@ -136,7 +179,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   @override
-  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
+  Future<void> setRepeatMode(
+    audio_service.AudioServiceRepeatMode repeatMode,
+  ) async {
     playbackState.add(playbackState.value.copyWith(repeatMode: repeatMode));
     await _player.setLoopMode(LoopMode.values[repeatMode.index]);
   }
@@ -167,17 +212,17 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
     await updateQueue(newList);
 
-    mediaItem.whereType<MediaItem>().listen(
+    mediaItem.whereType<audio_service.MediaItem>().listen(
       (item) => _recentSubject.add([item]),
     );
 
     Rx.combineLatest5<
           int?,
-          List<MediaItem>,
+          List<audio_service.MediaItem>,
           bool,
           List<int>?,
           Duration?,
-          MediaItem?
+          audio_service.MediaItem?
         >(
           _player.currentIndexStream,
           queue,
@@ -198,7 +243,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
                 : null;
           },
         )
-        .whereType<MediaItem>()
+        .whereType<audio_service.MediaItem>()
         .listen(mediaItem.add);
 
     _player.playbackEventStream.listen(_broadcastState);
@@ -217,7 +262,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         .map(
           (sequence) => sequence
               .map((source) => _mediaItemMap[source.tag])
-              .whereType<MediaItem>()
+              .whereType<audio_service.MediaItem>()
               .toList(),
         )
         .listen(queue.add);
@@ -233,7 +278,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     }
   }
 
-  AudioSource _itemToSource(MediaItem mediaItem) {
+  AudioSource _itemToSource(audio_service.MediaItem mediaItem) {
     final UriAudioSource audioSource = AudioSource.uri(
       Uri.parse(mediaItem.id),
       tag: mediaItem.id,
@@ -242,7 +287,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     return audioSource;
   }
 
-  List<AudioSource> _itemsToSources(List<MediaItem> mediaItems) =>
+  List<AudioSource> _itemsToSources(List<audio_service.MediaItem> mediaItems) =>
       mediaItems.map(_itemToSource).toList();
 
   int? _pendingIndex;
@@ -263,7 +308,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     // before the player even finishes loading.
     playbackState.add(
       playbackState.value.copyWith(
-        processingState: AudioProcessingState.loading,
+        processingState: audio_service.AudioProcessingState.loading,
         queueIndex: effectiveIndex,
       ),
     );
@@ -306,7 +351,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   @override
-  Future<List<MediaItem>> getChildren(
+  Future<List<audio_service.MediaItem>> getChildren(
     String parentMediaId, [
     Map<String, dynamic>? options,
   ]) async {
@@ -316,7 +361,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
     switch (parentMediaId) {
-      case AudioService.recentRootId:
+      case audio_service.AudioService.recentRootId:
         final Stream<Map<String, dynamic>> stream = _recentSubject.map(
           (_) => <String, dynamic>{},
         );
@@ -330,42 +375,45 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   }
 
   @override
-  Future<void> addQueueItem(MediaItem mediaItem) async {
+  Future<void> addQueueItem(audio_service.MediaItem mediaItem) async {
     _playlist.add(_itemToSource(mediaItem));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
-  Future<void> addQueueItems(List<MediaItem> mediaItems) async {
+  Future<void> addQueueItems(List<audio_service.MediaItem> mediaItems) async {
     _playlist.addAll(_itemsToSources(mediaItems));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
-  Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
+  Future<void> insertQueueItem(
+    int index,
+    audio_service.MediaItem mediaItem,
+  ) async {
     _playlist.insert(index, _itemToSource(mediaItem));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
-  Future<void> updateQueue(List<MediaItem> queue) async {
+  Future<void> updateQueue(List<audio_service.MediaItem> queue) async {
     _playlist.clear();
     _playlist.addAll(_itemsToSources(queue));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
-  Future<void> updateMediaItem(MediaItem mediaItem) async {
+  Future<void> updateMediaItem(audio_service.MediaItem mediaItem) async {
     _mediaItemMap[mediaItem.id] = mediaItem;
-    final List<MediaItem> currentQueue = queue.value;
-    final List<MediaItem> newQueue = currentQueue
+    final List<audio_service.MediaItem> currentQueue = queue.value;
+    final List<audio_service.MediaItem> newQueue = currentQueue
         .map((item) => item.id == mediaItem.id ? mediaItem : item)
         .toList();
     queue.add(newQueue);
   }
 
   @override
-  Future<void> removeQueueItem(MediaItem mediaItem) async {
+  Future<void> removeQueueItem(audio_service.MediaItem mediaItem) async {
     final int index = _playlist.indexWhere((s) {
       // Safe check for tag
       if (s is UriAudioSource) {
@@ -440,7 +488,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> play() async {
     await _player.play();
     // Log analytics event
-    final MediaItem? currentItem = mediaItem.valueOrNull;
+    final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioPlay(
         currentItem.id,
@@ -454,7 +502,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> pause() async {
     await _player.pause();
     // Log analytics event
-    final MediaItem? currentItem = mediaItem.valueOrNull;
+    final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioPause(currentItem.id);
     }
@@ -464,7 +512,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> seek(Duration position) async {
     await _player.seek(position);
     // Log analytics event
-    final MediaItem? currentItem = mediaItem.valueOrNull;
+    final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioSeek(currentItem.id, position.inSeconds);
     }
@@ -474,12 +522,13 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   Future<void> stop() async {
     await _player.stop();
     // Log analytics event
-    final MediaItem? currentItem = mediaItem.valueOrNull;
+    final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioStop(currentItem.id);
     }
     await playbackState.firstWhere(
-      (state) => state.processingState == AudioProcessingState.idle,
+      (state) =>
+          state.processingState == audio_service.AudioProcessingState.idle,
     );
   }
 
@@ -500,23 +549,28 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     playbackState.add(
       playbackState.value.copyWith(
         controls: [
-          MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.stop,
-          MediaControl.skipToNext,
+          audio_service.MediaControl.skipToPrevious,
+          if (playing)
+            audio_service.MediaControl.pause
+          else
+            audio_service.MediaControl.play,
+          audio_service.MediaControl.stop,
+          audio_service.MediaControl.skipToNext,
         ],
         systemActions: const {
-          MediaAction.seek,
-          MediaAction.seekForward,
-          MediaAction.seekBackward,
+          audio_service.MediaAction.seek,
+          audio_service.MediaAction.seekForward,
+          audio_service.MediaAction.seekBackward,
         },
         androidCompactActionIndices: const [0, 1, 3],
         processingState: const {
-          ProcessingState.idle: AudioProcessingState.idle,
-          ProcessingState.loading: AudioProcessingState.loading,
-          ProcessingState.buffering: AudioProcessingState.buffering,
-          ProcessingState.ready: AudioProcessingState.ready,
-          ProcessingState.completed: AudioProcessingState.completed,
+          ProcessingState.idle: audio_service.AudioProcessingState.idle,
+          ProcessingState.loading: audio_service.AudioProcessingState.loading,
+          ProcessingState.buffering:
+              audio_service.AudioProcessingState.buffering,
+          ProcessingState.ready: audio_service.AudioProcessingState.ready,
+          ProcessingState.completed:
+              audio_service.AudioProcessingState.completed,
         }[_player.processingState]!,
         playing: playing,
         updatePosition: _player.position,
@@ -527,17 +581,23 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
     );
   }
 
+  List<AudioEntity>? _cachedReciters;
+  final Duration _cacheDuration = const Duration(minutes: 5);
+  DateTime? _lastCacheTime;
+
   @override
-  Future<List<MediaItem>?> getReciters({String? languageCode}) async {
-    // Return cached data if available
-    if (_cachedMediaItems != null) {
-      return _cachedMediaItems;
+  Future<List<AudioEntity>?> getReciters({String? languageCode}) async {
+    // Return cached data if valid
+    if (_cachedReciters != null &&
+        _lastCacheTime != null &&
+        DateTime.now().difference(_lastCacheTime!) < _cacheDuration) {
+      return _cachedReciters;
     }
 
     // Prevent multiple simultaneous requests
     if (_isLoadingReciters) {
       await Future.delayed(const Duration(milliseconds: 200));
-      return _cachedMediaItems;
+      return _cachedReciters; // Return validation attempt or null
     }
 
     _isLoadingReciters = true;
@@ -552,26 +612,21 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
           return null;
         },
         (reciters) {
-          final mediaItems = <MediaItem>[];
+          final audioEntities = <AudioEntity>[];
           for (final reciter in reciters) {
             for (final MoshafEntity moshaf in reciter.moshaf) {
               final List<String> surahList = moshaf.surahList.split(',');
               for (final surahId in surahList) {
                 final String formattedSurahId = surahId.padLeft(3, '0');
-                final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
-                // Note: Using SurahNames helper here might be async if you wanted strict localization check
-                // but since title construction usually needs context or prefs
-                // we can accept a slight delay or use the helper
-                // Wait, SurahNames is sync.
-                // But we might want localized names. The previous impl fetched reciters with lang code.
-                // Our repo handles lang internally?
-                // The repository fetches data based on prefs internally.
+                final audioId = '${moshaf.server}$formattedSurahId.mp3';
 
-                mediaItems.add(
-                  MediaItem(
-                    id: mediaItemId,
+                audioEntities.add(
+                  AudioEntity(
+                    id: audioId,
                     title:
-                        '${SurahNames.getEnglishSurahName(int.parse(surahId))} $formattedSurahId', // Fallback or standard
+                        '${SurahNames.getEnglishSurahName(int.parse(surahId))} $formattedSurahId',
+                    url: audioId,
+                    duration: Duration.zero,
                     album: moshaf.name,
                     artist: reciter.name,
                   ),
@@ -579,9 +634,9 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
               }
             }
           }
-          _cachedMediaItems = mediaItems;
-          // _cachedRecitersEntities = reciters;
-          return mediaItems;
+          _cachedReciters = audioEntities;
+          _lastCacheTime = DateTime.now();
+          return audioEntities;
         },
       );
     } finally {
@@ -603,40 +658,33 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
   /// Get surah list for a specific moshaf
   @override
-  Future<List<MediaItem>?> getSurahListForMoshaf(
+  Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,
   }) async {
     try {
       final List<String> surahList = moshaf.surahList.split(',');
-      final mediaItems = <MediaItem>[];
+      final audioEntities = <AudioEntity>[];
 
       for (final surahId in surahList) {
         final int surahNumber = int.parse(surahId);
         final String formattedSurahId = surahId.padLeft(3, '0');
-        final mediaItemId = '${moshaf.server}$formattedSurahId.mp3';
+        final audioId = '${moshaf.server}$formattedSurahId.mp3';
         final String surahName = await _getSurahName(surahNumber);
-        final String nameAr = SurahNames.getArabicSurahName(surahNumber);
-        final String nameEn = SurahNames.getEnglishSurahName(surahNumber);
 
-        mediaItems.add(
-          MediaItem(
-            id: mediaItemId,
-            title: '$formattedSurahId - $surahName',
+        audioEntities.add(
+          AudioEntity(
+            id: audioId,
+            title: surahName,
+            url: audioId,
+            duration: Duration.zero,
+            artist: reciterName,
             album: moshaf.name,
-            artist: reciterName ?? '', // Set reciter name if provided
-            duration: const Duration(minutes: 5), // Default duration
-            extras: {
-              'nameAr': nameAr,
-              'nameEn': nameEn,
-              'surahNumber': surahNumber,
-              'formattedId': formattedSurahId,
-            },
           ),
         );
       }
 
-      return mediaItems;
+      return audioEntities;
     } catch (e) {
       log('Exception getting surah list: $e');
       return null;
@@ -683,7 +731,8 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
 
       // Check if we already have this artist's playlist cached
       if (_artistPlaylists.containsKey(artistId)) {
-        final List<MediaItem> artistPlaylist = _artistPlaylists[artistId]!;
+        final List<audio_service.MediaItem> artistPlaylist =
+            _artistPlaylists[artistId]!;
         log(
           'Using cached playlist for artist: $artistId (${artistPlaylist.length} items)',
         );
@@ -697,16 +746,21 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
       log('Loading playlist for artist: $artistId');
 
       // Fetch the reciters list from getReciters method
-      final List<MediaItem>? reciters = await getReciters();
+      final List<AudioEntity>? reciters = await getReciters();
 
       if (reciters != null) {
-        // Filter the reciters list to find the media items belonging to the artist with the provided artistId
-        final List<MediaItem> artistPlaylist = reciters
+        // Filter the reciters list to find the items belonging to the artist
+        final List<AudioEntity> artistAudioEntities = reciters
             .where((item) => item.artist == artistId)
             .toList();
 
-        if (artistPlaylist.isNotEmpty) {
-          log('Found ${artistPlaylist.length} items for artist: $artistId');
+        if (artistAudioEntities.isNotEmpty) {
+          log(
+            'Found ${artistAudioEntities.length} items for artist: $artistId',
+          );
+
+          final List<audio_service.MediaItem> artistPlaylist =
+              artistAudioEntities.map(_mapAudioEntityToMediaItem).toList();
 
           // Cache the artist's playlist
           _artistPlaylists[artistId] = artistPlaylist;
@@ -726,14 +780,29 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         log('No reciters found.');
       }
     } catch (e) {
-      rethrow;
+      log('Error playing artist playlist: $e');
     } finally {
       _currentLoadingArtist = null;
     }
   }
 
+  audio_service.MediaItem _mapAudioEntityToMediaItem(AudioEntity entity) {
+    return audio_service.MediaItem(
+      id: entity.id,
+      title: entity.title,
+      duration: entity.duration,
+      artist: entity.artist,
+      album: entity.album,
+      artUri: entity.artUri != null ? Uri.parse(entity.artUri!) : null,
+      extras: {'url': entity.url},
+    );
+  }
+
   @override
-  Future<void> playFromQueue(List<MediaItem> queue, int index) async {
+  Future<void> playFromQueue(
+    List<audio_service.MediaItem> queue,
+    int index,
+  ) async {
     _playlist.clear();
     _playlist.addAll(_itemsToSources(queue));
     await _safeSetAudioSources(_playlist, initialIndex: index);

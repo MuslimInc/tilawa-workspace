@@ -9,13 +9,11 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 
-import 'data/services/download_service_test.mocks.dart';
+import 'data/services/flutter_downloader_wrapper_test.mocks.dart';
 @GenerateMocks([DownloadNotificationService])
 import 'download_queue_repro_test.mocks.dart';
-
-// class MockDownloadNotificationService extends Mock
-//     implements DownloadNotificationService {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -74,12 +72,16 @@ void main() {
     when(mockNotification.cancelNotification(any)).thenAnswer((_) async {});
 
     // Setup Service basics
-    when(
-      mockDownloader.initialize(debug: anyNamed('debug')),
-    ).thenAnswer((_) async {});
+    when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
+      _,
+    ) async {
+      return;
+    });
     when(
       mockDownloader.registerCallback(any, step: anyNamed('step')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     // Default empty tasks
     when(mockDownloader.loadTasks()).thenAnswer((_) async => []);

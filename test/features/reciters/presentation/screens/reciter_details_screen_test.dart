@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:tilawa/core/entities/entities.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -199,17 +199,21 @@ void main() {
 
   final testSurahList = <SurahEntity>[
     const SurahEntity(
-      mediaItem: MediaItem(
+      audio: AudioEntity(
         id: '001',
         title: 'Al-Fatiha',
         artist: 'Test Reciter',
+        url: 'url1',
+        duration: Duration.zero,
       ),
     ),
     const SurahEntity(
-      mediaItem: MediaItem(
+      audio: AudioEntity(
         id: '002',
         title: 'Al-Baqarah',
         artist: 'Test Reciter',
+        url: 'url2',
+        duration: Duration.zero,
       ),
     ),
   ];
@@ -258,12 +262,9 @@ void main() {
       ),
     );
     when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
-    when(() => mockAudioPlayerBloc.state).thenReturn(
-      AudioPlayerState(
-        status: AudioPlayerStatus.initial,
-        playbackState: PlaybackState(),
-      ),
-    );
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
@@ -276,7 +277,7 @@ void main() {
     expect(find.text('Hafs'), findsOneWidget);
 
     // Verify Surah list
-    // expect(find.text('Al-Fatiha'), findsOneWidget);
+    expect(find.text('Al-Fatiha'), findsOneWidget);
     expect(find.text('Al-Baqarah'), findsOneWidget);
   });
 
@@ -339,12 +340,15 @@ void main() {
     WidgetTester tester,
   ) async {
     // Generate a long list of surahs to enable scrolling
+    // Generate a long list of surahs to enable scrolling
     final List<SurahEntity> longSurahList = List.generate(20, (index) {
       return SurahEntity(
-        mediaItem: MediaItem(
-          id: 'surah_$index',
-          title: 'Surah $index',
-          artist: 'Test Reciter',
+        audio: AudioEntity(
+          id: 'url$index',
+          title: 'Surah $index', // Update title to match test expectation
+          artist: 'tReciterName',
+          url: 'url$index',
+          duration: Duration.zero,
         ),
       );
     });
@@ -553,10 +557,34 @@ void main() {
       () => mockAudioPlayerBloc.state,
     ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
 
+    when(
+      () => mockReciterDetailsBloc.stream,
+    ).thenAnswer((_) => const Stream.empty());
+
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(ElevatedButton).first); // Download All
+    // debugDumpApp(); // Uncomment if needed
+    // print('Found ElevatedButton widgets: ${find.byType(ElevatedButton).evaluate().length}');
+
+    // Robust finding strategy:
+    Finder buttonFinder = find.byType(ElevatedButton);
+    if (buttonFinder.evaluate().isEmpty) {
+      // Try offstage
+      buttonFinder = find.byType(ElevatedButton, skipOffstage: false);
+    }
+
+    // Verify button existence via Icon since find.byType(ElevatedButton) is flaky with _ElevatedButtonWithIcon
+    buttonFinder = find.byIcon(Icons.download_rounded);
+
+    if (buttonFinder.evaluate().isEmpty) {
+      // Only fail if icon is also missing (meaning button truly not rendered or icon changed)
+      debugDumpApp();
+      fail('Download All button (Icon) not found!');
+    }
+
+    // Now tap (use the finder that works)
+    await tester.tap(buttonFinder.first); // Download All
     verify(
       () => mockReciterDetailsBloc.add(
         DownloadAllSurahs(reciter: testReciter, surahs: testSurahList),
@@ -630,8 +658,8 @@ void main() {
     verify(
       () => mockAudioPlayerBloc.add(
         AudioPlayerEvent.playFromQueue([
-          testSurahList[0].mediaItem,
-          testSurahList[1].mediaItem,
+          testSurahList[0].audio,
+          testSurahList[1].audio,
         ], 0),
       ),
     ).called(1);
@@ -792,20 +820,24 @@ void main() {
     when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
 
     // Set Al-Fatiha as currently playing
-    final MediaItem currentMediaItem = testSurahList[0].mediaItem;
-    final playbackState = PlaybackState(
-      playing: true,
-      processingState: AudioProcessingState.ready,
+    final AudioEntity currentAudio = testSurahList[0].audio;
+    const playbackState = PlaybackStateEntity(
+      isPlaying: true,
+      processingState: AudioProcessingStateStatus.ready,
+      position: Duration.zero,
+      duration: Duration.zero,
+      currentIndex: 0,
+      queue: [],
     );
 
     final playingState = AudioPlayerState(
       status: AudioPlayerStatus.success,
-      mediaItem: currentMediaItem,
+      currentAudio: currentAudio,
       playbackState: playbackState,
     );
 
     final AudioPlayerState pausedState = playingState.copyWith(
-      playbackState: playbackState.copyWith(playing: false),
+      playbackState: playbackState.copyWith(isPlaying: false),
     );
 
     final stateController = StreamController<AudioPlayerState>.broadcast();
@@ -868,8 +900,6 @@ void main() {
     WidgetTester tester,
   ) async {
     final mockFile = MockFile();
-    when(() => mockFile.existsSync()).thenReturn(true);
-    when(() => mockFile.path).thenReturn('/path/to/fatiha.mp3');
 
     await IOOverrides.runZoned(() async {
       final state = ReciterDetailsState(
@@ -878,10 +908,6 @@ void main() {
         selectedMoshaf: testReciter.moshaf.first,
       );
       when(() => mockReciterDetailsBloc.state).thenReturn(state);
-      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
-      when(
-        () => mockAudioPlayerBloc.state,
-      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
       when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
       when(
         () => mockAudioPlayerBloc.state,
@@ -918,7 +944,23 @@ void main() {
       await tester.pump();
 
       // Verify playFromQueue was called.
-      verify(() => mockAudioPlayerBloc.add(any())).called(1);
+      final List<dynamic> captured = verify(
+        () => mockAudioPlayerBloc.add(captureAny()),
+      ).captured;
+
+      final List<dynamic> playFromQueueEvents = captured
+          .where(
+            (e) =>
+                e is AudioPlayerEvent &&
+                e.maybeMap(playFromQueue: (_) => true, orElse: () => false),
+          )
+          .toList();
+
+      expect(
+        playFromQueueEvents.length,
+        1,
+        reason: 'Expected 1 PlayFromQueue event',
+      );
     }, createFile: (path) => mockFile);
   });
 
@@ -929,10 +971,12 @@ void main() {
       status: ReciterDetailsStatus.loaded,
       surahList: [
         testSurahList[0].copyWith(
-          mediaItem: MediaItem(
+          audio: AudioEntity(
             id: '',
             title: testSurahList[0].name,
             artist: testSurahList[0].reciterName,
+            url: '',
+            duration: Duration.zero,
           ),
         ),
       ], // Invalid ID

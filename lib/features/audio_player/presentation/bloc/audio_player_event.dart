@@ -5,15 +5,12 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
   const factory AudioPlayerEvent.loadAudioPlayerData({
     @Default(true) bool restorePlayback,
   }) = LoadAudioPlayerData;
-  const factory AudioPlayerEvent.updateMediaItem(MediaItem? mediaItem) =
-      UpdateMediaItem;
-  const factory AudioPlayerEvent.updatePlaybackState(
-    PlaybackState playbackState,
-  ) = UpdatePlaybackState;
+  const factory AudioPlayerEvent.updateAudio(AudioEntity? audio) = UpdateAudio;
+  const factory AudioPlayerEvent.updatePlaybackStateEntity(
+    PlaybackStateEntity playbackState,
+  ) = UpdatePlaybackStateEntity;
   const factory AudioPlayerEvent.updatePositionData(PositionData positionData) =
       UpdatePositionData;
-  const factory AudioPlayerEvent.updateQueueState(QueueState queueState) =
-      UpdateQueueState;
   const factory AudioPlayerEvent.updateVolume(double volume) = UpdateVolume;
   const factory AudioPlayerEvent.updateSpeed(double speed) = UpdateSpeed;
 
@@ -28,20 +25,18 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
   const factory AudioPlayerEvent.setSpeed(double speed) = SetSpeed;
   const factory AudioPlayerEvent.skipToQueueItem(int index) = SkipToQueueItem;
   const factory AudioPlayerEvent.playFromQueue(
-    List<MediaItem> queue,
+    List<AudioEntity> queue,
     int index,
   ) = PlayFromQueue;
-  const factory AudioPlayerEvent.updateQueue(List<MediaItem> queue) =
+  const factory AudioPlayerEvent.updateQueue(List<AudioEntity> queue) =
       UpdateQueue;
-  const factory AudioPlayerEvent.addQueueItem(MediaItem item) = AddQueueItem;
-  const factory AudioPlayerEvent.removeQueueItem(MediaItem item) =
+  const factory AudioPlayerEvent.addQueueItem(AudioEntity audio) = AddQueueItem;
+  const factory AudioPlayerEvent.removeQueueItem(AudioEntity audio) =
       RemoveQueueItem;
   const factory AudioPlayerEvent.moveQueueItem(int currentIndex, int newIndex) =
       MoveQueueItem;
-  const factory AudioPlayerEvent.setRepeatMode(
-    AudioServiceRepeatMode repeatMode,
-  ) = SetRepeatMode;
-  const factory AudioPlayerEvent.setShuffleMode(
-    AudioServiceShuffleMode shuffleMode,
-  ) = SetShuffleMode;
+  const factory AudioPlayerEvent.setRepeatMode(AudioRepeatMode repeatMode) =
+      SetRepeatMode;
+  const factory AudioPlayerEvent.setShuffleMode(AudioShuffleMode shuffleMode) =
+      SetShuffleMode;
 }

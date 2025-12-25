@@ -1,37 +1,16 @@
-import 'package:audio_service/audio_service.dart';
+import '../../../../core/entities/audio.dart';
 import '../entities/surah_entity.dart';
 
 class SurahMapper {
-  /// Convert Surah to MediaItem
-  static MediaItem toMediaItem(SurahEntity surah) {
-    // Return the original MediaItem with updated extras
-    return MediaItem(
-      id: surah.mediaItem.id,
-      title: surah.mediaItem.title,
-      artist: surah.mediaItem.artist,
-      album: surah.mediaItem.album,
-      duration: surah.mediaItem.duration,
-      artUri: surah.mediaItem.artUri,
-      extras: {
-        ...surah.mediaItem.extras ?? {},
-        'isDownloaded': surah.isDownloaded,
-        'isDownloading': surah.isDownloading,
-        'downloadProgress': surah.downloadProgress,
-        'downloadId': surah.downloadId,
-      },
-    );
+  /// Convert Surah to AudioEntity
+  static AudioEntity toAudioEntity(SurahEntity surah) {
+    // Return the original AudioEntity
+    return surah.audio;
   }
 
-  /// Convert MediaItem to Surah
-  static SurahEntity fromMediaItem(MediaItem mediaItem) {
-    return SurahEntity(
-      mediaItem: mediaItem,
-      isDownloaded: mediaItem.extras?['isDownloaded'] as bool? ?? false,
-      isDownloading: mediaItem.extras?['isDownloading'] as bool? ?? false,
-      downloadProgress:
-          (mediaItem.extras?['downloadProgress'] as num?)?.toDouble() ?? 0.0,
-      downloadId: mediaItem.extras?['downloadId'] as String?,
-    );
+  /// Convert AudioEntity to Surah
+  static SurahEntity fromAudioEntity(AudioEntity audio) {
+    return SurahEntity(audio: audio);
   }
 
   /// Create Surah from basic data
@@ -41,21 +20,25 @@ class SurahMapper {
     required String nameAr,
     required String reciterName,
     required String url,
+    required Duration duration,
+    String? artUri,
     bool isDownloaded = false,
     bool isDownloading = false,
     double downloadProgress = 0.0,
     String? downloadId,
   }) {
-    final mediaItem = MediaItem(
+    final audio = AudioEntity(
       id: id,
       title: name,
       artist: reciterName,
       album: reciterName,
-      extras: {'nameAr': nameAr, 'url': url},
+      url: url,
+      duration: duration,
+      artUri: artUri,
     );
 
     return SurahEntity(
-      mediaItem: mediaItem,
+      audio: audio,
       isDownloaded: isDownloaded,
       isDownloading: isDownloading,
       downloadProgress: downloadProgress,

@@ -7,21 +7,23 @@ import 'dart:async' as _i10;
 
 import 'package:dartz_plus/dartz_plus.dart' as _i11;
 import 'package:dio/src/adapter.dart' as _i5;
-import 'package:dio/src/cancel_token.dart' as _i37;
+import 'package:dio/src/cancel_token.dart' as _i38;
 import 'package:dio/src/dio.dart' as _i8;
 import 'package:dio/src/dio_mixin.dart' as _i4;
 import 'package:dio/src/options.dart' as _i3;
 import 'package:dio/src/response.dart' as _i7;
 import 'package:dio/src/transformer.dart' as _i6;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    as _i33;
+    as _i34;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i14;
 import 'package:tilawa/core/errors/failures.dart' as _i12;
 import 'package:tilawa/core/services/analytics_service.dart' as _i30;
 import 'package:tilawa/core/usecases/usecase.dart' as _i16;
-import 'package:tilawa/features/downloads/data/services/download_notification_service.dart'
+import 'package:tilawa/features/downloads/data/models/download_progress.dart'
     as _i32;
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart'
+    as _i33;
 import 'package:tilawa/features/downloads/data/services/download_service.dart'
     as _i31;
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart'
@@ -45,7 +47,7 @@ import 'package:tilawa/features/downloads/domain/usecases/download_surah_use_cas
 import 'package:tilawa/features/downloads/domain/usecases/get_download_item_use_case.dart'
     as _i28;
 import 'package:tilawa/features/downloads/domain/usecases/get_download_status_use_case.dart'
-    as _i35;
+    as _i36;
 import 'package:tilawa/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart'
     as _i9;
 import 'package:tilawa/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart'
@@ -53,13 +55,13 @@ import 'package:tilawa/features/downloads/domain/usecases/get_total_downloads_si
 import 'package:tilawa/features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart'
     as _i23;
 import 'package:tilawa/features/downloads/domain/usecases/observe_global_download_progress_use_case.dart'
-    as _i34;
+    as _i35;
 import 'package:tilawa/features/downloads/domain/usecases/play_all_downloads_use_case.dart'
     as _i26;
 import 'package:tilawa/features/downloads/domain/usecases/play_download_use_case.dart'
     as _i25;
 import 'package:tilawa/features/downloads/domain/usecases/remove_from_download_queue_use_case.dart'
-    as _i36;
+    as _i37;
 import 'package:tilawa/features/downloads/domain/usecases/retry_download_use_case.dart'
     as _i27;
 import 'package:tilawa/features/downloads/domain/usecases/validate_downloaded_file_use_case.dart'
@@ -801,20 +803,20 @@ class MockDownloadService extends _i1.Mock implements _i31.DownloadService {
   }
 
   @override
-  _i10.Stream<_i31.DownloadProgress> get globalProgressStream =>
+  _i10.Stream<_i32.DownloadProgress> get globalProgressStream =>
       (super.noSuchMethod(
             Invocation.getter(#globalProgressStream),
-            returnValue: _i10.Stream<_i31.DownloadProgress>.empty(),
+            returnValue: _i10.Stream<_i32.DownloadProgress>.empty(),
           )
-          as _i10.Stream<_i31.DownloadProgress>);
+          as _i10.Stream<_i32.DownloadProgress>);
 
   @override
-  _i10.Stream<_i31.DownloadProgress> getProgressStream(String? id) =>
+  _i10.Stream<_i32.DownloadProgress> getProgressStream(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getProgressStream, [id]),
-            returnValue: _i10.Stream<_i31.DownloadProgress>.empty(),
+            returnValue: _i10.Stream<_i32.DownloadProgress>.empty(),
           )
-          as _i10.Stream<_i31.DownloadProgress>);
+          as _i10.Stream<_i32.DownloadProgress>);
 
   @override
   _i10.Future<List<String>> getActiveDownloadIds() =>
@@ -906,7 +908,7 @@ class MockDownloadService extends _i1.Mock implements _i31.DownloadService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadNotificationService extends _i1.Mock
-    implements _i32.DownloadNotificationService {
+    implements _i33.DownloadNotificationService {
   MockDownloadNotificationService() {
     _i1.throwOnMissingStub(this);
   }
@@ -992,7 +994,7 @@ class MockDownloadNotificationService extends _i1.Mock
 
   @override
   _i10.Future<void> handleNotificationResponse(
-    _i33.NotificationResponse? response,
+    _i34.NotificationResponse? response,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#handleNotificationResponse, [response]),
@@ -1006,25 +1008,25 @@ class MockDownloadNotificationService extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockObserveGlobalDownloadProgressUseCase extends _i1.Mock
-    implements _i34.ObserveGlobalDownloadProgressUseCase {
+    implements _i35.ObserveGlobalDownloadProgressUseCase {
   MockObserveGlobalDownloadProgressUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i10.Stream<_i31.DownloadProgress> call() =>
+  _i10.Stream<_i32.DownloadProgress> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i10.Stream<_i31.DownloadProgress>.empty(),
+            returnValue: _i10.Stream<_i32.DownloadProgress>.empty(),
           )
-          as _i10.Stream<_i31.DownloadProgress>);
+          as _i10.Stream<_i32.DownloadProgress>);
 }
 
 /// A class which mocks [GetDownloadStatusUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetDownloadStatusUseCase extends _i1.Mock
-    implements _i35.GetDownloadStatusUseCase {
+    implements _i36.GetDownloadStatusUseCase {
   MockGetDownloadStatusUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -1042,7 +1044,7 @@ class MockGetDownloadStatusUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRemoveFromDownloadQueueUseCase extends _i1.Mock
-    implements _i36.RemoveFromDownloadQueueUseCase {
+    implements _i37.RemoveFromDownloadQueueUseCase {
   MockRemoveFromDownloadQueueUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -1133,7 +1135,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -1169,7 +1171,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -1196,7 +1198,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
       (super.noSuchMethod(
@@ -1235,7 +1237,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
       (super.noSuchMethod(
@@ -1273,7 +1275,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1315,7 +1317,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1356,7 +1358,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1398,7 +1400,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1439,7 +1441,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1481,7 +1483,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
   }) =>
@@ -1522,7 +1524,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Object? data,
     Map<String, dynamic>? queryParameters,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -1558,7 +1560,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri, {
     Object? data,
     _i3.Options? options,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -1585,7 +1587,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     dynamic savePath, {
     _i3.ProgressCallback? onReceiveProgress,
     Map<String, dynamic>? queryParameters,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     bool? deleteOnError = true,
     _i3.FileAccessMode? fileAccessMode = _i3.FileAccessMode.write,
     String? lengthHeader = 'content-length',
@@ -1634,7 +1636,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     Uri? uri,
     dynamic savePath, {
     _i3.ProgressCallback? onReceiveProgress,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     bool? deleteOnError = true,
     _i3.FileAccessMode? fileAccessMode = _i3.FileAccessMode.write,
     String? lengthHeader = 'content-length',
@@ -1681,7 +1683,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
     String? url, {
     Object? data,
     Map<String, dynamic>? queryParameters,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.Options? options,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,
@@ -1723,7 +1725,7 @@ class MockDio extends _i1.Mock implements _i8.Dio {
   _i10.Future<_i7.Response<T>> requestUri<T>(
     Uri? uri, {
     Object? data,
-    _i37.CancelToken? cancelToken,
+    _i38.CancelToken? cancelToken,
     _i3.Options? options,
     _i3.ProgressCallback? onSendProgress,
     _i3.ProgressCallback? onReceiveProgress,

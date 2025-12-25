@@ -27,13 +27,13 @@ void main() {
       // Arrange
       when(
         mockRepository.getCurrentLanguage(),
-      ).thenAnswer((_) async => const Right(tLanguageCode));
+      ).thenAnswer((_) async => const Right<Failure, String>(tLanguageCode));
 
       // Act
       final Either<Failure, String> result = await useCase();
 
       // Assert
-      expect(result, const Right(tLanguageCode));
+      expect(result, const Right<Failure, String>(tLanguageCode));
       verify(mockRepository.getCurrentLanguage()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -43,13 +43,13 @@ void main() {
       const tFailure = CacheFailure('Failed to get language');
       when(
         mockRepository.getCurrentLanguage(),
-      ).thenAnswer((_) async => const Left(tFailure));
+      ).thenAnswer((_) async => const Left<Failure, String>(tFailure));
 
       // Act
       final Either<Failure, String> result = await useCase();
 
       // Assert
-      expect(result, const Left(tFailure));
+      expect(result, const Left<Failure, String>(tFailure));
       verify(mockRepository.getCurrentLanguage()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });

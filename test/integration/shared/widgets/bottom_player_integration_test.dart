@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -88,28 +88,33 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert: Should be effectively invisible (SizedBox.shrink)
-      // The BottomPlayer itself is in the tree, but it returns SizedBox.shrink
       expect(find.byType(Container), findsNothing);
       expect(find.text('Unknown Reciter'), findsNothing);
     });
 
     testWidgets(
-      'should display media info when mediaItem is present and status is success',
+      'should display media info when currentAudio is present and status is success',
       (tester) async {
         // Arrange
-        const testMediaItem = MediaItem(
+        const testAudio = AudioEntity(
           id: '1',
           title: 'Surah Al-Fatiha',
           artist: 'Mishary Rashid',
+          url: 'url',
+          duration: Duration(minutes: 5),
         );
 
         when(() => mockAudioPlayerBloc.state).thenReturn(
-          AudioPlayerState(
+          const AudioPlayerState(
             status: AudioPlayerStatus.success,
-            mediaItem: testMediaItem,
-            playbackState: PlaybackState(
-              playing: true,
-              processingState: AudioProcessingState.ready,
+            currentAudio: testAudio,
+            playbackState: PlaybackStateEntity(
+              isPlaying: true,
+              processingState: AudioProcessingStateStatus.ready,
+              position: Duration.zero,
+              duration: Duration.zero,
+              currentIndex: 0,
+              queue: [],
             ),
           ),
         );
@@ -129,18 +134,25 @@ void main() {
       tester,
     ) async {
       // Arrange: Paused state
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: '1',
         title: 'Surah Al-Fatiha',
         artist: 'Mishary Rashid',
+        url: 'url',
+        duration: Duration(minutes: 5),
       );
 
       when(() => mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+        const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            processingState: AudioProcessingState.ready,
+          currentAudio: testAudio,
+          playbackState: PlaybackStateEntity(
+            isPlaying: false,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
           ), // Paused
         ),
       );
@@ -158,18 +170,25 @@ void main() {
       tester,
     ) async {
       // Arrange
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: '1',
         title: 'Surah Al-Fatiha',
         artist: 'Mishary Rashid',
+        url: 'url',
+        duration: Duration(minutes: 5),
       );
 
       when(() => mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+        const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            processingState: AudioProcessingState.ready,
+          currentAudio: testAudio,
+          playbackState: PlaybackStateEntity(
+            isPlaying: false,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
           ), // Paused
         ),
       );
@@ -193,19 +212,25 @@ void main() {
       tester,
     ) async {
       // Arrange
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: '1',
         title: 'Surah Al-Fatiha',
         artist: 'Mishary Rashid',
+        url: 'url',
+        duration: Duration(minutes: 5),
       );
 
       when(() => mockAudioPlayerBloc.state).thenReturn(
-        AudioPlayerState(
+        const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            playing: true,
-            processingState: AudioProcessingState.ready,
+          currentAudio: testAudio,
+          playbackState: PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
           ), // Playing
         ),
       );

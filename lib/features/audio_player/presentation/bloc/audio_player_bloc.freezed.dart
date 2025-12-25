@@ -55,15 +55,14 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadAudioPlayerData value)?  loadAudioPlayerData,TResult Function( UpdateMediaItem value)?  updateMediaItem,TResult Function( UpdatePlaybackState value)?  updatePlaybackState,TResult Function( UpdatePositionData value)?  updatePositionData,TResult Function( UpdateQueueState value)?  updateQueueState,TResult Function( UpdateVolume value)?  updateVolume,TResult Function( UpdateSpeed value)?  updateSpeed,TResult Function( PlayAudio value)?  playAudio,TResult Function( PauseAudio value)?  pauseAudio,TResult Function( StopAudio value)?  stopAudio,TResult Function( SkipToNext value)?  skipToNext,TResult Function( SkipToPrevious value)?  skipToPrevious,TResult Function( SeekTo value)?  seekTo,TResult Function( SetVolume value)?  setVolume,TResult Function( SetSpeed value)?  setSpeed,TResult Function( SkipToQueueItem value)?  skipToQueueItem,TResult Function( PlayFromQueue value)?  playFromQueue,TResult Function( UpdateQueue value)?  updateQueue,TResult Function( AddQueueItem value)?  addQueueItem,TResult Function( RemoveQueueItem value)?  removeQueueItem,TResult Function( MoveQueueItem value)?  moveQueueItem,TResult Function( SetRepeatMode value)?  setRepeatMode,TResult Function( SetShuffleMode value)?  setShuffleMode,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadAudioPlayerData value)?  loadAudioPlayerData,TResult Function( UpdateAudio value)?  updateAudio,TResult Function( UpdatePlaybackStateEntity value)?  updatePlaybackStateEntity,TResult Function( UpdatePositionData value)?  updatePositionData,TResult Function( UpdateVolume value)?  updateVolume,TResult Function( UpdateSpeed value)?  updateSpeed,TResult Function( PlayAudio value)?  playAudio,TResult Function( PauseAudio value)?  pauseAudio,TResult Function( StopAudio value)?  stopAudio,TResult Function( SkipToNext value)?  skipToNext,TResult Function( SkipToPrevious value)?  skipToPrevious,TResult Function( SeekTo value)?  seekTo,TResult Function( SetVolume value)?  setVolume,TResult Function( SetSpeed value)?  setSpeed,TResult Function( SkipToQueueItem value)?  skipToQueueItem,TResult Function( PlayFromQueue value)?  playFromQueue,TResult Function( UpdateQueue value)?  updateQueue,TResult Function( AddQueueItem value)?  addQueueItem,TResult Function( RemoveQueueItem value)?  removeQueueItem,TResult Function( MoveQueueItem value)?  moveQueueItem,TResult Function( SetRepeatMode value)?  setRepeatMode,TResult Function( SetShuffleMode value)?  setShuffleMode,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData(_that);case UpdateMediaItem() when updateMediaItem != null:
-return updateMediaItem(_that);case UpdatePlaybackState() when updatePlaybackState != null:
-return updatePlaybackState(_that);case UpdatePositionData() when updatePositionData != null:
-return updatePositionData(_that);case UpdateQueueState() when updateQueueState != null:
-return updateQueueState(_that);case UpdateVolume() when updateVolume != null:
+return loadAudioPlayerData(_that);case UpdateAudio() when updateAudio != null:
+return updateAudio(_that);case UpdatePlaybackStateEntity() when updatePlaybackStateEntity != null:
+return updatePlaybackStateEntity(_that);case UpdatePositionData() when updatePositionData != null:
+return updatePositionData(_that);case UpdateVolume() when updateVolume != null:
 return updateVolume(_that);case UpdateSpeed() when updateSpeed != null:
 return updateSpeed(_that);case PlayAudio() when playAudio != null:
 return playAudio(_that);case PauseAudio() when pauseAudio != null:
@@ -99,15 +98,14 @@ return setShuffleMode(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadAudioPlayerData value)  loadAudioPlayerData,required TResult Function( UpdateMediaItem value)  updateMediaItem,required TResult Function( UpdatePlaybackState value)  updatePlaybackState,required TResult Function( UpdatePositionData value)  updatePositionData,required TResult Function( UpdateQueueState value)  updateQueueState,required TResult Function( UpdateVolume value)  updateVolume,required TResult Function( UpdateSpeed value)  updateSpeed,required TResult Function( PlayAudio value)  playAudio,required TResult Function( PauseAudio value)  pauseAudio,required TResult Function( StopAudio value)  stopAudio,required TResult Function( SkipToNext value)  skipToNext,required TResult Function( SkipToPrevious value)  skipToPrevious,required TResult Function( SeekTo value)  seekTo,required TResult Function( SetVolume value)  setVolume,required TResult Function( SetSpeed value)  setSpeed,required TResult Function( SkipToQueueItem value)  skipToQueueItem,required TResult Function( PlayFromQueue value)  playFromQueue,required TResult Function( UpdateQueue value)  updateQueue,required TResult Function( AddQueueItem value)  addQueueItem,required TResult Function( RemoveQueueItem value)  removeQueueItem,required TResult Function( MoveQueueItem value)  moveQueueItem,required TResult Function( SetRepeatMode value)  setRepeatMode,required TResult Function( SetShuffleMode value)  setShuffleMode,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadAudioPlayerData value)  loadAudioPlayerData,required TResult Function( UpdateAudio value)  updateAudio,required TResult Function( UpdatePlaybackStateEntity value)  updatePlaybackStateEntity,required TResult Function( UpdatePositionData value)  updatePositionData,required TResult Function( UpdateVolume value)  updateVolume,required TResult Function( UpdateSpeed value)  updateSpeed,required TResult Function( PlayAudio value)  playAudio,required TResult Function( PauseAudio value)  pauseAudio,required TResult Function( StopAudio value)  stopAudio,required TResult Function( SkipToNext value)  skipToNext,required TResult Function( SkipToPrevious value)  skipToPrevious,required TResult Function( SeekTo value)  seekTo,required TResult Function( SetVolume value)  setVolume,required TResult Function( SetSpeed value)  setSpeed,required TResult Function( SkipToQueueItem value)  skipToQueueItem,required TResult Function( PlayFromQueue value)  playFromQueue,required TResult Function( UpdateQueue value)  updateQueue,required TResult Function( AddQueueItem value)  addQueueItem,required TResult Function( RemoveQueueItem value)  removeQueueItem,required TResult Function( MoveQueueItem value)  moveQueueItem,required TResult Function( SetRepeatMode value)  setRepeatMode,required TResult Function( SetShuffleMode value)  setShuffleMode,}){
 final _that = this;
 switch (_that) {
 case LoadAudioPlayerData():
-return loadAudioPlayerData(_that);case UpdateMediaItem():
-return updateMediaItem(_that);case UpdatePlaybackState():
-return updatePlaybackState(_that);case UpdatePositionData():
-return updatePositionData(_that);case UpdateQueueState():
-return updateQueueState(_that);case UpdateVolume():
+return loadAudioPlayerData(_that);case UpdateAudio():
+return updateAudio(_that);case UpdatePlaybackStateEntity():
+return updatePlaybackStateEntity(_that);case UpdatePositionData():
+return updatePositionData(_that);case UpdateVolume():
 return updateVolume(_that);case UpdateSpeed():
 return updateSpeed(_that);case PlayAudio():
 return playAudio(_that);case PauseAudio():
@@ -139,15 +137,14 @@ return setShuffleMode(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadAudioPlayerData value)?  loadAudioPlayerData,TResult? Function( UpdateMediaItem value)?  updateMediaItem,TResult? Function( UpdatePlaybackState value)?  updatePlaybackState,TResult? Function( UpdatePositionData value)?  updatePositionData,TResult? Function( UpdateQueueState value)?  updateQueueState,TResult? Function( UpdateVolume value)?  updateVolume,TResult? Function( UpdateSpeed value)?  updateSpeed,TResult? Function( PlayAudio value)?  playAudio,TResult? Function( PauseAudio value)?  pauseAudio,TResult? Function( StopAudio value)?  stopAudio,TResult? Function( SkipToNext value)?  skipToNext,TResult? Function( SkipToPrevious value)?  skipToPrevious,TResult? Function( SeekTo value)?  seekTo,TResult? Function( SetVolume value)?  setVolume,TResult? Function( SetSpeed value)?  setSpeed,TResult? Function( SkipToQueueItem value)?  skipToQueueItem,TResult? Function( PlayFromQueue value)?  playFromQueue,TResult? Function( UpdateQueue value)?  updateQueue,TResult? Function( AddQueueItem value)?  addQueueItem,TResult? Function( RemoveQueueItem value)?  removeQueueItem,TResult? Function( MoveQueueItem value)?  moveQueueItem,TResult? Function( SetRepeatMode value)?  setRepeatMode,TResult? Function( SetShuffleMode value)?  setShuffleMode,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadAudioPlayerData value)?  loadAudioPlayerData,TResult? Function( UpdateAudio value)?  updateAudio,TResult? Function( UpdatePlaybackStateEntity value)?  updatePlaybackStateEntity,TResult? Function( UpdatePositionData value)?  updatePositionData,TResult? Function( UpdateVolume value)?  updateVolume,TResult? Function( UpdateSpeed value)?  updateSpeed,TResult? Function( PlayAudio value)?  playAudio,TResult? Function( PauseAudio value)?  pauseAudio,TResult? Function( StopAudio value)?  stopAudio,TResult? Function( SkipToNext value)?  skipToNext,TResult? Function( SkipToPrevious value)?  skipToPrevious,TResult? Function( SeekTo value)?  seekTo,TResult? Function( SetVolume value)?  setVolume,TResult? Function( SetSpeed value)?  setSpeed,TResult? Function( SkipToQueueItem value)?  skipToQueueItem,TResult? Function( PlayFromQueue value)?  playFromQueue,TResult? Function( UpdateQueue value)?  updateQueue,TResult? Function( AddQueueItem value)?  addQueueItem,TResult? Function( RemoveQueueItem value)?  removeQueueItem,TResult? Function( MoveQueueItem value)?  moveQueueItem,TResult? Function( SetRepeatMode value)?  setRepeatMode,TResult? Function( SetShuffleMode value)?  setShuffleMode,}){
 final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData(_that);case UpdateMediaItem() when updateMediaItem != null:
-return updateMediaItem(_that);case UpdatePlaybackState() when updatePlaybackState != null:
-return updatePlaybackState(_that);case UpdatePositionData() when updatePositionData != null:
-return updatePositionData(_that);case UpdateQueueState() when updateQueueState != null:
-return updateQueueState(_that);case UpdateVolume() when updateVolume != null:
+return loadAudioPlayerData(_that);case UpdateAudio() when updateAudio != null:
+return updateAudio(_that);case UpdatePlaybackStateEntity() when updatePlaybackStateEntity != null:
+return updatePlaybackStateEntity(_that);case UpdatePositionData() when updatePositionData != null:
+return updatePositionData(_that);case UpdateVolume() when updateVolume != null:
 return updateVolume(_that);case UpdateSpeed() when updateSpeed != null:
 return updateSpeed(_that);case PlayAudio() when playAudio != null:
 return playAudio(_that);case PauseAudio() when pauseAudio != null:
@@ -182,14 +179,13 @@ return setShuffleMode(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool restorePlayback)?  loadAudioPlayerData,TResult Function( MediaItem? mediaItem)?  updateMediaItem,TResult Function( PlaybackState playbackState)?  updatePlaybackState,TResult Function( PositionData positionData)?  updatePositionData,TResult Function( QueueState queueState)?  updateQueueState,TResult Function( double volume)?  updateVolume,TResult Function( double speed)?  updateSpeed,TResult Function()?  playAudio,TResult Function()?  pauseAudio,TResult Function()?  stopAudio,TResult Function()?  skipToNext,TResult Function()?  skipToPrevious,TResult Function( Duration position)?  seekTo,TResult Function( double volume)?  setVolume,TResult Function( double speed)?  setSpeed,TResult Function( int index)?  skipToQueueItem,TResult Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult Function( List<MediaItem> queue)?  updateQueue,TResult Function( MediaItem item)?  addQueueItem,TResult Function( MediaItem item)?  removeQueueItem,TResult Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool restorePlayback)?  loadAudioPlayerData,TResult Function( AudioEntity? audio)?  updateAudio,TResult Function( PlaybackStateEntity playbackState)?  updatePlaybackStateEntity,TResult Function( PositionData positionData)?  updatePositionData,TResult Function( double volume)?  updateVolume,TResult Function( double speed)?  updateSpeed,TResult Function()?  playAudio,TResult Function()?  pauseAudio,TResult Function()?  stopAudio,TResult Function()?  skipToNext,TResult Function()?  skipToPrevious,TResult Function( Duration position)?  seekTo,TResult Function( double volume)?  setVolume,TResult Function( double speed)?  setSpeed,TResult Function( int index)?  skipToQueueItem,TResult Function( List<AudioEntity> queue,  int index)?  playFromQueue,TResult Function( List<AudioEntity> queue)?  updateQueue,TResult Function( AudioEntity audio)?  addQueueItem,TResult Function( AudioEntity audio)?  removeQueueItem,TResult Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult Function( AudioRepeatMode repeatMode)?  setRepeatMode,TResult Function( AudioShuffleMode shuffleMode)?  setShuffleMode,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem() when updateMediaItem != null:
-return updateMediaItem(_that.mediaItem);case UpdatePlaybackState() when updatePlaybackState != null:
-return updatePlaybackState(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
-return updatePositionData(_that.positionData);case UpdateQueueState() when updateQueueState != null:
-return updateQueueState(_that.queueState);case UpdateVolume() when updateVolume != null:
+return loadAudioPlayerData(_that.restorePlayback);case UpdateAudio() when updateAudio != null:
+return updateAudio(_that.audio);case UpdatePlaybackStateEntity() when updatePlaybackStateEntity != null:
+return updatePlaybackStateEntity(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
+return updatePositionData(_that.positionData);case UpdateVolume() when updateVolume != null:
 return updateVolume(_that.volume);case UpdateSpeed() when updateSpeed != null:
 return updateSpeed(_that.speed);case PlayAudio() when playAudio != null:
 return playAudio();case PauseAudio() when pauseAudio != null:
@@ -203,8 +199,8 @@ return setSpeed(_that.speed);case SkipToQueueItem() when skipToQueueItem != null
 return skipToQueueItem(_that.index);case PlayFromQueue() when playFromQueue != null:
 return playFromQueue(_that.queue,_that.index);case UpdateQueue() when updateQueue != null:
 return updateQueue(_that.queue);case AddQueueItem() when addQueueItem != null:
-return addQueueItem(_that.item);case RemoveQueueItem() when removeQueueItem != null:
-return removeQueueItem(_that.item);case MoveQueueItem() when moveQueueItem != null:
+return addQueueItem(_that.audio);case RemoveQueueItem() when removeQueueItem != null:
+return removeQueueItem(_that.audio);case MoveQueueItem() when moveQueueItem != null:
 return moveQueueItem(_that.currentIndex,_that.newIndex);case SetRepeatMode() when setRepeatMode != null:
 return setRepeatMode(_that.repeatMode);case SetShuffleMode() when setShuffleMode != null:
 return setShuffleMode(_that.shuffleMode);case _:
@@ -225,14 +221,13 @@ return setShuffleMode(_that.shuffleMode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool restorePlayback)  loadAudioPlayerData,required TResult Function( MediaItem? mediaItem)  updateMediaItem,required TResult Function( PlaybackState playbackState)  updatePlaybackState,required TResult Function( PositionData positionData)  updatePositionData,required TResult Function( QueueState queueState)  updateQueueState,required TResult Function( double volume)  updateVolume,required TResult Function( double speed)  updateSpeed,required TResult Function()  playAudio,required TResult Function()  pauseAudio,required TResult Function()  stopAudio,required TResult Function()  skipToNext,required TResult Function()  skipToPrevious,required TResult Function( Duration position)  seekTo,required TResult Function( double volume)  setVolume,required TResult Function( double speed)  setSpeed,required TResult Function( int index)  skipToQueueItem,required TResult Function( List<MediaItem> queue,  int index)  playFromQueue,required TResult Function( List<MediaItem> queue)  updateQueue,required TResult Function( MediaItem item)  addQueueItem,required TResult Function( MediaItem item)  removeQueueItem,required TResult Function( int currentIndex,  int newIndex)  moveQueueItem,required TResult Function( AudioServiceRepeatMode repeatMode)  setRepeatMode,required TResult Function( AudioServiceShuffleMode shuffleMode)  setShuffleMode,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool restorePlayback)  loadAudioPlayerData,required TResult Function( AudioEntity? audio)  updateAudio,required TResult Function( PlaybackStateEntity playbackState)  updatePlaybackStateEntity,required TResult Function( PositionData positionData)  updatePositionData,required TResult Function( double volume)  updateVolume,required TResult Function( double speed)  updateSpeed,required TResult Function()  playAudio,required TResult Function()  pauseAudio,required TResult Function()  stopAudio,required TResult Function()  skipToNext,required TResult Function()  skipToPrevious,required TResult Function( Duration position)  seekTo,required TResult Function( double volume)  setVolume,required TResult Function( double speed)  setSpeed,required TResult Function( int index)  skipToQueueItem,required TResult Function( List<AudioEntity> queue,  int index)  playFromQueue,required TResult Function( List<AudioEntity> queue)  updateQueue,required TResult Function( AudioEntity audio)  addQueueItem,required TResult Function( AudioEntity audio)  removeQueueItem,required TResult Function( int currentIndex,  int newIndex)  moveQueueItem,required TResult Function( AudioRepeatMode repeatMode)  setRepeatMode,required TResult Function( AudioShuffleMode shuffleMode)  setShuffleMode,}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData():
-return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem():
-return updateMediaItem(_that.mediaItem);case UpdatePlaybackState():
-return updatePlaybackState(_that.playbackState);case UpdatePositionData():
-return updatePositionData(_that.positionData);case UpdateQueueState():
-return updateQueueState(_that.queueState);case UpdateVolume():
+return loadAudioPlayerData(_that.restorePlayback);case UpdateAudio():
+return updateAudio(_that.audio);case UpdatePlaybackStateEntity():
+return updatePlaybackStateEntity(_that.playbackState);case UpdatePositionData():
+return updatePositionData(_that.positionData);case UpdateVolume():
 return updateVolume(_that.volume);case UpdateSpeed():
 return updateSpeed(_that.speed);case PlayAudio():
 return playAudio();case PauseAudio():
@@ -246,8 +241,8 @@ return setSpeed(_that.speed);case SkipToQueueItem():
 return skipToQueueItem(_that.index);case PlayFromQueue():
 return playFromQueue(_that.queue,_that.index);case UpdateQueue():
 return updateQueue(_that.queue);case AddQueueItem():
-return addQueueItem(_that.item);case RemoveQueueItem():
-return removeQueueItem(_that.item);case MoveQueueItem():
+return addQueueItem(_that.audio);case RemoveQueueItem():
+return removeQueueItem(_that.audio);case MoveQueueItem():
 return moveQueueItem(_that.currentIndex,_that.newIndex);case SetRepeatMode():
 return setRepeatMode(_that.repeatMode);case SetShuffleMode():
 return setShuffleMode(_that.shuffleMode);}
@@ -264,14 +259,13 @@ return setShuffleMode(_that.shuffleMode);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool restorePlayback)?  loadAudioPlayerData,TResult? Function( MediaItem? mediaItem)?  updateMediaItem,TResult? Function( PlaybackState playbackState)?  updatePlaybackState,TResult? Function( PositionData positionData)?  updatePositionData,TResult? Function( QueueState queueState)?  updateQueueState,TResult? Function( double volume)?  updateVolume,TResult? Function( double speed)?  updateSpeed,TResult? Function()?  playAudio,TResult? Function()?  pauseAudio,TResult? Function()?  stopAudio,TResult? Function()?  skipToNext,TResult? Function()?  skipToPrevious,TResult? Function( Duration position)?  seekTo,TResult? Function( double volume)?  setVolume,TResult? Function( double speed)?  setSpeed,TResult? Function( int index)?  skipToQueueItem,TResult? Function( List<MediaItem> queue,  int index)?  playFromQueue,TResult? Function( List<MediaItem> queue)?  updateQueue,TResult? Function( MediaItem item)?  addQueueItem,TResult? Function( MediaItem item)?  removeQueueItem,TResult? Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult? Function( AudioServiceRepeatMode repeatMode)?  setRepeatMode,TResult? Function( AudioServiceShuffleMode shuffleMode)?  setShuffleMode,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool restorePlayback)?  loadAudioPlayerData,TResult? Function( AudioEntity? audio)?  updateAudio,TResult? Function( PlaybackStateEntity playbackState)?  updatePlaybackStateEntity,TResult? Function( PositionData positionData)?  updatePositionData,TResult? Function( double volume)?  updateVolume,TResult? Function( double speed)?  updateSpeed,TResult? Function()?  playAudio,TResult? Function()?  pauseAudio,TResult? Function()?  stopAudio,TResult? Function()?  skipToNext,TResult? Function()?  skipToPrevious,TResult? Function( Duration position)?  seekTo,TResult? Function( double volume)?  setVolume,TResult? Function( double speed)?  setSpeed,TResult? Function( int index)?  skipToQueueItem,TResult? Function( List<AudioEntity> queue,  int index)?  playFromQueue,TResult? Function( List<AudioEntity> queue)?  updateQueue,TResult? Function( AudioEntity audio)?  addQueueItem,TResult? Function( AudioEntity audio)?  removeQueueItem,TResult? Function( int currentIndex,  int newIndex)?  moveQueueItem,TResult? Function( AudioRepeatMode repeatMode)?  setRepeatMode,TResult? Function( AudioShuffleMode shuffleMode)?  setShuffleMode,}) {final _that = this;
 switch (_that) {
 case LoadAudioPlayerData() when loadAudioPlayerData != null:
-return loadAudioPlayerData(_that.restorePlayback);case UpdateMediaItem() when updateMediaItem != null:
-return updateMediaItem(_that.mediaItem);case UpdatePlaybackState() when updatePlaybackState != null:
-return updatePlaybackState(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
-return updatePositionData(_that.positionData);case UpdateQueueState() when updateQueueState != null:
-return updateQueueState(_that.queueState);case UpdateVolume() when updateVolume != null:
+return loadAudioPlayerData(_that.restorePlayback);case UpdateAudio() when updateAudio != null:
+return updateAudio(_that.audio);case UpdatePlaybackStateEntity() when updatePlaybackStateEntity != null:
+return updatePlaybackStateEntity(_that.playbackState);case UpdatePositionData() when updatePositionData != null:
+return updatePositionData(_that.positionData);case UpdateVolume() when updateVolume != null:
 return updateVolume(_that.volume);case UpdateSpeed() when updateSpeed != null:
 return updateSpeed(_that.speed);case PlayAudio() when playAudio != null:
 return playAudio();case PauseAudio() when pauseAudio != null:
@@ -285,8 +279,8 @@ return setSpeed(_that.speed);case SkipToQueueItem() when skipToQueueItem != null
 return skipToQueueItem(_that.index);case PlayFromQueue() when playFromQueue != null:
 return playFromQueue(_that.queue,_that.index);case UpdateQueue() when updateQueue != null:
 return updateQueue(_that.queue);case AddQueueItem() when addQueueItem != null:
-return addQueueItem(_that.item);case RemoveQueueItem() when removeQueueItem != null:
-return removeQueueItem(_that.item);case MoveQueueItem() when moveQueueItem != null:
+return addQueueItem(_that.audio);case RemoveQueueItem() when removeQueueItem != null:
+return removeQueueItem(_that.audio);case MoveQueueItem() when moveQueueItem != null:
 return moveQueueItem(_that.currentIndex,_that.newIndex);case SetRepeatMode() when setRepeatMode != null:
 return setRepeatMode(_that.repeatMode);case SetShuffleMode() when setShuffleMode != null:
 return setShuffleMode(_that.shuffleMode);case _:
@@ -366,89 +360,101 @@ as bool,
 /// @nodoc
 
 
-class UpdateMediaItem implements AudioPlayerEvent {
-  const UpdateMediaItem(this.mediaItem);
+class UpdateAudio implements AudioPlayerEvent {
+  const UpdateAudio(this.audio);
   
 
- final  MediaItem? mediaItem;
+ final  AudioEntity? audio;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$UpdateMediaItemCopyWith<UpdateMediaItem> get copyWith => _$UpdateMediaItemCopyWithImpl<UpdateMediaItem>(this, _$identity);
+$UpdateAudioCopyWith<UpdateAudio> get copyWith => _$UpdateAudioCopyWithImpl<UpdateAudio>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateMediaItem&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateAudio&&(identical(other.audio, audio) || other.audio == audio));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mediaItem);
+int get hashCode => Object.hash(runtimeType,audio);
 
 @override
 String toString() {
-  return 'AudioPlayerEvent.updateMediaItem(mediaItem: $mediaItem)';
+  return 'AudioPlayerEvent.updateAudio(audio: $audio)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $UpdateMediaItemCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
-  factory $UpdateMediaItemCopyWith(UpdateMediaItem value, $Res Function(UpdateMediaItem) _then) = _$UpdateMediaItemCopyWithImpl;
+abstract mixin class $UpdateAudioCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
+  factory $UpdateAudioCopyWith(UpdateAudio value, $Res Function(UpdateAudio) _then) = _$UpdateAudioCopyWithImpl;
 @useResult
 $Res call({
- MediaItem? mediaItem
+ AudioEntity? audio
 });
 
 
-
+$AudioEntityCopyWith<$Res>? get audio;
 
 }
 /// @nodoc
-class _$UpdateMediaItemCopyWithImpl<$Res>
-    implements $UpdateMediaItemCopyWith<$Res> {
-  _$UpdateMediaItemCopyWithImpl(this._self, this._then);
+class _$UpdateAudioCopyWithImpl<$Res>
+    implements $UpdateAudioCopyWith<$Res> {
+  _$UpdateAudioCopyWithImpl(this._self, this._then);
 
-  final UpdateMediaItem _self;
-  final $Res Function(UpdateMediaItem) _then;
+  final UpdateAudio _self;
+  final $Res Function(UpdateAudio) _then;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? mediaItem = freezed,}) {
-  return _then(UpdateMediaItem(
-freezed == mediaItem ? _self.mediaItem : mediaItem // ignore: cast_nullable_to_non_nullable
-as MediaItem?,
+@pragma('vm:prefer-inline') $Res call({Object? audio = freezed,}) {
+  return _then(UpdateAudio(
+freezed == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
+as AudioEntity?,
   ));
 }
 
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res>? get audio {
+    if (_self.audio == null) {
+    return null;
+  }
 
+  return $AudioEntityCopyWith<$Res>(_self.audio!, (value) {
+    return _then(_self.copyWith(audio: value));
+  });
+}
 }
 
 /// @nodoc
 
 
-class UpdatePlaybackState implements AudioPlayerEvent {
-  const UpdatePlaybackState(this.playbackState);
+class UpdatePlaybackStateEntity implements AudioPlayerEvent {
+  const UpdatePlaybackStateEntity(this.playbackState);
   
 
- final  PlaybackState playbackState;
+ final  PlaybackStateEntity playbackState;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$UpdatePlaybackStateCopyWith<UpdatePlaybackState> get copyWith => _$UpdatePlaybackStateCopyWithImpl<UpdatePlaybackState>(this, _$identity);
+$UpdatePlaybackStateEntityCopyWith<UpdatePlaybackStateEntity> get copyWith => _$UpdatePlaybackStateEntityCopyWithImpl<UpdatePlaybackStateEntity>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdatePlaybackState&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdatePlaybackStateEntity&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState));
 }
 
 
@@ -457,42 +463,51 @@ int get hashCode => Object.hash(runtimeType,playbackState);
 
 @override
 String toString() {
-  return 'AudioPlayerEvent.updatePlaybackState(playbackState: $playbackState)';
+  return 'AudioPlayerEvent.updatePlaybackStateEntity(playbackState: $playbackState)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $UpdatePlaybackStateCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
-  factory $UpdatePlaybackStateCopyWith(UpdatePlaybackState value, $Res Function(UpdatePlaybackState) _then) = _$UpdatePlaybackStateCopyWithImpl;
+abstract mixin class $UpdatePlaybackStateEntityCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
+  factory $UpdatePlaybackStateEntityCopyWith(UpdatePlaybackStateEntity value, $Res Function(UpdatePlaybackStateEntity) _then) = _$UpdatePlaybackStateEntityCopyWithImpl;
 @useResult
 $Res call({
- PlaybackState playbackState
+ PlaybackStateEntity playbackState
 });
 
 
-
+$PlaybackStateEntityCopyWith<$Res> get playbackState;
 
 }
 /// @nodoc
-class _$UpdatePlaybackStateCopyWithImpl<$Res>
-    implements $UpdatePlaybackStateCopyWith<$Res> {
-  _$UpdatePlaybackStateCopyWithImpl(this._self, this._then);
+class _$UpdatePlaybackStateEntityCopyWithImpl<$Res>
+    implements $UpdatePlaybackStateEntityCopyWith<$Res> {
+  _$UpdatePlaybackStateEntityCopyWithImpl(this._self, this._then);
 
-  final UpdatePlaybackState _self;
-  final $Res Function(UpdatePlaybackState) _then;
+  final UpdatePlaybackStateEntity _self;
+  final $Res Function(UpdatePlaybackStateEntity) _then;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? playbackState = null,}) {
-  return _then(UpdatePlaybackState(
+  return _then(UpdatePlaybackStateEntity(
 null == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
-as PlaybackState,
+as PlaybackStateEntity,
   ));
 }
 
-
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PlaybackStateEntityCopyWith<$Res> get playbackState {
+  
+  return $PlaybackStateEntityCopyWith<$Res>(_self.playbackState, (value) {
+    return _then(_self.copyWith(playbackState: value));
+  });
+}
 }
 
 /// @nodoc
@@ -566,81 +581,6 @@ $PositionDataCopyWith<$Res> get positionData {
   
   return $PositionDataCopyWith<$Res>(_self.positionData, (value) {
     return _then(_self.copyWith(positionData: value));
-  });
-}
-}
-
-/// @nodoc
-
-
-class UpdateQueueState implements AudioPlayerEvent {
-  const UpdateQueueState(this.queueState);
-  
-
- final  QueueState queueState;
-
-/// Create a copy of AudioPlayerEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$UpdateQueueStateCopyWith<UpdateQueueState> get copyWith => _$UpdateQueueStateCopyWithImpl<UpdateQueueState>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateQueueState&&(identical(other.queueState, queueState) || other.queueState == queueState));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,queueState);
-
-@override
-String toString() {
-  return 'AudioPlayerEvent.updateQueueState(queueState: $queueState)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $UpdateQueueStateCopyWith<$Res> implements $AudioPlayerEventCopyWith<$Res> {
-  factory $UpdateQueueStateCopyWith(UpdateQueueState value, $Res Function(UpdateQueueState) _then) = _$UpdateQueueStateCopyWithImpl;
-@useResult
-$Res call({
- QueueState queueState
-});
-
-
-$QueueStateCopyWith<$Res> get queueState;
-
-}
-/// @nodoc
-class _$UpdateQueueStateCopyWithImpl<$Res>
-    implements $UpdateQueueStateCopyWith<$Res> {
-  _$UpdateQueueStateCopyWithImpl(this._self, this._then);
-
-  final UpdateQueueState _self;
-  final $Res Function(UpdateQueueState) _then;
-
-/// Create a copy of AudioPlayerEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? queueState = null,}) {
-  return _then(UpdateQueueState(
-null == queueState ? _self.queueState : queueState // ignore: cast_nullable_to_non_nullable
-as QueueState,
-  ));
-}
-
-/// Create a copy of AudioPlayerEvent
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$QueueStateCopyWith<$Res> get queueState {
-  
-  return $QueueStateCopyWith<$Res>(_self.queueState, (value) {
-    return _then(_self.copyWith(queueState: value));
   });
 }
 }
@@ -1205,11 +1145,11 @@ as int,
 
 
 class PlayFromQueue implements AudioPlayerEvent {
-  const PlayFromQueue(final  List<MediaItem> queue, this.index): _queue = queue;
+  const PlayFromQueue(final  List<AudioEntity> queue, this.index): _queue = queue;
   
 
- final  List<MediaItem> _queue;
- List<MediaItem> get queue {
+ final  List<AudioEntity> _queue;
+ List<AudioEntity> get queue {
   if (_queue is EqualUnmodifiableListView) return _queue;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_queue);
@@ -1247,7 +1187,7 @@ abstract mixin class $PlayFromQueueCopyWith<$Res> implements $AudioPlayerEventCo
   factory $PlayFromQueueCopyWith(PlayFromQueue value, $Res Function(PlayFromQueue) _then) = _$PlayFromQueueCopyWithImpl;
 @useResult
 $Res call({
- List<MediaItem> queue, int index
+ List<AudioEntity> queue, int index
 });
 
 
@@ -1267,7 +1207,7 @@ class _$PlayFromQueueCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? queue = null,Object? index = null,}) {
   return _then(PlayFromQueue(
 null == queue ? _self._queue : queue // ignore: cast_nullable_to_non_nullable
-as List<MediaItem>,null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as List<AudioEntity>,null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -1279,11 +1219,11 @@ as int,
 
 
 class UpdateQueue implements AudioPlayerEvent {
-  const UpdateQueue(final  List<MediaItem> queue): _queue = queue;
+  const UpdateQueue(final  List<AudioEntity> queue): _queue = queue;
   
 
- final  List<MediaItem> _queue;
- List<MediaItem> get queue {
+ final  List<AudioEntity> _queue;
+ List<AudioEntity> get queue {
   if (_queue is EqualUnmodifiableListView) return _queue;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_queue);
@@ -1320,7 +1260,7 @@ abstract mixin class $UpdateQueueCopyWith<$Res> implements $AudioPlayerEventCopy
   factory $UpdateQueueCopyWith(UpdateQueue value, $Res Function(UpdateQueue) _then) = _$UpdateQueueCopyWithImpl;
 @useResult
 $Res call({
- List<MediaItem> queue
+ List<AudioEntity> queue
 });
 
 
@@ -1340,7 +1280,7 @@ class _$UpdateQueueCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? queue = null,}) {
   return _then(UpdateQueue(
 null == queue ? _self._queue : queue // ignore: cast_nullable_to_non_nullable
-as List<MediaItem>,
+as List<AudioEntity>,
   ));
 }
 
@@ -1351,10 +1291,10 @@ as List<MediaItem>,
 
 
 class AddQueueItem implements AudioPlayerEvent {
-  const AddQueueItem(this.item);
+  const AddQueueItem(this.audio);
   
 
- final  MediaItem item;
+ final  AudioEntity audio;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -1366,16 +1306,16 @@ $AddQueueItemCopyWith<AddQueueItem> get copyWith => _$AddQueueItemCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AddQueueItem&&(identical(other.item, item) || other.item == item));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AddQueueItem&&(identical(other.audio, audio) || other.audio == audio));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,item);
+int get hashCode => Object.hash(runtimeType,audio);
 
 @override
 String toString() {
-  return 'AudioPlayerEvent.addQueueItem(item: $item)';
+  return 'AudioPlayerEvent.addQueueItem(audio: $audio)';
 }
 
 
@@ -1386,11 +1326,11 @@ abstract mixin class $AddQueueItemCopyWith<$Res> implements $AudioPlayerEventCop
   factory $AddQueueItemCopyWith(AddQueueItem value, $Res Function(AddQueueItem) _then) = _$AddQueueItemCopyWithImpl;
 @useResult
 $Res call({
- MediaItem item
+ AudioEntity audio
 });
 
 
-
+$AudioEntityCopyWith<$Res> get audio;
 
 }
 /// @nodoc
@@ -1403,24 +1343,33 @@ class _$AddQueueItemCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? item = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? audio = null,}) {
   return _then(AddQueueItem(
-null == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
-as MediaItem,
+null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
+as AudioEntity,
   ));
 }
 
-
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res> get audio {
+  
+  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+    return _then(_self.copyWith(audio: value));
+  });
+}
 }
 
 /// @nodoc
 
 
 class RemoveQueueItem implements AudioPlayerEvent {
-  const RemoveQueueItem(this.item);
+  const RemoveQueueItem(this.audio);
   
 
- final  MediaItem item;
+ final  AudioEntity audio;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -1432,16 +1381,16 @@ $RemoveQueueItemCopyWith<RemoveQueueItem> get copyWith => _$RemoveQueueItemCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RemoveQueueItem&&(identical(other.item, item) || other.item == item));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RemoveQueueItem&&(identical(other.audio, audio) || other.audio == audio));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,item);
+int get hashCode => Object.hash(runtimeType,audio);
 
 @override
 String toString() {
-  return 'AudioPlayerEvent.removeQueueItem(item: $item)';
+  return 'AudioPlayerEvent.removeQueueItem(audio: $audio)';
 }
 
 
@@ -1452,11 +1401,11 @@ abstract mixin class $RemoveQueueItemCopyWith<$Res> implements $AudioPlayerEvent
   factory $RemoveQueueItemCopyWith(RemoveQueueItem value, $Res Function(RemoveQueueItem) _then) = _$RemoveQueueItemCopyWithImpl;
 @useResult
 $Res call({
- MediaItem item
+ AudioEntity audio
 });
 
 
-
+$AudioEntityCopyWith<$Res> get audio;
 
 }
 /// @nodoc
@@ -1469,14 +1418,23 @@ class _$RemoveQueueItemCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? item = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? audio = null,}) {
   return _then(RemoveQueueItem(
-null == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
-as MediaItem,
+null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
+as AudioEntity,
   ));
 }
 
-
+/// Create a copy of AudioPlayerEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res> get audio {
+  
+  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+    return _then(_self.copyWith(audio: value));
+  });
+}
 }
 
 /// @nodoc
@@ -1554,7 +1512,7 @@ class SetRepeatMode implements AudioPlayerEvent {
   const SetRepeatMode(this.repeatMode);
   
 
- final  AudioServiceRepeatMode repeatMode;
+ final  AudioRepeatMode repeatMode;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -1586,7 +1544,7 @@ abstract mixin class $SetRepeatModeCopyWith<$Res> implements $AudioPlayerEventCo
   factory $SetRepeatModeCopyWith(SetRepeatMode value, $Res Function(SetRepeatMode) _then) = _$SetRepeatModeCopyWithImpl;
 @useResult
 $Res call({
- AudioServiceRepeatMode repeatMode
+ AudioRepeatMode repeatMode
 });
 
 
@@ -1606,7 +1564,7 @@ class _$SetRepeatModeCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? repeatMode = null,}) {
   return _then(SetRepeatMode(
 null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
-as AudioServiceRepeatMode,
+as AudioRepeatMode,
   ));
 }
 
@@ -1620,7 +1578,7 @@ class SetShuffleMode implements AudioPlayerEvent {
   const SetShuffleMode(this.shuffleMode);
   
 
- final  AudioServiceShuffleMode shuffleMode;
+ final  AudioShuffleMode shuffleMode;
 
 /// Create a copy of AudioPlayerEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -1652,7 +1610,7 @@ abstract mixin class $SetShuffleModeCopyWith<$Res> implements $AudioPlayerEventC
   factory $SetShuffleModeCopyWith(SetShuffleMode value, $Res Function(SetShuffleMode) _then) = _$SetShuffleModeCopyWithImpl;
 @useResult
 $Res call({
- AudioServiceShuffleMode shuffleMode
+ AudioShuffleMode shuffleMode
 });
 
 
@@ -1672,7 +1630,7 @@ class _$SetShuffleModeCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? shuffleMode = null,}) {
   return _then(SetShuffleMode(
 null == shuffleMode ? _self.shuffleMode : shuffleMode // ignore: cast_nullable_to_non_nullable
-as AudioServiceShuffleMode,
+as AudioShuffleMode,
   ));
 }
 
@@ -1682,7 +1640,7 @@ as AudioServiceShuffleMode,
 /// @nodoc
 mixin _$AudioPlayerState {
 
- MediaItem? get mediaItem; PlaybackState? get playbackState; PositionData? get positionData; QueueState? get queueState; double get volume; double get speed; AudioPlayerStatus get status;
+ AudioEntity? get currentAudio; PlaybackStateEntity? get playbackState; PositionData? get positionData; double get volume; double get speed; AudioRepeatMode get repeatMode; AudioShuffleMode get shuffleMode; AudioPlayerStatus get status;
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1693,16 +1651,16 @@ $AudioPlayerStateCopyWith<AudioPlayerState> get copyWith => _$AudioPlayerStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AudioPlayerState&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.queueState, queueState) || other.queueState == queueState)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.status, status) || other.status == status));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mediaItem,playbackState,positionData,queueState,volume,speed,status);
+int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,status);
 
 @override
 String toString() {
-  return 'AudioPlayerState(mediaItem: $mediaItem, playbackState: $playbackState, positionData: $positionData, queueState: $queueState, volume: $volume, speed: $speed, status: $status)';
+  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, status: $status)';
 }
 
 
@@ -1713,11 +1671,11 @@ abstract mixin class $AudioPlayerStateCopyWith<$Res>  {
   factory $AudioPlayerStateCopyWith(AudioPlayerState value, $Res Function(AudioPlayerState) _then) = _$AudioPlayerStateCopyWithImpl;
 @useResult
 $Res call({
- MediaItem? mediaItem, PlaybackState? playbackState, PositionData? positionData, QueueState? queueState, double volume, double speed, AudioPlayerStatus status
+ AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, AudioPlayerStatus status
 });
 
 
-$PositionDataCopyWith<$Res>? get positionData;$QueueStateCopyWith<$Res>? get queueState;
+$AudioEntityCopyWith<$Res>? get currentAudio;$PlaybackStateEntityCopyWith<$Res>? get playbackState;$PositionDataCopyWith<$Res>? get positionData;
 
 }
 /// @nodoc
@@ -1730,19 +1688,44 @@ class _$AudioPlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mediaItem = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? queueState = freezed,Object? volume = null,Object? speed = null,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? status = null,}) {
   return _then(_self.copyWith(
-mediaItem: freezed == mediaItem ? _self.mediaItem : mediaItem // ignore: cast_nullable_to_non_nullable
-as MediaItem?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
-as PlaybackState?,positionData: freezed == positionData ? _self.positionData : positionData // ignore: cast_nullable_to_non_nullable
-as PositionData?,queueState: freezed == queueState ? _self.queueState : queueState // ignore: cast_nullable_to_non_nullable
-as QueueState?,volume: null == volume ? _self.volume : volume // ignore: cast_nullable_to_non_nullable
+currentAudio: freezed == currentAudio ? _self.currentAudio : currentAudio // ignore: cast_nullable_to_non_nullable
+as AudioEntity?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
+as PlaybackStateEntity?,positionData: freezed == positionData ? _self.positionData : positionData // ignore: cast_nullable_to_non_nullable
+as PositionData?,volume: null == volume ? _self.volume : volume // ignore: cast_nullable_to_non_nullable
 as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
-as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as double,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
+as AudioRepeatMode,shuffleMode: null == shuffleMode ? _self.shuffleMode : shuffleMode // ignore: cast_nullable_to_non_nullable
+as AudioShuffleMode,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AudioPlayerStatus,
   ));
 }
 /// Create a copy of AudioPlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res>? get currentAudio {
+    if (_self.currentAudio == null) {
+    return null;
+  }
+
+  return $AudioEntityCopyWith<$Res>(_self.currentAudio!, (value) {
+    return _then(_self.copyWith(currentAudio: value));
+  });
+}/// Create a copy of AudioPlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PlaybackStateEntityCopyWith<$Res>? get playbackState {
+    if (_self.playbackState == null) {
+    return null;
+  }
+
+  return $PlaybackStateEntityCopyWith<$Res>(_self.playbackState!, (value) {
+    return _then(_self.copyWith(playbackState: value));
+  });
+}/// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -1753,18 +1736,6 @@ $PositionDataCopyWith<$Res>? get positionData {
 
   return $PositionDataCopyWith<$Res>(_self.positionData!, (value) {
     return _then(_self.copyWith(positionData: value));
-  });
-}/// Create a copy of AudioPlayerState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$QueueStateCopyWith<$Res>? get queueState {
-    if (_self.queueState == null) {
-    return null;
-  }
-
-  return $QueueStateCopyWith<$Res>(_self.queueState!, (value) {
-    return _then(_self.copyWith(queueState: value));
   });
 }
 }
@@ -1848,10 +1819,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MediaItem? mediaItem,  PlaybackState? playbackState,  PositionData? positionData,  QueueState? queueState,  double volume,  double speed,  AudioPlayerStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  AudioPlayerStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AudioPlayerState() when $default != null:
-return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.queueState,_that.volume,_that.speed,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.status);case _:
   return orElse();
 
 }
@@ -1869,10 +1840,10 @@ return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.que
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MediaItem? mediaItem,  PlaybackState? playbackState,  PositionData? positionData,  QueueState? queueState,  double volume,  double speed,  AudioPlayerStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  AudioPlayerStatus status)  $default,) {final _that = this;
 switch (_that) {
 case _AudioPlayerState():
-return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.queueState,_that.volume,_that.speed,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.status);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1889,10 +1860,10 @@ return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.que
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MediaItem? mediaItem,  PlaybackState? playbackState,  PositionData? positionData,  QueueState? queueState,  double volume,  double speed,  AudioPlayerStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  AudioPlayerStatus status)?  $default,) {final _that = this;
 switch (_that) {
 case _AudioPlayerState() when $default != null:
-return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.queueState,_that.volume,_that.speed,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.status);case _:
   return null;
 
 }
@@ -1904,15 +1875,16 @@ return $default(_that.mediaItem,_that.playbackState,_that.positionData,_that.que
 
 
 class _AudioPlayerState extends AudioPlayerState {
-  const _AudioPlayerState({this.mediaItem, this.playbackState, this.positionData, this.queueState, this.volume = 1.0, this.speed = 1.0, required this.status}): super._();
+  const _AudioPlayerState({this.currentAudio, this.playbackState, this.positionData, this.volume = 1.0, this.speed = 1.0, this.repeatMode = AudioRepeatMode.none, this.shuffleMode = AudioShuffleMode.none, required this.status}): super._();
   
 
-@override final  MediaItem? mediaItem;
-@override final  PlaybackState? playbackState;
+@override final  AudioEntity? currentAudio;
+@override final  PlaybackStateEntity? playbackState;
 @override final  PositionData? positionData;
-@override final  QueueState? queueState;
 @override@JsonKey() final  double volume;
 @override@JsonKey() final  double speed;
+@override@JsonKey() final  AudioRepeatMode repeatMode;
+@override@JsonKey() final  AudioShuffleMode shuffleMode;
 @override final  AudioPlayerStatus status;
 
 /// Create a copy of AudioPlayerState
@@ -1925,16 +1897,16 @@ _$AudioPlayerStateCopyWith<_AudioPlayerState> get copyWith => __$AudioPlayerStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AudioPlayerState&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.queueState, queueState) || other.queueState == queueState)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.status, status) || other.status == status));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mediaItem,playbackState,positionData,queueState,volume,speed,status);
+int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,status);
 
 @override
 String toString() {
-  return 'AudioPlayerState(mediaItem: $mediaItem, playbackState: $playbackState, positionData: $positionData, queueState: $queueState, volume: $volume, speed: $speed, status: $status)';
+  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, status: $status)';
 }
 
 
@@ -1945,11 +1917,11 @@ abstract mixin class _$AudioPlayerStateCopyWith<$Res> implements $AudioPlayerSta
   factory _$AudioPlayerStateCopyWith(_AudioPlayerState value, $Res Function(_AudioPlayerState) _then) = __$AudioPlayerStateCopyWithImpl;
 @override @useResult
 $Res call({
- MediaItem? mediaItem, PlaybackState? playbackState, PositionData? positionData, QueueState? queueState, double volume, double speed, AudioPlayerStatus status
+ AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, AudioPlayerStatus status
 });
 
 
-@override $PositionDataCopyWith<$Res>? get positionData;@override $QueueStateCopyWith<$Res>? get queueState;
+@override $AudioEntityCopyWith<$Res>? get currentAudio;@override $PlaybackStateEntityCopyWith<$Res>? get playbackState;@override $PositionDataCopyWith<$Res>? get positionData;
 
 }
 /// @nodoc
@@ -1962,20 +1934,45 @@ class __$AudioPlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mediaItem = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? queueState = freezed,Object? volume = null,Object? speed = null,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? status = null,}) {
   return _then(_AudioPlayerState(
-mediaItem: freezed == mediaItem ? _self.mediaItem : mediaItem // ignore: cast_nullable_to_non_nullable
-as MediaItem?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
-as PlaybackState?,positionData: freezed == positionData ? _self.positionData : positionData // ignore: cast_nullable_to_non_nullable
-as PositionData?,queueState: freezed == queueState ? _self.queueState : queueState // ignore: cast_nullable_to_non_nullable
-as QueueState?,volume: null == volume ? _self.volume : volume // ignore: cast_nullable_to_non_nullable
+currentAudio: freezed == currentAudio ? _self.currentAudio : currentAudio // ignore: cast_nullable_to_non_nullable
+as AudioEntity?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
+as PlaybackStateEntity?,positionData: freezed == positionData ? _self.positionData : positionData // ignore: cast_nullable_to_non_nullable
+as PositionData?,volume: null == volume ? _self.volume : volume // ignore: cast_nullable_to_non_nullable
 as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
-as double,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as double,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
+as AudioRepeatMode,shuffleMode: null == shuffleMode ? _self.shuffleMode : shuffleMode // ignore: cast_nullable_to_non_nullable
+as AudioShuffleMode,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AudioPlayerStatus,
   ));
 }
 
 /// Create a copy of AudioPlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res>? get currentAudio {
+    if (_self.currentAudio == null) {
+    return null;
+  }
+
+  return $AudioEntityCopyWith<$Res>(_self.currentAudio!, (value) {
+    return _then(_self.copyWith(currentAudio: value));
+  });
+}/// Create a copy of AudioPlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PlaybackStateEntityCopyWith<$Res>? get playbackState {
+    if (_self.playbackState == null) {
+    return null;
+  }
+
+  return $PlaybackStateEntityCopyWith<$Res>(_self.playbackState!, (value) {
+    return _then(_self.copyWith(playbackState: value));
+  });
+}/// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -1986,18 +1983,6 @@ $PositionDataCopyWith<$Res>? get positionData {
 
   return $PositionDataCopyWith<$Res>(_self.positionData!, (value) {
     return _then(_self.copyWith(positionData: value));
-  });
-}/// Create a copy of AudioPlayerState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$QueueStateCopyWith<$Res>? get queueState {
-    if (_self.queueState == null) {
-    return null;
-  }
-
-  return $QueueStateCopyWith<$Res>(_self.queueState!, (value) {
-    return _then(_self.copyWith(queueState: value));
   });
 }
 }

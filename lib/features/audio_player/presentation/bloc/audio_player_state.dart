@@ -1,23 +1,33 @@
 part of 'audio_player_bloc.dart';
 
-enum AudioPlayerStatus { initial, success }
+enum AudioPlayerStatus { initial, loading, success }
 
 @freezed
 abstract class AudioPlayerState with _$AudioPlayerState {
   const factory AudioPlayerState({
-    MediaItem? mediaItem,
-    PlaybackState? playbackState,
+    AudioEntity? currentAudio,
+    PlaybackStateEntity? playbackState,
     PositionData? positionData,
-    QueueState? queueState,
     @Default(1.0) double volume,
     @Default(1.0) double speed,
+    @Default(AudioRepeatMode.none) AudioRepeatMode repeatMode,
+    @Default(AudioShuffleMode.none) AudioShuffleMode shuffleMode,
     required AudioPlayerStatus status,
   }) = _AudioPlayerState;
 
   const AudioPlayerState._();
 
-  bool get isPlaying => playbackState?.playing ?? false;
-  bool get canGoNext => queueState?.hasNext ?? false;
-  bool get canGoPrevious => queueState?.hasPrevious ?? false;
-  bool get hasMediaItem => mediaItem != null;
+  QueueState get queueState => QueueState(
+    queue: playbackState?.queue ?? [],
+    queueIndex: playbackState?.currentIndex,
+    shuffleIndices: null, // Not yet implemented in PlaybackStateEntity
+    repeatMode: repeatMode,
+  );
+
+  bool get isPlaying => playbackState?.isPlaying ?? false;
+  bool get canGoNext => queueState.hasNext;
+  bool get canGoPrevious => queueState.hasPrevious;
+  bool get hasMediaItem => currentAudio != null;
+  AudioEntity? get mediaItem => currentAudio;
+  bool get hasAudio => currentAudio != null;
 }

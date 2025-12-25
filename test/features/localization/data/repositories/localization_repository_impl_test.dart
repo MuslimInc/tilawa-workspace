@@ -39,7 +39,7 @@ void main() {
               .getCurrentLanguage();
 
           // Assert
-          expect(result, const Right(tLanguageCode));
+          expect(result, const Right<Failure, String>(tLanguageCode));
           verify(mockLocalDataSource.getCurrentLanguage()).called(1);
           verifyNoMoreInteractions(mockLocalDataSource);
         },
@@ -84,7 +84,7 @@ void main() {
         );
 
         // Assert
-        expect(result, const Right(null));
+        expect(result, const Right<Failure, void>(null));
         verify(mockLocalDataSource.setLanguage(tLanguageCode)).called(1);
         verifyNoMoreInteractions(mockLocalDataSource);
       });
@@ -130,7 +130,10 @@ void main() {
               .getSupportedLanguages();
 
           // Assert
-          expect(result, const Right(tSupportedLanguages));
+          expect(
+            result,
+            const Right<Failure, List<String>>(tSupportedLanguages),
+          );
           verify(mockLocalDataSource.getSupportedLanguages()).called(1);
           verifyNoMoreInteractions(mockLocalDataSource);
         },

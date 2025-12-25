@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
@@ -600,13 +600,22 @@ void main() {
 
       // Mock playing state for this item
       when(mockAudioPlayerBloc.state).thenAnswer(
-        (_) => AudioPlayerState(
+        (_) => const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: const MediaItem(
+          currentAudio: AudioEntity(
             id: 'file:///path/to/test.mp3',
             title: 'Test',
+            url: '',
+            duration: Duration.zero,
           ),
-          playbackState: PlaybackState(playing: true),
+          playbackState: PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
+          ),
         ),
       );
 
@@ -640,13 +649,22 @@ void main() {
 
       // Mock playing state for DIFFERENT item
       when(mockAudioPlayerBloc.state).thenAnswer(
-        (_) => AudioPlayerState(
+        (_) => const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: const MediaItem(
-            id: 'file:///path/to/OTHER.mp3',
+          currentAudio: AudioEntity(
+            id: 'file:///path/to/another_test.mp3',
             title: 'Other',
+            url: '',
+            duration: Duration.zero,
           ),
-          playbackState: PlaybackState(playing: true),
+          playbackState: PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
+          ),
         ),
       );
 
@@ -674,13 +692,22 @@ void main() {
 
       // Mock PAUSED state for this item
       when(mockAudioPlayerBloc.state).thenAnswer(
-        (_) => AudioPlayerState(
+        (_) => const AudioPlayerState(
           status: AudioPlayerStatus.success,
-          mediaItem: const MediaItem(
+          currentAudio: AudioEntity(
             id: 'file:///path/to/test.mp3',
             title: 'Test',
+            url: '',
+            duration: Duration.zero,
           ),
-          playbackState: PlaybackState(),
+          playbackState: PlaybackStateEntity(
+            isPlaying: false,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
+          ),
         ),
       );
 

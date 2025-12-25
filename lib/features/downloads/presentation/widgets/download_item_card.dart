@@ -1,8 +1,8 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/entities/audio.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -135,14 +135,14 @@ class DownloadItemCard extends StatelessWidget {
                   ),
                   icon: Icon(
                     isCurrentlyPlaying &&
-                            (audioState.playbackState?.playing ?? false)
+                            (audioState.playbackState?.isPlaying ?? false)
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,
                   ),
                   onPressed: () => _handlePlayPause(context, audioState),
                   tooltip:
                       isCurrentlyPlaying &&
-                          (audioState.playbackState?.playing ?? false)
+                          (audioState.playbackState?.isPlaying ?? false)
                       ? context.l10n.pause
                       : context.l10n.play,
                 );
@@ -339,14 +339,14 @@ class DownloadItemCard extends StatelessWidget {
 
   /// Check if this download is currently playing
   bool _isCurrentlyPlaying(AudioPlayerState audioState) {
-    final MediaItem? currentMediaItem = audioState.mediaItem;
-    if (currentMediaItem == null) {
+    final AudioEntity? currentAudio = audioState.currentAudio;
+    if (currentAudio == null) {
       return false;
     }
 
-    // Check if the current media item matches this download
+    // Check if the current audio entity matches this download
     final fileUri = Uri.file(download.filePath).toString();
-    return currentMediaItem.id == fileUri;
+    return currentAudio.id == fileUri;
   }
 
   /// Handle play/pause button press
@@ -355,7 +355,7 @@ class DownloadItemCard extends StatelessWidget {
 
     if (isCurrentlyPlaying) {
       // If this download is currently playing, toggle play/pause
-      if (audioState.playbackState?.playing ?? false) {
+      if (audioState.playbackState?.isPlaying ?? false) {
         context.read<AudioPlayerBloc>().add(
           const AudioPlayerEvent.pauseAudio(),
         );

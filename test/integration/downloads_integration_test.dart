@@ -15,14 +15,13 @@ import 'package:tilawa/features/downloads/data/services/download_notification_se
 import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 import 'package:tilawa/features/downloads/data/services/download_status_synchronizer.dart';
 import 'package:tilawa/features/downloads/data/services/download_validator.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
-import '../features/downloads/data/services/download_service_test.mocks.dart';
-// Generate mocks
-
+import '../features/downloads/data/services/flutter_downloader_wrapper_test.mocks.dart';
 @GenerateMocks([
   DownloadService,
   DownloadsLocalDataSource,

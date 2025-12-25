@@ -6,33 +6,35 @@
 import 'dart:async' as _i5;
 import 'dart:ui' as _i3;
 
-import 'package:dartz_plus/dartz_plus.dart' as _i15;
+import 'package:dartz_plus/dartz_plus.dart' as _i16;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    as _i9;
+    as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
-import 'package:tilawa/core/entities/reciter_entity.dart' as _i17;
-import 'package:tilawa/core/errors/failures.dart' as _i16;
+import 'package:tilawa/core/entities/reciter_entity.dart' as _i18;
+import 'package:tilawa/core/errors/failures.dart' as _i17;
 import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart'
     as _i4;
-import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart'
-    as _i10;
-import 'package:tilawa/features/downloads/data/services/download_notification_service.dart'
+import 'package:tilawa/features/downloads/data/models/download_progress.dart'
     as _i8;
-import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart'
+import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart'
     as _i11;
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart'
+    as _i9;
+import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart'
+    as _i12;
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart'
-    as _i18;
+    as _i19;
 import 'package:tilawa/features/downloads/data/services/download_service.dart'
     as _i7;
 import 'package:tilawa/features/downloads/data/services/download_status_synchronizer.dart'
-    as _i13;
+    as _i14;
 import 'package:tilawa/features/downloads/data/services/download_validator.dart'
-    as _i12;
+    as _i13;
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart'
     as _i2;
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart'
-    as _i14;
+    as _i15;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -181,20 +183,20 @@ class MockDownloadService extends _i1.Mock implements _i7.DownloadService {
   }
 
   @override
-  _i5.Stream<_i7.DownloadProgress> get globalProgressStream =>
+  _i5.Stream<_i8.DownloadProgress> get globalProgressStream =>
       (super.noSuchMethod(
             Invocation.getter(#globalProgressStream),
-            returnValue: _i5.Stream<_i7.DownloadProgress>.empty(),
+            returnValue: _i5.Stream<_i8.DownloadProgress>.empty(),
           )
-          as _i5.Stream<_i7.DownloadProgress>);
+          as _i5.Stream<_i8.DownloadProgress>);
 
   @override
-  _i5.Stream<_i7.DownloadProgress> getProgressStream(String? id) =>
+  _i5.Stream<_i8.DownloadProgress> getProgressStream(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getProgressStream, [id]),
-            returnValue: _i5.Stream<_i7.DownloadProgress>.empty(),
+            returnValue: _i5.Stream<_i8.DownloadProgress>.empty(),
           )
-          as _i5.Stream<_i7.DownloadProgress>);
+          as _i5.Stream<_i8.DownloadProgress>);
 
   @override
   _i5.Future<List<String>> getActiveDownloadIds() =>
@@ -286,7 +288,7 @@ class MockDownloadService extends _i1.Mock implements _i7.DownloadService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadNotificationService extends _i1.Mock
-    implements _i8.DownloadNotificationService {
+    implements _i9.DownloadNotificationService {
   MockDownloadNotificationService() {
     _i1.throwOnMissingStub(this);
   }
@@ -372,7 +374,7 @@ class MockDownloadNotificationService extends _i1.Mock
 
   @override
   _i5.Future<void> handleNotificationResponse(
-    _i9.NotificationResponse? response,
+    _i10.NotificationResponse? response,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#handleNotificationResponse, [response]),
@@ -386,7 +388,7 @@ class MockDownloadNotificationService extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBatchDownloadManager extends _i1.Mock
-    implements _i10.BatchDownloadManager {
+    implements _i11.BatchDownloadManager {
   MockBatchDownloadManager() {
     _i1.throwOnMissingStub(this);
   }
@@ -419,7 +421,7 @@ class MockBatchDownloadManager extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadPathResolver extends _i1.Mock
-    implements _i11.DownloadPathResolver {
+    implements _i12.DownloadPathResolver {
   MockDownloadPathResolver() {
     _i1.throwOnMissingStub(this);
   }
@@ -455,7 +457,7 @@ class MockDownloadPathResolver extends _i1.Mock
 /// A class which mocks [DownloadValidator].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDownloadValidator extends _i1.Mock implements _i12.DownloadValidator {
+class MockDownloadValidator extends _i1.Mock implements _i13.DownloadValidator {
   MockDownloadValidator() {
     _i1.throwOnMissingStub(this);
   }
@@ -493,7 +495,7 @@ class MockDownloadValidator extends _i1.Mock implements _i12.DownloadValidator {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadStatusSynchronizer extends _i1.Mock
-    implements _i13.DownloadStatusSynchronizer {
+    implements _i14.DownloadStatusSynchronizer {
   MockDownloadStatusSynchronizer() {
     _i1.throwOnMissingStub(this);
   }
@@ -515,125 +517,125 @@ class MockDownloadStatusSynchronizer extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRecitersRepository extends _i1.Mock
-    implements _i14.RecitersRepository {
+    implements _i15.RecitersRepository {
   MockRecitersRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>
+  _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>
   getReciters() =>
       (super.noSuchMethod(
             Invocation.method(#getReciters, []),
             returnValue:
                 _i5.Future<
-                  _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                  _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                 >.value(
                   _i6.dummyValue<
-                    _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                    _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                   >(this, Invocation.method(#getReciters, [])),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>);
+          as _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>
+  _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>
   searchReciters(String? query) =>
       (super.noSuchMethod(
             Invocation.method(#searchReciters, [query]),
             returnValue:
                 _i5.Future<
-                  _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                  _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                 >.value(
                   _i6.dummyValue<
-                    _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                    _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                   >(this, Invocation.method(#searchReciters, [query])),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>);
+          as _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>
+  _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>
   getRecitersByLetter(String? letter) =>
       (super.noSuchMethod(
             Invocation.method(#getRecitersByLetter, [letter]),
             returnValue:
                 _i5.Future<
-                  _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                  _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                 >.value(
                   _i6.dummyValue<
-                    _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                    _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                   >(this, Invocation.method(#getRecitersByLetter, [letter])),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>);
+          as _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, _i17.ReciterEntity?>> getReciterById(
+  _i5.Future<_i16.Either<_i17.Failure, _i18.ReciterEntity?>> getReciterById(
     String? id,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getReciterById, [id]),
             returnValue:
                 _i5.Future<
-                  _i15.Either<_i16.Failure, _i17.ReciterEntity?>
+                  _i16.Either<_i17.Failure, _i18.ReciterEntity?>
                 >.value(
                   _i6.dummyValue<
-                    _i15.Either<_i16.Failure, _i17.ReciterEntity?>
+                    _i16.Either<_i17.Failure, _i18.ReciterEntity?>
                   >(this, Invocation.method(#getReciterById, [id])),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, _i17.ReciterEntity?>>);
+          as _i5.Future<_i16.Either<_i17.Failure, _i18.ReciterEntity?>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>
+  _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>
   getFavoriteReciters() =>
       (super.noSuchMethod(
             Invocation.method(#getFavoriteReciters, []),
             returnValue:
                 _i5.Future<
-                  _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                  _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                 >.value(
                   _i6.dummyValue<
-                    _i15.Either<_i16.Failure, List<_i17.ReciterEntity>>
+                    _i16.Either<_i17.Failure, List<_i18.ReciterEntity>>
                   >(this, Invocation.method(#getFavoriteReciters, [])),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, List<_i17.ReciterEntity>>>);
+          as _i5.Future<_i16.Either<_i17.Failure, List<_i18.ReciterEntity>>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, void>> toggleFavoriteReciter(int? id) =>
+  _i5.Future<_i16.Either<_i17.Failure, void>> toggleFavoriteReciter(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#toggleFavoriteReciter, [id]),
-            returnValue: _i5.Future<_i15.Either<_i16.Failure, void>>.value(
-              _i6.dummyValue<_i15.Either<_i16.Failure, void>>(
+            returnValue: _i5.Future<_i16.Either<_i17.Failure, void>>.value(
+              _i6.dummyValue<_i16.Either<_i17.Failure, void>>(
                 this,
                 Invocation.method(#toggleFavoriteReciter, [id]),
               ),
             ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, void>>);
+          as _i5.Future<_i16.Either<_i17.Failure, void>>);
 
   @override
-  _i5.Future<_i15.Either<_i16.Failure, List<String>>> getFavoriteReciterIds() =>
+  _i5.Future<_i16.Either<_i17.Failure, List<String>>> getFavoriteReciterIds() =>
       (super.noSuchMethod(
             Invocation.method(#getFavoriteReciterIds, []),
             returnValue:
-                _i5.Future<_i15.Either<_i16.Failure, List<String>>>.value(
-                  _i6.dummyValue<_i15.Either<_i16.Failure, List<String>>>(
+                _i5.Future<_i16.Either<_i17.Failure, List<String>>>.value(
+                  _i6.dummyValue<_i16.Either<_i17.Failure, List<String>>>(
                     this,
                     Invocation.method(#getFavoriteReciterIds, []),
                   ),
                 ),
           )
-          as _i5.Future<_i15.Either<_i16.Failure, List<String>>>);
+          as _i5.Future<_i16.Either<_i17.Failure, List<String>>>);
 }
 
 /// A class which mocks [DownloadQueueManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadQueueManager extends _i1.Mock
-    implements _i18.DownloadQueueManager {
+    implements _i19.DownloadQueueManager {
   MockDownloadQueueManager() {
     _i1.throwOnMissingStub(this);
   }
@@ -668,12 +670,12 @@ class MockDownloadQueueManager extends _i1.Mock
           as int);
 
   @override
-  _i5.Stream<_i18.QueueUpdate> get queueUpdates =>
+  _i5.Stream<_i19.QueueUpdate> get queueUpdates =>
       (super.noSuchMethod(
             Invocation.getter(#queueUpdates),
-            returnValue: _i5.Stream<_i18.QueueUpdate>.empty(),
+            returnValue: _i5.Stream<_i19.QueueUpdate>.empty(),
           )
-          as _i5.Stream<_i18.QueueUpdate>);
+          as _i5.Stream<_i19.QueueUpdate>);
 
   @override
   set maxConcurrentDownloads(int? count) => super.noSuchMethod(

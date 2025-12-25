@@ -6,14 +6,16 @@
 import 'dart:async' as _i3;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    as _i6;
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:tilawa/features/downloads/data/models/download_progress.dart'
+    as _i4;
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart'
-    as _i5;
+    as _i6;
 import 'package:tilawa/features/downloads/data/services/download_service.dart'
     as _i2;
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart'
-    as _i4;
+    as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -39,20 +41,20 @@ class MockDownloadService extends _i1.Mock implements _i2.DownloadService {
   }
 
   @override
-  _i3.Stream<_i2.DownloadProgress> get globalProgressStream =>
+  _i3.Stream<_i4.DownloadProgress> get globalProgressStream =>
       (super.noSuchMethod(
             Invocation.getter(#globalProgressStream),
-            returnValue: _i3.Stream<_i2.DownloadProgress>.empty(),
+            returnValue: _i3.Stream<_i4.DownloadProgress>.empty(),
           )
-          as _i3.Stream<_i2.DownloadProgress>);
+          as _i3.Stream<_i4.DownloadProgress>);
 
   @override
-  _i3.Stream<_i2.DownloadProgress> getProgressStream(String? id) =>
+  _i3.Stream<_i4.DownloadProgress> getProgressStream(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getProgressStream, [id]),
-            returnValue: _i3.Stream<_i2.DownloadProgress>.empty(),
+            returnValue: _i3.Stream<_i4.DownloadProgress>.empty(),
           )
-          as _i3.Stream<_i2.DownloadProgress>);
+          as _i3.Stream<_i4.DownloadProgress>);
 
   @override
   _i3.Future<List<String>> getActiveDownloadIds() =>
@@ -71,12 +73,12 @@ class MockDownloadService extends _i1.Mock implements _i2.DownloadService {
           as _i3.Future<bool>);
 
   @override
-  _i3.Future<_i4.DownloadStatus?> getStatus(String? id) =>
+  _i3.Future<_i5.DownloadStatus?> getStatus(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getStatus, [id]),
-            returnValue: _i3.Future<_i4.DownloadStatus?>.value(),
+            returnValue: _i3.Future<_i5.DownloadStatus?>.value(),
           )
-          as _i3.Future<_i4.DownloadStatus?>);
+          as _i3.Future<_i5.DownloadStatus?>);
 
   @override
   _i3.Future<void> download({
@@ -144,7 +146,7 @@ class MockDownloadService extends _i1.Mock implements _i2.DownloadService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadNotificationService extends _i1.Mock
-    implements _i5.DownloadNotificationService {
+    implements _i6.DownloadNotificationService {
   MockDownloadNotificationService() {
     _i1.throwOnMissingStub(this);
   }
@@ -164,7 +166,7 @@ class MockDownloadNotificationService extends _i1.Mock
     required String? title,
     required String? reciterName,
     required int? progress,
-    required _i4.DownloadStatus? status,
+    required _i5.DownloadStatus? status,
     String? pendingMessage,
     String? progressMessage,
     String? completeMessage,
@@ -194,7 +196,7 @@ class MockDownloadNotificationService extends _i1.Mock
     required int? progress,
     required int? completedCount,
     required int? totalCount,
-    required _i4.DownloadStatus? status,
+    required _i5.DownloadStatus? status,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#showBatchDownloadProgress, [], {
@@ -230,7 +232,7 @@ class MockDownloadNotificationService extends _i1.Mock
 
   @override
   _i3.Future<void> handleNotificationResponse(
-    _i6.NotificationResponse? response,
+    _i7.NotificationResponse? response,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#handleNotificationResponse, [response]),

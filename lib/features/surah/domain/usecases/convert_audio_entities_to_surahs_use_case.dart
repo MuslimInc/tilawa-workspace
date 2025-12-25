@@ -1,6 +1,6 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/entities/audio.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/repositories/downloads_repository.dart';
 import '../entities/surah_entity.dart';
@@ -8,8 +8,8 @@ import '../mappers/surah_mapper.dart';
 import '../repositories/surah_repository.dart';
 
 @Singleton()
-class ConvertMediaItemsToSurahsUseCase {
-  const ConvertMediaItemsToSurahsUseCase(
+class ConvertAudioEntitiesToSurahsUseCase {
+  const ConvertAudioEntitiesToSurahsUseCase(
     this._surahRepository,
     this._downloadsRepository,
   );
@@ -17,13 +17,13 @@ class ConvertMediaItemsToSurahsUseCase {
   final SurahRepository _surahRepository;
   final DownloadsRepository _downloadsRepository;
 
-  Future<List<SurahEntity>> call(List<MediaItem> mediaItems) async {
+  Future<List<SurahEntity>> call(List<AudioEntity> audioEntities) async {
     final surahList = <SurahEntity>[];
 
     // Batch fetch download statuses for all items
     List<DownloadItem> downloads = [];
-    if (mediaItems.isNotEmpty) {
-      final String reciterName = mediaItems.first.artist ?? '';
+    if (audioEntities.isNotEmpty) {
+      final String reciterName = audioEntities.first.artist ?? '';
       if (reciterName.isNotEmpty) {
         downloads = await _downloadsRepository.getDownloadsForReciter(
           reciterName,
@@ -48,9 +48,9 @@ class ConvertMediaItemsToSurahsUseCase {
       downloadIdMap[download.url] = download.id;
     }
 
-    for (final mediaItem in mediaItems) {
-      // Convert MediaItem to Surah
-      SurahEntity surah = SurahMapper.fromMediaItem(mediaItem);
+    for (final audio in audioEntities) {
+      // Convert AudioEntity to Surah
+      SurahEntity surah = SurahMapper.fromAudioEntity(audio);
 
       // Check status using in-memory maps
       // Note: surah.id is the URL

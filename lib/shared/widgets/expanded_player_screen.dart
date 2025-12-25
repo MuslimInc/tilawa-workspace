@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../core/entities/audio.dart';
 import '../../core/extensions.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import '../models/queue_state.dart';
 import 'seek_bar.dart';
 
 class ExpandedPlayerScreen extends StatefulWidget {
@@ -91,8 +90,8 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
   Widget build(BuildContext context) {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
-        final MediaItem? mediaItem = state.mediaItem;
-        if (state.status != AudioPlayerStatus.success || mediaItem == null) {
+        final AudioEntity? audio = state.currentAudio;
+        if (state.status != AudioPlayerStatus.success || audio == null) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
@@ -119,10 +118,10 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                 body: Stack(
                   children: [
                     // 1. Background Image with Blur
-                    if (mediaItem.artUri != null)
+                    if (audio.artUri != null)
                       Positioned.fill(
                         child: CachedNetworkImage(
-                          imageUrl: mediaItem.artUri.toString(),
+                          imageUrl: audio.artUri!,
                           fit: BoxFit.cover,
                           errorWidget: (_, _, _) =>
                               Container(color: Colors.grey),
@@ -203,10 +202,9 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(24.r),
-                                      child: mediaItem.artUri != null
+                                      child: audio.artUri != null
                                           ? CachedNetworkImage(
-                                              imageUrl: mediaItem.artUri
-                                                  .toString(),
+                                              imageUrl: audio.artUri!,
                                               fit: BoxFit.cover,
                                               errorWidget:
                                                   (context, error, stackTrace) {
@@ -231,7 +229,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                             child: Column(
                               children: [
                                 Text(
-                                  mediaItem.title,
+                                  audio.title,
                                   style: TextStyle(
                                     fontSize: 24.sp,
                                     color: Colors.white,
@@ -242,9 +240,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                                 ),
                                 SizedBox(height: 8.h),
                                 Text(
-                                  mediaItem.artist ??
-                                      mediaItem.album ??
-                                      'Unknown',
+                                  audio.artist ?? 'Unknown',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     color: Colors.white.withValues(alpha: 0.7),
@@ -341,7 +337,6 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
   }
 
   Widget _buildControls(BuildContext context, AudioPlayerState state) {
-    final QueueState queueState = state.queueState ?? QueueState.empty;
     final bool isPlaying = state.isPlaying;
 
     return Padding(
@@ -367,7 +362,6 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                   max: 1.0,
                   value: state.volume,
                   onChanged: (newVolume) {
-                    // logger.d('Volume changed to: $newVolume');
                     context.read<AudioPlayerBloc>().add(
                       AudioPlayerEvent.setVolume(newVolume),
                     );
@@ -387,11 +381,9 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
               ),
               onPressed: state.canGoPrevious
                   ? () {
-                      if (queueState.hasPrevious) {
-                        context.read<AudioPlayerBloc>().add(
-                          const AudioPlayerEvent.skipToPrevious(),
-                        );
-                      }
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.skipToPrevious(),
+                      );
                     }
                   : null,
             ),

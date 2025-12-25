@@ -1,3 +1,5 @@
+import 'package:dartz_plus/dartz_plus.dart';
+
 import '../../../../core/entities/audio.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../repositories/audio_player_repository.dart';
@@ -7,7 +9,7 @@ class GetPlaybackStateUseCase {
 
   final AudioPlayerRepository _repository;
 
-  ResultFuture<PlaybackStateEntity> call() {
-    return _repository.getPlaybackState();
+  ResultFuture<PlaybackStateEntity> call() async {
+    return Right(_repository.getPlaybackState);
   }
 }

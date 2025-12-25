@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
@@ -23,7 +24,7 @@ import 'package:tilawa/features/downloads/data/services/download_validator.dart'
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
-import '../services/download_service_test.mocks.dart';
+import '../services/flutter_downloader_wrapper_test.mocks.dart';
 import 'downloads_repository_impl_test.mocks.dart';
 
 @GenerateMocks([

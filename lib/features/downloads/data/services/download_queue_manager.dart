@@ -9,6 +9,7 @@ import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../models/download_progress.dart';
 import 'download_notification_service.dart';
 import 'download_service.dart';
 

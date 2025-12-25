@@ -8,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 import 'package:tilawa/features/downloads/data/services/flutter_downloader_wrapper.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
@@ -469,15 +471,17 @@ void main() {
 
           // Simulate progress update
           // Use the same ID as enqueued
-          DownloadService.globalProgressController.add(
-            const DownloadProgress(
-              id: 'id_batch',
-              status: DownloadStatus.downloading,
-              progress: 0.5,
-              downloadedSize: 50,
-              fileSize: 100,
-            ),
-          );
+          (GetIt.instance<DownloadService>() as DownloadServiceImpl)
+              .globalProgressControllerInternal
+              .add(
+                const DownloadProgress(
+                  id: 'id_batch',
+                  status: DownloadStatus.downloading,
+                  progress: 0.5,
+                  downloadedSize: 50,
+                  fileSize: 100,
+                ),
+              );
 
           async.flushMicrotasks();
 

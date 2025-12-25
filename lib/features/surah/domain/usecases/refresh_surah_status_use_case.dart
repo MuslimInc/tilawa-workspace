@@ -1,5 +1,6 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:injectable/injectable.dart';
+
+import '../../../../core/entities/audio.dart';
 import '../entities/surah_entity.dart';
 import '../repositories/surah_repository.dart';
 
@@ -21,13 +22,14 @@ class RefreshSurahStatusUseCase {
     SurahEntity? surah = await _surahRepository.getSurah(surahId, reciterName);
     if (surah == null) {
       // Create a basic surah if it doesn't exist
-      final mediaItem = MediaItem(
+      final audio = AudioEntity(
         id: surahId,
         title: '', // This should be provided from the data source
         artist: reciterName,
-        extras: {'nameAr': '', 'url': ''},
+        url: '', // This should also be provided
+        duration: Duration.zero,
       );
-      surah = SurahEntity(mediaItem: mediaItem, isDownloaded: isDownloaded);
+      surah = SurahEntity(audio: audio, isDownloaded: isDownloaded);
     } else {
       surah = surah.copyWith(isDownloaded: isDownloaded);
     }

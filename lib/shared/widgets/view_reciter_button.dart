@@ -1,7 +1,7 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/entities/audio.dart';
 import '../../core/entities/reciter_entity.dart';
 import '../../core/extensions.dart';
 import '../../core/utils/toast_utils.dart';
@@ -9,18 +9,18 @@ import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
 
 class ViewReciterButton extends StatelessWidget {
-  const ViewReciterButton({super.key, required this.mediaItem});
-  final MediaItem mediaItem;
+  const ViewReciterButton({super.key, required this.audio});
+  final AudioEntity audio;
 
   @override
   Widget build(BuildContext context) {
     Future<void> navigateToReciterDetails(
       BuildContext context,
-      MediaItem mediaItem,
+      AudioEntity audio,
     ) async {
       try {
         final ReciterEntity? reciter =
-            await ReciterHelper.getReciterFromMediaItem(mediaItem);
+            await ReciterHelper.getReciterFromAudioEntity(audio);
         if (reciter != null && context.mounted) {
           // Use GoRouter to navigate to reciter details
           await ReciterDetailsRoute(
@@ -45,8 +45,8 @@ class ViewReciterButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(start: 12),
       child: TextButton.icon(
         icon: const Icon(FluentIcons.person_24_regular, size: 18),
-        label: Text('${mediaItem.artist}'),
-        onPressed: () => navigateToReciterDetails(context, mediaItem),
+        label: Text('${audio.artist}'),
+        onPressed: () => navigateToReciterDetails(context, audio),
       ),
     );
   }

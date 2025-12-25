@@ -10,8 +10,10 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 import 'download_queue_manager_test.mocks.dart';
@@ -215,15 +217,17 @@ void main() {
         async.flushMicrotasks();
 
         // Simulate progress
-        DownloadService.globalProgressController.add(
-          const DownloadProgress(
-            id: 'notify_id',
-            status: DownloadStatus.downloading,
-            progress: 0.5,
-            downloadedSize: 50,
-            fileSize: 100,
-          ),
-        );
+        (downloadService as DownloadServiceImpl)
+            .globalProgressControllerInternal
+            .add(
+              const DownloadProgress(
+                id: 'notify_id',
+                status: DownloadStatus.downloading,
+                progress: 0.5,
+                downloadedSize: 50,
+                fileSize: 100,
+              ),
+            );
 
         async.flushMicrotasks();
 

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QueueState {
 
- List<MediaItem> get queue; int? get queueIndex; List<int>? get shuffleIndices; AudioServiceRepeatMode get repeatMode;
+ List<AudioEntity> get queue; int? get queueIndex; List<int>? get shuffleIndices; AudioRepeatMode get repeatMode;
 /// Create a copy of QueueState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $QueueStateCopyWith<$Res>  {
   factory $QueueStateCopyWith(QueueState value, $Res Function(QueueState) _then) = _$QueueStateCopyWithImpl;
 @useResult
 $Res call({
- List<MediaItem> queue, int? queueIndex, List<int>? shuffleIndices, AudioServiceRepeatMode repeatMode
+ List<AudioEntity> queue, int? queueIndex, List<int>? shuffleIndices, AudioRepeatMode repeatMode
 });
 
 
@@ -65,10 +65,10 @@ class _$QueueStateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? queue = null,Object? queueIndex = freezed,Object? shuffleIndices = freezed,Object? repeatMode = null,}) {
   return _then(_self.copyWith(
 queue: null == queue ? _self.queue : queue // ignore: cast_nullable_to_non_nullable
-as List<MediaItem>,queueIndex: freezed == queueIndex ? _self.queueIndex : queueIndex // ignore: cast_nullable_to_non_nullable
+as List<AudioEntity>,queueIndex: freezed == queueIndex ? _self.queueIndex : queueIndex // ignore: cast_nullable_to_non_nullable
 as int?,shuffleIndices: freezed == shuffleIndices ? _self.shuffleIndices : shuffleIndices // ignore: cast_nullable_to_non_nullable
 as List<int>?,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
-as AudioServiceRepeatMode,
+as AudioRepeatMode,
   ));
 }
 
@@ -153,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<MediaItem> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioServiceRepeatMode repeatMode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<AudioEntity> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioRepeatMode repeatMode)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QueueState() when $default != null:
 return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMode);case _:
@@ -174,7 +174,7 @@ return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<MediaItem> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioServiceRepeatMode repeatMode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<AudioEntity> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioRepeatMode repeatMode)  $default,) {final _that = this;
 switch (_that) {
 case _QueueState():
 return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMode);case _:
@@ -194,7 +194,7 @@ return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<MediaItem> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioServiceRepeatMode repeatMode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<AudioEntity> queue,  int? queueIndex,  List<int>? shuffleIndices,  AudioRepeatMode repeatMode)?  $default,) {final _that = this;
 switch (_that) {
 case _QueueState() when $default != null:
 return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMode);case _:
@@ -209,11 +209,11 @@ return $default(_that.queue,_that.queueIndex,_that.shuffleIndices,_that.repeatMo
 
 
 class _QueueState extends QueueState {
-  const _QueueState({required final  List<MediaItem> queue, required this.queueIndex, required final  List<int>? shuffleIndices, required this.repeatMode}): _queue = queue,_shuffleIndices = shuffleIndices,super._();
+  const _QueueState({required final  List<AudioEntity> queue, required this.queueIndex, required final  List<int>? shuffleIndices, required this.repeatMode}): _queue = queue,_shuffleIndices = shuffleIndices,super._();
   
 
- final  List<MediaItem> _queue;
-@override List<MediaItem> get queue {
+ final  List<AudioEntity> _queue;
+@override List<AudioEntity> get queue {
   if (_queue is EqualUnmodifiableListView) return _queue;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_queue);
@@ -229,7 +229,7 @@ class _QueueState extends QueueState {
   return EqualUnmodifiableListView(value);
 }
 
-@override final  AudioServiceRepeatMode repeatMode;
+@override final  AudioRepeatMode repeatMode;
 
 /// Create a copy of QueueState
 /// with the given fields replaced by the non-null parameter values.
@@ -261,7 +261,7 @@ abstract mixin class _$QueueStateCopyWith<$Res> implements $QueueStateCopyWith<$
   factory _$QueueStateCopyWith(_QueueState value, $Res Function(_QueueState) _then) = __$QueueStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<MediaItem> queue, int? queueIndex, List<int>? shuffleIndices, AudioServiceRepeatMode repeatMode
+ List<AudioEntity> queue, int? queueIndex, List<int>? shuffleIndices, AudioRepeatMode repeatMode
 });
 
 
@@ -281,10 +281,10 @@ class __$QueueStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? queue = null,Object? queueIndex = freezed,Object? shuffleIndices = freezed,Object? repeatMode = null,}) {
   return _then(_QueueState(
 queue: null == queue ? _self._queue : queue // ignore: cast_nullable_to_non_nullable
-as List<MediaItem>,queueIndex: freezed == queueIndex ? _self.queueIndex : queueIndex // ignore: cast_nullable_to_non_nullable
+as List<AudioEntity>,queueIndex: freezed == queueIndex ? _self.queueIndex : queueIndex // ignore: cast_nullable_to_non_nullable
 as int?,shuffleIndices: freezed == shuffleIndices ? _self._shuffleIndices : shuffleIndices // ignore: cast_nullable_to_non_nullable
 as List<int>?,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
-as AudioServiceRepeatMode,
+as AudioRepeatMode,
   ));
 }
 
