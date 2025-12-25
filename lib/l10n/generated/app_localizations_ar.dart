@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'مزكري';
+  String get appTitle => 'تلاوة';
 
   @override
   String get reciters => 'القراء';
@@ -369,7 +369,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToMuzakri => 'مرحباً بك في مزكري';
+  String get welcomeToApp => 'مرحباً بك في تلاوة';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
@@ -601,4 +601,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get unableToFindQibla => 'تعذر العثور على القبلة';
+
+  @override
+  String get onboardingTitle1 => 'دقائق من القرآن... تغير يومك كله';
+
+  @override
+  String get onboardingDesc1 =>
+      'حين تشعر بضيق الحياة، تذكر أن هناك آيات في القرآن تتحدث عن حالتك تمامًا، فقط ابحث عنها وستجد السكينة.';
+
+  @override
+  String get onboardingTitle2 => 'رحلة إيمانية مع أصوات قرانية متعددة';
+
+  @override
+  String get onboardingDesc2 =>
+      'هنا تجتمع أصوات القراء من كل أرجاء الأمة، في روايات تنسج جمال الحروف بنور المعاني.';
+
+  @override
+  String get onboardingTitle3 => 'كل آية وذكر صدقة جارية لأبي حذيفة';
+
+  @override
+  String get onboardingDesc3 =>
+      'كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته';
+
+  @override
+  String get startJourney => 'لنبدأ رحلتنا مع القرآن';
 }

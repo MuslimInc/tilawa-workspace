@@ -13,21 +13,21 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/core/entities/moshaf_entity.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/screens/reciter_details_screen.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/downloads/domain/usecases/usecases.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/screens/reciter_details_screen.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}

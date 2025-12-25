@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Muzakri'**
+  /// **'Tilawa'**
   String get appTitle;
 
   /// Reciters section title
@@ -803,8 +803,8 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Muzakri'**
-  String get welcomeToMuzakri;
+  /// **'Welcome to Tilawa'**
+  String get welcomeToApp;
 
   /// Description text for Google sign in
   ///
@@ -1213,6 +1213,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to find Qibla'**
   String get unableToFindQibla;
+
+  /// Onboarding page 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes from the Quran... change your whole day'**
+  String get onboardingTitle1;
+
+  /// Onboarding page 1 description
+  ///
+  /// In en, this message translates to:
+  /// **'When you feel life\'s constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.'**
+  String get onboardingDesc1;
+
+  /// Onboarding page 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'A spiritual journey with multiple Quranic voices'**
+  String get onboardingTitle2;
+
+  /// Onboarding page 2 description
+  ///
+  /// In en, this message translates to:
+  /// **'Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.'**
+  String get onboardingDesc2;
+
+  /// Onboarding page 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Every verse and dhikr is an ongoing charity for Abu Hudhayfah'**
+  String get onboardingTitle3;
+
+  /// Onboarding page 3 description
+  ///
+  /// In en, this message translates to:
+  /// **'Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.'**
+  String get onboardingDesc3;
+
+  /// Start button text
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s start our journey with the Quran'**
+  String get startJourney;
 }
 
 class _AppLocalizationsDelegate

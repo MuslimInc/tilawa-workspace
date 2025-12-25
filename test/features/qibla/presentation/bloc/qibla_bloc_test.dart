@@ -4,13 +4,13 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/usecases/usecase.dart';
-import 'package:muzakri/features/qibla/domain/entities/qibla_direction_entity.dart';
-import 'package:muzakri/features/qibla/domain/usecases/check_location_service_use_case.dart';
-import 'package:muzakri/features/qibla/domain/usecases/get_qibla_direction_use_case.dart';
-import 'package:muzakri/features/qibla/domain/usecases/request_location_permission_use_case.dart';
-import 'package:muzakri/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/usecases/usecase.dart';
+import 'package:tilawa/features/qibla/domain/entities/qibla_direction_entity.dart';
+import 'package:tilawa/features/qibla/domain/usecases/check_location_service_use_case.dart';
+import 'package:tilawa/features/qibla/domain/usecases/get_qibla_direction_use_case.dart';
+import 'package:tilawa/features/qibla/domain/usecases/request_location_permission_use_case.dart';
+import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 
 class MockGetQiblaDirectionUseCase extends Mock
     implements GetQiblaDirectionUseCase {}

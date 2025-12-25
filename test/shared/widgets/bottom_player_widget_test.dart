@@ -6,10 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:muzakri/shared/widgets/bottom_player_ui.dart';
-import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/shared/widgets/bottom_player_ui.dart';
+import 'package:tilawa/shared/widgets/bottom_player_widget.dart';
 
 import 'bottom_player_widget_test.mocks.dart';
 

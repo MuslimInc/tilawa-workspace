@@ -5,6 +5,8 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/config/config.dart';
+import '../../../../core/config/notification_config.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../main.dart';
@@ -343,7 +345,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> startDownload(
     String url, {
     required String title,
-    bool showNotification = true,
+    bool showNotification = NotificationConfig.enableLocalNotifications,
     required String surahTitle,
     required String reciterName,
     required int reciterId,

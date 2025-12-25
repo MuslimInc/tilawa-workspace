@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Muzakri';
+  String get appTitle => 'Tilawa';
 
   @override
   String get reciters => 'Reciters';
@@ -369,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign in';
 
   @override
-  String get welcomeToMuzakri => 'Welcome to Muzakri';
+  String get welcomeToApp => 'Welcome to Tilawa';
 
   @override
   String get signInWithGoogleDescription =>
@@ -604,4 +604,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unableToFindQibla => 'Unable to find Qibla';
+
+  @override
+  String get onboardingTitle1 =>
+      'Minutes from the Quran... change your whole day';
+
+  @override
+  String get onboardingDesc1 =>
+      'When you feel life\'s constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.';
+
+  @override
+  String get onboardingTitle2 =>
+      'A spiritual journey with multiple Quranic voices';
+
+  @override
+  String get onboardingDesc2 =>
+      'Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.';
+
+  @override
+  String get onboardingTitle3 =>
+      'Every verse and dhikr is an ongoing charity for Abu Hudhayfah';
+
+  @override
+  String get onboardingDesc3 =>
+      'Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.';
+
+  @override
+  String get startJourney => 'Let\'s start our journey with the Quran';
 }

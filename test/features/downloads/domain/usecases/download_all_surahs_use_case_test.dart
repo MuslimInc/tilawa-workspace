@@ -2,10 +2,10 @@ import 'package:audio_service/audio_service.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
+import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 

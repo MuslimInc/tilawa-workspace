@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 void main() {
   group('DownloadItem', () {

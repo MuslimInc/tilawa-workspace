@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/entities/audio.dart';
+import 'package:tilawa/core/entities/audio.dart';
 
 void main() {
   group('AudioEntity', () {

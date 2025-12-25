@@ -7,15 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
-import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/widgets/download_item_card.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
+import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:tilawa/features/downloads/presentation/widgets/download_item_card.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 import 'download_item_card_test.mocks.dart';
 

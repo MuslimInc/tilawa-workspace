@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:flutter/foundation.dart'; // for visibleForTesting
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/config/notification_config.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/navigation_service.dart';
@@ -22,11 +24,22 @@ class DownloadNotificationService {
   final NavigationService _navigator;
 
   /// Channel ID for download notifications
+  static const String _downloadChannelId = 'com.muzakri.app.downloads';
+  static const String _downloadChannelName = 'Downloads';
+  static const String _downloadChannelDescription = 'Shows download progress';
+
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
+
+  bool _initialized = false;
+  final Map<String, int> _notificationIds = {};
 
   /// Initialize the notification service
   Future<void> initialize() async {
-    // Temporarily disabled
-    /*
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     if (_initialized) {
       return;
     }
@@ -72,7 +85,6 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Initialization failed: $e');
     }
-    */
   }
 
   /// Show a download progress notification
@@ -92,8 +104,10 @@ class DownloadNotificationService {
     String? completeMessage,
     String? failedMessage,
   }) async {
-    // Temporarily disabled
-    /*
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     if (!_initialized) {
       await initialize();
     }
@@ -164,7 +178,6 @@ class DownloadNotificationService {
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing notification: $e');
     }
-    */
   }
 
   /// Show a batch download progress notification
@@ -176,8 +189,10 @@ class DownloadNotificationService {
     required int totalCount,
     required DownloadStatus status,
   }) async {
-    // Temporarily disabled
-    /*
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     if (!_initialized) {
       await initialize();
     }
@@ -243,33 +258,38 @@ class DownloadNotificationService {
         '[DownloadNotificationService] Error showing batch notification: $e',
       );
     }
-    */
   }
 
   /// Cancel a download notification
   Future<void> cancelNotification(String downloadId) async {
-    // Temporarily disabled
-    /*
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     final int? notificationId = _notificationIds[downloadId];
     if (notificationId != null) {
       await _notifications.cancel(notificationId);
       _notificationIds.remove(downloadId);
     }
-    */
   }
 
   /// Cancel all download notifications
   Future<void> cancelAllNotifications() async {
-    // Temporarily disabled
-    /*
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     await _notifications.cancelAll();
     _notificationIds.clear();
-    */
   }
 
   /// Handle notification tap
   @visibleForTesting
   Future<void> handleNotificationResponse(NotificationResponse response) async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
     final String? payload = response.payload;
     if (payload == null) {
       return;
@@ -333,6 +353,95 @@ class DownloadNotificationService {
       );
     } catch (e) {
       logger.e('DownloadNotificationService: Navigation error: $e');
+    }
+  }
+
+  /// Helper to generate a consistent notification ID from string ID
+  int _getNotificationId(String id) {
+    return _notificationIds.putIfAbsent(id, () => id.hashCode);
+  }
+
+  /// Helper to show completed notification
+  Future<void> _showCompletedNotification({
+    required int notificationId,
+    required String title,
+    required String message,
+    required String reciterName,
+  }) async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        _downloadChannelId,
+        _downloadChannelName,
+        channelDescription: _downloadChannelDescription,
+        color: Color(0xFF1AADC5),
+        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _notifications.show(
+        notificationId,
+        title,
+        message,
+        notificationDetails,
+        payload: jsonEncode({'reciterName': reciterName}),
+      );
+    } catch (e) {
+      logger.e('[DownloadNotificationService] Error showing completion: $e');
+    }
+  }
+
+  /// Helper to show failed notification
+  Future<void> _showFailedNotification({
+    required int notificationId,
+    required String title,
+    required String message,
+  }) async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        _downloadChannelId,
+        _downloadChannelName,
+        channelDescription: _downloadChannelDescription,
+        color: Colors.red,
+        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _notifications.show(
+        notificationId,
+        title,
+        message,
+        notificationDetails,
+      );
+    } catch (e) {
+      logger.e('[DownloadNotificationService] Error showing failure: $e');
     }
   }
 }

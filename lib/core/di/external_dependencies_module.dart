@@ -53,7 +53,7 @@ abstract class ExternalDependenciesModule {
       validateStatus: (status) => status != null && status < 500,
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'muzakri/1.0 (Flutter; Dart)',
+        'User-Agent': 'tilawa/1.0 (Flutter; Dart)',
       },
     ),
   );

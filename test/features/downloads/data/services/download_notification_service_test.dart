@@ -5,13 +5,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/services/navigation_service.dart';
-import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
 import 'download_notification_service_test.mocks.dart';
 

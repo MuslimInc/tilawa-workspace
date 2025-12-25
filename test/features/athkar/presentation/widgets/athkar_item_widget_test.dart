@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_item.dart';
-import 'package:muzakri/features/athkar/presentation/widgets/athkar_item_widget.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
+import 'package:tilawa/features/athkar/presentation/widgets/athkar_item_widget.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 void main() {
   const tItem = AthkarItem(

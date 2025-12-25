@@ -41,7 +41,7 @@ class LoginScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  context.l10n.welcomeToMuzakri,
+                  context.l10n.welcomeToApp,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,

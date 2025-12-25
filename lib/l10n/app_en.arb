@@ -1,6 +1,6 @@
 {
     "@@locale": "en",
-    "appTitle": "Muzakri",
+    "appTitle": "Tilawa",
     "@appTitle": {
         "description": "The title of the application"
     },
@@ -490,8 +490,8 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToMuzakri": "Welcome to Muzakri",
-    "@welcomeToMuzakri": {
+    "welcomeToApp": "Welcome to Tilawa",
+    "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
     "signInWithGoogleDescription": "Sign in with your Google account to continue",
@@ -825,5 +825,33 @@
     "unableToFindQibla": "Unable to find Qibla",
     "@unableToFindQibla": {
         "description": "Generic error title for Qibla"
+    },
+    "onboardingTitle1": "Minutes from the Quran... change your whole day",
+    "@onboardingTitle1": {
+        "description": "Onboarding page 1 title"
+    },
+    "onboardingDesc1": "When you feel life's constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.",
+    "@onboardingDesc1": {
+        "description": "Onboarding page 1 description"
+    },
+    "onboardingTitle2": "A spiritual journey with multiple Quranic voices",
+    "@onboardingTitle2": {
+        "description": "Onboarding page 2 title"
+    },
+    "onboardingDesc2": "Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.",
+    "@onboardingDesc2": {
+        "description": "Onboarding page 2 description"
+    },
+    "onboardingTitle3": "Every verse and dhikr is an ongoing charity for Abu Hudhayfah",
+    "@onboardingTitle3": {
+        "description": "Onboarding page 3 title"
+    },
+    "onboardingDesc3": "Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.",
+    "@onboardingDesc3": {
+        "description": "Onboarding page 3 description"
+    },
+    "startJourney": "Let's start our journey with the Quran",
+    "@startJourney": {
+        "description": "Start button text"
     }
 }

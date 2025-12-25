@@ -2,11 +2,11 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/usecases/usecase.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:muzakri/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/usecases/usecase.dart';
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
 
 import 'get_favorite_reciters_use_case_test.mocks.dart';
 

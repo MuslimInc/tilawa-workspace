@@ -3,11 +3,11 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/models/position_data.dart';
+import 'package:tilawa/shared/models/queue_state.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'audio_player_bloc_test.mocks.dart';

@@ -7,12 +7,12 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/widgets/bottom_player_widget.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/models/position_data.dart';
+import 'package:tilawa/shared/widgets/bottom_player_widget.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}

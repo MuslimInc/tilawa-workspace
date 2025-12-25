@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/utils/file_size_formatter.dart';
+import 'package:tilawa/core/utils/file_size_formatter.dart';
 
 void main() {
   group('FileSizeFormatter', () {

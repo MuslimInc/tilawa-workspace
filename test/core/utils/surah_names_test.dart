@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/utils/surah_names.dart';
+import 'package:tilawa/core/utils/surah_names.dart';
 
 void main() {
   group('SurahNames', () {

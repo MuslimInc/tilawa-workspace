@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/data/services/helpers/download_file_helper.dart';
+import 'package:tilawa/features/downloads/data/services/helpers/download_file_helper.dart';
 
 void main() {
   late DownloadFileHelper fileHelper;

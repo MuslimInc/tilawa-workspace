@@ -1,4 +1,4 @@
-package com.example.muzakri
+package com.tilawa.app
 
 import io.flutter.embedding.android.FlutterActivity
 

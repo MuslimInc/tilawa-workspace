@@ -8,13 +8,13 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
-import 'package:muzakri/shared/models/position_data.dart';
-import 'package:muzakri/shared/services/audio_position_service.dart';
-import 'package:muzakri/shared/widgets/expanded_player_screen.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/models/position_data.dart';
+import 'package:tilawa/shared/services/audio_position_service.dart';
+import 'package:tilawa/shared/widgets/expanded_player_screen.dart';
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}

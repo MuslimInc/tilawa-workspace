@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/utils/download_path_utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:tilawa/features/downloads/utils/download_path_utils.dart';
 
 void main() {
   group('DownloadPathUtils', () {

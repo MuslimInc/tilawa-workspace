@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/providers/providers.dart';
 import 'core/theme/app_theme.dart';
@@ -41,13 +42,13 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               return MaterialApp.router(
-                title: 'Muzakri',
+                title: AppStrings.appName,
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.getLightTheme(themeState.scheme),
                 darkTheme: AppTheme.getDarkTheme(themeState.scheme),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
-                restorationScopeId: 'quran_player_app',
+                restorationScopeId: AppStrings.restorationScopeId,
                 locale: locState.locale,
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,

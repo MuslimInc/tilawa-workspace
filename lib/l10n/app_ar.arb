@@ -1,6 +1,6 @@
 {
     "@@locale": "ar",
-    "appTitle": "مزكري",
+    "appTitle": "تلاوة",
     "@appTitle": {
         "description": "The title of the application"
     },
@@ -490,8 +490,8 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToMuzakri": "مرحباً بك في مزكري",
-    "@welcomeToMuzakri": {
+    "welcomeToApp": "مرحباً بك في تلاوة",
+    "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
     "signInWithGoogleDescription": "سجل الدخول بحساب جوجل للمتابعة",
@@ -825,5 +825,33 @@
     "unableToFindQibla": "تعذر العثور على القبلة",
     "@unableToFindQibla": {
         "description": "Generic error title for Qibla"
+    },
+    "onboardingTitle1": "دقائق من القرآن... تغير يومك كله",
+    "@onboardingTitle1": {
+        "description": "Onboarding page 1 title"
+    },
+    "onboardingDesc1": "حين تشعر بضيق الحياة، تذكر أن هناك آيات في القرآن تتحدث عن حالتك تمامًا، فقط ابحث عنها وستجد السكينة.",
+    "@onboardingDesc1": {
+        "description": "Onboarding page 1 description"
+    },
+    "onboardingTitle2": "رحلة إيمانية مع أصوات قرانية متعددة",
+    "@onboardingTitle2": {
+        "description": "Onboarding page 2 title"
+    },
+    "onboardingDesc2": "هنا تجتمع أصوات القراء من كل أرجاء الأمة، في روايات تنسج جمال الحروف بنور المعاني.",
+    "@onboardingDesc2": {
+        "description": "Onboarding page 2 description"
+    },
+    "onboardingTitle3": "كل آية وذكر صدقة جارية لأبي حذيفة",
+    "@onboardingTitle3": {
+        "description": "Onboarding page 3 title"
+    },
+    "onboardingDesc3": "كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته",
+    "@onboardingDesc3": {
+        "description": "Onboarding page 3 description"
+    },
+    "startJourney": "لنبدأ رحلتنا مع القرآن",
+    "@startJourney": {
+        "description": "Start button text"
     }
 }

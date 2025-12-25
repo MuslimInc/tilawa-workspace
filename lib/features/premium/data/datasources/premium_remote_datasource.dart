@@ -24,6 +24,19 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
   @override
   Future<PremiumStatus?> getPremiumStatus() async {
+    // Return a fake premium status to allow all users to download
+    return PremiumStatus(
+      isPremium: true,
+      subscriptionStartDate: DateTime.now(),
+      subscriptionEndDate: DateTime.now().add(
+        const Duration(days: 36500),
+      ), // Lifetime
+      subscriptionType: 'lifetime',
+      isTrialUsed: false,
+      trialStartDate: null,
+      trialEndDate: null,
+    );
+    /*
     try {
       final User? user = _auth.currentUser;
       if (user == null) {
@@ -45,6 +58,7 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
       logger.d('Error fetching premium status from Firebase: $e');
       return null;
     }
+    */
   }
 
   @override

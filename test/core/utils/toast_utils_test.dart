@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/utils/toast_utils.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 
 void main() {
   group('ToastUtils', () {

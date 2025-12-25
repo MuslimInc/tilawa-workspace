@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/widgets/hidden_thumb_component_shape.dart';
+import 'package:tilawa/core/widgets/hidden_thumb_component_shape.dart';
 
 void main() {
   group('HiddenThumbComponentShape', () {

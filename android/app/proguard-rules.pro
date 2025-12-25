@@ -122,8 +122,8 @@
 # ============================================
 # Application class (if custom)
 # ============================================
--keep class com.example.muzakri.MainActivity { *; }
--keep class com.example.muzakri.MainActivity$* { *; }
+-keep class com.tilawa.app.MainActivity { *; }
+-keep class com.tilawa.app.MainActivity$* { *; }
 
 # ============================================
 # Obfuscation optimizations

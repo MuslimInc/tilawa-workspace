@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/errors/failures.dart';
+import 'package:tilawa/core/errors/failures.dart';
 
 void main() {
   group('Failure', () {

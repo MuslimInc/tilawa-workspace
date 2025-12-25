@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/localization/domain/usecases/get_current_language_use_case.dart';
-import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/core/config/language_config.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
+import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'localization_bloc_test.mocks.dart';

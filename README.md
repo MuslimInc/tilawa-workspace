@@ -1,4 +1,4 @@
-# muzakri
+# Tilawa
 
 A new Flutter project.
 
@@ -18,6 +18,7 @@ samples, guidance on mobile development, and a full API reference.
 ## Building Secure Android Release
 
 This project is configured with secure build settings including:
+
 - **Code obfuscation** (R8/ProGuard)
 - **Resource shrinking** (removes unused resources)
 - **Code minification** (reduces APK size)
@@ -26,11 +27,13 @@ This project is configured with secure build settings including:
 ### Setting Up App Signing
 
 1. **Create a keystore** (if you don't have one):
+
    ```bash
    keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
    ```
 
 2. **Create key.properties file**:
+
    - Copy `android/key.properties.template` to `android/key.properties`
    - Fill in your keystore information:
      ```
@@ -41,6 +44,7 @@ This project is configured with secure build settings including:
      ```
 
 3. **Build release APK**:
+
    ```bash
    flutter build apk --release
    ```

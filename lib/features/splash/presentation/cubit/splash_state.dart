@@ -15,3 +15,7 @@ class SplashNavigateToHome extends SplashState {
 class SplashNavigateToLogin extends SplashState {
   const SplashNavigateToLogin();
 }
+
+class SplashNavigateToOnboarding extends SplashState {
+  const SplashNavigateToOnboarding();
+}

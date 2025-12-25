@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/features/auth/domain/entities/user_entity.dart';
-import 'package:muzakri/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:muzakri/features/settings/presentation/screens/settings_screen.dart';
-import 'package:muzakri/features/theme/presentation/cubit/theme_cubit.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/features/settings/presentation/screens/settings_screen.dart';
+import 'package:tilawa/features/theme/presentation/cubit/theme_cubit.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 // Mocks
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
