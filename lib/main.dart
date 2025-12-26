@@ -9,6 +9,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/observers/app_bloc_observer.dart';
 import 'core/services/analytics_initialization_service.dart';
@@ -78,8 +79,7 @@ Future<void> _initializeCredentialManager() async {
     final CredentialManager credentialManager = getIt<CredentialManager>();
     await credentialManager.init(
       preferImmediatelyAvailableCredentials: true,
-      googleClientId:
-          '181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com',
+      googleClientId: AppStrings.googleClientId,
     );
     logger.d('Credential Manager initialized successfully');
   } catch (e) {

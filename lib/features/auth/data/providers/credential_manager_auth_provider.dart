@@ -47,6 +47,7 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
       final UserEntity user = _mapFirebaseUserToUserEntity(
         userCredential.user!,
       );
+
       return AuthResult.success(user: user);
     } on PlatformException catch (e) {
       // Handle PlatformException from credential manager

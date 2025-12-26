@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/entities/audio.dart';
 import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
@@ -13,7 +13,7 @@ import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
 import '../../../downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
-import '../../../surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
+import '../../../surah/domain/usecases/convert_audio_entities_to_surahs_use_case.dart';
 import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.dart';
 
 part 'reciter_details_event.dart';
@@ -24,8 +24,7 @@ class ReciterDetailsBloc
     extends HydratedBloc<ReciterDetailsEvent, ReciterDetailsState> {
   ReciterDetailsBloc(
     this._audioHandler,
-    this._convertMediaItemsToSurahs,
-
+    this._convertAudioEntitiesToSurahs,
     this._refreshSurahDownloadStatusUseCase,
     this._downloadAllSurahsUseCase,
     this._cancelDownloadsForReciterUseCase,
@@ -46,7 +45,7 @@ class ReciterDetailsBloc
   }
 
   final AudioPlayerHandler _audioHandler;
-  final ConvertMediaItemsToSurahsUseCase _convertMediaItemsToSurahs;
+  final ConvertAudioEntitiesToSurahsUseCase _convertAudioEntitiesToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
   final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
   final CancelDownloadsForReciterUseCase _cancelDownloadsForReciterUseCase;
@@ -75,13 +74,13 @@ class ReciterDetailsBloc
     _downloadingSurahs.clear();
     _subscribeToDownloads();
     try {
-      final List<MediaItem>? mediaItemList = await _audioHandler
+      final List<AudioEntity>? audioEntities = await _audioHandler
           .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
 
-      if (mediaItemList != null) {
-        // Convert MediaItem list to Surah list with download status
-        final List<SurahEntity> surahList = await _convertMediaItemsToSurahs(
-          mediaItemList,
+      if (audioEntities != null) {
+        // Convert AudioEntity list to Surah list with download status
+        final List<SurahEntity> surahList = await _convertAudioEntitiesToSurahs(
+          audioEntities,
         );
 
         emit(

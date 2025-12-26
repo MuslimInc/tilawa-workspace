@@ -83,7 +83,7 @@ class PlaylistCard extends StatelessWidget {
                           children: [
                             const Icon(Icons.play_arrow),
                             const SizedBox(width: 8),
-                            Text(l10n.playPlaylist),
+                            Expanded(child: Text(l10n.playPlaylist)),
                           ],
                         ),
                       ),
@@ -93,7 +93,7 @@ class PlaylistCard extends StatelessWidget {
                           children: [
                             const Icon(Icons.edit),
                             const SizedBox(width: 8),
-                            Text(l10n.editPlaylist),
+                            Expanded(child: Text(l10n.editPlaylist)),
                           ],
                         ),
                       ),
@@ -108,10 +108,12 @@ class PlaylistCard extends StatelessWidget {
                               color: playlist.isFavorite ? Colors.red : null,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              playlist.isFavorite
-                                  ? l10n.favorites
-                                  : l10n.addToFavorites,
+                            Expanded(
+                              child: Text(
+                                playlist.isFavorite
+                                    ? l10n.favorites
+                                    : l10n.addToFavorites,
+                              ),
                             ),
                           ],
                         ),
@@ -123,9 +125,11 @@ class PlaylistCard extends StatelessWidget {
                           children: [
                             const Icon(Icons.delete, color: Colors.red),
                             const SizedBox(width: 8),
-                            Text(
-                              l10n.deletePlaylist,
-                              style: const TextStyle(color: Colors.red),
+                            Expanded(
+                              child: Text(
+                                l10n.deletePlaylist,
+                                style: const TextStyle(color: Colors.red),
+                              ),
                             ),
                           ],
                         ),

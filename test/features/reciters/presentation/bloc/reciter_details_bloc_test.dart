@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
@@ -13,14 +13,14 @@ import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_us
 import 'package:tilawa/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
-import 'package:tilawa/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
+import 'package:tilawa/features/surah/domain/usecases/convert_audio_entities_to_surahs_use_case.dart';
 import 'package:tilawa/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
-class MockConvertMediaItemsToSurahsUseCase extends Mock
-    implements ConvertMediaItemsToSurahsUseCase {}
+class MockConvertAudioEntitiesToSurahsUseCase extends Mock
+    implements ConvertAudioEntitiesToSurahsUseCase {}
 
 class MockRefreshSurahDownloadStatusUseCase extends Mock
     implements RefreshSurahDownloadStatusUseCase {}
@@ -53,7 +53,12 @@ void main() {
     );
     registerFallbackValue(
       const SurahEntity(
-        mediaItem: MediaItem(id: '0', title: ''),
+        audio: AudioEntity(
+          id: '0',
+          title: '',
+          url: '',
+          duration: Duration.zero,
+        ),
       ),
     );
   });
@@ -61,7 +66,7 @@ void main() {
   group('ReciterDetailsBloc Persistence', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -73,7 +78,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -94,11 +99,12 @@ void main() {
     );
 
     const surah = SurahEntity(
-      mediaItem: MediaItem(
+      audio: AudioEntity(
         id: '1',
         title: 'Al-Fatiha',
         artist: 'Mishary',
-        extras: {'nameAr': 'الفاتحة'},
+        url: '',
+        duration: Duration.zero,
       ),
       isDownloaded: true,
       downloadProgress: 1.0,
@@ -108,7 +114,7 @@ void main() {
     test('ReciterDetailsBloc toJson returns null when not loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -121,7 +127,7 @@ void main() {
     test('ReciterDetailsBloc toJson returns valid map when loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -146,7 +152,7 @@ void main() {
     test('ReciterDetailsBloc fromJson restores state correctly', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -180,7 +186,7 @@ void main() {
     test('ReciterDetailsBloc fromJson returns null on error', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -199,7 +205,7 @@ void main() {
   group('ReciterDetailsBloc DownloadAllSurahs', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -211,7 +217,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -242,7 +248,7 @@ void main() {
     test('DownloadAllSurahs triggers use case without state change', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -250,10 +256,20 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Surah 1'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'Surah 1',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
       const surah2 = SurahEntity(
-        mediaItem: MediaItem(id: '2', title: 'Surah 2'),
+        audio: AudioEntity(
+          id: '2',
+          title: 'Surah 2',
+          url: '',
+          duration: Duration.zero,
+        ),
         isDownloaded: true,
       );
 
@@ -292,7 +308,7 @@ void main() {
   group('ReciterDetailsBloc Download Progress', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -306,7 +322,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -341,7 +357,7 @@ void main() {
     test('Emits updated progress when download updates arrive', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -349,17 +365,21 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(
+        audio: AudioEntity(
           id: '1',
           title: 'S1',
-          extras: {'reciterName': 'Mishary'},
+          artist: 'Mishary',
+          url: '',
+          duration: Duration.zero,
         ),
       );
       const surah2 = SurahEntity(
-        mediaItem: MediaItem(
+        audio: AudioEntity(
           id: '2',
           title: 'S2',
-          extras: {'reciterName': 'Mishary'},
+          artist: 'Mishary',
+          url: '',
+          duration: Duration.zero,
         ),
       );
 
@@ -368,9 +388,9 @@ void main() {
           any(),
           reciterName: any(named: 'reciterName'),
         ),
-      ).thenAnswer((_) async => [surah1.mediaItem, surah2.mediaItem]);
+      ).thenAnswer((_) async => [surah1.audio, surah2.audio]);
       when(
-        () => convertMediaItemsToSurahs(any()),
+        () => convertAudioEntitiesToSurahs(any()),
       ).thenAnswer((_) async => [surah1, surah2]);
 
       // Trigger load to initialize subscription
@@ -425,7 +445,7 @@ void main() {
       () async {
         final bloc = ReciterDetailsBloc(
           audioHandler,
-          convertMediaItemsToSurahs,
+          convertAudioEntitiesToSurahs,
           refreshSurahDownloadStatus,
           downloadAllSurahs,
           cancelDownloadsForReciter,
@@ -437,16 +457,21 @@ void main() {
         ).thenAnswer((_) async => const Right(null));
 
         const surah1 = SurahEntity(
-          mediaItem: MediaItem(id: '1', title: 'S1'),
+          audio: AudioEntity(
+            id: '1',
+            title: 'S1',
+            url: '',
+            duration: Duration.zero,
+          ),
         );
         when(
           () => audioHandler.getSurahListForMoshaf(
             any(),
             reciterName: any(named: 'reciterName'),
           ),
-        ).thenAnswer((_) async => [surah1.mediaItem]);
+        ).thenAnswer((_) async => [surah1.audio]);
         when(
-          () => convertMediaItemsToSurahs(any()),
+          () => convertAudioEntitiesToSurahs(any()),
         ).thenAnswer((_) async => [surah1]);
 
         bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
@@ -466,7 +491,7 @@ void main() {
   group('ReciterDetailsBloc FilterSurahs', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -478,7 +503,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -492,7 +517,7 @@ void main() {
     test('FilterSurahs updates search query', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -515,7 +540,7 @@ void main() {
   group('ReciterDetailsBloc SelectMoshaf and SelectSurah', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -527,7 +552,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -550,7 +575,7 @@ void main() {
     test('SelectMoshaf does nothing when not loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -565,7 +590,7 @@ void main() {
     test('SelectMoshaf updates selected moshaf when loaded', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -590,7 +615,7 @@ void main() {
     test('SelectSurah does nothing when not loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -605,7 +630,7 @@ void main() {
     test('SelectSurah updates selected surah when loaded', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -631,7 +656,7 @@ void main() {
   group('ReciterDetailsBloc Error Handling', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -643,7 +668,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -675,7 +700,7 @@ void main() {
       () async {
         final bloc = ReciterDetailsBloc(
           audioHandler,
-          convertMediaItemsToSurahs,
+          convertAudioEntitiesToSurahs,
           refreshSurahDownloadStatus,
           downloadAllSurahs,
           cancelDownloadsForReciter,
@@ -710,7 +735,7 @@ void main() {
     test('LoadSurahList emits error when exception is thrown', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -744,7 +769,7 @@ void main() {
     test('LoadSurahList tracks already downloaded surahs', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -752,11 +777,21 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'Al-Fatiha',
+          url: '',
+          duration: Duration.zero,
+        ),
         isDownloaded: true, // Already downloaded - covers line 98
       );
       const surah2 = SurahEntity(
-        mediaItem: MediaItem(id: '2', title: 'Al-Baqarah'),
+        audio: AudioEntity(
+          id: '2',
+          title: 'Al-Baqarah',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       when(
@@ -764,10 +799,10 @@ void main() {
           any(),
           reciterName: any(named: 'reciterName'),
         ),
-      ).thenAnswer((_) async => [surah1.mediaItem, surah2.mediaItem]);
+      ).thenAnswer((_) async => [surah1.audio, surah2.audio]);
 
       when(
-        () => convertMediaItemsToSurahs(any()),
+        () => convertAudioEntitiesToSurahs(any()),
       ).thenAnswer((_) async => [surah1, surah2]);
 
       bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
@@ -795,7 +830,7 @@ void main() {
     test('RefreshSurahDownloadStatus does nothing when not loaded', () {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -812,7 +847,7 @@ void main() {
     test('RefreshSurahDownloadStatus updates surah list when loaded', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -820,7 +855,12 @@ void main() {
       );
 
       const surah = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'Al-Fatiha',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       // Set to loaded state
@@ -832,7 +872,12 @@ void main() {
       );
 
       const updatedSurah = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'Al-Fatiha',
+          url: '',
+          duration: Duration.zero,
+        ),
         isDownloaded: true,
       );
 
@@ -861,7 +906,7 @@ void main() {
     test('RefreshSurahDownloadStatus silently fails on error', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -869,7 +914,12 @@ void main() {
       );
 
       const surah = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'Al-Fatiha'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'Al-Fatiha',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       // Set to loaded state
@@ -900,7 +950,7 @@ void main() {
   group('ReciterDetailsBloc Download Status Updates', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -914,7 +964,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -949,7 +999,7 @@ void main() {
     test('Handles pending status updates', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -957,7 +1007,12 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'S1'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'S1',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       when(
@@ -965,9 +1020,9 @@ void main() {
           any(),
           reciterName: any(named: 'reciterName'),
         ),
-      ).thenAnswer((_) async => [surah1.mediaItem]);
+      ).thenAnswer((_) async => [surah1.audio]);
       when(
-        () => convertMediaItemsToSurahs(any()),
+        () => convertAudioEntitiesToSurahs(any()),
       ).thenAnswer((_) async => [surah1]);
 
       bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
@@ -997,7 +1052,7 @@ void main() {
     test('Handles failed status updates', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -1005,7 +1060,12 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'S1'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'S1',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       when(
@@ -1013,9 +1073,9 @@ void main() {
           any(),
           reciterName: any(named: 'reciterName'),
         ),
-      ).thenAnswer((_) async => [surah1.mediaItem]);
+      ).thenAnswer((_) async => [surah1.audio]);
       when(
-        () => convertMediaItemsToSurahs(any()),
+        () => convertAudioEntitiesToSurahs(any()),
       ).thenAnswer((_) async => [surah1]);
 
       bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
@@ -1064,7 +1124,7 @@ void main() {
     test('Handles cancelled status updates', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,
@@ -1072,7 +1132,12 @@ void main() {
       );
 
       const surah1 = SurahEntity(
-        mediaItem: MediaItem(id: '1', title: 'S1'),
+        audio: AudioEntity(
+          id: '1',
+          title: 'S1',
+          url: '',
+          duration: Duration.zero,
+        ),
       );
 
       when(
@@ -1080,9 +1145,9 @@ void main() {
           any(),
           reciterName: any(named: 'reciterName'),
         ),
-      ).thenAnswer((_) async => [surah1.mediaItem]);
+      ).thenAnswer((_) async => [surah1.audio]);
       when(
-        () => convertMediaItemsToSurahs(any()),
+        () => convertAudioEntitiesToSurahs(any()),
       ).thenAnswer((_) async => [surah1]);
 
       bloc.add(const LoadSurahList(reciter: reciter, moshaf: moshaf));
@@ -1132,7 +1197,7 @@ void main() {
   group('ReciterDetailsBloc Close', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
-    late MockConvertMediaItemsToSurahsUseCase convertMediaItemsToSurahs;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockDownloadAllSurahsUseCase downloadAllSurahs;
     late MockCancelDownloadsForReciterUseCase cancelDownloadsForReciter;
@@ -1144,7 +1209,7 @@ void main() {
       HydratedBloc.storage = storage;
 
       audioHandler = MockAudioPlayerHandler();
-      convertMediaItemsToSurahs = MockConvertMediaItemsToSurahsUseCase();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       downloadAllSurahs = MockDownloadAllSurahsUseCase();
       cancelDownloadsForReciter = MockCancelDownloadsForReciterUseCase();
@@ -1158,7 +1223,7 @@ void main() {
     test('close cancels downloads subscription', () async {
       final bloc = ReciterDetailsBloc(
         audioHandler,
-        convertMediaItemsToSurahs,
+        convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         downloadAllSurahs,
         cancelDownloadsForReciter,

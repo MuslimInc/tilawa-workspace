@@ -1,15 +1,14 @@
-import 'package:audio_service/audio_service.dart';
-
 import '../core/di/injection.dart';
+import '../core/entities/audio.dart';
 import '../core/entities/moshaf_entity.dart';
 import '../core/entities/reciter_entity.dart';
 import '../main.dart';
 import '../shared/audio/audio_player_handler.dart';
 
 class ReciterHelper {
-  /// Extract reciter information from a MediaItem
-  static Future<ReciterEntity?> getReciterFromMediaItem(
-    MediaItem mediaItem, {
+  /// Extract reciter information from an AudioEntity
+  static Future<ReciterEntity?> getReciterFromAudioEntity(
+    AudioEntity audio, {
     String? languageCode,
   }) async {
     try {
@@ -32,7 +31,7 @@ class ReciterHelper {
       }
 
       // First try to find by artist field
-      final String? reciterName = mediaItem.artist;
+      final String? reciterName = audio.artist;
       if (reciterName != null && reciterName.isNotEmpty) {
         try {
           return reciters.firstWhere(
@@ -44,40 +43,40 @@ class ReciterHelper {
         }
       }
 
-      // If artist field is empty, try to find by matching the server URL in the MediaItem ID
+      // If artist field is empty, try to find by matching the server URL in the audio ID
       // This is a fallback approach for when artist field is not set
       for (final ReciterEntity reciter in reciters) {
         for (final MoshafEntity moshaf in reciter.moshaf) {
-          if (mediaItem.id.contains(moshaf.server)) {
+          if (audio.id.contains(moshaf.server)) {
             logger.d('Found reciter by server match: ${reciter.name}');
             return reciter;
           }
         }
       }
 
-      logger.d('No reciter found for MediaItem: ${mediaItem.id}');
+      logger.d('No reciter found for AudioEntity: ${audio.id}');
       return null;
     } catch (e) {
-      logger.d('Error getting reciter from media item: $e');
+      logger.d('Error getting reciter from audio item: $e');
       return null;
     }
   }
 
-  /// Check if a MediaItem has valid reciter information
-  static bool hasReciterInfo(MediaItem mediaItem) {
-    final String? artist = mediaItem.artist;
+  /// Check if an AudioEntity has valid reciter information
+  static bool hasReciterInfo(AudioEntity audio) {
+    final String? artist = audio.artist;
 
     // Check if artist field has reciter name
     if (artist != null && artist.isNotEmpty) {
       return true;
     }
 
-    // Check if the MediaItem looks like a Quran recitation
+    // Check if the AudioEntity looks like a Quran recitation
     // (has .mp3 extension and contains surah-like patterns)
-    if (mediaItem.id.contains('.mp3') &&
-        (mediaItem.title.contains('سورة') ||
-            mediaItem.title.contains('Surah') ||
-            RegExp(r'\d{3}').hasMatch(mediaItem.title))) {
+    if (audio.id.contains('.mp3') &&
+        (audio.title.contains('سورة') ||
+            audio.title.contains('Surah') ||
+            RegExp(r'\d{3}').hasMatch(audio.title))) {
       return true;
     }
 

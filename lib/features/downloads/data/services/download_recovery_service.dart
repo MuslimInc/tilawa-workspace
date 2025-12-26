@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_queue_manager.dart';
-import 'download_service.dart';
+import 'download_service_interface.dart';
 import 'download_validator.dart';
 
 /// Service responsible for recovering downloads from inconsistent states.
@@ -21,7 +21,7 @@ class DownloadRecoveryService {
     this._downloadQueueManager,
   );
 
-  final DownloadService _downloadService;
+  final DownloadServiceInterface _downloadService;
   final DownloadValidator _validator;
   final DownloadQueueManager _downloadQueueManager;
 

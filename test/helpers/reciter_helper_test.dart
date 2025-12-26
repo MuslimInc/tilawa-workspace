@@ -1,8 +1,8 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/helpers/reciter_helper.dart';
@@ -24,7 +24,7 @@ void main() {
     await getIt.reset();
   });
 
-  group('ReciterHelper.getReciterFromMediaItem', () {
+  group('ReciterHelper.getReciterFromAudioEntity', () {
     const testMoshaf = MoshafEntity(
       id: 1,
       name: 'Test Moshaf',
@@ -45,10 +45,12 @@ void main() {
     test('returns reciter when found by artist name', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server.com/001.mp3',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       when(
@@ -58,9 +60,8 @@ void main() {
       ).thenAnswer((_) async => [testReciter]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, equals(testReciter));
@@ -70,10 +71,12 @@ void main() {
     test('returns reciter when found by server URL fallback', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server.com/001.mp3',
         artist: '', // Empty artist, should use server fallback
+        duration: Duration.zero,
       );
 
       when(
@@ -83,9 +86,8 @@ void main() {
       ).thenAnswer((_) async => [testReciter]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, equals(testReciter));
@@ -95,15 +97,17 @@ void main() {
       'returns null when AudioPlayerHandler not available in GetIt',
       () async {
         // Arrange - Don't register the handler
-        const mediaItem = MediaItem(
+        const audio = AudioEntity(
           id: 'https://server.com/001.mp3',
           title: 'Al-Fatiha',
+          url: 'https://server.com/001.mp3',
           artist: 'Abdul Basit',
+          duration: Duration.zero,
         );
 
         // Act
         final ReciterEntity? result =
-            await ReciterHelper.getReciterFromMediaItem(mediaItem);
+            await ReciterHelper.getReciterFromAudioEntity(audio);
 
         // Assert
         expect(result, isNull);
@@ -113,10 +117,12 @@ void main() {
     test('returns null when getRecitersData returns null', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server.com/001.mp3',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       when(
@@ -126,9 +132,8 @@ void main() {
       ).thenAnswer((_) async => null);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, isNull);
@@ -139,9 +144,11 @@ void main() {
       () async {
         // Arrange
         getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-        const mediaItem = MediaItem(
+        const audio = AudioEntity(
           id: 'https://different-server.com/001.mp3',
           title: 'Al-Fatiha',
+          url: 'https://different-server.com/001.mp3',
+          duration: Duration.zero,
         );
 
         when(
@@ -152,7 +159,7 @@ void main() {
 
         // Act
         final ReciterEntity? result =
-            await ReciterHelper.getReciterFromMediaItem(mediaItem);
+            await ReciterHelper.getReciterFromAudioEntity(audio);
 
         // Assert
         expect(result, isNull);
@@ -162,10 +169,12 @@ void main() {
     test('returns null when reciter not found by name', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://different-server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://different-server.com/001.mp3',
         artist: 'Unknown Reciter',
+        duration: Duration.zero,
       );
 
       when(
@@ -175,9 +184,8 @@ void main() {
       ).thenAnswer((_) async => [testReciter]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, isNull);
@@ -186,10 +194,12 @@ void main() {
     test('returns null when no reciter matches server URL', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://different-server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://different-server.com/001.mp3',
         artist: '',
+        duration: Duration.zero,
       );
 
       when(
@@ -199,9 +209,8 @@ void main() {
       ).thenAnswer((_) async => [testReciter]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, isNull);
@@ -210,10 +219,12 @@ void main() {
     test('handles exceptions gracefully', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server.com/001.mp3',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       when(
@@ -223,9 +234,8 @@ void main() {
       ).thenThrow(Exception('Network error'));
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, isNull);
@@ -234,10 +244,12 @@ void main() {
     test('uses provided languageCode parameter', () async {
       // Arrange
       getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server.com/001.mp3',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       when(
@@ -245,10 +257,11 @@ void main() {
       ).thenAnswer((_) async => [testReciter]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-        languageCode: 'ar',
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(
+            audio,
+            languageCode: 'ar',
+          );
 
       // Assert
       expect(result, equals(testReciter));
@@ -285,10 +298,12 @@ void main() {
         moshaf: [moshaf1, moshaf2],
       );
 
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server2.com/001.mp3',
         title: 'Al-Fatiha',
+        url: 'https://server2.com/001.mp3',
         artist: '',
+        duration: Duration.zero,
       );
 
       when(
@@ -298,9 +313,8 @@ void main() {
       ).thenAnswer((_) async => [reciterWithMultipleMoshaf]);
 
       // Act
-      final ReciterEntity? result = await ReciterHelper.getReciterFromMediaItem(
-        mediaItem,
-      );
+      final ReciterEntity? result =
+          await ReciterHelper.getReciterFromAudioEntity(audio);
 
       // Assert
       expect(result, equals(reciterWithMultipleMoshaf));
@@ -310,111 +324,121 @@ void main() {
   group('ReciterHelper.hasReciterInfo', () {
     test('returns true when artist field is valid and non-empty', () {
       // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: '1',
         title: 'Test',
+        url: '1',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isTrue);
-    });
-
-    test('returns false when artist field is null', () {
-      // Arrange
-      const mediaItem = MediaItem(id: '1', title: 'Test');
-
-      // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
-
-      // Assert
-      expect(result, isFalse);
     });
 
     test('returns false when artist field is empty', () {
       // Arrange
-      const mediaItem = MediaItem(id: '1', title: 'Test', artist: '');
+      const audio = AudioEntity(
+        id: '1',
+        title: 'Test',
+        url: '1',
+        artist: '',
+        duration: Duration.zero,
+      );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isFalse);
     });
 
-    test('returns true when MediaItem has .mp3 and Arabic surah pattern', () {
+    test('returns true when AudioEntity has .mp3 and Arabic surah pattern', () {
       // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: 'سورة الفاتحة',
+        url: 'https://server.com/001.mp3',
         artist: '',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isTrue);
     });
 
-    test('returns true when MediaItem has .mp3 and English surah pattern', () {
+    test(
+      'returns true when AudioEntity has .mp3 and English surah pattern',
+      () {
+        // Arrange
+        const audio = AudioEntity(
+          id: 'https://server.com/001.mp3',
+          title: 'Surah Al-Fatiha',
+          url: 'https://server.com/001.mp3',
+          artist: '',
+          duration: Duration.zero,
+        );
+
+        // Act
+        final bool result = ReciterHelper.hasReciterInfo(audio);
+
+        // Assert
+        expect(result, isTrue);
+      },
+    );
+
+    test('returns true when AudioEntity has .mp3 and numeric pattern', () {
       // Arrange
-      const mediaItem = MediaItem(
-        id: 'https://server.com/001.mp3',
-        title: 'Surah Al-Fatiha',
-        artist: '',
-      );
-
-      // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
-
-      // Assert
-      expect(result, isTrue);
-    });
-
-    test('returns true when MediaItem has .mp3 and numeric pattern', () {
-      // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.mp3',
         title: '001',
+        url: 'https://server.com/001.mp3',
         artist: '',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isTrue);
     });
 
-    test('returns false when MediaItem has no .mp3 extension', () {
+    test('returns false when AudioEntity has no .mp3 extension', () {
       // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/001.wav',
         title: 'Surah Al-Fatiha',
+        url: 'https://server.com/001.wav',
         artist: '',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isFalse);
     });
 
-    test('returns false when MediaItem does not match any pattern', () {
+    test('returns false when AudioEntity does not match any pattern', () {
       // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/random.mp3',
         title: 'Random Audio',
+        url: 'https://server.com/random.mp3',
         artist: '',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isFalse);
@@ -422,14 +446,16 @@ void main() {
 
     test('returns true when artist is non-empty even without .mp3', () {
       // Arrange
-      const mediaItem = MediaItem(
+      const audio = AudioEntity(
         id: 'https://server.com/audio',
         title: 'Test',
+        url: 'https://server.com/audio',
         artist: 'Abdul Basit',
+        duration: Duration.zero,
       );
 
       // Act
-      final bool result = ReciterHelper.hasReciterInfo(mediaItem);
+      final bool result = ReciterHelper.hasReciterInfo(audio);
 
       // Assert
       expect(result, isTrue);

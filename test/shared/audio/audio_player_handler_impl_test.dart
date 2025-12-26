@@ -11,6 +11,8 @@ import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/language_config.dart';
+import 'package:tilawa/core/entities/audio.dart'
+    hide AudioProcessingStateStatus;
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
@@ -583,7 +585,7 @@ void main() {
     test('getSurahListForMoshaf returns correct list for English', () async {
       when(mockPrefs.getString(any)).thenAnswer((_) async => 'en');
 
-      final List<MediaItem>? result = await handler.getSurahListForMoshaf(
+      final List<AudioEntity>? result = await handler.getSurahListForMoshaf(
         moshaf,
         reciterName: 'Reciter',
       );
@@ -596,7 +598,7 @@ void main() {
     test('getSurahListForMoshaf returns correct list for Arabic', () async {
       when(mockPrefs.getString(any)).thenAnswer((_) async => 'ar');
 
-      final List<MediaItem>? result = await handler.getSurahListForMoshaf(
+      final List<AudioEntity>? result = await handler.getSurahListForMoshaf(
         moshaf,
       );
 
@@ -614,7 +616,7 @@ void main() {
         surahTotal: 114,
       );
 
-      final List<MediaItem>? result = await handler.getSurahListForMoshaf(
+      final List<AudioEntity>? result = await handler.getSurahListForMoshaf(
         invalidMoshaf,
       );
       expect(result, isNull);
@@ -718,7 +720,7 @@ void main() {
         mockRepo.getReciters(),
       ).thenAnswer((_) async => const Right([reciter]));
 
-      final List<MediaItem>? result = await handler.getReciters();
+      final List<AudioEntity>? result = await handler.getReciters();
 
       expect(result, isNotNull);
       expect(result!.length, 2); // 2 surahs
@@ -736,7 +738,7 @@ void main() {
         mockRepo.getReciters(),
       ).thenAnswer((_) async => const Left(ServerFailure('Error')));
 
-      final List<MediaItem>? result = await handler.getReciters();
+      final List<AudioEntity>? result = await handler.getReciters();
 
       expect(result, isNull);
     });
@@ -981,7 +983,7 @@ void main() {
         moshafType: 1,
       );
 
-      final List<MediaItem>? result = await handler.getSurahListForMoshaf(
+      final List<AudioEntity>? result = await handler.getSurahListForMoshaf(
         moshaf,
       );
 
@@ -1003,7 +1005,7 @@ void main() {
         moshafType: 1,
       );
 
-      final List<MediaItem>? result = await handler.getSurahListForMoshaf(
+      final List<AudioEntity>? result = await handler.getSurahListForMoshaf(
         moshaf,
       );
 
@@ -1042,13 +1044,13 @@ void main() {
       });
 
       // Call 1
-      final Future<List<MediaItem>?> future1 = handler.getReciters();
+      final Future<List<AudioEntity>?> future1 = handler.getReciters();
 
       // Ensure the first call has set _isLoadingReciters = true
       await Future.delayed(const Duration(milliseconds: 50));
 
       // Call 2 - should hit the lock
-      final Future<List<MediaItem>?> future2 = handler.getReciters();
+      final Future<List<AudioEntity>?> future2 = handler.getReciters();
 
       await Future.wait([future1, future2]);
 

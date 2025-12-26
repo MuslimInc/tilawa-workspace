@@ -49,7 +49,7 @@ void main() {
       final Either<Failure, List<ReciterEntity>> result = await useCase();
 
       // Assert
-      expect(result, Right(tReciters));
+      expect(result, Right<Failure, List<ReciterEntity>>(tReciters));
       verify(mockRepository.getReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -65,7 +65,7 @@ void main() {
       final Either<Failure, List<ReciterEntity>> result = await useCase();
 
       // Assert
-      expect(result, const Left(tFailure));
+      expect(result, const Left<Failure, List<ReciterEntity>>(tFailure));
       verify(mockRepository.getReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });

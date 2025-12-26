@@ -27,13 +27,13 @@ void main() {
       // Arrange
       when(
         mockRepository.setLanguage(any),
-      ).thenAnswer((_) async => const Right(null));
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       final Either<Failure, void> result = await useCase(tLanguageCode);
 
       // Assert
-      expect(result, const Right(null));
+      expect(result, const Right<Failure, void>(null));
       verify(mockRepository.setLanguage(tLanguageCode)).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -43,13 +43,13 @@ void main() {
       const tFailure = CacheFailure('Failed to set language');
       when(
         mockRepository.setLanguage(any),
-      ).thenAnswer((_) async => const Left(tFailure));
+      ).thenAnswer((_) async => const Left<Failure, void>(tFailure));
 
       // Act
       final Either<Failure, void> result = await useCase(tLanguageCode);
 
       // Assert
-      expect(result, const Left(tFailure));
+      expect(result, const Left<Failure, void>(tFailure));
       verify(mockRepository.setLanguage(tLanguageCode)).called(1);
       verifyNoMoreInteractions(mockRepository);
     });

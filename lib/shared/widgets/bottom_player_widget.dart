@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/entities/audio.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/reciter_helper.dart';
@@ -47,8 +47,8 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   Widget build(BuildContext context) {
     return BlocListener<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
-        // Reset manual dismissal if media item changes or we start playing again
-        return previous.mediaItem != current.mediaItem ||
+        // Reset manual dismissal if current audio changes or we start playing again
+        return previous.currentAudio != current.currentAudio ||
             (!previous.isPlaying && current.isPlaying);
       },
       listener: (context, state) {
@@ -60,9 +60,9 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
       },
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
-          final MediaItem? mediaItem = state.mediaItem;
+          final AudioEntity? audio = state.currentAudio;
           final bool shouldShow =
-              mediaItem != null &&
+              audio != null &&
               state.status == AudioPlayerStatus.success &&
               !_manuallyDismissed;
 
@@ -73,8 +73,8 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
 
           // Load reciter ID if it's not cached or if the reciter name changed
           if (_currentReciterId == null ||
-              _currentReciterName != mediaItem.artist) {
-            _loadReciterId(mediaItem);
+              _currentReciterName != audio.artist) {
+            _loadReciterId(audio);
           }
 
           final PositionData position =
@@ -96,7 +96,7 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             ),
             child: Dismissible(
-              key: ValueKey('bottom_player_${mediaItem.id}'),
+              key: ValueKey('bottom_player_${audio.id}'),
               direction: DismissDirection.down,
               onDismissed: (direction) {
                 setState(() {
@@ -109,7 +109,7 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
                 child: BottomPlayerUi(
-                  mediaItem: mediaItem,
+                  audio: audio,
                   positionData: position,
                   isPlaying: state.isPlaying,
                   canGoPrevious: state.canGoPrevious,
@@ -156,15 +156,15 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   }
 
   /// Load reciter ID asynchronously and cache it
-  void _loadReciterId(MediaItem mediaItem) {
-    if (mediaItem.artist == null) {
+  void _loadReciterId(AudioEntity audio) {
+    if (audio.artist == null) {
       return;
     }
 
-    _currentReciterName = mediaItem.artist;
+    _currentReciterName = audio.artist;
 
     // Load reciter ID asynchronously
-    ReciterHelper.getReciterFromMediaItem(mediaItem)
+    ReciterHelper.getReciterFromAudioEntity(audio)
         .then((reciter) {
           if (mounted && reciter != null) {
             setState(() {

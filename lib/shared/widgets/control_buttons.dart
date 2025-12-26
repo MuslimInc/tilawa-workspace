@@ -1,8 +1,8 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/entities/audio.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../../main.dart';
@@ -51,14 +51,16 @@ class ControlButtons extends StatelessWidget {
               );
             }
 
-            final QueueState queueState = state.queueState ?? QueueState.empty;
+            final QueueState queueState = state.queueState;
             return IconButton(
               icon: const Icon(FluentIcons.arrow_left_24_regular),
-              onPressed: () {
-                if (queueState.hasPrevious) {
-                  context.read<AudioPlayerBloc>().add(const SkipToPrevious());
-                }
-              },
+              onPressed: queueState.hasPrevious
+                  ? () {
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.skipToPrevious(),
+                      );
+                    }
+                  : null,
             );
           },
         ),
@@ -76,19 +78,20 @@ class ControlButtons extends StatelessWidget {
               );
             }
 
-            final PlaybackState? playbackState = state.playbackState;
-            final AudioProcessingState? processingState =
+            final PlaybackStateEntity? playbackState = state.playbackState;
+            final AudioProcessingStateStatus? processingState =
                 playbackState?.processingState;
-            final bool? playing = playbackState?.playing;
-            if (processingState == AudioProcessingState.loading ||
-                processingState == AudioProcessingState.buffering) {
+            final bool isPlaying = state.isPlaying;
+
+            if (processingState == AudioProcessingStateStatus.loading ||
+                processingState == AudioProcessingStateStatus.buffering) {
               return Container(
                 margin: const EdgeInsets.all(8.0),
                 width: 64.0,
                 height: 64.0,
                 child: const CircularProgressIndicator(),
               );
-            } else if (playing != true) {
+            } else if (!isPlaying) {
               return IconButton(
                 icon: const Icon(FluentIcons.play_24_regular),
                 iconSize: 64.0,
@@ -120,12 +123,14 @@ class ControlButtons extends StatelessWidget {
               );
             }
 
-            final QueueState queueState = state.queueState ?? QueueState.empty;
+            final QueueState queueState = state.queueState;
             return IconButton(
               icon: const Icon(FluentIcons.arrow_right_24_regular),
               onPressed: queueState.hasNext
                   ? () {
-                      context.read<AudioPlayerBloc>().add(const SkipToNext());
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.skipToNext(),
+                      );
                     }
                   : null,
             );

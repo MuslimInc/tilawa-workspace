@@ -1,8 +1,8 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
+import 'core/entities/audio.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/models/position_data.dart';
 import 'shared/widgets/bottom_player_ui.dart';
@@ -21,12 +21,14 @@ PreviewThemeData themeData() {
   theme: themeData,
 )
 Widget preview() {
-  // Example MediaItem for preview
-  final mediaItem = MediaItem(
+  // Example AudioEntity for preview
+  const audio = AudioEntity(
     id: 'preview-1',
     title: 'Surah Al-Fatiha',
+    url: 'https://example.com/audio.mp3',
+    duration: Duration(minutes: 3),
     artist: 'Abdul Basit',
-    artUri: Uri.parse('https://example.com/art.jpg'),
+    artUri: 'https://example.com/art.jpg',
   );
 
   // Example position data
@@ -41,7 +43,7 @@ Widget preview() {
       padding: const EdgeInsets.all(8.0),
       child: Center(
         child: BottomPlayerUi(
-          mediaItem: mediaItem,
+          audio: audio,
           positionData: positionData,
           isPlaying: true,
           canGoPrevious: true,

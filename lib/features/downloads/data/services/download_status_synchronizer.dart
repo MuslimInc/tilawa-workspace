@@ -5,7 +5,7 @@ import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_queue_manager.dart';
 import 'download_recovery_service.dart';
-import 'download_service.dart';
+import 'download_service_interface.dart';
 
 /// Service responsible for synchronizing local download state with the platform's
 /// active downloads and the download queue.
@@ -17,7 +17,7 @@ class DownloadStatusSynchronizer {
     this._downloadQueueManager,
   );
 
-  final DownloadService _downloadService;
+  final DownloadServiceInterface _downloadService;
   final DownloadRecoveryService _recoveryService;
   final DownloadQueueManager _downloadQueueManager;
 

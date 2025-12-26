@@ -6,6 +6,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/extensions.dart';
+import '../../../../core/theme/color_scheme.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
@@ -88,7 +89,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 centerTitle: true,
                 elevation: 0,
                 surfaceTintColor: Colors.transparent,
-                backgroundColor: Colors.transparent,
+                backgroundColor: context.colorScheme.surface,
               ),
               body: Column(
                 children: [

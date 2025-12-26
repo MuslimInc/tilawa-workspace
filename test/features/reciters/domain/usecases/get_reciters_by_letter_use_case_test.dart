@@ -45,7 +45,7 @@ void main() {
       );
 
       // Assert
-      expect(result, Right(tReciters));
+      expect(result, Right<Failure, List<ReciterEntity>>(tReciters));
       verify(mockRepository.getRecitersByLetter(tLetter)).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -63,7 +63,7 @@ void main() {
       );
 
       // Assert
-      expect(result, const Left(tFailure));
+      expect(result, const Left<Failure, List<ReciterEntity>>(tFailure));
       verify(mockRepository.getRecitersByLetter(tLetter)).called(1);
       verifyNoMoreInteractions(mockRepository);
     });

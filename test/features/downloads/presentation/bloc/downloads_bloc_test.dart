@@ -7,38 +7,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/core/services/analytics_service.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
-import 'package:tilawa/features/downloads/domain/usecases/cancel_download_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/check_download_access_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/clear_all_downloads_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/delete_download_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/download_surah_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/get_download_item_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/get_download_status_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/observe_global_download_progress_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/play_all_downloads_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/play_download_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/remove_from_download_queue_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/retry_download_use_case.dart';
-import 'package:tilawa/features/downloads/domain/usecases/validate_downloaded_file_use_case.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
-import '../../data/services/download_service_test.mocks.dart';
-import 'downloads_bloc_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
 // Provide dummy values for Either types that Mockito can't generate automatically
 @visibleForTesting
@@ -49,32 +30,6 @@ Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
 provideDummyEitherFailureMapStringMapStringListDownloadItem() =>
     const Right({});
 
-@GenerateMocks(
-  [
-    GetDownloadsByReciterUseCase,
-    GetTotalDownloadsSizeUseCase,
-    DownloadSurahUseCase,
-    DeleteDownloadUseCase,
-    DeleteReciterDownloadsUseCase,
-    ClearAllDownloadsUseCase,
-    CheckSurahDownloadedUseCase,
-    ValidateDownloadedFileUseCase,
-    GetValidCompletedDownloadsUseCase,
-    CheckDownloadAccessUseCase,
-    PlayDownloadUseCase,
-    PlayAllDownloadsUseCase,
-    RetryDownloadUseCase,
-    GetDownloadItemUseCase,
-    CancelDownloadUseCase,
-    AnalyticsService,
-    DownloadService,
-    DownloadNotificationService,
-    ObserveGlobalDownloadProgressUseCase,
-    GetDownloadStatusUseCase,
-    RemoveFromDownloadQueueUseCase,
-  ],
-  customMocks: [MockSpec<Dio>(as: #MockDio)],
-)
 void main() {
   // Initialize Flutter bindings for background_downloader
   // This is required because DownloadService uses platform channels
@@ -130,8 +85,8 @@ void main() {
     if (getIt.isRegistered<DownloadNotificationService>()) {
       await getIt.unregister<DownloadNotificationService>();
     }
-    if (getIt.isRegistered<DownloadService>()) {
-      await getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      await getIt.unregister<DownloadServiceInterface>();
     }
     if (getIt.isRegistered<DownloadQueueManager>()) {
       try {
@@ -204,8 +159,8 @@ void main() {
     if (GetIt.I.isRegistered<DownloadNotificationService>()) {
       GetIt.I.unregister<DownloadNotificationService>();
     }
-    if (GetIt.I.isRegistered<DownloadService>()) {
-      GetIt.I.unregister<DownloadService>();
+    if (GetIt.I.isRegistered<DownloadServiceInterface>()) {
+      GetIt.I.unregister<DownloadServiceInterface>();
     }
     if (GetIt.I.isRegistered<DownloadQueueManager>()) {
       GetIt.I.unregister<DownloadQueueManager>();
@@ -240,7 +195,7 @@ void main() {
     final mockDownloadService = DownloadServiceImpl(
       flutterDownloader: mockDownloader,
     );
-    GetIt.I.registerSingleton<DownloadService>(mockDownloadService);
+    GetIt.I.registerSingleton<DownloadServiceInterface>(mockDownloadService);
 
     // Initialize DownloadQueueManager for testing with mocked service
     if (GetIt.I.isRegistered<DownloadQueueManager>()) {

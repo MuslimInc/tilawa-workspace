@@ -22,6 +22,8 @@ class SplashCubit extends Cubit<SplashState> {
         emit(const SplashNavigateToHome());
       case SplashDestination.login:
         emit(const SplashNavigateToLogin());
+      case SplashDestination.onboarding:
+        emit(const SplashNavigateToOnboarding());
     }
   }
 }

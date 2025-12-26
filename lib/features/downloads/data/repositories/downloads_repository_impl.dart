@@ -5,6 +5,8 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/config/config.dart';
+import '../../../../core/config/notification_config.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../main.dart';
@@ -16,7 +18,7 @@ import '../datasources/downloads_local_datasource.dart';
 import '../services/batch_download_manager.dart';
 import '../services/download_path_resolver.dart';
 import '../services/download_queue_manager.dart';
-import '../services/download_service.dart';
+import '../services/download_service_interface.dart';
 import '../services/download_status_synchronizer.dart';
 import '../services/download_validator.dart';
 
@@ -39,7 +41,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   );
 
   final DownloadsLocalDataSource localDataSource;
-  final DownloadService downloadService;
+  final DownloadServiceInterface downloadService;
   final BatchDownloadManager batchDownloadManager;
   final DownloadPathResolver pathResolver;
   final DownloadValidator validator;
@@ -343,7 +345,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> startDownload(
     String url, {
     required String title,
-    bool showNotification = true,
+    bool showNotification = NotificationConfig.enableLocalNotifications,
     required String surahTitle,
     required String reciterName,
     required int reciterId,

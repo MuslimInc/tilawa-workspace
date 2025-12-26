@@ -1,7 +1,7 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/entities/audio.dart';
 import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -147,7 +147,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                           _isPlayingFromThisReciter(audioState);
                       final bool isPlaying =
                           isPlayingFromThisReciter &&
-                          (audioState.playbackState?.playing ?? false);
+                          (audioState.playbackState?.isPlaying ?? false);
 
                       return IconButton.filledTonal(
                         style: IconButton.styleFrom(
@@ -356,13 +356,13 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
 
   /// Check if any download from this reciter is currently playing
   bool _isPlayingFromThisReciter(AudioPlayerState audioState) {
-    final MediaItem? currentMediaItem = audioState.mediaItem;
-    if (currentMediaItem == null) {
+    final AudioEntity? currentAudio = audioState.currentAudio;
+    if (currentAudio == null) {
       return false;
     }
 
-    // Check if the current media item is from this reciter
-    return currentMediaItem.artist == widget.reciterName;
+    // Check if the current audio entity is from this reciter
+    return currentAudio.artist == widget.reciterName;
   }
 
   /// Handle play all/pause all button press
@@ -374,7 +374,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
 
     if (isPlayingFromThisReciter) {
       // If playing from this reciter, toggle play/pause
-      if (audioState.playbackState?.playing ?? false) {
+      if (audioState.playbackState?.isPlaying ?? false) {
         context.read<AudioPlayerBloc>().add(
           const AudioPlayerEvent.pauseAudio(),
         );

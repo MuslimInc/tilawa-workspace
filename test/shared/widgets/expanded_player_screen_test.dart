@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -93,19 +93,27 @@ void main() {
   ) async {
     await setScreenSize(tester);
 
-    const testMediaItem = MediaItem(
+    const testAudio = AudioEntity(
       id: '1',
       title: 'Test Surah',
+      url: '1',
       artist: 'Test Reciter',
       duration: Duration(minutes: 5),
     );
 
     when(() => mockAudioPlayerBloc.state).thenReturn(
-      AudioPlayerState(
+      const AudioPlayerState(
         status: AudioPlayerStatus.success,
-        mediaItem: testMediaItem,
-        playbackState: PlaybackState(playing: true),
-        positionData: const PositionData(
+        currentAudio: testAudio,
+        playbackState: PlaybackStateEntity(
+          isPlaying: true,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration(minutes: 1),
+          duration: Duration(minutes: 5),
+          currentIndex: 0,
+          queue: [],
+        ),
+        positionData: PositionData(
           position: Duration(minutes: 1),
           bufferedPosition: Duration(minutes: 2),
           duration: Duration(minutes: 5),
@@ -138,18 +146,27 @@ void main() {
   testWidgets('Play button triggers event when pressed', (tester) async {
     await setScreenSize(tester);
 
-    const testMediaItem = MediaItem(
+    const testAudio = AudioEntity(
       id: '1',
       title: 'Test Surah',
+      url: '1',
       artist: 'Test Reciter',
+      duration: Duration(minutes: 5),
     );
 
     when(() => mockAudioPlayerBloc.state).thenReturn(
-      AudioPlayerState(
+      const AudioPlayerState(
         status: AudioPlayerStatus.success,
-        mediaItem: testMediaItem,
-        playbackState: PlaybackState(), // Paused
-        positionData: const PositionData(
+        currentAudio: testAudio,
+        playbackState: PlaybackStateEntity(
+          isPlaying: false,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          duration: Duration(minutes: 5),
+          currentIndex: 0,
+          queue: [],
+        ), // Paused
+        positionData: PositionData(
           position: Duration.zero,
           bufferedPosition: Duration.zero,
           duration: Duration(minutes: 5),

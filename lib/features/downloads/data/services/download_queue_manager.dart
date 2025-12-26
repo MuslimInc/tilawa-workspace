@@ -9,8 +9,9 @@ import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../models/download_progress.dart';
 import 'download_notification_service.dart';
-import 'download_service.dart';
+import 'download_service_interface.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
 /// Manages a queue of pending downloads and controls concurrency
@@ -18,7 +19,7 @@ import 'download_service.dart';
 class DownloadQueueManager {
   DownloadQueueManager(this._downloadService, this._notificationService);
 
-  final DownloadService _downloadService;
+  final DownloadServiceInterface _downloadService;
   final DownloadNotificationService _notificationService;
 
   // Maximum number of concurrent downloads

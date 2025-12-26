@@ -2,16 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
-import 'downloads_local_datasource_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([SharedPreferencesAsync])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

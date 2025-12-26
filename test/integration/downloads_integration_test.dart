@@ -4,36 +4,17 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
-import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
-import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
-import 'package:tilawa/features/downloads/data/services/download_status_synchronizer.dart';
-import 'package:tilawa/features/downloads/data/services/download_validator.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
-import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
-import '../features/downloads/data/services/download_service_test.mocks.dart';
-// Generate mocks
-
-@GenerateMocks([
-  DownloadService,
-  DownloadsLocalDataSource,
-  DownloadNotificationService,
-  BatchDownloadManager,
-  DownloadPathResolver,
-  DownloadValidator,
-  DownloadStatusSynchronizer,
-  RecitersRepository,
-])
-import 'downloads_integration_test.mocks.dart';
+import '../features/downloads/helpers/mock_helper.mocks.dart';
 
 void main() {
   provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
@@ -63,13 +44,13 @@ void main() {
 
     // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
-    if (!getIt.isRegistered<DownloadService>()) {
+    if (!getIt.isRegistered<DownloadServiceInterface>()) {
       // Create the real service with the mock downloader injected
       // This avoids using DownloadService.instance which would fail before registration
       final downloadService = DownloadServiceImpl(
         flutterDownloader: mockDownloader,
       );
-      getIt.registerSingleton<DownloadService>(downloadService);
+      getIt.registerSingleton<DownloadServiceInterface>(downloadService);
     }
     final mockDownloadNotificationService = MockDownloadNotificationService();
     if (!getIt.isRegistered<DownloadNotificationService>()) {
@@ -80,7 +61,8 @@ void main() {
 
     // Reset DownloadService state
     // We can cast because we know we registered the Impl in this test
-    (getIt<DownloadService>() as DownloadServiceImpl).resetForTesting();
+    (getIt<DownloadServiceInterface>() as DownloadServiceImpl)
+        .resetForTesting();
 
     when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
     when(
@@ -142,7 +124,7 @@ void main() {
       GetIt.instance.unregister<DownloadQueueManager>();
     }
     final queueManager = DownloadQueueManager(
-      GetIt.instance<DownloadService>(),
+      GetIt.instance<DownloadServiceInterface>(),
       GetIt.instance<DownloadNotificationService>(),
     );
     GetIt.instance.registerSingleton<DownloadQueueManager>(queueManager);
@@ -150,7 +132,7 @@ void main() {
 
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
-      GetIt.instance<DownloadService>(),
+      GetIt.instance<DownloadServiceInterface>(),
       mockBatchDownloadManager,
       mockPathResolver,
       mockValidator,
@@ -165,8 +147,8 @@ void main() {
 
   tearDown(() {
     final GetIt getIt = GetIt.instance;
-    if (getIt.isRegistered<DownloadService>()) {
-      getIt.unregister<DownloadService>();
+    if (getIt.isRegistered<DownloadServiceInterface>()) {
+      getIt.unregister<DownloadServiceInterface>();
     }
   });
 

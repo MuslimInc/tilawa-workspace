@@ -52,7 +52,7 @@ void main() {
       );
 
       // Assert
-      expect(result, Right(tFavoriteReciters));
+      expect(result, Right<Failure, List<ReciterEntity>>(tFavoriteReciters));
       verify(mockRepository.getFavoriteReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -69,7 +69,7 @@ void main() {
       );
 
       // Assert
-      expect(result, const Right([]));
+      expect(result, const Right<Failure, List<ReciterEntity>>([]));
       verify(mockRepository.getFavoriteReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
@@ -87,7 +87,7 @@ void main() {
       );
 
       // Assert
-      expect(result, const Left(tFailure));
+      expect(result, const Left<Failure, List<ReciterEntity>>(tFailure));
       verify(mockRepository.getFavoriteReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });

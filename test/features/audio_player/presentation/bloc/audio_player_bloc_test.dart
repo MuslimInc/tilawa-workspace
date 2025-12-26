@@ -1,20 +1,43 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tilawa/core/entities/audio.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
+import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
+import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa/shared/models/position_data.dart';
-import 'package:tilawa/shared/models/queue_state.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'audio_player_bloc_test.mocks.dart';
 
-@GenerateMocks([AudioPlayerHandler])
+@GenerateMocks([
+  PlayAudioUseCase,
+  PauseAudioUseCase,
+  StopAudioUseCase,
+  SeekToUseCase,
+  SetVolumeUseCase,
+  SetPlaybackSpeedUseCase,
+  SetRepeatModeUseCase,
+  SetShuffleModeUseCase,
+  SkipToNextUseCase,
+  SkipToPreviousUseCase,
+  SkipToQueueItemUseCase,
+  PlayFromQueueUseCase,
+  UpdateQueueUseCase,
+  AddQueueItemUseCase,
+  RemoveQueueItemUseCase,
+  MoveQueueItemUseCase,
+  LoadAudioPlayerDataUseCase,
+  GetAudioStreamsUseCase,
+])
 void main() {
   setUpAll(() async {
+    provideDummy<Either<Failure, void>>(const Right(null));
     await initializeHydratedStorageForTest();
   });
 
@@ -22,47 +45,110 @@ void main() {
     await clearHydratedStorageForTest();
   });
 
-  late MockAudioPlayerHandler mockAudioHandler;
-  late BehaviorSubject<MediaItem?> mediaItemSubject;
-  late BehaviorSubject<PlaybackState> playbackStateSubject;
-  late BehaviorSubject<QueueState> queueStateSubject;
-  late BehaviorSubject<List<MediaItem>> queueSubject;
+  late MockPlayAudioUseCase mockPlayAudio;
+  late MockPauseAudioUseCase mockPauseAudio;
+  late MockStopAudioUseCase mockStopAudio;
+  late MockSeekToUseCase mockSeekTo;
+  late MockSetVolumeUseCase mockSetVolume;
+  late MockSetPlaybackSpeedUseCase mockSetPlaybackSpeed;
+  late MockSkipToNextUseCase mockSkipToNext;
+  late MockSkipToPreviousUseCase mockSkipToPrevious;
+  late MockSkipToQueueItemUseCase mockSkipToQueueItem;
+  late MockPlayFromQueueUseCase mockPlayFromQueue;
+  late MockUpdateQueueUseCase mockUpdateQueue;
+  late MockAddQueueItemUseCase mockAddQueueItem;
+  late MockRemoveQueueItemUseCase mockRemoveQueueItem;
+  late MockMoveQueueItemUseCase mockMoveQueueItem;
+  late MockSetRepeatModeUseCase mockSetRepeatMode;
+  late MockSetShuffleModeUseCase mockSetShuffleMode;
+  late MockLoadAudioPlayerDataUseCase mockLoadAudioPlayerData;
+  late MockGetAudioStreamsUseCase mockGetAudioStreams;
+
+  late BehaviorSubject<AudioEntity?> currentAudioSubject;
+  late BehaviorSubject<PlaybackStateEntity> playbackStateSubject;
+  late BehaviorSubject<List<AudioEntity>> queueSubject;
   late BehaviorSubject<double> volumeSubject;
   late BehaviorSubject<double> speedSubject;
+  late BehaviorSubject<Duration> positionSubject;
 
   setUp(() {
-    mockAudioHandler = MockAudioPlayerHandler();
+    mockPlayAudio = MockPlayAudioUseCase();
+    mockPauseAudio = MockPauseAudioUseCase();
+    mockStopAudio = MockStopAudioUseCase();
+    mockSeekTo = MockSeekToUseCase();
+    mockSetVolume = MockSetVolumeUseCase();
+    mockSetPlaybackSpeed = MockSetPlaybackSpeedUseCase();
+    mockSkipToNext = MockSkipToNextUseCase();
+    mockSkipToPrevious = MockSkipToPreviousUseCase();
+    mockSkipToQueueItem = MockSkipToQueueItemUseCase();
+    mockPlayFromQueue = MockPlayFromQueueUseCase();
+    mockUpdateQueue = MockUpdateQueueUseCase();
+    mockAddQueueItem = MockAddQueueItemUseCase();
+    mockRemoveQueueItem = MockRemoveQueueItemUseCase();
+    mockMoveQueueItem = MockMoveQueueItemUseCase();
+    mockSetRepeatMode = MockSetRepeatModeUseCase();
+    mockSetShuffleMode = MockSetShuffleModeUseCase();
+    mockLoadAudioPlayerData = MockLoadAudioPlayerDataUseCase();
+    mockGetAudioStreams = MockGetAudioStreamsUseCase();
 
-    mediaItemSubject = BehaviorSubject<MediaItem?>();
-    playbackStateSubject = BehaviorSubject<PlaybackState>();
-    queueStateSubject = BehaviorSubject<QueueState>();
-    queueSubject = BehaviorSubject<List<MediaItem>>.seeded([]);
+    currentAudioSubject = BehaviorSubject<AudioEntity?>();
+    playbackStateSubject = BehaviorSubject<PlaybackStateEntity>();
+    queueSubject = BehaviorSubject<List<AudioEntity>>.seeded([]);
     volumeSubject = BehaviorSubject<double>.seeded(1.0);
     speedSubject = BehaviorSubject<double>.seeded(1.0);
+    positionSubject = BehaviorSubject<Duration>.seeded(Duration.zero);
 
     // Setup mock streams
-    when(mockAudioHandler.mediaItem).thenAnswer((_) => mediaItemSubject);
     when(
-      mockAudioHandler.playbackState,
+      mockGetAudioStreams.currentAudio,
+    ).thenAnswer((_) => currentAudioSubject);
+    when(
+      mockGetAudioStreams.playbackState,
     ).thenAnswer((_) => playbackStateSubject);
-    when(mockAudioHandler.queueState).thenAnswer((_) => queueStateSubject);
-    when(mockAudioHandler.queue).thenAnswer((_) => queueSubject);
-    when(mockAudioHandler.volume).thenAnswer((_) => volumeSubject);
-    when(mockAudioHandler.speed).thenAnswer((_) => speedSubject);
+    when(mockGetAudioStreams.queue).thenAnswer((_) => queueSubject);
+    when(mockGetAudioStreams.volume).thenAnswer((_) => volumeSubject);
+    when(mockGetAudioStreams.speed).thenAnswer((_) => speedSubject);
+    when(mockGetAudioStreams.position).thenAnswer((_) => positionSubject);
+
+    // Setup default mock returns for UseCases (ResultVoid/ResultFuture)
+    // We can add these as needed in tests or set defaults here
   });
 
   tearDown(() {
-    mediaItemSubject.close();
+    currentAudioSubject.close();
     playbackStateSubject.close();
-    queueStateSubject.close();
     queueSubject.close();
     volumeSubject.close();
     speedSubject.close();
+    positionSubject.close();
   });
+
+  AudioPlayerBloc buildBloc() {
+    return AudioPlayerBloc(
+      mockGetAudioStreams,
+      mockPlayAudio,
+      mockPauseAudio,
+      mockStopAudio,
+      mockSeekTo,
+      mockSkipToNext,
+      mockSkipToPrevious,
+      mockSetVolume,
+      mockSetPlaybackSpeed,
+      mockSetRepeatMode,
+      mockSetShuffleMode,
+      mockSkipToQueueItem,
+      mockPlayFromQueue,
+      mockUpdateQueue,
+      mockAddQueueItem,
+      mockRemoveQueueItem,
+      mockMoveQueueItem,
+      mockLoadAudioPlayerData,
+    );
+  }
 
   group('AudioPlayerBloc - LoadAudioPlayerData', () {
     test('initial state is correct', () {
-      final bloc = AudioPlayerBloc(mockAudioHandler);
+      final AudioPlayerBloc bloc = buildBloc();
       expect(
         bloc.state,
         const AudioPlayerState(status: AudioPlayerStatus.initial),
@@ -70,470 +156,167 @@ void main() {
     });
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData - when mediaItem stream has value, should restore state',
+      'loadAudioPlayerData - should emit loading then success',
       setUp: () {
-        // Create a test media item
-        const testMediaItem = MediaItem(
-          id: 'test-id',
-          title: 'Test Title',
-          artist: 'Test Artist',
-          duration: Duration(minutes: 3),
-        );
-
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          queueIndex: 0,
-        );
-
-        const testQueueState = QueueState(
-          queue: [testMediaItem],
-          queueIndex: 0,
-          shuffleIndices: null,
-          repeatMode: AudioServiceRepeatMode.none,
-        );
-
-        // Add values to subjects immediately
-        mediaItemSubject.add(testMediaItem);
-        playbackStateSubject.add(testPlaybackState);
-        queueStateSubject.add(testQueueState);
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) {
-        bloc.add(const AudioPlayerEvent.loadAudioPlayerData());
-      },
-      wait: const Duration(seconds: 2), // Wait for async operations
-      skip: 1, // Skip the first state (mediaItem only, no playbackState yet)
-      expect: () => [
-        // State with mediaItem and playbackState
-        isA<AudioPlayerState>()
-            .having((s) => s.status, 'status', AudioPlayerStatus.success)
-            .having((s) => s.mediaItem, 'mediaItem', isNotNull)
-            .having((s) => s.mediaItem?.id, 'mediaItem.id', 'test-id')
-            .having((s) => s.playbackState, 'playbackState', isNotNull)
-            .having((s) => s.playbackState?.playing, 'playing', true),
-        // State with queueState added (from stream listener)
-        isA<AudioPlayerState>().having(
-          (s) => s.queueState,
-          'queueState',
-          isNotNull,
-        ),
-      ],
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData - when mediaItem stream emits after delay, should restore state',
-      setUp: () {
-        // Create a test media item
-        const testMediaItem = MediaItem(
-          id: 'test-id-2',
-          title: 'Test Title 2',
-          artist: 'Test Artist 2',
-          duration: Duration(minutes: 5),
-        );
-
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          updateTime: DateTime.now(),
-          queueIndex: 0,
-        );
-
-        // Emit values after a delay to simulate stream not having value immediately
-        Future.delayed(const Duration(milliseconds: 100), () {
-          mediaItemSubject.add(testMediaItem);
-          playbackStateSubject.add(testPlaybackState);
-        });
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) {
-        bloc.add(const AudioPlayerEvent.loadAudioPlayerData());
-      },
-      wait: const Duration(seconds: 2),
-      skip: 1, // Skip the initial state (no mediaItem yet)
-      expect: () => [
-        // State with mediaItem from loadAudioPlayerData
-        isA<AudioPlayerState>()
-            .having((s) => s.status, 'status', AudioPlayerStatus.success)
-            .having((s) => s.mediaItem, 'mediaItem', isNotNull)
-            .having((s) => s.mediaItem?.id, 'mediaItem.id', 'test-id-2'),
-        // State with playbackState added (from stream listener)
-        isA<AudioPlayerState>().having(
-          (s) => s.playbackState,
-          'playbackState',
-          isNotNull,
-        ),
-      ],
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData - when mediaItem stream never emits, should not restore mediaItem',
-      setUp: () {
-        // Don't add any values to the stream
-        // This simulates the case where audio is not playing
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) {
-        bloc.add(const AudioPlayerEvent.loadAudioPlayerData());
-      },
-      wait: const Duration(seconds: 2),
-      expect: () => [
-        // State from loadAudioPlayerData (no mediaItem found)
-        // Initial state is emitted during bloc construction, before bloc_test captures states
-        isA<AudioPlayerState>()
-            .having((s) => s.status, 'status', AudioPlayerStatus.success)
-            .having((s) => s.mediaItem, 'mediaItem', isNull)
-            .having((s) => s.volume, 'volume', 1.0)
-            .having((s) => s.speed, 'speed', 1.0),
-      ],
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData - when valueOrNull returns value, should use it immediately',
-      setUp: () {
-        // Create a test media item
-        const testMediaItem = MediaItem(
-          id: 'test-id-3',
-          title: 'Test Title 3',
-          artist: 'Test Artist 3',
-        );
-
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          queueIndex: 0,
-        );
-
-        // Add values to subjects so valueOrNull will return them
-        mediaItemSubject.add(testMediaItem);
-        playbackStateSubject.add(testPlaybackState);
-      },
-      build: () {
-        // Create a ValueStream mock that has a value
-        final ValueStream<MediaItem?> mediaItemValueStream = mediaItemSubject
-            .shareValueSeeded(null);
         when(
-          mockAudioHandler.mediaItem,
-        ).thenAnswer((_) => mediaItemValueStream);
-        return AudioPlayerBloc(mockAudioHandler);
+          mockLoadAudioPlayerData(restorePlayback: anyNamed('restorePlayback')),
+        ).thenAnswer((_) async => const Right(null));
       },
+      build: () => buildBloc(),
       act: (bloc) {
         bloc.add(const AudioPlayerEvent.loadAudioPlayerData());
       },
-      wait: const Duration(seconds: 2),
-      skip: 1, // Skip the initial playbackState update from stream setup
       expect: () => [
-        // State with mediaItem from loadAudioPlayerData
-        isA<AudioPlayerState>()
-            .having((s) => s.status, 'status', AudioPlayerStatus.success)
-            .having((s) => s.mediaItem, 'mediaItem', isNotNull),
+        isA<AudioPlayerState>().having(
+          (s) => s.status,
+          'status',
+          AudioPlayerStatus.loading,
+        ),
+        isA<AudioPlayerState>().having(
+          (s) => s.status,
+          'status',
+          AudioPlayerStatus.success,
+        ),
       ],
+      verify: (_) {
+        verify(mockLoadAudioPlayerData()).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'loadAudioPlayerData - when restoration disabled, should call usecase with false',
+      setUp: () {
+        when(
+          mockLoadAudioPlayerData(restorePlayback: anyNamed('restorePlayback')),
+        ).thenAnswer((_) async => const Right(null));
+      },
+      build: () => buildBloc(),
+      act: (bloc) {
+        bloc.add(
+          const AudioPlayerEvent.loadAudioPlayerData(restorePlayback: false),
+        );
+      },
+      verify: (_) {
+        verify(mockLoadAudioPlayerData(restorePlayback: false)).called(1);
+      },
     );
   });
 
   group('AudioPlayerBloc - Stream Setup', () {
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'stream setup - should emit state when mediaItem stream emits',
+      'stream setup - should emit state when currentAudio stream emits',
       setUp: () {
-        const testMediaItem = MediaItem(
+        const testAudio = AudioEntity(
           id: 'stream-test',
           title: 'Stream Test',
-          artist: 'Stream Artist',
+          url: 'url',
+          duration: Duration(minutes: 3),
         );
-        // Don't add immediately, let stream emit later
         Future.delayed(const Duration(milliseconds: 50), () {
-          mediaItemSubject.add(testMediaItem);
+          currentAudioSubject.add(testAudio);
         });
       },
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      build: () => buildBloc(),
       wait: const Duration(milliseconds: 200),
-      skip: 1, // Skip the initial state emission
+      skip: 1,
       expect: () => [
         isA<AudioPlayerState>()
-            .having((s) => s.mediaItem, 'mediaItem', isNotNull)
-            .having((s) => s.mediaItem?.id, 'mediaItem.id', 'stream-test'),
+            .having((s) => s.currentAudio, 'currentAudio', isNotNull)
+            .having(
+              (s) => s.currentAudio?.id,
+              'currentAudio.id',
+              'stream-test',
+            ),
       ],
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'stream setup - should emit state when playbackState stream emits',
       setUp: () {
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          queueIndex: 0,
+        const testPlaybackState = PlaybackStateEntity(
+          isPlaying: true,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          duration: Duration.zero,
+          currentIndex: 0,
+          queue: [],
         );
         Future.delayed(const Duration(milliseconds: 50), () {
           playbackStateSubject.add(testPlaybackState);
         });
       },
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      build: () => buildBloc(),
       wait: const Duration(milliseconds: 200),
-      skip: 1, // Skip the initial state emission
+      skip: 1,
       expect: () => [
         isA<AudioPlayerState>()
             .having((s) => s.playbackState, 'playbackState', isNotNull)
-            .having((s) => s.playbackState?.playing, 'playing', true),
+            .having((s) => s.playbackState?.isPlaying, 'isPlaying', true),
       ],
-    );
-  });
-
-  group('AudioPlayerBloc - Integration with BottomPlayerWidget', () {
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should have mediaItem after loadAudioPlayerData when audio is playing',
-      setUp: () {
-        const testMediaItem = MediaItem(
-          id: 'integration-test',
-          title: 'Integration Test',
-          artist: 'Integration Artist',
-          duration: Duration(minutes: 2),
-        );
-
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updatePosition: const Duration(seconds: 30),
-          updateTime: DateTime.now(),
-          queueIndex: 0,
-        );
-
-        const testQueueState = QueueState(
-          queue: [testMediaItem],
-          queueIndex: 0,
-          shuffleIndices: null,
-          repeatMode: AudioServiceRepeatMode.none,
-        );
-
-        // Simulate audio already playing - add values immediately
-        mediaItemSubject.add(testMediaItem);
-        playbackStateSubject.add(testPlaybackState);
-        queueStateSubject.add(testQueueState);
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) {
-        bloc.add(const AudioPlayerEvent.loadAudioPlayerData());
-      },
-      wait: const Duration(seconds: 2),
-      verify: (bloc) {
-        final AudioPlayerState state = bloc.state;
-        expect(state.hasMediaItem, true, reason: 'hasMediaItem should be true');
-        expect(
-          state.mediaItem,
-          isNotNull,
-          reason: 'mediaItem should not be null',
-        );
-        expect(
-          state.status,
-          AudioPlayerStatus.success,
-          reason: 'status should be success',
-        );
-      },
     );
   });
 
   group('AudioPlayerBloc - State Persistence', () {
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'toJson should persist queue, queueIndex, and position',
-      setUp: () {
-        const testMediaItem1 = MediaItem(
-          id: 'test-1',
-          title: 'Test Track 1',
-          artist: 'Test Artist',
-          duration: Duration(minutes: 3),
-        );
-        const testMediaItem2 = MediaItem(
-          id: 'test-2',
-          title: 'Test Track 2',
-          artist: 'Test Artist',
-          duration: Duration(minutes: 4),
-        );
-
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          queueIndex: 1,
-        );
-
-        const testQueueState = QueueState(
-          queue: [testMediaItem1, testMediaItem2],
-          queueIndex: 1,
-          shuffleIndices: null,
-          repeatMode: AudioServiceRepeatMode.none,
-        );
-
-        // Add values to subjects
-        mediaItemSubject.add(testMediaItem2);
-        playbackStateSubject.add(testPlaybackState);
-        queueStateSubject.add(testQueueState);
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      wait: const Duration(milliseconds: 500),
-      verify: (bloc) {
-        // Get the serialized state
-        final Map<String, dynamic>? json = bloc.toJson(bloc.state);
-        expect(json, isNotNull);
-        expect(json!['queue'], isNotNull);
-        expect(json['queueIndex'], 1);
-        expect((json['queue'] as List).length, 2);
-      },
-    );
-
-    test('fromJson should restore queue and position', () {
-      final bloc = AudioPlayerBloc(mockAudioHandler);
-      final Map<String, Object> json = {
-        'volume': 0.8,
-        'speed': 1.5,
-        'queue': [
-          {
-            'id': 'restored-1',
-            'title': 'Restored Track 1',
-            'artist': 'Restored Artist',
-            'album': 'Test Album',
-            'duration': 180000, // 3 minutes in milliseconds
-          },
-          {
-            'id': 'restored-2',
-            'title': 'Restored Track 2',
-            'artist': 'Restored Artist',
-            'album': 'Test Album',
-            'duration': 240000, // 4 minutes in milliseconds
-          },
-        ],
-        'queueIndex': 1,
-        'position': 45000, // 45 seconds in milliseconds
-      };
-
-      final AudioPlayerState? state = bloc.fromJson(json);
-
-      expect(state, isNotNull);
-      expect(state!.volume, 0.8);
-      expect(state.speed, 1.5);
-      expect(state.queueState, isNotNull);
-      expect(state.queueState!.queue.length, 2);
-      expect(state.queueState!.queueIndex, 1);
-      expect(state.queueState!.queue[0].id, 'restored-1');
-      expect(state.queueState!.queue[1].title, 'Restored Track 2');
-      expect(state.positionData, isNotNull);
-      expect(state.positionData!.position, const Duration(seconds: 45));
+    test('fromJson should return null', () {
+      final AudioPlayerBloc bloc = buildBloc();
+      expect(bloc.fromJson(<String, dynamic>{}), isNull);
     });
 
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData should restore queue from persisted state',
-      setUp: () {
-        // Mock playFromQueue to track calls
-        when(mockAudioHandler.playFromQueue(any, any)).thenAnswer((_) async {});
-        when(mockAudioHandler.seek(any)).thenAnswer((_) async {});
-        when(mockAudioHandler.pause()).thenAnswer((_) async {});
-      },
-      seed: () => const AudioPlayerState(
-        status: AudioPlayerStatus.initial,
-        queueState: QueueState(
-          queue: [
-            MediaItem(
-              id: 'persisted-1',
-              title: 'Persisted Track',
-              artist: 'Persisted Artist',
-            ),
-          ],
-          queueIndex: 0,
-          shuffleIndices: null,
-          repeatMode: AudioServiceRepeatMode.none,
-        ),
-        positionData: PositionData(
-          position: Duration(seconds: 30),
-          bufferedPosition: Duration.zero,
-          duration: Duration.zero,
-        ),
-      ),
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
-      wait: const Duration(seconds: 1),
-      verify: (_) {
-        // Verify that playFromQueue was called with the persisted queue
-        verify(
-          mockAudioHandler.playFromQueue(
-            any,
-            0, // index from persisted state
-          ),
-        ).called(1);
-        // Verify that seek was called with the persisted position
-        verify(mockAudioHandler.seek(const Duration(seconds: 30))).called(1);
-        // Verify that pause was called (user needs to press play)
-        verify(mockAudioHandler.pause()).called(1);
-      },
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'loadAudioPlayerData - when restoration disabled, should clear persisted state',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      seed: () => const AudioPlayerState(
-        status: AudioPlayerStatus.initial,
-        queueState: QueueState(
-          queue: [
-            MediaItem(id: '1', title: 'Persisted', album: 'A', artist: 'Art'),
-          ],
-          queueIndex: 0,
-          shuffleIndices: null,
-          repeatMode: AudioServiceRepeatMode.none,
-        ),
-        positionData: PositionData(
-          position: Duration(seconds: 10),
-          bufferedPosition: Duration.zero,
-          duration: Duration.zero,
-        ),
-      ),
-      act: (bloc) => bloc.add(
-        const AudioPlayerEvent.loadAudioPlayerData(restorePlayback: false),
-      ),
-      wait: const Duration(seconds: 2),
-      skip: 1, // Skip initial side-effect emission
-      expect: () => [const AudioPlayerState(status: AudioPlayerStatus.success)],
-      verify: (_) {
-        verifyNever(mockAudioHandler.playFromQueue(any, any));
-      },
-    );
+    test('toJson should return null', () {
+      final AudioPlayerBloc bloc = buildBloc();
+      expect(
+        bloc.toJson(const AudioPlayerState(status: AudioPlayerStatus.initial)),
+        isNull,
+      );
+    });
   });
+
   group('AudioPlayerBloc - State Update Events', () {
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'UpdateMediaItem should update state with new media item',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'UpdateAudio should update state with new audio entity',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(
-        const AudioPlayerEvent.updateMediaItem(
-          MediaItem(id: 'new-id', title: 'New Title'),
+        const AudioPlayerEvent.updateAudio(
+          AudioEntity(
+            id: 'new-id',
+            title: 'New Title',
+            url: 'url',
+            duration: Duration.zero,
+          ),
         ),
       ),
       expect: () => [
         isA<AudioPlayerState>()
-            .having((s) => s.mediaItem, 'mediaItem', isNotNull)
-            .having((s) => s.mediaItem?.id, 'mediaItem.id', 'new-id'),
+            .having((s) => s.currentAudio, 'currentAudio', isNotNull)
+            .having((s) => s.currentAudio?.id, 'currentAudio.id', 'new-id'),
       ],
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'UpdatePlaybackState should update state with new playback state',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'UpdatePlaybackStateEntity should update state with new playback state entity',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(
-        AudioPlayerEvent.updatePlaybackState(PlaybackState(playing: true)),
+        const AudioPlayerEvent.updatePlaybackStateEntity(
+          PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            duration: Duration.zero,
+            currentIndex: 0,
+            queue: [],
+          ),
+        ),
       ),
       expect: () => [
         isA<AudioPlayerState>()
             .having((s) => s.playbackState, 'playbackState', isNotNull)
-            .having((s) => s.playbackState?.playing, 'playing', true),
+            .having((s) => s.playbackState?.isPlaying, 'isPlaying', true),
       ],
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'UpdatePositionData should update state with new position data',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(
         const AudioPlayerEvent.updatePositionData(
           PositionData(
@@ -553,40 +336,17 @@ void main() {
             ),
       ],
     );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'UpdateQueueState should update state with new queue state',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) => bloc.add(
-        const AudioPlayerEvent.updateQueueState(
-          QueueState(
-            queue: [],
-            queueIndex: 1,
-            shuffleIndices: [],
-            repeatMode: AudioServiceRepeatMode.all,
-          ),
-        ),
-      ),
-      expect: () => [
-        isA<AudioPlayerState>()
-            .having((s) => s.queueState, 'queueState', isNotNull)
-            .having((s) => s.queueState?.queueIndex, 'queueIndex', 1),
-      ],
-    );
   });
 
   group('AudioPlayerBloc - State Update Events (Volume/Speed)', () {
-    // Uses parent setUp with default seeds (1.0), which causes no initial emission
-    // since AudioPlayerState defaults are 1.0.
-
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'UpdateVolume should update state with new volume',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      build: () => buildBloc(),
       act: (bloc) async {
-        await Future.delayed(Duration.zero); // Ensure init completes
+        await Future.delayed(Duration.zero);
         bloc.add(const AudioPlayerEvent.updateVolume(0.5));
       },
-      skip: 1, // Skip initialization emission from UpdatePlaybackState
+      skip: 1,
       expect: () => [
         isA<AudioPlayerState>().having((s) => s.volume, 'volume', 0.5),
       ],
@@ -594,12 +354,12 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'UpdateSpeed should update state with new speed',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      build: () => buildBloc(),
       act: (bloc) async {
-        await Future.delayed(Duration.zero); // Ensure init completes
+        await Future.delayed(Duration.zero);
         bloc.add(const AudioPlayerEvent.updateSpeed(1.5));
       },
-      skip: 1, // Skip initialization emission from UpdatePlaybackState
+      skip: 1,
       expect: () => [
         isA<AudioPlayerState>().having((s) => s.speed, 'speed', 1.5),
       ],
@@ -608,575 +368,225 @@ void main() {
 
   group('AudioPlayerBloc - Audio Control Events (Command Delegation)', () {
     setUp(() {
-      // Mock audio handler methods
-      when(mockAudioHandler.play()).thenAnswer((_) async {});
-      when(mockAudioHandler.pause()).thenAnswer((_) async {});
-      when(mockAudioHandler.stop()).thenAnswer((_) async {});
-      when(mockAudioHandler.skipToNext()).thenAnswer((_) async {});
-      when(mockAudioHandler.skipToPrevious()).thenAnswer((_) async {});
-      when(mockAudioHandler.seek(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.skipToQueueItem(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.playFromQueue(any, any)).thenAnswer((_) async {});
-      when(mockAudioHandler.updateQueue(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.removeQueueItem(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.moveQueueItem(any, any)).thenAnswer((_) async {});
-      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.setShuffleMode(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.setVolume(any)).thenAnswer((_) async {});
-      when(mockAudioHandler.setSpeed(any)).thenAnswer((_) async {});
+      when(mockPlayAudio.call()).thenAnswer((_) async => const Right(null));
+      when(mockPauseAudio.call()).thenAnswer((_) async => const Right(null));
+      when(mockStopAudio.call()).thenAnswer((_) async => const Right(null));
+      when(mockSkipToNext.call()).thenAnswer((_) async => const Right(null));
+      when(
+        mockSkipToPrevious.call(),
+      ).thenAnswer((_) async => const Right(null));
+      when(mockSeekTo.call(any)).thenAnswer((_) async => const Right(null));
+      when(
+        mockSkipToQueueItem.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockPlayFromQueue.call(any, any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockUpdateQueue.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockAddQueueItem.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockRemoveQueueItem.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockMoveQueueItem.call(any, any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockSetRepeatMode.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        mockSetShuffleMode.call(any),
+      ).thenAnswer((_) async => const Right(null));
+      when(mockSetVolume.call(any)).thenAnswer((_) async => const Right(null));
+      when(
+        mockSetPlaybackSpeed.call(any),
+      ).thenAnswer((_) async => const Right(null));
     });
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'PlayAudio should call audioHandler.play',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'PlayAudio should call mockPlayAudio',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.playAudio()),
       verify: (_) {
-        verify(mockAudioHandler.play()).called(1);
+        verify(mockPlayAudio()).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'PauseAudio should call audioHandler.pause',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'PauseAudio should call mockPauseAudio',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.pauseAudio()),
       verify: (_) {
-        verify(mockAudioHandler.pause()).called(1);
+        verify(mockPauseAudio()).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'StopAudio should call audioHandler.stop',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'StopAudio should call mockStopAudio',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.stopAudio()),
       verify: (_) {
-        verify(mockAudioHandler.stop()).called(1);
+        verify(mockStopAudio()).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SkipToNext should call audioHandler.skipToNext',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'SkipToNext should call mockSkipToNext',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.skipToNext()),
       verify: (_) {
-        verify(mockAudioHandler.skipToNext()).called(1);
+        verify(mockSkipToNext()).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SkipToPrevious should call audioHandler.skipToPrevious',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'SkipToPrevious should call mockSkipToPrevious',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.skipToPrevious()),
       verify: (_) {
-        verify(mockAudioHandler.skipToPrevious()).called(1);
+        verify(mockSkipToPrevious()).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SeekTo should call audioHandler.seek',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'SeekTo should call mockSeekTo',
+      build: () => buildBloc(),
       act: (bloc) =>
           bloc.add(const AudioPlayerEvent.seekTo(Duration(seconds: 45))),
       verify: (_) {
-        verify(mockAudioHandler.seek(const Duration(seconds: 45))).called(1);
+        verify(mockSeekTo(const Duration(seconds: 45))).called(1);
       },
     );
+
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SkipToQueueItem should call audioHandler.skipToQueueItem',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'SkipToQueueItem should call mockSkipToQueueItem',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.skipToQueueItem(1)),
       verify: (_) {
-        verify(mockAudioHandler.skipToQueueItem(1)).called(1);
+        verify(mockSkipToQueueItem(1)).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'PlayFromQueue should call audioHandler.playFromQueue',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'PlayFromQueue should call mockPlayFromQueue',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.playFromQueue([], 0)),
       verify: (_) {
-        verify(mockAudioHandler.playFromQueue([], 0)).called(1);
+        verify(mockPlayFromQueue([], 0)).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'UpdateQueue should call audioHandler.updateQueue',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'UpdateQueue should call mockUpdateQueue',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.updateQueue([])),
       verify: (_) {
-        verify(mockAudioHandler.updateQueue([])).called(1);
+        verify(mockUpdateQueue([])).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'AddQueueItem should call audioHandler.addQueueItem',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'AddQueueItem should call mockAddQueueItem',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(
-        const AudioPlayerEvent.addQueueItem(MediaItem(id: 'add', title: 'Add')),
+        const AudioPlayerEvent.addQueueItem(
+          AudioEntity(
+            id: 'add',
+            title: 'Add',
+            url: 'u',
+            duration: Duration.zero,
+          ),
+        ),
       ),
       verify: (_) {
         verify(
-          mockAudioHandler.addQueueItem(
-            const MediaItem(id: 'add', title: 'Add'),
+          mockAddQueueItem(
+            const AudioEntity(
+              id: 'add',
+              title: 'Add',
+              url: 'u',
+              duration: Duration.zero,
+            ),
           ),
         ).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'RemoveQueueItem should call audioHandler.removeQueueItem',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'RemoveQueueItem should call mockRemoveQueueItem',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(
         const AudioPlayerEvent.removeQueueItem(
-          MediaItem(id: 'remove', title: 'Remove'),
+          AudioEntity(
+            id: 'remove',
+            title: 'Remove',
+            url: 'u',
+            duration: Duration.zero,
+          ),
         ),
       ),
       verify: (_) {
         verify(
-          mockAudioHandler.removeQueueItem(
-            const MediaItem(id: 'remove', title: 'Remove'),
+          mockRemoveQueueItem(
+            const AudioEntity(
+              id: 'remove',
+              title: 'Remove',
+              url: 'u',
+              duration: Duration.zero,
+            ),
           ),
         ).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'MoveQueueItem should call audioHandler.moveQueueItem',
-      build: () => AudioPlayerBloc(mockAudioHandler),
+      'MoveQueueItem should call mockMoveQueueItem',
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.moveQueueItem(0, 1)),
       verify: (_) {
-        verify(mockAudioHandler.moveQueueItem(0, 1)).called(1);
+        verify(mockMoveQueueItem(0, 1)).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SetRepeatMode should call audioHandler.setRepeatMode',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) => bloc.add(
-        const AudioPlayerEvent.setRepeatMode(AudioServiceRepeatMode.all),
-      ),
+      'SetRepeatMode should call mockSetRepeatMode',
+      build: () => buildBloc(),
+      act: (bloc) =>
+          bloc.add(const AudioPlayerEvent.setRepeatMode(AudioRepeatMode.all)),
       verify: (_) {
-        verify(
-          mockAudioHandler.setRepeatMode(AudioServiceRepeatMode.all),
-        ).called(1);
+        verify(mockSetRepeatMode(AudioRepeatMode.all)).called(1);
       },
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SetShuffleMode should call audioHandler.setShuffleMode',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) => bloc.add(
-        const AudioPlayerEvent.setShuffleMode(AudioServiceShuffleMode.all),
-      ),
+      'SetShuffleMode should call mockSetShuffleMode',
+      build: () => buildBloc(),
+      act: (bloc) =>
+          bloc.add(const AudioPlayerEvent.setShuffleMode(AudioShuffleMode.all)),
       verify: (_) {
-        verify(
-          mockAudioHandler.setShuffleMode(AudioServiceShuffleMode.all),
-        ).called(1);
+        verify(mockSetShuffleMode(AudioShuffleMode.all)).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'SetVolume should call mockSetVolume',
+      build: () => buildBloc(),
+      act: (bloc) => bloc.add(const AudioPlayerEvent.setVolume(0.5)),
+      verify: (_) {
+        verify(mockSetVolume(0.5)).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'SetSpeed should call mockSetPlaybackSpeed',
+      build: () => buildBloc(),
+      act: (bloc) => bloc.add(const AudioPlayerEvent.setSpeed(1.5)),
+      verify: (_) {
+        verify(mockSetPlaybackSpeed(1.5)).called(1);
       },
     );
   });
-
-  group('AudioPlayerBloc - Audio Control Events (State + Delegation)', () {
-    setUp(() {
-      // Seed with 0.5 (different from default 1.0) to ensure initialization emits a state
-      // allowing us to deterministically skip it.
-      // Seed speed with 1.0 (default) to likely avoid extra emission for speed logic in volume test.
-      // Note: We need to handle each test carefully regarding seeds if they interfere,
-      // but using 0.5 for both as base "different" value is a good start.
-      // Actually, for SetVolume test: seed volume 0.5, speed 1.0.
-      // For SetSpeed test: seed volume 1.0, speed 0.5.
-      // But setUp is shared. So let's seed BOTH with 0.5 to be safe and explicits skips.
-      volumeSubject = BehaviorSubject<double>.seeded(0.5);
-      speedSubject = BehaviorSubject<double>.seeded(0.5);
-
-      when(mockAudioHandler.volume).thenAnswer((_) => volumeSubject);
-      when(mockAudioHandler.speed).thenAnswer((_) => speedSubject);
-
-      when(mockAudioHandler.setVolume(any)).thenAnswer((invocation) async {
-        final volume = invocation.positionalArguments[0] as double;
-        volumeSubject.add(volume);
-      });
-      when(mockAudioHandler.setSpeed(any)).thenAnswer((invocation) async {
-        final speed = invocation.positionalArguments[0] as double;
-        speedSubject.add(speed);
-      });
-    });
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SetVolume should call audioHandler.setVolume and update state',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) async {
-        await Future.delayed(
-          Duration.zero,
-        ); // Allow initialization events to process
-        bloc.add(const AudioPlayerEvent.setVolume(0.8));
-      },
-      skip: 2, // Skip initialization emissions (volume 0.5, speed 0.5)
-      expect: () => [
-        isA<AudioPlayerState>().having((s) => s.volume, 'volume', 0.8),
-      ],
-      verify: (_) {
-        verify(mockAudioHandler.setVolume(0.8)).called(1);
-      },
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'SetSpeed should call audioHandler.setSpeed and update state',
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      act: (bloc) async {
-        await Future.delayed(
-          Duration.zero,
-        ); // Allow initialization events to process
-        bloc.add(const AudioPlayerEvent.setSpeed(1.2));
-      },
-      skip: 2, // Skip initialization emissions (volume 0.5, speed 0.5)
-      expect: () => [
-        isA<AudioPlayerState>().having((s) => s.speed, 'speed', 1.2),
-      ],
-      verify: (_) {
-        verify(mockAudioHandler.setSpeed(1.2)).called(1);
-      },
-    );
-  });
-  group('AudioPlayerBloc - JSON Serialization Errors', () {
-    test('fromJson should handle malformed queue data gracefully', () {
-      final Map<String, Object> json = {
-        'volume': 0.8,
-        'speed': 1.2,
-        'queue': ['invalid-data'], // Malformed queue list
-        'queueIndex': 0,
-      };
-
-      final bloc = AudioPlayerBloc(mockAudioHandler);
-      final AudioPlayerState? state = bloc.fromJson(json);
-
-      expect(state, isNotNull);
-      expect(state!.volume, 0.8);
-      expect(state.speed, 1.2);
-      expect(state.queueState, isNull); // Queue should be null due to error
-    });
-
-    test('fromJson should handle malformed position data gracefully', () {
-      final Map<String, Object> json = {
-        'volume': 0.8,
-        'speed': 1.2,
-        'position': 'invalid-position', // Should be int
-      };
-
-      final bloc = AudioPlayerBloc(mockAudioHandler);
-      final AudioPlayerState? state = bloc.fromJson(json);
-
-      expect(state, isNotNull);
-      expect(state!.positionData, isNull); // Position should be null
-    });
-
-    test('fromJson should return initial state on general error', () {
-      final json = {
-        'volume': 'invalid-volume-string', // Causes CastError
-      };
-
-      final bloc = AudioPlayerBloc(mockAudioHandler);
-      final AudioPlayerState? state = bloc.fromJson(json);
-
-      expect(state, isNotNull);
-      expect(state!.status, AudioPlayerStatus.initial); // Default fallback
-      expect(state.volume, 1.0); // Default
-    });
-  });
-
-  group('AudioPlayerBloc - LoadAudioPlayerData Errors', () {
-    const mockQueueState = QueueState(
-      queue: [MediaItem(id: '1', title: 'Test')],
-      queueIndex: 0,
-      repeatMode: AudioServiceRepeatMode.none,
-      shuffleIndices: null,
-    );
-    const mockPositionData = PositionData(
-      position: Duration(seconds: 10),
-      bufferedPosition: Duration.zero,
-      duration: Duration(minutes: 3),
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should catch error during queue restoration and continue',
-      build: () {
-        when(
-          mockAudioHandler.queue,
-        ).thenAnswer((_) => BehaviorSubject.seeded([]));
-        when(
-          mockAudioHandler.playFromQueue(any, any),
-        ).thenThrow(Exception('Restoration failed'));
-        // Mock fallback streams to successful values to ensure it continues
-        when(
-          mockAudioHandler.queueState,
-        ).thenAnswer((_) => BehaviorSubject.seeded(mockQueueState));
-        when(mockAudioHandler.playbackState).thenAnswer(
-          (_) => BehaviorSubject.seeded(PlaybackState(queueIndex: 0)),
-        );
-
-        return AudioPlayerBloc(mockAudioHandler);
-      },
-      seed: () => const AudioPlayerState(
-        status: AudioPlayerStatus.initial,
-        queueState: mockQueueState,
-        positionData: mockPositionData,
-      ),
-      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
-      verify: (_) {
-        verify(mockAudioHandler.playFromQueue(any, any)).called(1);
-        // Should verify that it moved on to fetching current state (implied if no crash)
-      },
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should handle timeouts/errors when fetching initial state from streams',
-      build: () {
-        when(
-          mockAudioHandler.queue,
-        ).thenAnswer((_) => BehaviorSubject.seeded([]));
-
-        // Mock streams to never emit (timeout) or throw
-        // Using unseeded subjects which will cause timeout in `.first.timeout()`
-        when(
-          mockAudioHandler.queueState,
-        ).thenAnswer((_) => BehaviorSubject<QueueState>());
-        when(
-          mockAudioHandler.playbackState,
-        ).thenAnswer((_) => BehaviorSubject<PlaybackState>());
-        when(
-          mockAudioHandler.mediaItem,
-        ).thenAnswer((_) => BehaviorSubject<MediaItem?>());
-
-        return AudioPlayerBloc(mockAudioHandler);
-      },
-      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
-      // Expect a state update with defaults/empty since all streams failed/timed out
-      expect: () => [
-        isA<AudioPlayerState>().having(
-          (s) => s.status,
-          'status',
-          AudioPlayerStatus.success,
-        ),
-      ],
-      wait: const Duration(seconds: 1), // Wait for timeouts
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should skip queue restoration when queue already has items',
-      build: () {
-        // Mock queue to already have items
-        when(mockAudioHandler.queue).thenAnswer(
-          (_) => BehaviorSubject.seeded([
-            const MediaItem(id: 'existing', title: 'Existing Track'),
-          ]),
-        );
-
-        return AudioPlayerBloc(mockAudioHandler);
-      },
-      seed: () => const AudioPlayerState(
-        status: AudioPlayerStatus.initial,
-        queueState: QueueState(
-          queue: [MediaItem(id: 'persisted', title: 'Persisted Track')],
-          queueIndex: 0,
-          repeatMode: AudioServiceRepeatMode.none,
-          shuffleIndices: null,
-        ),
-      ),
-      act: (bloc) => bloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
-      wait: const Duration(seconds: 1),
-      verify: (_) {
-        // Should NOT call playFromQueue since queue already has items
-        verifyNever(mockAudioHandler.playFromQueue(any, any));
-      },
-    );
-  });
-
-  group('AudioPlayerBloc - toJson Error Handling', () {
-    test('toJson should handle serialization errors gracefully', () {
-      final bloc = AudioPlayerBloc(mockAudioHandler);
-
-      // Create a state with a MediaItem that might cause serialization issues
-      // We'll use a state with queueState that has valid data
-      const testState = AudioPlayerState(
-        status: AudioPlayerStatus.success,
-        volume: 0.7,
-        speed: 1.3,
-        queueState: QueueState(
-          queue: [
-            MediaItem(
-              id: 'test-id',
-              title: 'Test Title',
-              artist: 'Test Artist',
-            ),
-          ],
-          queueIndex: 0,
-          repeatMode: AudioServiceRepeatMode.none,
-          shuffleIndices: null,
-        ),
-        positionData: PositionData(
-          position: Duration(seconds: 45),
-          bufferedPosition: Duration(seconds: 50),
-          duration: Duration(minutes: 3),
-        ),
-      );
-
-      // Call toJson - should succeed normally
-      final Map<String, dynamic>? json = bloc.toJson(testState);
-
-      expect(json, isNotNull);
-      expect(json!['volume'], 0.7);
-      expect(json['speed'], 1.3);
-      expect(json['queue'], isNotNull);
-      expect(json['queueIndex'], 0);
-      expect(json['position'], 45000);
-    });
-
-    test(
-      'toJson should catch serialization errors and return minimal state',
-      () {
-        // Create a bloc that throws during queue serialization
-        final testBloc = _TestBlocWithFailingSerializeQueue(mockAudioHandler);
-
-        // Create a state with a queue to trigger serialization
-        const testState = AudioPlayerState(
-          status: AudioPlayerStatus.success,
-          volume: 0.8,
-          speed: 1.2,
-          queueState: QueueState(
-            queue: [MediaItem(id: 'test', title: 'Test')],
-            queueIndex: 0,
-            repeatMode: AudioServiceRepeatMode.none,
-            shuffleIndices: null,
-          ),
-        );
-
-        // This will trigger the catch block (lines 575-577)
-        final Map<String, dynamic>? json = testBloc.toJson(testState);
-
-        // Should return minimal state due to error
-        expect(json, isNotNull);
-        expect(json!['volume'], 0.8);
-        expect(json['speed'], 1.2);
-        // Queue should not be in the result due to error
-        expect(json.containsKey('queue'), false);
-      },
-    );
-  });
-
-  group('AudioPlayerBloc - Position Stream Handling', () {
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should handle position data updates from combined stream',
-      setUp: () {
-        // Create a playback state with buffered position
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          bufferedPosition: const Duration(seconds: 30),
-        );
-
-        const testMediaItem = MediaItem(
-          id: 'test-position',
-          title: 'Test Position',
-          duration: Duration(minutes: 3),
-        );
-
-        // Add values to subjects
-        playbackStateSubject.add(testPlaybackState);
-        mediaItemSubject.add(testMediaItem);
-      },
-      build: () => AudioPlayerBloc(mockAudioHandler),
-      wait: const Duration(milliseconds: 500),
-      skip: 2, // Skip initial emissions
-      verify: (bloc) {
-        // Verify that the bloc received playback state with buffered position
-        expect(bloc.state.playbackState, isNotNull);
-        expect(
-          bloc.state.playbackState?.bufferedPosition,
-          const Duration(seconds: 30),
-        );
-        expect(bloc.state.mediaItem, isNotNull);
-        expect(bloc.state.mediaItem?.duration, const Duration(minutes: 3));
-      },
-    );
-
-    test(
-      'bloc initialization succeeds even when AudioService.position is unavailable',
-      () async {
-        // This test verifies that the runZonedGuarded error handling (lines 78-99)
-        // works correctly. AudioService.position will not be available in unit tests,
-        // so the _getPositionDataStream() will throw an error when trying to subscribe.
-        // The runZonedGuarded callback (lines 91-99) catches this and logs it,
-        // allowing the bloc to initialize successfully without crashing.
-
-        // Note: Lines 81-82, 84, 86 (position stream callbacks) and line 131
-        // (combineLatest mapper) cannot be easily covered in unit tests because:
-        // 1. AudioService.position is a static stream that requires AudioService initialization
-        // 2. We can't inject a custom position stream anymore (removed for GetIt fix)
-        // 3. These lines will be covered in integration tests where AudioService is initialized
-
-        // Create the bloc - this exercises the error handling path
-        final bloc = AudioPlayerBloc(mockAudioHandler);
-
-        // Give time for async stream setup to complete
-        await Future.delayed(const Duration(milliseconds: 100));
-
-        // Verify bloc initialized successfully despite position stream errors
-        // Status will be 'success' after volume/speed stream updates
-        expect(bloc.state.status, AudioPlayerStatus.success);
-
-        // The bloc should still be functional
-        expect(bloc.isClosed, false);
-
-        await bloc.close();
-      },
-    );
-
-    blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should handle errors from AudioService.position gracefully',
-      setUp: () {
-        // Setup playback state and media item
-        final testPlaybackState = PlaybackState(
-          controls: [],
-          processingState: AudioProcessingState.ready,
-          playing: true,
-          updateTime: DateTime.now(),
-          bufferedPosition: const Duration(seconds: 15),
-        );
-
-        const testMediaItem = MediaItem(
-          id: 'test-position-error',
-          title: 'Test Position Error',
-          duration: Duration(minutes: 4),
-        );
-
-        playbackStateSubject.add(testPlaybackState);
-        mediaItemSubject.add(testMediaItem);
-      },
-      build: () {
-        // Position stream error handling is now part of AudioService.position
-        // This test verifies the bloc handles errors gracefully
-        return AudioPlayerBloc(mockAudioHandler);
-      },
-      wait: const Duration(milliseconds: 500),
-      skip: 1, // Skip initial emission
-      verify: (bloc) {
-        // Bloc should still be functional despite position stream error
-        expect(bloc.state.status, AudioPlayerStatus.success);
-      },
-    );
-  });
-}
-
-/// Helper class to test toJson error handling
-/// Overrides serializeQueue to throw an exception
-class _TestBlocWithFailingSerializeQueue extends AudioPlayerBloc {
-  _TestBlocWithFailingSerializeQueue(super.audioHandler);
-
-  @override
-  List<Map<String, dynamic>> serializeQueue(List<MediaItem> queue) {
-    // Throw an exception to trigger the catch block in toJson
-    throw Exception('Forced serialization error for testing');
-  }
 }

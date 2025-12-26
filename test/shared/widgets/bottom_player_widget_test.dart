@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/shared/widgets/bottom_player_ui.dart';
@@ -106,16 +106,18 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: 'test-id',
         title: 'Test Title',
+        url: 'test-url',
         artist: 'Test Artist',
+        duration: Duration(minutes: 3),
       );
 
       when(mockBloc.state).thenReturn(
         const AudioPlayerState(
           status: AudioPlayerStatus.initial,
-          mediaItem: testMediaItem,
+          currentAudio: testAudio,
         ),
       );
       when(mockBloc.stream).thenAnswer((_) => const Stream.empty());
@@ -132,23 +134,25 @@ void main() {
       'should show player when mediaItem exists and status is success',
       (WidgetTester tester) async {
         // Arrange
-        const testMediaItem = MediaItem(
+        const testAudio = AudioEntity(
           id: 'test-id',
           title: 'Test Title',
           artist: 'Test Artist',
+          url: 'test-url',
           duration: Duration(minutes: 3),
         );
 
         when(mockBloc.state).thenReturn(
-          AudioPlayerState(
+          const AudioPlayerState(
             status: AudioPlayerStatus.success,
-            mediaItem: testMediaItem,
-            playbackState: PlaybackState(
-              controls: [],
-              processingState: AudioProcessingState.ready,
-              playing: true,
-              updateTime: DateTime.now(),
-              queueIndex: 0,
+            currentAudio: testAudio,
+            playbackState: PlaybackStateEntity(
+              isPlaying: true,
+              processingState: AudioProcessingStateStatus.ready,
+              position: Duration.zero,
+              duration: Duration(minutes: 3),
+              currentIndex: 0,
+              queue: [],
             ),
           ),
         );
@@ -169,10 +173,12 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: 'test-id',
         title: 'Test Title',
         artist: 'Test Artist',
+        url: 'test-url',
+        duration: Duration(minutes: 3),
       );
 
       // Start with no media item
@@ -191,30 +197,20 @@ void main() {
       expect(find.text('Test Title'), findsNothing);
 
       // Update state to have media item
-      stateController.add(
-        AudioPlayerState(
-          status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            controls: [],
-            processingState: AudioProcessingState.ready,
-            updateTime: DateTime.now(),
-            queueIndex: 0,
-          ),
+      const newState = AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: testAudio,
+        playbackState: PlaybackStateEntity(
+          isPlaying: false,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          duration: Duration(minutes: 3),
+          currentIndex: 0,
+          queue: [],
         ),
       );
-      when(mockBloc.state).thenReturn(
-        AudioPlayerState(
-          status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            controls: [],
-            processingState: AudioProcessingState.ready,
-            updateTime: DateTime.now(),
-            queueIndex: 0,
-          ),
-        ),
-      );
+      stateController.add(newState);
+      when(mockBloc.state).thenReturn(newState);
 
       await tester.pumpAndSettle();
 
@@ -229,10 +225,12 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      const testMediaItem = MediaItem(
+      const testAudio = AudioEntity(
         id: 'test-id',
         title: 'Test Title',
         artist: 'Test Artist',
+        url: 'test-url',
+        duration: Duration(minutes: 3),
       );
 
       when(
@@ -247,30 +245,20 @@ void main() {
       await tester.pump();
 
       // Update state to have media item
-      stateController.add(
-        AudioPlayerState(
-          status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            controls: [],
-            processingState: AudioProcessingState.ready,
-            updateTime: DateTime.now(),
-            queueIndex: 0,
-          ),
+      const newState = AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: testAudio,
+        playbackState: PlaybackStateEntity(
+          isPlaying: false,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          duration: Duration(minutes: 3),
+          currentIndex: 0,
+          queue: [],
         ),
       );
-      when(mockBloc.state).thenReturn(
-        AudioPlayerState(
-          status: AudioPlayerStatus.success,
-          mediaItem: testMediaItem,
-          playbackState: PlaybackState(
-            controls: [],
-            processingState: AudioProcessingState.ready,
-            updateTime: DateTime.now(),
-            queueIndex: 0,
-          ),
-        ),
-      );
+      stateController.add(newState);
+      when(mockBloc.state).thenReturn(newState);
 
       await tester.pumpAndSettle();
 

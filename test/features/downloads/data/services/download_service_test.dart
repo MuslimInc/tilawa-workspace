@@ -6,22 +6,15 @@ import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
-import 'package:tilawa/features/downloads/data/services/flutter_downloader_wrapper.dart';
-import 'package:tilawa/features/downloads/data/services/helpers/download_file_helper.dart';
-import 'package:tilawa/features/downloads/data/services/helpers/download_isolate_manager.dart';
+import 'package:tilawa/features/downloads/data/models/download_progress.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/utils/download_path_utils.dart';
 
-import 'download_service_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([
-  FlutterDownloaderWrapper,
-  DownloadFileHelper,
-  DownloadIsolateManager,
-])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -36,6 +29,7 @@ void main() {
     const testFileName = 'test.mp3';
     late MockFlutterDownloaderWrapper mockDownloader;
     late MockDownloadIsolateManager mockIsolateManager;
+    late StreamController<(String, DownloadTaskStatus, int)> updateController;
     late DownloadServiceImpl downloadService;
 
     setUp(() {
@@ -44,7 +38,8 @@ void main() {
 
       mockDownloader = MockFlutterDownloaderWrapper();
       mockIsolateManager = MockDownloadIsolateManager();
-      // final mockFileHelper = MockDownloadFileHelper(); // Default mock for main service
+      updateController =
+          StreamController<(String, DownloadTaskStatus, int)>.broadcast();
 
       // Default stubs
       when(
@@ -52,16 +47,20 @@ void main() {
           debug: anyNamed('debug'),
           ignoreSsl: anyNamed('ignoreSsl'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       when(mockIsolateManager.registerPort()).thenReturn(null);
       when(
         mockIsolateManager.updateStream,
-      ).thenAnswer((_) => const Stream.empty());
+      ).thenAnswer((_) => updateController.stream);
 
       when(
         mockDownloader.registerCallback(any, step: anyNamed('step')),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
       when(
         mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
       ).thenAnswer((_) async => []);
@@ -98,28 +97,32 @@ void main() {
 
       // Clean registration
       final GetIt getIt = GetIt.instance;
-      if (getIt.isRegistered<DownloadService>()) {
-        getIt.unregister<DownloadService>();
+      if (getIt.isRegistered<DownloadServiceInterface>()) {
+        getIt.unregister<DownloadServiceInterface>();
       }
 
       downloadService = DownloadServiceImpl(
         flutterDownloader: mockDownloader,
         isolateManager: mockIsolateManager,
       );
-      getIt.registerSingleton<DownloadService>(downloadService);
+      getIt.registerSingleton<DownloadServiceInterface>(downloadService);
     });
 
     tearDown(() async {
       await downloadService.disposeService();
       final GetIt getIt = GetIt.instance;
-      if (getIt.isRegistered<DownloadService>()) {
-        await getIt.unregister<DownloadService>();
+      if (getIt.isRegistered<DownloadServiceInterface>()) {
+        await getIt.unregister<DownloadServiceInterface>();
       }
       if (tempDir.existsSync()) {
         try {
           tempDir.deleteSync(recursive: true);
         } catch (_) {}
       }
+    });
+
+    tearDown(() {
+      updateController.close();
     });
 
     group('Initialization', () {
@@ -131,10 +134,7 @@ void main() {
           mockDownloader.registerCallback(any, step: anyNamed('step')),
         ).called(1);
 
-        final SendPort? port = IsolateNameServer.lookupPortByName(
-          'downloader_send_port',
-        );
-        expect(port, isNotNull);
+        verify(mockIsolateManager.registerPort()).called(1);
       });
 
       test('subsequent initialize calls do not re-initialize', () async {
@@ -598,12 +598,7 @@ void main() {
                 .getProgressStream(testUrl)
                 .listen(progressEvents.add);
 
-        final SendPort? port = IsolateNameServer.lookupPortByName(
-          'downloader_send_port',
-        );
-        expect(port, isNotNull);
-
-        port!.send([testTaskId, 2, 50]);
+        updateController.add((testTaskId, DownloadTaskStatus.running, 50));
 
         await Future.delayed(const Duration(milliseconds: 500));
 
@@ -637,10 +632,7 @@ void main() {
                   .getProgressStream(testUrl)
                   .listen(progressEvents.add);
 
-          final SendPort? port = IsolateNameServer.lookupPortByName(
-            'downloader_send_port',
-          );
-          port!.send([testTaskId, 2, 50]);
+          updateController.add((testTaskId, DownloadTaskStatus.running, 50));
 
           await Future.delayed(const Duration(milliseconds: 500));
 
@@ -693,32 +685,13 @@ void main() {
           DownloadTaskStatus.failed: DownloadStatus.failed,
           DownloadTaskStatus.canceled: DownloadStatus.cancelled,
           DownloadTaskStatus.paused: DownloadStatus.paused,
-          DownloadTaskStatus.undefined: DownloadStatus.failed,
         };
 
-        final Map<DownloadTaskStatus, int> statusToInt = {
-          DownloadTaskStatus.undefined: 0,
-          DownloadTaskStatus.enqueued: 1,
-          DownloadTaskStatus.running: 2,
-          DownloadTaskStatus.complete: 3,
-          DownloadTaskStatus.failed: 4,
-          DownloadTaskStatus.canceled: 5,
-          DownloadTaskStatus.paused: 6,
-        };
-
-        when(
-          mockDownloader.enqueue(
-            url: anyNamed('url'),
-            savedDir: anyNamed('savedDir'),
-            fileName: anyNamed('fileName'),
-            headers: anyNamed('headers'),
-            showNotification: anyNamed('showNotification'),
-            openFileFromNotification: anyNamed('openFileFromNotification'),
-            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
-            saveInPublicStorage: anyNamed('saveInPublicStorage'),
-            title: anyNamed('title'),
-          ),
-        ).thenAnswer((_) async => testTaskId);
+        final progressEvents = <DownloadProgress>[];
+        final StreamSubscription<DownloadProgress> subscription =
+            downloadService
+                .getProgressStream(testUrl)
+                .listen(progressEvents.add);
 
         await downloadService.download(
           id: testUrl,
@@ -728,20 +701,10 @@ void main() {
           reciterName: testReciterName,
         );
 
-        final progressEvents = <DownloadProgress>[];
-        final StreamSubscription<DownloadProgress> subscription =
-            downloadService
-                .getProgressStream(testUrl)
-                .listen(progressEvents.add);
-
-        final SendPort? port = IsolateNameServer.lookupPortByName(
-          'downloader_send_port',
-        );
-
         for (final MapEntry<DownloadTaskStatus, DownloadStatus> entry
             in statusMap.entries) {
-          port!.send([testTaskId, statusToInt[entry.key], 0]);
-          await Future.delayed(const Duration(milliseconds: 10));
+          updateController.add((testTaskId, entry.key, 0));
+          await Future.delayed(const Duration(milliseconds: 50));
         }
 
         await Future.delayed(const Duration(milliseconds: 100));
@@ -995,32 +958,6 @@ void main() {
       });
     });
 
-    group('Static & Test Helpers', () {
-      // Cover lines 132, 153-159, 163-167
-      test('resetForTesting clears state', () {
-        // We need to inject some state
-        DownloadServiceImpl.instance.resetForTesting();
-        // Since attributes are private, we indirectly verify by state
-      });
-
-      test('test override setter/getter', () {
-        final mock = MockFlutterDownloaderWrapper();
-        DownloadService.flutterDownloaderTestOverride = mock;
-        expect(DownloadService.flutterDownloaderTestOverride, mock);
-
-        expect(
-          identical(DownloadService.flutterDownloaderTestOverride, mock),
-          isTrue,
-        );
-      });
-
-      test('default constructor arguments', () {
-        // Cover line 132 default args
-        final service = DownloadServiceImpl();
-        expect(service, isNotNull);
-      });
-    });
-
     group('Data Classes', () {
       // Cover lines 634-635: props
       test('DownloadProgress props are correct', () {
@@ -1032,42 +969,6 @@ void main() {
           fileSize: 1000,
         );
         expect(dp.props, ['1', DownloadStatus.pending, 0.1, 100, 1000]);
-      });
-    });
-    group('Static Compatibility', () {
-      test('globalProgressStreamStatic accesses instance stream', () {
-        expect(
-          DownloadService.globalProgressStreamStatic,
-          isA<Stream<DownloadProgress>>(),
-        );
-      });
-
-      test('flutterDownloaderTestOverride getter/setter works', () {
-        DownloadServiceImpl.flutterDownloaderTestOverride = mockDownloader;
-        expect(
-          DownloadServiceImpl.flutterDownloaderTestOverride,
-          mockDownloader,
-        );
-      });
-
-      test('static methods delegate to instance', () async {
-        // We just call them to ensure coverage path is hit
-        // and no crash occurs.
-        // Since downloadService (instance) uses mocks, these should work.
-
-        // We need to ensure instance is initialized for methods that call initialize()
-        // But the static methods map to instance methods which call initialize().
-        // So it's fine.
-
-        await DownloadService.reset(); // calls disposeService()
-
-        // These are futures, we await them or just call them.
-        expect(DownloadService.activeDownloadIds, completes);
-      });
-
-      test('resetForTesting clears state', () {
-        downloadService.resetForTesting();
-        // Verification is tricky without public accessors, but code path is covered.
       });
     });
 

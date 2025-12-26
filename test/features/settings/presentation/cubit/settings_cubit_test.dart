@@ -1,34 +1,26 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
-import 'package:tilawa/features/downloads/data/services/download_service.dart';
-import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
-
-class MockDownloadService extends Mock implements DownloadService {}
-
-class MockDownloadsRepository extends Mock implements DownloadsRepository {}
-
-class MockDownloadNotificationService extends Mock
-    implements DownloadNotificationService {}
+import '../../../downloads/helpers/mock_helper.mocks.dart';
 
 final GetIt getIt = GetIt.instance;
 
 void main() {
   setUpAll(() async {
-    registerFallbackValue(DownloadStatus.pending);
     await initializeHydratedStorageForTest();
   });
 
   group('SettingsCubit', () {
     late SettingsCubit cubit;
-    late MockDownloadService mockDownloadService;
+    late MockDownloadServiceInterface mockDownloadService;
     late MockDownloadsRepository mockDownloadsRepository;
     late MockDownloadNotificationService mockDownloadNotificationService;
 
@@ -37,8 +29,8 @@ void main() {
       if (getIt.isRegistered<DownloadQueueManager>()) {
         getIt.unregister<DownloadQueueManager>();
       }
-      if (getIt.isRegistered<DownloadService>()) {
-        getIt.unregister<DownloadService>();
+      if (getIt.isRegistered<DownloadServiceInterface>()) {
+        getIt.unregister<DownloadServiceInterface>();
       }
       if (getIt.isRegistered<DownloadsRepository>()) {
         getIt.unregister<DownloadsRepository>();
@@ -47,42 +39,46 @@ void main() {
         getIt.unregister<DownloadNotificationService>();
       }
 
-      mockDownloadService = MockDownloadService();
+      mockDownloadService = MockDownloadServiceInterface();
       mockDownloadsRepository = MockDownloadsRepository();
       mockDownloadNotificationService = MockDownloadNotificationService();
 
       when(
-        () => mockDownloadService.getActiveDownloadIds(),
+        mockDownloadService.getActiveDownloadIds(),
       ).thenAnswer((_) async => []);
       when(
-        () => mockDownloadService.globalProgressStream,
+        mockDownloadService.globalProgressStream,
       ).thenAnswer((_) => const Stream.empty());
 
-      getIt.registerSingleton<DownloadService>(mockDownloadService);
+      getIt.registerSingleton<DownloadServiceInterface>(mockDownloadService);
       getIt.registerSingleton<DownloadsRepository>(mockDownloadsRepository);
       getIt.registerSingleton<DownloadNotificationService>(
         mockDownloadNotificationService,
       );
 
+      when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+        return;
+      });
       when(
-        () => mockDownloadNotificationService.initialize(),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockDownloadNotificationService.showDownloadProgress(
-          downloadId: any(named: 'downloadId'),
-          title: any(named: 'title'),
-          reciterName: any(named: 'reciterName'),
-          progress: any(named: 'progress'),
-          status: any(named: 'status'),
-          pendingMessage: any(named: 'pendingMessage'),
-          progressMessage: any(named: 'progressMessage'),
-          completeMessage: any(named: 'completeMessage'),
-          failedMessage: any(named: 'failedMessage'),
+        mockDownloadNotificationService.showDownloadProgress(
+          downloadId: anyNamed('downloadId'),
+          title: anyNamed('title'),
+          reciterName: anyNamed('reciterName'),
+          progress: anyNamed('progress'),
+          status: anyNamed('status'),
+          pendingMessage: anyNamed('pendingMessage'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockDownloadNotificationService.cancelNotification(any()),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(mockDownloadNotificationService.cancelNotification(any)).thenAnswer((
+        _,
+      ) async {
+        return;
+      });
 
       final dqm = DownloadQueueManager(
         mockDownloadService,

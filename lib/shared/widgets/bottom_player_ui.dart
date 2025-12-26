@@ -1,9 +1,9 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../core/entities/audio.dart';
 import '../models/position_data.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
@@ -11,7 +11,7 @@ import '../models/position_data.dart';
 class BottomPlayerUi extends StatelessWidget {
   const BottomPlayerUi({
     super.key,
-    required this.mediaItem,
+    required this.audio,
     required this.positionData,
     required this.isPlaying,
     required this.canGoPrevious,
@@ -23,7 +23,7 @@ class BottomPlayerUi extends StatelessWidget {
     this.onClose,
   });
 
-  final MediaItem mediaItem;
+  final AudioEntity audio;
   final PositionData positionData;
   final bool isPlaying;
   final bool canGoPrevious;
@@ -111,11 +111,11 @@ class BottomPlayerUi extends StatelessWidget {
                               context,
                             ).primaryColor.withValues(alpha: 0.1),
                           ),
-                          child: mediaItem.artUri != null
+                          child: audio.artUri != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12.r),
                                   child: CachedNetworkImage(
-                                    imageUrl: mediaItem.artUri.toString(),
+                                    imageUrl: audio.artUri.toString(),
                                     fit: BoxFit.cover,
                                     errorWidget: (context, error, stackTrace) =>
                                         _buildDefaultIcon(context),
@@ -137,7 +137,7 @@ class BottomPlayerUi extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            mediaItem.title,
+                            audio.title,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -150,7 +150,7 @@ class BottomPlayerUi extends StatelessWidget {
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            mediaItem.artist ?? 'Unknown Reciter',
+                            audio.artist ?? 'Unknown Reciter',
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Theme.of(context)

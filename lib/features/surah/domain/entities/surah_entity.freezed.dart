@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SurahEntity {
 
-@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem get mediaItem; bool get isDownloaded; bool get isDownloading; double get downloadProgress;// 0.0 to 1.0
+ AudioEntity get audio; bool get isDownloaded; bool get isDownloading; double get downloadProgress;// 0.0 to 1.0
  String? get downloadId;
 /// Create a copy of SurahEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -29,16 +29,16 @@ $SurahEntityCopyWith<SurahEntity> get copyWith => _$SurahEntityCopyWithImpl<Sura
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SurahEntity&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SurahEntity&&(identical(other.audio, audio) || other.audio == audio)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,mediaItem,isDownloaded,isDownloading,downloadProgress,downloadId);
+int get hashCode => Object.hash(runtimeType,audio,isDownloaded,isDownloading,downloadProgress,downloadId);
 
 @override
 String toString() {
-  return 'SurahEntity(mediaItem: $mediaItem, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
+  return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
 }
 
 
@@ -49,11 +49,11 @@ abstract mixin class $SurahEntityCopyWith<$Res>  {
   factory $SurahEntityCopyWith(SurahEntity value, $Res Function(SurahEntity) _then) = _$SurahEntityCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
+ AudioEntity audio, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
 });
 
 
-
+$AudioEntityCopyWith<$Res> get audio;
 
 }
 /// @nodoc
@@ -66,17 +66,26 @@ class _$SurahEntityCopyWithImpl<$Res>
 
 /// Create a copy of SurahEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mediaItem = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? audio = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
   return _then(_self.copyWith(
-mediaItem: null == mediaItem ? _self.mediaItem : mediaItem // ignore: cast_nullable_to_non_nullable
-as MediaItem,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
+audio: null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
+as AudioEntity,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
 as bool,isDownloading: null == isDownloading ? _self.isDownloading : isDownloading // ignore: cast_nullable_to_non_nullable
 as bool,downloadProgress: null == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
 as double,downloadId: freezed == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
-
+/// Create a copy of SurahEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res> get audio {
+  
+  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+    return _then(_self.copyWith(audio: value));
+  });
+}
 }
 
 
@@ -158,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SurahEntity() when $default != null:
-return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
+return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
   return orElse();
 
 }
@@ -179,10 +188,10 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)  $default,) {final _that = this;
 switch (_that) {
 case _SurahEntity():
-return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
+return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +208,10 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson)  MediaItem mediaItem,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,) {final _that = this;
 switch (_that) {
 case _SurahEntity() when $default != null:
-return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
+return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
   return null;
 
 }
@@ -214,10 +223,10 @@ return $default(_that.mediaItem,_that.isDownloaded,_that.isDownloading,_that.dow
 @JsonSerializable()
 
 class _SurahEntity extends SurahEntity {
-  const _SurahEntity({@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) required this.mediaItem, this.isDownloaded = false, this.isDownloading = false, this.downloadProgress = 0.0, this.downloadId}): super._();
+  const _SurahEntity({required this.audio, this.isDownloaded = false, this.isDownloading = false, this.downloadProgress = 0.0, this.downloadId}): super._();
   factory _SurahEntity.fromJson(Map<String, dynamic> json) => _$SurahEntityFromJson(json);
 
-@override@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) final  MediaItem mediaItem;
+@override final  AudioEntity audio;
 @override@JsonKey() final  bool isDownloaded;
 @override@JsonKey() final  bool isDownloading;
 @override@JsonKey() final  double downloadProgress;
@@ -237,16 +246,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SurahEntity&&(identical(other.mediaItem, mediaItem) || other.mediaItem == mediaItem)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SurahEntity&&(identical(other.audio, audio) || other.audio == audio)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,mediaItem,isDownloaded,isDownloading,downloadProgress,downloadId);
+int get hashCode => Object.hash(runtimeType,audio,isDownloaded,isDownloading,downloadProgress,downloadId);
 
 @override
 String toString() {
-  return 'SurahEntity(mediaItem: $mediaItem, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
+  return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
 }
 
 
@@ -257,11 +266,11 @@ abstract mixin class _$SurahEntityCopyWith<$Res> implements $SurahEntityCopyWith
   factory _$SurahEntityCopyWith(_SurahEntity value, $Res Function(_SurahEntity) _then) = __$SurahEntityCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(fromJson: MediaItemJson.fromJson, toJson: MediaItemJson.toJson) MediaItem mediaItem, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
+ AudioEntity audio, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
 });
 
 
-
+@override $AudioEntityCopyWith<$Res> get audio;
 
 }
 /// @nodoc
@@ -274,10 +283,10 @@ class __$SurahEntityCopyWithImpl<$Res>
 
 /// Create a copy of SurahEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mediaItem = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? audio = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
   return _then(_SurahEntity(
-mediaItem: null == mediaItem ? _self.mediaItem : mediaItem // ignore: cast_nullable_to_non_nullable
-as MediaItem,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
+audio: null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
+as AudioEntity,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
 as bool,isDownloading: null == isDownloading ? _self.isDownloading : isDownloading // ignore: cast_nullable_to_non_nullable
 as bool,downloadProgress: null == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
 as double,downloadId: freezed == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
@@ -285,7 +294,16 @@ as String?,
   ));
 }
 
-
+/// Create a copy of SurahEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AudioEntityCopyWith<$Res> get audio {
+  
+  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+    return _then(_self.copyWith(audio: value));
+  });
+}
 }
 
 // dart format on

@@ -1,49 +1,46 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class AudioEntity extends Equatable {
-  const AudioEntity({
-    required this.id,
-    required this.title,
-    required this.url,
-    required this.duration,
-    this.artist,
-    this.album,
-    this.artUri,
-  });
+part 'audio.freezed.dart';
+part 'audio.g.dart';
 
-  final String id;
-  final String title;
-  final String url;
-  final Duration duration;
-  final String? artist;
-  final String? album;
-  final String? artUri;
+@freezed
+abstract class AudioEntity with _$AudioEntity {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory AudioEntity({
+    required String id,
+    required String title,
+    required String url,
+    required Duration duration,
+    String? artist,
+    String? album,
+    String? artUri,
+  }) = _AudioEntity;
 
-  @override
-  List<Object?> get props => [id, title, url, duration, artist, album, artUri];
+  factory AudioEntity.fromJson(Map<String, dynamic> json) =>
+      _$AudioEntityFromJson(json);
 }
 
-class PlaybackStateEntity extends Equatable {
-  const PlaybackStateEntity({
-    required this.isPlaying,
-    required this.position,
-    required this.duration,
-    required this.currentIndex,
-    required this.queue,
-  });
+enum AudioProcessingStateStatus {
+  idle,
+  loading,
+  buffering,
+  ready,
+  completed,
+  error,
+}
 
-  final bool isPlaying;
-  final Duration position;
-  final Duration duration;
-  final int currentIndex;
-  final List<AudioEntity> queue;
+@freezed
+abstract class PlaybackStateEntity with _$PlaybackStateEntity {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory PlaybackStateEntity({
+    required bool isPlaying,
+    required AudioProcessingStateStatus processingState,
+    required Duration position,
+    required Duration duration,
+    required int currentIndex,
+    required List<AudioEntity> queue,
+  }) = _PlaybackStateEntity;
 
-  @override
-  List<Object?> get props => [
-    isPlaying,
-    position,
-    duration,
-    currentIndex,
-    queue,
-  ];
+  factory PlaybackStateEntity.fromJson(Map<String, dynamic> json) =>
+      _$PlaybackStateEntityFromJson(json);
 }

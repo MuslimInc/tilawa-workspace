@@ -12,7 +12,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../../main.dart';
-import '../../data/services/download_service.dart';
+import '../../data/models/download_progress.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/usecases/cancel_download_use_case.dart';
 import '../../domain/usecases/check_download_access_use_case.dart';

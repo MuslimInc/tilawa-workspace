@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../core/entities/audio.dart';
 import '../../core/entities/moshaf_entity.dart';
 import '../../core/entities/reciter_entity.dart';
 import '../models/queue_state.dart';
@@ -59,11 +60,12 @@ abstract class AudioPlayerHandler implements AudioHandler {
 
   // Audio state management
   Future<void> clearAudioState();
+  Future<void> loadAudioPlayerData({bool restorePlayback = true});
 
   // Reciter and surah management
-  Future<List<MediaItem>?> getReciters({String? languageCode});
+  Future<List<AudioEntity>?> getReciters({String? languageCode});
   Future<List<ReciterEntity>?> getRecitersData({String? languageCode});
-  Future<List<MediaItem>?> getSurahListForMoshaf(
+  Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,
   });

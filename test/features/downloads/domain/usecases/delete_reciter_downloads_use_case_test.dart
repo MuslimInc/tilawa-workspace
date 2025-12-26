@@ -1,14 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 
-import 'delete_reciter_downloads_use_case_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
-@GenerateMocks([DownloadsRepository])
 void main() {
   late DeleteReciterDownloadsUseCase useCase;
   late MockDownloadsRepository mockRepository;

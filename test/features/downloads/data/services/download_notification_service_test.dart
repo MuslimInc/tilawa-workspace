@@ -3,17 +3,14 @@ import 'dart:convert';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
-import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
-import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 
-import 'download_notification_service_test.mocks.dart';
+import '../../helpers/mock_helper.mocks.dart';
 
 // Mock platform implementation for testing
 class MockFlutterLocalNotificationsPlatform extends Mock
@@ -41,7 +38,6 @@ class MockFlutterLocalNotificationsPlatform extends Mock
   }
 }
 
-@GenerateMocks([RecitersRepository, NavigationService])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -417,7 +413,9 @@ void main() {
       // Stub push to satisfy the call
       when(
         mockNavigationService.push(any, extra: anyNamed('extra')),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await service.handleNotificationResponse(response);
