@@ -1,0 +1,341 @@
+00:00 +0: loading /Users/mohammadkamel/tilawa/test/features/playlists/presentation/widgets/playlist_widgets_test.dart                                                                                  00:01 +0: loading /Users/mohammadkamel/tilawa/test/features/playlists/presentation/widgets/playlist_widgets_test.dart                                                                                  00:01 +0: (setUpAll)                                                                                                                                                                                   00:01 +0: PlaylistCard renders playlist info correctly                                                                                                                                                 00:01 +1: PlaylistCard renders playlist info correctly                                                                                                                                                 00:01 +1: PlaylistCard calls callbacks when buttons pressed                                                                                                                                            00:01 +1: PlaylistCard calls callbacks when buttons pressed                                                                                                                                            
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 1.6 pixels on the right.
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#17b58 DISPOSED OVERFLOWING:
+  creator: MultiChildRenderObjectElement#1c408(DEFUNCT) ←
+    SingleChildRenderObjectElement#15f32(DEFUNCT) ← SingleChildRenderObjectElement#e34d1(DEFUNCT) ←
+    SingleChildRenderObjectElement#3a74d(DEFUNCT) ← InheritedElement#c4621(DEFUNCT) ←
+    StatefulElement#e53b5(DEFUNCT) ← InheritedElement#47ee8(DEFUNCT) ← StatelessElement#d277f(DEFUNCT)
+    ← SingleChildRenderObjectElement#bde72(DEFUNCT) ← StatefulElement#ed864(DEFUNCT) ←
+    StatelessElement#bd0d0(DEFUNCT) ← SingleChildRenderObjectElement#cff7d(DEFUNCT) ← ⋯
+  parentData: offset=Offset(0.0, 12.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=256.0, 0.0<=h<=Infinity)
+  size: Size(256.0, 24.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 1.6 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/mohammadkamel/tilawa/lib/features/playlists/presentation/widgets/playlist_card.dart:102:32
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#f10dd relayoutBoundary=up31 OVERFLOWING:
+  creator: Row ← Align ← Padding ← ConstrainedBox ← DefaultTextStyle ← AnimatedDefaultTextStyle ←
+    ListTileTheme ← Builder ← Listener ← RawGestureDetector ← GestureDetector ← Semantics ← ⋯
+  parentData: offset=Offset(0.0, 12.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=256.0, 0.0<=h<=Infinity)
+  size: Size(256.0, 24.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY WIDGET INSPECTOR ╞══════════════════════════════════════════════════════════
+The following assertion was thrown:
+Looking up a deactivated widget's ancestor is unsafe.
+At this point the state of the widget's element tree is no longer stable.
+To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by
+calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+
+When the exception was thrown, this was the stack:
+#0      Element._debugCheckStateIsActiveForAncestorLookup.<anonymous closure> (package:flutter/src/widgets/framework.dart:5052:9)
+#1      Element._debugCheckStateIsActiveForAncestorLookup (package:flutter/src/widgets/framework.dart:5066:6)
+#2      Element.visitAncestorElements (package:flutter/src/widgets/framework.dart:5177:12)
+#3      _describeRelevantUserCode (package:flutter/src/widgets/widget_inspector.dart:4244:13)
+#4      _parseDiagnosticsNode (package:flutter/src/widgets/widget_inspector.dart:4163:12)
+#5      debugTransformDebugCreator (package:flutter/src/widgets/widget_inspector.dart:4142:21)
+#6      _FlutterErrorDetailsNode.builder (package:flutter/src/foundation/assertions.dart:1310:31)
+#7      DiagnosticableNode.getProperties (package:flutter/src/foundation/diagnostics.dart:2945:68)
+#8      TextTreeRenderer._debugRender (package:flutter/src/foundation/diagnostics.dart:1270:63)
+#9      TextTreeRenderer.render (package:flutter/src/foundation/diagnostics.dart:1137:14)
+#10     FlutterError.dumpErrorToConsole (package:flutter/src/foundation/assertions.dart:1040:13)
+#11     TestWidgetsFlutterBinding._runTest.<anonymous closure> (package:flutter_test/src/binding.dart:886:24)
+#12     FlutterError.reportError (package:flutter/src/foundation/assertions.dart:1203:14)
+#13     DebugOverflowIndicatorMixin._reportOverflow (package:flutter/src/rendering/debug_overflow_indicator.dart:259:18)
+#14     DebugOverflowIndicatorMixin.paintOverflowIndicator (package:flutter/src/rendering/debug_overflow_indicator.dart:329:7)
+#15     RenderFlex.paint.<anonymous closure> (package:flutter/src/rendering/flex.dart:1364:7)
+#16     RenderFlex.paint (package:flutter/src/rendering/flex.dart:1372:6)
+#17     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#18     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#19     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#20     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#21     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#22     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#23     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#24     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#25     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#26     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#27     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#28     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#29     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#30     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#31     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#32     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#33     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#34     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#35     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#36     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#37     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#38     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#39     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#40     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#41     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#42     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#43     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#44     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#45     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#46     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#47     RenderAnimatedOpacityMixin.paint (package:flutter/src/rendering/proxy_box.dart:1076:11)
+#48     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#49     PaintingContext._repaintCompositedChild (package:flutter/src/rendering/object.dart:176:11)
+#50     PaintingContext.repaintCompositedChild (package:flutter/src/rendering/object.dart:121:5)
+#51     PaintingContext._compositeChild (package:flutter/src/rendering/object.dart:272:7)
+#52     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:253:7)
+#53     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#54     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#55     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#56     RenderBoxContainerDefaultsMixin.defaultPaint (package:flutter/src/rendering/box.dart:3367:15)
+#57     RenderListBody.paint (package:flutter/src/rendering/list_body.dart:356:5)
+#58     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#59     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#60     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#61     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#62     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#63     _RenderSingleChildViewport.paint.paintContents (package:flutter/src/widgets/single_child_scroll_view.dart:550:17)
+#64     _RenderSingleChildViewport.paint (package:flutter/src/widgets/single_child_scroll_view.dart:564:9)
+#65     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#66     PaintingContext._repaintCompositedChild (package:flutter/src/rendering/object.dart:176:11)
+#67     PaintingContext.repaintCompositedChild (package:flutter/src/rendering/object.dart:121:5)
+#68     PipelineOwner.flushPaint (package:flutter/src/rendering/object.dart:1322:31)
+#69     PipelineOwner.flushPaint (package:flutter/src/rendering/object.dart:1332:15)
+#70     AutomatedTestWidgetsFlutterBinding.drawFrame (package:flutter_test/src/binding.dart:1512:31)
+#71     RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)
+#72     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)
+#73     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)
+#74     AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1335:9)
+#77     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#78     AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1324:27)
+#79     WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:719:23)
+<asynchronous suspension>
+#80     TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#81     main.<anonymous closure>.<anonymous closure> (file:///Users/mohammadkamel/tilawa/test/features/playlists/presentation/widgets/playlist_widgets_test.dart:98:7)
+<asynchronous suspension>
+#82     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#83     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+This exception was caught while trying to describe the user-relevant code of another error.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY WIDGET INSPECTOR ╞══════════════════════════════════════════════════════════
+The following assertion was thrown:
+Looking up a deactivated widget's ancestor is unsafe.
+At this point the state of the widget's element tree is no longer stable.
+To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by
+calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+
+When the exception was thrown, this was the stack:
+#0      Element._debugCheckStateIsActiveForAncestorLookup.<anonymous closure> (package:flutter/src/widgets/framework.dart:5052:9)
+#1      Element._debugCheckStateIsActiveForAncestorLookup (package:flutter/src/widgets/framework.dart:5066:6)
+#2      Element.visitAncestorElements (package:flutter/src/widgets/framework.dart:5177:12)
+#3      _describeRelevantUserCode (package:flutter/src/widgets/widget_inspector.dart:4244:13)
+#4      _parseDiagnosticsNode (package:flutter/src/widgets/widget_inspector.dart:4163:12)
+#5      debugTransformDebugCreator (package:flutter/src/widgets/widget_inspector.dart:4142:21)
+#6      _FlutterErrorDetailsNode.builder (package:flutter/src/foundation/assertions.dart:1310:31)
+#7      DiagnosticableNode.emptyBodyDescription (package:flutter/src/foundation/diagnostics.dart:2941:45)
+#8      TextTreeRenderer._debugRender (package:flutter/src/foundation/diagnostics.dart:1307:14)
+#9      TextTreeRenderer.render (package:flutter/src/foundation/diagnostics.dart:1137:14)
+#10     FlutterError.dumpErrorToConsole (package:flutter/src/foundation/assertions.dart:1040:13)
+#11     TestWidgetsFlutterBinding._runTest.<anonymous closure> (package:flutter_test/src/binding.dart:886:24)
+#12     FlutterError.reportError (package:flutter/src/foundation/assertions.dart:1203:14)
+#13     DebugOverflowIndicatorMixin._reportOverflow (package:flutter/src/rendering/debug_overflow_indicator.dart:259:18)
+#14     DebugOverflowIndicatorMixin.paintOverflowIndicator (package:flutter/src/rendering/debug_overflow_indicator.dart:329:7)
+#15     RenderFlex.paint.<anonymous closure> (package:flutter/src/rendering/flex.dart:1364:7)
+#16     RenderFlex.paint (package:flutter/src/rendering/flex.dart:1372:6)
+#17     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#18     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#19     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#20     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#21     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#22     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#23     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#24     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#25     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#26     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#27     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#28     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#29     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#30     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#31     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#32     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#33     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#34     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#35     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#36     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#37     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#38     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#39     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#40     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#41     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#42     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#43     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#44     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#45     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#46     RenderProxyBoxMixin.paint (package:flutter/src/rendering/proxy_box.dart:140:13)
+#47     RenderAnimatedOpacityMixin.paint (package:flutter/src/rendering/proxy_box.dart:1076:11)
+#48     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#49     PaintingContext._repaintCompositedChild (package:flutter/src/rendering/object.dart:176:11)
+#50     PaintingContext.repaintCompositedChild (package:flutter/src/rendering/object.dart:121:5)
+#51     PaintingContext._compositeChild (package:flutter/src/rendering/object.dart:272:7)
+#52     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:253:7)
+#53     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#54     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#55     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#56     RenderBoxContainerDefaultsMixin.defaultPaint (package:flutter/src/rendering/box.dart:3367:15)
+#57     RenderListBody.paint (package:flutter/src/rendering/list_body.dart:356:5)
+#58     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#59     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#60     RenderShiftedBox.paint (package:flutter/src/rendering/shifted_box.dart:81:15)
+#61     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#62     PaintingContext.paintChild (package:flutter/src/rendering/object.dart:261:13)
+#63     _RenderSingleChildViewport.paint.paintContents (package:flutter/src/widgets/single_child_scroll_view.dart:550:17)
+#64     _RenderSingleChildViewport.paint (package:flutter/src/widgets/single_child_scroll_view.dart:564:9)
+#65     RenderObject._paintWithContext (package:flutter/src/rendering/object.dart:3436:7)
+#66     PaintingContext._repaintCompositedChild (package:flutter/src/rendering/object.dart:176:11)
+#67     PaintingContext.repaintCompositedChild (package:flutter/src/rendering/object.dart:121:5)
+#68     PipelineOwner.flushPaint (package:flutter/src/rendering/object.dart:1322:31)
+#69     PipelineOwner.flushPaint (package:flutter/src/rendering/object.dart:1332:15)
+#70     AutomatedTestWidgetsFlutterBinding.drawFrame (package:flutter_test/src/binding.dart:1512:31)
+#71     RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)
+#72     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)
+#73     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)
+#74     AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1335:9)
+#77     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#78     AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1324:27)
+#79     WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:719:23)
+<asynchronous suspension>
+#80     TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#81     main.<anonymous closure>.<anonymous closure> (file:///Users/mohammadkamel/tilawa/test/features/playlists/presentation/widgets/playlist_widgets_test.dart:98:7)
+<asynchronous suspension>
+#82     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#83     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+This exception was caught while trying to describe the user-relevant code of another error.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 1.6 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/mohammadkamel/tilawa/lib/features/playlists/presentation/widgets/playlist_card.dart:102:32
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#16046 relayoutBoundary=up31 OVERFLOWING:
+  creator: Row ← Align ← Padding ← ConstrainedBox ← DefaultTextStyle ← AnimatedDefaultTextStyle ←
+    ListTileTheme ← Builder ← Listener ← RawGestureDetector ← GestureDetector ← Semantics ← ⋯
+  parentData: offset=Offset(0.0, 12.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=256.0, 0.0<=h<=Infinity)
+  size: Size(256.0, 24.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 1.6 pixels on the right.
+
+The relevant error-causing widget was:
+  Row
+  Row:file:///Users/mohammadkamel/tilawa/lib/features/playlists/presentation/widgets/playlist_card.dart:102:32
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#586d0 relayoutBoundary=up31 OVERFLOWING:
+  creator: Row ← Align ← Padding ← ConstrainedBox ← DefaultTextStyle ← AnimatedDefaultTextStyle ←
+    ListTileTheme ← Builder ← Listener ← RawGestureDetector ← GestureDetector ← Semantics ← ⋯
+  parentData: offset=Offset(0.0, 12.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=256.0, 0.0<=h<=Infinity)
+  size: Size(256.0, 24.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (6) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +1 -1: PlaylistCard calls callbacks when buttons pressed [E]                                                                                                                                     
+  Test failed. See exception logs above.
+  The test description was: calls callbacks when buttons pressed
+  
+
+To run this test again: /Users/mohammadkamel/flutter/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/tilawa/test/features/playlists/presentation/widgets/playlist_widgets_test.dart -p vm --plain-name 'PlaylistCard calls callbacks when buttons pressed'
+00:01 +1 -1: CreatePlaylistDialog dispatches CreatePlaylistEvent when valid data is submitted                                                                                                          00:01 +2 -1: CreatePlaylistDialog dispatches CreatePlaylistEvent when valid data is submitted                                                                                                          00:01 +2 -1: (tearDownAll)                                                                                                                                                                             00:01 +2 -1: Some tests failed.                                                                                                                                                                        
