@@ -24,7 +24,7 @@ class DownloadNotificationService {
   final NavigationService _navigator;
 
   /// Channel ID for download notifications
-  static const String _downloadChannelId = 'com.muzakri.app.downloads';
+  static const String _downloadChannelId = 'com.tilawa.app.downloads';
   static const String _downloadChannelName = 'Downloads';
   static const String _downloadChannelDescription = 'Shows download progress';
 
