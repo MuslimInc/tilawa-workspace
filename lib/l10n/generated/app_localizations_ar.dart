@@ -369,7 +369,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToMuzakri => 'مرحباً بك في مزكري';
+  String get welcomeToMuzakri => 'مرحباً بك في تلاوة';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';

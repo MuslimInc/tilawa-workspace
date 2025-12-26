@@ -2,9 +2,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/localization/domain/repositories/localization_repository.dart';
-import 'package:muzakri/features/localization/domain/usecases/set_language_use_case.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/localization/domain/repositories/localization_repository.dart';
+import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
 
 import 'set_language_use_case_test.mocks.dart';
 

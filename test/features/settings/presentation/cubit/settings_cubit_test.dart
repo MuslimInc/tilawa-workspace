@@ -2,12 +2,12 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
-import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
+import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 

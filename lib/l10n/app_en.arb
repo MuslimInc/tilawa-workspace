@@ -490,7 +490,8 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToMuzakri": "Welcome to Muzakri",
+    "appTitle": "Tilawa",
+    "welcomeToMuzakri": "Welcome to Tilawa",
     "@welcomeToMuzakri": {
         "description": "Welcome message on login screen"
     },

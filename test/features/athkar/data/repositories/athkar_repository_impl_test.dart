@@ -2,13 +2,13 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/athkar/data/datasources/athkar_local_datasource.dart';
-import 'package:muzakri/features/athkar/data/models/athkar_category_model.dart';
-import 'package:muzakri/features/athkar/data/models/athkar_item_model.dart';
-import 'package:muzakri/features/athkar/data/repositories/athkar_repository_impl.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_category.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_item.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/athkar/data/datasources/athkar_local_datasource.dart';
+import 'package:tilawa/features/athkar/data/models/athkar_category_model.dart';
+import 'package:tilawa/features/athkar/data/models/athkar_item_model.dart';
+import 'package:tilawa/features/athkar/data/repositories/athkar_repository_impl.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 
 import 'athkar_repository_impl_test.mocks.dart';
 

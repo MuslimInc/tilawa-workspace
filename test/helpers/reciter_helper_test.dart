@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/entities/moshaf_entity.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/helpers/reciter_helper.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/helpers/reciter_helper.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 import 'reciter_helper_test.mocks.dart';
 

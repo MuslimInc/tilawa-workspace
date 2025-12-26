@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/config/api_config.dart';
+import 'package:tilawa/core/config/api_config.dart';
 
 void main() {
   group('ApiConfig', () {

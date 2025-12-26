@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/data/services/helpers/download_isolate_manager.dart';
+import 'package:tilawa/features/downloads/data/services/helpers/download_isolate_manager.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

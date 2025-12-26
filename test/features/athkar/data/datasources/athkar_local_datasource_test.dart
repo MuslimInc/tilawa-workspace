@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/athkar/data/datasources/athkar_local_datasource.dart';
-import 'package:muzakri/features/athkar/data/models/athkar_category_model.dart';
-import 'package:muzakri/features/athkar/data/models/athkar_item_model.dart';
+import 'package:tilawa/features/athkar/data/datasources/athkar_local_datasource.dart';
+import 'package:tilawa/features/athkar/data/models/athkar_category_model.dart';
+import 'package:tilawa/features/athkar/data/models/athkar_item_model.dart';
 
 import 'athkar_local_datasource_test.mocks.dart';
 

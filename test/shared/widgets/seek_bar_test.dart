@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/shared/widgets/seek_bar.dart';
+import 'package:tilawa/shared/widgets/seek_bar.dart';
 
 void main() {
   group('SeekBar Widget Tests', () {

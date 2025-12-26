@@ -2,9 +2,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/localization/data/datasources/localization_local_datasource.dart';
-import 'package:muzakri/features/localization/data/repositories/localization_repository_impl.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/localization/data/datasources/localization_local_datasource.dart';
+import 'package:tilawa/features/localization/data/repositories/localization_repository_impl.dart';
 
 import 'localization_repository_impl_test.mocks.dart';
 

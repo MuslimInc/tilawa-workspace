@@ -8,16 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/config/language_config.dart';
-import 'package:muzakri/core/entities/moshaf_entity.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/services/analytics_service.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:muzakri/shared/audio/audio_player_handler_impl.dart';
-import 'package:muzakri/shared/models/queue_state.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/config/language_config.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/services/analytics_service.dart';
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
+import 'package:tilawa/shared/models/queue_state.dart';
 
 import 'audio_player_handler_impl_test.mocks.dart';
 

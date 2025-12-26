@@ -41,7 +41,7 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               return MaterialApp.router(
-                title: 'Muzakri',
+                title: 'Tilawa',
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.getLightTheme(themeState.scheme),
                 darkTheme: AppTheme.getDarkTheme(themeState.scheme),

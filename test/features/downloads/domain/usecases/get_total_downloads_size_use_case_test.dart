@@ -2,10 +2,10 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/usecases/usecase.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/usecases/usecase.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/downloads/domain/usecases/get_total_downloads_size_use_case.dart';
 
 import 'get_total_downloads_size_use_case_test.mocks.dart';
 

@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Muzakri';
+  String get appTitle => 'Tilawa';
 
   @override
   String get reciters => 'Reciters';
@@ -369,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign in';
 
   @override
-  String get welcomeToMuzakri => 'Welcome to Muzakri';
+  String get welcomeToMuzakri => 'Welcome to Tilawa';
 
   @override
   String get signInWithGoogleDescription =>

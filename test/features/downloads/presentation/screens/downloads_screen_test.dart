@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:muzakri/features/downloads/domain/usecases/usecases.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_bloc.dart';
-import 'package:muzakri/features/downloads/presentation/bloc/downloads_status.dart';
-import 'package:muzakri/features/downloads/presentation/screens/downloads_screen.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/downloads/domain/usecases/usecases.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
+import 'package:tilawa/features/downloads/presentation/screens/downloads_screen.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 import 'downloads_screen_test.mocks.dart';
 

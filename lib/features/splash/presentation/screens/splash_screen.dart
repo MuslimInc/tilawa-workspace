@@ -49,7 +49,7 @@ class SplashScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'Muzakri', // App Name
+                  'Tilawa', // App Name
                   style: TextStyle(
                     fontSize: 32.sp,
                     fontWeight: FontWeight.bold,

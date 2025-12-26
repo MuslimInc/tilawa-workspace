@@ -5,11 +5,11 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_category.dart';
-import 'package:muzakri/features/athkar/presentation/cubit/athkar_cubit.dart';
-import 'package:muzakri/features/athkar/presentation/cubit/athkar_state.dart';
-import 'package:muzakri/features/athkar/presentation/screens/athkar_categories_screen.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/athkar_state.dart';
+import 'package:tilawa/features/athkar/presentation/screens/athkar_categories_screen.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 class MockAthkarCubit extends MockCubit<AthkarState> implements AthkarCubit {}
 

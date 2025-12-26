@@ -3,12 +3,12 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:muzakri/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
-import 'package:muzakri/features/reciters/presentation/cubit/reciter_details_loader_state.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/utils/typedefs.dart';
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_state.dart';
 
 import 'reciter_details_loader_cubit_test.mocks.dart';
 

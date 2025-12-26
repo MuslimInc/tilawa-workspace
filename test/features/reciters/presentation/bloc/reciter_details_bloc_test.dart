@@ -5,17 +5,17 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/core/entities/moshaf_entity.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
-import 'package:muzakri/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
-import 'package:muzakri/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import 'package:muzakri/features/surah/domain/entities/surah_entity.dart';
-import 'package:muzakri/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
-import 'package:muzakri/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
-import 'package:muzakri/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
+import 'package:tilawa/features/surah/domain/usecases/convert_media_items_to_surahs_use_case.dart';
+import 'package:tilawa/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 

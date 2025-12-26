@@ -490,7 +490,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToMuzakri": "مرحباً بك في مزكري",
+    "welcomeToMuzakri": "مرحباً بك في تلاوة",
     "@welcomeToMuzakri": {
         "description": "Welcome message on login screen"
     },

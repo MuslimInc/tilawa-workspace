@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/core/entities/moshaf_entity.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
 
 void main() {
   group('MoshafEntity', () {

@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/features/downloads/data/services/download_notification_service.dart';
-import 'package:muzakri/features/downloads/data/services/download_queue_manager.dart';
-import 'package:muzakri/features/downloads/data/services/download_service.dart';
-import 'package:muzakri/features/downloads/data/services/flutter_downloader_wrapper.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
+import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
+import 'package:tilawa/features/downloads/data/services/download_service.dart';
+import 'package:tilawa/features/downloads/data/services/flutter_downloader_wrapper.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 import 'download_queue_manager_test.mocks.dart';
 

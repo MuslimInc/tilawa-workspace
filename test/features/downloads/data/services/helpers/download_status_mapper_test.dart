@@ -1,7 +1,7 @@
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muzakri/features/downloads/data/services/helpers/download_status_mapper.dart';
-import 'package:muzakri/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/data/services/helpers/download_status_mapper.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 void main() {
   late DownloadStatusMapper statusMapper;

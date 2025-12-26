@@ -5,16 +5,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:muzakri/core/di/injection.dart';
-import 'package:muzakri/core/entities/reciter_entity.dart';
-import 'package:muzakri/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
-import 'package:muzakri/features/localization/presentation/bloc/localization_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:muzakri/features/reciters/presentation/cubit/favorites_cubit.dart';
-import 'package:muzakri/features/reciters/presentation/cubit/favorites_state.dart';
-import 'package:muzakri/features/reciters/presentation/screens/reciters_screen.dart';
-import 'package:muzakri/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/favorites_state.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 class MockRecitersBloc extends MockBloc<RecitersEvent, RecitersState>
     implements RecitersBloc {}

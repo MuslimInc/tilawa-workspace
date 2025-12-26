@@ -3,15 +3,15 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:muzakri/core/errors/failures.dart';
-import 'package:muzakri/core/usecases/usecase.dart';
-import 'package:muzakri/core/utils/typedefs.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_category.dart';
-import 'package:muzakri/features/athkar/domain/entities/athkar_item.dart';
-import 'package:muzakri/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
-import 'package:muzakri/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
-import 'package:muzakri/features/athkar/presentation/cubit/athkar_cubit.dart';
-import 'package:muzakri/features/athkar/presentation/cubit/athkar_state.dart';
+import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/usecases/usecase.dart';
+import 'package:tilawa/core/utils/typedefs.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
+import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
+import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/athkar_cubit.dart';
+import 'package:tilawa/features/athkar/presentation/cubit/athkar_state.dart';
 
 import 'athkar_cubit_test.mocks.dart';
 

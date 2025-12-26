@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Muzakri'**
+  /// **'Tilawa'**
   String get appTitle;
 
   /// Reciters section title
@@ -803,7 +803,7 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Muzakri'**
+  /// **'Welcome to Tilawa'**
   String get welcomeToMuzakri;
 
   /// Description text for Google sign in
