@@ -1785,30 +1785,33 @@ String toString() {
 
 
 
+
 /// @nodoc
 mixin _$AudioPlayerState {
 
- AudioEntity? get currentAudio; PlaybackStateEntity? get playbackState; PositionData? get positionData; double get volume; double get speed; AudioRepeatMode get repeatMode; AudioShuffleMode get shuffleMode; DateTime? get sleepTimerTargetTime; AudioPlayerStatus get status;
+ AudioEntity? get currentAudio; PlaybackStateEntity? get playbackState; PositionData? get positionData; double get volume; double get speed; AudioRepeatMode get repeatMode; AudioShuffleMode get shuffleMode; DateTime? get sleepTimerTargetTime; Duration? get lastSleepTimerDuration; AudioPlayerStatus get status;
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $AudioPlayerStateCopyWith<AudioPlayerState> get copyWith => _$AudioPlayerStateCopyWithImpl<AudioPlayerState>(this as AudioPlayerState, _$identity);
 
+  /// Serializes this AudioPlayerState to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.sleepTimerTargetTime, sleepTimerTargetTime) || other.sleepTimerTargetTime == sleepTimerTargetTime)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.sleepTimerTargetTime, sleepTimerTargetTime) || other.sleepTimerTargetTime == sleepTimerTargetTime)&&(identical(other.lastSleepTimerDuration, lastSleepTimerDuration) || other.lastSleepTimerDuration == lastSleepTimerDuration)&&(identical(other.status, status) || other.status == status));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,sleepTimerTargetTime,status);
+int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,sleepTimerTargetTime,lastSleepTimerDuration,status);
 
 @override
 String toString() {
-  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, status: $status)';
+  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, status: $status)';
 }
 
 
@@ -1819,7 +1822,7 @@ abstract mixin class $AudioPlayerStateCopyWith<$Res>  {
   factory $AudioPlayerStateCopyWith(AudioPlayerState value, $Res Function(AudioPlayerState) _then) = _$AudioPlayerStateCopyWithImpl;
 @useResult
 $Res call({
- AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, DateTime? sleepTimerTargetTime, AudioPlayerStatus status
+ AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, DateTime? sleepTimerTargetTime, Duration? lastSleepTimerDuration, AudioPlayerStatus status
 });
 
 
@@ -1836,7 +1839,7 @@ class _$AudioPlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? sleepTimerTargetTime = freezed,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? sleepTimerTargetTime = freezed,Object? lastSleepTimerDuration = freezed,Object? status = null,}) {
   return _then(_self.copyWith(
 currentAudio: freezed == currentAudio ? _self.currentAudio : currentAudio // ignore: cast_nullable_to_non_nullable
 as AudioEntity?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
@@ -1846,7 +1849,8 @@ as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to
 as double,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
 as AudioRepeatMode,shuffleMode: null == shuffleMode ? _self.shuffleMode : shuffleMode // ignore: cast_nullable_to_non_nullable
 as AudioShuffleMode,sleepTimerTargetTime: freezed == sleepTimerTargetTime ? _self.sleepTimerTargetTime : sleepTimerTargetTime // ignore: cast_nullable_to_non_nullable
-as DateTime?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime?,lastSleepTimerDuration: freezed == lastSleepTimerDuration ? _self.lastSleepTimerDuration : lastSleepTimerDuration // ignore: cast_nullable_to_non_nullable
+as Duration?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AudioPlayerStatus,
   ));
 }
@@ -1968,10 +1972,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  AudioPlayerStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  Duration? lastSleepTimerDuration,  AudioPlayerStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AudioPlayerState() when $default != null:
-return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.lastSleepTimerDuration,_that.status);case _:
   return orElse();
 
 }
@@ -1989,10 +1993,10 @@ return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  AudioPlayerStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  Duration? lastSleepTimerDuration,  AudioPlayerStatus status)  $default,) {final _that = this;
 switch (_that) {
 case _AudioPlayerState():
-return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.lastSleepTimerDuration,_that.status);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2009,10 +2013,10 @@ return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  AudioPlayerStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AudioEntity? currentAudio,  PlaybackStateEntity? playbackState,  PositionData? positionData,  double volume,  double speed,  AudioRepeatMode repeatMode,  AudioShuffleMode shuffleMode,  DateTime? sleepTimerTargetTime,  Duration? lastSleepTimerDuration,  AudioPlayerStatus status)?  $default,) {final _that = this;
 switch (_that) {
 case _AudioPlayerState() when $default != null:
-return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.status);case _:
+return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.volume,_that.speed,_that.repeatMode,_that.shuffleMode,_that.sleepTimerTargetTime,_that.lastSleepTimerDuration,_that.status);case _:
   return null;
 
 }
@@ -2022,10 +2026,10 @@ return $default(_that.currentAudio,_that.playbackState,_that.positionData,_that.
 
 /// @nodoc
 
-
+@JsonSerializable(explicitToJson: true)
 class _AudioPlayerState extends AudioPlayerState {
-  const _AudioPlayerState({this.currentAudio, this.playbackState, this.positionData, this.volume = 1.0, this.speed = 1.0, this.repeatMode = AudioRepeatMode.none, this.shuffleMode = AudioShuffleMode.none, this.sleepTimerTargetTime, required this.status}): super._();
-  
+  const _AudioPlayerState({this.currentAudio, this.playbackState, this.positionData, this.volume = 1.0, this.speed = 1.0, this.repeatMode = AudioRepeatMode.none, this.shuffleMode = AudioShuffleMode.none, this.sleepTimerTargetTime, this.lastSleepTimerDuration, required this.status}): super._();
+  factory _AudioPlayerState.fromJson(Map<String, dynamic> json) => _$AudioPlayerStateFromJson(json);
 
 @override final  AudioEntity? currentAudio;
 @override final  PlaybackStateEntity? playbackState;
@@ -2035,6 +2039,7 @@ class _AudioPlayerState extends AudioPlayerState {
 @override@JsonKey() final  AudioRepeatMode repeatMode;
 @override@JsonKey() final  AudioShuffleMode shuffleMode;
 @override final  DateTime? sleepTimerTargetTime;
+@override final  Duration? lastSleepTimerDuration;
 @override final  AudioPlayerStatus status;
 
 /// Create a copy of AudioPlayerState
@@ -2043,20 +2048,23 @@ class _AudioPlayerState extends AudioPlayerState {
 @pragma('vm:prefer-inline')
 _$AudioPlayerStateCopyWith<_AudioPlayerState> get copyWith => __$AudioPlayerStateCopyWithImpl<_AudioPlayerState>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$AudioPlayerStateToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.sleepTimerTargetTime, sleepTimerTargetTime) || other.sleepTimerTargetTime == sleepTimerTargetTime)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AudioPlayerState&&(identical(other.currentAudio, currentAudio) || other.currentAudio == currentAudio)&&(identical(other.playbackState, playbackState) || other.playbackState == playbackState)&&(identical(other.positionData, positionData) || other.positionData == positionData)&&(identical(other.volume, volume) || other.volume == volume)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.repeatMode, repeatMode) || other.repeatMode == repeatMode)&&(identical(other.shuffleMode, shuffleMode) || other.shuffleMode == shuffleMode)&&(identical(other.sleepTimerTargetTime, sleepTimerTargetTime) || other.sleepTimerTargetTime == sleepTimerTargetTime)&&(identical(other.lastSleepTimerDuration, lastSleepTimerDuration) || other.lastSleepTimerDuration == lastSleepTimerDuration)&&(identical(other.status, status) || other.status == status));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,sleepTimerTargetTime,status);
+int get hashCode => Object.hash(runtimeType,currentAudio,playbackState,positionData,volume,speed,repeatMode,shuffleMode,sleepTimerTargetTime,lastSleepTimerDuration,status);
 
 @override
 String toString() {
-  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, status: $status)';
+  return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, status: $status)';
 }
 
 
@@ -2067,7 +2075,7 @@ abstract mixin class _$AudioPlayerStateCopyWith<$Res> implements $AudioPlayerSta
   factory _$AudioPlayerStateCopyWith(_AudioPlayerState value, $Res Function(_AudioPlayerState) _then) = __$AudioPlayerStateCopyWithImpl;
 @override @useResult
 $Res call({
- AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, DateTime? sleepTimerTargetTime, AudioPlayerStatus status
+ AudioEntity? currentAudio, PlaybackStateEntity? playbackState, PositionData? positionData, double volume, double speed, AudioRepeatMode repeatMode, AudioShuffleMode shuffleMode, DateTime? sleepTimerTargetTime, Duration? lastSleepTimerDuration, AudioPlayerStatus status
 });
 
 
@@ -2084,7 +2092,7 @@ class __$AudioPlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of AudioPlayerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? sleepTimerTargetTime = freezed,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentAudio = freezed,Object? playbackState = freezed,Object? positionData = freezed,Object? volume = null,Object? speed = null,Object? repeatMode = null,Object? shuffleMode = null,Object? sleepTimerTargetTime = freezed,Object? lastSleepTimerDuration = freezed,Object? status = null,}) {
   return _then(_AudioPlayerState(
 currentAudio: freezed == currentAudio ? _self.currentAudio : currentAudio // ignore: cast_nullable_to_non_nullable
 as AudioEntity?,playbackState: freezed == playbackState ? _self.playbackState : playbackState // ignore: cast_nullable_to_non_nullable
@@ -2094,7 +2102,8 @@ as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to
 as double,repeatMode: null == repeatMode ? _self.repeatMode : repeatMode // ignore: cast_nullable_to_non_nullable
 as AudioRepeatMode,shuffleMode: null == shuffleMode ? _self.shuffleMode : shuffleMode // ignore: cast_nullable_to_non_nullable
 as AudioShuffleMode,sleepTimerTargetTime: freezed == sleepTimerTargetTime ? _self.sleepTimerTargetTime : sleepTimerTargetTime // ignore: cast_nullable_to_non_nullable
-as DateTime?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime?,lastSleepTimerDuration: freezed == lastSleepTimerDuration ? _self.lastSleepTimerDuration : lastSleepTimerDuration // ignore: cast_nullable_to_non_nullable
+as Duration?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AudioPlayerStatus,
   ));
 }

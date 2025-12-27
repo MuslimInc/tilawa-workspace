@@ -1259,8 +1259,8 @@ abstract class AppLocalizations {
   /// Sleep timer dialog title
   ///
   /// In en, this message translates to:
-  /// **'Sleep Timer'**
-  String get sleepTimer;
+  /// **'مدة التلاوة'**
+  String get recitationDuration;
 
   /// 15 minutes option
   ///
@@ -1291,6 +1291,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get custom;
+
+  /// Hour label for duration picker
+  ///
+  /// In en, this message translates to:
+  /// **'Hour'**
+  String get hourLabel;
+
+  /// Minute label for duration picker
+  ///
+  /// In en, this message translates to:
+  /// **'Minute'**
+  String get minuteLabel;
+
+  /// Sleep timer active status
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get sleepTimerActive;
+
+  /// Sleep timer end of track option
+  ///
+  /// In en, this message translates to:
+  /// **'End of Track'**
+  String get endOfTrack;
+
+  /// Set timer title
+  ///
+  /// In en, this message translates to:
+  /// **'Set Timer'**
+  String get setTimer;
 }
 
 class _AppLocalizationsDelegate

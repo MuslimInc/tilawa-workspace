@@ -627,7 +627,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get startJourney => 'لنبدأ رحلتنا مع القرآن';
 
   @override
-  String get sleepTimer => 'مؤقت النوم';
+  String get recitationDuration => 'مدة التلاوة';
 
   @override
   String get minutes15 => '15 دقيقة';
@@ -643,4 +643,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get custom => 'تخصيص';
+
+  @override
+  String get hourLabel => 'ساعة';
+
+  @override
+  String get minuteLabel => 'دقيقة';
+
+  @override
+  String get sleepTimerActive => 'نشط';
+
+  @override
+  String get endOfTrack => 'نهاية المقطع';
+
+  @override
+  String get setTimer => 'ضبط المؤقت';
 }

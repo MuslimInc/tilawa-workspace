@@ -4,6 +4,7 @@ enum AudioPlayerStatus { initial, loading, success }
 
 @freezed
 abstract class AudioPlayerState with _$AudioPlayerState {
+  @JsonSerializable(explicitToJson: true)
   const factory AudioPlayerState({
     AudioEntity? currentAudio,
     PlaybackStateEntity? playbackState,
@@ -13,8 +14,12 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     @Default(AudioRepeatMode.none) AudioRepeatMode repeatMode,
     @Default(AudioShuffleMode.none) AudioShuffleMode shuffleMode,
     DateTime? sleepTimerTargetTime,
+    Duration? lastSleepTimerDuration,
     required AudioPlayerStatus status,
   }) = _AudioPlayerState;
+
+  factory AudioPlayerState.fromJson(Map<String, dynamic> json) =>
+      _$AudioPlayerStateFromJson(json);
 
   const AudioPlayerState._();
 

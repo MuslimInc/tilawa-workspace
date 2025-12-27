@@ -12,6 +12,7 @@ import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/get_audio_streams_use_case.dart';
 
 part 'audio_player_bloc.freezed.dart';
+part 'audio_player_bloc.g.dart';
 part 'audio_player_event.dart';
 part 'audio_player_state.dart';
 
@@ -303,6 +304,22 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   ) async {
     emit(state.copyWith(status: AudioPlayerStatus.loading));
     await _loadAudioPlayerData(restorePlayback: event.restorePlayback);
+
+    // After loading/restoring playback, check if we had a sleep timer
+    if (state.sleepTimerTargetTime != null) {
+      final now = DateTime.now();
+      if (state.sleepTimerTargetTime!.isAfter(now)) {
+        final Duration remaining = state.sleepTimerTargetTime!.difference(now);
+        _sleepTimer?.cancel();
+        _sleepTimer = Timer(remaining, () {
+          add(const AudioPlayerEvent.audioTimerExpired());
+        });
+      } else {
+        // Timer already expired while app was closed
+        add(const AudioPlayerEvent.audioTimerExpired());
+      }
+    }
+
     emit(state.copyWith(status: AudioPlayerStatus.success));
   }
 
@@ -321,6 +338,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(
       state.copyWith(
         sleepTimerTargetTime: DateTime.now().add(event.duration),
+        lastSleepTimerDuration: event.duration,
         status: AudioPlayerStatus.success,
       ),
     );
@@ -335,6 +353,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(
       state.copyWith(
         sleepTimerTargetTime: null,
+        lastSleepTimerDuration: null,
         status: AudioPlayerStatus.success,
       ),
     );
@@ -350,6 +369,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(
       state.copyWith(
         sleepTimerTargetTime: null,
+        lastSleepTimerDuration: null,
         status: AudioPlayerStatus.success,
       ),
     );
@@ -357,12 +377,11 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
-    // Hydration logic can stay here or be moved to a repository if it involves complex data
-    return null; // Simplified for now
+    return AudioPlayerState.fromJson(json);
   }
 
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
-    return null; // Simplified for now
+    return state.toJson();
   }
 }

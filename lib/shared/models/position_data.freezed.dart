@@ -11,6 +11,7 @@ part of 'position_data.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$PositionData {
 
@@ -21,6 +22,8 @@ mixin _$PositionData {
 @pragma('vm:prefer-inline')
 $PositionDataCopyWith<PositionData> get copyWith => _$PositionDataCopyWithImpl<PositionData>(this as PositionData, _$identity);
 
+  /// Serializes this PositionData to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -28,7 +31,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is PositionData&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,position,bufferedPosition,duration);
 
@@ -205,11 +208,11 @@ return $default(_that.position,_that.bufferedPosition,_that.duration);case _:
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _PositionData implements PositionData {
   const _PositionData({required this.position, required this.bufferedPosition, required this.duration});
-  
+  factory _PositionData.fromJson(Map<String, dynamic> json) => _$PositionDataFromJson(json);
 
 @override final  Duration position;
 @override final  Duration bufferedPosition;
@@ -221,14 +224,17 @@ class _PositionData implements PositionData {
 @pragma('vm:prefer-inline')
 _$PositionDataCopyWith<_PositionData> get copyWith => __$PositionDataCopyWithImpl<_PositionData>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$PositionDataToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _PositionData&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,position,bufferedPosition,duration);
 

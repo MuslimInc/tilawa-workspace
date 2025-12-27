@@ -853,9 +853,9 @@
     "startJourney": "لنبدأ رحلتنا مع القرآن",
     "@startJourney": {
         "description": "Start button text"
-    }
-,    "sleepTimer": "مؤقت النوم",
-    "@sleepTimer": {
+    },
+    "recitationDuration": "مدة التلاوة",
+    "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },
     "minutes15": "15 دقيقة",
@@ -877,5 +877,25 @@
     "custom": "تخصيص",
     "@custom": {
         "description": "Custom timer option"
+    },
+    "hourLabel": "ساعة",
+    "@hourLabel": {
+        "description": "Hour label for duration picker"
+    },
+    "minuteLabel": "دقيقة",
+    "@minuteLabel": {
+        "description": "Minute label for duration picker"
+    },
+    "sleepTimerActive": "نشط",
+    "@sleepTimerActive": {
+        "description": "Sleep timer active status"
+    },
+    "endOfTrack": "نهاية المقطع",
+    "@endOfTrack": {
+        "description": "Sleep timer end of track option"
+    },
+    "setTimer": "ضبط المؤقت",
+    "@setTimer": {
+        "description": "Set timer title"
     }
 }

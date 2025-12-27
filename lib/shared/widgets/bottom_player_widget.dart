@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/entities/audio.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
@@ -114,6 +115,7 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                   isPlaying: state.isPlaying,
                   canGoPrevious: state.canGoPrevious,
                   canGoNext: state.canGoNext,
+                  isSleepTimerActive: state.isSleepTimerActive,
                   onPlayPause: () {
                     if (state.isPlaying) {
                       context.read<AudioPlayerBloc>().add(
@@ -133,6 +135,12 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                   onNext: () {
                     context.read<AudioPlayerBloc>().add(
                       const AudioPlayerEvent.skipToNext(),
+                    );
+                  },
+                  onSleepTimerTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => const SleepTimerDialog(),
                     );
                   },
                   onClose: () {

@@ -853,9 +853,9 @@
     "startJourney": "Let's start our journey with the Quran",
     "@startJourney": {
         "description": "Start button text"
-    }
-,    "sleepTimer": "Sleep Timer",
-    "@sleepTimer": {
+    },
+    "recitationDuration": "مدة التلاوة",
+    "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },
     "minutes15": "15 Minutes",
@@ -877,5 +877,25 @@
     "custom": "Custom",
     "@custom": {
         "description": "Custom timer option"
+    },
+    "hourLabel": "Hour",
+    "@hourLabel": {
+        "description": "Hour label for duration picker"
+    },
+    "minuteLabel": "Minute",
+    "@minuteLabel": {
+        "description": "Minute label for duration picker"
+    },
+    "sleepTimerActive": "Active",
+    "@sleepTimerActive": {
+        "description": "Sleep timer active status"
+    },
+    "endOfTrack": "End of Track",
+    "@endOfTrack": {
+        "description": "Sleep timer end of track option"
+    },
+    "setTimer": "Set Timer",
+    "@setTimer": {
+        "description": "Set timer title"
     }
 }

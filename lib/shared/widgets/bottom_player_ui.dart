@@ -16,9 +16,11 @@ class BottomPlayerUi extends StatelessWidget {
     required this.isPlaying,
     required this.canGoPrevious,
     required this.canGoNext,
+    this.isSleepTimerActive = false,
     this.onPlayPause,
     this.onPrevious,
     this.onNext,
+    this.onSleepTimerTap,
     this.onTap,
     this.onClose,
   });
@@ -28,9 +30,11 @@ class BottomPlayerUi extends StatelessWidget {
   final bool isPlaying;
   final bool canGoPrevious;
   final bool canGoNext;
+  final bool isSleepTimerActive;
   final VoidCallback? onPlayPause;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
+  final VoidCallback? onSleepTimerTap;
   final VoidCallback? onTap;
   final VoidCallback? onClose;
 
@@ -239,6 +243,27 @@ class BottomPlayerUi extends StatelessWidget {
                                     : Colors.grey.withValues(alpha: 0.3),
                               ),
                               onPressed: canGoNext ? onNext : null,
+                            ),
+                          ),
+
+                          SizedBox(width: 4.w),
+
+                          // Sleep Timer
+                          SizedBox(
+                            width: 32.w,
+                            height: 32.w,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                isSleepTimerActive
+                                    ? FluentIcons.timer_20_filled
+                                    : FluentIcons.timer_20_regular,
+                                size: 20.sp,
+                                color: isSleepTimerActive
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey.withValues(alpha: 0.3),
+                              ),
+                              onPressed: onSleepTimerTap,
                             ),
                           ),
                         ],

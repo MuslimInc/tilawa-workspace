@@ -633,7 +633,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startJourney => 'Let\'s start our journey with the Quran';
 
   @override
-  String get sleepTimer => 'Sleep Timer';
+  String get recitationDuration => 'مدة التلاوة';
 
   @override
   String get minutes15 => '15 Minutes';
@@ -649,4 +649,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get custom => 'Custom';
+
+  @override
+  String get hourLabel => 'Hour';
+
+  @override
+  String get minuteLabel => 'Minute';
+
+  @override
+  String get sleepTimerActive => 'Active';
+
+  @override
+  String get endOfTrack => 'End of Track';
+
+  @override
+  String get setTimer => 'Set Timer';
 }
