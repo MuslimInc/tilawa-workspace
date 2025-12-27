@@ -17,6 +17,7 @@ class BottomPlayerUi extends StatelessWidget {
     required this.canGoPrevious,
     required this.canGoNext,
     this.isSleepTimerActive = false,
+    this.isSleepTimerEnabled = true,
     this.onPlayPause,
     this.onPrevious,
     this.onNext,
@@ -31,6 +32,7 @@ class BottomPlayerUi extends StatelessWidget {
   final bool canGoPrevious;
   final bool canGoNext;
   final bool isSleepTimerActive;
+  final bool isSleepTimerEnabled;
   final VoidCallback? onPlayPause;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
@@ -249,23 +251,24 @@ class BottomPlayerUi extends StatelessWidget {
                           SizedBox(width: 4.w),
 
                           // Sleep Timer
-                          SizedBox(
-                            width: 32.w,
-                            height: 32.w,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(
-                                isSleepTimerActive
-                                    ? FluentIcons.timer_20_filled
-                                    : FluentIcons.timer_20_regular,
-                                size: 20.sp,
-                                color: isSleepTimerActive
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey.withValues(alpha: 0.3),
+                          if (isSleepTimerEnabled)
+                            SizedBox(
+                              width: 32.w,
+                              height: 32.w,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(
+                                  isSleepTimerActive
+                                      ? FluentIcons.timer_20_filled
+                                      : FluentIcons.timer_20_regular,
+                                  size: 20.sp,
+                                  color: isSleepTimerActive
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.withValues(alpha: 0.3),
+                                ),
+                                onPressed: onSleepTimerTap,
                               ),
-                              onPressed: onSleepTimerTap,
                             ),
-                          ),
                         ],
                       ),
                     ),

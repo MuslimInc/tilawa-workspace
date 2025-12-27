@@ -3,19 +3,22 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
-import 'package:dartz_plus/src/either.dart' as _i4;
+import 'package:dartz_plus/src/either.dart' as _i5;
+import 'package:hydrated_bloc/hydrated_bloc.dart' as _i11;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
-import 'package:tilawa/core/entities/audio.dart' as _i8;
-import 'package:tilawa/core/errors/failures.dart' as _i5;
+import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:tilawa/core/entities/audio.dart' as _i9;
+import 'package:tilawa/core/errors/failures.dart' as _i6;
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart'
-    as _i7;
+    as _i8;
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart'
-    as _i2;
+    as _i3;
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart'
-    as _i9;
+    as _i10;
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart'
+    as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -32,393 +35,398 @@ import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_u
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
+class _FakeSettingsState_0 extends _i1.SmartFake implements _i2.SettingsState {
+  _FakeSettingsState_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [PlayAudioUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPlayAudioUseCase extends _i1.Mock implements _i2.PlayAudioUseCase {
+class MockPlayAudioUseCase extends _i1.Mock implements _i3.PlayAudioUseCase {
   MockPlayAudioUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call() =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [PauseAudioUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPauseAudioUseCase extends _i1.Mock implements _i2.PauseAudioUseCase {
+class MockPauseAudioUseCase extends _i1.Mock implements _i3.PauseAudioUseCase {
   MockPauseAudioUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call() =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [StopAudioUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockStopAudioUseCase extends _i1.Mock implements _i2.StopAudioUseCase {
+class MockStopAudioUseCase extends _i1.Mock implements _i3.StopAudioUseCase {
   MockStopAudioUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call() =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SeekToUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSeekToUseCase extends _i1.Mock implements _i2.SeekToUseCase {
+class MockSeekToUseCase extends _i1.Mock implements _i3.SeekToUseCase {
   MockSeekToUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(Duration? position) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(Duration? position) =>
       (super.noSuchMethod(
             Invocation.method(#call, [position]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [position]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SetVolumeUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSetVolumeUseCase extends _i1.Mock implements _i2.SetVolumeUseCase {
+class MockSetVolumeUseCase extends _i1.Mock implements _i3.SetVolumeUseCase {
   MockSetVolumeUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(double? volume) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(double? volume) =>
       (super.noSuchMethod(
             Invocation.method(#call, [volume]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [volume]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SetPlaybackSpeedUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSetPlaybackSpeedUseCase extends _i1.Mock
-    implements _i2.SetPlaybackSpeedUseCase {
+    implements _i3.SetPlaybackSpeedUseCase {
   MockSetPlaybackSpeedUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(double? speed) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(double? speed) =>
       (super.noSuchMethod(
             Invocation.method(#call, [speed]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [speed]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SetRepeatModeUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSetRepeatModeUseCase extends _i1.Mock
-    implements _i2.SetRepeatModeUseCase {
+    implements _i3.SetRepeatModeUseCase {
   MockSetRepeatModeUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(_i7.AudioRepeatMode? mode) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(_i8.AudioRepeatMode? mode) =>
       (super.noSuchMethod(
             Invocation.method(#call, [mode]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [mode]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SetShuffleModeUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSetShuffleModeUseCase extends _i1.Mock
-    implements _i2.SetShuffleModeUseCase {
+    implements _i3.SetShuffleModeUseCase {
   MockSetShuffleModeUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(_i7.AudioShuffleMode? mode) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(_i8.AudioShuffleMode? mode) =>
       (super.noSuchMethod(
             Invocation.method(#call, [mode]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [mode]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SkipToNextUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSkipToNextUseCase extends _i1.Mock implements _i2.SkipToNextUseCase {
+class MockSkipToNextUseCase extends _i1.Mock implements _i3.SkipToNextUseCase {
   MockSkipToNextUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call() =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SkipToPreviousUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSkipToPreviousUseCase extends _i1.Mock
-    implements _i2.SkipToPreviousUseCase {
+    implements _i3.SkipToPreviousUseCase {
   MockSkipToPreviousUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call() =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [SkipToQueueItemUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSkipToQueueItemUseCase extends _i1.Mock
-    implements _i2.SkipToQueueItemUseCase {
+    implements _i3.SkipToQueueItemUseCase {
   MockSkipToQueueItemUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(int? index) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(int? index) =>
       (super.noSuchMethod(
             Invocation.method(#call, [index]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [index]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [PlayFromQueueUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPlayFromQueueUseCase extends _i1.Mock
-    implements _i2.PlayFromQueueUseCase {
+    implements _i3.PlayFromQueueUseCase {
   MockPlayFromQueueUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(
-    List<_i8.AudioEntity>? queue,
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(
+    List<_i9.AudioEntity>? queue,
     int? index,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [queue, index]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [queue, index]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [UpdateQueueUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUpdateQueueUseCase extends _i1.Mock
-    implements _i2.UpdateQueueUseCase {
+    implements _i3.UpdateQueueUseCase {
   MockUpdateQueueUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(
-    List<_i8.AudioEntity>? queue,
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(
+    List<_i9.AudioEntity>? queue,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [queue]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [queue]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [AddQueueItemUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAddQueueItemUseCase extends _i1.Mock
-    implements _i2.AddQueueItemUseCase {
+    implements _i3.AddQueueItemUseCase {
   MockAddQueueItemUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(_i8.AudioEntity? audio) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(_i9.AudioEntity? audio) =>
       (super.noSuchMethod(
             Invocation.method(#call, [audio]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [audio]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [RemoveQueueItemUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRemoveQueueItemUseCase extends _i1.Mock
-    implements _i2.RemoveQueueItemUseCase {
+    implements _i3.RemoveQueueItemUseCase {
   MockRemoveQueueItemUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(_i8.AudioEntity? audio) =>
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(_i9.AudioEntity? audio) =>
       (super.noSuchMethod(
             Invocation.method(#call, [audio]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [audio]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [MoveQueueItemUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockMoveQueueItemUseCase extends _i1.Mock
-    implements _i2.MoveQueueItemUseCase {
+    implements _i3.MoveQueueItemUseCase {
   MockMoveQueueItemUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call(
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(
     int? currentIndex,
     int? newIndex,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [currentIndex, newIndex]),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [currentIndex, newIndex]),
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [LoadAudioPlayerDataUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLoadAudioPlayerDataUseCase extends _i1.Mock
-    implements _i2.LoadAudioPlayerDataUseCase {
+    implements _i3.LoadAudioPlayerDataUseCase {
   MockLoadAudioPlayerDataUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, void>> call({
+  _i4.Future<_i5.Either<_i6.Failure, void>> call({
     bool? restorePlayback = true,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#call, [], {#restorePlayback: restorePlayback}),
-            returnValue: _i3.Future<_i4.Either<_i5.Failure, void>>.value(
-              _i6.dummyValue<_i4.Either<_i5.Failure, void>>(
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
                 this,
                 Invocation.method(#call, [], {
                   #restorePlayback: restorePlayback,
@@ -426,63 +434,211 @@ class MockLoadAudioPlayerDataUseCase extends _i1.Mock
               ),
             ),
           )
-          as _i3.Future<_i4.Either<_i5.Failure, void>>);
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
 
 /// A class which mocks [GetAudioStreamsUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetAudioStreamsUseCase extends _i1.Mock
-    implements _i9.GetAudioStreamsUseCase {
+    implements _i10.GetAudioStreamsUseCase {
   MockGetAudioStreamsUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Stream<_i8.PlaybackStateEntity> get playbackState =>
+  _i4.Stream<_i9.PlaybackStateEntity> get playbackState =>
       (super.noSuchMethod(
             Invocation.getter(#playbackState),
-            returnValue: _i3.Stream<_i8.PlaybackStateEntity>.empty(),
+            returnValue: _i4.Stream<_i9.PlaybackStateEntity>.empty(),
           )
-          as _i3.Stream<_i8.PlaybackStateEntity>);
+          as _i4.Stream<_i9.PlaybackStateEntity>);
 
   @override
-  _i3.Stream<_i8.AudioEntity?> get currentAudio =>
+  _i4.Stream<_i9.AudioEntity?> get currentAudio =>
       (super.noSuchMethod(
             Invocation.getter(#currentAudio),
-            returnValue: _i3.Stream<_i8.AudioEntity?>.empty(),
+            returnValue: _i4.Stream<_i9.AudioEntity?>.empty(),
           )
-          as _i3.Stream<_i8.AudioEntity?>);
+          as _i4.Stream<_i9.AudioEntity?>);
 
   @override
-  _i3.Stream<List<_i8.AudioEntity>> get queue =>
+  _i4.Stream<List<_i9.AudioEntity>> get queue =>
       (super.noSuchMethod(
             Invocation.getter(#queue),
-            returnValue: _i3.Stream<List<_i8.AudioEntity>>.empty(),
+            returnValue: _i4.Stream<List<_i9.AudioEntity>>.empty(),
           )
-          as _i3.Stream<List<_i8.AudioEntity>>);
+          as _i4.Stream<List<_i9.AudioEntity>>);
 
   @override
-  _i3.Stream<double> get volume =>
+  _i4.Stream<double> get volume =>
       (super.noSuchMethod(
             Invocation.getter(#volume),
-            returnValue: _i3.Stream<double>.empty(),
+            returnValue: _i4.Stream<double>.empty(),
           )
-          as _i3.Stream<double>);
+          as _i4.Stream<double>);
 
   @override
-  _i3.Stream<double> get speed =>
+  _i4.Stream<double> get speed =>
       (super.noSuchMethod(
             Invocation.getter(#speed),
-            returnValue: _i3.Stream<double>.empty(),
+            returnValue: _i4.Stream<double>.empty(),
           )
-          as _i3.Stream<double>);
+          as _i4.Stream<double>);
 
   @override
-  _i3.Stream<Duration> get position =>
+  _i4.Stream<Duration> get position =>
       (super.noSuchMethod(
             Invocation.getter(#position),
-            returnValue: _i3.Stream<Duration>.empty(),
+            returnValue: _i4.Stream<Duration>.empty(),
           )
-          as _i3.Stream<Duration>);
+          as _i4.Stream<Duration>);
+}
+
+/// A class which mocks [SettingsCubit].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSettingsCubit extends _i1.Mock implements _i2.SettingsCubit {
+  MockSettingsCubit() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.SettingsState get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: _FakeSettingsState_0(this, Invocation.getter(#state)),
+          )
+          as _i2.SettingsState);
+
+  @override
+  _i4.Stream<_i2.SettingsState> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i4.Stream<_i2.SettingsState>.empty(),
+          )
+          as _i4.Stream<_i2.SettingsState>);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(Invocation.getter(#isClosed), returnValue: false)
+          as bool);
+
+  @override
+  String get id =>
+      (super.noSuchMethod(
+            Invocation.getter(#id),
+            returnValue: _i7.dummyValue<String>(this, Invocation.getter(#id)),
+          )
+          as String);
+
+  @override
+  String get storagePrefix =>
+      (super.noSuchMethod(
+            Invocation.getter(#storagePrefix),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.getter(#storagePrefix),
+            ),
+          )
+          as String);
+
+  @override
+  String get storageToken =>
+      (super.noSuchMethod(
+            Invocation.getter(#storageToken),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.getter(#storageToken),
+            ),
+          )
+          as String);
+
+  @override
+  _i2.SettingsState? fromJson(Map<String, dynamic>? json) =>
+      (super.noSuchMethod(Invocation.method(#fromJson, [json]))
+          as _i2.SettingsState?);
+
+  @override
+  Map<String, dynamic>? toJson(_i2.SettingsState? state) =>
+      (super.noSuchMethod(Invocation.method(#toJson, [state]))
+          as Map<String, dynamic>?);
+
+  @override
+  _i4.Future<void> setMaxConcurrentDownloads(int? count) =>
+      (super.noSuchMethod(
+            Invocation.method(#setMaxConcurrentDownloads, [count]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> toggleRestorePlaybackState(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleRestorePlaybackState, [enabled]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> toggleSleepTimerEnabled(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleSleepTimerEnabled, [enabled]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  void emit(_i2.SettingsState? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onChange(_i11.Change<_i2.SettingsState>? change) => super.noSuchMethod(
+    Invocation.method(#onChange, [change]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i4.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  void hydrate({
+    _i11.Storage? storage,
+    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+  }) => super.noSuchMethod(
+    Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i4.Future<void> clear() =>
+      (super.noSuchMethod(
+            Invocation.method(#clear, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }

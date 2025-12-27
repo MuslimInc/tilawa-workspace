@@ -290,6 +290,15 @@ class MockSettingsCubit extends _i1.Mock implements _i3.SettingsCubit {
           as _i4.Future<void>);
 
   @override
+  _i4.Future<void> toggleSleepTimerEnabled(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleSleepTimerEnabled, [enabled]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
   void emit(_i3.SettingsState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,

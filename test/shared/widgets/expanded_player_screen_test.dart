@@ -10,6 +10,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa/shared/models/position_data.dart';
@@ -19,6 +20,9 @@ import 'package:tilawa/shared/widgets/expanded_player_screen.dart';
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
 
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
+
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
@@ -27,6 +31,7 @@ class MockAudioPositionService extends Mock implements AudioPositionService {}
 
 void main() {
   late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockSettingsCubit mockSettingsCubit;
   late MockAudioPositionService mockAudioPositionService;
 
   Future<void> setScreenSize(WidgetTester tester) async {
@@ -45,6 +50,7 @@ void main() {
     GetIt.instance.allowReassignment = true;
 
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockSettingsCubit = MockSettingsCubit();
     mockAudioPositionService = MockAudioPositionService();
 
     // Register mocks
@@ -62,6 +68,8 @@ void main() {
     when(
       () => mockAudioPositionService.position,
     ).thenAnswer((_) => Stream.value(Duration.zero));
+
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
   });
 
   tearDown(() async {
@@ -69,8 +77,11 @@ void main() {
   });
 
   Widget createWidgetUnderTest() {
-    return BlocProvider<AudioPlayerBloc>.value(
-      value: mockAudioPlayerBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+      ],
       child: const ScreenUtilPlusInit(
         designSize: Size(375, 812),
         child: MaterialApp(

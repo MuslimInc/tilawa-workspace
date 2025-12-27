@@ -886,6 +886,14 @@
     "@minuteLabel": {
         "description": "Minute label for duration picker"
     },
+    "enableRecitationDuration": "مدة التلاوة (مؤقت النوم)",
+    "@enableRecitationDuration": {
+        "description": "Settings label to enable sleep timer"
+    },
+    "enableRecitationDurationSubtitle": "إظهار وتفعيل ميزة مؤقت النوم في المشغل",
+    "@enableRecitationDurationSubtitle": {
+        "description": "Settings subtitle to enable sleep timer"
+    },
     "sleepTimerActive": "نشط",
     "@sleepTimerActive": {
         "description": "Sleep timer active status"

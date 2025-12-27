@@ -651,6 +651,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get minuteLabel => 'دقيقة';
 
   @override
+  String get enableRecitationDuration => 'مدة التلاوة (مؤقت النوم)';
+
+  @override
+  String get enableRecitationDurationSubtitle =>
+      'إظهار وتفعيل ميزة مؤقت النوم في المشغل';
+
+  @override
   String get sleepTimerActive => 'نشط';
 
   @override

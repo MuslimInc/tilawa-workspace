@@ -657,6 +657,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minuteLabel => 'Minute';
 
   @override
+  String get enableRecitationDuration => 'Recitation Duration (Sleep Timer)';
+
+  @override
+  String get enableRecitationDurationSubtitle =>
+      'Show and enable sleep timer functionality in the player';
+
+  @override
   String get sleepTimerActive => 'Active';
 
   @override

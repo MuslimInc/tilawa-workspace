@@ -791,6 +791,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i420.DownloadQueueManager>(),
       ),
     );
+    gh.factory<_i712.GetSplashNextRouteUseCase>(
+      () => _i712.GetSplashNextRouteUseCase(
+        gh<_i561.GetCurrentUserUseCase>(),
+        gh<_i892.CheckOnboardingStatus>(),
+      ),
+    );
+    gh.factory<_i447.AuthBloc>(
+      () => _i447.AuthBloc(
+        gh<_i931.SignInWithGoogleUseCase>(),
+        gh<_i633.SignOut>(),
+        gh<_i561.GetCurrentUserUseCase>(),
+        gh<_i648.SyncDeviceTokenUseCase>(),
+      ),
+    );
+    gh.factory<_i887.SplashCubit>(
+      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
+    );
     gh.factory<_i433.AudioPlayerBloc>(
       () => _i433.AudioPlayerBloc(
         gh<_i902.GetAudioStreamsUseCase>(),
@@ -811,24 +828,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i28.RemoveQueueItemUseCase>(),
         gh<_i28.MoveQueueItemUseCase>(),
         gh<_i28.LoadAudioPlayerDataUseCase>(),
+        gh<_i718.SettingsCubit>(),
       ),
-    );
-    gh.factory<_i712.GetSplashNextRouteUseCase>(
-      () => _i712.GetSplashNextRouteUseCase(
-        gh<_i561.GetCurrentUserUseCase>(),
-        gh<_i892.CheckOnboardingStatus>(),
-      ),
-    );
-    gh.factory<_i447.AuthBloc>(
-      () => _i447.AuthBloc(
-        gh<_i931.SignInWithGoogleUseCase>(),
-        gh<_i633.SignOut>(),
-        gh<_i561.GetCurrentUserUseCase>(),
-        gh<_i648.SyncDeviceTokenUseCase>(),
-      ),
-    );
-    gh.factory<_i887.SplashCubit>(
-      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
     );
     gh.lazySingleton<_i373.DownloadsRepository>(
       () => _i194.DownloadsRepositoryImpl(

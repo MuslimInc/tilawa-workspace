@@ -94,17 +94,33 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
-                      return _SwitchSettingsTile(
-                        icon: FluentIcons.history_24_regular,
-                        title: context.l10n.restorePlaybackState,
-                        subtitle: context.l10n.restorePlaybackStateSubtitle,
-                        value: state.restorePlaybackState,
-                        onChanged: (value) {
-                          context
-                              .read<SettingsCubit>()
-                              .toggleRestorePlaybackState(value);
-                        },
-                        showDivider: false,
+                      return Column(
+                        children: [
+                          _SwitchSettingsTile(
+                            icon: FluentIcons.history_24_regular,
+                            title: context.l10n.restorePlaybackState,
+                            subtitle: context.l10n.restorePlaybackStateSubtitle,
+                            value: state.restorePlaybackState,
+                            onChanged: (value) {
+                              context
+                                  .read<SettingsCubit>()
+                                  .toggleRestorePlaybackState(value);
+                            },
+                          ),
+                          _SwitchSettingsTile(
+                            icon: FluentIcons.timer_24_regular,
+                            title: context.l10n.enableRecitationDuration,
+                            subtitle:
+                                context.l10n.enableRecitationDurationSubtitle,
+                            value: state.isSleepTimerEnabled,
+                            onChanged: (value) {
+                              context
+                                  .read<SettingsCubit>()
+                                  .toggleSleepTimerEnabled(value);
+                            },
+                            showDivider: false,
+                          ),
+                        ],
                       );
                     },
                   ),

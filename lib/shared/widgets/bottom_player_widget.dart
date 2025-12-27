@@ -116,6 +116,10 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                   canGoPrevious: state.canGoPrevious,
                   canGoNext: state.canGoNext,
                   isSleepTimerActive: state.isSleepTimerActive,
+                  isSleepTimerEnabled: context
+                      .watch<SettingsCubit>()
+                      .state
+                      .isSleepTimerEnabled,
                   onPlayPause: () {
                     if (state.isPlaying) {
                       context.read<AudioPlayerBloc>().add(

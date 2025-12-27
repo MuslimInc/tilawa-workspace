@@ -146,14 +146,25 @@ void main() {
       ],
     );
 
+    blocTest<SettingsCubit, SettingsState>(
+      'toggleSleepTimerEnabled updates state',
+      build: () => cubit,
+      act: (cubit) => cubit.toggleSleepTimerEnabled(false),
+      expect: () => [const SettingsState(isSleepTimerEnabled: false)],
+    );
+
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
           cubit.fromJson({
             'maxConcurrentDownloads': 5,
             'restorePlaybackState': true,
+            'isSleepTimerEnabled': false,
           }),
-          const SettingsState(maxConcurrentDownloads: 5),
+          const SettingsState(
+            maxConcurrentDownloads: 5,
+            isSleepTimerEnabled: false,
+          ),
         );
       });
 
@@ -168,6 +179,7 @@ void main() {
         expect(cubit.toJson(const SettingsState(maxConcurrentDownloads: 3)), {
           'maxConcurrentDownloads': 3,
           'restorePlaybackState': true,
+          'isSleepTimerEnabled': true,
         });
       });
 

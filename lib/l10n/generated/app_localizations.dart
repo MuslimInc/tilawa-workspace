@@ -1304,6 +1304,18 @@ abstract class AppLocalizations {
   /// **'Minute'**
   String get minuteLabel;
 
+  /// Settings label to enable sleep timer
+  ///
+  /// In en, this message translates to:
+  /// **'Recitation Duration (Sleep Timer)'**
+  String get enableRecitationDuration;
+
+  /// Settings subtitle to enable sleep timer
+  ///
+  /// In en, this message translates to:
+  /// **'Show and enable sleep timer functionality in the player'**
+  String get enableRecitationDurationSubtitle;
+
   /// Sleep timer active status
   ///
   /// In en, this message translates to:

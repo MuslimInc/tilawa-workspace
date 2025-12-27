@@ -11,6 +11,7 @@ import '../../core/entities/audio.dart';
 import '../../core/extensions.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
+import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'seek_bar.dart';
@@ -170,23 +171,27 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                               ),
                             ),
                             actions: [
-                              IconButton(
-                                icon: Icon(
-                                  state.isSleepTimerActive
-                                      ? FluentIcons.timer_24_filled
-                                      : FluentIcons.timer_24_regular,
-                                  color: state.isSleepTimerActive
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.white,
-                                  size: 24.sp,
+                              if (context
+                                  .watch<SettingsCubit>()
+                                  .state
+                                  .isSleepTimerEnabled)
+                                IconButton(
+                                  icon: Icon(
+                                    state.isSleepTimerActive
+                                        ? FluentIcons.timer_24_filled
+                                        : FluentIcons.timer_24_regular,
+                                    color: state.isSleepTimerActive
+                                        ? Theme.of(context).primaryColor
+                                        : Colors.white,
+                                    size: 24.sp,
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) => const SleepTimerDialog(),
+                                    );
+                                  },
                                 ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (_) => const SleepTimerDialog(),
-                                  );
-                                },
-                              ),
                             ],
                           ),
 

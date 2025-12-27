@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/entities/audio.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/get_audio_streams_use_case.dart';
@@ -37,6 +38,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._removeQueueItem,
     this._moveQueueItem,
     this._loadAudioPlayerData,
+    this._settingsCubit,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<LoadAudioPlayerData>(_onLoadAudioPlayerData);
@@ -70,6 +72,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     on<SetShuffleMode>(_onSetShuffleMode);
 
     _setupAudioStreams();
+    _setupSettingsSubscription();
   }
 
   final GetAudioStreamsUseCase _getAudioStreams;
@@ -90,6 +93,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final RemoveQueueItemUseCase _removeQueueItem;
   final MoveQueueItemUseCase _moveQueueItem;
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
+  final SettingsCubit _settingsCubit;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -124,9 +128,13 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       _getAudioStreams.position.listen((position) {
         final AudioEntity? currentAudio = state.currentAudio;
         final PlaybackStateEntity? playbackState = state.playbackState;
-        final Duration duration = currentAudio?.duration ?? Duration.zero;
-        final Duration buffered =
-            playbackState?.bufferedPosition ?? Duration.zero;
+
+        final Duration duration = currentAudio != null
+            ? currentAudio.duration
+            : Duration.zero;
+        final Duration buffered = playbackState != null
+            ? playbackState.bufferedPosition
+            : Duration.zero;
 
         add(
           AudioPlayerEvent.updatePositionData(
@@ -137,6 +145,16 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
             ),
           ),
         );
+      }),
+    );
+  }
+
+  void _setupSettingsSubscription() {
+    _subscriptions.add(
+      _settingsCubit.stream.listen((settingsState) {
+        if (!settingsState.isSleepTimerEnabled) {
+          add(const AudioPlayerEvent.cancelSleepTimer());
+        }
       }),
     );
   }
@@ -199,6 +217,11 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     Emitter<AudioPlayerState> emit,
   ) async {
     await _playAudio();
+    // Start sleep timer if a duration was previously selected and feature is enabled
+    if (_settingsCubit.state.isSleepTimerEnabled &&
+        state.lastSleepTimerDuration != null) {
+      add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
+    }
   }
 
   Future<void> _onPauseAudio(
@@ -206,6 +229,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     Emitter<AudioPlayerState> emit,
   ) async {
     await _pauseAudio();
+    // Cancel sleep timer on manual pause but keep the preference
+    add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
   }
 
   Future<void> _onStopAudio(
@@ -213,6 +238,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     Emitter<AudioPlayerState> emit,
   ) async {
     await _stopAudio();
+    // Cancel sleep timer on manual stop but keep the preference
+    add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
   }
 
   Future<void> _onSkipToNext(
@@ -353,7 +380,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(
       state.copyWith(
         sleepTimerTargetTime: null,
-        lastSleepTimerDuration: null,
+        lastSleepTimerDuration: event.clearPreference
+            ? null
+            : state.lastSleepTimerDuration,
         status: AudioPlayerStatus.success,
       ),
     );
@@ -369,7 +398,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(
       state.copyWith(
         sleepTimerTargetTime: null,
-        lastSleepTimerDuration: null,
+        // Keep the duration preference when timer expires
         status: AudioPlayerStatus.success,
       ),
     );

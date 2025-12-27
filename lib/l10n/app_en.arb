@@ -886,6 +886,14 @@
     "@minuteLabel": {
         "description": "Minute label for duration picker"
     },
+    "enableRecitationDuration": "Recitation Duration (Sleep Timer)",
+    "@enableRecitationDuration": {
+        "description": "Settings label to enable sleep timer"
+    },
+    "enableRecitationDurationSubtitle": "Show and enable sleep timer functionality in the player",
+    "@enableRecitationDurationSubtitle": {
+        "description": "Settings subtitle to enable sleep timer"
+    },
     "sleepTimerActive": "Active",
     "@sleepTimerActive": {
         "description": "Sleep timer active status"
