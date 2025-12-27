@@ -43,4 +43,57 @@ void main() {
 
     expect(find.text('Settings Page'), findsOneWidget);
   });
+
+  testWidgets('RouteListScreen handles various route types in _getAllRoutes', (
+    tester,
+  ) async {
+    // Mock routes to trigger logical branches in _getAllRoutes
+    final List<RouteBase> mockRoutes = [
+      GoRoute(path: '/', builder: (context, state) => const SizedBox()),
+      GoRoute(
+        path: '/parent',
+        builder: (context, state) => const SizedBox(),
+        routes: [
+          GoRoute(path: 'child', builder: (context, state) => const SizedBox()),
+          GoRoute(
+            path: '/absolute-child',
+            builder: (context, state) => const SizedBox(),
+          ),
+        ],
+      ),
+      ShellRoute(
+        builder: (context, state, child) => child,
+        routes: [
+          GoRoute(
+            path: '/shell',
+            builder: (context, state) => const SizedBox(),
+          ),
+        ],
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => navigationShell,
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/branch',
+                builder: (context, state) => const SizedBox(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(home: RouteListScreen(routes: mockRoutes)),
+    );
+
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('/parent'), findsOneWidget);
+    expect(find.text('/parent/child'), findsOneWidget);
+    expect(find.text('/parent/absolute-child'), findsOneWidget);
+    expect(find.text('/shell'), findsOneWidget);
+    expect(find.text('/branch'), findsOneWidget);
+  });
 }

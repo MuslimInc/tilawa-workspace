@@ -93,6 +93,15 @@ void main() {
       expect(page, isA<CustomTransitionPage>());
       final transitionPage = page as CustomTransitionPage;
       expect(transitionPage.child, isA<ExpandedPlayerScreen>());
+
+      // Test transitionsBuilder (lines 71-72)
+      final Widget transitionWidget = transitionPage.transitionsBuilder(
+        MockBuildContext(),
+        const AlwaysStoppedAnimation(1.0),
+        const AlwaysStoppedAnimation(0.0),
+        const SizedBox(),
+      );
+      expect(transitionWidget, isA<FadeTransition>());
     });
 
     test('PremiumRoute builds PremiumScreen', () {
@@ -177,6 +186,34 @@ void main() {
 
       expect(find.byIcon(Icons.error), findsOneWidget);
       expect(find.byType(ElevatedButton), findsOneWidget);
+    });
+
+    testWidgets('ErrorRoute navigation works', (tester) async {
+      final router = GoRouter(
+        initialLocation: '/error',
+        routes: [
+          GoRoute(path: '/', builder: (context, state) => const Text('Home')),
+          GoRoute(
+            path: '/error',
+            builder: (context, state) =>
+                const ErrorRoute().build(context, state),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      );
+
+      // Tap Go Home button (lines 135-138)
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home'), findsOneWidget);
     });
   });
 }
