@@ -18,7 +18,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.athkar), centerTitle: true),
+        appBar: AppBar(title: Text(context.l10n.athkar)),
         body: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             if (state is AthkarLoading) {

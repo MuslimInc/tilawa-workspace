@@ -19,11 +19,15 @@ import 'core/services/notification_permission_service.dart';
 import 'features/downloads/data/services/downloads_initialization_service.dart';
 import 'firebase_options.dart';
 import 'quran_player_app.dart';
+import 'router/app_router.dart';
 
 final logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize AppRouter (registers JSON types)
+  AppRouter.init();
 
   // Enable edge-to-edge display (Flutter recommended approach)
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

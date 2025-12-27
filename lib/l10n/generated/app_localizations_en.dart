@@ -631,4 +631,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startJourney => 'Let\'s start our journey with the Quran';
+
+  @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
+  String get minutes15 => '15 Minutes';
+
+  @override
+  String get minutes30 => '30 Minutes';
+
+  @override
+  String get minutes60 => '60 Minutes';
+
+  @override
+  String get cancelTimer => 'Cancel Timer';
+
+  @override
+  String get custom => 'Custom';
 }

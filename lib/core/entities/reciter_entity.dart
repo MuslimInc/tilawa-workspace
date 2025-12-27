@@ -1,22 +1,20 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'moshaf_entity.dart';
 
-class ReciterEntity extends Equatable {
-  const ReciterEntity({
-    required this.id,
-    required this.name,
-    required this.letter,
-    required this.date,
-    required this.moshaf,
-  });
+part 'reciter_entity.freezed.dart';
+part 'reciter_entity.g.dart';
 
-  final int id;
-  final String name;
-  final String letter;
-  final String date;
-  final List<MoshafEntity> moshaf;
+@freezed
+abstract class ReciterEntity with _$ReciterEntity {
+  const factory ReciterEntity({
+    required int id,
+    required String name,
+    required String letter,
+    required String date,
+    required List<MoshafEntity> moshaf,
+  }) = _ReciterEntity;
 
-  @override
-  List<Object?> get props => [id, name, letter, date, moshaf];
+  factory ReciterEntity.fromJson(Map<String, dynamic> json) =>
+      _$ReciterEntityFromJson(json);
 }

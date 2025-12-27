@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
 import 'app_router_config.dart';
+import 'json_type_registry.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -40,5 +44,39 @@ class AppRouter {
     redirect: redirect,
     routes: $appRoutes,
     errorBuilder: errorBuilder,
+    extraCodec: const AppRouterExtraCodec(),
   );
+
+  static void init() {
+    JsonTypeRegistry().register('ReciterEntity', ReciterEntity.fromJson);
+  }
+}
+
+@visibleForTesting
+class AppRouterExtraCodec extends Codec<Object?, Object?> {
+  const AppRouterExtraCodec();
+
+  @override
+  Converter<Object?, Object?> get decoder => const _ExtraDecoder();
+
+  @override
+  Converter<Object?, Object?> get encoder => const _ExtraEncoder();
+}
+
+class _ExtraDecoder extends Converter<Object?, Object?> {
+  const _ExtraDecoder();
+
+  @override
+  Object? convert(Object? input) {
+    return JsonTypeRegistry().decode(input);
+  }
+}
+
+class _ExtraEncoder extends Converter<Object?, Object?> {
+  const _ExtraEncoder();
+
+  @override
+  Object? convert(Object? input) {
+    return JsonTypeRegistry().encode(input);
+  }
 }

@@ -839,6 +839,7 @@ void main() {
       isPlaying: true,
       processingState: AudioProcessingStateStatus.ready,
       position: Duration.zero,
+      bufferedPosition: Duration.zero,
       duration: Duration.zero,
       currentIndex: 0,
       queue: [],

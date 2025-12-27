@@ -75,24 +75,24 @@ void main() {
       expect(reciter1, isNot(reciter2));
     });
 
-    test('props should contain all fields', () {
-      // arrange
-      const reciter = ReciterEntity(
-        id: 1,
-        name: 'Test Reciter',
-        letter: 'T',
-        date: '2024-01-01',
-        moshaf: [tMoshaf],
-      );
+    group('serialization', () {
+      test('should work correctly', () {
+        // arrange
+        const reciter = ReciterEntity(
+          id: 1,
+          name: 'Test Reciter',
+          letter: 'T',
+          date: '2024-01-01',
+          moshaf: [tMoshaf],
+        );
 
-      // assert
-      expect(reciter.props, [
-        1,
-        'Test Reciter',
-        'T',
-        '2024-01-01',
-        const [tMoshaf],
-      ]);
+        // act
+        final Map<String, dynamic> json = reciter.toJson();
+        final result = ReciterEntity.fromJson(json);
+
+        // assert
+        expect(result, reciter);
+      });
     });
   });
 }

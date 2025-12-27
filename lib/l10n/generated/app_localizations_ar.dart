@@ -625,4 +625,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get startJourney => 'لنبدأ رحلتنا مع القرآن';
+
+  @override
+  String get sleepTimer => 'مؤقت النوم';
+
+  @override
+  String get minutes15 => '15 دقيقة';
+
+  @override
+  String get minutes30 => '30 دقيقة';
+
+  @override
+  String get minutes60 => '60 دقيقة';
+
+  @override
+  String get cancelTimer => 'إلغاء المؤقت';
+
+  @override
+  String get custom => 'تخصيص';
 }

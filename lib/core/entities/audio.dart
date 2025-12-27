@@ -36,6 +36,7 @@ abstract class PlaybackStateEntity with _$PlaybackStateEntity {
     required bool isPlaying,
     required AudioProcessingStateStatus processingState,
     required Duration position,
+    required Duration bufferedPosition,
     required Duration duration,
     required int currentIndex,
     required List<AudioEntity> queue,

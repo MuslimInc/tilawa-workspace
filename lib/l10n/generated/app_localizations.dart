@@ -1255,6 +1255,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Let\'s start our journey with the Quran'**
   String get startJourney;
+
+  /// Sleep timer dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer'**
+  String get sleepTimer;
+
+  /// 15 minutes option
+  ///
+  /// In en, this message translates to:
+  /// **'15 Minutes'**
+  String get minutes15;
+
+  /// 30 minutes option
+  ///
+  /// In en, this message translates to:
+  /// **'30 Minutes'**
+  String get minutes30;
+
+  /// 60 minutes option
+  ///
+  /// In en, this message translates to:
+  /// **'60 Minutes'**
+  String get minutes60;
+
+  /// Cancel timer button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Timer'**
+  String get cancelTimer;
+
+  /// Custom timer option
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
 }
 
 class _AppLocalizationsDelegate

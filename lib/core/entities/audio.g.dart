@@ -35,6 +35,9 @@ _PlaybackStateEntity _$PlaybackStateEntityFromJson(Map<String, dynamic> json) =>
         json['processing_state'],
       ),
       position: Duration(microseconds: (json['position'] as num).toInt()),
+      bufferedPosition: Duration(
+        microseconds: (json['buffered_position'] as num).toInt(),
+      ),
       duration: Duration(microseconds: (json['duration'] as num).toInt()),
       currentIndex: (json['current_index'] as num).toInt(),
       queue: (json['queue'] as List<dynamic>)
@@ -49,6 +52,7 @@ Map<String, dynamic> _$PlaybackStateEntityToJson(
   'processing_state':
       _$AudioProcessingStateStatusEnumMap[instance.processingState]!,
   'position': instance.position.inMicroseconds,
+  'buffered_position': instance.bufferedPosition.inMicroseconds,
   'duration': instance.duration.inMicroseconds,
   'current_index': instance.currentIndex,
   'queue': instance.queue.map((e) => e.toJson()).toList(),

@@ -96,7 +96,7 @@ void main() {
     queueSubject = BehaviorSubject<List<AudioEntity>>.seeded([]);
     volumeSubject = BehaviorSubject<double>.seeded(1.0);
     speedSubject = BehaviorSubject<double>.seeded(1.0);
-    positionSubject = BehaviorSubject<Duration>.seeded(Duration.zero);
+    positionSubject = BehaviorSubject<Duration>();
 
     // Setup mock streams
     when(
@@ -237,6 +237,7 @@ void main() {
           isPlaying: true,
           processingState: AudioProcessingStateStatus.ready,
           position: Duration.zero,
+          bufferedPosition: Duration.zero,
           duration: Duration.zero,
           currentIndex: 0,
           queue: [],
@@ -301,6 +302,7 @@ void main() {
             isPlaying: true,
             processingState: AudioProcessingStateStatus.ready,
             position: Duration.zero,
+            bufferedPosition: Duration.zero,
             duration: Duration.zero,
             currentIndex: 0,
             queue: [],
@@ -586,6 +588,61 @@ void main() {
       act: (bloc) => bloc.add(const AudioPlayerEvent.setSpeed(1.5)),
       verify: (_) {
         verify(mockSetPlaybackSpeed(1.5)).called(1);
+      },
+    );
+  });
+
+  group('AudioPlayerBloc - Sleep Timer', () {
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'SetSleepTimer should update sleepTimerTargetTime',
+      build: () => buildBloc(),
+      act: (bloc) =>
+          bloc.add(const AudioPlayerEvent.setSleepTimer(Duration(minutes: 15))),
+      expect: () => [
+        isA<AudioPlayerState>()
+            .having(
+              (s) => s.sleepTimerTargetTime,
+              'sleepTimerTargetTime',
+              isNotNull,
+            )
+            .having((s) => s.isSleepTimerActive, 'isSleepTimerActive', true),
+      ],
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'CancelSleepTimer should set sleepTimerTargetTime to null',
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.success,
+      ).copyWith(sleepTimerTargetTime: DateTime.now()),
+      build: () => buildBloc(),
+      act: (bloc) => bloc.add(const AudioPlayerEvent.cancelSleepTimer()),
+      expect: () => [
+        isA<AudioPlayerState>()
+            .having(
+              (s) => s.sleepTimerTargetTime,
+              'sleepTimerTargetTime',
+              isNull,
+            )
+            .having((s) => s.isSleepTimerActive, 'isSleepTimerActive', false),
+      ],
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'AudioTimerExpired should pause audio and reset timer',
+      build: () {
+        when(mockPauseAudio.call()).thenAnswer((_) async => const Right(null));
+        return buildBloc();
+      },
+      act: (bloc) => bloc.add(const AudioPlayerEvent.audioTimerExpired()),
+      expect: () => [
+        isA<AudioPlayerState>().having(
+          (s) => s.sleepTimerTargetTime,
+          'sleepTimerTargetTime',
+          isNull,
+        ),
+      ],
+      verify: (_) {
+        verify(mockPauseAudio()).called(1);
       },
     );
   });

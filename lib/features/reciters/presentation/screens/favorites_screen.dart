@@ -4,6 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
@@ -14,16 +15,10 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
-
     return BlocProvider(
       create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            l10n.favorites,
-          ), // Ensure this string exists or use fallback
-        ),
+        appBar: AppBar(title: Text(context.l10n.favorites)),
         body: BlocBuilder<FavoritesCubit, FavoritesState>(
           builder: (context, state) {
             if (state is FavoritesLoading) {
@@ -37,7 +32,7 @@ class FavoritesScreen extends StatelessWidget {
               );
             } else if (state is FavoritesLoaded) {
               if (state.favorites.isEmpty) {
-                return _buildEmptyState(context, l10n);
+                return _buildEmptyState(context, context.l10n);
               }
               return ListView.separated(
                 padding: EdgeInsets.all(16.r),
@@ -66,10 +61,12 @@ class FavoritesScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            l10n.reciterRemovedFromFavorites(reciter.name),
+                            context.l10n.reciterRemovedFromFavorites(
+                              reciter.name,
+                            ),
                           ), // Improve string if needed
                           action: SnackBarAction(
-                            label: l10n.undo,
+                            label: context.l10n.undo,
                             onPressed: () {
                               cubit.toggleFavorite(reciter);
                             },

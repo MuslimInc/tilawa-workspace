@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
 
@@ -11,6 +12,7 @@ void main() {
   late MockGoRouterState mockGoRouterState;
 
   setUp(() {
+    AppRouter.init(); // Register JSON types
     mockGoRouterState = MockGoRouterState();
     when(mockGoRouterState.uri).thenReturn(Uri.parse('/test'));
   });
@@ -77,6 +79,37 @@ void main() {
 
     test('router is initialized', () {
       expect(AppRouter.router, isNotNull);
+    });
+
+    test('extraCodec supports ReciterEntity serialization', () {
+      const codec = AppRouterExtraCodec();
+
+      const reciter = ReciterEntity(
+        id: 1,
+        name: 'Test',
+        letter: 'T',
+        date: '2024-01-01',
+        moshaf: [],
+      );
+
+      final Object? encoded = codec.encoder.convert(reciter);
+      expect(encoded, isA<Map<String, dynamic>>()); // Should be json map
+
+      final Object? decoded = codec.decoder.convert(encoded);
+      expect(decoded, reciter);
+    });
+
+    test('extraCodec handles null', () {
+      const codec = AppRouterExtraCodec();
+      expect(codec.encoder.convert(null), isNull);
+      expect(codec.decoder.convert(null), isNull);
+    });
+
+    test('extraCodec passes through unknown tokens', () {
+      const codec = AppRouterExtraCodec();
+      const token = 'some-string';
+      expect(codec.encoder.convert(token), token);
+      expect(codec.decoder.convert(token), token);
     });
   });
 }

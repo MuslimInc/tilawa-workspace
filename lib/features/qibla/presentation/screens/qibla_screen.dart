@@ -22,16 +22,7 @@ class QiblaScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: Text(
-            AppLocalizations.of(context)!.qiblaDirection,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20.sp,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Colors.white),
+          title: Text(AppLocalizations.of(context)!.qiblaDirection),
         ),
         body: Container(
           width: double.infinity,

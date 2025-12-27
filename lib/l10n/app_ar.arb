@@ -854,4 +854,28 @@
     "@startJourney": {
         "description": "Start button text"
     }
+,    "sleepTimer": "مؤقت النوم",
+    "@sleepTimer": {
+        "description": "Sleep timer dialog title"
+    },
+    "minutes15": "15 دقيقة",
+    "@minutes15": {
+        "description": "15 minutes option"
+    },
+    "minutes30": "30 دقيقة",
+    "@minutes30": {
+        "description": "30 minutes option"
+    },
+    "minutes60": "60 دقيقة",
+    "@minutes60": {
+        "description": "60 minutes option"
+    },
+    "cancelTimer": "إلغاء المؤقت",
+    "@cancelTimer": {
+        "description": "Cancel timer button text"
+    },
+    "custom": "تخصيص",
+    "@custom": {
+        "description": "Custom timer option"
+    }
 }

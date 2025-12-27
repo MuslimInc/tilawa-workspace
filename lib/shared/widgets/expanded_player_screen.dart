@@ -10,6 +10,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import '../../core/entities/audio.dart';
 import '../../core/extensions.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'seek_bar.dart';
@@ -168,6 +169,25 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                                 fontSize: 16.sp,
                               ),
                             ),
+                            actions: [
+                              IconButton(
+                                icon: Icon(
+                                  state.isSleepTimerActive
+                                      ? FluentIcons.timer_24_filled
+                                      : FluentIcons.timer_24_regular,
+                                  color: state.isSleepTimerActive
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.white,
+                                  size: 24.sp,
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => const SleepTimerDialog(),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
 
                           SizedBox(height: 20.h),

@@ -45,6 +45,11 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     on<UpdateVolume>(_onUpdateVolume);
     on<UpdateSpeed>(_onUpdateSpeed);
 
+    // Sleep Timer events
+    on<SetSleepTimer>(_onSetSleepTimer);
+    on<CancelSleepTimer>(_onCancelSleepTimer);
+    on<AudioTimerExpired>(_onAudioTimerExpired);
+
     // Audio control events
     on<PlayAudio>(_onPlayAudio);
     on<PauseAudio>(_onPauseAudio);
@@ -87,6 +92,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
+  Timer? _sleepTimer;
 
   void _setupAudioStreams() {
     _subscriptions.add(
@@ -112,10 +118,31 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         add(AudioPlayerEvent.updateSpeed(speed));
       }),
     );
+
+    _subscriptions.add(
+      _getAudioStreams.position.listen((position) {
+        final AudioEntity? currentAudio = state.currentAudio;
+        final PlaybackStateEntity? playbackState = state.playbackState;
+        final Duration duration = currentAudio?.duration ?? Duration.zero;
+        final Duration buffered =
+            playbackState?.bufferedPosition ?? Duration.zero;
+
+        add(
+          AudioPlayerEvent.updatePositionData(
+            PositionData(
+              position: position,
+              bufferedPosition: buffered,
+              duration: duration,
+            ),
+          ),
+        );
+      }),
+    );
   }
 
   @override
   Future<void> close() {
+    _sleepTimer?.cancel();
     for (final StreamSubscription<dynamic> subscription in _subscriptions) {
       subscription.cancel();
     }
@@ -284,6 +311,48 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     Emitter<AudioPlayerState> emit,
   ) async {
     await _updateQueue(event.queue);
+  }
+
+  void _onSetSleepTimer(SetSleepTimer event, Emitter<AudioPlayerState> emit) {
+    _sleepTimer?.cancel();
+    _sleepTimer = Timer(event.duration, () {
+      add(const AudioPlayerEvent.audioTimerExpired());
+    });
+    emit(
+      state.copyWith(
+        sleepTimerTargetTime: DateTime.now().add(event.duration),
+        status: AudioPlayerStatus.success,
+      ),
+    );
+  }
+
+  void _onCancelSleepTimer(
+    CancelSleepTimer event,
+    Emitter<AudioPlayerState> emit,
+  ) {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    emit(
+      state.copyWith(
+        sleepTimerTargetTime: null,
+        status: AudioPlayerStatus.success,
+      ),
+    );
+  }
+
+  Future<void> _onAudioTimerExpired(
+    AudioTimerExpired event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    await _pauseAudio();
+    emit(
+      state.copyWith(
+        sleepTimerTargetTime: null,
+        status: AudioPlayerStatus.success,
+      ),
+    );
   }
 
   @override

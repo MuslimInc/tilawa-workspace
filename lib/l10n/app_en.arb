@@ -854,4 +854,28 @@
     "@startJourney": {
         "description": "Start button text"
     }
+,    "sleepTimer": "Sleep Timer",
+    "@sleepTimer": {
+        "description": "Sleep timer dialog title"
+    },
+    "minutes15": "15 Minutes",
+    "@minutes15": {
+        "description": "15 minutes option"
+    },
+    "minutes30": "30 Minutes",
+    "@minutes30": {
+        "description": "30 minutes option"
+    },
+    "minutes60": "60 Minutes",
+    "@minutes60": {
+        "description": "60 minutes option"
+    },
+    "cancelTimer": "Cancel Timer",
+    "@cancelTimer": {
+        "description": "Cancel timer button text"
+    },
+    "custom": "Custom",
+    "@custom": {
+        "description": "Custom timer option"
+    }
 }

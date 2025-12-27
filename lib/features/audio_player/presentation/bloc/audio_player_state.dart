@@ -12,6 +12,7 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     @Default(1.0) double speed,
     @Default(AudioRepeatMode.none) AudioRepeatMode repeatMode,
     @Default(AudioShuffleMode.none) AudioShuffleMode shuffleMode,
+    DateTime? sleepTimerTargetTime,
     required AudioPlayerStatus status,
   }) = _AudioPlayerState;
 
@@ -30,4 +31,5 @@ abstract class AudioPlayerState with _$AudioPlayerState {
   bool get hasMediaItem => currentAudio != null;
   AudioEntity? get mediaItem => currentAudio;
   bool get hasAudio => currentAudio != null;
+  bool get isSleepTimerActive => sleepTimerTargetTime != null;
 }

@@ -127,14 +127,15 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                theme.primaryColor.withValues(alpha: 0.1),
-                theme.scaffoldBackgroundColor,
-              ],
-            ),
+            color: Theme.of(context).scaffoldBackgroundColor,
+            // gradient: LinearGradient(
+            //   begin: Alignment.topCenter,
+            //   end: Alignment.bottomCenter,
+            //   colors: [
+            //     theme.primaryColor.withValues(alpha: 0.1),
+            //     theme.scaffoldBackgroundColor,
+            //   ],
+            // ),
           ),
         ),
       ),
