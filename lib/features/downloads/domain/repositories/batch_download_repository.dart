@@ -14,12 +14,4 @@ abstract class BatchDownloadRepository {
     List<({String url, String surahTitle, String reciterName, int reciterId})>
     items,
   );
-
-  /// Cancel all active downloads for a specific reciter
-  ///
-  /// This is typically used when user cancels "Download All" operation
-  Future<void> cancelDownloadsForReciter(String reciterName);
-
-  /// Delete all downloads for a specific reciter
-  Future<void> deleteDownloadsForReciter(String reciterName);
 }

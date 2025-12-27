@@ -20,9 +20,6 @@ abstract class SurahRepository {
     String? downloadId,
   );
 
-  /// Check if a surah is downloaded
-  Future<bool> isSurahDownloaded(String surahId, String reciterName);
-
   /// Get surah by ID and reciter
   Future<SurahEntity?> getSurah(String surahId, String reciterName);
 

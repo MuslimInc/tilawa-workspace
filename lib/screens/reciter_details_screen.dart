@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -9,11 +10,13 @@ import '../core/di/injection.dart';
 import '../core/entities/audio.dart';
 import '../core/entities/moshaf_entity.dart';
 import '../core/entities/reciter_entity.dart';
+import '../core/errors/failures.dart';
 import '../core/extensions.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/downloads/domain/entities/download_item.dart';
 import '../features/downloads/domain/repositories/downloads_repository.dart';
+import '../features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
@@ -199,20 +202,17 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
       if (surahIndex != -1) {
         // Optimization: Fetch all downloads for this reciter ONCE to avoid N database queries
-        final DownloadsRepository downloadsRepository =
-            getIt<DownloadsRepository>();
-        final List<DownloadItem> reciterDownloads = await downloadsRepository
-            .getDownloadsForReciter(widget.reciter.name);
+        // Optimization: Fetch all downloads for this reciter ONCE to avoid N database queries
+        final Either<Failure, List<DownloadItem>> result =
+            await getIt<GetValidCompletedDownloadsUseCase>()(
+              widget.reciter.name,
+            );
+        final List<DownloadItem> reciterDownloads = result.getOrElse(() => []);
 
         // Create a map of Surah ID -> File Path for fast lookup
         final Map<String, String> downloadMap = {};
         for (final item in reciterDownloads) {
-          if (item.status == DownloadStatus.completed) {
-            final file = File(item.filePath);
-            if (file.existsSync()) {
-              downloadMap[item.url] = item.filePath;
-            }
-          }
+          downloadMap[item.url] = item.filePath;
         }
 
         // Create a list of surahs, using downloaded files when available

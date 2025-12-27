@@ -115,4 +115,13 @@ class MockUserRepository extends _i1.Mock implements _i7.UserRepository {
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> saveDeviceToken(String? userId, String? token) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveDeviceToken, [userId, token]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 }

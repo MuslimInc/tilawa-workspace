@@ -1213,24 +1213,6 @@ class MockDownloadsRepository extends _i1.Mock
           as _i15.Future<void>);
 
   @override
-  _i15.Future<void> cancelDownloadsForReciter(String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#cancelDownloadsForReciter, [reciterName]),
-            returnValue: _i15.Future<void>.value(),
-            returnValueForMissingStub: _i15.Future<void>.value(),
-          )
-          as _i15.Future<void>);
-
-  @override
-  _i15.Future<void> deleteDownloadsForReciter(String? reciterName) =>
-      (super.noSuchMethod(
-            Invocation.method(#deleteDownloadsForReciter, [reciterName]),
-            returnValue: _i15.Future<void>.value(),
-            returnValueForMissingStub: _i15.Future<void>.value(),
-          )
-          as _i15.Future<void>);
-
-  @override
   _i15.Future<void> initialize() =>
       (super.noSuchMethod(
             Invocation.method(#initialize, []),
@@ -1240,23 +1222,9 @@ class MockDownloadsRepository extends _i1.Mock
           as _i15.Future<void>);
 
   @override
-  _i15.Future<Map<String, Map<String, List<_i2.DownloadItem>>>>
-  getDownloadsByReciter() =>
+  _i15.Future<List<_i2.DownloadItem>> getAllDownloads() =>
       (super.noSuchMethod(
-            Invocation.method(#getDownloadsByReciter, []),
-            returnValue:
-                _i15.Future<
-                  Map<String, Map<String, List<_i2.DownloadItem>>>
-                >.value(<String, Map<String, List<_i2.DownloadItem>>>{}),
-          )
-          as _i15.Future<Map<String, Map<String, List<_i2.DownloadItem>>>>);
-
-  @override
-  _i15.Future<List<_i2.DownloadItem>> getDownloadsForReciter(
-    String? reciterName,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#getDownloadsForReciter, [reciterName]),
+            Invocation.method(#getAllDownloads, []),
             returnValue: _i15.Future<List<_i2.DownloadItem>>.value(
               <_i2.DownloadItem>[],
             ),
@@ -1270,18 +1238,6 @@ class MockDownloadsRepository extends _i1.Mock
             returnValue: _i15.Future<_i2.DownloadItem?>.value(),
           )
           as _i15.Future<_i2.DownloadItem?>);
-
-  @override
-  _i15.Future<List<_i2.DownloadItem>> getValidCompletedDownloads(
-    String? reciterName,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#getValidCompletedDownloads, [reciterName]),
-            returnValue: _i15.Future<List<_i2.DownloadItem>>.value(
-              <_i2.DownloadItem>[],
-            ),
-          )
-          as _i15.Future<List<_i2.DownloadItem>>);
 
   @override
   _i15.Future<bool> validateDownloadedFile(_i2.DownloadItem? download) =>

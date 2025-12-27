@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +27,8 @@ void main() {
     const testFileName = 'test.mp3';
     late MockFlutterDownloaderWrapper mockDownloader;
     late MockDownloadIsolateManager mockIsolateManager;
+    late MockDownloadStatusMapper mockStatusMapper;
+    late MockDownloadFileHelper mockFileHelper;
     late StreamController<(String, DownloadTaskStatus, int)> updateController;
     late DownloadServiceImpl downloadService;
 
@@ -38,6 +38,8 @@ void main() {
 
       mockDownloader = MockFlutterDownloaderWrapper();
       mockIsolateManager = MockDownloadIsolateManager();
+      mockStatusMapper = MockDownloadStatusMapper();
+      mockFileHelper = MockDownloadFileHelper();
       updateController =
           StreamController<(String, DownloadTaskStatus, int)>.broadcast();
 
@@ -55,6 +57,46 @@ void main() {
       when(
         mockIsolateManager.updateStream,
       ).thenAnswer((_) => updateController.stream);
+
+      // Default status mapper behavior
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(any),
+      ).thenReturn(DownloadStatus.pending);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.running,
+        ),
+      ).thenReturn(DownloadStatus.downloading);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.complete,
+        ),
+      ).thenReturn(DownloadStatus.completed);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.failed,
+        ),
+      ).thenReturn(DownloadStatus.failed);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.canceled,
+        ),
+      ).thenReturn(DownloadStatus.cancelled);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.paused,
+        ),
+      ).thenReturn(DownloadStatus.paused);
+
+      // Default file helper behavior
+      when(mockFileHelper.getDirectoryName(any)).thenAnswer(
+        (inv) => DownloadPathUtils.getDirectoryName(inv.positionalArguments[0]),
+      );
+      when(mockFileHelper.getFileName(any)).thenAnswer(
+        (inv) => DownloadPathUtils.getFileName(inv.positionalArguments[0]),
+      );
+      when(mockFileHelper.ensureDirectoryExists(any)).thenAnswer((_) => true);
+      when(mockFileHelper.isFileExists(any)).thenReturn(false);
 
       when(
         mockDownloader.registerCallback(any, step: anyNamed('step')),
@@ -102,8 +144,10 @@ void main() {
       }
 
       downloadService = DownloadServiceImpl(
-        flutterDownloader: mockDownloader,
-        isolateManager: mockIsolateManager,
+        mockDownloader,
+        mockFileHelper,
+        mockStatusMapper,
+        mockIsolateManager,
       );
       getIt.registerSingleton<DownloadServiceInterface>(downloadService);
     });
@@ -157,7 +201,7 @@ void main() {
       });
 
       test('initialize logs warning when generic error occurs', () async {
-        final localMock = MockFlutterDownloaderWrapper();
+        final localMock = mockDownloader;
         when(localMock.initialize(debug: anyNamed('debug'))).thenAnswer((
           _,
         ) async {
@@ -172,7 +216,12 @@ void main() {
         // Throw generic error during loadTasks which is called during init
         when(localMock.loadTasks()).thenThrow(Exception('Generic init error'));
 
-        final localService = DownloadServiceImpl(flutterDownloader: localMock);
+        final localService = DownloadServiceImpl(
+          localMock,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
+        );
 
         // Should not throw, but generic error logged
         await localService.initialize();
@@ -183,8 +232,13 @@ void main() {
       });
 
       test('initialize rethrows fatal error', () async {
-        final localMock = MockFlutterDownloaderWrapper();
-        final localService = DownloadServiceImpl(flutterDownloader: localMock);
+        final localMock = mockDownloader;
+        final localService = DownloadServiceImpl(
+          localMock,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
+        );
 
         when(
           localMock.initialize(
@@ -197,10 +251,11 @@ void main() {
       });
 
       test('should not enqueue if fileName is empty', () async {
-        final mockFileHelper = MockDownloadFileHelper();
         final localService = DownloadServiceImpl(
-          flutterDownloader: mockDownloader,
-          fileHelper: mockFileHelper,
+          mockDownloader,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
         );
         // Ensure initialization specific to this local service if needed,
         // or just mock what's needed for download().
@@ -316,6 +371,7 @@ void main() {
                 .getProgressStream(testUrl)
                 .listen(progressEvents.add);
 
+        when(mockFileHelper.isFileExists(testFilePath)).thenReturn(true);
         File(testFilePath).createSync(recursive: true);
 
         await downloadService.download(
@@ -361,6 +417,8 @@ void main() {
             mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
           ).thenAnswer((_) async => [task]);
           when(mockDownloader.loadTasks()).thenAnswer((_) async => [task]);
+
+          when(mockFileHelper.isFileExists(testFilePath)).thenReturn(false);
 
           await downloadService.download(
             id: testUrl,
@@ -460,9 +518,13 @@ void main() {
         final newDir = '${tempDir.path}/new_subdir';
         final newFilePath = '$newDir/$testFileName';
 
-        if (Directory(newDir).existsSync()) {
-          Directory(newDir).deleteSync(recursive: true);
-        }
+        when(mockFileHelper.getDirectoryName(newFilePath)).thenReturn(newDir);
+        when(mockFileHelper.getFileName(newFilePath)).thenReturn(testFileName);
+        // Simulate directory not existing initially
+        when(mockFileHelper.ensureDirectoryExists(newDir)).thenAnswer((_) {
+          Directory(newDir).createSync(recursive: true);
+          return true;
+        });
 
         await downloadService.download(
           id: testUrl,
@@ -475,8 +537,8 @@ void main() {
         expect(Directory(newDir).existsSync(), isTrue);
       });
 
-      test('should handle enqueue failure (null taskId)', () async {
-        final localMock = MockFlutterDownloaderWrapper();
+      test('handle enqueue failure (null taskId)', () async {
+        final localMock = mockDownloader;
         when(localMock.initialize(debug: anyNamed('debug'))).thenAnswer((
           _,
         ) async {
@@ -504,7 +566,12 @@ void main() {
           ),
         ).thenAnswer((_) async => null);
 
-        final localService = DownloadServiceImpl(flutterDownloader: localMock);
+        final localService = DownloadServiceImpl(
+          localMock,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
+        );
 
         final progressEvents = <DownloadProgress>[];
         final StreamSubscription<DownloadProgress> subscription = localService
@@ -527,16 +594,16 @@ void main() {
 
       // Cover line 387: Log error if savedDir is empty
       test('should not enqueue if savedDir is empty', () async {
-        final mockFileHelper = MockDownloadFileHelper();
-        when(mockFileHelper.getDirectoryName(any)).thenReturn('');
-        when(mockFileHelper.getFileName(any)).thenReturn('test.mp3');
-
-        final serviceWithMocks = DownloadServiceImpl(
-          flutterDownloader: mockDownloader,
-          fileHelper: mockFileHelper,
+        final localService = DownloadServiceImpl(
+          mockDownloader,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
         );
 
-        await serviceWithMocks.download(
+        when(mockFileHelper.getDirectoryName('path/to/file')).thenReturn('');
+
+        await localService.download(
           id: testUrl,
           url: testUrl,
           filePath: 'path/to/file',
@@ -652,12 +719,8 @@ void main() {
         // Return empy tasks to fail resolution
         when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
-        final SendPort? port = IsolateNameServer.lookupPortByName(
-          'downloader_send_port',
-        );
-
         // Send unknown task ID
-        port!.send(['unknown-id', 2, 50]);
+        updateController.add(('unknown-id', DownloadTaskStatus.running, 50));
 
         await Future.delayed(const Duration(milliseconds: 100));
 
@@ -886,6 +949,8 @@ void main() {
           return;
         });
 
+        when(mockFileHelper.isFileExists(testFilePath)).thenReturn(false);
+
         await downloadService.download(
           id: testUrl,
           url: testUrl,
@@ -930,6 +995,8 @@ void main() {
           mockDownloader.remove(taskId: anyNamed('taskId')),
         ).thenThrow(Exception('Permanent failure'));
 
+        when(mockFileHelper.isFileExists(testFilePath)).thenReturn(false);
+
         await downloadService.download(
           id: testUrl,
           url: testUrl,
@@ -937,7 +1004,6 @@ void main() {
           title: testTitle,
           reciterName: testReciterName,
         );
-
         verify(
           mockDownloader.remove(taskId: anyNamed('taskId')),
         ).called(3); // 3 retries
@@ -1013,9 +1079,10 @@ void main() {
         // We need a NEW service instance to pick up this specific mock setup
         // because main setUp uses Stream.empty().
         final testService = DownloadServiceImpl(
-          flutterDownloader: mockDownloader,
-          isolateManager: mockIsolateManager,
-          // Reuse other dependencies
+          mockDownloader,
+          mockFileHelper,
+          mockStatusMapper,
+          mockIsolateManager,
         );
 
         await testService.initialize();

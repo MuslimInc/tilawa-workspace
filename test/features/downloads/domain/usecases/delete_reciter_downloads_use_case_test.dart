@@ -1,7 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/delete_reciter_downloads_use_case.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
@@ -9,339 +11,152 @@ import '../../helpers/mock_helper.mocks.dart';
 void main() {
   late DeleteReciterDownloadsUseCase useCase;
   late MockDownloadsRepository mockRepository;
+  late MockRecitersRepository mockRecitersRepository;
+
+  void provideDummies() {
+    provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
+  }
 
   setUp(() {
+    provideDummies();
     mockRepository = MockDownloadsRepository();
-    useCase = DeleteReciterDownloadsUseCase(mockRepository);
+    mockRecitersRepository = MockRecitersRepository();
+    useCase = DeleteReciterDownloadsUseCase(
+      mockRepository,
+      mockRecitersRepository,
+    );
   });
 
+  const testReciterName = 'Abdul Rahman Al-Sudais';
+  const testReciterId = 1;
+
+  const testReciter = ReciterEntity(
+    id: testReciterId,
+    name: testReciterName,
+    letter: 'A',
+    date: '2024-01-01',
+    moshaf: [],
+  );
+
+  final downloadActive = DownloadItem(
+    id: '1',
+    reciterName: testReciterName,
+    reciterId: testReciterId,
+    status: DownloadStatus.downloading,
+    title: 'Surah 1',
+    url: 'url1',
+    progress: 0.5,
+    fileSize: 100,
+    downloadedSize: 50,
+    createdAt: DateTime.now(),
+    filePath: "/downloads/$testReciterName/Rewayat Hafs A'n Assem/001.mp3",
+  );
+
+  final downloadCompleted = DownloadItem(
+    id: '2',
+    reciterName: testReciterName,
+    reciterId: testReciterId,
+    status: DownloadStatus.completed,
+    title: 'Surah 2',
+    url: 'url2',
+    progress: 1.0,
+    fileSize: 100,
+    downloadedSize: 100,
+    createdAt: DateTime.now(),
+    filePath: "/downloads/$testReciterName/Rewayat Hafs A'n Assem/002.mp3",
+  );
+
+  final otherReciterDownload = DownloadItem(
+    id: '3',
+    reciterName: 'Other Reciter',
+    reciterId: 2,
+    status: DownloadStatus.downloading,
+    title: 'Surah 3',
+    url: 'url3',
+    progress: 0.5,
+    fileSize: 100,
+    downloadedSize: 50,
+    createdAt: DateTime.now(),
+    filePath: "/downloads/Other Reciter/Rewayat Hafs A'n Assem/003.mp3",
+  );
+
   group('DeleteReciterDownloadsUseCase', () {
-    group('call', () {
-      test('should return Right(null) when delete is successful', () async {
+    test(
+      'should delete all downloads for reciter and cancel active ones',
+      () async {
         // Arrange
-        const testReciterName = 'Abdul Rahman Al-Sudais';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
+        when(mockRepository.getAllDownloads()).thenAnswer(
+          (_) async => [
+            downloadActive,
+            downloadCompleted,
+            otherReciterDownload,
+          ],
         );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test(
-        'should return Left(AudioFailure) when repository throws exception',
-        () async {
-          // Arrange
-          const testReciterName = 'Abdul Rahman Al-Sudais';
-          const errorMessage = 'Reciter not found';
-          when(
-            mockRepository.deleteDownloadsForReciter(any),
-          ).thenThrow(Exception(errorMessage));
-
-          // Act
-          final Either<Failure, void> result = await useCase(testReciterName);
-
-          // Assert
-          result.fold((failure) {
-            expect(failure, isA<AudioFailure>());
-            expect(failure.message, 'Exception: $errorMessage');
-          }, (_) => fail('Expected Left but got Right'));
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName),
-          ).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
-      );
-
-      test(
-        'should return Left(AudioFailure) when repository throws generic exception',
-        () async {
-          // Arrange
-          const testReciterName = 'Abdul Rahman Al-Sudais';
-          when(
-            mockRepository.deleteDownloadsForReciter(any),
-          ).thenThrow('Generic error');
-
-          // Act
-          final Either<Failure, void> result = await useCase(testReciterName);
-
-          // Assert
-          result.fold((failure) {
-            expect(failure, isA<AudioFailure>());
-            expect(failure.message, 'Generic error');
-          }, (_) => fail('Expected Left but got Right'));
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName),
-          ).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
-      );
-
-      test('should call repository with correct reciter name', () async {
-        // Arrange
-        const testReciterName = 'Mishary Rashid Alafasy';
         when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
-
-        // Act
-        await useCase(testReciterName);
-
-        // Assert
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle empty reciter name', () async {
-        // Arrange
-        const testReciterName = '';
+          mockRecitersRepository.getReciters(),
+        ).thenAnswer((_) async => const Right([testReciter]));
         when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
+          mockRepository.cancelDownload(any),
+        ).thenAnswer((_) async => Future.value());
+        when(
+          mockRepository.deleteDownload(any),
+        ).thenAnswer((_) async => Future.value());
 
         // Act
         final Either<Failure, void> result = await useCase(testReciterName);
 
         // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
-        );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
+        expect(result, isA<Right>());
 
-      test('should handle special characters in reciter name', () async {
-        // Arrange
-        const testReciterName = 'عبد الرحمن السديس';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
+        // Should cancel active download
+        verify(mockRepository.cancelDownload(downloadActive.id)).called(1);
 
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
+        // Should delete both active and completed downloads for target reciter
+        verify(mockRepository.deleteDownload(downloadActive.id)).called(1);
+        verify(mockRepository.deleteDownload(downloadCompleted.id)).called(1);
 
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
-        );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
+        // Should NOT touch other reciter's download
+        verifyNever(mockRepository.deleteDownload(otherReciterDownload.id));
+      },
+    );
 
-      test('should handle very long reciter name', () async {
-        // Arrange
-        final String testReciterName = 'A' * 1000; // Very long name
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
+    test('should return AudioFailure when getAllDownloads fails', () async {
+      // Arrange
+      const errorMessage = 'DB Error';
+      when(mockRepository.getAllDownloads()).thenThrow(Exception(errorMessage));
 
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
+      // Act
+      final Either<Failure, void> result = await useCase(testReciterName);
 
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
-        );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle database connection error', () async {
-        // Arrange
-        const testReciterName = 'Abdul Rahman Al-Sudais';
-        const errorMessage = 'Database connection failed';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenThrow(Exception(errorMessage));
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold((failure) {
-          expect(failure, isA<AudioFailure>());
-          expect(failure.message, 'Exception: $errorMessage');
-        }, (_) => fail('Expected Left but got Right'));
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle file system error', () async {
-        // Arrange
-        const testReciterName = 'Abdul Rahman Al-Sudais';
-        const errorMessage = 'Permission denied';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenThrow(Exception(errorMessage));
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold((failure) {
-          expect(failure, isA<AudioFailure>());
-          expect(failure.message, 'Exception: $errorMessage');
-        }, (_) => fail('Expected Left but got Right'));
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle network error during delete', () async {
-        // Arrange
-        const testReciterName = 'Abdul Rahman Al-Sudais';
-        const errorMessage = 'Network timeout';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenThrow(Exception(errorMessage));
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold((failure) {
-          expect(failure, isA<AudioFailure>());
-          expect(failure.message, 'Exception: $errorMessage');
-        }, (_) => fail('Expected Left but got Right'));
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle reciter with no downloads', () async {
-        // Arrange
-        const testReciterName = 'Non-existent Reciter';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
-        );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test(
-        'should handle multiple consecutive delete calls for different reciters',
-        () async {
-          // Arrange
-          const testReciterName1 = 'Abdul Rahman Al-Sudais';
-          const testReciterName2 = 'Mishary Rashid Alafasy';
-          const testReciterName3 = 'Saad Al-Ghamdi';
-
-          when(
-            mockRepository.deleteDownloadsForReciter(any),
-          ).thenAnswer((_) async {});
-
-          // Act
-          final Either<Failure, void> result1 = await useCase(testReciterName1);
-          final Either<Failure, void> result2 = await useCase(testReciterName2);
-          final Either<Failure, void> result3 = await useCase(testReciterName3);
-
-          // Assert
-          result1.fold(
-            (_) => fail('Expected Right but got Left'),
-            (_) => expect(true, true), // Right with void
-          );
-          result2.fold(
-            (_) => fail('Expected Right but got Left'),
-            (_) => expect(true, true), // Right with void
-          );
-          result3.fold(
-            (_) => fail('Expected Right but got Left'),
-            (_) => expect(true, true), // Right with void
-          );
-
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName1),
-          ).called(1);
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName2),
-          ).called(1);
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName3),
-          ).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
-      );
-
-      test(
-        'should handle reciter name with spaces and special characters',
-        () async {
-          // Arrange
-          const testReciterName = 'Abdul Rahman Al-Sudais (عبد الرحمن السديس)';
-          when(
-            mockRepository.deleteDownloadsForReciter(any),
-          ).thenAnswer((_) async {});
-
-          // Act
-          final Either<Failure, void> result = await useCase(testReciterName);
-
-          // Assert
-          result.fold(
-            (_) => fail('Expected Right but got Left'),
-            (_) => expect(true, true), // Right with void
-          );
-          verify(
-            mockRepository.deleteDownloadsForReciter(testReciterName),
-          ).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
-      );
-
-      test('should handle reciter name with numbers', () async {
-        // Arrange
-        const testReciterName = 'Reciter 123';
-        when(
-          mockRepository.deleteDownloadsForReciter(any),
-        ).thenAnswer((_) async {});
-
-        // Act
-        final Either<Failure, void> result = await useCase(testReciterName);
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (_) => expect(true, true), // Right with void
-        );
-        verify(
-          mockRepository.deleteDownloadsForReciter(testReciterName),
-        ).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
+      // Assert
+      expect(result, isA<Left>());
+      result.fold((failure) {
+        expect(failure, isA<AudioFailure>());
+        expect(failure.message, contains(errorMessage));
+      }, (_) => fail('Should return Left'));
     });
+
+    test(
+      'should fallback to name matching if reciter resolution fails',
+      () async {
+        // Arrange
+        when(
+          mockRepository.getAllDownloads(),
+        ).thenAnswer((_) async => [downloadCompleted]);
+        when(
+          mockRecitersRepository.getReciters(),
+        ).thenAnswer((_) async => const Left(ServerFailure('API Error')));
+        when(
+          mockRepository.deleteDownload(any),
+        ).thenAnswer((_) async => Future.value());
+
+        // Act
+        final Either<Failure, void> result = await useCase(testReciterName);
+
+        // Assert
+        expect(result, isA<Right>());
+        verify(mockRepository.deleteDownload(downloadCompleted.id)).called(1);
+      },
+    );
   });
 }

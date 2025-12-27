@@ -16,18 +16,12 @@ import 'helpers/download_status_mapper.dart';
 @pragma('vm:entry-point')
 @LazySingleton(as: DownloadServiceInterface)
 class DownloadServiceImpl implements DownloadServiceInterface {
-  /// Create a new DownloadServiceImpl.
-  ///
-  /// [flutterDownloader] can be provided for testing purposes.
-  DownloadServiceImpl({
-    FlutterDownloaderWrapper? flutterDownloader,
-    DownloadFileHelper? fileHelper,
-    DownloadStatusMapper? statusMapper,
-    DownloadIsolateManager? isolateManager,
-  }) : _flutterDownloader = flutterDownloader ?? FlutterDownloaderWrapper(),
-       _fileHelper = fileHelper ?? DownloadFileHelper(),
-       _statusMapper = statusMapper ?? DownloadStatusMapper(),
-       _isolateManager = isolateManager ?? DownloadIsolateManager();
+  DownloadServiceImpl(
+    this._flutterDownloader,
+    this._fileHelper,
+    this._statusMapper,
+    this._isolateManager,
+  );
 
   FlutterDownloaderWrapper _flutterDownloader;
   final DownloadFileHelper _fileHelper;

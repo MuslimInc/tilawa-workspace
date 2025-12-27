@@ -20,11 +20,55 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockFlutterDownloaderWrapper mockDownloader;
+  late MockDownloadIsolateManager mockIsolateManager;
+  late MockDownloadStatusMapper mockStatusMapper;
+  late MockDownloadFileHelper mockFileHelper;
   late Directory tempDir;
 
   setUp(() async {
     tempDir = Directory.systemTemp.createTempSync('dqm_test');
     mockDownloader = MockFlutterDownloaderWrapper();
+    mockIsolateManager = MockDownloadIsolateManager();
+    mockStatusMapper = MockDownloadStatusMapper();
+    mockFileHelper = MockDownloadFileHelper();
+
+    // Default isolate manager behavior
+    when(
+      mockIsolateManager.updateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(mockIsolateManager.registerPort()).thenReturn(null);
+
+    // Default status mapper behavior
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(any),
+    ).thenReturn(DownloadStatus.pending);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(
+        DownloadTaskStatus.running,
+      ),
+    ).thenReturn(DownloadStatus.downloading);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(
+        DownloadTaskStatus.complete,
+      ),
+    ).thenReturn(DownloadStatus.completed);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(DownloadTaskStatus.failed),
+    ).thenReturn(DownloadStatus.failed);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(
+        DownloadTaskStatus.canceled,
+      ),
+    ).thenReturn(DownloadStatus.cancelled);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(DownloadTaskStatus.paused),
+    ).thenReturn(DownloadStatus.paused);
+
+    // Default file helper behavior
+    when(mockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
+    when(mockFileHelper.getFileName(any)).thenReturn('file.mp3');
+    when(mockFileHelper.ensureDirectoryExists(any)).thenAnswer((_) => true);
+    when(mockFileHelper.isFileExists(any)).thenReturn(false);
 
     final GetIt getIt = GetIt.instance;
 
@@ -46,7 +90,10 @@ void main() {
 
     // Register DownloadService (Implementation) with mocked downloader
     final downloadService = DownloadServiceImpl(
-      flutterDownloader: mockDownloader,
+      mockDownloader,
+      mockFileHelper,
+      mockStatusMapper,
+      mockIsolateManager,
     );
     getIt.registerSingleton<DownloadServiceInterface>(downloadService);
 

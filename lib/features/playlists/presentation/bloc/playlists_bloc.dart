@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -118,10 +119,14 @@ class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
       return;
     }
 
-    final Playlist playlistToUpdate = currentState.playlists.firstWhere(
+    final Playlist? playlistToUpdate = currentState.playlists.firstWhereOrNull(
       (p) => p.id == event.id,
-      orElse: () => throw Exception('Playlist not found'),
     );
+
+    if (playlistToUpdate == null) {
+      emit(const PlaylistsState.error('Playlist not found'));
+      return;
+    }
 
     final Playlist updatedPlaylist = playlistToUpdate.copyWith(
       name: event.name,

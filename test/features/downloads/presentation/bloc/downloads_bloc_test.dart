@@ -193,7 +193,10 @@ void main() {
 
     // Register mocked DownloadService
     final mockDownloadService = DownloadServiceImpl(
-      flutterDownloader: mockDownloader,
+      MockFlutterDownloaderWrapper(),
+      MockDownloadFileHelper(),
+      MockDownloadStatusMapper(),
+      MockDownloadIsolateManager(),
     );
     GetIt.I.registerSingleton<DownloadServiceInterface>(mockDownloadService);
 
