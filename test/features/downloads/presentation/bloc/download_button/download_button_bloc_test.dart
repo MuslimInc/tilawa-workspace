@@ -217,7 +217,7 @@ void main() {
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [failed] when downloadSurah returns failure',
+        'emits [featured] when downloadSurah returns failure',
         build: () {
           when(
             mockDownloadSurah.call(
@@ -236,6 +236,59 @@ void main() {
           const DownloadButtonState.pending(),
           const DownloadButtonState.failed(errorMessage: 'Network error'),
         ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'ignores startDownload when already pending or downloading',
+        build: () {
+          when(
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
+          ).thenAnswer((_) async => const Right(null));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) async {
+          bloc.add(
+            const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
+          );
+          bloc.add(
+            const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
+          );
+        },
+        expect: () => [const DownloadButtonState.pending()],
+        verify: (_) {
+          verify(
+            mockDownloadSurah.call(
+              surahId: testUrl,
+              surahTitle: testSurahTitle,
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+            ),
+          ).called(1);
+        },
+      );
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'ignores startDownload when state is downloading',
+        build: () => downloadButtonBloc!,
+        seed: () => const DownloadButtonState.downloading(progress: 0.5),
+        act: (bloc) => bloc.add(
+          const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
+        ),
+        expect: () => [],
+        verify: (_) {
+          verifyNever(
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
+          );
+        },
       );
     });
 

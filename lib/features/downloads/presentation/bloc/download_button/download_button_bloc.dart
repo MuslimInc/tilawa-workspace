@@ -112,6 +112,20 @@ class DownloadButtonBloc
     String surahTitle,
     Emitter<DownloadButtonState> emit,
   ) async {
+    // Prevent double downloads
+    final bool shouldIgnore = state.maybeMap(
+      pending: (_) => true,
+      downloading: (_) => true,
+      orElse: () => false,
+    );
+
+    if (shouldIgnore) {
+      logger.d(
+        '[DownloadButtonBloc] Ignoring startDownload event because state is $state',
+      );
+      return;
+    }
+
     emit(const DownloadButtonState.pending());
     _listenToProgress();
 
