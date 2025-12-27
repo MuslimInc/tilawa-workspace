@@ -474,9 +474,7 @@ void main() {
     });
 
     test('updates status when downloading in background', () async {
-      final DownloadItem download = createTestDownload(
-        
-      );
+      final DownloadItem download = createTestDownload();
 
       when(
         () => mockDownloadService.getStatus('url'),

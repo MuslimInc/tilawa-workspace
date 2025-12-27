@@ -36,4 +36,7 @@ class DownloadButtonEvent with _$DownloadButtonEvent {
 
   /// Download paused
   const factory DownloadButtonEvent.paused() = _Paused;
+
+  /// Pending download detected from stream (for widget rebuild scenarios)
+  const factory DownloadButtonEvent.pendingDetected() = _PendingDetected;
 }

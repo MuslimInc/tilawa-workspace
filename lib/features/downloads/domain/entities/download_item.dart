@@ -1,118 +1,34 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class DownloadItem extends Equatable {
-  const DownloadItem({
-    required this.id,
-    required this.title,
-    required this.url,
-    required this.filePath,
-    required this.reciterName,
-    this.reciterId,
-    required this.status,
-    required this.progress,
-    required this.fileSize,
-    required this.downloadedSize,
-    required this.createdAt,
-    this.completedAt,
-  });
+part 'download_item.freezed.dart';
+part 'download_item.g.dart';
 
-  factory DownloadItem.fromJson(Map<String, dynamic> json) {
-    return DownloadItem(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      url: json['url'] as String,
-      filePath: json['filePath'] as String,
-      reciterName: json['reciterName'] as String,
-      reciterId: json['reciterId'] as int?,
-      status: DownloadStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => DownloadStatus.pending,
-      ),
-      progress: (json['progress'] as num).toDouble(),
-      fileSize: json['fileSize'] as int,
-      downloadedSize: json['downloadedSize'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
-          : null,
-    );
-  }
-
-  final String id;
-  final String title;
-  final String url;
-  final String filePath;
-  final String reciterName;
-  final int? reciterId;
-  final DownloadStatus status;
-  final double progress; // 0.0 to 1.0
-  final int fileSize; // in bytes
-  final int downloadedSize; // in bytes
-  final DateTime createdAt;
-  final DateTime? completedAt;
-
-  @override
-  List<Object?> get props => [
-    id,
-    title,
-    url,
-    filePath,
-    reciterName,
-    reciterId,
-    status,
-    progress,
-    fileSize,
-    downloadedSize,
-    createdAt,
-    completedAt,
-  ];
-
-  DownloadItem copyWith({
-    String? id,
-    String? title,
-    String? url,
-    String? filePath,
-    String? reciterName,
+/// Represents a download item with its current state and metadata.
+@freezed
+abstract class DownloadItem with _$DownloadItem {
+  const factory DownloadItem({
+    required String id,
+    required String title,
+    required String url,
+    required String filePath,
+    required String reciterName,
     int? reciterId,
-    DownloadStatus? status,
-    double? progress,
-    int? fileSize,
-    int? downloadedSize,
-    DateTime? createdAt,
-    DateTime? completedAt,
-  }) {
-    return DownloadItem(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      url: url ?? this.url,
-      filePath: filePath ?? this.filePath,
-      reciterName: reciterName ?? this.reciterName,
-      reciterId: reciterId ?? this.reciterId,
-      status: status ?? this.status,
-      progress: progress ?? this.progress,
-      fileSize: fileSize ?? this.fileSize,
-      downloadedSize: downloadedSize ?? this.downloadedSize,
-      createdAt: createdAt ?? this.createdAt,
-      completedAt: completedAt ?? this.completedAt,
-    );
-  }
+    required DownloadStatus status,
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'url': url,
-      'filePath': filePath,
-      'reciterName': reciterName,
-      'reciterId': reciterId,
-      'status': status.name,
-      'progress': progress,
-      'fileSize': fileSize,
-      'downloadedSize': downloadedSize,
-      'createdAt': createdAt.toIso8601String(),
-      'completedAt': completedAt?.toIso8601String(),
-    };
-  }
+    /// Progress value from 0.0 to 1.0
+    required double progress,
+
+    /// File size in bytes
+    required int fileSize,
+
+    /// Downloaded size in bytes
+    required int downloadedSize,
+    required DateTime createdAt,
+    DateTime? completedAt,
+  }) = _DownloadItem;
+
+  factory DownloadItem.fromJson(Map<String, dynamic> json) =>
+      _$DownloadItemFromJson(json);
 }
 
 enum DownloadStatus {

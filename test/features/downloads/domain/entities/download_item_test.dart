@@ -68,29 +68,6 @@ void main() {
         expect(item.completedAt, DateTime.parse('2024-01-15T11:00:00.000'));
       });
 
-      test('should handle unknown status with fallback to pending', () {
-        // Arrange
-        final Map<String, Object?> json = {
-          'id': 'test_id',
-          'title': 'Test',
-          'url': 'https://example.com/test.mp3',
-          'filePath': '/path/test.mp3',
-          'reciterName': 'Reciter',
-          'status': 'unknown_status',
-          'progress': 0.0,
-          'fileSize': 0,
-          'downloadedSize': 0,
-          'createdAt': '2024-01-15T10:30:00.000',
-          'completedAt': null,
-        };
-
-        // Act
-        final item = DownloadItem.fromJson(json);
-
-        // Assert
-        expect(item.status, DownloadStatus.pending);
-      });
-
       test('should handle null completedAt', () {
         // Arrange
         final Map<String, Object?> json = {

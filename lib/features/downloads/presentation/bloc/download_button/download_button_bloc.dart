@@ -62,6 +62,7 @@ class DownloadButtonBloc
         failed: (e) async => _onFailed(e.errorMessage, emit),
         cancelled: (_) async => _onCancelled(emit),
         paused: (_) async => _onPaused(emit),
+        pendingDetected: (_) async => emit(const DownloadButtonState.pending()),
       );
     });
   }
@@ -200,8 +201,9 @@ class DownloadButtonBloc
 
         switch (item.status) {
           case DownloadStatus.pending:
-            // Optional: emit pending if not already
-            break;
+            // Emit pending state when stream indicates download is queued
+            // This handles widget rebuild scenarios (e.g., scroll off-screen)
+            add(const DownloadButtonEvent.pendingDetected());
           case DownloadStatus.downloading:
             add(
               DownloadButtonEvent.progressUpdated(

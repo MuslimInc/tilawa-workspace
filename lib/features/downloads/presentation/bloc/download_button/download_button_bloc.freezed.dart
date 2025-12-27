@@ -55,7 +55,7 @@ extension DownloadButtonEventPatterns on DownloadButtonEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initialize value)?  initialize,TResult Function( _StartDownload value)?  startDownload,TResult Function( _Retry value)?  retry,TResult Function( _Cancel value)?  cancel,TResult Function( _ProgressUpdated value)?  progressUpdated,TResult Function( _Completed value)?  completed,TResult Function( _Failed value)?  failed,TResult Function( _Cancelled value)?  cancelled,TResult Function( _Paused value)?  paused,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initialize value)?  initialize,TResult Function( _StartDownload value)?  startDownload,TResult Function( _Retry value)?  retry,TResult Function( _Cancel value)?  cancel,TResult Function( _ProgressUpdated value)?  progressUpdated,TResult Function( _Completed value)?  completed,TResult Function( _Failed value)?  failed,TResult Function( _Cancelled value)?  cancelled,TResult Function( _Paused value)?  paused,TResult Function( _PendingDetected value)?  pendingDetected,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
@@ -67,7 +67,8 @@ return progressUpdated(_that);case _Completed() when completed != null:
 return completed(_that);case _Failed() when failed != null:
 return failed(_that);case _Cancelled() when cancelled != null:
 return cancelled(_that);case _Paused() when paused != null:
-return paused(_that);case _:
+return paused(_that);case _PendingDetected() when pendingDetected != null:
+return pendingDetected(_that);case _:
   return orElse();
 
 }
@@ -85,7 +86,7 @@ return paused(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initialize value)  initialize,required TResult Function( _StartDownload value)  startDownload,required TResult Function( _Retry value)  retry,required TResult Function( _Cancel value)  cancel,required TResult Function( _ProgressUpdated value)  progressUpdated,required TResult Function( _Completed value)  completed,required TResult Function( _Failed value)  failed,required TResult Function( _Cancelled value)  cancelled,required TResult Function( _Paused value)  paused,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initialize value)  initialize,required TResult Function( _StartDownload value)  startDownload,required TResult Function( _Retry value)  retry,required TResult Function( _Cancel value)  cancel,required TResult Function( _ProgressUpdated value)  progressUpdated,required TResult Function( _Completed value)  completed,required TResult Function( _Failed value)  failed,required TResult Function( _Cancelled value)  cancelled,required TResult Function( _Paused value)  paused,required TResult Function( _PendingDetected value)  pendingDetected,}){
 final _that = this;
 switch (_that) {
 case _Initialize():
@@ -97,7 +98,8 @@ return progressUpdated(_that);case _Completed():
 return completed(_that);case _Failed():
 return failed(_that);case _Cancelled():
 return cancelled(_that);case _Paused():
-return paused(_that);case _:
+return paused(_that);case _PendingDetected():
+return pendingDetected(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -114,7 +116,7 @@ return paused(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initialize value)?  initialize,TResult? Function( _StartDownload value)?  startDownload,TResult? Function( _Retry value)?  retry,TResult? Function( _Cancel value)?  cancel,TResult? Function( _ProgressUpdated value)?  progressUpdated,TResult? Function( _Completed value)?  completed,TResult? Function( _Failed value)?  failed,TResult? Function( _Cancelled value)?  cancelled,TResult? Function( _Paused value)?  paused,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initialize value)?  initialize,TResult? Function( _StartDownload value)?  startDownload,TResult? Function( _Retry value)?  retry,TResult? Function( _Cancel value)?  cancel,TResult? Function( _ProgressUpdated value)?  progressUpdated,TResult? Function( _Completed value)?  completed,TResult? Function( _Failed value)?  failed,TResult? Function( _Cancelled value)?  cancelled,TResult? Function( _Paused value)?  paused,TResult? Function( _PendingDetected value)?  pendingDetected,}){
 final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
@@ -126,7 +128,8 @@ return progressUpdated(_that);case _Completed() when completed != null:
 return completed(_that);case _Failed() when failed != null:
 return failed(_that);case _Cancelled() when cancelled != null:
 return cancelled(_that);case _Paused() when paused != null:
-return paused(_that);case _:
+return paused(_that);case _PendingDetected() when pendingDetected != null:
+return pendingDetected(_that);case _:
   return null;
 
 }
@@ -143,7 +146,7 @@ return paused(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialize,TResult Function( String surahTitle)?  startDownload,TResult Function( String surahTitle)?  retry,TResult Function()?  cancel,TResult Function( double progress,  int downloadedBytes,  int totalBytes)?  progressUpdated,TResult Function()?  completed,TResult Function( String? errorMessage)?  failed,TResult Function()?  cancelled,TResult Function()?  paused,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initialize,TResult Function( String surahTitle)?  startDownload,TResult Function( String surahTitle)?  retry,TResult Function()?  cancel,TResult Function( double progress,  int downloadedBytes,  int totalBytes)?  progressUpdated,TResult Function()?  completed,TResult Function( String? errorMessage)?  failed,TResult Function()?  cancelled,TResult Function()?  paused,TResult Function()?  pendingDetected,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
 return initialize();case _StartDownload() when startDownload != null:
@@ -154,7 +157,8 @@ return progressUpdated(_that.progress,_that.downloadedBytes,_that.totalBytes);ca
 return completed();case _Failed() when failed != null:
 return failed(_that.errorMessage);case _Cancelled() when cancelled != null:
 return cancelled();case _Paused() when paused != null:
-return paused();case _:
+return paused();case _PendingDetected() when pendingDetected != null:
+return pendingDetected();case _:
   return orElse();
 
 }
@@ -172,7 +176,7 @@ return paused();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialize,required TResult Function( String surahTitle)  startDownload,required TResult Function( String surahTitle)  retry,required TResult Function()  cancel,required TResult Function( double progress,  int downloadedBytes,  int totalBytes)  progressUpdated,required TResult Function()  completed,required TResult Function( String? errorMessage)  failed,required TResult Function()  cancelled,required TResult Function()  paused,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initialize,required TResult Function( String surahTitle)  startDownload,required TResult Function( String surahTitle)  retry,required TResult Function()  cancel,required TResult Function( double progress,  int downloadedBytes,  int totalBytes)  progressUpdated,required TResult Function()  completed,required TResult Function( String? errorMessage)  failed,required TResult Function()  cancelled,required TResult Function()  paused,required TResult Function()  pendingDetected,}) {final _that = this;
 switch (_that) {
 case _Initialize():
 return initialize();case _StartDownload():
@@ -183,7 +187,8 @@ return progressUpdated(_that.progress,_that.downloadedBytes,_that.totalBytes);ca
 return completed();case _Failed():
 return failed(_that.errorMessage);case _Cancelled():
 return cancelled();case _Paused():
-return paused();case _:
+return paused();case _PendingDetected():
+return pendingDetected();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,7 +205,7 @@ return paused();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialize,TResult? Function( String surahTitle)?  startDownload,TResult? Function( String surahTitle)?  retry,TResult? Function()?  cancel,TResult? Function( double progress,  int downloadedBytes,  int totalBytes)?  progressUpdated,TResult? Function()?  completed,TResult? Function( String? errorMessage)?  failed,TResult? Function()?  cancelled,TResult? Function()?  paused,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initialize,TResult? Function( String surahTitle)?  startDownload,TResult? Function( String surahTitle)?  retry,TResult? Function()?  cancel,TResult? Function( double progress,  int downloadedBytes,  int totalBytes)?  progressUpdated,TResult? Function()?  completed,TResult? Function( String? errorMessage)?  failed,TResult? Function()?  cancelled,TResult? Function()?  paused,TResult? Function()?  pendingDetected,}) {final _that = this;
 switch (_that) {
 case _Initialize() when initialize != null:
 return initialize();case _StartDownload() when startDownload != null:
@@ -211,7 +216,8 @@ return progressUpdated(_that.progress,_that.downloadedBytes,_that.totalBytes);ca
 return completed();case _Failed() when failed != null:
 return failed(_that.errorMessage);case _Cancelled() when cancelled != null:
 return cancelled();case _Paused() when paused != null:
-return paused();case _:
+return paused();case _PendingDetected() when pendingDetected != null:
+return pendingDetected();case _:
   return null;
 
 }
@@ -639,6 +645,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'DownloadButtonEvent.paused()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _PendingDetected implements DownloadButtonEvent {
+  const _PendingDetected();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingDetected);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'DownloadButtonEvent.pendingDetected()';
 }
 
 

@@ -192,11 +192,7 @@ void main() {
     });
 
     testWidgets('displays default icon when artUri is null', (tester) async {
-      await tester.pumpWidget(
-        createWidget(
-          
-        ),
-      );
+      await tester.pumpWidget(createWidget());
       await tester.pumpAndSettle();
 
       // Should show the default music icon

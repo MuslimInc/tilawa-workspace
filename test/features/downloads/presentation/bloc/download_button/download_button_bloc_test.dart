@@ -432,7 +432,7 @@ void main() {
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'handles pending status from stream (no state change)',
+        'emits [pending] when stream emits pending status (handles scroll rebuild)',
         build: () {
           final item = DownloadItem(
             id: testUrl,
@@ -455,7 +455,7 @@ void main() {
         act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
         expect: () => [
           const DownloadButtonState.readyToDownload(),
-          // No additional state emission for pending status
+          const DownloadButtonState.pending(), // Now correctly emits pending
         ],
       );
 
