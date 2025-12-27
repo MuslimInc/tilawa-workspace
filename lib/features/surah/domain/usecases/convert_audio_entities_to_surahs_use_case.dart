@@ -1,33 +1,64 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/entities/audio.dart';
+import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/repositories/downloads_repository.dart';
+import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../entities/surah_entity.dart';
 import '../mappers/surah_mapper.dart';
 import '../repositories/surah_repository.dart';
 
-@Singleton()
+@injectable
 class ConvertAudioEntitiesToSurahsUseCase {
   const ConvertAudioEntitiesToSurahsUseCase(
     this._surahRepository,
     this._downloadsRepository,
+    this._recitersRepository,
   );
 
   final SurahRepository _surahRepository;
   final DownloadsRepository _downloadsRepository;
+  final RecitersRepository _recitersRepository;
 
   Future<List<SurahEntity>> call(List<AudioEntity> audioEntities) async {
     final surahList = <SurahEntity>[];
 
     // Batch fetch download statuses for all items
-    List<DownloadItem> downloads = [];
+    final List<DownloadItem> downloads = [];
     if (audioEntities.isNotEmpty) {
       final String reciterName = audioEntities.first.artist ?? '';
       if (reciterName.isNotEmpty) {
-        downloads = await _downloadsRepository.getDownloadsForReciter(
-          reciterName,
-        );
+        // 1. Get all downloads
+        final List<DownloadItem> allDownloads = await _downloadsRepository
+            .getAllDownloads();
+
+        // 2. Resolve Reciter ID
+        final Either<Failure, List<ReciterEntity>> recitersResult =
+            await _recitersRepository.getReciters();
+
+        final int? reciterId = recitersResult.fold((l) => null, (reciters) {
+          try {
+            return reciters.firstWhere((r) => r.name == reciterName).id;
+          } catch (_) {
+            return null;
+          }
+        });
+
+        // 3. Filter
+        for (final download in allDownloads) {
+          var isMatch = false;
+          if (reciterId != null && download.reciterId == reciterId) {
+            isMatch = true;
+          } else if (download.reciterName == reciterName) {
+            isMatch = true;
+          }
+          if (isMatch) {
+            downloads.add(download);
+          }
+        }
       }
     }
 

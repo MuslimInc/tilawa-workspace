@@ -56,6 +56,9 @@ class MockCancelDownloadUseCase extends Mock implements CancelDownloadUseCase {}
 class MockObserveDownloadProgressUseCase extends Mock
     implements ObserveDownloadProgressUseCase {}
 
+class MockGetValidCompletedDownloadsUseCase extends Mock
+    implements GetValidCompletedDownloadsUseCase {}
+
 void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
   late MockDownloadsBloc mockDownloadsBloc;
@@ -66,6 +69,8 @@ void main() {
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
   late MockCancelDownloadUseCase mockCancelDownloadUseCase;
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgressUseCase;
+  late MockGetValidCompletedDownloadsUseCase
+  mockGetValidCompletedDownloadsUseCase;
   late MockDownloadsRepository mockDownloadsRepository;
 
   setUpAll(() {
@@ -100,6 +105,8 @@ void main() {
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
     mockCancelDownloadUseCase = MockCancelDownloadUseCase();
     mockObserveDownloadProgressUseCase = MockObserveDownloadProgressUseCase();
+    mockGetValidCompletedDownloadsUseCase =
+        MockGetValidCompletedDownloadsUseCase();
     mockDownloadsRepository =
         GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
 
@@ -124,6 +131,11 @@ void main() {
         mockObserveDownloadProgressUseCase,
       );
     }
+    if (!GetIt.instance.isRegistered<GetValidCompletedDownloadsUseCase>()) {
+      GetIt.instance.registerSingleton<GetValidCompletedDownloadsUseCase>(
+        mockGetValidCompletedDownloadsUseCase,
+      );
+    }
 
     when(
       () => mockCheckSurahDownloadedUseCase.call(
@@ -135,6 +147,10 @@ void main() {
     when(
       () => mockObserveDownloadProgressUseCase.call(any()),
     ).thenAnswer((_) => const Stream.empty());
+
+    when(
+      () => mockGetValidCompletedDownloadsUseCase.call(any()),
+    ).thenAnswer((_) async => const Right([]));
 
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
 
@@ -646,9 +662,7 @@ void main() {
     when(
       () => mockRepository.getDownloadedFilePath(any(), any()),
     ).thenAnswer((_) async => null);
-    when(
-      () => mockRepository.getDownloadsForReciter(any()),
-    ).thenAnswer((_) async => []);
+    when(() => mockRepository.getAllDownloads()).thenAnswer((_) async => []);
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
@@ -691,7 +705,7 @@ void main() {
     when(
       () => mockRepository.getDownloadedFilePath(any(), any()),
     ).thenAnswer((_) async => downloadedPath);
-    when(() => mockRepository.getDownloadsForReciter(any())).thenAnswer(
+    when(() => mockRepository.getAllDownloads()).thenAnswer(
       (_) async => [
         DownloadItem(
           id: '001',
@@ -934,7 +948,7 @@ void main() {
         () => mockDownloadsRepository.getDownloadedFilePath(any(), any()),
       ).thenAnswer((_) async => '/path/to/fatiha.mp3');
       when(
-        () => mockDownloadsRepository.getDownloadsForReciter(any()),
+        () => mockDownloadsRepository.getAllDownloads(),
       ).thenAnswer((_) async => [downloadItem]);
 
       await tester.pumpWidget(createWidgetUnderTest());

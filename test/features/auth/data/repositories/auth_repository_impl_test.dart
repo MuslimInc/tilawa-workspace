@@ -15,16 +15,14 @@ void main() {
   late AuthRepositoryImpl authRepository;
   late MockAuthProviderFactory mockFactory;
   late MockAuthProviderInterface mockAuthProvider;
-  late MockUserRepository mockUserRepository;
 
   setUp(() {
     mockFactory = MockAuthProviderFactory();
     mockAuthProvider = MockAuthProviderInterface();
-    mockUserRepository = MockUserRepository();
 
     when(mockFactory.createAuthProvider()).thenReturn(mockAuthProvider);
 
-    authRepository = AuthRepositoryImpl(mockFactory, mockUserRepository);
+    authRepository = AuthRepositoryImpl(mockFactory);
   });
 
   group('AuthRepositoryImpl', () {
@@ -35,54 +33,31 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    test('signInWithGoogle should save user data on success', () async {
+    test('signInWithGoogle should return failure on error', () async {
       // Arrange
       when(
         mockAuthProvider.signIn(),
-      ).thenAnswer((_) async => AuthResult.success(user: tUser));
-      when(mockUserRepository.saveUserData(any)).thenAnswer((_) async => {});
+      ).thenAnswer((_) async => const AuthResult.failure(message: 'error'));
 
       // Act
       final AuthResult result = await authRepository.signInWithGoogle();
 
       // Assert
-      expect(result, AuthResult.success(user: tUser));
-      verify(mockUserRepository.saveUserData(tUser)).called(1);
+      expect(result, const AuthResult.failure(message: 'error'));
     });
 
-    test(
-      'signInWithGoogle should return failure and NOT save data on error',
-      () async {
-        // Arrange
-        when(
-          mockAuthProvider.signIn(),
-        ).thenAnswer((_) async => const AuthResult.failure(message: 'error'));
+    test('signInWithGoogle should return cancelled on cancellation', () async {
+      // Arrange
+      when(
+        mockAuthProvider.signIn(),
+      ).thenAnswer((_) async => const AuthResult.cancelled());
 
-        // Act
-        final AuthResult result = await authRepository.signInWithGoogle();
+      // Act
+      final AuthResult result = await authRepository.signInWithGoogle();
 
-        // Assert
-        expect(result, const AuthResult.failure(message: 'error'));
-        verifyNever(mockUserRepository.saveUserData(any));
-      },
-    );
-
-    test(
-      'signInWithGoogle should return cancelled and NOT save data on cancellation',
-      () async {
-        // Arrange
-        when(
-          mockAuthProvider.signIn(),
-        ).thenAnswer((_) async => const AuthResult.cancelled());
-
-        // Act
-        final AuthResult result = await authRepository.signInWithGoogle();
-
-        // Assert
-        expect(result, const AuthResult.cancelled());
-        verifyNever(mockUserRepository.saveUserData(any));
-      },
-    );
+      // Assert
+      expect(result, const AuthResult.cancelled());
+    });
 
     test('authStateChanges should delegate to provider', () {
       // Arrange

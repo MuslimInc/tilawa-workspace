@@ -1,13 +1,11 @@
 import 'package:injectable/injectable.dart';
-import '../../../downloads/domain/repositories/downloads_repository.dart';
+
 import '../../domain/entities/surah_entity.dart';
 import '../../domain/repositories/surah_repository.dart';
 
 @LazySingleton(as: SurahRepository)
 class SurahRepositoryImpl implements SurahRepository {
-  SurahRepositoryImpl(this._downloadsRepository);
-
-  final DownloadsRepository _downloadsRepository;
+  SurahRepositoryImpl();
 
   // In-memory cache for surahs
   final Map<String, SurahEntity> _surahCache = {};
@@ -59,20 +57,6 @@ class SurahRepositoryImpl implements SurahRepository {
         downloadId: downloadId,
       );
     }
-  }
-
-  @override
-  Future<bool> isSurahDownloaded(String surahId, String reciterName) async {
-    // First check cache
-    final String cacheKey = _getCacheKey(surahId, reciterName);
-    final SurahEntity? cachedSurah = _surahCache[cacheKey];
-
-    if (cachedSurah != null) {
-      return cachedSurah.isDownloaded;
-    }
-
-    // Fallback to downloads repository
-    return _downloadsRepository.isSurahDownloaded(surahId, reciterName);
   }
 
   @override

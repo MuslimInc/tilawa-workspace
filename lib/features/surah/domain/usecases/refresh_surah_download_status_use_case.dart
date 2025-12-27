@@ -20,7 +20,7 @@ class RefreshSurahDownloadStatusUseCase {
     required String reciterName,
   }) async {
     // Check download status
-    final bool isDownloaded = await _surahRepository.isSurahDownloaded(
+    final bool isDownloaded = await _downloadsRepository.isSurahDownloaded(
       surahId,
       reciterName,
     );

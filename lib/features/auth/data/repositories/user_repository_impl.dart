@@ -26,4 +26,15 @@ class UserRepositoryImpl implements UserRepository {
       'createdAt': user.createdAt.toIso8601String(),
     }, SetOptions(merge: true));
   }
+
+  @override
+  Future<void> saveDeviceToken(String userId, String token) async {
+    final DocumentReference<Map<String, dynamic>> userRef = _firestore
+        .collection('users')
+        .doc(userId);
+
+    await userRef.set({
+      'tokens': FieldValue.arrayUnion([token]),
+    }, SetOptions(merge: true));
+  }
 }

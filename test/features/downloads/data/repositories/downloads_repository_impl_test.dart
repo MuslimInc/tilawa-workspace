@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa/core/entities/reciter_entity.dart';
-import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
@@ -20,7 +17,6 @@ import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import '../../helpers/mock_helper.mocks.dart';
 
 void main() {
-  provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
@@ -63,7 +59,6 @@ void main() {
   late MockDownloadValidator mockValidator;
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
-  late MockRecitersRepository mockRecitersRepository;
   late StreamController<DownloadProgress> progressController;
 
   setUp(() async {
@@ -76,7 +71,6 @@ void main() {
     mockPathResolver = MockDownloadPathResolver();
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
-    mockRecitersRepository = MockRecitersRepository();
     // DownloadService.flutterDownloaderTestOverride = mockDownloader; // Removed: we use mockDownloadService directly
 
     // Default stubs for new services
@@ -93,9 +87,6 @@ void main() {
       (invocation) async =>
           invocation.positionalArguments[0] as List<DownloadItem>,
     );
-    when(
-      mockRecitersRepository.getReciters(),
-    ).thenAnswer((_) async => const Right([]));
 
     progressController = StreamController<DownloadProgress>.broadcast();
     when(
@@ -178,9 +169,8 @@ void main() {
       mockDownloadService,
       mockBatchDownloadManager,
       mockPathResolver,
-      mockValidator,
       mockStatusSynchronizer,
-      mockRecitersRepository,
+      mockValidator,
       downloadQueueManager,
     );
     when(
@@ -523,9 +513,8 @@ void main() {
           mockDownloadService,
           mockBatchDownloadManager,
           mockPathResolver,
-          mockValidator,
           mockStatusSynchronizer,
-          mockRecitersRepository,
+          mockValidator,
           mockQueueManager,
         );
 
@@ -573,9 +562,8 @@ void main() {
           mockDownloadService,
           mockBatchDownloadManager,
           mockPathResolver,
-          mockValidator,
           mockStatusSynchronizer,
-          mockRecitersRepository,
+          mockValidator,
           mockQueueManager,
         );
 
@@ -739,9 +727,8 @@ void main() {
             mockDownloadService,
             mockBatchDownloadManager,
             mockPathResolver,
-            mockValidator,
             mockStatusSynchronizer,
-            mockRecitersRepository,
+            mockValidator,
             mockQueueManager,
           );
 
@@ -1342,57 +1329,47 @@ void main() {
     });
 
     group('getDownloadsByReciter - Status Syncing', () {
-      test('should mark interrupted downloads as failed when app restarts', () async {
-        // This test simulates the scenario where:
-        // 1. User starts a download (status = downloading)
-        // 2. User closes the app (isolate is killed, DownloadService._tasks is empty)
-        // 3. User reopens the app
-        // 4. Download should be marked as failed since it's no longer active
+      test(
+        'should mark interrupted downloads as failed when app restarts',
+        () async {
+          // This test simulates the scenario where:
+          // 1. User starts a download (status = downloading)
+          // 2. User closes the app (isolate is killed, DownloadService._tasks is empty)
+          // 3. User reopens the app
+          // 4. Download should be marked as failed since it's no longer active
 
-        // Arrange
-        final interruptedDownload = DownloadItem(
-          id: 'https://example.com/audio.mp3_Test_Reciter',
-          title: 'Al-Fatiha',
-          url: 'https://example.com/audio.mp3',
-          filePath: '/path/to/file.mp3',
-          reciterName: 'Test Reciter',
-          reciterId: 1,
-          status: DownloadStatus.downloading, // Was downloading when app closed
-          progress: 0.5, // 50% downloaded
-          fileSize: 1000,
-          downloadedSize: 500,
-          createdAt: DateTime.now(),
-        );
+          // Arrange
+          final interruptedDownload = DownloadItem(
+            id: 'https://example.com/audio.mp3_Test_Reciter',
+            title: 'Al-Fatiha',
+            url: 'https://example.com/audio.mp3',
+            filePath: '/path/to/file.mp3',
+            reciterName: 'Test Reciter',
+            reciterId: 1,
+            status:
+                DownloadStatus.downloading, // Was downloading when app closed
+            progress: 0.5, // 50% downloaded
+            fileSize: 1000,
+            downloadedSize: 500,
+            createdAt: DateTime.now(),
+          );
 
-        when(
-          mockLocalDataSource.getDownloads(),
-        ).thenAnswer((_) async => [interruptedDownload]);
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
-          return;
-        });
+          when(
+            mockLocalDataSource.getDownloads(),
+          ).thenAnswer((_) async => [interruptedDownload]);
+          when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+            return;
+          });
 
-        // Act
-        // Note: DownloadService.getDownloadStatus() and activeDownloadIds
-        // will throw MissingPluginException in test environment, but the repository
-        // now handles this gracefully and returns downloads without syncing status
-        final Map<String, Map<String, List<DownloadItem>>> result =
-            await repository.getDownloadsByReciter();
+          // Act
+          final List<DownloadItem> result = await repository.getAllDownloads();
 
-        // Assert
-        // In test environment, status syncing is skipped, so updateDownload
-        // may or may not be called depending on the implementation
-        verify(mockLocalDataSource.getDownloads()).called(1);
-        expect(result, isA<Map<String, Map<String, List<DownloadItem>>>>());
-        // The download should be returned as-is (status syncing skipped in test)
-        expect(result.containsKey('Test Reciter'), true);
-        // Access defaults or flattened list
-        final List<DownloadItem> downloads = result['Test Reciter']!.values
-            .expand((e) => e)
-            .toList();
-        expect(downloads.length, 1);
-        // Status may remain as downloading since we can't verify it in test environment
-        expect(downloads.first.status, isA<DownloadStatus>());
-      });
+          // Assert
+          verify(mockLocalDataSource.getDownloads()).called(1);
+          expect(result.length, 1);
+          expect(result.first.status, isA<DownloadStatus>());
+        },
+      );
       test(
         'should sync status to downloading when download is active in DownloadService',
         () async {
@@ -1419,19 +1396,16 @@ void main() {
           ).thenAnswer((_) async => {});
 
           // Act
-          final Map<String, Map<String, List<DownloadItem>>> result =
-              await repository.getDownloadsByReciter();
+          final List<DownloadItem> result = await repository.getAllDownloads();
 
           // Assert
           verify(mockLocalDataSource.getDownloads()).called(1);
-          expect(result, isA<Map<String, Map<String, List<DownloadItem>>>>());
           expect(result.length, greaterThanOrEqualTo(0));
-          // If we could verify specific calls to DownloadService.isDownloadActive with URL, we would do it here.
-          // Since we can't easily spy on valid logic inside the repo's internal catch block for tests
-          // we rely on the broader structure check.
         },
       );
 
+      // Removed "should not change status when download is not active" as it duplicates others or logic changed
+      // Actually, let's keep it but refactored
       test('should not change status when download is not active', () async {
         // Arrange
         const testDownloadId = 'test_download_id';
@@ -1454,21 +1428,13 @@ void main() {
         ).thenAnswer((_) async => [testDownload]);
 
         // Act
-        // Note: DownloadService.activeDownloadIds will throw MissingPluginException
-        // in test environment, but the repository now handles this gracefully
-        final Map<String, Map<String, List<DownloadItem>>> result =
-            await repository.getDownloadsByReciter();
+        final List<DownloadItem> result = await repository.getAllDownloads();
 
         // Assert
         verify(mockLocalDataSource.getDownloads()).called(1);
-        expect(result, isA<Map<String, Map<String, List<DownloadItem>>>>());
+        expect(result.length, 1);
         // Status should remain as completed since it's not active
-        final List<DownloadItem> downloads = result.values
-            .expand((narrativeMap) => narrativeMap.values)
-            .expand((list) => list)
-            .toList();
-        expect(downloads.length, 1);
-        expect(downloads.first.status, DownloadStatus.downloading);
+        expect(result.first.status, DownloadStatus.downloading);
       });
     });
 
@@ -1771,25 +1737,14 @@ void main() {
       );
 
       // Act
-      final Map<String, Map<String, List<DownloadItem>>> result =
-          await repository.getDownloadsByReciter();
+      final List<DownloadItem> result = await repository.getAllDownloads();
 
       // Assert
       verify(mockPathResolver.getDownloadsDir()).called(1);
 
-      final Map<String, List<DownloadItem>>? narrativeMap =
-          result['Test Reciter'];
-      expect(narrativeMap, isNotNull);
-      final List<DownloadItem> downloads = narrativeMap!.values
-          .expand((e) => e)
-          .toList();
-
       // New path should be structured correctly under the new directory
-      expect(
-        downloads.first.filePath,
-        '$newDownloadsDir/$expectedRelativePath',
-      );
-      expect(downloads.first.filePath, isNot(equals(itemWithOldPath.filePath)));
+      expect(result.first.filePath, '$newDownloadsDir/$expectedRelativePath');
+      expect(result.first.filePath, isNot(equals(itemWithOldPath.filePath)));
     });
 
     test('should dynamically resolve file path in getDownloadItem', () async {
@@ -2509,9 +2464,8 @@ void main() {
           mockDownloadService,
           mockBatchDownloadManager,
           mockPathResolver,
-          mockValidator,
           mockStatusSynchronizer,
-          mockRecitersRepository,
+          mockValidator,
           mockQueueManager,
         );
 
@@ -2721,7 +2675,7 @@ void main() {
     });
   });
 
-  group('getDownloadsByReciter sync', () {
+  group('getAllDownloads sync', () {
     test('should update downloads when sync detects changes', () async {
       // Arrange
       final download = DownloadItem(
@@ -2752,13 +2706,8 @@ void main() {
         mockStatusSynchronizer.syncDownloadStatuses(any),
       ).thenAnswer((_) async => [syncedDownload]);
 
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Right([]));
-      when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
-
       // Act
-      await repository.getDownloadsByReciter();
+      await repository.getAllDownloads();
 
       // Assert
       verify(mockLocalDataSource.updateDownloads(any)).called(1);
@@ -2799,13 +2748,8 @@ void main() {
         when(
           mockStatusSynchronizer.syncDownloadStatuses(any),
         ).thenAnswer((_) async => [download1, download2]);
-        when(
-          mockRecitersRepository.getReciters(),
-        ).thenAnswer((_) async => const Right([]));
-        when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
-
         // Act
-        await repository.getDownloadsByReciter();
+        await repository.getAllDownloads();
 
         // Assert
         verify(mockLocalDataSource.updateDownloads(any)).called(1);
@@ -2858,9 +2802,8 @@ void main() {
         mockDownloadService,
         mockBatchDownloadManager,
         mockPathResolver,
-        mockValidator,
         mockStatusSynchronizer,
-        mockRecitersRepository,
+        mockValidator,
         mockQueueManager,
       );
 
@@ -2910,216 +2853,6 @@ void main() {
       // Act & Assert
       expect(() => repository.retryDownload(testId), throwsA(isA<Exception>()));
     });
-
-    test('should use localized reciter name when available', () async {
-      // Arrange
-      final download = DownloadItem(
-        id: 'id1',
-        title: 'T1',
-        url: 'u1',
-        filePath: 'p1',
-        reciterName: 'Original Name',
-        reciterId: 123,
-        status: DownloadStatus.completed,
-        progress: 1.0,
-        fileSize: 1024,
-        downloadedSize: 1024,
-        createdAt: DateTime.now(),
-      );
-
-      final reciters = [
-        const ReciterEntity(
-          id: 123,
-          name: 'Localized Name',
-          letter: 'L',
-          date: '2023-01-01',
-          moshaf: [],
-        ),
-      ];
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => [download]);
-      when(
-        mockStatusSynchronizer.syncDownloadStatuses(any),
-      ).thenAnswer((_) async => [download]);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => Right(reciters));
-
-      // Act
-      final Map<String, Map<String, List<DownloadItem>>> result =
-          await repository.getDownloadsByReciter();
-
-      // Assert
-      expect(result.containsKey('Localized Name'), isTrue);
-      expect(result.containsKey('Original Name'), isFalse);
-    });
-  });
-
-  group('getDownloadsForReciter', () {
-    test('should match by reciter ID if possible', () async {
-      // Arrange
-      const reciterName = 'Reciter';
-      final download = DownloadItem(
-        id: 'id1',
-        title: 'T1',
-        url: 'u1',
-        filePath: 'p1',
-        reciterName: 'Some Other Name', // Different name but same ID
-        reciterId: 123,
-        status: DownloadStatus.completed,
-        progress: 1.0,
-        fileSize: 1024,
-        downloadedSize: 1024,
-        createdAt: DateTime.now(),
-      );
-
-      final reciters = [
-        const ReciterEntity(
-          id: 123,
-          name: reciterName,
-          letter: 'R',
-          date: '2023-01-01',
-          moshaf: [],
-        ),
-      ];
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => [download]);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => Right(reciters));
-      when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '/tmp');
-      when(mockPathResolver.resolveDownloadPath(any, any)).thenReturn(download);
-
-      // Act
-      final List<DownloadItem> result = await repository.getDownloadsForReciter(
-        reciterName,
-      );
-
-      // Assert
-      expect(result.length, 1);
-      expect(result.first.id, 'id1');
-    });
-  });
-
-  group('deleteDownloadsForReciter', () {
-    test('should continue if cancel in download service fails', () async {
-      // Arrange
-      const reciterName = 'Reciter';
-      final download = DownloadItem(
-        id: 'id1',
-        title: 'T1',
-        url: 'u1',
-        filePath: 'p1',
-        reciterName: reciterName,
-        status: DownloadStatus.downloading,
-        progress: 0.5,
-        fileSize: 1024,
-        downloadedSize: 512,
-        createdAt: DateTime.now(),
-      );
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => [download]);
-      when(mockDownloadService.cancel(any)).thenThrow(Exception('Cancel fail'));
-      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
-      when(mockValidator.verifyFileExists(any)).thenAnswer((_) async => false);
-
-      // Act
-      await repository.deleteDownloadsForReciter(reciterName);
-
-      // Assert
-      verify(mockDownloadService.cancel(any)).called(1);
-      verify(mockLocalDataSource.deleteDownload('id1')).called(1);
-    });
-
-    test('should cancel active downloads and delete records', () async {
-      // Arrange
-      const testReciter = 'Reciter';
-      final downloads = [
-        DownloadItem(
-          id: 'id1',
-          title: 'T1',
-          url: 'u1',
-          filePath: 'p1',
-          reciterName: testReciter,
-          status: DownloadStatus.completed,
-          progress: 1.0,
-          fileSize: 1024,
-          downloadedSize: 1024,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => downloads);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Right([]));
-      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
-      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
-
-      // Act
-      await repository.deleteDownloadsForReciter(testReciter);
-
-      // Assert
-      verify(mockLocalDataSource.deleteDownload('id1')).called(1);
-    });
-  });
-
-  group('cancelDownloadsForReciter', () {
-    test('should do nothing if no downloads to cancel', () async {
-      // Arrange
-      const testReciter = 'Reciter';
-      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Right([]));
-
-      // Act
-      await repository.cancelDownloadsForReciter(testReciter);
-
-      // Assert
-      verifyNever(mockLocalDataSource.updateDownloads(any));
-    });
-
-    test('should cancel pending and downloading items', () async {
-      // Arrange
-      const testReciter = 'Reciter';
-      final downloads = [
-        DownloadItem(
-          id: 'id1',
-          title: 'T1',
-          url: 'u1',
-          filePath: 'p1',
-          reciterName: testReciter,
-          status: DownloadStatus.downloading,
-          progress: 0.5,
-          fileSize: 1024,
-          downloadedSize: 512,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => downloads);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Right([]));
-      when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
-
-      // Act
-      await repository.cancelDownloadsForReciter(testReciter);
-
-      // Assert
-      verify(mockLocalDataSource.updateDownloads(any)).called(1);
-    });
   });
 
   group('cancelDownload', () {
@@ -3142,7 +2875,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.cancelDownload(testId);
@@ -3156,7 +2891,9 @@ void main() {
       const testId = 'id1';
 
       when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-      when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+      when(mockDownloadService.cancel(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.cancelDownload(testId);
@@ -3186,7 +2923,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.updateDownloadProgress(
@@ -3227,7 +2966,9 @@ void main() {
       when(
         mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
       ).thenAnswer((_) async => false);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.updateDownloadProgress(
@@ -3271,7 +3012,9 @@ void main() {
       when(
         mockValidator.verifyFileSize(any, any),
       ).thenAnswer((_) async => false);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.updateDownloadProgress(
@@ -3325,7 +3068,9 @@ void main() {
           mockValidator.getActualFileSize(any),
         ).thenAnswer((_) async => 1024);
 
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         // Pass status as downloading, but progress as 1.0
@@ -3379,7 +3124,9 @@ void main() {
         when(
           mockValidator.getActualFileSize(any),
         ).thenAnswer((_) async => 2048); // Actual size found
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.updateDownloadProgress(
@@ -3431,7 +3178,9 @@ void main() {
         when(
           mockValidator.getActualFileSize(any),
         ).thenAnswer((_) async => null); // Check fails
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.updateDownloadProgress(
@@ -3482,7 +3231,9 @@ void main() {
         when(
           mockValidator.getActualFileSize(any),
         ).thenAnswer((_) async => 1024);
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.updateDownloadProgress(
@@ -3524,7 +3275,9 @@ void main() {
         when(
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [download]);
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.updateDownloadProgress(
@@ -3559,7 +3312,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act - pass fileSize as 0 to trigger fallback (line 803)
       await repository.updateDownloadProgress(
@@ -3617,7 +3372,9 @@ void main() {
           reciterId: anyNamed('reciterId'),
           showNotification: anyNamed('showNotification'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.resumePendingDownloads();
@@ -3672,7 +3429,9 @@ void main() {
         when(
           mockDownloadService.getStatus(any),
         ).thenAnswer((_) async => DownloadStatus.pending);
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
         when(
           mockDownloadService.download(
             id: anyNamed('id'),
@@ -3683,7 +3442,9 @@ void main() {
             reciterId: anyNamed('reciterId'),
             showNotification: anyNamed('showNotification'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.resumePendingDownloads();
@@ -3789,7 +3550,9 @@ void main() {
           reciterId: anyNamed('reciterId'),
           showNotification: anyNamed('showNotification'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.resumePendingDownloads();
@@ -3938,7 +3701,9 @@ void main() {
       when(
         mockValidator.getActualFileSize('p1'),
       ).thenAnswer((_) async => 500); // Actual size
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       final int total = await repository.getTotalDownloadsSize();
@@ -4012,83 +3777,6 @@ void main() {
         expect(total, 0); // Caught exception, added nothing
       },
     );
-  });
-
-  group('getValidCompletedDownloads', () {
-    test('should return only downloads that exist on disk', () async {
-      // Arrange
-      final d1 = DownloadItem(
-        id: '1',
-        title: 'T1',
-        url: 'u1',
-        filePath: 'p1',
-        reciterName: 'R1',
-        status: DownloadStatus.completed,
-        fileSize: 100,
-        downloadedSize: 100,
-        progress: 1.0,
-        createdAt: DateTime.now(),
-      );
-      final d2 = DownloadItem(
-        id: '2',
-        title: 'T2',
-        url: 'u2',
-        filePath: 'p2',
-        reciterName: 'R1',
-        status: DownloadStatus.completed,
-        fileSize: 100,
-        downloadedSize: 100,
-        progress: 1.0,
-        createdAt: DateTime.now(),
-      );
-
-      when(
-        mockLocalDataSource.getDownloads(),
-      ).thenAnswer((_) async => [d1, d2]);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Right([])); // Mock empty reciters
-      when(mockValidator.verifyFileExists('p1')).thenAnswer((_) async => true);
-      when(mockValidator.verifyFileExists('p2')).thenAnswer((_) async => false);
-
-      // Act
-      final List<DownloadItem> valid = await repository
-          .getValidCompletedDownloads('R1');
-
-      // Assert
-      expect(valid.length, 1);
-      expect(valid.first.id, '1');
-    });
-
-    test('should fallback to name matching if getReciters fails', () async {
-      // Arrange
-      final d1 = DownloadItem(
-        id: '1',
-        title: 'T1',
-        url: 'u1',
-        filePath: 'p1',
-        reciterName: 'R1',
-        status: DownloadStatus.completed,
-        fileSize: 100,
-        downloadedSize: 100,
-        progress: 1.0,
-        createdAt: DateTime.now(),
-      );
-
-      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => [d1]);
-      when(
-        mockRecitersRepository.getReciters(),
-      ).thenAnswer((_) async => const Left(ServerFailure('Error')));
-      when(mockValidator.verifyFileExists('p1')).thenAnswer((_) async => true);
-
-      // Act
-      final List<DownloadItem> valid = await repository
-          .getValidCompletedDownloads('R1');
-
-      // Assert
-      expect(valid.length, 1);
-      expect(valid.first.id, '1');
-    });
   });
 
   group('MediaItem Conversion', () {

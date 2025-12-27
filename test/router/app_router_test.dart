@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -42,6 +43,32 @@ void main() {
       expect(find.byIcon(Icons.error), findsOneWidget);
       expect(find.textContaining('/not-found'), findsOneWidget);
       expect(find.byType(ElevatedButton), findsOneWidget);
+    });
+
+    testWidgets('errorBuilder Go Home navigation works', (tester) async {
+      final router = GoRouter(
+        initialLocation: '/non-existent',
+        routes: [
+          GoRoute(path: '/', builder: (context, state) => const Text('Home')),
+        ],
+        errorBuilder: AppRouter.errorBuilder,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      );
+
+      expect(find.byIcon(Icons.error), findsOneWidget);
+
+      // Tap Go Home button (line 27)
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home'), findsOneWidget);
     });
 
     test('navigatorKey is initialized', () {

@@ -45,10 +45,42 @@ void main() {
     // Register DownloadService in GetIt
     final GetIt getIt = GetIt.instance;
     if (!getIt.isRegistered<DownloadServiceInterface>()) {
-      // Create the real service with the mock downloader injected
-      // This avoids using DownloadService.instance which would fail before registration
+      final mockStatusMapper = MockDownloadStatusMapper();
+      final mockFileHelper = MockDownloadFileHelper();
+      final mockIsolateManager = MockDownloadIsolateManager();
+
+      when(
+        mockIsolateManager.updateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(mockIsolateManager.registerPort()).thenReturn(null);
+
+      // Stub status mapper
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(any),
+      ).thenReturn(DownloadStatus.pending);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.running,
+        ),
+      ).thenReturn(DownloadStatus.downloading);
+      when(
+        mockStatusMapper.mapTaskStatusToDownloadStatus(
+          DownloadTaskStatus.complete,
+        ),
+      ).thenReturn(DownloadStatus.completed);
+
+      // Stub file helper
+      when(mockFileHelper.getDirectoryName(any)).thenReturn('dir');
+      when(mockFileHelper.getFileName(any)).thenReturn('file.mp3');
+      when(mockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+      when(mockFileHelper.isFileExists(any)).thenReturn(false);
+
+      // Create the real service with the mock dependencies
       final downloadService = DownloadServiceImpl(
-        flutterDownloader: mockDownloader,
+        mockDownloader,
+        mockFileHelper,
+        mockStatusMapper,
+        mockIsolateManager,
       );
       getIt.registerSingleton<DownloadServiceInterface>(downloadService);
     }
@@ -135,9 +167,8 @@ void main() {
       GetIt.instance<DownloadServiceInterface>(),
       mockBatchDownloadManager,
       mockPathResolver,
-      mockValidator,
       mockStatusSynchronizer,
-      mockRecitersRepository,
+      mockValidator,
       queueManager,
     );
 

@@ -21,6 +21,8 @@ import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dar
     as _i12;
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart'
     as _i15;
+import 'package:tilawa/features/playlists/presentation/bloc/playlists_bloc.dart'
+    as _i17;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i8;
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart'
@@ -1338,6 +1340,169 @@ class MockReciterDetailsBloc extends _i1.Mock
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
       );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void hydrate({
+    _i11.Storage? storage,
+    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+  }) => super.noSuchMethod(
+    Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i9.Future<void> clear() =>
+      (super.noSuchMethod(
+            Invocation.method(#clear, []),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+}
+
+/// A class which mocks [PlaylistsBloc].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
+  MockPlaylistsBloc() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i17.PlaylistsState get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: _i10.dummyValue<_i17.PlaylistsState>(
+              this,
+              Invocation.getter(#state),
+            ),
+          )
+          as _i17.PlaylistsState);
+
+  @override
+  _i9.Stream<_i17.PlaylistsState> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i9.Stream<_i17.PlaylistsState>.empty(),
+          )
+          as _i9.Stream<_i17.PlaylistsState>);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(Invocation.getter(#isClosed), returnValue: false)
+          as bool);
+
+  @override
+  String get id =>
+      (super.noSuchMethod(
+            Invocation.getter(#id),
+            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+          )
+          as String);
+
+  @override
+  String get storagePrefix =>
+      (super.noSuchMethod(
+            Invocation.getter(#storagePrefix),
+            returnValue: _i10.dummyValue<String>(
+              this,
+              Invocation.getter(#storagePrefix),
+            ),
+          )
+          as String);
+
+  @override
+  String get storageToken =>
+      (super.noSuchMethod(
+            Invocation.getter(#storageToken),
+            returnValue: _i10.dummyValue<String>(
+              this,
+              Invocation.getter(#storageToken),
+            ),
+          )
+          as String);
+
+  @override
+  _i17.PlaylistsState? fromJson(Map<String, dynamic>? json) =>
+      (super.noSuchMethod(Invocation.method(#fromJson, [json]))
+          as _i17.PlaylistsState?);
+
+  @override
+  Map<String, dynamic>? toJson(_i17.PlaylistsState? state) =>
+      (super.noSuchMethod(Invocation.method(#toJson, [state]))
+          as Map<String, dynamic>?);
+
+  @override
+  void add(_i17.PlaylistsEvent? event) => super.noSuchMethod(
+    Invocation.method(#add, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onEvent(_i17.PlaylistsEvent? event) => super.noSuchMethod(
+    Invocation.method(#onEvent, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void emit(_i17.PlaylistsState? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void on<E extends _i17.PlaylistsEvent>(
+    _i11.EventHandler<E, _i17.PlaylistsState>? handler, {
+    _i11.EventTransformer<E>? transformer,
+  }) => super.noSuchMethod(
+    Invocation.method(#on, [handler], {#transformer: transformer}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onTransition(
+    _i11.Transition<_i17.PlaylistsEvent, _i17.PlaylistsState>? transition,
+  ) => super.noSuchMethod(
+    Invocation.method(#onTransition, [transition]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onDone(
+    _i17.PlaylistsEvent? event, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) => super.noSuchMethod(
+    Invocation.method(#onDone, [event, error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i9.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
+  void onChange(_i11.Change<_i17.PlaylistsState>? change) => super.noSuchMethod(
+    Invocation.method(#onChange, [change]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(

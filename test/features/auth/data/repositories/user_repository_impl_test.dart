@@ -52,5 +52,16 @@ void main() {
       expect(docSnapshot.data()!['email'], tUser.email);
       expect(docSnapshot.data()!['existingField'], 'value');
     });
+
+    test('saveDeviceToken should add token to tokens array', () async {
+      // Act
+      await userRepository.saveDeviceToken('user_123', 'token_abc');
+
+      // Assert
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await fakeFirestore.collection('users').doc('user_123').get();
+      expect(docSnapshot.exists, true);
+      expect(docSnapshot.data()!['tokens'], contains('token_abc'));
+    });
   });
 }

@@ -12,17 +12,11 @@ abstract class DownloadQueryRepository {
   /// Initialize the repository (start listening to progress updates)
   Future<void> initialize();
 
-  /// Get all downloads grouped by reciter and then by narrative
-  Future<Map<String, Map<String, List<DownloadItem>>>> getDownloadsByReciter();
-
-  /// Get downloads for a specific reciter
-  Future<List<DownloadItem>> getDownloadsForReciter(String reciterName);
+  /// Get all downloads (raw list)
+  Future<List<DownloadItem>> getAllDownloads();
 
   /// Get a specific download item by ID
   Future<DownloadItem?> getDownloadItem(String id);
-
-  /// Get valid completed downloads for a reciter
-  Future<List<DownloadItem>> getValidCompletedDownloads(String reciterName);
 
   /// Validate if downloaded file exists on disk
   Future<bool> validateDownloadedFile(DownloadItem download);

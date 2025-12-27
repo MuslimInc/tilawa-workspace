@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/get_downloads_by_reciter_use_case.dart';
@@ -10,319 +11,122 @@ import '../../helpers/mock_helper.mocks.dart';
 void main() {
   late GetDownloadsByReciterUseCase useCase;
   late MockDownloadsRepository mockRepository;
+  late MockRecitersRepository mockRecitersRepository;
+
+  void provideDummies() {
+    provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
+  }
 
   setUp(() {
+    provideDummies();
     mockRepository = MockDownloadsRepository();
-    useCase = GetDownloadsByReciterUseCase(mockRepository);
+    mockRecitersRepository = MockRecitersRepository();
+    useCase = GetDownloadsByReciterUseCase(
+      mockRepository,
+      mockRecitersRepository,
+    );
   });
 
+  const testReciterId = 1;
+  const testReciterName = 'Abdul Rahman Al-Sudais';
+
+  const testReciter = ReciterEntity(
+    id: testReciterId,
+    name: testReciterName,
+    letter: 'A',
+    date: '2024-01-01',
+    moshaf: [],
+  );
+
+  final downloadItem = DownloadItem(
+    id: '1',
+    reciterName: 'Old Name', // Should be overridden by ReciterEntity name
+    reciterId: testReciterId,
+    status: DownloadStatus.completed,
+    title: 'Al-Fatiha',
+    url: 'url1',
+    filePath: "/downloads/$testReciterName/Rewayat Hafs A'n Assem/001.mp3",
+    progress: 1.0,
+    fileSize: 1024,
+    downloadedSize: 1024,
+    createdAt: DateTime.now(),
+  );
+
   group('GetDownloadsByReciterUseCase', () {
-    group('call', () {
-      test(
-        'should return Right(Map) when repository returns downloads',
-        () async {
-          // Arrange
-          final testDownloads = <String, Map<String, List<DownloadItem>>>{
-            'Abdul Rahman Al-Sudais': {
-              'Default': [
-                DownloadItem(
-                  id: '001_Abdul_Rahman_Al-Sudais',
-                  title: 'Al-Fatiha',
-                  url: 'https://example.com/audio.mp3',
-                  filePath: '/path/to/file.mp3',
-                  reciterName: 'Abdul Rahman Al-Sudais',
-                  status: DownloadStatus.completed,
-                  progress: 1.0,
-                  fileSize: 1024000,
-                  downloadedSize: 1024000,
-                  createdAt: DateTime.now(),
-                ),
-              ],
-            },
-            'Mishary Rashid Alafasy': {
-              'Default': [
-                DownloadItem(
-                  id: '002_Mishary_Rashid_Alafasy',
-                  title: 'Al-Baqarah',
-                  url: 'https://example.com/audio2.mp3',
-                  filePath: '/path/to/file2.mp3',
-                  reciterName: 'Mishary Rashid Alafasy',
-                  status: DownloadStatus.completed,
-                  progress: 1.0,
-                  fileSize: 2048000,
-                  downloadedSize: 2048000,
-                  createdAt: DateTime.now(),
-                ),
-              ],
-            },
-          };
+    test('should group downloads by reciter and narrative', () async {
+      // Arrange
+      when(
+        mockRepository.getAllDownloads(),
+      ).thenAnswer((_) async => [downloadItem]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([testReciter]));
 
-          when(
-            mockRepository.getDownloadsByReciter(),
-          ).thenAnswer((_) async => testDownloads);
+      // Act
+      final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
+      result = await useCase();
 
-          // Act
-          final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-          result = await useCase();
+      // Assert
+      expect(result, isA<Right>());
+      final Map<String, Map<String, List<DownloadItem>>> grouped = result
+          .getOrElse(() => {});
 
-          // Assert
-          result.fold(
-            (_) => fail('Expected Right but got Left'),
-            (downloads) => expect(downloads, testDownloads),
-          );
-          verify(mockRepository.getDownloadsByReciter()).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
+      // key should be reciter name (from entity lookup)
+      expect(grouped.containsKey(testReciterName), true);
+
+      // inner key should be narrative (extracted from path)
+      // Path: .../Rewayat Hafs A'n Assem/...
+      expect(
+        grouped[testReciterName]!.containsKey("Rewayat Hafs A'n Assem"),
+        true,
       );
 
-      test(
-        'should return Right(empty Map) when repository returns empty map',
-        () async {
-          // Arrange
-          const testDownloads = <String, Map<String, List<DownloadItem>>>{};
-
-          when(
-            mockRepository.getDownloadsByReciter(),
-          ).thenAnswer((_) async => testDownloads);
-
-          // Act
-          final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-          result = await useCase();
-
-          // Assert
-          result.fold(
-            (_) => fail('Expected Right but got Left'),
-            (downloads) => expect(downloads, testDownloads),
-          );
-          verify(mockRepository.getDownloadsByReciter()).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
+      // item should be in the list
+      expect(
+        grouped[testReciterName]!["Rewayat Hafs A'n Assem"]!.first,
+        downloadItem,
       );
 
-      test(
-        'should return Left(AudioFailure) when repository throws exception',
-        () async {
-          // Arrange
-          const errorMessage = 'Database connection failed';
-          when(
-            mockRepository.getDownloadsByReciter(),
-          ).thenThrow(Exception(errorMessage));
+      verify(mockRepository.getAllDownloads()).called(1);
+      verify(mockRecitersRepository.getReciters()).called(1);
+    });
 
-          // Act
-          final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-          result = await useCase();
-
-          // Assert
-          result.fold((failure) {
-            expect(failure, isA<AudioFailure>());
-            expect(failure.message, 'Exception: $errorMessage');
-          }, (_) => fail('Expected Left but got Right'));
-          verify(mockRepository.getDownloadsByReciter()).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
+    test('should fallback to stored reciter name if ID lookup fails', () async {
+      // Arrange
+      final DownloadItem itemNoId = downloadItem.copyWith(
+        reciterName: 'Stored Name',
+        reciterId: 999, // Use ID that won't be in the lookup
       );
 
-      test(
-        'should return Left(AudioFailure) when repository throws generic exception',
-        () async {
-          // Arrange
-          when(
-            mockRepository.getDownloadsByReciter(),
-          ).thenThrow('Generic error');
+      when(
+        mockRepository.getAllDownloads(),
+      ).thenAnswer((_) async => [itemNoId]);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([testReciter]));
 
-          // Act
-          final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-          result = await useCase();
+      // Act
+      final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
+      result = await useCase();
 
-          // Assert
-          result.fold((failure) {
-            expect(failure, isA<AudioFailure>());
-            expect(failure.message, 'Generic error');
-          }, (_) => fail('Expected Left but got Right'));
-          verify(mockRepository.getDownloadsByReciter()).called(1);
-          verifyNoMoreInteractions(mockRepository);
-        },
-      );
+      // Assert
+      expect(result, isA<Right>());
+      final Map<String, Map<String, List<DownloadItem>>> grouped = result
+          .getOrElse(() => {});
+      expect(grouped.containsKey('Stored Name'), true);
+    });
 
-      test('should handle downloads with different statuses', () async {
-        // Arrange
-        final testDownloads = <String, Map<String, List<DownloadItem>>>{
-          'Test Reciter': {
-            'Default': [
-              DownloadItem(
-                id: '001_Test_Reciter',
-                title: 'Al-Fatiha',
-                url: 'https://example.com/audio.mp3',
-                filePath: '/path/to/file.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.pending,
-                progress: 0.0,
-                fileSize: 1024000,
-                downloadedSize: 0,
-                createdAt: DateTime.now(),
-              ),
-              DownloadItem(
-                id: '002_Test_Reciter',
-                title: 'Al-Baqarah',
-                url: 'https://example.com/audio2.mp3',
-                filePath: '/path/to/file2.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.downloading,
-                progress: 0.5,
-                fileSize: 2048000,
-                downloadedSize: 1024000,
-                createdAt: DateTime.now(),
-              ),
-              DownloadItem(
-                id: '003_Test_Reciter',
-                title: 'Ali Imran',
-                url: 'https://example.com/audio3.mp3',
-                filePath: '/path/to/file3.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.failed,
-                progress: 0.3,
-                fileSize: 1536000,
-                downloadedSize: 460800,
-                createdAt: DateTime.now(),
-              ),
-              DownloadItem(
-                id: '004_Test_Reciter',
-                title: 'An-Nisa',
-                url: 'https://example.com/audio4.mp3',
-                filePath: '/path/to/file4.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.paused,
-                progress: 0.7,
-                fileSize: 1792000,
-                downloadedSize: 1254400,
-                createdAt: DateTime.now(),
-              ),
-              DownloadItem(
-                id: '005_Test_Reciter',
-                title: 'Al-Maidah',
-                url: 'https://example.com/audio5.mp3',
-                filePath: '/path/to/file5.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.cancelled,
-                progress: 0.2,
-                fileSize: 1280000,
-                downloadedSize: 256000,
-                createdAt: DateTime.now(),
-              ),
-            ],
-          },
-        };
+    test('should return AudioFailure when repository fails', () async {
+      // Arrange
+      when(mockRepository.getAllDownloads()).thenThrow(Exception('DB Error'));
 
-        when(
-          mockRepository.getDownloadsByReciter(),
-        ).thenAnswer((_) async => testDownloads);
+      // Act
+      final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
+      result = await useCase();
 
-        // Act
-        final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-        result = await useCase();
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (downloads) => expect(downloads, testDownloads),
-        );
-        verify(mockRepository.getDownloadsByReciter()).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle large number of downloads', () async {
-        // Arrange
-        final testDownloads = <String, Map<String, List<DownloadItem>>>{};
-
-        // Create 100 downloads for 10 different reciters
-        for (var i = 0; i < 10; i++) {
-          final reciterName = 'Reciter $i';
-          final downloads = <DownloadItem>[];
-
-          for (var j = 1; j <= 10; j++) {
-            downloads.add(
-              DownloadItem(
-                id: '${j.toString().padLeft(3, '0')}_Reciter_$i',
-                title: 'Surah $j',
-                url: 'https://example.com/audio$j.mp3',
-                filePath: '/path/to/file$j.mp3',
-                reciterName: reciterName,
-                status: DownloadStatus.completed,
-                progress: 1.0,
-                fileSize: 1024000 * j,
-                downloadedSize: 1024000 * j,
-                createdAt: DateTime.now(),
-              ),
-            );
-          }
-
-          testDownloads[reciterName] = {'Default': downloads};
-        }
-
-        when(
-          mockRepository.getDownloadsByReciter(),
-        ).thenAnswer((_) async => testDownloads);
-
-        // Act
-        final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-        result = await useCase();
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (downloads) => expect(downloads, testDownloads),
-        );
-        expect(result.getOrElse(() => {}).length, 10);
-        expect(
-          result
-              .getOrElse(() => {})
-              .values
-              .expand((map) => map.values)
-              .expand((list) => list)
-              .length,
-          100,
-        );
-        verify(mockRepository.getDownloadsByReciter()).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
-
-      test('should handle null values in download items gracefully', () async {
-        // Arrange
-        final testDownloads = <String, Map<String, List<DownloadItem>>>{
-          'Test Reciter': {
-            'Default': [
-              DownloadItem(
-                id: '001_Test_Reciter',
-                title: 'Al-Fatiha',
-                url: 'https://example.com/audio.mp3',
-                filePath: '/path/to/file.mp3',
-                reciterName: 'Test Reciter',
-                status: DownloadStatus.completed,
-                progress: 1.0,
-                fileSize: 1024000,
-                downloadedSize: 1024000,
-                createdAt: DateTime.now(),
-              ),
-            ],
-          },
-        };
-
-        when(
-          mockRepository.getDownloadsByReciter(),
-        ).thenAnswer((_) async => testDownloads);
-
-        // Act
-        final Either<Failure, Map<String, Map<String, List<DownloadItem>>>>
-        result = await useCase();
-
-        // Assert
-        result.fold(
-          (_) => fail('Expected Right but got Left'),
-          (downloads) => expect(downloads, testDownloads),
-        );
-        verify(mockRepository.getDownloadsByReciter()).called(1);
-        verifyNoMoreInteractions(mockRepository);
-      });
+      // Assert
+      expect(result, isA<Left>());
+      expect(result.fold((l) => l, (r) => null), isA<AudioFailure>());
     });
   });
 }

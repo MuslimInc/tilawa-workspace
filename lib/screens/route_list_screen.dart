@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import '../router/app_router_config.dart';
 
 class RouteListScreen extends StatelessWidget {
-  const RouteListScreen({super.key});
+  const RouteListScreen({super.key, this.routes});
+
+  final List<RouteBase>? routes;
 
   @override
   Widget build(BuildContext context) {
-    final List<String> interactions = _getAllRoutes($appRoutes);
+    final List<String> interactions = _getAllRoutes(routes ?? $appRoutes);
 
     return Scaffold(
       appBar: AppBar(title: const Text('All Routes')),

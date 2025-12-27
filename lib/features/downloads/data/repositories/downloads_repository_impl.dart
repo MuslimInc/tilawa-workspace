@@ -1,16 +1,12 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/config/config.dart';
 import '../../../../core/config/notification_config.dart';
-import '../../../../core/entities/reciter_entity.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../main.dart';
-import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';
@@ -34,9 +30,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.downloadService,
     this.batchDownloadManager,
     this.pathResolver,
-    this.validator,
     this.statusSynchronizer,
-    this.recitersRepository,
+    this.validator,
     this.queueManager,
   );
 
@@ -44,9 +39,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   final DownloadServiceInterface downloadService;
   final BatchDownloadManager batchDownloadManager;
   final DownloadPathResolver pathResolver;
-  final DownloadValidator validator;
   final DownloadStatusSynchronizer statusSynchronizer;
-  final RecitersRepository recitersRepository;
+  final DownloadValidator validator;
   final DownloadQueueManager queueManager;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
@@ -80,128 +74,53 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   }
 
   @override
-  Future<Map<String, Map<String, List<DownloadItem>>>>
-  getDownloadsByReciter() async {
-    final List<DownloadItem> rawDownloads = await localDataSource
-        .getDownloads();
-    final String downloadsDir = await pathResolver.getDownloadsDir();
-
-    // Resolve paths for all downloads
-    final List<DownloadItem> downloads = rawDownloads
-        .map((item) => pathResolver.resolveDownloadPath(item, downloadsDir))
-        .toList();
-
-    // Synchronize statuses using the new service
-    final List<DownloadItem> updatedDownloads = await statusSynchronizer
-        .syncDownloadStatuses(downloads);
-
-    // Identify if any changes occurred during sync
-    var hasChanges = updatedDownloads.length != downloads.length;
-    if (!hasChanges) {
-      for (var i = 0; i < downloads.length; i++) {
-        if (updatedDownloads[i] != downloads[i]) {
-          hasChanges = true;
-          break;
-        }
-      }
-    }
-
-    // Save updated downloads if there were any changes
-    if (hasChanges) {
-      final List<DownloadItem> changedItems = [];
-      if (updatedDownloads.length == downloads.length) {
-        for (var i = 0; i < updatedDownloads.length; i++) {
-          if (updatedDownloads[i] != downloads[i]) {
-            changedItems.add(updatedDownloads[i]);
-          }
-        }
-      } else {
-        changedItems.addAll(updatedDownloads);
-      }
-
-      if (changedItems.isNotEmpty) {
-        await localDataSource.updateDownloads(changedItems);
-      }
-    }
-
-    // Get localized reciter names
-    final Either<Failure, List<ReciterEntity>> recitersResult =
-        await recitersRepository.getReciters();
-    final List<ReciterEntity> reciters = recitersResult.getOrElse(() => []);
-    final Map<int, String> reciterNameLookup = {
-      for (final r in reciters) r.id: r.name,
-    };
-
-    return _groupDownloadsByReciter(updatedDownloads, reciterNameLookup);
-  }
-
-  /// Groups downloads by reciter name and then by narrative
-  Map<String, Map<String, List<DownloadItem>>> _groupDownloadsByReciter(
-    List<DownloadItem> downloads,
-    Map<int, String> reciterNameLookup,
-  ) {
-    final Map<String, Map<String, List<DownloadItem>>> grouped = {};
+  Future<List<DownloadItem>> getAllDownloads() async {
+    final List<DownloadItem> downloads = await localDataSource.getDownloads();
+    final List<DownloadItem> pathResolvedDownloads = [];
 
     for (final download in downloads) {
-      // Use localized name from lookup if available, otherwise fallback to saved name
-      String reciterName = download.reciterName;
-      if (download.reciterId != null &&
-          reciterNameLookup.containsKey(download.reciterId)) {
-        reciterName = reciterNameLookup[download.reciterId!]!;
-      }
+      // Resolve absolute file path
+      final String downloadsDir = await pathResolver.getDownloadsDir();
+      final String filePath = pathResolver
+          .resolveDownloadPath(download, downloadsDir)
+          .filePath;
 
-      final String narrative = DownloadPathUtils.extractNarrativeFromPath(
-        download.filePath,
-      );
-
-      // Ensure reciter group exists
-      if (!grouped.containsKey(reciterName)) {
-        grouped[reciterName] = {};
-      }
-
-      // Ensure narrative group exists within reciter
-      if (!grouped[reciterName]!.containsKey(narrative)) {
-        grouped[reciterName]![narrative] = [];
-      }
-
-      // Add download to appropriate narrative group
-      grouped[reciterName]![narrative]!.add(download);
+      pathResolvedDownloads.add(download.copyWith(filePath: filePath));
     }
 
-    return grouped;
-  }
+    // Sync download statuses (batch)
+    final List<DownloadItem> syncedDownloads = await statusSynchronizer
+        .syncDownloadStatuses(pathResolvedDownloads);
 
-  @override
-  Future<List<DownloadItem>> getDownloadsForReciter(String reciterName) async {
-    final List<DownloadItem> rawDownloads = await localDataSource
-        .getDownloads();
-    final String downloadsDir = await pathResolver.getDownloadsDir();
+    // Update in database if changed
+    // syncDownloadStatuses returns the full list with updates applied.
+    // We should compare against original 'downloads' to find changes?
+    // Or just update all? Or let updateDownloads handle uniqueness?
+    // DownloadItem implements Equatable? Yes.
 
-    // Try to find the reciter by name (could be localized or original)
-    // to get its ID for more accurate filtering
-    final Either<Failure, List<ReciterEntity>> recitersResult =
-        await recitersRepository.getReciters();
-    final List<ReciterEntity> reciters = recitersResult.getOrElse(() => []);
+    // Optimisation: Find changed items
+    final List<DownloadItem> changedItems = [];
+    for (final syncedDownload in syncedDownloads) {
+      // Find matching item in local DB
+      final int index = downloads.indexWhere((d) => d.id == syncedDownload.id);
 
-    int? targetReciterId;
-    for (final reciter in reciters) {
-      if (reciter.name == reciterName) {
-        targetReciterId = reciter.id;
-        break;
+      if (index == -1) {
+        // New item (not in DB) -> needs update (insert)
+        changedItems.add(syncedDownload);
+      } else {
+        // Existing item -> check if changed
+        final DownloadItem original = downloads[index];
+        if (syncedDownload != original) {
+          changedItems.add(syncedDownload);
+        }
       }
     }
 
-    return rawDownloads
-        .where((d) {
-          // Priority 1: Match by ID if we found it
-          if (targetReciterId != null && d.reciterId == targetReciterId) {
-            return true;
-          }
-          // Priority 2: Match by name (fallback for legacy data without ID)
-          return d.reciterName == reciterName;
-        })
-        .map((item) => pathResolver.resolveDownloadPath(item, downloadsDir))
-        .toList();
+    if (changedItems.isNotEmpty) {
+      await localDataSource.updateDownloads(changedItems);
+    }
+
+    return syncedDownloads;
   }
 
   @override
@@ -240,69 +159,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       await localDataSource.deleteFile(download.filePath);
     }
     await localDataSource.deleteDownload(id);
-  }
-
-  @override
-  Future<void> deleteDownloadsForReciter(String reciterName) async {
-    // Cancel any active downloads first
-    await cancelDownloadsForReciter(reciterName);
-
-    final List<DownloadItem> downloads = await getDownloadsForReciter(
-      reciterName,
-    );
-    for (final download in downloads) {
-      await deleteDownload(download.id);
-    }
-  }
-
-  @override
-  Future<void> cancelDownloadsForReciter(String reciterName) async {
-    final List<DownloadItem> downloads = await getDownloadsForReciter(
-      reciterName,
-    );
-    final List<DownloadItem> toCancel = downloads
-        .where(
-          (d) =>
-              d.status == DownloadStatus.downloading ||
-              d.status == DownloadStatus.pending,
-        )
-        .toList();
-
-    if (toCancel.isEmpty) {
-      return;
-    }
-
-    final List<DownloadItem> updatedItems = [];
-
-    for (final item in toCancel) {
-      // Remove from queue
-      queueManager.removeFromQueue(item.id);
-
-      // Cancel in download service
-      try {
-        await downloadService.cancel(item.url);
-      } catch (e) {
-        logger.w(
-          '[DownloadsRepository] Error canceling download ${item.id}: $e',
-        );
-      }
-
-      // Delete partial file if exists
-      final bool fileExists = await validator.verifyFileExists(item.filePath);
-      if (fileExists) {
-        await localDataSource.deleteFile(item.filePath);
-      }
-
-      final DownloadItem updatedItem = item.copyWith(
-        status: DownloadStatus.cancelled,
-      );
-      updatedItems.add(updatedItem);
-    }
-
-    if (updatedItems.isNotEmpty) {
-      await localDataSource.updateDownloads(updatedItems);
-      updatedItems.forEach(_downloadUpdatesController.add);
-    }
   }
 
   @override
@@ -858,27 +714,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<bool> validateDownloadedFile(DownloadItem download) async {
     return validator.verifyFileExists(download.filePath);
-  }
-
-  @override
-  Future<List<DownloadItem>> getValidCompletedDownloads(
-    String reciterName,
-  ) async {
-    final List<DownloadItem> downloads = await getDownloadsForReciter(
-      reciterName,
-    );
-    final validDownloads = <DownloadItem>[];
-
-    for (final download in downloads) {
-      if (download.status == DownloadStatus.completed) {
-        final bool fileExists = await validateDownloadedFile(download);
-        if (fileExists) {
-          validDownloads.add(download);
-        }
-      }
-    }
-
-    return validDownloads;
   }
 
   @override

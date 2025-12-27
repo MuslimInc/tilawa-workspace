@@ -4,6 +4,8 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_impl.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/utils/download_path_utils.dart';
 
 import 'helpers/mock_helper.mocks.dart';
 
@@ -11,16 +13,55 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockFlutterDownloaderWrapper mockDownloader;
+  late MockDownloadIsolateManager mockIsolateManager;
+  late MockDownloadStatusMapper mockStatusMapper;
+  late MockDownloadFileHelper mockFileHelper;
 
   setUp(() {
     mockDownloader = MockFlutterDownloaderWrapper();
+    mockIsolateManager = MockDownloadIsolateManager();
+    mockStatusMapper = MockDownloadStatusMapper();
+    mockFileHelper = MockDownloadFileHelper();
 
     when(
-      mockDownloader.initialize(debug: anyNamed('debug')),
+      mockDownloader.initialize(
+        debug: anyNamed('debug'),
+        ignoreSsl: anyNamed('ignoreSsl'),
+      ),
     ).thenAnswer((_) async {});
+
     when(
       mockDownloader.registerCallback(any, step: anyNamed('step')),
     ).thenAnswer((_) async {});
+
+    when(mockIsolateManager.registerPort()).thenReturn(null);
+    when(
+      mockIsolateManager.updateStream,
+    ).thenAnswer((_) => const Stream.empty());
+
+    // Status map stubs for realistic restart behavior
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(any),
+    ).thenReturn(DownloadStatus.pending);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(
+        DownloadTaskStatus.running,
+      ),
+    ).thenReturn(DownloadStatus.downloading);
+    when(
+      mockStatusMapper.mapTaskStatusToDownloadStatus(
+        DownloadTaskStatus.complete,
+      ),
+    ).thenReturn(DownloadStatus.completed);
+
+    when(mockFileHelper.getDirectoryName(any)).thenAnswer(
+      (inv) => DownloadPathUtils.getDirectoryName(inv.positionalArguments[0]),
+    );
+    when(mockFileHelper.getFileName(any)).thenAnswer(
+      (inv) => DownloadPathUtils.getFileName(inv.positionalArguments[0]),
+    );
+    when(mockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
+    when(mockFileHelper.isFileExists(any)).thenReturn(false);
   });
 
   tearDown(() async {
@@ -87,7 +128,12 @@ void main() {
 
       // Act
       // Initialize service (simulating app restart with new instance)
-      final service = DownloadServiceImpl(flutterDownloader: mockDownloader);
+      final service = DownloadServiceImpl(
+        mockDownloader,
+        mockFileHelper,
+        mockStatusMapper,
+        mockIsolateManager,
+      );
 
       final List<String> activeIds = await service.getActiveDownloadIds();
 
