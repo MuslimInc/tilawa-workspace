@@ -7,6 +7,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/config/language_config.dart';
 import '../../../../core/extensions.dart';
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -21,194 +22,210 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: Text(context.l10n.settings)),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-        child: Column(
-          children: [
-            // User Profile Section
-            _buildProfileSection(context),
-            SizedBox(height: 32.h),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        state.when(
+          initial: () {},
+          loading: () {},
+          authenticated: (_) {},
+          unauthenticated: () {
+            // Navigate to login on logout
+            const LoginRoute().go(context);
+          },
+          error: (message) {
+            ToastUtils.showErrorToast(message);
+          },
+        );
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(title: Text(context.l10n.settings)),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+          child: Column(
+            children: [
+              // User Profile Section
+              _buildProfileSection(context),
+              SizedBox(height: 32.h),
 
-            // General Group (Theme & Language)
-            _SettingsGroup(
-              title: context.l10n.appearance,
-              children: [
-                BlocBuilder<ThemeCubit, ThemeState>(
-                  builder: (context, state) {
-                    return _SettingsTile(
-                      icon: FluentIcons.dark_theme_24_regular,
-                      title: context.l10n.theme,
-                      subtitle: _getThemeName(context, state.mode),
-                      onTap: () => _showThemePicker(context, state.mode),
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16.r),
-                      ),
-                    );
-                  },
-                ),
-                BlocBuilder<LocalizationBloc, LocalizationState>(
-                  builder: (context, state) {
-                    return _SettingsTile(
-                      icon: FluentIcons.local_language_24_regular,
-                      title: context.l10n.language,
-                      subtitle:
-                          state.locale.languageCode ==
-                              LanguageConfig.defaultLanguageCode
-                          ? context.l10n.arabic
-                          : context.l10n.english,
-                      onTap: () => _showLanguagePicker(context, state.locale),
-                      showDivider: false,
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(16.r),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-
-            SizedBox(height: 24.h),
-
-            // Audio Group
-            _SettingsGroup(
-              title: context.l10n.audioSettings,
-              children: [
-                BlocBuilder<SettingsCubit, SettingsState>(
-                  builder: (context, state) {
-                    return _SwitchSettingsTile(
-                      icon: FluentIcons.history_24_regular,
-                      title: context.l10n.restorePlaybackState,
-                      subtitle: context.l10n.restorePlaybackStateSubtitle,
-                      value: state.restorePlaybackState,
-                      onChanged: (value) {
-                        context
-                            .read<SettingsCubit>()
-                            .toggleRestorePlaybackState(value);
-                      },
-                      showDivider: false,
-                    );
-                  },
-                ),
-              ],
-            ),
-
-            SizedBox(height: 24.h),
-
-            // Downloads Group
-            _SettingsGroup(
-              title: context.l10n.downloads,
-              children: [
-                _SettingsTile(
-                  icon: FluentIcons.folder_24_regular,
-                  title: context.l10n.manageStorage,
-                  subtitle: context.l10n.manageStorageSubtitle,
-                  onTap: () => const DownloadsRoute().push(context),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(16.r),
-                  ),
-                ),
-                BlocBuilder<SettingsCubit, SettingsState>(
-                  builder: (context, state) {
-                    return _SettingsTile(
-                      icon: FluentIcons.arrow_download_24_regular,
-                      title: context.l10n.concurrentDownloads,
-                      subtitle: context.l10n.concurrentDownloadsSubtitle(
-                        state.maxConcurrentDownloads,
-                      ),
-                      onTap: () => _showConcurrentDownloadsPicker(
-                        context,
-                        state.maxConcurrentDownloads,
-                      ),
-                      showDivider: false,
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(16.r),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-
-            SizedBox(height: 32.h),
-
-            // Logout Button
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is AuthAuthenticated) {
-                  return InkWell(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(context.l10n.logout),
-                          content: Text(context.l10n.logoutConfirmation),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(context.l10n.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                context.read<AuthBloc>().add(
-                                  const SignOutEvent(),
-                                );
-                              },
-                              child: Text(
-                                context.l10n.logout,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
+              // General Group (Theme & Language)
+              _SettingsGroup(
+                title: context.l10n.appearance,
+                children: [
+                  BlocBuilder<ThemeCubit, ThemeState>(
+                    builder: (context, state) {
+                      return _SettingsTile(
+                        icon: FluentIcons.dark_theme_24_regular,
+                        title: context.l10n.theme,
+                        subtitle: _getThemeName(context, state.mode),
+                        onTap: () => _showThemePicker(context, state.mode),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(16.r),
                         ),
                       );
                     },
-                    borderRadius: BorderRadius.circular(16.r),
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.1),
+                  ),
+                  BlocBuilder<LocalizationBloc, LocalizationState>(
+                    builder: (context, state) {
+                      return _SettingsTile(
+                        icon: FluentIcons.local_language_24_regular,
+                        title: context.l10n.language,
+                        subtitle:
+                            state.locale.languageCode ==
+                                LanguageConfig.defaultLanguageCode
+                            ? context.l10n.arabic
+                            : context.l10n.english,
+                        onTap: () => _showLanguagePicker(context, state.locale),
+                        showDivider: false,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(16.r),
                         ),
-                      ),
-                      child: Text(
-                        context.l10n.logout,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-
-            // Route List (Dev)
-            if (kDebugMode) ...[
-              SizedBox(height: 32.h),
-              _SettingsTile(
-                icon: Icons.list_alt_rounded,
-                title: 'Route List (Dev)',
-                onTap: () => const RouteListRoute().push(context),
-                borderRadius: BorderRadius.circular(16.r),
-                showDivider: false,
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
 
-            SizedBox(height: 32.h),
-          ],
+              SizedBox(height: 24.h),
+
+              // Audio Group
+              _SettingsGroup(
+                title: context.l10n.audioSettings,
+                children: [
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, state) {
+                      return _SwitchSettingsTile(
+                        icon: FluentIcons.history_24_regular,
+                        title: context.l10n.restorePlaybackState,
+                        subtitle: context.l10n.restorePlaybackStateSubtitle,
+                        value: state.restorePlaybackState,
+                        onChanged: (value) {
+                          context
+                              .read<SettingsCubit>()
+                              .toggleRestorePlaybackState(value);
+                        },
+                        showDivider: false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 24.h),
+
+              // Downloads Group
+              _SettingsGroup(
+                title: context.l10n.downloads,
+                children: [
+                  _SettingsTile(
+                    icon: FluentIcons.folder_24_regular,
+                    title: context.l10n.manageStorage,
+                    subtitle: context.l10n.manageStorageSubtitle,
+                    onTap: () => const DownloadsRoute().push(context),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16.r),
+                    ),
+                  ),
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, state) {
+                      return _SettingsTile(
+                        icon: FluentIcons.arrow_download_24_regular,
+                        title: context.l10n.concurrentDownloads,
+                        subtitle: context.l10n.concurrentDownloadsSubtitle(
+                          state.maxConcurrentDownloads,
+                        ),
+                        onTap: () => _showConcurrentDownloadsPicker(
+                          context,
+                          state.maxConcurrentDownloads,
+                        ),
+                        showDivider: false,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(16.r),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 32.h),
+
+              // Logout Button
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthAuthenticated) {
+                    return InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(context.l10n.logout),
+                            content: Text(context.l10n.logoutConfirmation),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(context.l10n.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  context.read<AuthBloc>().add(
+                                    const SignOutEvent(),
+                                  );
+                                },
+                                child: Text(
+                                  context.l10n.logout,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: Text(
+                          context.l10n.logout,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+
+              // Route List (Dev)
+              if (kDebugMode) ...[
+                SizedBox(height: 32.h),
+                _SettingsTile(
+                  icon: Icons.list_alt_rounded,
+                  title: 'Route List (Dev)',
+                  onTap: () => const RouteListRoute().push(context),
+                  borderRadius: BorderRadius.circular(16.r),
+                  showDivider: false,
+                ),
+              ],
+
+              SizedBox(height: 32.h),
+            ],
+          ),
         ),
       ),
     );

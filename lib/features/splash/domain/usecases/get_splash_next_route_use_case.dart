@@ -27,8 +27,9 @@ class GetSplashNextRouteUseCase {
 
     if (user != null) {
       // User is logged in
+      return SplashDestination.home;
     }
 
-    return SplashDestination.home;
+    return SplashDestination.login;
   }
 }

@@ -4,17 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../core/extensions.dart';
-import '../core/utils/toast_utils.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../l10n/generated/app_localizations.dart';
-import '../router/app_router_config.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
 class MainScreen extends StatefulWidget {
@@ -37,113 +34,88 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        state.when(
-          initial: () {},
-          loading: () {},
-          authenticated: (user) {
-            // User is authenticated, stay on current screen
-          },
-          unauthenticated: () {
-            // Redirect to login if not authenticated
-            const LoginRoute().go(context);
-          },
-          error: (message) {
-            // Show error and redirect to login
-            ToastUtils.showErrorToast(message);
-            const LoginRoute().go(context);
-          },
-        );
-      },
-      child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-        builder: (context, state) {
-          return Scaffold(
-            body: Column(
-              children: [
-                // Main content
-                Expanded(
-                  child: IndexedStack(index: _currentIndex, children: _screens),
-                ),
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: Column(
+            children: [
+              // Main content
+              Expanded(
+                child: IndexedStack(index: _currentIndex, children: _screens),
+              ),
 
-                const BottomPlayerWidget(),
+              const BottomPlayerWidget(),
+            ],
+          ),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 20.r,
+                  offset: const Offset(0, -5),
+                ),
               ],
             ),
-            bottomNavigationBar: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 20.r,
-                    offset: const Offset(0, -5),
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+                if (index == 1) {
+                  context.read<DownloadsBloc>().add(
+                    const DownloadsEvent.loadDownloads(),
+                  );
+                }
+              },
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
+                  activeIcon: Icon(FluentIcons.person_24_filled, size: 24.sp),
+                  label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                  tooltip: AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    FluentIcons.arrow_download_24_regular,
+                    size: 24.sp,
                   ),
-                ],
-              ),
-              child: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                  if (index == 1) {
-                    context.read<DownloadsBloc>().add(
-                      const DownloadsEvent.loadDownloads(),
-                    );
-                  }
-                },
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                selectedItemColor: Theme.of(context).primaryColor,
-                unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
-                    activeIcon: Icon(FluentIcons.person_24_filled, size: 24.sp),
-                    label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
-                    tooltip:
-                        AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                  activeIcon: Icon(
+                    FluentIcons.arrow_download_24_filled,
+                    size: 24.sp,
                   ),
-                  BottomNavigationBarItem(
-                    icon: Icon(
-                      FluentIcons.arrow_download_24_regular,
-                      size: 24.sp,
-                    ),
-                    activeIcon: Icon(
-                      FluentIcons.arrow_download_24_filled,
-                      size: 24.sp,
-                    ),
-                    label:
-                        AppLocalizations.of(context)?.downloads ?? 'Downloads',
+                  label: AppLocalizations.of(context)?.downloads ?? 'Downloads',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
+                  activeIcon: Icon(
+                    FluentIcons.book_open_24_filled,
+                    size: 24.sp,
                   ),
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
-                    activeIcon: Icon(
-                      FluentIcons.book_open_24_filled,
-                      size: 24.sp,
-                    ),
-                    label: context.l10n.athkar,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.explore_outlined, size: 24.sp),
-                    activeIcon: Icon(Icons.explore, size: 24.sp),
-                    label: context.l10n.qibla,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
-                    activeIcon: Icon(
-                      FluentIcons.settings_24_filled,
-                      size: 24.sp,
-                    ),
-                    label: context.l10n.settings,
-                  ),
-                ],
-              ),
+                  label: context.l10n.athkar,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.explore_outlined, size: 24.sp),
+                  activeIcon: Icon(Icons.explore, size: 24.sp),
+                  label: context.l10n.qibla,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
+                  activeIcon: Icon(FluentIcons.settings_24_filled, size: 24.sp),
+                  label: context.l10n.settings,
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

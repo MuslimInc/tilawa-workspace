@@ -17,8 +17,7 @@ class ReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),

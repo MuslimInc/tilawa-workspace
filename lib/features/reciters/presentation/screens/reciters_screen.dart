@@ -44,7 +44,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
     super.dispose();
   }
 
-  void _onLetterSelected(String letter) {
+  void _onLetterSelected(String? letter) {
+    if (letter == null || letter.isEmpty) {
+      _clearLetterFilter();
+      return;
+    }
     context.read<RecitersBloc>().add(FilterByLetter(letter));
     _searchController.clear();
   }
@@ -67,18 +71,29 @@ class _RecitersScreenState extends State<RecitersScreen> {
         child: BlocBuilder<RecitersBloc, RecitersState>(
           builder: (context, state) {
             return Scaffold(
-              appBar: AppBar(
-                actions: [
-                  IconButton(
-                    onPressed: () async {
-                      await const FavoritesRoute().push(context);
-                      if (context.mounted) {
-                        await context.read<FavoritesCubit>().loadFavorites();
-                      }
-                    },
-                    icon: const Icon(Icons.favorite_rounded, color: Colors.red),
+              floatingActionButtonLocation:
+                  Directionality.of(context) == TextDirection.rtl
+                  ? FloatingActionButtonLocation.endFloat
+                  : FloatingActionButtonLocation.startFloat,
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: () async {
+                  await const FavoritesRoute().push(context);
+                  if (context.mounted) {
+                    await context.read<FavoritesCubit>().loadFavorites();
+                  }
+                },
+                backgroundColor: theme.colorScheme.primaryContainer,
+                foregroundColor: theme.colorScheme.onPrimaryContainer,
+                icon: const Icon(Icons.favorite_rounded, color: Colors.red),
+                label: Text(
+                  l10n.favorites,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
                   ),
-                ],
+                ),
+              ),
+              appBar: AppBar(
                 title: Text(
                   l10n.reciters,
                   style: TextStyle(
@@ -275,6 +290,17 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Scrollbar (Right side for RTL)
+                        if (Directionality.of(context) == TextDirection.rtl &&
+                            state is RecitersLoaded &&
+                            state.reciters.isNotEmpty &&
+                            state.searchQuery.isEmpty)
+                          ReciterAlphabetScrollbar(
+                            reciters: state.filteredReciters,
+                            scrollController: _scrollController,
+                            onLetterSelected: _onLetterSelected,
+                          ),
+
                         // Main content
                         Expanded(
                           child: state is RecitersLoading
@@ -355,8 +381,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                       SizedBox(height: 8.h),
                                   controller: _scrollController,
                                   itemCount: state.filteredReciters.length,
-                                  padding: EdgeInsetsDirectional.only(
-                                    start: 16.w,
+                                  padding: EdgeInsets.only(
+                                    left: 8.w,
+                                    right: 8.w,
+                                    top: 8.h,
+                                    bottom: 80.h,
                                   ),
                                   itemBuilder: (context, index) {
                                     final ReciterEntity reciter =
@@ -366,13 +395,14 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        // Arabic alphabet scrollbar
-                        if (state is RecitersLoaded &&
+
+                        // Scrollbar (Right side for LTR)
+                        if (Directionality.of(context) != TextDirection.rtl &&
+                            state is RecitersLoaded &&
                             state.reciters.isNotEmpty &&
                             state.searchQuery.isEmpty)
                           ReciterAlphabetScrollbar(
-                            reciters: state
-                                .filteredReciters, // Use filtered list for scrolling
+                            reciters: state.filteredReciters,
                             scrollController: _scrollController,
                             onLetterSelected: _onLetterSelected,
                           ),

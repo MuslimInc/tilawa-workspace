@@ -15,12 +15,23 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
     required this.getItemLetter,
   });
   final List<String> letters;
-  final Function(String letter) onLetterSelected;
+  final Function(String? letter) onLetterSelected;
   final ScrollController scrollController;
   final List<dynamic> items; // List of items to search through
   final String Function(ReciterEntity item) getItemLetter;
 
   void _onLetterTap(String letter, BuildContext context) {
+    final AlphabetScrollbarState currentState = context
+        .read<AlphabetScrollbarBloc>()
+        .state;
+
+    if (currentState.selectedLetter == letter) {
+      // Toggle off
+      context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+      onLetterSelected(null);
+      return;
+    }
+
     context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
 
     // Find the first item that starts with this letter
@@ -168,7 +179,7 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
   });
   final List<ReciterEntity> reciters;
   final ScrollController scrollController;
-  final Function(String letter) onLetterSelected;
+  final Function(String? letter) onLetterSelected;
 
   @override
   Widget build(BuildContext context) {

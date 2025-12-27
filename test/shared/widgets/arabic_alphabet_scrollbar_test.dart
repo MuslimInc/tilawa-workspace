@@ -73,13 +73,21 @@ void main() {
                     ReciterAlphabetScrollbar(
                       reciters: reciters,
                       scrollController: scrollController,
-                      onLetterSelected: (letter) => selectedLetters.add(letter),
+                      onLetterSelected: (letter) {
+                        if (letter != null) {
+                          selectedLetters.add(letter);
+                        }
+                      },
                     )
                   else
                     ArabicAlphabetScrollbar(
                       letters: letters,
                       scrollController: scrollController,
-                      onLetterSelected: (letter) => selectedLetters.add(letter),
+                      onLetterSelected: (letter) {
+                        if (letter != null) {
+                          selectedLetters.add(letter);
+                        }
+                      },
                       items: itemsList,
                       getItemLetter: (item) => item.letter,
                     ),
