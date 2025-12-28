@@ -886,21 +886,21 @@
     "@minuteLabel": {
         "description": "Minute label for duration picker"
     },
-    "enableRecitationDuration": "Recitation Duration (Sleep Timer)",
+    "enableRecitationDuration": "Recitation Duration",
     "@enableRecitationDuration": {
-        "description": "Settings label to enable sleep timer"
+        "description": "Settings label to enable recitation duration control feature"
     },
-    "enableRecitationDurationSubtitle": "Show and enable sleep timer functionality in the player",
+    "enableRecitationDurationSubtitle": "Show and enable recitation duration control feature",
     "@enableRecitationDurationSubtitle": {
-        "description": "Settings subtitle to enable sleep timer"
+        "description": "Settings subtitle to enable recitation duration control feature"
     },
     "sleepTimerActive": "Active",
     "@sleepTimerActive": {
-        "description": "Sleep timer active status"
+        "description": "Recitation duration control feature active status"
     },
     "endOfTrack": "End of Track",
     "@endOfTrack": {
-        "description": "Sleep timer end of track option"
+        "description": "Recitation duration control feature end of track option"
     },
     "setTimer": "Set Timer",
     "@setTimer": {

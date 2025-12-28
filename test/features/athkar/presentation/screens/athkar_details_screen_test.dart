@@ -81,8 +81,12 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    expect(find.text('Test En'), findsOneWidget);
+    expect(find.text('Test Ar'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
+    expect(find.byType(PageView), findsOneWidget);
+    // Elements removed by user refactor:
+    // expect(find.text('1 / 1'), findsOneWidget);
+    // expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
   testWidgets('interaction triggers decrementCount', (tester) async {
@@ -95,8 +99,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    // Tap the item (usually the whole card or the counter tap area)
-    await tester.tap(find.text('Test En'));
+    // Tap the item
+    await tester.tap(find.text('Test Ar'));
     await tester.pump();
 
     verify(() => mockAthkarCubit.decrementCount(1)).called(1);
@@ -113,7 +117,7 @@ void main() {
     await tester.pump();
 
     // Long press the item
-    await tester.longPress(find.text('Test En'));
+    await tester.longPress(find.text('Test Ar'));
     await tester.pump();
 
     verify(() => mockAthkarCubit.resetCount(1)).called(1);

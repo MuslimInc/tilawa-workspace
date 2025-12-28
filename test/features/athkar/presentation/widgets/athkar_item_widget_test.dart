@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -53,9 +54,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('سبحان الله'), findsOneWidget);
-    expect(find.text('Subhan Allah'), findsOneWidget);
+    expect(find.text('Subhan Allah'), findsNothing);
     expect(find.text('3'), findsOneWidget);
-    expect(find.text('Muslim'), findsOneWidget);
+    expect(find.text('Muslim'), findsNothing);
   });
 
   testWidgets('calls onTap when tapped and not done', (tester) async {
@@ -94,7 +95,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Done'), findsOneWidget);
-    expect(find.text('0'), findsNothing);
+    expect(find.text('5'), findsNothing);
+    expect(find.byIcon(FluentIcons.checkmark_24_filled), findsOneWidget);
   });
 }
