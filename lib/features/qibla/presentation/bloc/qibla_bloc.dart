@@ -55,6 +55,9 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
         ),
       ),
       (isServiceEnabled) async {
+        if (isClosed) {
+          return;
+        }
         if (isServiceEnabled) {
           // 2. If Service is Enabled, we MUST Check/Request Permissions
           // We trigger the RequestLocationPermission event which handles the permission check logic
@@ -75,14 +78,14 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     final Either<Failure, bool> permissionResult =
         await _requestLocationPermission(const NoParams());
 
-    permissionResult.fold(
-      (failure) => emit(
+    await permissionResult.fold(
+      (failure) async => emit(
         state.copyWith(
           status: QiblaStatus.error,
           errorMessage: failure.message,
         ),
       ),
-      (isGranted) {
+      (isGranted) async {
         if (isGranted) {
           // 4. Permission Granted -> Start Stream
           add(const StartQiblaStream());

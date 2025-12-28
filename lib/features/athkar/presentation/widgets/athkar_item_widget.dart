@@ -86,9 +86,11 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         item.textAr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 22.sp,
-                          height: 1.8,
-                          color: theme.colorScheme.onSurface,
+                          fontSize: 20.sp,
+                          height: 2.0,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                     ),

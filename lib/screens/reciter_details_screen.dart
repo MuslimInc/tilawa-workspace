@@ -259,6 +259,7 @@ class _ReciterSearchField extends StatelessWidget {
           hintStyle: TextStyle(color: Theme.of(context).hintColor),
           fillColor: context.primaryColor.withValues(alpha: 0.1),
           filled: true,
+          isDense: true,
           prefixIcon: Icon(
             Icons.search_rounded,
             color: Theme.of(context).hintColor,

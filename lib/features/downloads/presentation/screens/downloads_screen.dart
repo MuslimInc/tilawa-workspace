@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/file_size_formatter.dart';
@@ -81,97 +80,85 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
+      appBar: AppBar(
+        title: Text(context.l10n.downloads),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            onPressed: _loadDownloads,
+            tooltip: context.l10n.refreshDownloads,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white),
+            onPressed: () => _showClearAllDialog(context),
+            tooltip: context.l10n.deleteAll,
+          ),
+        ],
+      ),
       body: BlocBuilder<DownloadsBloc, DownloadsState>(
         builder: (context, state) {
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(context, state),
-              _buildBody(context, state),
-              // Add some bottom padding for floating action buttons or player
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
-          );
+          return _DownloadsBody(state: state);
         },
       ),
     );
   }
 
-  SliverAppBar _buildAppBar(BuildContext context, DownloadsState state) {
-    final int totalBytes = state.totalDownloadsSize;
-    final String formattedSize = FileSizeFormatter.formatBytes(
-      context,
-      totalBytes,
-    );
-    final ThemeData theme = Theme.of(context);
-    final TextTheme textTheme = theme.textTheme;
-
-    return SliverAppBar(
-      expandedHeight: 120.0,
-      floating: true,
-      pinned: true,
-      title: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(context.l10n.downloads),
-          if (state.status == DownloadsStateStatus.loaded &&
-              state.downloads.isNotEmpty)
-            Text(
-              context.l10n.storageUsed(formattedSize),
-              style: TextStyle(
-                color: textTheme.bodySmall?.color,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
+  void _showClearAllDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.clearAllDownloads),
+        content: Text(context.l10n.clearAllDownloadsMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<DownloadsBloc>().add(const ClearAllDownloads());
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(context.l10n.deleteAll),
+          ),
         ],
       ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            // gradient: LinearGradient(
-            //   begin: Alignment.topCenter,
-            //   end: Alignment.bottomCenter,
-            //   colors: [
-            //     theme.primaryColor.withValues(alpha: 0.1),
-            //     theme.scaffoldBackgroundColor,
-            //   ],
-            // ),
-          ),
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded),
-          onPressed: _loadDownloads,
-          tooltip: context.l10n.refreshDownloads,
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
-          onPressed: () => _showClearAllDialog(context),
-          tooltip: context.l10n.deleteAll,
-        ),
-      ],
     );
   }
+}
 
-  Widget _buildBody(BuildContext context, DownloadsState state) {
-    switch (state.status) {
-      case DownloadsStateStatus.initial:
-      case DownloadsStateStatus.loading:
-        return const SliverFillRemaining(
-          child: Center(child: CircularProgressIndicator()),
-        );
-      case DownloadsStateStatus.loaded:
-        return _buildDownloadsList(context, state.downloads);
-      case DownloadsStateStatus.error:
-        return _buildError(context, state.errorMessage ?? context.l10n.error);
-    }
+class _DownloadsBody extends StatelessWidget {
+  const _DownloadsBody({required this.state});
+
+  final DownloadsState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (state.status) {
+      DownloadsStateStatus.initial || DownloadsStateStatus.loading =>
+        const Center(child: CircularProgressIndicator()),
+      DownloadsStateStatus.loaded => _DownloadsList(
+        downloadsByReciter: state.downloads,
+        formattedSize: FileSizeFormatter.formatBytes(
+          context,
+          state.totalDownloadsSize,
+        ),
+      ),
+      DownloadsStateStatus.error => _ErrorView(
+        message: state.errorMessage ?? context.l10n.error,
+      ),
+    };
   }
+}
 
-  Widget _buildError(BuildContext context, String message) {
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
     return SliverFillRemaining(
       child: Center(
         child: Column(
@@ -201,90 +188,126 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       ),
     );
   }
+}
 
-  Widget _buildDownloadsList(
-    BuildContext context,
-    Map<String, Map<String, List<DownloadItem>>> downloadsByReciter,
-  ) {
+class _DownloadsList extends StatelessWidget {
+  const _DownloadsList({
+    required this.downloadsByReciter,
+    required this.formattedSize,
+  });
+
+  final Map<String, Map<String, List<DownloadItem>>> downloadsByReciter;
+  final String formattedSize;
+
+  @override
+  Widget build(BuildContext context) {
     if (downloadsByReciter.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      return const _EmptyDownloadsView();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _DownloadsSizeWidget(formattedSize: formattedSize),
+        Expanded(
+          child: ListView(
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+              for (int i = 0; i < downloadsByReciter.length; i++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ReciterDownloadsSection(
+                    reciterName: downloadsByReciter.keys.elementAt(i),
+                    downloadsByNarrative: downloadsByReciter.values.elementAt(
+                      i,
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  Icons.download_done_rounded,
-                  size: 64,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                context.l10n.noDownloadsYet,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.downloadSurahsOffline,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-                ),
-              ),
             ],
           ),
         ),
-      );
-    }
-
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final String reciterName = downloadsByReciter.keys.elementAt(index);
-        final Map<String, List<DownloadItem>> narrativeDownloads =
-            downloadsByReciter[reciterName] ?? {};
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ReciterDownloadsSection(
-            reciterName: reciterName,
-            downloadsByNarrative: narrativeDownloads,
-          ),
-        );
-      }, childCount: downloadsByReciter.length),
+      ],
     );
   }
+}
 
-  void _showClearAllDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.clearAllDownloads),
-        content: Text(context.l10n.clearAllDownloadsMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
+class _EmptyDownloadsView extends StatelessWidget {
+  const _EmptyDownloadsView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.download_done_rounded,
+              size: 64,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<DownloadsBloc>().add(const ClearAllDownloads());
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(context.l10n.deleteAll),
+          const SizedBox(height: 24),
+          Text(
+            context.l10n.noDownloadsYet,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.downloadSurahsOffline,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DownloadsSizeWidget extends StatelessWidget {
+  const _DownloadsSizeWidget({required this.formattedSize});
+
+  final String formattedSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.primaryColor.withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.sd_storage_rounded, size: 20, color: theme.primaryColor),
+            const SizedBox(width: 8),
+            Text(
+              context.l10n.storageUsed(formattedSize),
+              style: textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
