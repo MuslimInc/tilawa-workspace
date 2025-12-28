@@ -57,7 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state is OnboardingCompleted) {
-            const HomeRoute().go(context);
+            const LoginRoute().go(context);
           }
         },
         builder: (context, state) {
