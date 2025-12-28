@@ -23,6 +23,7 @@ import 'package:tilawa/features/downloads/domain/usecases/usecases.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -41,6 +42,10 @@ class MockDownloadsBloc extends MockBloc<DownloadsEvent, DownloadsState>
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
+
+class MockReciterDownloadBloc
+    extends MockBloc<ReciterDownloadEvent, ReciterDownloadState>
+    implements ReciterDownloadBloc {}
 
 class MockDownloadsRepository extends Mock implements DownloadsRepository {}
 
@@ -61,6 +66,7 @@ class MockGetValidCompletedDownloadsUseCase extends Mock
 
 void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
+  late MockReciterDownloadBloc mockReciterDownloadBloc;
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockSettingsCubit mockSettingsCubit;
@@ -97,6 +103,7 @@ void main() {
     view.devicePixelRatio = 3.0;
 
     mockReciterDetailsBloc = MockReciterDetailsBloc();
+    mockReciterDownloadBloc = MockReciterDownloadBloc();
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockSettingsCubit = MockSettingsCubit();
@@ -136,6 +143,16 @@ void main() {
         mockGetValidCompletedDownloadsUseCase,
       );
     }
+    if (!GetIt.instance.isRegistered<ReciterDetailsBloc>()) {
+      GetIt.instance.registerLazySingleton<ReciterDetailsBloc>(
+        () => mockReciterDetailsBloc,
+      );
+    }
+    if (!GetIt.instance.isRegistered<ReciterDownloadBloc>()) {
+      GetIt.instance.registerLazySingleton<ReciterDownloadBloc>(
+        () => mockReciterDownloadBloc,
+      );
+    }
 
     when(
       () => mockCheckSurahDownloadedUseCase.call(
@@ -153,6 +170,21 @@ void main() {
     ).thenAnswer((_) async => const Right([]));
 
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
+    when(
+      () => mockReciterDownloadBloc.state,
+    ).thenReturn(const ReciterDownloadState());
+    when(
+      () => mockReciterDownloadBloc.stream,
+    ).thenAnswer((_) => const Stream.empty());
+
+    // Stub MockDownloadsRepository (GetIt instance)
+    final mockAudioPlayerHandler =
+        GetIt.instance<AudioPlayerHandler>() as MockAudioPlayerHandler;
+    when(
+      () => mockAudioPlayerHandler.getRecitersData(
+        languageCode: any(named: 'languageCode'),
+      ),
+    ).thenAnswer((_) async => []);
 
     // Stub MockDownloadsRepository (GetIt instance)
     mockDownloadsRepository =
@@ -244,6 +276,9 @@ void main() {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<ReciterDetailsBloc>.value(value: mockReciterDetailsBloc),
+          BlocProvider<ReciterDownloadBloc>.value(
+            value: mockReciterDownloadBloc,
+          ),
           BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
           BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
@@ -599,11 +634,10 @@ void main() {
       fail('Download All button (Icon) not found!');
     }
 
-    // Now tap (use the finder that works)
     await tester.tap(buttonFinder.first); // Download All
     verify(
-      () => mockReciterDetailsBloc.add(
-        DownloadAllSurahs(reciter: testReciter, surahs: testSurahList),
+      () => mockReciterDownloadBloc.add(
+        StartReciterDownloadAll(reciter: testReciter, surahs: testSurahList),
       ),
     ).called(1);
 
@@ -618,9 +652,10 @@ void main() {
       ReciterDetailsState(
         status: ReciterDetailsStatus.loaded,
         surahList: testSurahList,
-        isDownloadingAll: true,
-        downloadProgress: 0.5,
       ),
+    );
+    when(() => mockReciterDownloadBloc.state).thenReturn(
+      const ReciterDownloadState(isDownloadingAll: true, progress: 0.5),
     );
     when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
     when(
@@ -630,10 +665,10 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.textContaining('Cancel'));
+    await tester.tap(find.textContaining('Pause')); // Refactored text is Pause
     verify(
-      () => mockReciterDetailsBloc.add(
-        const CancelDownloadAllSurahs('Test Reciter'),
+      () => mockReciterDownloadBloc.add(
+        const CancelReciterDownloadAll(reciterName: 'Test Reciter'),
       ),
     ).called(1);
   });
@@ -670,12 +705,7 @@ void main() {
     await tester.tap(find.text('Al-Fatiha'));
 
     verify(
-      () => mockAudioPlayerBloc.add(
-        AudioPlayerEvent.playFromQueue([
-          testSurahList[0].audio,
-          testSurahList[1].audio,
-        ], 0),
-      ),
+      () => mockReciterDetailsBloc.add(PlaySurahRequested(testSurahList[0])),
     ).called(1);
   });
 
@@ -732,7 +762,9 @@ void main() {
     await tester.tap(find.text('Al-Fatiha'));
 
     // Verify it tries to play. The actual path conversion happens in _playSurah.
-    verify(() => mockAudioPlayerBloc.add(captureAny())).called(greaterThan(0));
+    verify(
+      () => mockReciterDetailsBloc.add(PlaySurahRequested(testSurahList[0])),
+    ).called(1);
   });
 
   testWidgets('ReciterDetailsScreen handles playback error', (
@@ -958,24 +990,9 @@ void main() {
       await tester.tap(find.byKey(ValueKey('surah_${testSurahList[0].id}')));
       await tester.pump();
 
-      // Verify playFromQueue was called.
-      final List<dynamic> captured = verify(
-        () => mockAudioPlayerBloc.add(captureAny()),
-      ).captured;
-
-      final List<dynamic> playFromQueueEvents = captured
-          .where(
-            (e) =>
-                e is AudioPlayerEvent &&
-                e.maybeMap(playFromQueue: (_) => true, orElse: () => false),
-          )
-          .toList();
-
-      expect(
-        playFromQueueEvents.length,
-        1,
-        reason: 'Expected 1 PlayFromQueue event',
-      );
+      verify(
+        () => mockReciterDetailsBloc.add(PlaySurahRequested(testSurahList[0])),
+      ).called(1);
     }, createFile: (path) => mockFile);
   });
 

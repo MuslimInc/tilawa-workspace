@@ -10,8 +10,7 @@ class ReciterDetailsState extends Equatable {
     this.selectedSurahId,
     this.errorMessage,
     this.searchQuery = '',
-    this.downloadProgress = 0.0,
-    this.isDownloadingAll = false,
+    this.playCommand,
   });
 
   factory ReciterDetailsState.fromJson(Map<String, dynamic> json) {
@@ -39,8 +38,7 @@ class ReciterDetailsState extends Equatable {
   final String? selectedSurahId;
   final String? errorMessage;
   final String searchQuery;
-  final double downloadProgress;
-  final bool isDownloadingAll;
+  final PlaySurahCommand? playCommand;
 
   @override
   List<Object?> get props => [
@@ -50,8 +48,7 @@ class ReciterDetailsState extends Equatable {
     selectedSurahId,
     errorMessage,
     searchQuery,
-    downloadProgress,
-    isDownloadingAll,
+    playCommand,
   ];
 
   ReciterDetailsState copyWith({
@@ -61,8 +58,7 @@ class ReciterDetailsState extends Equatable {
     String? selectedSurahId,
     String? errorMessage,
     String? searchQuery,
-    double? downloadProgress,
-    bool? isDownloadingAll,
+    PlaySurahCommand? playCommand,
   }) {
     return ReciterDetailsState(
       status: status ?? this.status,
@@ -71,8 +67,7 @@ class ReciterDetailsState extends Equatable {
       selectedSurahId: selectedSurahId ?? this.selectedSurahId,
       errorMessage: errorMessage ?? this.errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
-      downloadProgress: downloadProgress ?? this.downloadProgress,
-      isDownloadingAll: isDownloadingAll ?? this.isDownloadingAll,
+      playCommand: playCommand, // No default, it's transient
     );
   }
 
@@ -97,4 +92,13 @@ class ReciterDetailsState extends Equatable {
           nameAr.contains(query);
     }).toList();
   }
+}
+
+class PlaySurahCommand extends Equatable {
+  const PlaySurahCommand({required this.playlist, required this.initialIndex});
+  final List<AudioEntity> playlist;
+  final int initialIndex;
+
+  @override
+  List<Object?> get props => [playlist, initialIndex];
 }

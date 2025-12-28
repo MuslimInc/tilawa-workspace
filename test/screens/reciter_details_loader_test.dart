@@ -16,6 +16,7 @@ import 'package:tilawa/features/downloads/domain/usecases/usecases.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_state.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
@@ -26,12 +27,15 @@ import 'package:tilawa/screens/reciter_details_screen.dart';
 import '../features/downloads/helpers/mock_helper.mocks.dart' as download_mocks;
 import '../router/router_mock_helper.mocks.dart';
 
+class MockReciterDownloadBloc extends Mock implements ReciterDownloadBloc {}
+
 void main() {
   late MockReciterDetailsLoaderCubit mockLoaderCubit;
   late MockAuthBloc mockAuthBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockDownloadsBloc mockDownloadsBloc;
   late MockReciterDetailsBloc mockReciterDetailsBloc;
+  late MockReciterDownloadBloc mockReciterDownloadBloc;
   late MockLocalizationBloc mockLocalizationBloc;
   late MockSettingsCubit mockSettingsCubit;
   late download_mocks.MockDownloadsRepository mockDownloadsRepository;
@@ -50,6 +54,7 @@ void main() {
       const AudioPlayerState(status: AudioPlayerStatus.initial),
     );
     provideDummy<DownloadsState>(const DownloadsState());
+    provideDummy<ReciterDownloadState>(const ReciterDownloadState());
     provideDummy<SettingsState>(const SettingsState());
     provideDummy<ReciterDetailsLoaderState>(
       const ReciterDetailsLoaderLoading(),
@@ -71,6 +76,7 @@ void main() {
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockDownloadsBloc = MockDownloadsBloc();
     mockReciterDetailsBloc = MockReciterDetailsBloc();
+    mockReciterDownloadBloc = MockReciterDownloadBloc();
     mockLocalizationBloc = MockLocalizationBloc();
     mockSettingsCubit = MockSettingsCubit();
 
@@ -86,6 +92,7 @@ void main() {
     getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
     getIt.registerFactory<DownloadsBloc>(() => mockDownloadsBloc);
     getIt.registerFactory<ReciterDetailsBloc>(() => mockReciterDetailsBloc);
+    getIt.registerFactory<ReciterDownloadBloc>(() => mockReciterDownloadBloc);
     getIt.registerFactory<LocalizationBloc>(() => mockLocalizationBloc);
     getIt.registerFactory<SettingsCubit>(() => mockSettingsCubit);
     getIt.registerLazySingleton<DownloadsRepository>(
@@ -109,6 +116,7 @@ void main() {
     );
     _stubBloc(mockDownloadsBloc, const DownloadsState());
     _stubBloc(mockReciterDetailsBloc, const ReciterDetailsState());
+    // _stubBloc(mockReciterDownloadBloc, const ReciterDownloadState());
     _stubBloc(
       mockLocalizationBloc,
       const LocalizationState(locale: Locale('en')),
@@ -137,6 +145,9 @@ void main() {
           BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
           BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
           BlocProvider<ReciterDetailsBloc>.value(value: mockReciterDetailsBloc),
+          BlocProvider<ReciterDownloadBloc>.value(
+            value: mockReciterDownloadBloc,
+          ),
           BlocProvider<LocalizationBloc>.value(value: mockLocalizationBloc),
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
@@ -199,6 +210,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    expect(
+      find.byType(MultiBlocProvider),
+      findsNWidgets(2),
+    ); // One in createWidget, one in Loader
     expect(find.byType(ReciterDetailsScreen), findsOneWidget);
   });
 }

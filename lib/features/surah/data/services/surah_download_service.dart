@@ -43,8 +43,7 @@ class SurahDownloadService {
             // Cancel subscription after completion
             await _progressSubscriptions[downloadId]?.cancel();
             _progressSubscriptions.remove(downloadId);
-          } else if (progress.status == DownloadStatus.failed ||
-              progress.status == DownloadStatus.cancelled) {
+          } else if (progress.status == DownloadStatus.failed) {
             await surahRepository.updateSurahDownloadProgress(
               surahId,
               reciterName,

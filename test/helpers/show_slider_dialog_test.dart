@@ -50,7 +50,6 @@ void main() {
 
     // Drag slider to the right
     final Finder sliderFinder = find.byType(Slider);
-    final Offset center = tester.getCenter(sliderFinder);
     await tester.drag(sliderFinder, const Offset(50, 0));
     await tester.pumpAndSettle();
 

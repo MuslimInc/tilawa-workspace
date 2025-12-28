@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -7,11 +8,10 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/entities/audio.dart';
 import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../downloads/domain/entities/download_item.dart';
-import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
-import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
-import '../../../downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
+import '../../../downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../surah/domain/usecases/convert_audio_entities_to_surahs_use_case.dart';
 import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.dart';
@@ -26,18 +26,14 @@ class ReciterDetailsBloc
     this._audioHandler,
     this._convertAudioEntitiesToSurahs,
     this._refreshSurahDownloadStatusUseCase,
-    this._downloadAllSurahsUseCase,
-    this._cancelDownloadsForReciterUseCase,
-    this._observeReciterDownloads,
+    this._getValidCompletedDownloadsUseCase,
   ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
     on<SelectSurah>(_onSelectSurah);
     on<RefreshSurahDownloadStatus>(_onRefreshSurahDownloadStatus);
-    on<DownloadAllSurahs>(_onDownloadAllSurahs);
     on<FilterSurahs>(_onFilterSurahs);
-    on<CancelDownloadAllSurahs>(_onCancelDownloadAllSurahs);
-    on<UpdateDownloadProgress>(_onUpdateDownloadProgress);
+    on<PlaySurahRequested>(_onPlaySurahRequested);
   }
 
   void _onFilterSurahs(FilterSurahs event, Emitter<ReciterDetailsState> emit) {
@@ -47,32 +43,13 @@ class ReciterDetailsBloc
   final AudioPlayerHandler _audioHandler;
   final ConvertAudioEntitiesToSurahsUseCase _convertAudioEntitiesToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
-  final DownloadAllSurahsUseCase _downloadAllSurahsUseCase;
-  final CancelDownloadsForReciterUseCase _cancelDownloadsForReciterUseCase;
-  final ObserveReciterDownloadsUseCase _observeReciterDownloads;
-
-  StreamSubscription? _downloadsSubscription;
-  String? _currentReciterName;
-  final Map<String, bool> _completedSurahs = {}; // surahId -> isDownloaded
-  final Set<String> _downloadingSurahs =
-      {}; // surahId (that are actively downloading)
+  final GetValidCompletedDownloadsUseCase _getValidCompletedDownloadsUseCase;
 
   Future<void> _onLoadSurahList(
     LoadSurahList event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: ReciterDetailsStatus.loading,
-        downloadProgress: 0.0,
-        isDownloadingAll: false,
-        searchQuery: '',
-      ),
-    );
-    _currentReciterName = event.reciter.name;
-    _completedSurahs.clear();
-    _downloadingSurahs.clear();
-    _subscribeToDownloads();
+    emit(state.copyWith(status: ReciterDetailsStatus.loading));
     try {
       final List<AudioEntity>? audioEntities = await _audioHandler
           .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
@@ -92,12 +69,7 @@ class ReciterDetailsBloc
         );
 
         // Initialize local status tracking from loaded list
-        for (final surah in surahList) {
-          if (surah.isDownloaded) {
-            _completedSurahs[surah.id] = true;
-          }
-        }
-        _updateProgressAndEmit();
+        // Note: Progress tracking is now handled by ReciterDownloadBloc
       } else {
         emit(
           state.copyWith(
@@ -154,104 +126,74 @@ class ReciterDetailsBloc
     }
   }
 
-  Future<void> _onDownloadAllSurahs(
-    DownloadAllSurahs event,
+  Future<void> _onPlaySurahRequested(
+    PlaySurahRequested event,
     Emitter<ReciterDetailsState> emit,
   ) async {
-    // We don't optimistically update here to avoid massive rebuilds.
-    // Instead, we rely on the repository's event stream (watched by DownloadButtonBloc)
-    // to update individual button states efficiently.
-
-    await _downloadAllSurahsUseCase(
-      surahs: event.surahs,
-      reciterName: event.reciter.name,
-      reciterId: event.reciter.id,
-    );
-    // The start of download will be picked up by the stream listener
-  }
-
-  Future<void> _onCancelDownloadAllSurahs(
-    CancelDownloadAllSurahs event,
-    Emitter<ReciterDetailsState> emit,
-  ) async {
-    await _cancelDownloadsForReciterUseCase(event.reciterName);
-    // Clearing local state will be handled by stream updates (cancelled/failed events)
-    // But we can eagerly clear downloading set to update UI immediately
-    _downloadingSurahs.clear();
-    _updateProgressAndEmit();
-  }
-
-  void _subscribeToDownloads() {
-    _downloadsSubscription?.cancel();
-    if (_currentReciterName == null) {
+    final SurahEntity surah = event.surah;
+    if (state.status != ReciterDetailsStatus.loaded) {
       return;
     }
 
-    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!)
-        .listen((item) {
-          var stateChanged = false;
+    // Immediately update selected surah for UI feedback
+    emit(state.copyWith(selectedSurahId: surah.id));
 
-          if (item.status == DownloadStatus.completed) {
-            if (!_completedSurahs.containsKey(item.url)) {
-              _completedSurahs[item.url] = true;
-              stateChanged = true;
-            }
-            if (_downloadingSurahs.contains(item.url)) {
-              _downloadingSurahs.remove(item.url);
-              stateChanged = true;
-            }
-          } else if (item.status == DownloadStatus.downloading ||
-              item.status == DownloadStatus.pending) {
-            if (!_downloadingSurahs.contains(item.url)) {
-              _downloadingSurahs.add(item.url);
-              stateChanged = true;
-            }
-          } else if (item.status == DownloadStatus.failed ||
-              item.status == DownloadStatus.cancelled) {
-            if (_downloadingSurahs.contains(item.url)) {
-              _downloadingSurahs.remove(item.url);
-              stateChanged = true;
-            }
-          }
+    try {
+      // Find index
+      final int surahIndex = state.surahList.indexWhere(
+        (item) => item.id == surah.id,
+      );
 
-          if (stateChanged) {
-            _updateProgressAndEmit();
-          }
-        });
-  }
+      if (surahIndex == -1) {
+        return;
+      }
 
-  void _updateProgressAndEmit() {
-    if (state.surahList.isEmpty) {
-      return;
+      // Fetch valid downloads
+      final Either<Failure, List<DownloadItem>> result =
+          await _getValidCompletedDownloadsUseCase(surah.reciterName);
+
+      final List<DownloadItem> reciterDownloads = result.getOrElse(() => []);
+
+      // Create map
+      final Map<String, String> downloadMap = {};
+      for (final item in reciterDownloads) {
+        downloadMap[item.url] = item.filePath;
+      }
+
+      // Build playlist with local files
+      final List<AudioEntity> surahListWithDownloads = [];
+      for (var i = 0; i < state.surahList.length; i++) {
+        final SurahEntity currentSurah = state.surahList[i];
+        final String? localPath = downloadMap[currentSurah.id];
+
+        if (localPath != null) {
+          surahListWithDownloads.add(
+            _createLocalAudioEntity(currentSurah, localPath),
+          );
+        } else {
+          surahListWithDownloads.add(currentSurah.audio);
+        }
+      }
+
+      // Emit command to play
+      emit(
+        state.copyWith(
+          playCommand: PlaySurahCommand(
+            playlist: surahListWithDownloads,
+            initialIndex: surahIndex,
+          ),
+        ),
+      );
+
+      // Clear command immediately after so it doesn't re-trigger
+      emit(state.copyWith());
+    } catch (e) {
+      // Log error or ignoring
     }
-
-    final double progress = _completedSurahs.length / state.surahList.length;
-    final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
-
-    add(
-      UpdateDownloadProgress(
-        progress: progress,
-        isDownloading: isDownloadingAll,
-      ),
-    );
   }
 
-  void _onUpdateDownloadProgress(
-    UpdateDownloadProgress event,
-    Emitter<ReciterDetailsState> emit,
-  ) {
-    emit(
-      state.copyWith(
-        downloadProgress: event.progress,
-        isDownloadingAll: event.isDownloading,
-      ),
-    );
-  }
-
-  @override
-  Future<void> close() {
-    _downloadsSubscription?.cancel();
-    return super.close();
+  AudioEntity _createLocalAudioEntity(SurahEntity surah, String localPath) {
+    return surah.audio.copyWith(url: Uri.file(localPath).toString());
   }
 
   @override

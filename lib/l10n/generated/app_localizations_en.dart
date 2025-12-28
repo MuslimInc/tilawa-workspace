@@ -450,6 +450,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearance => 'Appearance';
 
   @override
+  String get primaryColor => 'Primary Color';
+
+  @override
+  String get choosePrimaryColor => 'Choose Primary Color';
+
+  @override
+  String get colorCyan => 'Cyan';
+
+  @override
+  String get colorGreen => 'Green';
+
+  @override
+  String get colorBrown => 'Brown';
+
+  @override
+  String get colorPurple => 'Purple';
+
+  @override
   String get theme => 'Theme';
 
   @override
@@ -563,6 +581,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get done => 'Done';
+
+  @override
+  String get fileSizeUnitB => 'B';
+
+  @override
+  String get fileSizeUnitKB => 'KB';
+
+  @override
+  String get fileSizeUnitMB => 'MB';
+
+  @override
+  String get fileSizeUnitGB => 'GB';
+
+  @override
+  String get fileSizeUnitTB => 'TB';
 
   @override
   String get reset => 'Reset';

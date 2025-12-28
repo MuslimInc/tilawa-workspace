@@ -1,4 +1,3 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -9,8 +8,8 @@ import 'shared/widgets/bottom_player_ui.dart';
 
 PreviewThemeData themeData() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(FlexScheme.redM3),
-    materialDark: AppTheme.getDarkTheme(FlexScheme.redM3),
+    materialLight: AppTheme.getLightTheme(primaryColor: Colors.red),
+    materialDark: AppTheme.getDarkTheme(primaryColor: Colors.red),
   );
 }
 

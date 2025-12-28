@@ -600,6 +600,30 @@
     "@appearance": {
         "description": "Appearance section title"
     },
+    "primaryColor": "اللون الأساسي",
+    "@primaryColor": {
+        "description": "Primary color setting title"
+    },
+    "choosePrimaryColor": "اختر اللون الأساسي",
+    "@choosePrimaryColor": {
+        "description": "Choose primary color dialog title"
+    },
+    "colorCyan": "سماوي",
+    "@colorCyan": {
+        "description": "Cyan color name"
+    },
+    "colorGreen": "أخضر",
+    "@colorGreen": {
+        "description": "Green color name"
+    },
+    "colorBrown": "بني",
+    "@colorBrown": {
+        "description": "Brown color name"
+    },
+    "colorPurple": "أرجواني",
+    "@colorPurple": {
+        "description": "Purple color name"
+    },
     "theme": "السمة",
     "@theme": {
         "description": "Theme setting title"
@@ -773,6 +797,26 @@
     "done": "تم",
     "@done": {
         "description": "Done label for thikr completion"
+    },
+    "fileSizeUnitB": "بايت",
+    "@fileSizeUnitB": {
+        "description": "Bytes unit"
+    },
+    "fileSizeUnitKB": "ك.ب",
+    "@fileSizeUnitKB": {
+        "description": "Kilobytes unit"
+    },
+    "fileSizeUnitMB": "م.ب",
+    "@fileSizeUnitMB": {
+        "description": "Megabytes unit"
+    },
+    "fileSizeUnitGB": "ج.ب",
+    "@fileSizeUnitGB": {
+        "description": "Gigabytes unit"
+    },
+    "fileSizeUnitTB": "ت.ب",
+    "@fileSizeUnitTB": {
+        "description": "Terabytes unit"
     },
     "reset": "إعادة ضبط",
     "@reset": {

@@ -1,26 +1,19 @@
-import 'dart:io';
-
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-import '../core/di/injection.dart';
 import '../core/entities/audio.dart';
 import '../core/entities/moshaf_entity.dart';
 import '../core/entities/reciter_entity.dart';
-import '../core/errors/failures.dart';
 import '../core/extensions.dart';
+import '../core/theme/color_scheme.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../features/downloads/domain/entities/download_item.dart';
-import '../features/downloads/domain/repositories/downloads_repository.dart';
-import '../features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
 import '../features/downloads/presentation/widgets/download_button.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/surah/domain/entities/surah_entity.dart';
-import '../main.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
@@ -54,212 +47,91 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Note: DownloadButton gets its state directly from DownloadsBloc,
-    // so no need to listen to DownloadsBloc here and update surah list
     return Scaffold(
-      body: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-        buildWhen: (previous, current) {
-          return previous.status != current.status ||
-              previous.surahList != current.surahList ||
-              previous.selectedMoshaf != current.selectedMoshaf ||
-              previous.searchQuery != current.searchQuery ||
-              previous.errorMessage != current.errorMessage;
+      body: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
+        listenWhen: (previous, current) =>
+            (previous.searchQuery != current.searchQuery &&
+                current.searchQuery.isEmpty) ||
+            (current.playCommand != null &&
+                previous.playCommand != current.playCommand) ||
+            (previous.status != current.status &&
+                current.status == ReciterDetailsStatus.loaded),
+        listener: (context, state) {
+          // Handle search clear
+          if (state.searchQuery.isEmpty && _searchController.text.isNotEmpty) {
+            _searchController.clear();
+          }
+
+          // Handle playback command from Bloc
+          final PlaySurahCommand? command = state.playCommand;
+          if (command != null) {
+            context.read<AudioPlayerBloc>().add(
+              AudioPlayerEvent.playFromQueue(
+                command.playlist,
+                command.initialIndex,
+              ),
+            );
+          }
+
+          // Initialize ReciterDownloadBloc when surah list is loaded
+          if (state.status == ReciterDetailsStatus.loaded) {
+            context.read<ReciterDownloadBloc>().add(
+              InitializeReciterDownload(
+                reciterName: widget.reciter.name,
+                totalSurahs: state.surahList.length,
+                downloadedSurahIds: state.surahList
+                    .where((s) => s.isDownloaded)
+                    .map((s) => s.id)
+                    .toList(),
+              ),
+            );
+          }
         },
         builder: (context, state) {
-          return BlocListener<ReciterDetailsBloc, ReciterDetailsState>(
-            listenWhen: (previous, current) =>
-                previous.searchQuery != current.searchQuery &&
-                current.searchQuery.isEmpty,
-            listener: (context, state) {
-              if (_searchController.text.isNotEmpty) {
-                _searchController.clear();
-              }
-            },
-            child: CustomScrollView(
-              restorationId: 'reciter_details_scroll_view',
-              slivers: [
-                _ReciterAppBar(reciter: widget.reciter),
-                SliverToBoxAdapter(
-                  child: _ReciterSearchField(controller: _searchController),
-                ),
-                if (widget.reciter.moshaf.length > 1)
-                  SliverToBoxAdapter(
-                    child: _MoshafSelector(
-                      reciter: widget.reciter,
-                      state: state,
-                    ),
+          return CustomScrollView(
+            restorationId: 'reciter_details_scroll_view',
+            slivers: [
+              _ReciterAppBar(reciter: widget.reciter),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyHeaderDelegate(
+                  minHeight: 60.h,
+                  maxHeight: 60.h,
+                  child: ColoredBox(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: _ReciterSearchField(controller: _searchController),
                   ),
-                if (state.status == ReciterDetailsStatus.loaded &&
-                    state.surahList.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: _DownloadAllButton(
-                      reciter: widget.reciter,
-                      parentState: state,
-                    ),
-                  ),
-                _ReciterDetailsContent(
-                  reciter: widget.reciter,
-                  state: state,
-                  onPlaySurah: (surah) => _playSurah(surah, state),
                 ),
-              ],
-            ),
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    if (widget.reciter.moshaf.length > 1)
+                      _MoshafSelector(reciter: widget.reciter, state: state),
+                    if (state.status == ReciterDetailsStatus.loaded &&
+                        state.surahList.isNotEmpty)
+                      _DownloadAllButton(
+                        reciter: widget.reciter,
+                        parentState: state,
+                      ),
+                  ],
+                ),
+              ),
+              _ReciterDetailsContent(
+                reciter: widget.reciter,
+                state: state,
+                onPlaySurah: (surah) {
+                  context.read<ReciterDetailsBloc>().add(
+                    PlaySurahRequested(surah),
+                  );
+                },
+              ),
+            ],
           );
         },
       ),
       bottomNavigationBar: const BottomPlayerWidget(),
     );
-  }
-
-  /// Check if a surah is downloaded and get its file path
-  Future<String?> _getDownloadedFilePath(SurahEntity surah) async {
-    try {
-      final DownloadsRepository downloadsRepository =
-          getIt<DownloadsRepository>();
-      // Use surah.id which contains the download URL
-      final String? filePath = await downloadsRepository.getDownloadedFilePath(
-        surah.id,
-        widget.reciter.name,
-      );
-
-      if (filePath != null) {
-        // Validate that the file actually exists
-        final file = File(filePath);
-        if (file.existsSync()) {
-          logger.d('_getDownloadedFilePath: file exists at $filePath');
-          return filePath;
-        } else {
-          logger.d('_getDownloadedFilePath: file does not exist at $filePath');
-          return null;
-        }
-      }
-
-      return null;
-    } catch (e) {
-      logger.d('Error checking downloaded file: $e');
-      return null;
-    }
-  }
-
-  /// Create an AudioEntity with local file path for downloaded surahs
-  AudioEntity _createLocalAudioEntity(
-    SurahEntity originalSurah,
-    String filePath,
-  ) {
-    try {
-      // Convert file path to proper file:// URI
-      final fileUri = Uri.file(filePath).toString();
-
-      logger.d('_createLocalAudioEntity: original file path: $filePath');
-      logger.d('_createLocalAudioEntity: file URI: $fileUri');
-
-      return AudioEntity(
-        id: fileUri, // Use file URI as ID for local files
-        title: originalSurah.name,
-        artist: originalSurah.reciterName,
-        album: originalSurah.reciterName,
-        url: fileUri,
-        duration: originalSurah.audio.duration,
-        artUri: originalSurah.audio.artUri,
-      );
-    } catch (e) {
-      logger.d('_createLocalAudioEntity error: $e');
-      logger.d('_createLocalAudioEntity: falling back to original surah');
-      // Fallback to original surah if file URI creation fails
-      return originalSurah.audio;
-    }
-  }
-
-  Future<void> _playSurah(SurahEntity surah, ReciterDetailsState state) async {
-    try {
-      // Check if the surah is downloaded
-      final String? downloadedFilePath = await _getDownloadedFilePath(surah);
-
-      // Set the selected surah immediately for instant highlighting
-      if (mounted) {
-        context.read<ReciterDetailsBloc>().add(SelectSurah(surah.id));
-      }
-
-      // Validate surah data
-      if (surah.id.isEmpty) {
-        throw Exception('Invalid surah: missing ID');
-      }
-
-      // Find the index of the selected surah in the full list
-      final int surahIndex = state.surahList.indexWhere(
-        (item) => item.id == surah.id,
-      );
-
-      logger.d(
-        '_playSurah: selected surah=${surah.name}, index=$surahIndex, total surahs=${state.surahList.length}',
-      );
-      logger.d('_playSurah: downloaded file path: $downloadedFilePath');
-
-      if (downloadedFilePath != null) {
-        final fileUri = Uri.file(downloadedFilePath).toString();
-        logger.d('_playSurah: file URI: $fileUri');
-      }
-
-      if (surahIndex != -1) {
-        // Optimization: Fetch all downloads for this reciter ONCE to avoid N database queries
-        // Optimization: Fetch all downloads for this reciter ONCE to avoid N database queries
-        final Either<Failure, List<DownloadItem>> result =
-            await getIt<GetValidCompletedDownloadsUseCase>()(
-              widget.reciter.name,
-            );
-        final List<DownloadItem> reciterDownloads = result.getOrElse(() => []);
-
-        // Create a map of Surah ID -> File Path for fast lookup
-        final Map<String, String> downloadMap = {};
-        for (final item in reciterDownloads) {
-          downloadMap[item.url] = item.filePath;
-        }
-
-        // Create a list of surahs, using downloaded files when available
-        final List<AudioEntity> surahListWithDownloads = [];
-        for (var i = 0; i < state.surahList.length; i++) {
-          final SurahEntity currentSurah = state.surahList[i];
-          final String? localPath = downloadMap[currentSurah.id];
-
-          if (localPath != null) {
-            surahListWithDownloads.add(
-              _createLocalAudioEntity(currentSurah, localPath),
-            );
-          } else {
-            surahListWithDownloads.add(currentSurah.audio);
-          }
-        }
-
-        // Update queue with the surah list (with downloaded files where available)
-        logger.d(
-          '_playSurah: updating queue with ${surahListWithDownloads.length} surahs',
-        );
-
-        if (mounted) {
-          context.read<AudioPlayerBloc>().add(
-            AudioPlayerEvent.playFromQueue(surahListWithDownloads, surahIndex),
-          );
-        }
-      } else {
-        // Fallback: just play the single surah
-        logger.d('_playSurah: surah not found in list, playing single surah');
-        final AudioEntity surahToPlay = downloadedFilePath != null
-            ? _createLocalAudioEntity(surah, downloadedFilePath)
-            : surah.audio;
-
-        if (mounted) {
-          context.read<AudioPlayerBloc>().add(
-            AudioPlayerEvent.playFromQueue([surahToPlay], 0),
-          );
-        }
-      }
-    } catch (e, stackTrace) {
-      logger.d('_playSurah error: $e');
-      logger.d('Stack trace: $stackTrace');
-      if (mounted) {
-        ToastUtils.showErrorToast('Error playing surah: $e');
-      }
-    }
   }
 }
 
@@ -270,38 +142,102 @@ class _ReciterAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 140.h,
+      expandedHeight: 180.h,
       pinned: true,
       stretch: true,
       backgroundColor: Theme.of(context).primaryColor,
-      centerTitle: true,
-      title: Text(
-        reciter.name,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 18.sp,
-        ),
-      ),
+      // Remove text title here to avoid duplication
+      // title: ...
+      leading: const BackButton(color: Colors.white),
       flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.8),
-              ],
-            ),
+        stretchModes: const [
+          StretchMode.zoomBackground,
+          StretchMode.blurBackground,
+        ],
+        centerTitle: true,
+        titlePadding: EdgeInsets.only(bottom: 16.h, left: 16.w, right: 16.w),
+        title: Text(
+          reciter.name,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16.sp, // Reduced slightly as it scales up
           ),
-          child: Center(
-            child: Icon(
-              Icons.mic_none_outlined,
-              size: 80.sp,
-              color: Colors.white.withValues(alpha: 0.2),
+          textAlign: TextAlign.center,
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
+                ),
+              ),
             ),
-          ),
+            // Decorative Icon
+            Positioned(
+              right: -40.w,
+              bottom: -10.h,
+              child: Transform.rotate(
+                angle: -0.2,
+                child: Icon(
+                  Icons.mic_none_outlined,
+                  size: 200.sp,
+                  color: Colors.white.withValues(alpha: 0.05), // Subtle
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.1),
+                  ],
+                ),
+              ),
+            ),
+            // Avatar in background
+            Center(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: 30.h,
+                ), // Push up to make room for title
+                child: Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 36.r,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    child: Text(
+                      reciter.name[0],
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -315,19 +251,30 @@ class _ReciterSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
           hintText: context.l10n.searchSurah,
-          prefixIcon: const Icon(Icons.search),
+          hintStyle: TextStyle(color: Theme.of(context).hintColor),
+          fillColor: context.primaryColor.withValues(alpha: 0.1),
           filled: true,
-          fillColor: Theme.of(context).cardColor,
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: Theme.of(context).hintColor,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(16.r),
             borderSide: BorderSide.none,
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, child) {
@@ -336,6 +283,7 @@ class _ReciterSearchField extends StatelessWidget {
               }
               return IconButton(
                 icon: const Icon(Icons.clear_rounded),
+                color: Theme.of(context).hintColor,
                 onPressed: () {
                   controller.clear();
                   context.read<ReciterDetailsBloc>().add(
@@ -367,26 +315,34 @@ class _MoshafSelector extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: Material(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12.r),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.primaryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         child: ButtonTheme(
           alignedDropdown: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<MoshafEntity>(
               isExpanded: true,
               dropdownColor: theme.cardColor,
-              borderRadius: BorderRadius.circular(12.r),
-              alignment: AlignmentDirectional.center,
-              icon: Icon(Icons.keyboard_arrow_down_rounded, size: 24.sp),
+              borderRadius: BorderRadius.circular(16.r),
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 24.sp,
+                color: theme.primaryColor,
+              ),
               value: uniqueMoshaf.contains(selectedMoshaf)
                   ? selectedMoshaf
                   : uniqueMoshaf.first,
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
               items: uniqueMoshaf.map((moshaf) {
                 return DropdownMenuItem<MoshafEntity>(
                   value: moshaf,
@@ -415,63 +371,54 @@ class _DownloadAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (parentState.surahList.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-        buildWhen: (previous, current) =>
-            previous.isDownloadingAll != current.isDownloadingAll ||
-            previous.downloadProgress != current.downloadProgress,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: BlocBuilder<ReciterDownloadBloc, ReciterDownloadState>(
         builder: (context, state) {
           final bool isDownloading = state.isDownloadingAll;
-          final double progress = state.downloadProgress;
+          final double progress = state.progress;
 
-          return ElevatedButton.icon(
-            onPressed: () {
-              if (isDownloading) {
-                context.read<ReciterDetailsBloc>().add(
-                  CancelDownloadAllSurahs(reciter.name),
-                );
-              } else {
-                context.read<ReciterDetailsBloc>().add(
-                  DownloadAllSurahs(
-                    reciter: reciter,
-                    surahs: state.filteredSurahs,
-                  ),
-                );
-                ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
-              }
-            },
-            icon: isDownloading
-                ? SizedBox(
-                    width: 20.w,
-                    height: 20.w,
-                    child: CircularProgressIndicator(
-                      value: progress > 0 ? progress : null,
-                      strokeWidth: 2,
-                      color: Theme.of(context).primaryColor,
+          return SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                if (isDownloading) {
+                  context.read<ReciterDownloadBloc>().add(
+                    CancelReciterDownloadAll(reciterName: reciter.name),
+                  );
+                } else {
+                  context.read<ReciterDownloadBloc>().add(
+                    StartReciterDownloadAll(
+                      reciter: reciter,
+                      surahs: parentState.surahList,
                     ),
-                  )
-                : const Icon(Icons.download_rounded),
-            label: Text(
-              isDownloading
-                  ? '${context.l10n.cancel} ${(progress * 100).toInt()}%'
-                  : (progress > 0 && progress < 1.0)
-                  ? context.l10n.completeDownloading
-                  : context.l10n.downloadAll,
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).cardColor,
-              foregroundColor: Theme.of(context).primaryColor,
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-                side: BorderSide(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                  );
+                  ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
+                }
+              },
+              icon: isDownloading
+                  ? SizedBox(
+                      width: 20.w,
+                      height: 20.w,
+                      child: const Icon(
+                        Icons.pause_rounded,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.download_rounded, color: Colors.white),
+              label: Text(
+                isDownloading
+                    ? '${context.l10n.pause} ${(progress * 100).toInt()}%'
+                    : (progress > 0 && progress < 1.0)
+                    ? context.l10n.completeDownloading
+                    : context.l10n.downloadAll,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
               ),
             ),
@@ -744,15 +691,13 @@ class _SurahCard extends StatelessWidget {
 
     return RepaintBoundary(
       child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
+        margin: EdgeInsets.only(bottom: 8.h),
         decoration: BoxDecoration(
           color: isCurrentItem
-              ? theme.primaryColor.withValues(alpha: 0.05)
-              : theme.cardColor,
+              ? context.primaryColor.withValues(alpha: 0.1)
+              : Colors.transparent, // Cleaner look without card background
           borderRadius: BorderRadius.circular(16.r),
-          border: isCurrentItem
-              ? Border.all(color: theme.primaryColor.withValues(alpha: 0.3))
-              : Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
+          // No border for cleaner look
         ),
         child: Material(
           color: Colors.transparent,
@@ -774,16 +719,16 @@ class _SurahCard extends StatelessWidget {
               }
             },
             child: Padding(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               child: Row(
                 children: [
                   Container(
-                    width: 48.w,
-                    height: 48.w,
+                    width: 44.w,
+                    height: 44.w,
                     decoration: BoxDecoration(
                       color: isCurrentItem
                           ? theme.primaryColor
-                          : theme.primaryColor.withValues(alpha: 0.1),
+                          : theme.disabledColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -791,16 +736,18 @@ class _SurahCard extends StatelessWidget {
                           ? Icon(
                               Icons.graphic_eq_rounded,
                               color: Colors.white,
-                              size: 24.sp,
+                              size: 20.sp,
                             )
                           : Text(
                               surah.formattedId.isNotEmpty
                                   ? surah.formattedId
                                   : '${index + 1}',
                               style: TextStyle(
-                                color: theme.primaryColor,
+                                color: isCurrentItem
+                                    ? Colors.white
+                                    : theme.primaryColor,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
+                                fontSize: 14.sp,
                               ),
                             ),
                     ),
@@ -814,6 +761,9 @@ class _SurahCard extends StatelessWidget {
                           surah.name,
                           style: TextStyle(
                             fontSize: 16.sp,
+                            fontWeight: isCurrentItem
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                             color: isCurrentItem
                                 ? theme.primaryColor
                                 : theme.textTheme.bodyLarge?.color,
@@ -849,35 +799,39 @@ class _SurahCard extends StatelessWidget {
                         initialProgress: surah.downloadProgress,
                       ),
 
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 8.w),
 
-                      // Play Button Container
-                      Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: BoxDecoration(
-                          color: isCurrentItem
-                              ? Theme.of(
-                                  context,
-                                ).primaryColor.withValues(alpha: 0.1)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
-                            color: isCurrentItem
-                                ? theme.primaryColor
-                                : Colors.grey.withValues(alpha: 0.3),
+                      // Play Button with cleaner look
+                      if (!isCurrentItem)
+                        Container(
+                          width: 32.w,
+                          height: 32.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.primaryColor.withValues(alpha: 0.05),
+                          ),
+                          child: Icon(
+                            Icons.play_arrow_rounded,
+                            color: theme.primaryColor,
+                            size: 20.sp,
+                          ),
+                        )
+                      else
+                        Container(
+                          width: 32.w,
+                          height: 32.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.primaryColor,
+                          ),
+                          child: Icon(
+                            isPlaying
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                            color: Colors.white,
+                            size: 20.sp,
                           ),
                         ),
-                        child: Icon(
-                          isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          color: isCurrentItem
-                              ? theme.primaryColor
-                              : Colors.grey,
-                          size: 24.sp,
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -887,5 +841,39 @@ class _SurahCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _StickyHeaderDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }

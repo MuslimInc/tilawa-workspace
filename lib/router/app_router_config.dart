@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/di/injection.dart';
 import '../core/entities/reciter_entity.dart';
 import '../core/extensions.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
@@ -10,6 +12,8 @@ import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
+import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
@@ -53,7 +57,13 @@ class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
     if ($extra == null) {
       return ReciterDetailsLoader(reciterId: reciterId);
     }
-    return ReciterDetailsScreen(reciter: $extra!);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => getIt<ReciterDetailsBloc>()),
+        BlocProvider(create: (context) => getIt<ReciterDownloadBloc>()),
+      ],
+      child: ReciterDetailsScreen(reciter: $extra!),
+    );
   }
 }
 

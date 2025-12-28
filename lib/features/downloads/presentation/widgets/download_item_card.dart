@@ -84,7 +84,7 @@ class DownloadItemCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${_formatFileSize(download.downloadedSize)} / ${_formatFileSize(download.fileSize)}',
+                    '${_formatFileSize(context, download.downloadedSize)} / ${_formatFileSize(context, download.fileSize)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -305,8 +305,8 @@ class DownloadItemCard extends StatelessWidget {
     }
   }
 
-  String _formatFileSize(int bytes) {
-    return FileSizeFormatter.formatBytes(bytes);
+  String _formatFileSize(BuildContext context, int bytes) {
+    return FileSizeFormatter.formatBytes(context, bytes);
   }
 
   void _showDeleteDialog(BuildContext context) {

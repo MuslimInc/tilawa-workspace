@@ -3,13 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i9;
+import 'dart:async' as _i10;
 
 import 'package:flutter/widgets.dart' as _i7;
-import 'package:go_router/src/state.dart' as _i16;
-import 'package:hydrated_bloc/hydrated_bloc.dart' as _i11;
+import 'package:go_router/src/state.dart' as _i17;
+import 'package:hydrated_bloc/hydrated_bloc.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:mockito/src/dummies.dart' as _i11;
 import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
     as _i6;
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart'
@@ -18,17 +18,19 @@ import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart' as _i2;
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i4;
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart'
-    as _i12;
+    as _i13;
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart'
-    as _i15;
+    as _i16;
 import 'package:tilawa/features/playlists/presentation/bloc/playlists_bloc.dart'
-    as _i17;
+    as _i18;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i8;
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart'
+    as _i9;
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart'
-    as _i13;
-import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_state.dart'
     as _i14;
+import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_state.dart'
+    as _i15;
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart'
     as _i5;
 
@@ -91,6 +93,12 @@ class _FakeReciterDetailsState_7 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
+class _FakeReciterDownloadState_8 extends _i1.SmartFake
+    implements _i9.ReciterDownloadState {
+  _FakeReciterDownloadState_8(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [AuthBloc].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -108,12 +116,12 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
           as _i2.AuthState);
 
   @override
-  _i9.Stream<_i2.AuthState> get stream =>
+  _i10.Stream<_i2.AuthState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i2.AuthState>.empty(),
+            returnValue: _i10.Stream<_i2.AuthState>.empty(),
           )
-          as _i9.Stream<_i2.AuthState>);
+          as _i10.Stream<_i2.AuthState>);
 
   @override
   bool get isClosed =>
@@ -124,7 +132,7 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -132,7 +140,7 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -143,7 +151,7 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -180,8 +188,8 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
 
   @override
   void on<E extends _i2.AuthEvent>(
-    _i11.EventHandler<E, _i2.AuthState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+    _i12.EventHandler<E, _i2.AuthState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -189,7 +197,7 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
 
   @override
   void onTransition(
-    _i11.Transition<_i2.AuthEvent, _i2.AuthState>? transition,
+    _i12.Transition<_i2.AuthEvent, _i2.AuthState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -203,16 +211,16 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
       );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  void onChange(_i11.Change<_i2.AuthState>? change) => super.noSuchMethod(
+  void onChange(_i12.Change<_i2.AuthState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -231,21 +239,21 @@ class MockAuthBloc extends _i1.Mock implements _i2.AuthBloc {
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [AudioPlayerBloc].
@@ -268,12 +276,12 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
           as _i3.AudioPlayerState);
 
   @override
-  _i9.Stream<_i3.AudioPlayerState> get stream =>
+  _i10.Stream<_i3.AudioPlayerState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i3.AudioPlayerState>.empty(),
+            returnValue: _i10.Stream<_i3.AudioPlayerState>.empty(),
           )
-          as _i9.Stream<_i3.AudioPlayerState>);
+          as _i10.Stream<_i3.AudioPlayerState>);
 
   @override
   bool get isClosed =>
@@ -284,7 +292,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -292,7 +300,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -303,7 +311,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -311,13 +319,13 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
           as String);
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
   _i3.AudioPlayerState? fromJson(Map<String, dynamic>? json) =>
@@ -349,8 +357,8 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
 
   @override
   void on<E extends _i3.AudioPlayerEvent>(
-    _i11.EventHandler<E, _i3.AudioPlayerState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+    _i12.EventHandler<E, _i3.AudioPlayerState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -358,7 +366,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
 
   @override
   void onTransition(
-    _i11.Transition<_i3.AudioPlayerEvent, _i3.AudioPlayerState>? transition,
+    _i12.Transition<_i3.AudioPlayerEvent, _i3.AudioPlayerState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -375,7 +383,7 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
   );
 
   @override
-  void onChange(_i11.Change<_i3.AudioPlayerState>? change) =>
+  void onChange(_i12.Change<_i3.AudioPlayerState>? change) =>
       super.noSuchMethod(
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
@@ -395,21 +403,21 @@ class MockAudioPlayerBloc extends _i1.Mock implements _i3.AudioPlayerBloc {
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [DownloadsBloc].
@@ -421,12 +429,12 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
   }
 
   @override
-  _i9.Stream<_i12.DownloadsStatus> get statusStream =>
+  _i10.Stream<_i13.DownloadsStatus> get statusStream =>
       (super.noSuchMethod(
             Invocation.getter(#statusStream),
-            returnValue: _i9.Stream<_i12.DownloadsStatus>.empty(),
+            returnValue: _i10.Stream<_i13.DownloadsStatus>.empty(),
           )
-          as _i9.Stream<_i12.DownloadsStatus>);
+          as _i10.Stream<_i13.DownloadsStatus>);
 
   @override
   _i4.DownloadsState get state =>
@@ -437,12 +445,12 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
           as _i4.DownloadsState);
 
   @override
-  _i9.Stream<_i4.DownloadsState> get stream =>
+  _i10.Stream<_i4.DownloadsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i4.DownloadsState>.empty(),
+            returnValue: _i10.Stream<_i4.DownloadsState>.empty(),
           )
-          as _i9.Stream<_i4.DownloadsState>);
+          as _i10.Stream<_i4.DownloadsState>);
 
   @override
   bool get isClosed =>
@@ -453,7 +461,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -461,7 +469,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -472,7 +480,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -480,13 +488,13 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
           as String);
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
   _i4.DownloadsState? fromJson(Map<String, dynamic>? json) =>
@@ -518,8 +526,8 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
 
   @override
   void on<E extends _i4.DownloadsEvent>(
-    _i11.EventHandler<E, _i4.DownloadsState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+    _i12.EventHandler<E, _i4.DownloadsState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -527,7 +535,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
 
   @override
   void onTransition(
-    _i11.Transition<_i4.DownloadsEvent, _i4.DownloadsState>? transition,
+    _i12.Transition<_i4.DownloadsEvent, _i4.DownloadsState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -544,7 +552,7 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
   );
 
   @override
-  void onChange(_i11.Change<_i4.DownloadsState>? change) => super.noSuchMethod(
+  void onChange(_i12.Change<_i4.DownloadsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -563,50 +571,50 @@ class MockDownloadsBloc extends _i1.Mock implements _i4.DownloadsBloc {
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [ReciterDetailsLoaderCubit].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockReciterDetailsLoaderCubit extends _i1.Mock
-    implements _i13.ReciterDetailsLoaderCubit {
+    implements _i14.ReciterDetailsLoaderCubit {
   MockReciterDetailsLoaderCubit() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i14.ReciterDetailsLoaderState get state =>
+  _i15.ReciterDetailsLoaderState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i10.dummyValue<_i14.ReciterDetailsLoaderState>(
+            returnValue: _i11.dummyValue<_i15.ReciterDetailsLoaderState>(
               this,
               Invocation.getter(#state),
             ),
           )
-          as _i14.ReciterDetailsLoaderState);
+          as _i15.ReciterDetailsLoaderState);
 
   @override
-  _i9.Stream<_i14.ReciterDetailsLoaderState> get stream =>
+  _i10.Stream<_i15.ReciterDetailsLoaderState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i14.ReciterDetailsLoaderState>.empty(),
+            returnValue: _i10.Stream<_i15.ReciterDetailsLoaderState>.empty(),
           )
-          as _i9.Stream<_i14.ReciterDetailsLoaderState>);
+          as _i10.Stream<_i15.ReciterDetailsLoaderState>);
 
   @override
   bool get isClosed =>
@@ -614,22 +622,22 @@ class MockReciterDetailsLoaderCubit extends _i1.Mock
           as bool);
 
   @override
-  _i9.Future<void> loadReciter(String? reciterId) =>
+  _i10.Future<void> loadReciter(String? reciterId) =>
       (super.noSuchMethod(
             Invocation.method(#loadReciter, [reciterId]),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  void emit(_i14.ReciterDetailsLoaderState? state) => super.noSuchMethod(
+  void emit(_i15.ReciterDetailsLoaderState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void onChange(_i11.Change<_i14.ReciterDetailsLoaderState>? change) =>
+  void onChange(_i12.Change<_i15.ReciterDetailsLoaderState>? change) =>
       super.noSuchMethod(
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
@@ -648,13 +656,13 @@ class MockReciterDetailsLoaderCubit extends _i1.Mock
   );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [SettingsCubit].
@@ -674,12 +682,12 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
           as _i5.SettingsState);
 
   @override
-  _i9.Stream<_i5.SettingsState> get stream =>
+  _i10.Stream<_i5.SettingsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i5.SettingsState>.empty(),
+            returnValue: _i10.Stream<_i5.SettingsState>.empty(),
           )
-          as _i9.Stream<_i5.SettingsState>);
+          as _i10.Stream<_i5.SettingsState>);
 
   @override
   bool get isClosed =>
@@ -690,7 +698,7 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -698,7 +706,7 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -709,7 +717,7 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -727,31 +735,31 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
           as Map<String, dynamic>?);
 
   @override
-  _i9.Future<void> setMaxConcurrentDownloads(int? count) =>
+  _i10.Future<void> setMaxConcurrentDownloads(int? count) =>
       (super.noSuchMethod(
             Invocation.method(#setMaxConcurrentDownloads, [count]),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  _i9.Future<void> toggleRestorePlaybackState(bool? enabled) =>
+  _i10.Future<void> toggleRestorePlaybackState(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#toggleRestorePlaybackState, [enabled]),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  _i9.Future<void> toggleSleepTimerEnabled(bool? enabled) =>
+  _i10.Future<void> toggleSleepTimerEnabled(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#toggleSleepTimerEnabled, [enabled]),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
   void emit(_i5.SettingsState? state) => super.noSuchMethod(
@@ -760,7 +768,7 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
   );
 
   @override
-  void onChange(_i11.Change<_i5.SettingsState>? change) => super.noSuchMethod(
+  void onChange(_i12.Change<_i5.SettingsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -778,59 +786,59 @@ class MockSettingsCubit extends _i1.Mock implements _i5.SettingsCubit {
   );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [LocalizationBloc].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
+class MockLocalizationBloc extends _i1.Mock implements _i16.LocalizationBloc {
   MockLocalizationBloc() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i15.LocalizationState get state =>
+  _i16.LocalizationState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i10.dummyValue<_i15.LocalizationState>(
+            returnValue: _i11.dummyValue<_i16.LocalizationState>(
               this,
               Invocation.getter(#state),
             ),
           )
-          as _i15.LocalizationState);
+          as _i16.LocalizationState);
 
   @override
-  _i9.Stream<_i15.LocalizationState> get stream =>
+  _i10.Stream<_i16.LocalizationState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i15.LocalizationState>.empty(),
+            returnValue: _i10.Stream<_i16.LocalizationState>.empty(),
           )
-          as _i9.Stream<_i15.LocalizationState>);
+          as _i10.Stream<_i16.LocalizationState>);
 
   @override
   bool get isClosed =>
@@ -841,7 +849,7 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -849,7 +857,7 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -860,7 +868,7 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -868,37 +876,37 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
           as String);
 
   @override
-  _i15.LocalizationState? fromJson(Map<String, dynamic>? json) =>
+  _i16.LocalizationState? fromJson(Map<String, dynamic>? json) =>
       (super.noSuchMethod(Invocation.method(#fromJson, [json]))
-          as _i15.LocalizationState?);
+          as _i16.LocalizationState?);
 
   @override
-  Map<String, dynamic>? toJson(_i15.LocalizationState? state) =>
+  Map<String, dynamic>? toJson(_i16.LocalizationState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);
 
   @override
-  void add(_i15.LocalizationEvent? event) => super.noSuchMethod(
+  void add(_i16.LocalizationEvent? event) => super.noSuchMethod(
     Invocation.method(#add, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void onEvent(_i15.LocalizationEvent? event) => super.noSuchMethod(
+  void onEvent(_i16.LocalizationEvent? event) => super.noSuchMethod(
     Invocation.method(#onEvent, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void emit(_i15.LocalizationState? state) => super.noSuchMethod(
+  void emit(_i16.LocalizationState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void on<E extends _i15.LocalizationEvent>(
-    _i11.EventHandler<E, _i15.LocalizationState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+  void on<E extends _i16.LocalizationEvent>(
+    _i12.EventHandler<E, _i16.LocalizationState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -906,7 +914,7 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
 
   @override
   void onTransition(
-    _i11.Transition<_i15.LocalizationEvent, _i15.LocalizationState>? transition,
+    _i12.Transition<_i16.LocalizationEvent, _i16.LocalizationState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -914,7 +922,7 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
 
   @override
   void onDone(
-    _i15.LocalizationEvent? event, [
+    _i16.LocalizationEvent? event, [
     Object? error,
     StackTrace? stackTrace,
   ]) => super.noSuchMethod(
@@ -923,16 +931,16 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
   );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  void onChange(_i11.Change<_i15.LocalizationState>? change) =>
+  void onChange(_i12.Change<_i16.LocalizationState>? change) =>
       super.noSuchMethod(
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
@@ -952,21 +960,21 @@ class MockLocalizationBloc extends _i1.Mock implements _i15.LocalizationBloc {
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [AlphabetScrollbarBloc].
@@ -990,12 +998,12 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
           as _i6.AlphabetScrollbarState);
 
   @override
-  _i9.Stream<_i6.AlphabetScrollbarState> get stream =>
+  _i10.Stream<_i6.AlphabetScrollbarState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i6.AlphabetScrollbarState>.empty(),
+            returnValue: _i10.Stream<_i6.AlphabetScrollbarState>.empty(),
           )
-          as _i9.Stream<_i6.AlphabetScrollbarState>);
+          as _i10.Stream<_i6.AlphabetScrollbarState>);
 
   @override
   bool get isClosed =>
@@ -1006,7 +1014,7 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -1014,7 +1022,7 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -1025,7 +1033,7 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -1062,8 +1070,8 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
 
   @override
   void on<E extends _i6.AlphabetScrollbarEvent>(
-    _i11.EventHandler<E, _i6.AlphabetScrollbarState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+    _i12.EventHandler<E, _i6.AlphabetScrollbarState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -1071,7 +1079,7 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
 
   @override
   void onTransition(
-    _i11.Transition<_i6.AlphabetScrollbarEvent, _i6.AlphabetScrollbarState>?
+    _i12.Transition<_i6.AlphabetScrollbarEvent, _i6.AlphabetScrollbarState>?
     transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
@@ -1089,16 +1097,16 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
   );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  void onChange(_i11.Change<_i6.AlphabetScrollbarState>? change) =>
+  void onChange(_i12.Change<_i6.AlphabetScrollbarState>? change) =>
       super.noSuchMethod(
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
@@ -1118,28 +1126,28 @@ class MockAlphabetScrollbarBloc extends _i1.Mock
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [GoRouterState].
 ///
 /// See the documentation for Mockito's code generation for more information.
 // ignore: must_be_immutable
-class MockGoRouterState extends _i1.Mock implements _i16.GoRouterState {
+class MockGoRouterState extends _i1.Mock implements _i17.GoRouterState {
   MockGoRouterState() {
     _i1.throwOnMissingStub(this);
   }
@@ -1156,7 +1164,7 @@ class MockGoRouterState extends _i1.Mock implements _i16.GoRouterState {
   String get matchedLocation =>
       (super.noSuchMethod(
             Invocation.getter(#matchedLocation),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#matchedLocation),
             ),
@@ -1199,7 +1207,7 @@ class MockGoRouterState extends _i1.Mock implements _i16.GoRouterState {
                 #fragment: fragment,
               },
             ),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.method(
                 #namedLocation,
@@ -1236,12 +1244,12 @@ class MockReciterDetailsBloc extends _i1.Mock
           as _i8.ReciterDetailsState);
 
   @override
-  _i9.Stream<_i8.ReciterDetailsState> get stream =>
+  _i10.Stream<_i8.ReciterDetailsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i8.ReciterDetailsState>.empty(),
+            returnValue: _i10.Stream<_i8.ReciterDetailsState>.empty(),
           )
-          as _i9.Stream<_i8.ReciterDetailsState>);
+          as _i10.Stream<_i8.ReciterDetailsState>);
 
   @override
   bool get isClosed =>
@@ -1252,7 +1260,7 @@ class MockReciterDetailsBloc extends _i1.Mock
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -1260,7 +1268,7 @@ class MockReciterDetailsBloc extends _i1.Mock
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -1271,21 +1279,12 @@ class MockReciterDetailsBloc extends _i1.Mock
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
           )
           as String);
-
-  @override
-  _i9.Future<void> close() =>
-      (super.noSuchMethod(
-            Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
-          )
-          as _i9.Future<void>);
 
   @override
   _i8.ReciterDetailsState? fromJson(Map<String, dynamic>? json) =>
@@ -1317,8 +1316,8 @@ class MockReciterDetailsBloc extends _i1.Mock
 
   @override
   void on<E extends _i8.ReciterDetailsEvent>(
-    _i11.EventHandler<E, _i8.ReciterDetailsState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+    _i12.EventHandler<E, _i8.ReciterDetailsState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -1326,7 +1325,7 @@ class MockReciterDetailsBloc extends _i1.Mock
 
   @override
   void onTransition(
-    _i11.Transition<_i8.ReciterDetailsEvent, _i8.ReciterDetailsState>?
+    _i12.Transition<_i8.ReciterDetailsEvent, _i8.ReciterDetailsState>?
     transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
@@ -1344,7 +1343,16 @@ class MockReciterDetailsBloc extends _i1.Mock
   );
 
   @override
-  void onChange(_i11.Change<_i8.ReciterDetailsState>? change) =>
+  _i10.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
+
+  @override
+  void onChange(_i12.Change<_i8.ReciterDetailsState>? change) =>
       super.noSuchMethod(
         Invocation.method(#onChange, [change]),
         returnValueForMissingStub: null,
@@ -1364,49 +1372,157 @@ class MockReciterDetailsBloc extends _i1.Mock
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
+}
+
+/// A class which mocks [ReciterDownloadBloc].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockReciterDownloadBloc extends _i1.Mock
+    implements _i9.ReciterDownloadBloc {
+  MockReciterDownloadBloc() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i9.ReciterDownloadState get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: _FakeReciterDownloadState_8(
+              this,
+              Invocation.getter(#state),
+            ),
+          )
+          as _i9.ReciterDownloadState);
+
+  @override
+  _i10.Stream<_i9.ReciterDownloadState> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i10.Stream<_i9.ReciterDownloadState>.empty(),
+          )
+          as _i10.Stream<_i9.ReciterDownloadState>);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(Invocation.getter(#isClosed), returnValue: false)
+          as bool);
+
+  @override
+  _i10.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
+
+  @override
+  void add(_i9.ReciterDownloadEvent? event) => super.noSuchMethod(
+    Invocation.method(#add, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onEvent(_i9.ReciterDownloadEvent? event) => super.noSuchMethod(
+    Invocation.method(#onEvent, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void emit(_i9.ReciterDownloadState? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void on<E extends _i9.ReciterDownloadEvent>(
+    _i12.EventHandler<E, _i9.ReciterDownloadState>? handler, {
+    _i12.EventTransformer<E>? transformer,
+  }) => super.noSuchMethod(
+    Invocation.method(#on, [handler], {#transformer: transformer}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onTransition(
+    _i12.Transition<_i9.ReciterDownloadEvent, _i9.ReciterDownloadState>?
+    transition,
+  ) => super.noSuchMethod(
+    Invocation.method(#onTransition, [transition]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onDone(
+    _i9.ReciterDownloadEvent? event, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) => super.noSuchMethod(
+    Invocation.method(#onDone, [event, error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onChange(_i12.Change<_i9.ReciterDownloadState>? change) =>
+      super.noSuchMethod(
+        Invocation.method(#onChange, [change]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
 }
 
 /// A class which mocks [PlaylistsBloc].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
+class MockPlaylistsBloc extends _i1.Mock implements _i18.PlaylistsBloc {
   MockPlaylistsBloc() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i17.PlaylistsState get state =>
+  _i18.PlaylistsState get state =>
       (super.noSuchMethod(
             Invocation.getter(#state),
-            returnValue: _i10.dummyValue<_i17.PlaylistsState>(
+            returnValue: _i11.dummyValue<_i18.PlaylistsState>(
               this,
               Invocation.getter(#state),
             ),
           )
-          as _i17.PlaylistsState);
+          as _i18.PlaylistsState);
 
   @override
-  _i9.Stream<_i17.PlaylistsState> get stream =>
+  _i10.Stream<_i18.PlaylistsState> get stream =>
       (super.noSuchMethod(
             Invocation.getter(#stream),
-            returnValue: _i9.Stream<_i17.PlaylistsState>.empty(),
+            returnValue: _i10.Stream<_i18.PlaylistsState>.empty(),
           )
-          as _i9.Stream<_i17.PlaylistsState>);
+          as _i10.Stream<_i18.PlaylistsState>);
 
   @override
   bool get isClosed =>
@@ -1417,7 +1533,7 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
   String get id =>
       (super.noSuchMethod(
             Invocation.getter(#id),
-            returnValue: _i10.dummyValue<String>(this, Invocation.getter(#id)),
+            returnValue: _i11.dummyValue<String>(this, Invocation.getter(#id)),
           )
           as String);
 
@@ -1425,7 +1541,7 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
   String get storagePrefix =>
       (super.noSuchMethod(
             Invocation.getter(#storagePrefix),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storagePrefix),
             ),
@@ -1436,7 +1552,7 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
   String get storageToken =>
       (super.noSuchMethod(
             Invocation.getter(#storageToken),
-            returnValue: _i10.dummyValue<String>(
+            returnValue: _i11.dummyValue<String>(
               this,
               Invocation.getter(#storageToken),
             ),
@@ -1444,37 +1560,37 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
           as String);
 
   @override
-  _i17.PlaylistsState? fromJson(Map<String, dynamic>? json) =>
+  _i18.PlaylistsState? fromJson(Map<String, dynamic>? json) =>
       (super.noSuchMethod(Invocation.method(#fromJson, [json]))
-          as _i17.PlaylistsState?);
+          as _i18.PlaylistsState?);
 
   @override
-  Map<String, dynamic>? toJson(_i17.PlaylistsState? state) =>
+  Map<String, dynamic>? toJson(_i18.PlaylistsState? state) =>
       (super.noSuchMethod(Invocation.method(#toJson, [state]))
           as Map<String, dynamic>?);
 
   @override
-  void add(_i17.PlaylistsEvent? event) => super.noSuchMethod(
+  void add(_i18.PlaylistsEvent? event) => super.noSuchMethod(
     Invocation.method(#add, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void onEvent(_i17.PlaylistsEvent? event) => super.noSuchMethod(
+  void onEvent(_i18.PlaylistsEvent? event) => super.noSuchMethod(
     Invocation.method(#onEvent, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void emit(_i17.PlaylistsState? state) => super.noSuchMethod(
+  void emit(_i18.PlaylistsState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void on<E extends _i17.PlaylistsEvent>(
-    _i11.EventHandler<E, _i17.PlaylistsState>? handler, {
-    _i11.EventTransformer<E>? transformer,
+  void on<E extends _i18.PlaylistsEvent>(
+    _i12.EventHandler<E, _i18.PlaylistsState>? handler, {
+    _i12.EventTransformer<E>? transformer,
   }) => super.noSuchMethod(
     Invocation.method(#on, [handler], {#transformer: transformer}),
     returnValueForMissingStub: null,
@@ -1482,7 +1598,7 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
 
   @override
   void onTransition(
-    _i11.Transition<_i17.PlaylistsEvent, _i17.PlaylistsState>? transition,
+    _i12.Transition<_i18.PlaylistsEvent, _i18.PlaylistsState>? transition,
   ) => super.noSuchMethod(
     Invocation.method(#onTransition, [transition]),
     returnValueForMissingStub: null,
@@ -1490,7 +1606,7 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
 
   @override
   void onDone(
-    _i17.PlaylistsEvent? event, [
+    _i18.PlaylistsEvent? event, [
     Object? error,
     StackTrace? stackTrace,
   ]) => super.noSuchMethod(
@@ -1499,16 +1615,16 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
   );
 
   @override
-  _i9.Future<void> close() =>
+  _i10.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 
   @override
-  void onChange(_i11.Change<_i17.PlaylistsState>? change) => super.noSuchMethod(
+  void onChange(_i12.Change<_i18.PlaylistsState>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );
@@ -1527,19 +1643,19 @@ class MockPlaylistsBloc extends _i1.Mock implements _i17.PlaylistsBloc {
 
   @override
   void hydrate({
-    _i11.Storage? storage,
-    _i11.OnHydrationError? onError = _i11.defaultOnHydrationError,
+    _i12.Storage? storage,
+    _i12.OnHydrationError? onError = _i12.defaultOnHydrationError,
   }) => super.noSuchMethod(
     Invocation.method(#hydrate, [], {#storage: storage, #onError: onError}),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i9.Future<void> clear() =>
+  _i10.Future<void> clear() =>
       (super.noSuchMethod(
             Invocation.method(#clear, []),
-            returnValue: _i9.Future<void>.value(),
-            returnValueForMissingStub: _i9.Future<void>.value(),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
           )
-          as _i9.Future<void>);
+          as _i10.Future<void>);
 }

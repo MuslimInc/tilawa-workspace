@@ -938,6 +938,42 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get appearance;
 
+  /// Primary color setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Color'**
+  String get primaryColor;
+
+  /// Choose primary color dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Primary Color'**
+  String get choosePrimaryColor;
+
+  /// Cyan color name
+  ///
+  /// In en, this message translates to:
+  /// **'Cyan'**
+  String get colorCyan;
+
+  /// Green color name
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get colorGreen;
+
+  /// Brown color name
+  ///
+  /// In en, this message translates to:
+  /// **'Brown'**
+  String get colorBrown;
+
+  /// Purple color name
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get colorPurple;
+
   /// Theme setting title
   ///
   /// In en, this message translates to:
@@ -1135,6 +1171,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get done;
+
+  /// Bytes unit
+  ///
+  /// In en, this message translates to:
+  /// **'B'**
+  String get fileSizeUnitB;
+
+  /// Kilobytes unit
+  ///
+  /// In en, this message translates to:
+  /// **'KB'**
+  String get fileSizeUnitKB;
+
+  /// Megabytes unit
+  ///
+  /// In en, this message translates to:
+  /// **'MB'**
+  String get fileSizeUnitMB;
+
+  /// Gigabytes unit
+  ///
+  /// In en, this message translates to:
+  /// **'GB'**
+  String get fileSizeUnitGB;
+
+  /// Terabytes unit
+  ///
+  /// In en, this message translates to:
+  /// **'TB'**
+  String get fileSizeUnitTB;
 
   /// Reset label for thikr
   ///

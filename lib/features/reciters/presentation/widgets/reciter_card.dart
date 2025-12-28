@@ -143,10 +143,10 @@ class ReciterCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.library_music_rounded,
                       size: 12,
-                      color: Colors.blue,
+                      color: theme.primaryColor,
                     ),
                     SizedBox(width: 4.w),
                     Flexible(

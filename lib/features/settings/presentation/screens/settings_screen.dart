@@ -8,14 +8,13 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import '../../../../core/config/language_config.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/toast_utils.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
-
-// ... other imports
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -54,14 +53,28 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   BlocBuilder<ThemeCubit, ThemeState>(
                     builder: (context, state) {
-                      return _SettingsTile(
-                        icon: FluentIcons.dark_theme_24_regular,
-                        title: context.l10n.theme,
-                        subtitle: _getThemeName(context, state.mode),
-                        onTap: () => _showThemePicker(context, state.mode),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(16.r),
-                        ),
+                      return Column(
+                        children: [
+                          _SettingsTile(
+                            icon: FluentIcons.dark_theme_24_regular,
+                            title: context.l10n.theme,
+                            subtitle: _getThemeName(context, state.mode),
+                            onTap: () => _showThemePicker(context, state.mode),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(16.r),
+                            ),
+                          ),
+                          _SettingsTile(
+                            icon: FluentIcons.color_24_regular,
+                            title: context.l10n.primaryColor,
+                            subtitle: _getColorName(
+                              context,
+                              state.primaryColor,
+                            ),
+                            onTap: () =>
+                                _showColorPicker(context, state.primaryColor),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -357,6 +370,76 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
+            SizedBox(height: 16.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getColorName(BuildContext context, Color color) {
+    final AppColorOption option = ThemeCubit.colorOptions.firstWhere(
+      (element) => element.color.value == color.value,
+      orElse: () => ThemeCubit.colorOptions.first,
+    );
+    return _getLocalizedColorName(context, option.name);
+  }
+
+  String _getLocalizedColorName(BuildContext context, String name) {
+    final AppLocalizations l10n = context.l10n;
+    return switch (name) {
+      'Cyan' => l10n.colorCyan,
+      'Green' => l10n.colorGreen,
+      'Brown' => l10n.colorBrown,
+      'Purple' => l10n.colorPurple,
+      _ => name,
+    };
+  }
+
+  void _showColorPicker(BuildContext context, Color currentColor) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16.h),
+            Text(
+              context.l10n.choosePrimaryColor,
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.h),
+            ...ThemeCubit.colorOptions.map((option) {
+              final isSelected = option.color.value == currentColor.value;
+              return ListTile(
+                onTap: () {
+                  context.read<ThemeCubit>().setPrimaryColor(option.color);
+                  Navigator.pop(context);
+                },
+                leading: CircleAvatar(
+                  backgroundColor: option.color,
+                  radius: 12.r,
+                ),
+                title: Text(
+                  _getLocalizedColorName(context, option.name),
+                  style: TextStyle(
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected ? option.color : null,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(
+                        FluentIcons.checkmark_24_regular,
+                        color: option.color,
+                      )
+                    : null,
+              );
+            }),
             SizedBox(height: 16.h),
           ],
         ),

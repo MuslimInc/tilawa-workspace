@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../core/config/language_config.dart';
+import '../../core/theme/color_scheme.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 
 class LanguageSwitcher extends StatelessWidget {
@@ -35,7 +37,7 @@ class LanguageSwitcher extends StatelessWidget {
                     ),
                     if (currentLocale.languageCode ==
                         LanguageConfig.defaultLanguageCode)
-                      const Icon(Icons.check, color: Colors.blue),
+                      Icon(Icons.check, color: context.primaryColor),
                   ],
                 ),
               ),
@@ -52,7 +54,7 @@ class LanguageSwitcher extends StatelessWidget {
                       ),
                     ),
                     if (currentLocale.languageCode == 'en')
-                      const Icon(Icons.check, color: Colors.blue),
+                      Icon(Icons.check, color: context.primaryColor),
                   ],
                 ),
               ),

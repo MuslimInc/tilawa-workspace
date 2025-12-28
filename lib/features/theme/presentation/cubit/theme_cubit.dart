@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -9,26 +8,39 @@ import '../../../../core/theme/app_theme.dart';
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
-    this.scheme = FlexScheme.green,
+    this.primaryColor = const Color(0xFF1AADC5), // Default primary color
     this.useSystemTheme = true,
   });
   final ThemeMode mode;
-  final FlexScheme scheme;
+  final Color primaryColor;
   final bool useSystemTheme;
 
   @override
-  List<Object?> get props => [mode, scheme, useSystemTheme];
+  List<Object?> get props => [mode, primaryColor, useSystemTheme];
+}
+
+class AppColorOption {
+  const AppColorOption({required this.name, required this.color});
+  final String name;
+  final Color color;
 }
 
 @injectable
 class ThemeCubit extends HydratedCubit<ThemeState> {
   ThemeCubit() : super(const ThemeState(mode: ThemeMode.system));
 
+  static const List<AppColorOption> colorOptions = [
+    AppColorOption(name: 'Cyan', color: Color(0xFF1AADC5)),
+    AppColorOption(name: 'Green', color: Color(0xFF4CAF50)),
+    AppColorOption(name: 'Brown', color: Color(0xFF795548)),
+    AppColorOption(name: 'Purple', color: Color(0xFF9C27B0)),
+  ];
+
   @override
   ThemeState? fromJson(Map<String, dynamic> json) {
     try {
       final modeValue = json['mode'] as String?;
-      final schemeValue = json['scheme'] as String?;
+      final colorValue = json['primaryColor'] as int?;
       final bool useSystemTheme = json['useSystemTheme'] as bool? ?? true;
 
       final ThemeMode mode = switch (modeValue) {
@@ -37,14 +49,13 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         _ => ThemeMode.system,
       };
 
-      final FlexScheme scheme = FlexScheme.values.firstWhere(
-        (s) => s.name == schemeValue,
-        orElse: () => FlexScheme.green,
-      );
+      final primaryColor = colorValue != null
+          ? Color(colorValue)
+          : const Color(0xFF1AADC5);
 
       return ThemeState(
         mode: mode,
-        scheme: scheme,
+        primaryColor: primaryColor,
         useSystemTheme: useSystemTheme,
       );
     } catch (e) {
@@ -60,7 +71,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         ThemeMode.dark => 'dark',
         ThemeMode.system => 'system',
       },
-      'scheme': state.scheme.name,
+      // ignore: deprecated_member_use
+      'primaryColor': state.primaryColor.value,
       'useSystemTheme': state.useSystemTheme,
     };
   }
@@ -69,17 +81,17 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     emit(
       ThemeState(
         mode: mode,
-        scheme: state.scheme,
+        primaryColor: state.primaryColor,
         useSystemTheme: state.useSystemTheme,
       ),
     );
   }
 
-  Future<void> setScheme(FlexScheme scheme) async {
+  Future<void> setPrimaryColor(Color color) async {
     emit(
       ThemeState(
         mode: state.mode,
-        scheme: scheme,
+        primaryColor: color,
         useSystemTheme: state.useSystemTheme,
       ),
     );
@@ -89,7 +101,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     emit(
       ThemeState(
         mode: state.mode,
-        scheme: state.scheme,
+        primaryColor: state.primaryColor,
         useSystemTheme: useSystemTheme,
       ),
     );
@@ -101,16 +113,11 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
   /// Get the current light theme
   ThemeData getLightTheme() {
-    return AppTheme.getLightTheme(state.scheme);
+    return AppTheme.getLightTheme(primaryColor: state.primaryColor);
   }
 
   /// Get the current dark theme
   ThemeData getDarkTheme() {
-    return AppTheme.getDarkTheme(state.scheme);
-  }
-
-  /// Get available color schemes
-  List<FlexScheme> getAvailableSchemes() {
-    return AppTheme.getAvailableSchemes();
+    return AppTheme.getDarkTheme(primaryColor: state.primaryColor);
   }
 }

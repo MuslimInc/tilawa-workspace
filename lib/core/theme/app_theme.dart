@@ -16,11 +16,6 @@ class AppTheme {
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Custom theme colors
-  static const Color _primaryColor = Color(0xFF1AADC5);
-  static final FlexSchemeColor _customScheme = FlexSchemeColor.from(
-    primary: _primaryColor,
-    secondary: _primaryColor,
-  );
 
   // Dark theme configuration constants
   static const FlexSurfaceMode _darkSurfaceMode =
@@ -35,10 +30,15 @@ class AppTheme {
   static const bool _tooltipsMatchBackground = true;
   static const bool _useMaterial3ErrorColors = true;
 
-  /// Get the light theme for the given color scheme
-  static ThemeData getLightTheme(FlexScheme? scheme) {
+  /// Get the light theme for the given primary color
+  static ThemeData getLightTheme({required Color primaryColor}) {
+    final scheme = FlexSchemeColor.from(
+      primary: primaryColor,
+      secondary: primaryColor,
+    );
+
     return FlexThemeData.light(
-      colors: _customScheme,
+      colors: scheme,
       surfaceMode: _lightSurfaceMode,
       blendLevel: _lightBlendLevel,
       appBarStyle: _lightAppBarStyle,
@@ -52,10 +52,15 @@ class AppTheme {
     );
   }
 
-  /// Get the dark theme for the given color scheme
-  static ThemeData getDarkTheme(FlexScheme? scheme) {
+  /// Get the dark theme for the given primary color
+  static ThemeData getDarkTheme({required Color primaryColor}) {
+    final scheme = FlexSchemeColor.from(
+      primary: primaryColor,
+      secondary: primaryColor,
+    );
+
     return FlexThemeData.dark(
-      colors: _customScheme,
+      colors: scheme,
       surfaceMode: _darkSurfaceMode,
       blendLevel: _darkBlendLevel,
       appBarStyle: _darkAppBarStyle,
@@ -67,10 +72,5 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: GoogleFonts.alexandria().fontFamily,
     );
-  }
-
-  /// Get available color schemes for the app
-  static List<FlexScheme> getAvailableSchemes() {
-    return [FlexScheme.green];
   }
 }

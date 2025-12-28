@@ -448,6 +448,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appearance => 'المظهر';
 
   @override
+  String get primaryColor => 'اللون الأساسي';
+
+  @override
+  String get choosePrimaryColor => 'اختر اللون الأساسي';
+
+  @override
+  String get colorCyan => 'سماوي';
+
+  @override
+  String get colorGreen => 'أخضر';
+
+  @override
+  String get colorBrown => 'بني';
+
+  @override
+  String get colorPurple => 'أرجواني';
+
+  @override
   String get theme => 'السمة';
 
   @override
@@ -560,6 +578,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get done => 'تم';
+
+  @override
+  String get fileSizeUnitB => 'بايت';
+
+  @override
+  String get fileSizeUnitKB => 'ك.ب';
+
+  @override
+  String get fileSizeUnitMB => 'م.ب';
+
+  @override
+  String get fileSizeUnitGB => 'ج.ب';
+
+  @override
+  String get fileSizeUnitTB => 'ت.ب';
 
   @override
   String get reset => 'إعادة ضبط';

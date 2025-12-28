@@ -44,8 +44,12 @@ class _PlayerApp extends StatelessWidget {
               return MaterialApp.router(
                 title: AppStrings.appName,
                 debugShowCheckedModeBanner: false,
-                theme: AppTheme.getLightTheme(themeState.scheme),
-                darkTheme: AppTheme.getDarkTheme(themeState.scheme),
+                theme: AppTheme.getLightTheme(
+                  primaryColor: themeState.primaryColor,
+                ),
+                darkTheme: AppTheme.getDarkTheme(
+                  primaryColor: themeState.primaryColor,
+                ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
                 restorationScopeId: AppStrings.restorationScopeId,

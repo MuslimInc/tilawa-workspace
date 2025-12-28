@@ -98,7 +98,10 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   SliverAppBar _buildAppBar(BuildContext context, DownloadsState state) {
     final int totalBytes = state.totalDownloadsSize;
-    final String formattedSize = FileSizeFormatter.formatBytes(totalBytes);
+    final String formattedSize = FileSizeFormatter.formatBytes(
+      context,
+      totalBytes,
+    );
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 

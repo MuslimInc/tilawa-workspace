@@ -600,6 +600,30 @@
     "@appearance": {
         "description": "Appearance section title"
     },
+    "primaryColor": "Primary Color",
+    "@primaryColor": {
+        "description": "Primary color setting title"
+    },
+    "choosePrimaryColor": "Choose Primary Color",
+    "@choosePrimaryColor": {
+        "description": "Choose primary color dialog title"
+    },
+    "colorCyan": "Cyan",
+    "@colorCyan": {
+        "description": "Cyan color name"
+    },
+    "colorGreen": "Green",
+    "@colorGreen": {
+        "description": "Green color name"
+    },
+    "colorBrown": "Brown",
+    "@colorBrown": {
+        "description": "Brown color name"
+    },
+    "colorPurple": "Purple",
+    "@colorPurple": {
+        "description": "Purple color name"
+    },
     "theme": "Theme",
     "@theme": {
         "description": "Theme setting title"
@@ -773,6 +797,26 @@
     "done": "Done",
     "@done": {
         "description": "Done label for thikr completion"
+    },
+    "fileSizeUnitB": "B",
+    "@fileSizeUnitB": {
+        "description": "Bytes unit"
+    },
+    "fileSizeUnitKB": "KB",
+    "@fileSizeUnitKB": {
+        "description": "Kilobytes unit"
+    },
+    "fileSizeUnitMB": "MB",
+    "@fileSizeUnitMB": {
+        "description": "Megabytes unit"
+    },
+    "fileSizeUnitGB": "GB",
+    "@fileSizeUnitGB": {
+        "description": "Gigabytes unit"
+    },
+    "fileSizeUnitTB": "TB",
+    "@fileSizeUnitTB": {
+        "description": "Terabytes unit"
     },
     "reset": "Reset",
     "@reset": {

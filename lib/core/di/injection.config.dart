@@ -268,6 +268,8 @@ import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter
     as _i961;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i184;
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart'
+    as _i510;
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart'
     as _i672;
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart'
@@ -979,9 +981,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i563.AudioPlayerHandler>(),
         gh<_i405.ConvertAudioEntitiesToSurahsUseCase>(),
         gh<_i863.RefreshSurahDownloadStatusUseCase>(),
-        gh<_i645.DownloadAllSurahsUseCase>(),
-        gh<_i817.CancelDownloadsForReciterUseCase>(),
-        gh<_i446.ObserveReciterDownloadsUseCase>(),
+        gh<_i274.GetValidCompletedDownloadsUseCase>(),
       ),
     );
     gh.factory<_i354.DownloadsBloc>(
@@ -1007,6 +1007,13 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i323.ObserveGlobalDownloadProgressUseCase>(),
         getDownloadStatus: gh<_i935.GetDownloadStatusUseCase>(),
         removeFromDownloadQueue: gh<_i204.RemoveFromDownloadQueueUseCase>(),
+      ),
+    );
+    gh.factory<_i510.ReciterDownloadBloc>(
+      () => _i510.ReciterDownloadBloc(
+        gh<_i645.DownloadAllSurahsUseCase>(),
+        gh<_i817.CancelDownloadsForReciterUseCase>(),
+        gh<_i446.ObserveReciterDownloadsUseCase>(),
       ),
     );
     return this;

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../core/di/injection.dart';
+import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
 import '../features/reciters/presentation/cubit/reciter_details_loader_state.dart';
 import 'reciter_details_screen.dart';
@@ -46,7 +48,17 @@ class ReciterDetailsLoader extends StatelessWidget {
             }
 
             if (state is ReciterDetailsLoaderSuccess) {
-              return ReciterDetailsScreen(reciter: state.reciter);
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => getIt<ReciterDetailsBloc>(),
+                  ),
+                  BlocProvider(
+                    create: (context) => getIt<ReciterDownloadBloc>(),
+                  ),
+                ],
+                child: ReciterDetailsScreen(reciter: state.reciter),
+              );
             }
 
             return const SizedBox.shrink();

@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/features/athkar/presentation/screens/athkar_categories_screen.dart';
 import 'package:tilawa/features/athkar/presentation/screens/athkar_details_screen.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/screens/login_screen.dart';
+import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/screens/downloads_screen.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:tilawa/features/premium/presentation/screens/premium_screen.dart';
 import 'package:tilawa/features/qibla/presentation/screens/qibla_screen.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/screens/favorites_screen.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/settings/presentation/screens/settings_screen.dart';
 import 'package:tilawa/features/splash/presentation/screens/splash_screen.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -24,21 +34,71 @@ import 'package:tilawa/shared/widgets/expanded_player_screen.dart';
 import 'router_mock_helper.mocks.dart';
 
 void main() {
+  provideDummy<LocalizationState>(
+    const LocalizationState(locale: Locale('en')),
+  );
+  provideDummy<AudioPlayerState>(
+    const AudioPlayerState(status: AudioPlayerStatus.initial),
+  );
+
+  late MockGoRouterState mockGoRouterState;
   late MockAuthBloc mockAuthBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockDownloadsBloc mockDownloadsBloc;
-  late MockReciterDetailsLoaderCubit mockReciterDetailsLoaderCubit;
-  late MockGoRouterState mockGoRouterState;
+  late MockReciterDetailsBloc mockReciterDetailsBloc;
+  late MockReciterDownloadBloc mockReciterDownloadBloc;
+  late MockLocalizationBloc mockLocalizationBloc;
+  late MockSettingsCubit mockSettingsCubit;
+
+  final GetIt getIt = GetIt.instance;
 
   setUp(() {
+    getIt.reset();
+    mockGoRouterState = MockGoRouterState();
     mockAuthBloc = MockAuthBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockDownloadsBloc = MockDownloadsBloc();
-    mockReciterDetailsLoaderCubit = MockReciterDetailsLoaderCubit();
-    mockGoRouterState = MockGoRouterState();
+    mockReciterDetailsBloc = MockReciterDetailsBloc();
+    mockReciterDownloadBloc = MockReciterDownloadBloc();
+    mockLocalizationBloc = MockLocalizationBloc();
+    mockSettingsCubit = MockSettingsCubit();
 
     when(mockGoRouterState.pageKey).thenReturn(const ValueKey('test'));
     when(mockGoRouterState.uri).thenReturn(Uri.parse('/test'));
+
+    getIt.registerFactory<AuthBloc>(() => mockAuthBloc);
+    getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
+    getIt.registerFactory<DownloadsBloc>(() => mockDownloadsBloc);
+    getIt.registerFactory<ReciterDetailsBloc>(() => mockReciterDetailsBloc);
+    getIt.registerFactory<ReciterDownloadBloc>(() => mockReciterDownloadBloc);
+    getIt.registerFactory<LocalizationBloc>(() => mockLocalizationBloc);
+    getIt.registerFactory<SettingsCubit>(() => mockSettingsCubit);
+
+    // Default state stubs
+    when(mockAuthBloc.state).thenReturn(const AuthState.initial());
+    when(
+      mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+    when(mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(mockReciterDetailsBloc.state).thenReturn(const ReciterDetailsState());
+    when(
+      mockReciterDownloadBloc.state,
+    ).thenReturn(const ReciterDownloadState());
+    when(
+      mockLocalizationBloc.state,
+    ).thenReturn(const LocalizationState(locale: Locale('en')));
+    when(mockSettingsCubit.state).thenReturn(const SettingsState());
+
+    // Stream stubs for MultiBlocProvider
+    when(mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(mockAudioPlayerBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(mockReciterDetailsBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      mockReciterDownloadBloc.stream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(mockLocalizationBloc.stream).thenAnswer((_) => const Stream.empty());
+    when(mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
   });
 
   group('AppRouterConfig Routes', () {
@@ -55,12 +115,20 @@ void main() {
     });
 
     group('ReciterDetailsRoute', () {
+      const moshaf = MoshafEntity(
+        id: 1,
+        name: 'Test Moshaf',
+        server: 'https://test.com',
+        surahTotal: 114,
+        moshafType: 1,
+        surahList: '',
+      );
       const reciter = ReciterEntity(
         id: 1,
         name: 'Test Reciter',
         letter: 'T',
         date: '2023-01-01',
-        moshaf: [],
+        moshaf: [moshaf],
       );
 
       test('builds ReciterDetailsLoader when extra is null', () {
@@ -73,14 +141,38 @@ void main() {
         expect((widget as ReciterDetailsLoader).reciterId, '1');
       });
 
-      test('builds ReciterDetailsScreen when extra is present', () {
+      testWidgets('builds ReciterDetailsScreen when extra is present', (
+        tester,
+      ) async {
         const route = ReciterDetailsRoute(reciterId: '1', $extra: reciter);
         final Widget widget = route.build(
           MockBuildContext(),
           mockGoRouterState,
         );
-        expect(widget, isA<ReciterDetailsScreen>());
-        expect((widget as ReciterDetailsScreen).reciter, reciter);
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MultiBlocProvider(
+              providers: [
+                BlocProvider<AuthBloc>.value(value: mockAuthBloc),
+                BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+                BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
+                BlocProvider<LocalizationBloc>.value(
+                  value: mockLocalizationBloc,
+                ),
+                BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+              ],
+              child: widget,
+            ),
+          ),
+        );
+
+        expect(find.byType(ReciterDetailsScreen), findsOneWidget);
+        final ReciterDetailsScreen screen = tester.widget<ReciterDetailsScreen>(
+          find.byType(ReciterDetailsScreen),
+        );
+        expect(screen.reciter, reciter);
       });
     });
 
