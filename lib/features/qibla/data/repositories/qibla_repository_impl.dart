@@ -1,15 +1,18 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
-import 'package:qibla/qibla.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/repositories/qibla_repository.dart';
+import '../datasources/qibla_data_source.dart';
 
 @LazySingleton(as: QiblaRepository)
 class QiblaRepositoryImpl implements QiblaRepository {
+  QiblaRepositoryImpl(this._dataSource);
+  final QiblaDataSource _dataSource;
+
   @override
   Stream<QiblaDirectionEntity> getQiblaDirection() {
-    return Qibla.qiblaStream.map((qiblaDirection) {
+    return _dataSource.qiblaStream.map((qiblaDirection) {
       return QiblaDirectionEntity(
         qibla: qiblaDirection.qibla,
         direction: qiblaDirection.direction,
@@ -20,15 +23,15 @@ class QiblaRepositoryImpl implements QiblaRepository {
 
   @override
   Future<bool> isLocationServiceEnabled() {
-    return Geolocator.isLocationServiceEnabled();
+    return _dataSource.isLocationServiceEnabled();
   }
 
   @override
   Future<bool> requestLocationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
+    LocationPermission permission = await _dataSource.checkPermission();
 
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+      permission = await _dataSource.requestPermission();
     }
 
     return permission == LocationPermission.always ||

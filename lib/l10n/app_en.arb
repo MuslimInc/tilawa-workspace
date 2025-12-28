@@ -1,5 +1,25 @@
 {
     "@@locale": "en",
+    "toQibla": "To Qibla",
+    "@toQibla": {
+        "description": "The title of the qibla direction screen"
+    },
+    "north": "N",
+    "@north": {
+        "description": "North direction label"
+    },
+    "east": "E",
+    "@east": {
+        "description": "East direction label"
+    },
+    "south": "S",
+    "@south": {
+        "description": "South direction label"
+    },
+    "west": "W",
+    "@west": {
+        "description": "West direction label"
+    },
     "appTitle": "Tilawa",
     "@appTitle": {
         "description": "The title of the application"

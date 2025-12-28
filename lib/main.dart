@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
 import 'core/services/notification_permission_service.dart';
 import 'features/downloads/data/services/downloads_initialization_service.dart';
+import 'features/notifications/domain/repositories/notifications_repository.dart';
 import 'firebase_options.dart';
 import 'quran_player_app.dart';
 import 'router/app_router.dart';
@@ -34,6 +36,7 @@ Future<void> main() async {
 
   // Initialize Firebase first, then DI
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await configureDependencies();
 
   // Initialize HydratedStorage
@@ -51,6 +54,9 @@ Future<void> main() async {
   // Request notification permission on first launch
   await _requestNotificationPermission();
 
+  // Initialize Notification Service (FCM)
+  await _initializeNotificationService();
+
   // Initialize downloads feature (resumes pending downloads)
   await _initializeDownloads();
 
@@ -60,6 +66,26 @@ Future<void> main() async {
   Bloc.observer = AppBlocObserver();
 
   runApp(const QuranPlayerApp());
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('Handling a background message: ${message.messageId}');
+}
+
+/// Initialize Notification Service
+Future<void> _initializeNotificationService() async {
+  try {
+    final NotificationsRepository notificationsRepository =
+        getIt<NotificationsRepository>();
+    await notificationsRepository.requestPermission();
+    await notificationsRepository.getToken();
+    await notificationsRepository.initializeListeners();
+    logger.d('Notification Repository initialized successfully');
+  } catch (e) {
+    logger.d('Warning: Could not initialize Notification Repository: $e');
+  }
 }
 
 /// Initialize HydratedStorage for bloc state persistence

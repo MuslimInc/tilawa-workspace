@@ -33,6 +33,8 @@ import 'package:tilawa/core/services/firebase_initialization_service.dart'
 import 'package:tilawa/core/services/navigation_service.dart' as _i628;
 import 'package:tilawa/core/services/notification_permission_service.dart'
     as _i1039;
+import 'package:tilawa/core/wrappers/location_service_wrapper.dart' as _i527;
+import 'package:tilawa/core/wrappers/qibla_service_wrapper.dart' as _i119;
 import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
     as _i895;
 import 'package:tilawa/features/athkar/data/datasources/athkar_local_datasource.dart'
@@ -178,6 +180,12 @@ import 'package:tilawa/features/localization/domain/usecases/set_language_use_ca
     as _i586;
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart'
     as _i522;
+import 'package:tilawa/features/notifications/data/datasources/notifications_remote_data_source.dart'
+    as _i371;
+import 'package:tilawa/features/notifications/data/repositories/notifications_repository_impl.dart'
+    as _i25;
+import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart'
+    as _i549;
 import 'package:tilawa/features/onboarding/data/repositories/onboarding_repository_impl.dart'
     as _i186;
 import 'package:tilawa/features/onboarding/domain/repositories/onboarding_repository.dart'
@@ -240,6 +248,8 @@ import 'package:tilawa/features/premium/domain/usecases/start_trial_use_case.dar
     as _i644;
 import 'package:tilawa/features/premium/presentation/bloc/premium_bloc.dart'
     as _i64;
+import 'package:tilawa/features/qibla/data/datasources/qibla_data_source.dart'
+    as _i912;
 import 'package:tilawa/features/qibla/data/repositories/qibla_repository_impl.dart'
     as _i490;
 import 'package:tilawa/features/qibla/domain/repositories/qibla_repository.dart'
@@ -351,6 +361,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
     );
+    gh.lazySingleton<_i527.LocationServiceWrapper>(
+      () => _i527.LocationServiceWrapper(),
+    );
+    gh.lazySingleton<_i119.QiblaServiceWrapper>(
+      () => _i119.QiblaServiceWrapper(),
+    );
     gh.lazySingleton<_i624.FlutterDownloaderWrapper>(
       () => _i624.FlutterDownloaderWrapper(),
     );
@@ -405,6 +421,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i641.AudioPositionService>(
       () => _i641.AudioPositionServiceImpl(),
     );
+    gh.lazySingleton<_i912.QiblaDataSource>(
+      () => _i912.QiblaDataSourceImpl(
+        gh<_i527.LocationServiceWrapper>(),
+        gh<_i119.QiblaServiceWrapper>(),
+      ),
+    );
     gh.lazySingleton<_i958.OnboardingRepository>(
       () => _i186.OnboardingRepositoryImpl(gh<_i460.SharedPreferencesAsync>()),
     );
@@ -419,6 +441,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i995.CompleteOnboarding>(
       () => _i995.CompleteOnboarding(gh<_i958.OnboardingRepository>()),
     );
+    gh.lazySingleton<_i371.NotificationsRemoteDataSource>(
+      () => _i371.NotificationsRemoteDataSourceImpl(
+        gh<_i892.FirebaseMessaging>(),
+      ),
+    );
     gh.singleton<_i792.GetSurahsForReciterUseCase>(
       () => _i792.GetSurahsForReciterUseCase(gh<_i697.SurahRepository>()),
     );
@@ -429,7 +456,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i889.UpdateSurahDownloadStatusUseCase>(
       () => _i889.UpdateSurahDownloadStatusUseCase(gh<_i697.SurahRepository>()),
     );
-    gh.lazySingleton<_i6.QiblaRepository>(() => _i490.QiblaRepositoryImpl());
+    gh.lazySingleton<_i6.QiblaRepository>(
+      () => _i490.QiblaRepositoryImpl(gh<_i912.QiblaDataSource>()),
+    );
     gh.lazySingleton<_i965.DownloadsLocalDataSource>(
       () => _i965.DownloadsLocalDataSourceImpl(
         gh<_i460.SharedPreferencesAsync>(),
@@ -489,6 +518,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i650.AthkarLocalDataSource>(
       () =>
           _i650.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
+    );
+    gh.lazySingleton<_i549.NotificationsRepository>(
+      () => _i25.NotificationsRepositoryImpl(
+        gh<_i371.NotificationsRemoteDataSource>(),
+      ),
     );
     gh.lazySingleton<_i399.AuthProviderFactory>(
       () => _i399.AuthProviderFactory(

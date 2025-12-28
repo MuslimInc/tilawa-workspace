@@ -9,6 +9,21 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get toQibla => 'إلى القبلة';
+
+  @override
+  String get north => 'شمال';
+
+  @override
+  String get east => 'شرق';
+
+  @override
+  String get south => 'جنوب';
+
+  @override
+  String get west => 'غرب';
+
+  @override
   String get appTitle => 'تلاوة';
 
   @override

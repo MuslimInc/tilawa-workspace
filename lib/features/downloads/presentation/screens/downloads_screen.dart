@@ -84,12 +84,12 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         title: Text(context.l10n.downloads),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadDownloads,
             tooltip: context.l10n.refreshDownloads,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white),
+            icon: const Icon(Icons.delete_sweep_rounded),
             onPressed: () => _showClearAllDialog(context),
             tooltip: context.l10n.deleteAll,
           ),

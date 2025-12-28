@@ -1,5 +1,25 @@
 {
     "@@locale": "ar",
+    "toQibla": "إلى القبلة",
+    "@toQibla": {
+        "description": "The title of the qibla direction screen"
+    },
+    "north": "شمال",
+    "@north": {
+        "description": "North direction label"
+    },
+    "east": "شرق",
+    "@east": {
+        "description": "East direction label"
+    },
+    "south": "جنوب",
+    "@south": {
+        "description": "South direction label"
+    },
+    "west": "غرب",
+    "@west": {
+        "description": "West direction label"
+    },
     "appTitle": "تلاوة",
     "@appTitle": {
         "description": "The title of the application"

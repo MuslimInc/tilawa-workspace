@@ -9,6 +9,21 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get toQibla => 'To Qibla';
+
+  @override
+  String get north => 'N';
+
+  @override
+  String get east => 'E';
+
+  @override
+  String get south => 'S';
+
+  @override
+  String get west => 'W';
+
+  @override
   String get appTitle => 'Tilawa';
 
   @override

@@ -403,11 +403,11 @@ void main() {
           reason: 'DownloadsScreen not found',
         );
 
-        // Check CustomScrollView
+        // Check ListView
         expect(
-          find.byType(CustomScrollView),
+          find.byType(ListView),
           findsOneWidget,
-          reason: 'CustomScrollView not found - BlocBuilder failing?',
+          reason: 'ListView not found - BlocBuilder failing?',
         );
 
         // 1. Check Reciter Header

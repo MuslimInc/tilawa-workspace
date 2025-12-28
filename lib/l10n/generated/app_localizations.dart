@@ -98,6 +98,36 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// The title of the qibla direction screen
+  ///
+  /// In en, this message translates to:
+  /// **'To Qibla'**
+  String get toQibla;
+
+  /// North direction label
+  ///
+  /// In en, this message translates to:
+  /// **'N'**
+  String get north;
+
+  /// East direction label
+  ///
+  /// In en, this message translates to:
+  /// **'E'**
+  String get east;
+
+  /// South direction label
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get south;
+
+  /// West direction label
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get west;
+
   /// The title of the application
   ///
   /// In en, this message translates to:

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../core/extensions.dart';
 import '../bloc/qibla_bloc.dart';
 import '../widgets/qibla_compass_widget.dart';
 
@@ -13,84 +13,98 @@ class QiblaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
 
     return BlocProvider(
       create: (context) =>
           getIt<QiblaBloc>()..add(const CheckLocationService()),
       child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: Text(AppLocalizations.of(context)!.qiblaDirection),
-        ),
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                theme.primaryColor,
-                theme.primaryColor.withValues(alpha: 0.8),
-                Colors.black,
-              ],
-            ),
-          ),
-          child: BlocBuilder<QiblaBloc, QiblaState>(
-            builder: (context, state) {
-              switch (state.status) {
-                case QiblaStatus.loading:
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  );
-                case QiblaStatus.serviceDisabled:
-                  return _buildErrorState(
-                    context,
-                    AppLocalizations.of(context)!.locationServiceDisabled,
-                    AppLocalizations.of(context)!.enableLocationServiceMessage,
-                    Icons.location_off_rounded,
-                    () => context.read<QiblaBloc>().add(
-                      const CheckLocationService(),
+        backgroundColor: colorScheme.surface,
+        appBar: AppBar(elevation: 0, title: Text(context.l10n.qiblaDirection)),
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    BlocBuilder<QiblaBloc, QiblaState>(
+                      builder: (context, state) {
+                        switch (state.status) {
+                          case QiblaStatus.loading:
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: colorScheme.onSurface,
+                              ),
+                            );
+                          case QiblaStatus.serviceDisabled:
+                            return _buildErrorState(
+                              context,
+                              context.l10n.locationServiceDisabled,
+                              context.l10n.enableLocationServiceMessage,
+                              Icons.location_off_rounded,
+                              () => context.read<QiblaBloc>().add(
+                                const CheckLocationService(),
+                              ),
+                            );
+                          case QiblaStatus.permissionDenied:
+                            return _buildErrorState(
+                              context,
+                              context.l10n.permissionDenied,
+                              context.l10n.locationPermissionRequiredMessage,
+                              Icons.security_rounded,
+                              () => context.read<QiblaBloc>().add(
+                                const RequestLocationPermission(),
+                              ),
+                            );
+                          case QiblaStatus.error:
+                            return _buildErrorState(
+                              context,
+                              context.l10n.error,
+                              state.errorMessage ??
+                                  context.l10n.anErrorOccurred,
+                              Icons.error_outline_rounded,
+                              () => context.read<QiblaBloc>().add(
+                                const CheckLocationService(),
+                              ),
+                            );
+                          case QiblaStatus.success:
+                            if (state.direction == null) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.onSurface,
+                                ),
+                              );
+                            }
+                            return QiblaCompassWidget(
+                              qiblaDirection: state.direction!,
+                            );
+                          case QiblaStatus.initial:
+                            return const SizedBox.shrink();
+                        }
+                      },
                     ),
-                  );
-                case QiblaStatus.permissionDenied:
-                  return _buildErrorState(
-                    context,
-                    AppLocalizations.of(context)!.permissionDenied,
-                    AppLocalizations.of(
-                      context,
-                    )!.locationPermissionRequiredMessage,
-                    Icons.security_rounded,
-                    () => context.read<QiblaBloc>().add(
-                      const RequestLocationPermission(),
+                    const Spacer(),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32.w,
+                        vertical: 24.h,
+                      ),
+                      child: Text(
+                        'تأكد من أن السهم يتحرك عند تحريك الجهاز\nوابتعد عن الإلكترونيات',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  );
-                case QiblaStatus.error:
-                  return _buildErrorState(
-                    context,
-                    AppLocalizations.of(context)!.error,
-                    state.errorMessage ??
-                        AppLocalizations.of(context)!.anErrorOccurred,
-                    Icons.error_outline_rounded,
-                    () => context.read<QiblaBloc>().add(
-                      const CheckLocationService(),
-                    ),
-                  );
-                case QiblaStatus.success:
-                  if (state.direction == null) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    );
-                  }
-                  return Center(
-                    child: QiblaCompassWidget(direction: state.direction!),
-                  );
-                case QiblaStatus.initial:
-                  return const SizedBox.shrink();
-              }
-            },
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -104,28 +118,35 @@ class QiblaScreen extends StatelessWidget {
     IconData icon,
     VoidCallback onRetry,
   ) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80.r, color: Colors.white.withValues(alpha: 0.8)),
+          Icon(
+            icon,
+            size: 80.r,
+            color: colorScheme.onSurface.withValues(alpha: 0.8),
+          ),
           SizedBox(height: 24.h),
           Text(
             title,
-            style: TextStyle(
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontSize: 24.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 12.h),
           Text(
             message,
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 16.sp,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -133,14 +154,14 @@ class QiblaScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: colorScheme.onSurface,
+              foregroundColor: colorScheme.surface,
               padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.r),
               ),
             ),
-            child: Text(AppLocalizations.of(context)!.tryAgain),
+            child: Text(context.l10n.tryAgain),
           ),
         ],
       ),
