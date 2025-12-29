@@ -2,7 +2,7 @@ name: tilawa
 description: An Audio Quran Player project.
 
 publish_to: "none"
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ^3.10.4
@@ -94,3 +94,4 @@ flutter:
     - assets/data/
     - assets/images/qibla_dial.png
     - assets/images/qibla_needle.png
+    - shorebird.yaml
