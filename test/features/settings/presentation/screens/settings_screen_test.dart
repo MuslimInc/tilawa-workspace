@@ -131,4 +131,39 @@ void main() {
     expect(find.text('Light Mode'), findsOneWidget);
     expect(find.text('Dark Mode'), findsOneWidget);
   });
+
+  testWidgets('Tap on Primary Color tile opens color picker', (tester) async {
+    // Increase size to avoid overflow
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+
+    when(() => mockAuthBloc.state).thenReturn(const AuthState.initial());
+    when(() => mockThemeCubit.state).thenReturn(
+      const ThemeState(mode: ThemeMode.system, primaryColor: Colors.blue),
+    );
+
+    when(
+      () => mockLocalizationBloc.state,
+    ).thenReturn(const LocalizationState(locale: Locale('en')));
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    final Finder primaryColorFinder = find.text('Primary Color');
+    expect(primaryColorFinder, findsOneWidget);
+
+    await tester.tap(primaryColorFinder);
+    await tester.pumpAndSettle();
+
+    // Verify Dialog opens
+    expect(find.text('Choose Primary Color'), findsOneWidget);
+    // Verify Custom option exists (Text 'Custom')
+    // Might appear multiple times if the tile behind also shows "Custom" (if color not matched)
+    expect(find.text('Custom'), findsWidgets);
+
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+    });
+  });
 }

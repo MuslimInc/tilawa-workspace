@@ -83,7 +83,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 },
                 backgroundColor: theme.colorScheme.primaryContainer,
                 foregroundColor: theme.colorScheme.onPrimaryContainer,
-                icon: const Icon(Icons.favorite_rounded, color: Colors.red),
+                icon: const Icon(Icons.favorite_rounded),
                 label: Text(
                   l10n.favorites,
                   style: TextStyle(

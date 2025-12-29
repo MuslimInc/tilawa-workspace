@@ -12,6 +12,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
@@ -378,6 +379,15 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _getColorName(BuildContext context, Color color) {
+    // Check if the color is in options
+    final bool isKnownColor = ThemeCubit.colorOptions.any(
+      (element) => element.color.value == color.value,
+    );
+
+    if (!isKnownColor) {
+      return context.l10n.custom;
+    }
+
     final AppColorOption option = ThemeCubit.colorOptions.firstWhere(
       (element) => element.color.value == color.value,
       orElse: () => ThemeCubit.colorOptions.first,
@@ -440,10 +450,87 @@ class SettingsScreen extends StatelessWidget {
                     : null,
               );
             }),
+            // Custom Color Option
+            ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                _showCustomColorPicker(context, currentColor);
+              },
+              leading: Container(
+                width: 24.r,
+                height: 24.r,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: SweepGradient(
+                    colors: [Colors.red, Colors.blue, Colors.green, Colors.red],
+                  ),
+                ),
+              ),
+              title: Text(
+                context.l10n.custom,
+                style: TextStyle(
+                  fontWeight:
+                      !ThemeCubit.colorOptions.any(
+                        (opt) => opt.color.value == currentColor.value,
+                      )
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color:
+                      !ThemeCubit.colorOptions.any(
+                        (opt) => opt.color.value == currentColor.value,
+                      )
+                      ? currentColor
+                      : null,
+                ),
+              ),
+              trailing:
+                  !ThemeCubit.colorOptions.any(
+                    (opt) => opt.color.value == currentColor.value,
+                  )
+                  ? Icon(FluentIcons.checkmark_24_regular, color: currentColor)
+                  : null,
+            ),
             SizedBox(height: 16.h),
           ],
         ),
       ),
+    );
+  }
+
+  void _showCustomColorPicker(BuildContext context, Color currentColor) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        var pickerColor = currentColor;
+        return AlertDialog(
+          title: Text(ctx.l10n.choosePrimaryColor),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (color) {
+                pickerColor = color;
+              },
+              pickerAreaHeightPercent: 0.8,
+              enableAlpha: false,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(ctx.l10n.cancel),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            TextButton(
+              child: Text(ctx.l10n.save),
+              onPressed: () {
+                ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

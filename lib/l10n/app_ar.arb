@@ -620,11 +620,11 @@
     "@appearance": {
         "description": "Appearance section title"
     },
-    "primaryColor": "اللون الأساسي",
+    "primaryColor": "لون التطبيق",
     "@primaryColor": {
         "description": "Primary color setting title"
     },
-    "choosePrimaryColor": "اختر اللون الأساسي",
+    "choosePrimaryColor": "اختر لون التطبيق",
     "@choosePrimaryColor": {
         "description": "Choose primary color dialog title"
     },
