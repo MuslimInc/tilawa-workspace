@@ -651,6 +651,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get unableToFindQibla => 'تعذر العثور على القبلة';
 
   @override
+  String get qiblaCompassTip => 'تأكد من أن السهم يتحرك عند تحريك الجهاز';
+
+  @override
   String get onboardingTitle1 => 'دقائق من القرآن... تغير يومك كله';
 
   @override

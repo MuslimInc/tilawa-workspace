@@ -654,6 +654,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unableToFindQibla => 'Unable to find Qibla';
 
   @override
+  String get qiblaCompassTip =>
+      'Make sure the arrow moves when you rotate your device';
+
+  @override
   String get onboardingTitle1 =>
       'Minutes from the Quran... change your whole day';
 

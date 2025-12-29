@@ -88,45 +88,50 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           }
         },
         builder: (context, state) {
-          return CustomScrollView(
-            restorationId: 'reciter_details_scroll_view',
-            slivers: [
-              _ReciterAppBar(reciter: widget.reciter),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyHeaderDelegate(
-                  minHeight: 60.h,
-                  maxHeight: 60.h,
-                  child: ColoredBox(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: _ReciterSearchField(controller: _searchController),
+          return GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              restorationId: 'reciter_details_scroll_view',
+              slivers: [
+                _ReciterAppBar(reciter: widget.reciter),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyHeaderDelegate(
+                    minHeight: 60.h,
+                    maxHeight: 60.h,
+                    child: ColoredBox(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: _ReciterSearchField(controller: _searchController),
+                    ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    if (widget.reciter.moshaf.length > 1)
-                      _MoshafSelector(reciter: widget.reciter, state: state),
-                    if (state.status == ReciterDetailsStatus.loaded &&
-                        state.surahList.isNotEmpty)
-                      _DownloadAllButton(
-                        reciter: widget.reciter,
-                        parentState: state,
-                      ),
-                  ],
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      if (widget.reciter.moshaf.length > 1)
+                        _MoshafSelector(reciter: widget.reciter, state: state),
+                      if (state.status == ReciterDetailsStatus.loaded &&
+                          state.surahList.isNotEmpty &&
+                          state.searchQuery.isEmpty)
+                        _DownloadAllButton(
+                          reciter: widget.reciter,
+                          parentState: state,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              _ReciterDetailsContent(
-                reciter: widget.reciter,
-                state: state,
-                onPlaySurah: (surah) {
-                  context.read<ReciterDetailsBloc>().add(
-                    PlaySurahRequested(surah),
-                  );
-                },
-              ),
-            ],
+                _ReciterDetailsContent(
+                  reciter: widget.reciter,
+                  state: state,
+                  onPlaySurah: (surah) {
+                    context.read<ReciterDetailsBloc>().add(
+                      PlaySurahRequested(surah),
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -523,7 +528,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                   ),
                   SizedBox(height: 16.h),
                   Text(
-                    'No surahs found for "${state.searchQuery}"',
+                    context.l10n.noSurahsAvailable,
                     style: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   ),
                 ],

@@ -61,10 +61,28 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
     final ThemeData theme = Theme.of(context);
-    return BlocListener<LocalizationBloc, LocalizationState>(
-      listener: (context, state) {
-        context.read<RecitersBloc>().add(const LanguageChanged());
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<LocalizationBloc, LocalizationState>(
+          listener: (context, state) {
+            context.read<RecitersBloc>().add(const LanguageChanged());
+          },
+        ),
+        BlocListener<RecitersBloc, RecitersState>(
+          listenWhen: (previous, current) =>
+              previous is! RecitersLoaded && current is RecitersLoaded,
+          listener: (context, state) {
+            // Restore selected letter filter when reciters are loaded
+            final String? selectedLetter = context
+                .read<AlphabetScrollbarBloc>()
+                .state
+                .selectedLetter;
+            if (selectedLetter != null) {
+              context.read<RecitersBloc>().add(FilterByLetter(selectedLetter));
+            }
+          },
+        ),
+      ],
       child: BlocProvider(
         create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
         child: BlocBuilder<RecitersBloc, RecitersState>(

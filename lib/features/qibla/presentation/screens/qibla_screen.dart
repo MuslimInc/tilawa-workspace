@@ -92,7 +92,7 @@ class QiblaScreen extends StatelessWidget {
                         vertical: 24.h,
                       ),
                       child: Text(
-                        'تأكد من أن السهم يتحرك عند تحريك الجهاز\nوابتعد عن الإلكترونيات',
+                        context.l10n.qiblaCompassTip,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: colorScheme.onSurface,

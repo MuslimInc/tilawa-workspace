@@ -890,6 +890,10 @@
     "@unableToFindQibla": {
         "description": "Generic error title for Qibla"
     },
+    "qiblaCompassTip": "تأكد من أن السهم يتحرك عند تحريك الجهاز",
+    "@qiblaCompassTip": {
+        "description": "Tip message displayed on Qibla compass screen"
+    },
     "onboardingTitle1": "دقائق من القرآن... تغير يومك كله",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title"

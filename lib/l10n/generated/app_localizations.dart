@@ -1310,6 +1310,12 @@ abstract class AppLocalizations {
   /// **'Unable to find Qibla'**
   String get unableToFindQibla;
 
+  /// Tip message displayed on Qibla compass screen
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure the arrow moves when you rotate your device'**
+  String get qiblaCompassTip;
+
   /// Onboarding page 1 title
   ///
   /// In en, this message translates to:
