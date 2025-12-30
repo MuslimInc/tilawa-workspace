@@ -117,15 +117,15 @@ class DownloadButton extends StatelessWidget {
                   },
                   errorMessage: errorMessage,
                 ),
-                cancelled: () => _CancelledDownloadButton(
-                  onRestart: () {
+                cancelled: () => _DefaultDownloadButton(
+                  onDownload: () {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
                   },
                 ),
-                paused: () => _PausedDownloadButton(
-                  onUnpause: () {
+                paused: () => _DefaultDownloadButton(
+                  onDownload: () {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
@@ -188,26 +188,6 @@ class _FailedDownloadButton extends StatelessWidget {
         icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
         tooltip: errorMessage ?? 'Retry download',
         onPressed: onRetry,
-      ),
-    );
-  }
-}
-
-/// Cancelled download state widget
-class _CancelledDownloadButton extends StatelessWidget {
-  const _CancelledDownloadButton({required this.onRestart});
-
-  final VoidCallback onRestart;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: IconButton(
-        icon: Icon(Icons.download_rounded, color: Colors.grey.shade400),
-        tooltip: context.l10n.download,
-        onPressed: onRestart,
       ),
     );
   }
@@ -406,22 +386,6 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
           color: theme.primaryColor,
         ),
       ),
-    );
-  }
-}
-
-class _PausedDownloadButton extends StatelessWidget {
-  const _PausedDownloadButton({required this.onUnpause});
-
-  final VoidCallback onUnpause;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
-    return IconButton(
-      icon: const Icon(Icons.play_arrow_rounded),
-      tooltip: l10n.resume,
-      onPressed: onUnpause,
     );
   }
 }
