@@ -32,7 +32,7 @@ void main() {
   Widget buildTestWidget() {
     return ScreenUtilPlusInit(
       designSize: const Size(375, 812),
-      builder: (_, __) => const MaterialApp(
+      builder: (_, _) => const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: QiblaScreen(),

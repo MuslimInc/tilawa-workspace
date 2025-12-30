@@ -408,12 +408,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
-    gh.singleton<_i145.AnalyticsService>(
-      () => _i495.FirebaseAnalyticsService(
-        gh<_i398.FirebaseAnalytics>(),
-        debugMode: gh<bool>(),
-      ),
-    );
     gh.lazySingleton<_i628.NavigationService>(
       () => _i628.NavigationServiceImpl(),
     );
@@ -483,13 +477,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i338.OnboardingCubit>(
       () => _i338.OnboardingCubit(gh<_i995.CompleteOnboarding>()),
     );
-    gh.singleton<_i734.AnalyticsInitializationService>(
-      () => _i734.AnalyticsInitializationService(
-        gh<_i145.AnalyticsService>(),
-        gh<_i59.FirebaseAuth>(),
-        gh<_i600.CrashlyticsService>(),
-      ),
-    );
     gh.lazySingleton<_i259.RecitersRemoteDataSource>(
       () => _i259.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
@@ -514,12 +501,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i59.FirebaseAuth>(),
       ),
     );
-    gh.lazySingleton<_i422.PremiumRepository>(
-      () => _i437.PremiumRepositoryImpl(
-        gh<_i537.PremiumLocalDataSource>(),
-        gh<_i366.PremiumRemoteDataSource>(),
-        gh<_i145.AnalyticsService>(),
-      ),
+    gh.singleton<_i145.AnalyticsService>(
+      () => _i495.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
     gh.lazySingleton<_i342.GoogleAuthProviderImpl>(
       () => _i342.GoogleAuthProviderImpl(
@@ -585,30 +568,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i649.RequestLocationPermissionUseCase>(
       () => _i649.RequestLocationPermissionUseCase(gh<_i6.QiblaRepository>()),
     );
-    gh.singleton<_i91.CancelSubscriptionUseCase>(
-      () => _i91.CancelSubscriptionUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i995.CheckFeatureAccessUseCase>(
-      () => _i995.CheckFeatureAccessUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i91.GetAvailablePlansUseCase>(
-      () => _i91.GetAvailablePlansUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i64.GetPremiumStatusUseCase>(
-      () => _i64.GetPremiumStatusUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i659.PurchaseSubscriptionUseCase>(
-      () => _i659.PurchaseSubscriptionUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i497.RestoreSubscriptionUseCase>(
-      () => _i497.RestoreSubscriptionUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.singleton<_i644.StartTrialUseCase>(
-      () => _i644.StartTrialUseCase(gh<_i422.PremiumRepository>()),
-    );
-    gh.lazySingleton<_i105.CheckDownloadAccessUseCase>(
-      () => _i105.CheckDownloadAccessUseCase(gh<_i422.PremiumRepository>()),
-    );
     gh.lazySingleton<_i511.DownloadPathResolver>(
       () => _i511.DownloadPathResolver(gh<_i965.DownloadsLocalDataSource>()),
     );
@@ -631,8 +590,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i628.NavigationService>(),
       ),
     );
+    gh.singleton<_i734.AnalyticsInitializationService>(
+      () => _i734.AnalyticsInitializationService(
+        gh<_i145.AnalyticsService>(),
+        gh<_i59.FirebaseAuth>(),
+        gh<_i600.CrashlyticsService>(),
+      ),
+    );
     gh.lazySingleton<_i489.AudioPlayerRepository>(
       () => _i198.AudioPlayerRepositoryImpl(gh<_i563.AudioPlayerHandler>()),
+    );
+    gh.lazySingleton<_i422.PremiumRepository>(
+      () => _i437.PremiumRepositoryImpl(
+        gh<_i537.PremiumLocalDataSource>(),
+        gh<_i366.PremiumRemoteDataSource>(),
+        gh<_i145.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i183.BatchDownloadManager>(
       () => _i183.BatchDownloadManager(
@@ -729,17 +702,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i561.GetCurrentUserUseCase(gh<_i742.AuthRepository>()),
     );
     gh.factory<_i633.SignOut>(() => _i633.SignOut(gh<_i742.AuthRepository>()));
-    gh.factory<_i64.PremiumBloc>(
-      () => _i64.PremiumBloc(
-        gh<_i64.GetPremiumStatusUseCase>(),
-        gh<_i659.PurchaseSubscriptionUseCase>(),
-        gh<_i91.CancelSubscriptionUseCase>(),
-        gh<_i497.RestoreSubscriptionUseCase>(),
-        gh<_i644.StartTrialUseCase>(),
-        gh<_i91.GetAvailablePlansUseCase>(),
-        gh<_i995.CheckFeatureAccessUseCase>(),
-      ),
-    );
     gh.factory<_i931.SignInWithGoogleUseCase>(
       () => _i931.SignInWithGoogleUseCase(
         gh<_i742.AuthRepository>(),
@@ -752,6 +714,30 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i49.DownloadValidator>(),
         gh<_i420.DownloadQueueManager>(),
       ),
+    );
+    gh.singleton<_i91.CancelSubscriptionUseCase>(
+      () => _i91.CancelSubscriptionUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i995.CheckFeatureAccessUseCase>(
+      () => _i995.CheckFeatureAccessUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i91.GetAvailablePlansUseCase>(
+      () => _i91.GetAvailablePlansUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i64.GetPremiumStatusUseCase>(
+      () => _i64.GetPremiumStatusUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i659.PurchaseSubscriptionUseCase>(
+      () => _i659.PurchaseSubscriptionUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i497.RestoreSubscriptionUseCase>(
+      () => _i497.RestoreSubscriptionUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.singleton<_i644.StartTrialUseCase>(
+      () => _i644.StartTrialUseCase(gh<_i422.PremiumRepository>()),
+    );
+    gh.lazySingleton<_i105.CheckDownloadAccessUseCase>(
+      () => _i105.CheckDownloadAccessUseCase(gh<_i422.PremiumRepository>()),
     );
     gh.factory<_i28.PlayAudioUseCase>(
       () => _i28.PlayAudioUseCase(gh<_i489.AudioPlayerRepository>()),
@@ -913,6 +899,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i712.GetSplashNextRouteUseCase(
         gh<_i561.GetCurrentUserUseCase>(),
         gh<_i892.CheckOnboardingStatus>(),
+      ),
+    );
+    gh.factory<_i64.PremiumBloc>(
+      () => _i64.PremiumBloc(
+        gh<_i64.GetPremiumStatusUseCase>(),
+        gh<_i659.PurchaseSubscriptionUseCase>(),
+        gh<_i91.CancelSubscriptionUseCase>(),
+        gh<_i497.RestoreSubscriptionUseCase>(),
+        gh<_i644.StartTrialUseCase>(),
+        gh<_i91.GetAvailablePlansUseCase>(),
+        gh<_i995.CheckFeatureAccessUseCase>(),
       ),
     );
     gh.factory<_i447.AuthBloc>(

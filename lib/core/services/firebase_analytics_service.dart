@@ -9,21 +9,20 @@ import 'analytics_service.dart';
 /// Firebase Analytics implementation
 @Singleton(as: AnalyticsService)
 class FirebaseAnalyticsService implements AnalyticsService {
-  FirebaseAnalyticsService(
-    this._analytics, {
-    @visibleForTesting this.debugMode = kDebugMode,
-  }) {
-    if (debugMode) {
+  FirebaseAnalyticsService(this._analytics) {
+    if (kDebugMode) {
       _analytics.setAnalyticsCollectionEnabled(false);
     }
   }
 
   final FirebaseAnalytics _analytics;
-  final bool debugMode;
+
+  @visibleForTesting
+  bool testMode = false;
 
   @override
   Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
-    if (debugMode) {
+    if (kDebugMode && !testMode) {
       return;
     }
     try {
@@ -267,7 +266,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> setUserId(String? userId) async {
-    if (debugMode) {
+    if (kDebugMode && !testMode) {
       return;
     }
     try {
@@ -279,7 +278,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> setUserProperty(String name, String? value) async {
-    if (debugMode) {
+    if (kDebugMode && !testMode) {
       return;
     }
     try {
@@ -291,7 +290,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> resetAnalyticsData() async {
-    if (debugMode) {
+    if (kDebugMode && !testMode) {
       return;
     }
     try {

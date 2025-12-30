@@ -14,7 +14,8 @@ void main() {
 
   setUp(() {
     mockAnalytics = MockFirebaseAnalytics();
-    service = FirebaseAnalyticsService(mockAnalytics, debugMode: false);
+    service = FirebaseAnalyticsService(mockAnalytics);
+    service.testMode = true;
   });
 
   group('FirebaseAnalyticsService', () {

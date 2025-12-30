@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       ScreenUtilPlusInit(
         designSize: const Size(375, 812),
-        builder: (_, __) => const MaterialApp(
+        builder: (_, _) => const MaterialApp(
           home: Scaffold(body: OnboardingPage(content: content)),
         ),
       ),
