@@ -13,6 +13,8 @@ class ReciterDownloadState extends Equatable {
   final int downloadedCount;
   final int totalCount;
 
+  bool get isAllDownloaded => totalCount > 0 && downloadedCount == totalCount;
+
   @override
   List<Object?> get props => [
     progress,

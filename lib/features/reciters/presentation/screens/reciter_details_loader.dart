@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import '../../../../core/di/injection.dart';
+import '../bloc/reciter_details_bloc.dart';
+import '../bloc/reciter_download_bloc.dart';
+import '../cubit/reciter_details_loader_cubit.dart';
+import '../cubit/reciter_details_loader_state.dart';
 
-import '../core/di/injection.dart';
-import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
-import '../features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
-import '../features/reciters/presentation/cubit/reciter_details_loader_state.dart';
 import 'reciter_details_screen.dart';
 
 class ReciterDetailsLoader extends StatelessWidget {

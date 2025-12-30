@@ -586,6 +586,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get allDownloaded => 'تم التحميل بالكامل';
+
+  @override
   String get undo => 'تراجع';
 
   @override

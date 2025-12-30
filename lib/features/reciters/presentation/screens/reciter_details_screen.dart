@@ -3,18 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-import '../core/entities/audio.dart';
-import '../core/entities/moshaf_entity.dart';
-import '../core/entities/reciter_entity.dart';
-import '../core/extensions.dart';
-import '../core/theme/color_scheme.dart';
-import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../features/downloads/presentation/widgets/download_button.dart';
-import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
-import '../features/reciters/presentation/widgets/download_all_button.dart';
-import '../features/surah/domain/entities/surah_entity.dart';
-import '../shared/widgets/bottom_player_widget.dart';
+import '../../../../core/entities/audio.dart';
+import '../../../../core/entities/moshaf_entity.dart';
+import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/extensions.dart';
+import '../../../../core/theme/color_scheme.dart';
+import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../../downloads/presentation/widgets/download_button.dart';
+import '../../../surah/domain/entities/surah_entity.dart';
+import '../bloc/reciter_details_bloc.dart';
+import '../bloc/reciter_download_bloc.dart';
+import '../widgets/download_all_button.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   const ReciterDetailsScreen({super.key, required this.reciter});
@@ -116,7 +116,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                           state.searchQuery.isEmpty)
                         DownloadAllButton(
                           reciter: widget.reciter,
-                          parentState: state,
+                          surahs: state.surahList,
                         ),
                     ],
                   ),

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/utils/toast_utils.dart';
-import '../bloc/reciter_details_bloc.dart';
+import '../../../../features/surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
 
 class DownloadAllButton extends StatelessWidget {
   const DownloadAllButton({
     super.key,
     required this.reciter,
-    required this.parentState,
+    required this.surahs,
   });
   final ReciterEntity reciter;
-  final ReciterDetailsState parentState;
+  final List<SurahEntity> surahs;
 
   @override
   Widget build(BuildContext context) {
@@ -24,26 +25,34 @@ class DownloadAllButton extends StatelessWidget {
         builder: (context, state) {
           final bool isDownloading = state.isDownloadingAll;
           final double progress = state.progress;
+          final bool isAllDownloaded = state.isAllDownloaded;
 
           return SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {
-                if (isDownloading) {
-                  context.read<ReciterDownloadBloc>().add(
-                    CancelReciterDownloadAll(reciterName: reciter.name),
-                  );
-                } else {
-                  context.read<ReciterDownloadBloc>().add(
-                    StartReciterDownloadAll(
-                      reciter: reciter,
-                      surahs: parentState.surahList,
-                    ),
-                  );
-                  ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
-                }
-              },
-              icon: isDownloading
+              key: const Key('download_all_button'),
+              onPressed: isAllDownloaded
+                  ? null
+                  : () {
+                      if (isDownloading) {
+                        context.read<ReciterDownloadBloc>().add(
+                          CancelReciterDownloadAll(reciterName: reciter.name),
+                        );
+                      } else {
+                        context.read<ReciterDownloadBloc>().add(
+                          StartReciterDownloadAll(
+                            reciter: reciter,
+                            surahs: surahs,
+                          ),
+                        );
+                        ToastUtils.showToast(
+                          msg: context.l10n.downloadingAllSurahs,
+                        );
+                      }
+                    },
+              icon: isAllDownloaded
+                  ? const Icon(Icons.check_circle_outline)
+                  : isDownloading
                   ? SizedBox(
                       width: 20.w,
                       height: 20.w,
@@ -54,7 +63,9 @@ class DownloadAllButton extends StatelessWidget {
                     )
                   : const Icon(Icons.download_rounded, color: Colors.white),
               label: Text(
-                isDownloading
+                isAllDownloaded
+                    ? context.l10n.allDownloaded
+                    : isDownloading
                     ? '${context.l10n.pause} ${(progress * 100).toInt()}%'
                     : (progress > 0 && progress < 1.0)
                     ? context.l10n.completeDownloading
@@ -67,6 +78,10 @@ class DownloadAllButton extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r),
                 ),
+                disabledBackgroundColor: Theme.of(
+                  context,
+                ).disabledColor.withValues(alpha: 0.1),
+                disabledForegroundColor: Theme.of(context).disabledColor,
               ),
             ),
           );

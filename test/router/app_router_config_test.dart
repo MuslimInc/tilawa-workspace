@@ -20,14 +20,14 @@ import 'package:tilawa/features/qibla/presentation/screens/qibla_screen.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/screens/favorites_screen.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciter_details_loader.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciter_details_screen.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/settings/presentation/screens/settings_screen.dart';
 import 'package:tilawa/features/splash/presentation/screens/splash_screen.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/screens/main_screen.dart';
-import 'package:tilawa/screens/reciter_details_loader.dart';
-import 'package:tilawa/screens/reciter_details_screen.dart';
 import 'package:tilawa/screens/route_list_screen.dart';
 import 'package:tilawa/shared/widgets/expanded_player_screen.dart';
 

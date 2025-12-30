@@ -589,6 +589,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get allDownloaded => 'All Downloaded';
+
+  @override
   String get undo => 'Undo';
 
   @override

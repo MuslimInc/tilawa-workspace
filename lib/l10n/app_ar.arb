@@ -798,13 +798,17 @@
     },
     "reciterRemovedFromFavorites": "تمت إزالة {reciterName} من المفضلة",
     "@reciterRemovedFromFavorites": {
-        "description": "Message when a reciter is removed from favorites",
+        "description": "Reciter removed from favorites message",
         "placeholders": {
             "reciterName": {
                 "type": "String",
                 "description": "The name of the reciter"
             }
         }
+    },
+    "allDownloaded": "تم التحميل بالكامل",
+    "@allDownloaded": {
+        "description": "Text shown when all surahs for a reciter are downloaded"
     },
     "undo": "تراجع",
     "@undo": {

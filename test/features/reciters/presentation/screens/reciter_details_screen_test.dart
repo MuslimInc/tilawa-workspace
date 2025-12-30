@@ -25,10 +25,10 @@ import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart'
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciter_details_screen.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa/screens/reciter_details_screen.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
