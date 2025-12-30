@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/config/currency_config.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../main.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
@@ -10,9 +11,14 @@ import '../datasources/premium_remote_datasource.dart';
 
 @LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
-  PremiumRepositoryImpl(this._localDataSource, this._remoteDataSource);
+  PremiumRepositoryImpl(
+    this._localDataSource,
+    this._remoteDataSource,
+    this._analyticsService,
+  );
   final PremiumLocalDataSource _localDataSource;
   final PremiumRemoteDataSource _remoteDataSource;
+  final AnalyticsService _analyticsService;
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {
@@ -75,6 +81,19 @@ class PremiumRepositoryImpl implements PremiumRepository {
           subscriptionType: planId,
         );
         await updatePremiumStatus(updatedStatus);
+
+        // [MODIFIED] Log analytics purchase event
+        try {
+          final SubscriptionPlan plan = await getPlanById(planId);
+          await _analyticsService.logPurchase(
+            'tx_${DateTime.now().millisecondsSinceEpoch}', // Temporary ID as remote lacks one
+            value: plan.price,
+            currency: plan.currency,
+            itemId: planId,
+          );
+        } catch (e) {
+          logger.w('Failed to log purchase analytics: $e');
+        }
       }
       return result;
     } catch (e) {

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/constants/analytics_constants.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
@@ -59,6 +60,7 @@ void main() {
   late MockDownloadValidator mockValidator;
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
+  late MockAnalyticsService mockAnalyticsService;
   late StreamController<DownloadProgress> progressController;
 
   setUp(() async {
@@ -71,6 +73,7 @@ void main() {
     mockPathResolver = MockDownloadPathResolver();
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
+    mockAnalyticsService = MockAnalyticsService();
     // DownloadService.flutterDownloaderTestOverride = mockDownloader; // Removed: we use mockDownloadService directly
 
     // Default stubs for new services
@@ -103,6 +106,27 @@ void main() {
       mockDownloadService.isStatusDownloadActive(any),
     ).thenAnswer((_) async => false);
     when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+
+    // Stub AnalyticsService methods
+    when(
+      mockAnalyticsService.logDownloadStart(
+        any,
+        fileName: anyNamed('fileName'),
+      ),
+    ).thenAnswer((_) async => {});
+    when(
+      mockAnalyticsService.logDownloadComplete(
+        any,
+        fileName: anyNamed('fileName'),
+        fileSize: anyNamed('fileSize'),
+      ),
+    ).thenAnswer((_) async => {});
+    when(
+      mockAnalyticsService.logDownloadCancel(
+        any,
+        fileName: anyNamed('fileName'),
+      ),
+    ).thenAnswer((_) async => {});
 
     // Stub common methods to avoid MissingStubError during initialization
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -172,6 +196,7 @@ void main() {
       mockStatusSynchronizer,
       mockValidator,
       downloadQueueManager,
+      mockAnalyticsService,
     );
     when(
       mockNotificationService.showDownloadProgress(
@@ -234,6 +259,48 @@ void main() {
         verify(mockLocalDataSource.deleteDownload('non_existent')).called(1);
       },
     );
+
+    test(
+      'deleteReciterDownloads should call logger with correct params',
+      () async {
+        // Arrange
+        const testReciter = 'Reciter1';
+        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+        // Act
+        await repository.deleteReciterDownloads(testReciter);
+
+        // Assert
+        verify(
+          mockAnalyticsService.logEvent(
+            AnalyticsEvents.deleteReciterDownloads,
+            parameters: {
+              AnalyticsParams.reciterName: testReciter,
+              AnalyticsParams.action:
+                  AnalyticsActionValues.deleteReciterDownloads,
+            },
+          ),
+        ).called(1);
+      },
+    );
+
+    test('clearAllDownloads should call logger with correct params', () async {
+      // Arrange
+      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
+
+      // Act
+      await repository.clearAllDownloads();
+
+      // Assert
+      verify(
+        mockAnalyticsService.logEvent(
+          AnalyticsEvents.clearAllDownloads,
+          parameters: {
+            AnalyticsParams.action: AnalyticsActionValues.clearAllDownloads,
+          },
+        ),
+      ).called(1);
+    });
     group('initialize', () {
       test('should subscribe to global progress stream', () async {
         // Act
@@ -516,6 +583,7 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
+          mockAnalyticsService,
         );
 
         const testUrl = 'http://example.com/1.mp3';
@@ -565,6 +633,7 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
+          mockAnalyticsService,
         );
 
         when(mockQueueManager.isQueued(any)).thenReturn(false);
@@ -660,6 +729,16 @@ void main() {
         expect(downloadItem.progress, 0.0);
         expect(downloadItem.title, testSurahTitle);
         expect(downloadItem.reciterName, testReciterName);
+
+        // Verify analytics
+        verify(
+          mockAnalyticsService.logDownloadStart(
+            captureAny,
+            fileName: anyNamed('fileName'),
+            surahId: testSurahId,
+            reciterName: testReciterName,
+          ),
+        ).called(1);
       });
 
       test('should handle directory creation failure', () async {
@@ -730,6 +809,7 @@ void main() {
             mockStatusSynchronizer,
             mockValidator,
             mockQueueManager,
+            mockAnalyticsService,
           );
 
           when(mockQueueManager.isQueued(any)).thenReturn(false);
@@ -2467,6 +2547,7 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
+          mockAnalyticsService,
         );
 
         // Act
@@ -2805,6 +2886,7 @@ void main() {
         mockStatusSynchronizer,
         mockValidator,
         mockQueueManager,
+        mockAnalyticsService,
       );
 
       // Act

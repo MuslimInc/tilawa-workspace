@@ -6,6 +6,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/config/config.dart';
 import '../../../../core/config/notification_config.dart';
+import '../../../../core/constants/analytics_constants.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
@@ -33,6 +35,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.statusSynchronizer,
     this.validator,
     this.queueManager,
+    this._analyticsService,
   );
 
   final DownloadsLocalDataSource localDataSource;
@@ -42,6 +45,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   final DownloadStatusSynchronizer statusSynchronizer;
   final DownloadValidator validator;
   final DownloadQueueManager queueManager;
+  final AnalyticsService _analyticsService;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
       StreamController<DownloadItem>.broadcast();
@@ -181,6 +185,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
     }
     await localDataSource.clearAllDownloads();
+
+    // [MODIFIED] Log clear all downloads event
+    await _analyticsService.logEvent(
+      AnalyticsEvents.clearAllDownloads,
+      parameters: {
+        AnalyticsParams.action: AnalyticsActionValues.clearAllDownloads,
+      },
+    );
   }
 
   @override
@@ -262,6 +274,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     );
 
     await addDownload(downloadItem);
+
+    // [MODIFIED] Log download start event
+    await _analyticsService.logDownloadStart(
+      downloadId,
+      fileName: safeFileName,
+      surahId: downloadId,
+      reciterName: reciterName,
+    );
 
     logger.d(
       '[DownloadsRepositoryImpl] startDownload: id=$downloadId fileName=$safeFileName path=$filePath status=$initialStatus',
@@ -397,11 +417,34 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
           '[DownloadsRepositoryImpl] Started batch download of ${queueItems.length} items',
         );
       } on MissingPluginException {
-        logger.d(
-          '[DownloadsRepositoryImpl] enqueueBatch skipped (test environment)',
-        );
+        // Ignored in tests or specific environments where plugin is not available
       }
     }
+  }
+
+  @override
+  Future<void> deleteReciterDownloads(String reciterName) async {
+    final List<DownloadItem> downloads = await getAllDownloads();
+    final List<DownloadItem> toDelete = downloads
+        .where((d) => d.reciterName == reciterName)
+        .toList();
+
+    for (final download in toDelete) {
+      if (download.status == DownloadStatus.downloading ||
+          download.status == DownloadStatus.pending) {
+        await cancelDownload(download.id);
+      }
+      await deleteDownload(download.id);
+    }
+
+    // [MODIFIED] Log delete reciter downloads event
+    await _analyticsService.logEvent(
+      AnalyticsEvents.deleteReciterDownloads,
+      parameters: {
+        AnalyticsParams.reciterName: reciterName,
+        AnalyticsParams.action: AnalyticsActionValues.deleteReciterDownloads,
+      },
+    );
   }
 
   @override
@@ -448,6 +491,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
+      // [MODIFIED] Log download cancel event
+      await _analyticsService.logDownloadCancel(
+        id,
+        fileName: download.title,
+        surahId: download.url,
+        reciterName: download.reciterName,
+      );
+
       final DownloadItem updatedDownload = download.copyWith(
         status: DownloadStatus.cancelled,
       );
@@ -642,6 +693,16 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
                 completedAt: DateTime.now(),
               ),
             );
+
+            // [MODIFIED] Log download complete event
+            await _analyticsService.logDownloadComplete(
+              id,
+              fileName: download.title,
+              fileSize: actualSize,
+              surahId: download.url,
+              reciterName: download.reciterName,
+            );
+
             return;
           }
         }
@@ -654,6 +715,15 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             fileSize: fileSize,
             completedAt: DateTime.now(),
           ),
+        );
+
+        // [MODIFIED] Log download complete event
+        await _analyticsService.logDownloadComplete(
+          id,
+          fileName: download.title,
+          fileSize: fileSize,
+          surahId: download.url,
+          reciterName: download.reciterName,
         );
       } else {
         final int effectiveFileSize = fileSize > 0

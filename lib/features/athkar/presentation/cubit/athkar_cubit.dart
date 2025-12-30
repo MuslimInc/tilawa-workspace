@@ -2,7 +2,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/analytics_constants.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../../domain/entities/athkar_item.dart';
@@ -12,10 +14,14 @@ import 'athkar_state.dart';
 
 @injectable
 class AthkarCubit extends Cubit<AthkarState> {
-  AthkarCubit(this._getCategories, this._getAthkarByCategory)
-    : super(AthkarInitial());
+  AthkarCubit(
+    this._getCategories,
+    this._getAthkarByCategory,
+    this._analyticsService,
+  ) : super(AthkarInitial());
   final GetAthkarCategoriesUseCase _getCategories;
   final GetAthkarByCategoryUseCase _getAthkarByCategory;
+  final AnalyticsService _analyticsService;
 
   Future<void> loadCategories() async {
     emit(AthkarLoading());
@@ -25,7 +31,9 @@ class AthkarCubit extends Cubit<AthkarState> {
     result.fold(
       (failure) =>
           emit(AthkarError(failure.message ?? 'Error loading categories')),
-      (categories) => emit(AthkarCategoriesLoaded(categories)),
+      (categories) {
+        emit(AthkarCategoriesLoaded(categories));
+      },
     );
   }
 
@@ -51,6 +59,29 @@ class AthkarCubit extends Cubit<AthkarState> {
       final currentCounts = Map<int, int>.from(currentState.currentCounts);
       if (currentCounts[athkarId]! > 0) {
         currentCounts[athkarId] = currentCounts[athkarId]! - 1;
+
+        // Log decrement event
+        final AthkarItem item = currentState.items.firstWhere(
+          (element) => element.id == athkarId,
+        );
+        _analyticsService.logEvent(
+          AnalyticsEvents.athkarItemDecrement,
+          parameters: {
+            AnalyticsParams.itemId: athkarId,
+            AnalyticsParams.itemText: item.textAr.length > 100
+                ? item.textAr.substring(0, 100)
+                : item.textAr,
+            AnalyticsParams.remainingCount: currentCounts[athkarId]!,
+          },
+        );
+
+        if (currentCounts[athkarId] == 0) {
+          _analyticsService.logEvent(
+            AnalyticsEvents.athkarItemCompleted,
+            parameters: {AnalyticsParams.itemId: athkarId},
+          );
+        }
+
         emit(
           AthkarItemsLoaded(
             items: currentState.items,
@@ -69,6 +100,12 @@ class AthkarCubit extends Cubit<AthkarState> {
         (element) => element.id == athkarId,
       );
       currentCounts[athkarId] = item.count;
+
+      _analyticsService.logEvent(
+        AnalyticsEvents.athkarItemReset,
+        parameters: {AnalyticsParams.itemId: athkarId},
+      );
+
       emit(
         AthkarItemsLoaded(
           items: currentState.items,

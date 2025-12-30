@@ -1213,6 +1213,15 @@ class MockDownloadsRepository extends _i1.Mock
           as _i15.Future<void>);
 
   @override
+  _i15.Future<void> deleteReciterDownloads(String? reciterName) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteReciterDownloads, [reciterName]),
+            returnValue: _i15.Future<void>.value(),
+            returnValueForMissingStub: _i15.Future<void>.value(),
+          )
+          as _i15.Future<void>);
+
+  @override
   _i15.Future<void> initialize() =>
       (super.noSuchMethod(
             Invocation.method(#initialize, []),
@@ -1511,12 +1520,19 @@ class MockAnalyticsService extends _i1.Mock implements _i34.AnalyticsService {
     String? downloadId, {
     String? fileName,
     int? fileSize,
+    String? surahId,
+    String? reciterName,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadStart,
               [downloadId],
-              {#fileName: fileName, #fileSize: fileSize},
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i15.Future<void>.value(),
             returnValueForMissingStub: _i15.Future<void>.value(),
@@ -1528,12 +1544,19 @@ class MockAnalyticsService extends _i1.Mock implements _i34.AnalyticsService {
     String? downloadId, {
     String? fileName,
     int? fileSize,
+    String? surahId,
+    String? reciterName,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadComplete,
               [downloadId],
-              {#fileName: fileName, #fileSize: fileSize},
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i15.Future<void>.value(),
             returnValueForMissingStub: _i15.Future<void>.value(),
@@ -1541,12 +1564,21 @@ class MockAnalyticsService extends _i1.Mock implements _i34.AnalyticsService {
           as _i15.Future<void>);
 
   @override
-  _i15.Future<void> logDownloadCancel(String? downloadId, {String? fileName}) =>
+  _i15.Future<void> logDownloadCancel(
+    String? downloadId, {
+    String? fileName,
+    String? surahId,
+    String? reciterName,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadCancel,
               [downloadId],
-              {#fileName: fileName},
+              {
+                #fileName: fileName,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i15.Future<void>.value(),
             returnValueForMissingStub: _i15.Future<void>.value(),

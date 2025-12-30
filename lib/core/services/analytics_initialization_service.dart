@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../main.dart';
 import '../config/currency_config.dart';
+import '../constants/analytics_constants.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -29,33 +30,42 @@ class AnalyticsInitializationService {
         await _crashlyticsService.setUserId(user.uid);
 
         // Set user properties
-        await _analyticsService.setUserProperty('user_type', 'authenticated');
         await _analyticsService.setUserProperty(
-          'sign_in_method',
+          UserProperties.userType,
+          UserPropertyValues.authenticated,
+        );
+        await _analyticsService.setUserProperty(
+          UserProperties.signInMethod,
           user.providerData.isNotEmpty
               ? user.providerData.first.providerId
-              : 'unknown',
+              : UserPropertyValues.unknown,
         );
 
         // Set Crashlytics custom keys
         await _crashlyticsService.setCustomKeys({
-          'user_type': 'authenticated',
-          'sign_in_method': user.providerData.isNotEmpty
+          UserProperties.userType: UserPropertyValues.authenticated,
+          UserProperties.signInMethod: user.providerData.isNotEmpty
               ? user.providerData.first.providerId
-              : 'unknown',
+              : UserPropertyValues.unknown,
         });
       } else {
         await _analyticsService.setUserId(null);
         await _crashlyticsService.setUserId('');
-        await _analyticsService.setUserProperty('user_type', 'anonymous');
-        await _crashlyticsService.setCustomKey('user_type', 'anonymous');
+        await _analyticsService.setUserProperty(
+          UserProperties.userType,
+          UserPropertyValues.anonymous,
+        );
+        await _crashlyticsService.setCustomKey(
+          UserProperties.userType,
+          UserPropertyValues.anonymous,
+        );
       }
 
       // Log app start event
       await _analyticsService.logEvent(
-        'app_start',
+        AnalyticsEvents.appStart,
         parameters: {
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          AnalyticsParams.timestamp: DateTime.now().millisecondsSinceEpoch,
           ...CurrencyConfig.getAnalyticsParams(),
         },
       );
@@ -75,18 +85,21 @@ class AnalyticsInitializationService {
       final User? user = _auth.currentUser;
       if (user != null) {
         await _analyticsService.setUserId(user.uid);
-        await _analyticsService.setUserProperty('user_type', 'authenticated');
         await _analyticsService.setUserProperty(
-          'sign_in_method',
+          UserProperties.userType,
+          UserPropertyValues.authenticated,
+        );
+        await _analyticsService.setUserProperty(
+          UserProperties.signInMethod,
           user.providerData.isNotEmpty
               ? user.providerData.first.providerId
-              : 'unknown',
+              : UserPropertyValues.unknown,
         );
 
         await _analyticsService.logLogin(
           loginMethod: user.providerData.isNotEmpty
               ? user.providerData.first.providerId
-              : 'unknown',
+              : UserPropertyValues.unknown,
         );
       }
     } catch (e) {
@@ -98,10 +111,16 @@ class AnalyticsInitializationService {
   Future<void> onUserSignOut() async {
     try {
       await _analyticsService.setUserId(null);
-      await _analyticsService.setUserProperty('user_type', 'anonymous');
-      await _analyticsService.setUserProperty('sign_in_method', null);
+      await _analyticsService.setUserProperty(
+        UserProperties.userType,
+        UserPropertyValues.anonymous,
+      );
+      await _analyticsService.setUserProperty(
+        UserProperties.signInMethod,
+        null,
+      );
 
-      await _analyticsService.logEvent('user_sign_out');
+      await _analyticsService.logEvent(AnalyticsEvents.userSignOut);
     } catch (e) {
       logger.d('Analytics sign out error: $e');
     }

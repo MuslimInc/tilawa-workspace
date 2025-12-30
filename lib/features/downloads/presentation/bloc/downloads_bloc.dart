@@ -9,7 +9,6 @@ import 'package:injectable/injectable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../../../../core/services/analytics_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../../main.dart';
 import '../../data/models/download_progress.dart';
@@ -61,7 +60,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     required RetryDownloadUseCase retryDownload,
     required GetDownloadItemUseCase getDownloadItem,
     required CancelDownloadUseCase cancelDownload,
-    required AnalyticsService analyticsService,
     required ObserveGlobalDownloadProgressUseCase observeGlobalDownloadProgress,
     required GetDownloadStatusUseCase getDownloadStatus,
     required RemoveFromDownloadQueueUseCase removeFromDownloadQueue,
@@ -80,7 +78,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
        _retryDownload = retryDownload,
        _getDownloadItem = getDownloadItem,
        _cancelDownload = cancelDownload,
-       _analyticsService = analyticsService,
        _observeGlobalDownloadProgress = observeGlobalDownloadProgress,
        _getDownloadStatus = getDownloadStatus,
        _removeFromDownloadQueue = removeFromDownloadQueue,
@@ -119,7 +116,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   final RetryDownloadUseCase _retryDownload;
   final GetDownloadItemUseCase _getDownloadItem;
   final CancelDownloadUseCase _cancelDownload;
-  final AnalyticsService _analyticsService;
   final ObserveGlobalDownloadProgressUseCase _observeGlobalDownloadProgress;
   final GetDownloadStatusUseCase _getDownloadStatus;
   final RemoveFromDownloadQueueUseCase _removeFromDownloadQueue;
@@ -325,15 +321,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       );
     }
 
-    // Log analytics event for download start
-    // Use a formatted ID for analytics purposes
-    final analyticsDownloadId =
-        '${event.surahId}_${event.reciterName.replaceAll(' ', '_')}';
-    await _analyticsService.logDownloadStart(
-      analyticsDownloadId,
-      fileName: '${event.surahTitle}_${event.reciterName}',
-    );
-
     final Either<Failure, void> result = await _downloadSurah(
       surahId: event.surahId,
       surahTitle: event.surahTitle,
@@ -343,16 +330,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     result.fold(
       (failure) {
-        // Log analytics event for download failure
-        _analyticsService.logEvent(
-          'download_failed',
-          parameters: {
-            'download_id': analyticsDownloadId,
-            'surah_id': event.surahId,
-            'reciter_name': event.reciterName,
-            'error': failure.message ?? 'Unknown error',
-          },
-        );
         if (!_statusController.isClosed) {
           _statusController.add(
             DownloadsStatus.error(
@@ -362,11 +339,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         }
       },
       (_) {
-        // Log analytics event for download completion
-        _analyticsService.logDownloadComplete(
-          analyticsDownloadId,
-          fileName: '${event.surahTitle}_${event.reciterName}',
-        );
         // Reload downloads after successful download
         add(const LoadDownloads());
       },
@@ -444,14 +416,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         }
       },
       (_) {
-        // Log analytics event for delete reciter downloads
-        _analyticsService.logEvent(
-          'delete_reciter_downloads',
-          parameters: {
-            'reciter_name': event.reciterName,
-            'action': 'delete_reciter_downloads',
-          },
-        );
         // Reload downloads after successful deletion
         add(const LoadDownloads());
       },
@@ -479,11 +443,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         }
       },
       (_) {
-        // Log analytics event for clear all downloads
-        _analyticsService.logEvent(
-          'clear_all_downloads',
-          parameters: {'action': 'clear_all_downloads'},
-        );
         // Reload downloads after successful clearing
         add(const LoadDownloads());
       },
@@ -844,30 +803,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         );
       }
 
-      // Log analytics event for retry
-      await _analyticsService.logEvent(
-        'download_retry',
-        parameters: {
-          'download_id': event.downloadId,
-          'surah_title': downloadItem.title,
-          'reciter_name': downloadItem.reciterName,
-        },
-      );
-
       // Retry the download using UseCase
       final Either<Failure, void> retryResult = await _retryDownload(
         event.downloadId,
       );
       await retryResult.fold(
         (failure) async {
-          // Log analytics event for retry failure
-          await _analyticsService.logEvent(
-            'download_retry_failed',
-            parameters: {
-              'download_id': event.downloadId,
-              'error': failure.message ?? 'Unknown error',
-            },
-          );
           if (!_statusController.isClosed) {
             _statusController.add(
               DownloadsStatus.error(
@@ -877,15 +818,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           }
         },
         (_) async {
-          // Log analytics event for retry success
-          await _analyticsService.logEvent(
-            'download_retry_success',
-            parameters: {
-              'download_id': event.downloadId,
-              'surah_title': downloadItem.title,
-              'reciter_name': downloadItem.reciterName,
-            },
-          );
           // Reload downloads after successful retry
           add(const LoadDownloads());
         },

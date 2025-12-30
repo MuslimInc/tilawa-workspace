@@ -1,8 +1,6 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/config/currency_config.dart';
-import '../../../../core/services/analytics_service.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/usecases/cancel_subscription_use_case.dart';
@@ -25,7 +23,6 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
     this._startTrial,
     this._getAvailablePlans,
     this._checkFeatureAccess,
-    this._analyticsService,
   ) : super(const PremiumState.initial()) {
     on<LoadPremiumStatus>(_onLoadPremiumStatus);
     on<PurchaseSubscription>(_onPurchaseSubscription);
@@ -43,7 +40,6 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
   final StartTrialUseCase _startTrial;
   final GetAvailablePlansUseCase _getAvailablePlans;
   final CheckFeatureAccessUseCase _checkFeatureAccess;
-  final AnalyticsService _analyticsService;
 
   Future<void> _onLoadPremiumStatus(
     LoadPremiumStatus event,
@@ -80,13 +76,6 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
       final bool success = await _purchaseSubscription(event.planId);
 
       if (success) {
-        // Log analytics event for successful purchase
-        await _analyticsService.logPurchase(
-          'subscription_${event.planId}',
-          itemId: event.planId,
-          currency: CurrencyConfig.currencyCode,
-        );
-
         emit(
           const PremiumState.purchaseSuccess(
             message: 'Subscription purchased successfully!',
@@ -96,13 +85,6 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
         add(const LoadPremiumStatus());
       } else {
         // Log analytics event for failed purchase
-        await _analyticsService.logEvent(
-          'purchase_failed',
-          parameters: {
-            'plan_id': event.planId,
-            'reason': 'purchase_subscription_returned_false',
-          },
-        );
 
         emit(
           const PremiumState.purchaseFailed(
@@ -112,10 +94,6 @@ class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
       }
     } catch (e) {
       // Log analytics event for purchase error
-      await _analyticsService.logEvent(
-        'purchase_error',
-        parameters: {'plan_id': event.planId, 'error': e.toString()},
-      );
 
       emit(PremiumState.purchaseFailed(message: 'Purchase failed: $e'));
     }

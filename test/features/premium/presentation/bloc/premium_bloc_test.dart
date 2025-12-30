@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/features/premium/domain/entities/premium_status.dart';
 import 'package:tilawa/features/premium/domain/entities/subscription_plan.dart';
 import 'package:tilawa/features/premium/domain/usecases/cancel_subscription_use_case.dart';
@@ -27,7 +26,6 @@ import 'premium_bloc_test.mocks.dart';
   StartTrialUseCase,
   GetAvailablePlansUseCase,
   CheckFeatureAccessUseCase,
-  AnalyticsService,
   Storage,
 ])
 void main() {
@@ -39,7 +37,6 @@ void main() {
   late MockStartTrialUseCase mockStartTrial;
   late MockGetAvailablePlansUseCase mockGetAvailablePlans;
   late MockCheckFeatureAccessUseCase mockCheckFeatureAccess;
-  late MockAnalyticsService mockAnalyticsService;
   late MockStorage mockStorage;
 
   const tStatus = PremiumStatus(
@@ -69,7 +66,6 @@ void main() {
     mockStartTrial = MockStartTrialUseCase();
     mockGetAvailablePlans = MockGetAvailablePlansUseCase();
     mockCheckFeatureAccess = MockCheckFeatureAccessUseCase();
-    mockAnalyticsService = MockAnalyticsService();
 
     // Default stubs
     when(mockGetPremiumStatus()).thenAnswer(
@@ -84,7 +80,6 @@ void main() {
       mockStartTrial,
       mockGetAvailablePlans,
       mockCheckFeatureAccess,
-      mockAnalyticsService,
     );
   });
 
@@ -142,13 +137,6 @@ void main() {
       'emits [PremiumLoading, PremiumPurchaseSuccess, PremiumLoading, PremiumLoaded] when successful',
       build: () {
         when(mockPurchaseSubscription(tPlanId)).thenAnswer((_) async => true);
-        when(
-          mockAnalyticsService.logPurchase(
-            any,
-            itemId: anyNamed('itemId'),
-            currency: anyNamed('currency'),
-          ),
-        ).thenAnswer((_) async => {});
         return premiumBloc;
       },
       act: (bloc) =>
@@ -171,12 +159,6 @@ void main() {
       'emits [PremiumLoading, PremiumPurchaseFailed] when failure',
       build: () {
         when(mockPurchaseSubscription(tPlanId)).thenAnswer((_) async => false);
-        when(
-          mockAnalyticsService.logEvent(
-            any,
-            parameters: anyNamed('parameters'),
-          ),
-        ).thenAnswer((_) async => {});
         return premiumBloc;
       },
       act: (bloc) =>

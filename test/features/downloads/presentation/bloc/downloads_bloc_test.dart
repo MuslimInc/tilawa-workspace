@@ -112,7 +112,6 @@ void main() {
   late MockRetryDownloadUseCase mockRetryDownloadUseCase;
   late MockGetDownloadItemUseCase mockGetDownloadItemUseCase;
   late MockCancelDownloadUseCase mockCancelDownloadUseCase;
-  late MockAnalyticsService mockAnalyticsService;
   late MockDownloadNotificationService mockDownloadNotificationService;
   late MockObserveGlobalDownloadProgressUseCase
   mockObserveGlobalDownloadProgressUseCase;
@@ -147,8 +146,6 @@ void main() {
     mockRetryDownloadUseCase = MockRetryDownloadUseCase();
     mockGetDownloadItemUseCase = MockGetDownloadItemUseCase();
     mockCancelDownloadUseCase = MockCancelDownloadUseCase();
-
-    mockAnalyticsService = MockAnalyticsService();
     mockDownloadNotificationService = MockDownloadNotificationService();
     mockObserveGlobalDownloadProgressUseCase =
         MockObserveGlobalDownloadProgressUseCase();
@@ -268,7 +265,6 @@ void main() {
       retryDownload: mockRetryDownloadUseCase,
       getDownloadItem: mockGetDownloadItemUseCase,
       cancelDownload: mockCancelDownloadUseCase,
-      analyticsService: mockAnalyticsService,
       observeGlobalDownloadProgress: mockObserveGlobalDownloadProgressUseCase,
       getDownloadStatus: mockGetDownloadStatusUseCase,
       removeFromDownloadQueue: mockRemoveFromDownloadQueueUseCase,
@@ -351,14 +347,6 @@ void main() {
           when(
             mockGetDownloadsByReciterUseCase(),
           ).thenAnswer((_) async => const Right({}));
-          when(
-            mockAnalyticsService.logDownloadStart(
-              any,
-              fileName: anyNamed('fileName'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
 
           unawaited(
             expectLater(
@@ -505,22 +493,6 @@ void main() {
               reciterId: anyNamed('reciterId'),
             ),
           ).thenAnswer((_) async => const Left(AudioFailure('Network error')));
-          when(
-            mockAnalyticsService.logDownloadStart(
-              any,
-              fileName: anyNamed('fileName'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
-          when(
-            mockAnalyticsService.logEvent(
-              any,
-              parameters: anyNamed('parameters'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
 
           unawaited(
             expectLater(
@@ -653,14 +625,6 @@ void main() {
           when(
             mockGetDownloadsByReciterUseCase(),
           ).thenAnswer((_) async => const Right({}));
-          when(
-            mockAnalyticsService.logEvent(
-              any,
-              parameters: anyNamed('parameters'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(
@@ -707,14 +671,6 @@ void main() {
           when(
             mockGetDownloadsByReciterUseCase(),
           ).thenAnswer((_) async => const Right({}));
-          when(
-            mockAnalyticsService.logEvent(
-              any,
-              parameters: anyNamed('parameters'),
-            ),
-          ).thenAnswer((_) async {
-            return;
-          });
           return downloadsBloc;
         },
         act: (bloc) => bloc.add(const ClearAllDownloads()),
@@ -1289,14 +1245,6 @@ void main() {
         when(
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => const Right({}));
-        when(
-          mockAnalyticsService.logEvent(
-            any,
-            parameters: anyNamed('parameters'),
-          ),
-        ).thenAnswer((_) async {
-          return;
-        });
 
         unawaited(
           expectLater(
@@ -1386,14 +1334,6 @@ void main() {
         when(
           mockRetryDownloadUseCase(any),
         ).thenAnswer((_) async => const Left(ServerFailure('Retry failed')));
-        when(
-          mockAnalyticsService.logEvent(
-            any,
-            parameters: anyNamed('parameters'),
-          ),
-        ).thenAnswer((_) async {
-          return;
-        });
 
         unawaited(
           expectLater(
@@ -1434,30 +1374,6 @@ void main() {
             reciterId: anyNamed('reciterId'),
           ),
         ).thenAnswer((_) async => const Right(null));
-        when(
-          mockAnalyticsService.logDownloadStart(
-            any,
-            fileName: anyNamed('fileName'),
-          ),
-        ).thenAnswer((_) async {
-          return;
-        });
-        when(
-          mockAnalyticsService.logDownloadComplete(
-            any,
-            fileName: anyNamed('fileName'),
-          ),
-        ).thenAnswer((_) async {
-          return;
-        });
-        when(
-          mockAnalyticsService.logEvent(
-            any,
-            parameters: anyNamed('parameters'),
-          ),
-        ).thenAnswer((_) async {
-          return;
-        });
 
         // Expect stream emissions for DownloadSurah
         unawaited(
@@ -1720,7 +1636,6 @@ void main() {
           retryDownload: mockRetryDownloadUseCase,
           getDownloadStatus: mockGetDownloadStatusUseCase,
           removeFromDownloadQueue: mockRemoveFromDownloadQueueUseCase,
-          analyticsService: mockAnalyticsService,
           getDownloadItem: mockGetDownloadItemUseCase,
           cancelDownload: mockCancelDownloadUseCase,
         );
@@ -1769,7 +1684,6 @@ void main() {
           retryDownload: mockRetryDownloadUseCase,
           getDownloadStatus: mockGetDownloadStatusUseCase,
           removeFromDownloadQueue: mockRemoveFromDownloadQueueUseCase,
-          analyticsService: mockAnalyticsService,
           getDownloadItem: mockGetDownloadItemUseCase,
           cancelDownload: mockCancelDownloadUseCase,
         );
@@ -1816,7 +1730,6 @@ void main() {
             retryDownload: mockRetryDownloadUseCase,
             getDownloadStatus: mockGetDownloadStatusUseCase,
             removeFromDownloadQueue: mockRemoveFromDownloadQueueUseCase,
-            analyticsService: mockAnalyticsService,
             getDownloadItem: mockGetDownloadItemUseCase,
             cancelDownload: mockCancelDownloadUseCase,
           );
@@ -2044,12 +1957,6 @@ void main() {
           when(
             mockGetDownloadsByReciterUseCase(),
           ).thenAnswer((_) async => const Right({}));
-          when(
-            mockAnalyticsService.logEvent(
-              any,
-              parameters: anyNamed('parameters'),
-            ),
-          ).thenAnswer((_) async {});
 
           // Act
           downloadsBloc.add(
@@ -2590,12 +2497,6 @@ void main() {
         when(
           mockGetDownloadsByReciterUseCase(),
         ).thenAnswer((_) async => const Right({}));
-        when(
-          mockAnalyticsService.logDownloadStart(
-            any,
-            fileName: anyNamed('fileName'),
-          ),
-        ).thenAnswer((_) async {});
 
         // Should proceed with download even if active check throws
         downloadsBloc.add(

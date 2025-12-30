@@ -154,12 +154,19 @@ class MockAnalyticsService extends _i1.Mock implements _i3.AnalyticsService {
     String? downloadId, {
     String? fileName,
     int? fileSize,
+    String? surahId,
+    String? reciterName,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadStart,
               [downloadId],
-              {#fileName: fileName, #fileSize: fileSize},
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
@@ -171,12 +178,19 @@ class MockAnalyticsService extends _i1.Mock implements _i3.AnalyticsService {
     String? downloadId, {
     String? fileName,
     int? fileSize,
+    String? surahId,
+    String? reciterName,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadComplete,
               [downloadId],
-              {#fileName: fileName, #fileSize: fileSize},
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
@@ -184,12 +198,21 @@ class MockAnalyticsService extends _i1.Mock implements _i3.AnalyticsService {
           as _i4.Future<void>);
 
   @override
-  _i4.Future<void> logDownloadCancel(String? downloadId, {String? fileName}) =>
+  _i4.Future<void> logDownloadCancel(
+    String? downloadId, {
+    String? fileName,
+    String? surahId,
+    String? reciterName,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(
               #logDownloadCancel,
               [downloadId],
-              {#fileName: fileName},
+              {
+                #fileName: fileName,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
             ),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),

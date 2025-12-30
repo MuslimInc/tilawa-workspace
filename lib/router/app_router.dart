@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,7 +47,21 @@ class AppRouter {
     routes: $appRoutes,
     errorBuilder: errorBuilder,
     extraCodec: const AppRouterExtraCodec(),
+    observers: _getObservers(),
   );
+
+  static List<NavigatorObserver> _getObservers() {
+    if (kDebugMode) {
+      return [];
+    }
+
+    try {
+      return [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)];
+    } catch (e) {
+      // In tests or if Firebase is not initialized, return an empty list
+      return [];
+    }
+  }
 
   static void init() {
     JsonTypeRegistry().register('ReciterEntity', ReciterEntity.fromJson);
