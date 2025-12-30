@@ -534,7 +534,7 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
-    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"
     },
@@ -977,5 +977,9 @@
     "setTimer": "ضبط المؤقت",
     "@setTimer": {
         "description": "Set timer title"
+    },
+    "noInternetConnection": "لا يوجد اتصال بالإنترنت",
+    "@noInternetConnection": {
+        "description": "No internet connection message"
     }
 }

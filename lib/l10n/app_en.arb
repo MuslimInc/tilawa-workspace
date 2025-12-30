@@ -534,7 +534,7 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
-    "networkError": "Network error. Please check your connection.",
+    "networkError": "Please check your internet connection",
     "@networkError": {
         "description": "Network error message"
     },
@@ -977,5 +977,9 @@
     "setTimer": "Set Timer",
     "@setTimer": {
         "description": "Set timer title"
+    },
+    "noInternetConnection": "No Internet Connection",
+    "@noInternetConnection": {
+        "description": "No internet connection message"
     }
 }

@@ -405,7 +405,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to sign in with third-party account';
 
   @override
-  String get networkError => 'Network error. Please check your connection.';
+  String get networkError => 'Please check your internet connection';
 
   @override
   String recitationsAvailable(int count) {
@@ -726,4 +726,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setTimer => 'Set Timer';
+
+  @override
+  String get noInternetConnection => 'No Internet Connection';
 }

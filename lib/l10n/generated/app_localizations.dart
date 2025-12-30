@@ -869,7 +869,7 @@ abstract class AppLocalizations {
   /// Network error message
   ///
   /// In en, this message translates to:
-  /// **'Network error. Please check your connection.'**
+  /// **'Please check your internet connection'**
   String get networkError;
 
   /// Number of recitations available for a reciter
@@ -1441,6 +1441,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set Timer'**
   String get setTimer;
+
+  /// No internet connection message
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetConnection;
 }
 
 class _AppLocalizationsDelegate

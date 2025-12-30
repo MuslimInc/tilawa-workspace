@@ -163,6 +163,9 @@ void main() {
     await queueManager.initialize();
 
     final mockAnalyticsService = MockAnalyticsService();
+    final mockNetworkInfo = MockNetworkInfo();
+    when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
       GetIt.instance<DownloadServiceInterface>(),
@@ -172,6 +175,7 @@ void main() {
       mockValidator,
       queueManager,
       mockAnalyticsService,
+      mockNetworkInfo,
     );
 
     // Stub AnalyticsService methods to avoid MissingStubError

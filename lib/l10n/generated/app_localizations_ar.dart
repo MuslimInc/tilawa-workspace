@@ -404,7 +404,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر تسجيل الدخول باستخدام حساب طرف ثالث';
 
   @override
-  String get networkError => 'خطأ في الشبكة. يرجى التحقق من اتصالك.';
+  String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
 
   @override
   String recitationsAvailable(int count) {
@@ -719,4 +719,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get setTimer => 'ضبط المؤقت';
+
+  @override
+  String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
 }

@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:credential_manager/credential_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -22,6 +23,9 @@ import '../services/firebase_initialization_service.dart';
 
 @module
 abstract class ExternalDependenciesModule {
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
+
   @singleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 

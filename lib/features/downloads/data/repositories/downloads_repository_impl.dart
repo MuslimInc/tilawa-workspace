@@ -7,6 +7,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/config/config.dart';
 import '../../../../core/config/notification_config.dart';
 import '../../../../core/constants/analytics_constants.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../core/network/network_info.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
@@ -36,6 +38,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.validator,
     this.queueManager,
     this._analyticsService,
+    this._networkInfo,
   );
 
   final DownloadsLocalDataSource localDataSource;
@@ -46,6 +49,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   final DownloadValidator validator;
   final DownloadQueueManager queueManager;
   final AnalyticsService _analyticsService;
+  final NetworkInfo _networkInfo;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
       StreamController<DownloadItem>.broadcast();
@@ -228,6 +232,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw ArgumentError('Download URL is empty');
     }
 
+    if (!await _networkInfo.isConnected) {
+      throw const NetworkFailure('No internet connection');
+    }
+
     final String downloadsDir = await pathResolver.getDownloadsDir();
 
     // Use the URL as download ID (uniqueness is maintained through filename)
@@ -329,6 +337,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   ) async {
     if (items.isEmpty) {
       return;
+    }
+
+    if (!await _networkInfo.isConnected) {
+      throw const NetworkFailure('No internet connection');
     }
     final String downloadsDir = await pathResolver.getDownloadsDir();
     final List<

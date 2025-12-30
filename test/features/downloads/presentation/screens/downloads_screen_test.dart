@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -439,6 +440,52 @@ void main() {
           reason: 'Percentage text missing',
         );
         await stateController.close();
+      },
+    );
+
+    testWidgets(
+      'should show localized network error toast when status is error with internet message',
+      (WidgetTester tester) async {
+        final List<MethodCall> methodCalls = [];
+        const channel = MethodChannel('PonnamKarthik/fluttertoast');
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          (MethodCall methodCall) async {
+            methodCalls.add(methodCall);
+            return true;
+          },
+        );
+
+        // Arrange
+        const state = DownloadsState(status: DownloadsStateStatus.loaded);
+        whenListen(
+          mockDownloadsBloc!,
+          Stream.value(state),
+          initialState: state,
+        );
+
+        await tester.pumpWidget(createTestWidget());
+        await tester.pumpAndSettle();
+
+        // Act - Simulate error status from Bloc listener
+        mockDownloadsBloc!.statusController.add(
+          const DownloadsStatus.error(message: 'No internet connection'),
+        );
+        // Toast is shown in listener, which reacts to statusStream
+        await tester.pump();
+
+        // Assert
+        final List<MethodCall> toastCalls = methodCalls
+            .where((call) => call.method == 'showToast')
+            .toList();
+        expect(toastCalls.length, 1);
+        expect(
+          toastCalls.first.arguments['msg'],
+          contains('internet connection'),
+        );
+
+        // Drain any pending timers from toast
+        await tester.pump(const Duration(seconds: 3));
       },
     );
   });

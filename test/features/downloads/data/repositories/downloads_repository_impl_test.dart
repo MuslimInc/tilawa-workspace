@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/constants/analytics_constants.dart';
+import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
@@ -61,6 +62,7 @@ void main() {
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
   late MockAnalyticsService mockAnalyticsService;
+  late MockNetworkInfo mockNetworkInfo;
   late StreamController<DownloadProgress> progressController;
 
   setUp(() async {
@@ -73,7 +75,9 @@ void main() {
     mockPathResolver = MockDownloadPathResolver();
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
+    mockStatusSynchronizer = MockDownloadStatusSynchronizer();
     mockAnalyticsService = MockAnalyticsService();
+    mockNetworkInfo = MockNetworkInfo();
     // DownloadService.flutterDownloaderTestOverride = mockDownloader; // Removed: we use mockDownloadService directly
 
     // Default stubs for new services
@@ -106,6 +110,7 @@ void main() {
       mockDownloadService.isStatusDownloadActive(any),
     ).thenAnswer((_) async => false);
     when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+    when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     // Stub AnalyticsService methods
     when(
@@ -197,6 +202,7 @@ void main() {
       mockValidator,
       downloadQueueManager,
       mockAnalyticsService,
+      mockNetworkInfo,
     );
     when(
       mockNotificationService.showDownloadProgress(
@@ -564,6 +570,23 @@ void main() {
         );
       });
 
+      test('should throw NetworkFailure if no internet connection', () async {
+        // Arrange
+        when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+
+        // Act & Assert
+        expect(
+          () => repository.startDownload(
+            'http://test.com',
+            title: testSurahTitle,
+            surahTitle: testSurahTitle,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+          ),
+          throwsA(isA<NetworkFailure>()),
+        );
+      });
+
       test('should return early if already queued or active', () async {
         // Arrange
         final GetIt getIt = GetIt.instance;
@@ -584,6 +607,7 @@ void main() {
           mockValidator,
           mockQueueManager,
           mockAnalyticsService,
+          mockNetworkInfo,
         );
 
         const testUrl = 'http://example.com/1.mp3';
@@ -634,6 +658,7 @@ void main() {
           mockValidator,
           mockQueueManager,
           mockAnalyticsService,
+          mockNetworkInfo,
         );
 
         when(mockQueueManager.isQueued(any)).thenReturn(false);
@@ -810,6 +835,7 @@ void main() {
             mockValidator,
             mockQueueManager,
             mockAnalyticsService,
+            mockNetworkInfo,
           );
 
           when(mockQueueManager.isQueued(any)).thenReturn(false);
@@ -2548,6 +2574,7 @@ void main() {
           mockValidator,
           mockQueueManager,
           mockAnalyticsService,
+          mockNetworkInfo,
         );
 
         // Act
@@ -2887,6 +2914,7 @@ void main() {
         mockValidator,
         mockQueueManager,
         mockAnalyticsService,
+        mockNetworkInfo,
       );
 
       // Act

@@ -11,10 +11,6 @@ class DownloadButtonEvent with _$DownloadButtonEvent {
     required String surahTitle,
   }) = _StartDownload;
 
-  /// Retry a failed download
-  const factory DownloadButtonEvent.retry({required String surahTitle}) =
-      _Retry;
-
   /// Cancel an active download
   const factory DownloadButtonEvent.cancel() = _Cancel;
 

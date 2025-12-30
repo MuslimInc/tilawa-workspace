@@ -37,7 +37,14 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       status,
     ) {
       status.mapOrNull(
-        error: (s) => ToastUtils.showToast(msg: s.message),
+        error: (s) {
+          final String msg =
+              (s.message.contains('No internet') ||
+                  s.message.contains('internet'))
+              ? context.l10n.networkError
+              : s.message;
+          ToastUtils.showToast(msg: msg);
+        },
         premiumRequired: (s) => ToastUtils.showToast(msg: s.message),
         playbackInitiated: (s) => ToastUtils.showToast(msg: s.message),
       );

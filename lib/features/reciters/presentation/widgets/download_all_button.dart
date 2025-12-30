@@ -21,7 +21,14 @@ class DownloadAllButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: BlocBuilder<ReciterDownloadBloc, ReciterDownloadState>(
+      child: BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
+        listener: (context, state) {
+          if (state.errorMessage != null &&
+              (state.errorMessage!.contains('No internet') ||
+                  state.errorMessage!.contains('internet'))) {
+            ToastUtils.showToast(msg: context.l10n.networkError);
+          }
+        },
         builder: (context, state) {
           final bool isDownloading = state.isDownloadingAll;
           final double progress = state.progress;

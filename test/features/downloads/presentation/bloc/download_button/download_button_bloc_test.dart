@@ -573,7 +573,7 @@ void main() {
           return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(
-          const DownloadButtonEvent.retry(surahTitle: testSurahTitle),
+          const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
         ),
         expect: () => [const DownloadButtonState.pending()],
         verify: (_) {

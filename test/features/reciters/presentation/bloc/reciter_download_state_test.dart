@@ -16,6 +16,7 @@ void main() {
         isDownloadingAll: true,
         downloadedCount: 5,
         totalCount: 10,
+        errorMessage: 'error',
       );
 
       expect(
@@ -25,6 +26,7 @@ void main() {
           true, // isDownloadingAll
           5, // downloadedCount
           10, // totalCount
+          'error', // errorMessage
         ]),
       );
     });

@@ -34,6 +34,8 @@ class DownloadAllSurahsUseCase {
 
       await _repository.startDownloadBatch(batchItems);
       return const Right(null);
+    } on NetworkFailure catch (e) {
+      return Left(e);
     } catch (e) {
       return Left(AudioFailure(e.toString()));
     }

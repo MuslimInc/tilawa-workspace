@@ -66,6 +66,7 @@ dependencies:
   shared_preferences: ^2.5.4
   skeletonizer: ^2.1.1
   stream_transform: ^2.1.1
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   bloc_lint: ^0.3.5

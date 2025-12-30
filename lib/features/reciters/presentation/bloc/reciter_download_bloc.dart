@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:dartz_plus/src/either.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/entities/reciter_entity.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
@@ -60,11 +62,22 @@ class ReciterDownloadBloc
     StartReciterDownloadAll event,
     Emitter<ReciterDownloadState> emit,
   ) async {
-    await _downloadAllSurahsUseCase(
+    // Clear previous error message
+    emit(state.copyWith());
+
+    final Either<Failure, void> result = await _downloadAllSurahsUseCase(
       surahs: event.surahs,
       reciterName: event.reciter.name,
       reciterId: event.reciter.id,
     );
+
+    result.fold((failure) {
+      // We only care about immediate failures (like network error)
+      // since successful start just enqueues items
+      emit(state.copyWith(errorMessage: failure.message));
+      // Clear error message after a short delay so it doesn't persist?
+      // Or generic listener will show toast.
+    }, (_) {});
   }
 
   Future<void> _onCancelDownloadAll(

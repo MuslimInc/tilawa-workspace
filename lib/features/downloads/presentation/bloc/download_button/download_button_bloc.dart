@@ -50,7 +50,6 @@ class DownloadButtonBloc
       await event.map(
         initialize: (_) async => _onInitialize(emit),
         startDownload: (e) async => _onStartDownload(e.surahTitle, emit),
-        retry: (e) async => _onRetry(e.surahTitle, emit),
         cancel: (_) async => _onCancel(emit),
         progressUpdated: (e) async => _onProgressUpdated(
           e.progress,
@@ -136,22 +135,20 @@ class DownloadButtonBloc
       reciterId: _reciterId,
     );
 
-    result.fold(
-      (failure) =>
-          emit(DownloadButtonState.failed(errorMessage: failure.message)),
-      (_) {
+    await result.fold(
+      (failure) async {
+        if (failure is NetworkFailure) {
+          emit(DownloadButtonState.networkError(errorMessage: failure.message));
+        } else {
+          emit(DownloadButtonState.failed(errorMessage: failure.message));
+        }
+      },
+      (_) async {
         // Success means download started (enqueued).
         // Stream will handle updates.
         logger.d('[DownloadButtonBloc] Download started via UseCase');
       },
     );
-  }
-
-  Future<void> _onRetry(
-    String surahTitle,
-    Emitter<DownloadButtonState> emit,
-  ) async {
-    add(DownloadButtonEvent.startDownload(surahTitle: surahTitle));
   }
 
   Future<void> _onCancel(Emitter<DownloadButtonState> emit) async {
