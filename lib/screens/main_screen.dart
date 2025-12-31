@@ -41,88 +41,107 @@ class _MainScreenState extends State<MainScreen> {
       create: (_) => getIt<InternetStatusBloc>(),
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
-          return Scaffold(
-            body: Column(
-              children: [
-                const OfflineIndicatorWidget(),
-                // Main content
-                Expanded(
-                  child: IndexedStack(index: _currentIndex, children: _screens),
-                ),
-
-                const BottomPlayerWidget(),
-              ],
-            ),
-            bottomNavigationBar: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 20.r,
-                    offset: const Offset(0, -5),
+          return PopScope(
+            canPop: _currentIndex == 0,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) {
+                return;
+              }
+              setState(() {
+                _currentIndex = 0;
+              });
+            },
+            child: Scaffold(
+              body: Column(
+                children: [
+                  const OfflineIndicatorWidget(),
+                  // Main content
+                  Expanded(
+                    child: IndexedStack(
+                      index: _currentIndex,
+                      children: _screens,
+                    ),
                   ),
+
+                  const BottomPlayerWidget(),
                 ],
               ),
-              child: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                  if (index == 1) {
-                    context.read<DownloadsBloc>().add(
-                      const DownloadsEvent.loadDownloads(),
-                    );
-                  }
-                },
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                selectedItemColor: Theme.of(context).primaryColor,
-                unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
-                    activeIcon: Icon(FluentIcons.person_24_filled, size: 24.sp),
-                    label: AppLocalizations.of(context)?.reciters ?? 'Reciters',
-                    tooltip:
-                        AppLocalizations.of(context)?.reciters ?? 'Reciters',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(
-                      FluentIcons.arrow_download_24_regular,
-                      size: 24.sp,
+              bottomNavigationBar: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 20.r,
+                      offset: const Offset(0, -5),
                     ),
-                    activeIcon: Icon(
-                      FluentIcons.arrow_download_24_filled,
-                      size: 24.sp,
+                  ],
+                ),
+                child: BottomNavigationBar(
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                    if (index == 1) {
+                      context.read<DownloadsBloc>().add(
+                        const DownloadsEvent.loadDownloads(),
+                      );
+                    }
+                  },
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  selectedItemColor: Theme.of(context).primaryColor,
+                  unselectedItemColor: Colors.grey.withValues(alpha: 0.6),
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(FluentIcons.person_24_regular, size: 24.sp),
+                      activeIcon: Icon(
+                        FluentIcons.person_24_filled,
+                        size: 24.sp,
+                      ),
+                      label:
+                          AppLocalizations.of(context)?.reciters ?? 'Reciters',
+                      tooltip:
+                          AppLocalizations.of(context)?.reciters ?? 'Reciters',
                     ),
-                    label:
-                        AppLocalizations.of(context)?.downloads ?? 'Downloads',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
-                    activeIcon: Icon(
-                      FluentIcons.book_open_24_filled,
-                      size: 24.sp,
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        FluentIcons.arrow_download_24_regular,
+                        size: 24.sp,
+                      ),
+                      activeIcon: Icon(
+                        FluentIcons.arrow_download_24_filled,
+                        size: 24.sp,
+                      ),
+                      label:
+                          AppLocalizations.of(context)?.downloads ??
+                          'Downloads',
                     ),
-                    label: context.l10n.athkar,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.explore_outlined, size: 24.sp),
-                    activeIcon: Icon(Icons.explore, size: 24.sp),
-                    label: context.l10n.qibla,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
-                    activeIcon: Icon(
-                      FluentIcons.settings_24_filled,
-                      size: 24.sp,
+                    BottomNavigationBarItem(
+                      icon: Icon(FluentIcons.book_open_24_regular, size: 24.sp),
+                      activeIcon: Icon(
+                        FluentIcons.book_open_24_filled,
+                        size: 24.sp,
+                      ),
+                      label: context.l10n.athkar,
                     ),
-                    label: context.l10n.settings,
-                  ),
-                ],
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.explore_outlined, size: 24.sp),
+                      activeIcon: Icon(Icons.explore, size: 24.sp),
+                      label: context.l10n.qibla,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(FluentIcons.settings_24_regular, size: 24.sp),
+                      activeIcon: Icon(
+                        FluentIcons.settings_24_filled,
+                        size: 24.sp,
+                      ),
+                      label: context.l10n.settings,
+                    ),
+                  ],
+                ),
               ),
             ),
           );
