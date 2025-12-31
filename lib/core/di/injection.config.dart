@@ -638,15 +638,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i586.SetLanguageUseCase>(
       () => _i586.SetLanguageUseCase(gh<_i67.LocalizationRepository>()),
     );
-    await gh.singletonAsync<_i563.AudioPlayerHandler>(
-      () => externalDependenciesModule.audioPlayerHandler(
-        gh<List<_i87.MediaItem>>(),
-        gh<_i145.AnalyticsService>(),
-        gh<_i460.SharedPreferencesAsync>(),
-        gh<_i1039.RecitersRepository>(),
-      ),
-      preResolve: true,
-    );
     gh.singleton<_i977.FirebaseInitializationService>(
       () => externalDependenciesModule.firebaseInitializationService(
         gh<_i974.FirebaseFirestore>(),
@@ -792,91 +783,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i648.SyncDeviceTokenUseCase>(),
       ),
     );
-    gh.lazySingleton<_i489.AudioPlayerRepository>(
-      () => _i198.AudioPlayerRepositoryImpl(gh<_i563.AudioPlayerHandler>()),
-    );
-    gh.factory<_i28.PlayAudioUseCase>(
-      () => _i28.PlayAudioUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.PauseAudioUseCase>(
-      () => _i28.PauseAudioUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.StopAudioUseCase>(
-      () => _i28.StopAudioUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SeekToUseCase>(
-      () => _i28.SeekToUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SkipToNextUseCase>(
-      () => _i28.SkipToNextUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SkipToPreviousUseCase>(
-      () => _i28.SkipToPreviousUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SetVolumeUseCase>(
-      () => _i28.SetVolumeUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SetPlaybackSpeedUseCase>(
-      () => _i28.SetPlaybackSpeedUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SetRepeatModeUseCase>(
-      () => _i28.SetRepeatModeUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SetShuffleModeUseCase>(
-      () => _i28.SetShuffleModeUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.SkipToQueueItemUseCase>(
-      () => _i28.SkipToQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.PlayFromQueueUseCase>(
-      () => _i28.PlayFromQueueUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.UpdateQueueUseCase>(
-      () => _i28.UpdateQueueUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.MoveQueueItemUseCase>(
-      () => _i28.MoveQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.AddQueueItemUseCase>(
-      () => _i28.AddQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.RemoveQueueItemUseCase>(
-      () => _i28.RemoveQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i28.LoadAudioPlayerDataUseCase>(
-      () => _i28.LoadAudioPlayerDataUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
-    gh.factory<_i902.GetAudioStreamsUseCase>(
-      () => _i902.GetAudioStreamsUseCase(gh<_i489.AudioPlayerRepository>()),
-    );
     gh.lazySingleton<_i767.DownloadRecoveryService>(
       () => _i767.DownloadRecoveryService(
         gh<_i463.DownloadServiceInterface>(),
         gh<_i49.DownloadValidator>(),
         gh<_i420.DownloadQueueManager>(),
-      ),
-    );
-    gh.factory<_i433.AudioPlayerBloc>(
-      () => _i433.AudioPlayerBloc(
-        gh<_i902.GetAudioStreamsUseCase>(),
-        gh<_i28.PlayAudioUseCase>(),
-        gh<_i28.PauseAudioUseCase>(),
-        gh<_i28.StopAudioUseCase>(),
-        gh<_i28.SeekToUseCase>(),
-        gh<_i28.SkipToNextUseCase>(),
-        gh<_i28.SkipToPreviousUseCase>(),
-        gh<_i28.SetVolumeUseCase>(),
-        gh<_i28.SetPlaybackSpeedUseCase>(),
-        gh<_i28.SetRepeatModeUseCase>(),
-        gh<_i28.SetShuffleModeUseCase>(),
-        gh<_i28.SkipToQueueItemUseCase>(),
-        gh<_i28.PlayFromQueueUseCase>(),
-        gh<_i28.UpdateQueueUseCase>(),
-        gh<_i28.AddQueueItemUseCase>(),
-        gh<_i28.RemoveQueueItemUseCase>(),
-        gh<_i28.MoveQueueItemUseCase>(),
-        gh<_i28.LoadAudioPlayerDataUseCase>(),
-        gh<_i718.SettingsCubit>(),
       ),
     );
     gh.lazySingleton<_i881.DownloadStatusSynchronizer>(
@@ -979,18 +890,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.RecitersRepository>(),
       ),
     );
-    gh.lazySingleton<_i868.PlayAllDownloadsUseCase>(
-      () => _i868.PlayAllDownloadsUseCase(
-        gh<_i373.DownloadsRepository>(),
-        gh<_i563.AudioPlayerHandler>(),
-      ),
-    );
-    gh.lazySingleton<_i912.PlayDownloadUseCase>(
-      () => _i912.PlayDownloadUseCase(
-        gh<_i373.DownloadsRepository>(),
-        gh<_i563.AudioPlayerHandler>(),
-      ),
-    );
     gh.factory<_i387.SurahBloc>(
       () => _i387.SurahBloc(
         gh<_i792.GetSurahsForReciterUseCase>(),
@@ -1023,6 +922,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.RecitersRepository>(),
       ),
     );
+    await gh.singletonAsync<_i563.AudioPlayerHandler>(
+      () => externalDependenciesModule.audioPlayerHandler(
+        gh<List<_i87.MediaItem>>(),
+        gh<_i145.AnalyticsService>(),
+        gh<_i460.SharedPreferencesAsync>(),
+        gh<_i1039.RecitersRepository>(),
+        gh<_i373.DownloadsRepository>(),
+      ),
+      preResolve: true,
+    );
     gh.factory<_i184.ReciterDetailsBloc>(
       () => _i184.ReciterDetailsBloc(
         gh<_i563.AudioPlayerHandler>(),
@@ -1036,6 +945,82 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i373.DownloadsRepository>(),
         gh<_i409.DownloadNotificationService>(),
       ),
+    );
+    gh.lazySingleton<_i868.PlayAllDownloadsUseCase>(
+      () => _i868.PlayAllDownloadsUseCase(
+        gh<_i373.DownloadsRepository>(),
+        gh<_i563.AudioPlayerHandler>(),
+      ),
+    );
+    gh.lazySingleton<_i912.PlayDownloadUseCase>(
+      () => _i912.PlayDownloadUseCase(
+        gh<_i373.DownloadsRepository>(),
+        gh<_i563.AudioPlayerHandler>(),
+      ),
+    );
+    gh.factory<_i510.ReciterDownloadBloc>(
+      () => _i510.ReciterDownloadBloc(
+        gh<_i645.DownloadAllSurahsUseCase>(),
+        gh<_i817.CancelDownloadsForReciterUseCase>(),
+        gh<_i446.ObserveReciterDownloadsUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i489.AudioPlayerRepository>(
+      () => _i198.AudioPlayerRepositoryImpl(gh<_i563.AudioPlayerHandler>()),
+    );
+    gh.factory<_i28.PlayAudioUseCase>(
+      () => _i28.PlayAudioUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.PauseAudioUseCase>(
+      () => _i28.PauseAudioUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.StopAudioUseCase>(
+      () => _i28.StopAudioUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SeekToUseCase>(
+      () => _i28.SeekToUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SkipToNextUseCase>(
+      () => _i28.SkipToNextUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SkipToPreviousUseCase>(
+      () => _i28.SkipToPreviousUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SetVolumeUseCase>(
+      () => _i28.SetVolumeUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SetPlaybackSpeedUseCase>(
+      () => _i28.SetPlaybackSpeedUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SetRepeatModeUseCase>(
+      () => _i28.SetRepeatModeUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SetShuffleModeUseCase>(
+      () => _i28.SetShuffleModeUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.SkipToQueueItemUseCase>(
+      () => _i28.SkipToQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.PlayFromQueueUseCase>(
+      () => _i28.PlayFromQueueUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.UpdateQueueUseCase>(
+      () => _i28.UpdateQueueUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.MoveQueueItemUseCase>(
+      () => _i28.MoveQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.AddQueueItemUseCase>(
+      () => _i28.AddQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.RemoveQueueItemUseCase>(
+      () => _i28.RemoveQueueItemUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i28.LoadAudioPlayerDataUseCase>(
+      () => _i28.LoadAudioPlayerDataUseCase(gh<_i489.AudioPlayerRepository>()),
+    );
+    gh.factory<_i902.GetAudioStreamsUseCase>(
+      () => _i902.GetAudioStreamsUseCase(gh<_i489.AudioPlayerRepository>()),
     );
     gh.factory<_i354.DownloadsBloc>(
       () => _i354.DownloadsBloc(
@@ -1061,11 +1046,27 @@ extension GetItInjectableX on _i174.GetIt {
         removeFromDownloadQueue: gh<_i204.RemoveFromDownloadQueueUseCase>(),
       ),
     );
-    gh.factory<_i510.ReciterDownloadBloc>(
-      () => _i510.ReciterDownloadBloc(
-        gh<_i645.DownloadAllSurahsUseCase>(),
-        gh<_i817.CancelDownloadsForReciterUseCase>(),
-        gh<_i446.ObserveReciterDownloadsUseCase>(),
+    gh.factory<_i433.AudioPlayerBloc>(
+      () => _i433.AudioPlayerBloc(
+        gh<_i902.GetAudioStreamsUseCase>(),
+        gh<_i28.PlayAudioUseCase>(),
+        gh<_i28.PauseAudioUseCase>(),
+        gh<_i28.StopAudioUseCase>(),
+        gh<_i28.SeekToUseCase>(),
+        gh<_i28.SkipToNextUseCase>(),
+        gh<_i28.SkipToPreviousUseCase>(),
+        gh<_i28.SetVolumeUseCase>(),
+        gh<_i28.SetPlaybackSpeedUseCase>(),
+        gh<_i28.SetRepeatModeUseCase>(),
+        gh<_i28.SetShuffleModeUseCase>(),
+        gh<_i28.SkipToQueueItemUseCase>(),
+        gh<_i28.PlayFromQueueUseCase>(),
+        gh<_i28.UpdateQueueUseCase>(),
+        gh<_i28.AddQueueItemUseCase>(),
+        gh<_i28.RemoveQueueItemUseCase>(),
+        gh<_i28.MoveQueueItemUseCase>(),
+        gh<_i28.LoadAudioPlayerDataUseCase>(),
+        gh<_i718.SettingsCubit>(),
       ),
     );
     return this;

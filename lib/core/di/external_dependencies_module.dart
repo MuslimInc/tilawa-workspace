@@ -12,6 +12,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
@@ -90,6 +91,7 @@ abstract class ExternalDependenciesModule {
     AnalyticsService analyticsService,
     SharedPreferencesAsync prefs,
     RecitersRepository recitersRepository,
+    DownloadsRepository downloadsRepository,
   ) async {
     try {
       logger.d('Initializing audio service...');
@@ -98,6 +100,7 @@ abstract class ExternalDependenciesModule {
         analyticsService,
         prefs,
         recitersRepository,
+        downloadsRepository,
       );
 
       final AudioPlayerHandlerImpl audioHandler = await AudioService.init(
@@ -118,6 +121,7 @@ abstract class ExternalDependenciesModule {
         analyticsService,
         prefs,
         recitersRepository,
+        downloadsRepository,
       );
       logger.d('Fallback AudioPlayerHandler registered');
       return fallbackHandler;

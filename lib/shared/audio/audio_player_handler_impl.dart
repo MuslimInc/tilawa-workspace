@@ -16,6 +16,7 @@ import '../../core/errors/failures.dart';
 import '../../core/services/analytics_service.dart';
 import '../../core/utils/surah_names.dart';
 import '../../features/audio_player/domain/entities/audio_modes.dart';
+import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
 import '../models/queue_state.dart';
@@ -28,7 +29,8 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     this.newList,
     this._analyticsService,
     this._prefs,
-    this._recitersRepository, {
+    this._recitersRepository,
+    this._downloadsRepository, {
     AudioPlayer? player,
     AudioSession? audioSession, // For testing
   }) : _player = player ?? AudioPlayer(),
@@ -43,6 +45,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
   final RecitersRepository _recitersRepository;
+  final DownloadsRepository _downloadsRepository;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
   final List<AudioSource> _playlist = [];
@@ -146,16 +149,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   }
 
   AudioRepeatMode _mapRepeatMode(audio_service.AudioServiceRepeatMode mode) {
-    switch (mode) {
-      case audio_service.AudioServiceRepeatMode.none:
-        return AudioRepeatMode.none;
-      case audio_service.AudioServiceRepeatMode.one:
-        return AudioRepeatMode.one;
-      case audio_service.AudioServiceRepeatMode.all:
-        return AudioRepeatMode.all;
-      case audio_service.AudioServiceRepeatMode.group:
-        return AudioRepeatMode.all;
-    }
+    return switch (mode) {
+      audio_service.AudioServiceRepeatMode.none => AudioRepeatMode.none,
+      audio_service.AudioServiceRepeatMode.one => AudioRepeatMode.one,
+      audio_service.AudioServiceRepeatMode.all => AudioRepeatMode.all,
+      audio_service.AudioServiceRepeatMode.group => AudioRepeatMode.all,
+    };
   }
 
   @override
@@ -267,9 +266,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         )
         .listen(queue.add);
 
-    final List<AudioSource> initialSources = queue.value
-        .map(_itemToSource)
-        .toList();
+    final List<AudioSource> initialSources = await Future.wait(
+      queue.value.map(_itemToSource),
+    );
     _playlist.addAll(initialSources);
 
     // Only set sources if we actually have items to avoid a default "index 0" jump
@@ -278,17 +277,46 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     }
   }
 
-  AudioSource _itemToSource(audio_service.MediaItem mediaItem) {
+  Future<AudioSource> _itemToSource(audio_service.MediaItem mediaItem) async {
+    // Extract reciter name and URL from mediaItem
+    final String? reciterName = mediaItem.artist;
+    final String url = mediaItem.extras?['url'] ?? mediaItem.id;
+
+    // Check if the surah is downloaded locally
+    String? localFilePath;
+    if (reciterName != null) {
+      try {
+        localFilePath = await _downloadsRepository.getDownloadedFilePath(
+          url,
+          reciterName,
+        );
+      } catch (e) {
+        log('Error checking for downloaded file: $e');
+      }
+    }
+
+    // Use local file if available, otherwise use network URL
+    final Uri audioUri = localFilePath != null
+        ? Uri.file(localFilePath)
+        : Uri.parse(url);
+
+    log(
+      'Loading audio: ${mediaItem.title} from ${localFilePath != null ? "local file" : "network"}: $audioUri',
+    );
+
     final UriAudioSource audioSource = AudioSource.uri(
-      Uri.parse(mediaItem.id),
+      audioUri,
       tag: mediaItem.id,
     );
     _mediaItemMap[mediaItem.id] = mediaItem;
     return audioSource;
   }
 
-  List<AudioSource> _itemsToSources(List<audio_service.MediaItem> mediaItems) =>
-      mediaItems.map(_itemToSource).toList();
+  Future<List<AudioSource>> _itemsToSources(
+    List<audio_service.MediaItem> mediaItems,
+  ) async {
+    return Future.wait(mediaItems.map(_itemToSource));
+  }
 
   int? _pendingIndex;
 
@@ -376,13 +404,13 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> addQueueItem(audio_service.MediaItem mediaItem) async {
-    _playlist.add(_itemToSource(mediaItem));
+    _playlist.add(await _itemToSource(mediaItem));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
   Future<void> addQueueItems(List<audio_service.MediaItem> mediaItems) async {
-    _playlist.addAll(_itemsToSources(mediaItems));
+    _playlist.addAll(await _itemsToSources(mediaItems));
     await _safeSetAudioSources(_playlist);
   }
 
@@ -391,14 +419,14 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     int index,
     audio_service.MediaItem mediaItem,
   ) async {
-    _playlist.insert(index, _itemToSource(mediaItem));
+    _playlist.insert(index, await _itemToSource(mediaItem));
     await _safeSetAudioSources(_playlist);
   }
 
   @override
   Future<void> updateQueue(List<audio_service.MediaItem> queue) async {
     _playlist.clear();
-    _playlist.addAll(_itemsToSources(queue));
+    _playlist.addAll(await _itemsToSources(queue));
     await _safeSetAudioSources(_playlist);
   }
 
@@ -804,7 +832,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     int index,
   ) async {
     _playlist.clear();
-    _playlist.addAll(_itemsToSources(queue));
+    _playlist.addAll(await _itemsToSources(queue));
     await _safeSetAudioSources(_playlist, initialIndex: index);
     await play();
   }
