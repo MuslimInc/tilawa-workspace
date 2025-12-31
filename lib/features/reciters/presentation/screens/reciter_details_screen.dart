@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../../../core/constants/analytics_constants.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/entities/audio.dart';
 import '../../../../core/entities/moshaf_entity.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/extensions.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../core/theme/color_scheme.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -36,6 +39,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     final MoshafEntity selectedMoshaf = widget.reciter.moshaf.first;
     context.read<ReciterDetailsBloc>().add(
       LoadSurahList(reciter: widget.reciter, moshaf: selectedMoshaf),
+    );
+    // Log screen view with reciter name
+    getIt<AnalyticsService>().logScreenView(
+      widget.reciter.name,
+      screenClass: AnalyticsParams.reciterDetailsScreen,
     );
   }
 

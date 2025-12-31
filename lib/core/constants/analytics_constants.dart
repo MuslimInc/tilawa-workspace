@@ -89,6 +89,9 @@ class AnalyticsParams {
   static const String contentType = 'content_type';
   static const String itemType = 'item_type';
   static const String ratingValue = 'rating';
+
+  // Screens
+  static const String reciterDetailsScreen = 'ReciterDetailsScreen';
 }
 
 class UserProperties {

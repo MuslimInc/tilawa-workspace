@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,10 +50,6 @@ class AppRouter {
   );
 
   static List<NavigatorObserver> _getObservers() {
-    if (kDebugMode) {
-      return [];
-    }
-
     try {
       return [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)];
     } catch (e) {
