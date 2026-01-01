@@ -17,23 +17,10 @@ class ReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
+    return RepaintBoundary(
+      child: Material(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20.r),
           onTap: () {
@@ -49,7 +36,8 @@ class ReciterCard extends StatelessWidget {
                 _buildAvatar(context),
                 SizedBox(width: 14.w),
                 Expanded(child: _buildInfo(context)),
-                GestureDetector(
+                InkWell(
+                  borderRadius: BorderRadius.circular(20.r),
                   onTap: () {
                     context.read<FavoritesCubit>().toggleFavorite(reciter);
                   },
@@ -124,7 +112,6 @@ class ReciterCard extends StatelessWidget {
           reciter.name,
           style: theme.textTheme.titleMedium?.copyWith(
             fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
             letterSpacing: 0.3,
           ),
           maxLines: 1,

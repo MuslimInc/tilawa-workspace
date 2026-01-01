@@ -352,6 +352,10 @@
     "@favorites": {
         "description": "Favorites section title"
     },
+    "noFavorites": "No favorites",
+    "@noFavorites": {
+        "description": "No favorites message"
+    },
     "recent": "Recent",
     "@recent": {
         "description": "Recent section title"

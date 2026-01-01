@@ -92,7 +92,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   Directionality.of(context) == TextDirection.rtl
                   ? FloatingActionButtonLocation.endFloat
                   : FloatingActionButtonLocation.startFloat,
-              floatingActionButton: FloatingActionButton.extended(
+              floatingActionButton: FloatingActionButton(
                 onPressed: () async {
                   await const FavoritesRoute().push(context);
                   if (context.mounted) {
@@ -101,14 +101,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 },
                 backgroundColor: theme.colorScheme.primaryContainer,
                 foregroundColor: theme.colorScheme.onPrimaryContainer,
-                icon: const Icon(Icons.favorite_rounded),
-                label: Text(
-                  l10n.favorites,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
-                ),
+                child: const Icon(Icons.favorite_rounded),
               ),
               appBar: AppBar(title: Text(l10n.reciters)),
               body: Column(

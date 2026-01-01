@@ -529,74 +529,67 @@ class _SkeletonSurahCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(12.w),
-        child: Row(
-          children: [
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
+    return Padding(
+      padding: EdgeInsets.all(12.w),
+      child: Row(
+        children: [
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 120.w,
-                    height: 16.h,
-                    decoration: BoxDecoration(
-                      color: theme.dividerColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Container(
-                    width: 80.w,
-                    height: 12.h,
-                    decoration: BoxDecoration(
-                      color: theme.dividerColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 36.w,
-                  height: 36.w,
+                  width: 120.w,
+                  height: 16.h,
                   decoration: BoxDecoration(
-                    color: theme.dividerColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(10.r),
+                    color: theme.dividerColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(height: 8.h),
                 Container(
-                  width: 36.w,
-                  height: 36.w,
+                  width: 80.w,
+                  height: 12.h,
                   decoration: BoxDecoration(
                     color: theme.dividerColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(10.r),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: theme.dividerColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: theme.dividerColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -639,152 +632,143 @@ class _SurahCard extends StatelessWidget {
     });
 
     return RepaintBoundary(
-      child: Container(
-        margin: EdgeInsets.only(bottom: 8.h),
-        decoration: BoxDecoration(
-          color: isCurrentItem
-              ? context.primaryColor.withValues(alpha: 0.1)
-              : Colors.transparent, // Cleaner look without card background
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
           borderRadius: BorderRadius.circular(16.r),
-          // No border for cleaner look
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16.r),
-            onTap: () {
-              if (isCurrentItem) {
-                if (isPlaying) {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.pauseAudio(),
-                  );
-                } else {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.playAudio(),
-                  );
-                }
+          onTap: () {
+            if (isCurrentItem) {
+              if (isPlaying) {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.pauseAudio(),
+                );
               } else {
-                onTap();
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.playAudio(),
+                );
               }
-            },
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44.w,
-                    height: 44.w,
-                    decoration: BoxDecoration(
-                      color: isCurrentItem
-                          ? theme.primaryColor
-                          : theme.disabledColor.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: isCurrentItem
-                          ? Icon(
-                              Icons.graphic_eq_rounded,
-                              color: Colors.white,
-                              size: 20.sp,
-                            )
-                          : Text(
-                              surah.formattedId.isNotEmpty
-                                  ? surah.formattedId
-                                  : '${index + 1}',
-                              style: TextStyle(
-                                color: isCurrentItem
-                                    ? Colors.white
-                                    : theme.primaryColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                    ),
+            } else {
+              onTap();
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            child: Row(
+              children: [
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: isCurrentItem
+                        ? theme.primaryColor
+                        : theme.disabledColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
                   ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          surah.name,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: isCurrentItem
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                            color: isCurrentItem
-                                ? theme.primaryColor
-                                : theme.textTheme.bodyLarge?.color,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          surah.reciterName,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: theme.textTheme.bodyMedium?.color
-                                ?.withValues(alpha: 0.6),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Download Status
-                      DownloadButton(
-                        url: surah.id,
-                        surahTitle: surah.name,
-                        reciterName: reciterName,
-                        reciterId: reciterId,
-                        initialIsDownloaded: surah.isDownloaded,
-                        initialIsDownloading: surah.isDownloading,
-                        initialProgress: surah.downloadProgress,
-                      ),
-
-                      SizedBox(width: 8.w),
-
-                      // Play Button with cleaner look
-                      if (!isCurrentItem)
-                        Container(
-                          width: 32.w,
-                          height: 32.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.primaryColor.withValues(alpha: 0.05),
-                          ),
-                          child: Icon(
-                            Icons.play_arrow_rounded,
-                            color: theme.primaryColor,
-                            size: 20.sp,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 32.w,
-                          height: 32.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.primaryColor,
-                          ),
-                          child: Icon(
-                            isPlaying
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
+                  child: Center(
+                    child: isCurrentItem
+                        ? Icon(
+                            Icons.graphic_eq_rounded,
                             color: Colors.white,
                             size: 20.sp,
+                          )
+                        : Text(
+                            surah.formattedId.isNotEmpty
+                                ? surah.formattedId
+                                : '${index + 1}',
+                            style: TextStyle(
+                              color: isCurrentItem
+                                  ? Colors.white
+                                  : theme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        surah.name,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: isCurrentItem
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isCurrentItem
+                              ? theme.primaryColor
+                              : theme.textTheme.bodyLarge?.color,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        surah.reciterName,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: theme.textTheme.bodyMedium?.color?.withValues(
+                            alpha: 0.6,
                           ),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Download Status
+                    DownloadButton(
+                      url: surah.id,
+                      surahTitle: surah.name,
+                      reciterName: reciterName,
+                      reciterId: reciterId,
+                      initialIsDownloaded: surah.isDownloaded,
+                      initialIsDownloading: surah.isDownloading,
+                      initialProgress: surah.downloadProgress,
+                    ),
+
+                    SizedBox(width: 8.w),
+
+                    // Play Button with cleaner look
+                    if (!isCurrentItem)
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.primaryColor.withValues(alpha: 0.05),
+                        ),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: theme.primaryColor,
+                          size: 20.sp,
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.primaryColor,
+                        ),
+                        child: Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 20.sp,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

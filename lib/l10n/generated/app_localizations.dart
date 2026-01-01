@@ -626,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get favorites;
 
+  /// No favorites message
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites'**
+  String get noFavorites;
+
   /// Recent section title
   ///
   /// In en, this message translates to:

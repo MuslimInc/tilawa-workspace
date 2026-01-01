@@ -63,6 +63,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
         FavoritesLoaded(
           favorites: updatedReciters,
           favoriteIds: Set.from(_currentFavoriteIds),
+          removedReciter: isFav ? reciter : null,
         ),
       );
     }
