@@ -73,13 +73,15 @@ void main() {
   testWidgets(
     'DownloadAllButton renders download icon and text when not downloading',
     (tester) async {
-      when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
+      when(
+        () => mockBloc.state,
+      ).thenReturn(const ReciterDownloadState(totalCount: 10));
 
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.download_rounded), findsOneWidget);
-      expect(find.text('Download All'), findsOneWidget);
+      expect(find.text('Download All (0/10)'), findsOneWidget);
     },
   );
 
@@ -87,16 +89,37 @@ void main() {
     'DownloadAllButton renders pause icon and progress when downloading',
     (tester) async {
       when(() => mockBloc.state).thenReturn(
-        const ReciterDownloadState(isDownloadingAll: true, progress: 0.5),
+        const ReciterDownloadState(
+          isDownloadingAll: true,
+          progress: 0.5,
+          totalCount: 10,
+          downloadedCount: 5,
+        ),
       );
 
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
-      expect(find.text('Pause 50%'), findsOneWidget);
+      expect(find.text('Pause 50% (5/10)'), findsOneWidget);
     },
   );
+
+  testWidgets('DownloadAllButton is disabled when state is pending', (
+    tester,
+  ) async {
+    when(
+      () => mockBloc.state,
+    ).thenReturn(const ReciterDownloadState(isPending: true));
+
+    await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
+    await tester.pumpAndSettle();
+
+    final ElevatedButton button = tester.widget<ElevatedButton>(
+      find.byKey(const Key('download_all_button')),
+    );
+    expect(button.onPressed, isNull);
+  });
 
   testWidgets('DownloadAllButton fires StartReciterDownloadAll on tap', (
     tester,
@@ -194,8 +217,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
             if (methodCall.method == 'showToast') {
-              final args = methodCall.arguments as Map<String, dynamic>;
-              if (args['msg'] == 'Downloading all surahs...') {
+              final args = methodCall.arguments as Map<dynamic, dynamic>;
+              if (args['msg'].toString() == 'Downloading all surahs...') {
                 toastCalled = true;
               }
             }

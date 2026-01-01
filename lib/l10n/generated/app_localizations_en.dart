@@ -642,7 +642,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadAll => 'Download All';
 
   @override
+  String downloadAllWithCount(int downloaded, int total) {
+    final intl.NumberFormat downloadedNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String downloadedString = downloadedNumberFormat.format(downloaded);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'Download All ($downloadedString/$totalString)';
+  }
+
+  @override
   String get downloadingAllSurahs => 'Downloading all surahs...';
+
+  @override
+  String completeDownloadingWithCount(int downloaded, int total) {
+    final intl.NumberFormat downloadedNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String downloadedString = downloadedNumberFormat.format(downloaded);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'Complete Downloading ($downloadedString/$totalString)';
+  }
+
+  @override
+  String pauseProgressWithCount(int percent, int downloaded, int total) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+    final intl.NumberFormat downloadedNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String downloadedString = downloadedNumberFormat.format(downloaded);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'Pause $percentString% ($downloadedString/$totalString)';
+  }
 
   @override
   String get completeDownloading => 'Complete Downloading';

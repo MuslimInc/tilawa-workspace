@@ -874,9 +874,55 @@
     "@downloadAll": {
         "description": "Button to download all surahs"
     },
+    "downloadAllWithCount": "تحميل الكل ({downloaded}/{total})",
+    "@downloadAllWithCount": {
+        "description": "Button to download all surahs with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
     "downloadingAllSurahs": "جاري تحميل جميع السور...",
     "@downloadingAllSurahs": {
         "description": "Download progress message"
+    },
+    "completeDownloadingWithCount": "استكمال التحميل ({downloaded}/{total})",
+    "@completeDownloadingWithCount": {
+        "description": "Button text to complete downloading with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "pauseProgressWithCount": "إيقاف {percent}% ({downloaded}/{total})",
+    "@pauseProgressWithCount": {
+        "description": "Pause progress with count",
+        "placeholders": {
+            "percent": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
     },
     "completeDownloading": "استكمال التحميل",
     "@completeDownloading": {

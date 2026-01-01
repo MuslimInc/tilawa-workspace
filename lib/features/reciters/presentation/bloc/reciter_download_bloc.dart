@@ -38,6 +38,7 @@ class ReciterDownloadBloc
   StreamSubscription? _downloadsSubscription;
   String? _currentReciterName;
   bool _isCancelling = false;
+  bool _isBatchDownload = false;
   final Map<String, bool> _completedSurahs = {}; // surahId -> isDownloaded
   final Set<String> _downloadingSurahs = {}; // surahId (actively downloading)
   int _totalSurahsInRange = 0;
@@ -53,6 +54,7 @@ class ReciterDownloadBloc
       _completedSurahs[id] = true;
     }
     _downloadingSurahs.clear();
+    _isBatchDownload = false;
 
     _subscribeToDownloads();
     _updateProgressAndEmit(emit);
@@ -62,11 +64,13 @@ class ReciterDownloadBloc
     StartReciterDownloadAll event,
     Emitter<ReciterDownloadState> emit,
   ) async {
-    // Clear previous error message
+    _isBatchDownload = true;
+    // Clear previous error message and set pending state
     emit(
       ReciterDownloadState(
         progress: state.progress,
-        isDownloadingAll: state.isDownloadingAll,
+        isDownloadingAll: true,
+        isPending: true,
         downloadedCount: state.downloadedCount,
         totalCount: state.totalCount,
       ),
@@ -81,9 +85,14 @@ class ReciterDownloadBloc
     result.fold((failure) {
       // We only care about immediate failures (like network error)
       // since successful start just enqueues items
-      emit(state.copyWith(errorMessage: failure.message));
-      // Clear error message after a short delay so it doesn't persist?
-      // Or generic listener will show toast.
+      _isBatchDownload = false;
+      emit(
+        state.copyWith(
+          errorMessage: failure.message,
+          isPending: false,
+          isDownloadingAll: false,
+        ),
+      );
     }, (_) {});
   }
 
@@ -92,6 +101,7 @@ class ReciterDownloadBloc
     Emitter<ReciterDownloadState> emit,
   ) async {
     _isCancelling = true;
+    _isBatchDownload = false;
     _downloadingSurahs.clear();
     _updateProgressAndEmit(emit);
 
@@ -107,6 +117,7 @@ class ReciterDownloadBloc
       state.copyWith(
         progress: event.progress,
         isDownloadingAll: event.isDownloading,
+        isPending: false, // Ensure pending is cleared on progress update
         downloadedCount: event.downloadedCount,
         totalCount: event.totalCount,
       ),
@@ -145,18 +156,22 @@ class ReciterDownloadBloc
             }
           }
 
+          if (_downloadingSurahs.isEmpty && _isBatchDownload) {
+            _isBatchDownload = false;
+            stateChanged = true;
+          }
+
           if (stateChanged) {
             // Since this is a listener, we can't emit directly.
             // We'll add an event to the bloc.
             final double progress = _totalSurahsInRange > 0
                 ? _completedSurahs.length / _totalSurahsInRange
                 : 0.0;
-            final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
 
             add(
               UpdateReciterDownloadProgress(
                 progress: progress,
-                isDownloading: isDownloadingAll,
+                isDownloading: _isBatchDownload,
                 downloadedCount: _completedSurahs.length,
                 totalCount: _totalSurahsInRange,
               ),
@@ -169,12 +184,12 @@ class ReciterDownloadBloc
     final double progress = _totalSurahsInRange > 0
         ? _completedSurahs.length / _totalSurahsInRange
         : 0.0;
-    final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
 
     emit(
       state.copyWith(
         progress: progress,
-        isDownloadingAll: isDownloadingAll,
+        isDownloadingAll: _isBatchDownload,
+        isPending: false,
         downloadedCount: _completedSurahs.length,
         totalCount: _totalSurahsInRange,
       ),

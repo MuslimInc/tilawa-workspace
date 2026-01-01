@@ -874,9 +874,55 @@
     "@downloadAll": {
         "description": "Button to download all surahs"
     },
+    "downloadAllWithCount": "Download All ({downloaded}/{total})",
+    "@downloadAllWithCount": {
+        "description": "Button to download all surahs with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
     "downloadingAllSurahs": "Downloading all surahs...",
     "@downloadingAllSurahs": {
         "description": "Download progress message"
+    },
+    "completeDownloadingWithCount": "Complete Downloading ({downloaded}/{total})",
+    "@completeDownloadingWithCount": {
+        "description": "Button text to complete downloading with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "pauseProgressWithCount": "Pause {percent}% ({downloaded}/{total})",
+    "@pauseProgressWithCount": {
+        "description": "Pause progress with count",
+        "placeholders": {
+            "percent": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
     },
     "completeDownloading": "Complete Downloading",
     "@completeDownloading": {

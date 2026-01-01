@@ -1286,11 +1286,29 @@ abstract class AppLocalizations {
   /// **'Download All'**
   String get downloadAll;
 
+  /// Button to download all surahs with count
+  ///
+  /// In en, this message translates to:
+  /// **'Download All ({downloaded}/{total})'**
+  String downloadAllWithCount(int downloaded, int total);
+
   /// Download progress message
   ///
   /// In en, this message translates to:
   /// **'Downloading all surahs...'**
   String get downloadingAllSurahs;
+
+  /// Button text to complete downloading with count
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Downloading ({downloaded}/{total})'**
+  String completeDownloadingWithCount(int downloaded, int total);
+
+  /// Pause progress with count
+  ///
+  /// In en, this message translates to:
+  /// **'Pause {percent}% ({downloaded}/{total})'**
+  String pauseProgressWithCount(int percent, int downloaded, int total);
 
   /// Button text to complete downloading remaining surahs
   ///

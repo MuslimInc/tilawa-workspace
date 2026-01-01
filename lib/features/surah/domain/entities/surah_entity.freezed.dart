@@ -9,301 +9,474 @@ part of 'surah_entity.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$SurahEntity {
+  AudioEntity get audio;
+  bool get isDownloaded;
+  bool get isDownloading;
+  double get downloadProgress; // 0.0 to 1.0
+  String? get downloadId;
 
- AudioEntity get audio; bool get isDownloaded; bool get isDownloading; double get downloadProgress;// 0.0 to 1.0
- String? get downloadId;
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SurahEntityCopyWith<SurahEntity> get copyWith => _$SurahEntityCopyWithImpl<SurahEntity>(this as SurahEntity, _$identity);
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SurahEntityCopyWith<SurahEntity> get copyWith =>
+      _$SurahEntityCopyWithImpl<SurahEntity>(this as SurahEntity, _$identity);
 
   /// Serializes this SurahEntity to a JSON map.
   Map<String, dynamic> toJson();
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is SurahEntity &&
+            (identical(other.audio, audio) || other.audio == audio) &&
+            (identical(other.isDownloaded, isDownloaded) ||
+                other.isDownloaded == isDownloaded) &&
+            (identical(other.isDownloading, isDownloading) ||
+                other.isDownloading == isDownloading) &&
+            (identical(other.downloadProgress, downloadProgress) ||
+                other.downloadProgress == downloadProgress) &&
+            (identical(other.downloadId, downloadId) ||
+                other.downloadId == downloadId));
+  }
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SurahEntity&&(identical(other.audio, audio) || other.audio == audio)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
-}
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    audio,
+    isDownloaded,
+    isDownloading,
+    downloadProgress,
+    downloadId,
+  );
 
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,audio,isDownloaded,isDownloading,downloadProgress,downloadId);
-
-@override
-String toString() {
-  return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
-}
-
-
+  @override
+  String toString() {
+    return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class $SurahEntityCopyWith<$Res>  {
-  factory $SurahEntityCopyWith(SurahEntity value, $Res Function(SurahEntity) _then) = _$SurahEntityCopyWithImpl;
-@useResult
-$Res call({
- AudioEntity audio, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
-});
+abstract mixin class $SurahEntityCopyWith<$Res> {
+  factory $SurahEntityCopyWith(
+    SurahEntity value,
+    $Res Function(SurahEntity) _then,
+  ) = _$SurahEntityCopyWithImpl;
+  @useResult
+  $Res call({
+    AudioEntity audio,
+    bool isDownloaded,
+    bool isDownloading,
+    double downloadProgress,
+    String? downloadId,
+  });
 
-
-$AudioEntityCopyWith<$Res> get audio;
-
+  $AudioEntityCopyWith<$Res> get audio;
 }
+
 /// @nodoc
-class _$SurahEntityCopyWithImpl<$Res>
-    implements $SurahEntityCopyWith<$Res> {
+class _$SurahEntityCopyWithImpl<$Res> implements $SurahEntityCopyWith<$Res> {
   _$SurahEntityCopyWithImpl(this._self, this._then);
 
   final SurahEntity _self;
   final $Res Function(SurahEntity) _then;
 
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? audio = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
-  return _then(_self.copyWith(
-audio: null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
-as AudioEntity,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
-as bool,isDownloading: null == isDownloading ? _self.isDownloading : isDownloading // ignore: cast_nullable_to_non_nullable
-as bool,downloadProgress: null == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
-as double,downloadId: freezed == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
-}
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AudioEntityCopyWith<$Res> get audio {
-  
-  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
-    return _then(_self.copyWith(audio: value));
-  });
-}
-}
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? audio = null,
+    Object? isDownloaded = null,
+    Object? isDownloading = null,
+    Object? downloadProgress = null,
+    Object? downloadId = freezed,
+  }) {
+    return _then(
+      _self.copyWith(
+        audio: null == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as AudioEntity,
+        isDownloaded: null == isDownloaded
+            ? _self.isDownloaded
+            : isDownloaded // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isDownloading: null == isDownloading
+            ? _self.isDownloading
+            : isDownloading // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        downloadProgress: null == downloadProgress
+            ? _self.downloadProgress
+            : downloadProgress // ignore: cast_nullable_to_non_nullable
+                  as double,
+        downloadId: freezed == downloadId
+            ? _self.downloadId
+            : downloadId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AudioEntityCopyWith<$Res> get audio {
+    return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+      return _then(_self.copyWith(audio: value));
+    });
+  }
+}
 
 /// Adds pattern-matching-related methods to [SurahEntity].
 extension SurahEntityPatterns on SurahEntity {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SurahEntity value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _SurahEntity() when $default != null:
-return $default(_that);case _:
-  return orElse();
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_SurahEntity value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
 
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SurahEntity value)  $default,){
-final _that = this;
-switch (_that) {
-case _SurahEntity():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_SurahEntity value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
 
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SurahEntity value)?  $default,){
-final _that = this;
-switch (_that) {
-case _SurahEntity() when $default != null:
-return $default(_that);case _:
-  return null;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_SurahEntity value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
 
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _SurahEntity() when $default != null:
-return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
-  return orElse();
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+      AudioEntity audio,
+      bool isDownloaded,
+      bool isDownloading,
+      double downloadProgress,
+      String? downloadId,
+    )?
+    $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity() when $default != null:
+        return $default(
+          _that.audio,
+          _that.isDownloaded,
+          _that.isDownloading,
+          _that.downloadProgress,
+          _that.downloadId,
+        );
+      case _:
+        return orElse();
+    }
+  }
 
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)  $default,) {final _that = this;
-switch (_that) {
-case _SurahEntity():
-return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
-  throw StateError('Unexpected subclass');
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+      AudioEntity audio,
+      bool isDownloaded,
+      bool isDownloading,
+      double downloadProgress,
+      String? downloadId,
+    )
+    $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity():
+        return $default(
+          _that.audio,
+          _that.isDownloaded,
+          _that.isDownloading,
+          _that.downloadProgress,
+          _that.downloadId,
+        );
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
 
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AudioEntity audio,  bool isDownloaded,  bool isDownloading,  double downloadProgress,  String? downloadId)?  $default,) {final _that = this;
-switch (_that) {
-case _SurahEntity() when $default != null:
-return $default(_that.audio,_that.isDownloaded,_that.isDownloading,_that.downloadProgress,_that.downloadId);case _:
-  return null;
-
-}
-}
-
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+      AudioEntity audio,
+      bool isDownloaded,
+      bool isDownloading,
+      double downloadProgress,
+      String? downloadId,
+    )?
+    $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _SurahEntity() when $default != null:
+        return $default(
+          _that.audio,
+          _that.isDownloaded,
+          _that.isDownloading,
+          _that.downloadProgress,
+          _that.downloadId,
+        );
+      case _:
+        return null;
+    }
+  }
 }
 
 /// @nodoc
 @JsonSerializable()
-
 class _SurahEntity extends SurahEntity {
-  const _SurahEntity({required this.audio, this.isDownloaded = false, this.isDownloading = false, this.downloadProgress = 0.0, this.downloadId}): super._();
-  factory _SurahEntity.fromJson(Map<String, dynamic> json) => _$SurahEntityFromJson(json);
+  const _SurahEntity({
+    required this.audio,
+    this.isDownloaded = false,
+    this.isDownloading = false,
+    this.downloadProgress = 0.0,
+    this.downloadId,
+  }) : super._();
+  factory _SurahEntity.fromJson(Map<String, dynamic> json) =>
+      _$SurahEntityFromJson(json);
 
-@override final  AudioEntity audio;
-@override@JsonKey() final  bool isDownloaded;
-@override@JsonKey() final  bool isDownloading;
-@override@JsonKey() final  double downloadProgress;
-// 0.0 to 1.0
-@override final  String? downloadId;
+  @override
+  final AudioEntity audio;
+  @override
+  @JsonKey()
+  final bool isDownloaded;
+  @override
+  @JsonKey()
+  final bool isDownloading;
+  @override
+  @JsonKey()
+  final double downloadProgress;
+  // 0.0 to 1.0
+  @override
+  final String? downloadId;
 
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$SurahEntityCopyWith<_SurahEntity> get copyWith => __$SurahEntityCopyWithImpl<_SurahEntity>(this, _$identity);
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$SurahEntityCopyWith<_SurahEntity> get copyWith =>
+      __$SurahEntityCopyWithImpl<_SurahEntity>(this, _$identity);
 
-@override
-Map<String, dynamic> toJson() {
-  return _$SurahEntityToJson(this, );
-}
+  @override
+  Map<String, dynamic> toJson() {
+    return _$SurahEntityToJson(this);
+  }
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SurahEntity&&(identical(other.audio, audio) || other.audio == audio)&&(identical(other.isDownloaded, isDownloaded) || other.isDownloaded == isDownloaded)&&(identical(other.isDownloading, isDownloading) || other.isDownloading == isDownloading)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.downloadId, downloadId) || other.downloadId == downloadId));
-}
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _SurahEntity &&
+            (identical(other.audio, audio) || other.audio == audio) &&
+            (identical(other.isDownloaded, isDownloaded) ||
+                other.isDownloaded == isDownloaded) &&
+            (identical(other.isDownloading, isDownloading) ||
+                other.isDownloading == isDownloading) &&
+            (identical(other.downloadProgress, downloadProgress) ||
+                other.downloadProgress == downloadProgress) &&
+            (identical(other.downloadId, downloadId) ||
+                other.downloadId == downloadId));
+  }
 
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode => Object.hash(runtimeType,audio,isDownloaded,isDownloading,downloadProgress,downloadId);
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    audio,
+    isDownloaded,
+    isDownloading,
+    downloadProgress,
+    downloadId,
+  );
 
-@override
-String toString() {
-  return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
-}
-
-
+  @override
+  String toString() {
+    return 'SurahEntity(audio: $audio, isDownloaded: $isDownloaded, isDownloading: $isDownloading, downloadProgress: $downloadProgress, downloadId: $downloadId)';
+  }
 }
 
 /// @nodoc
-abstract mixin class _$SurahEntityCopyWith<$Res> implements $SurahEntityCopyWith<$Res> {
-  factory _$SurahEntityCopyWith(_SurahEntity value, $Res Function(_SurahEntity) _then) = __$SurahEntityCopyWithImpl;
-@override @useResult
-$Res call({
- AudioEntity audio, bool isDownloaded, bool isDownloading, double downloadProgress, String? downloadId
-});
+abstract mixin class _$SurahEntityCopyWith<$Res>
+    implements $SurahEntityCopyWith<$Res> {
+  factory _$SurahEntityCopyWith(
+    _SurahEntity value,
+    $Res Function(_SurahEntity) _then,
+  ) = __$SurahEntityCopyWithImpl;
+  @override
+  @useResult
+  $Res call({
+    AudioEntity audio,
+    bool isDownloaded,
+    bool isDownloading,
+    double downloadProgress,
+    String? downloadId,
+  });
 
-
-@override $AudioEntityCopyWith<$Res> get audio;
-
+  @override
+  $AudioEntityCopyWith<$Res> get audio;
 }
+
 /// @nodoc
-class __$SurahEntityCopyWithImpl<$Res>
-    implements _$SurahEntityCopyWith<$Res> {
+class __$SurahEntityCopyWithImpl<$Res> implements _$SurahEntityCopyWith<$Res> {
   __$SurahEntityCopyWithImpl(this._self, this._then);
 
   final _SurahEntity _self;
   final $Res Function(_SurahEntity) _then;
 
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? audio = null,Object? isDownloaded = null,Object? isDownloading = null,Object? downloadProgress = null,Object? downloadId = freezed,}) {
-  return _then(_SurahEntity(
-audio: null == audio ? _self.audio : audio // ignore: cast_nullable_to_non_nullable
-as AudioEntity,isDownloaded: null == isDownloaded ? _self.isDownloaded : isDownloaded // ignore: cast_nullable_to_non_nullable
-as bool,isDownloading: null == isDownloading ? _self.isDownloading : isDownloading // ignore: cast_nullable_to_non_nullable
-as bool,downloadProgress: null == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
-as double,downloadId: freezed == downloadId ? _self.downloadId : downloadId // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
-}
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? audio = null,
+    Object? isDownloaded = null,
+    Object? isDownloading = null,
+    Object? downloadProgress = null,
+    Object? downloadId = freezed,
+  }) {
+    return _then(
+      _SurahEntity(
+        audio: null == audio
+            ? _self.audio
+            : audio // ignore: cast_nullable_to_non_nullable
+                  as AudioEntity,
+        isDownloaded: null == isDownloaded
+            ? _self.isDownloaded
+            : isDownloaded // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isDownloading: null == isDownloading
+            ? _self.isDownloading
+            : isDownloading // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        downloadProgress: null == downloadProgress
+            ? _self.downloadProgress
+            : downloadProgress // ignore: cast_nullable_to_non_nullable
+                  as double,
+        downloadId: freezed == downloadId
+            ? _self.downloadId
+            : downloadId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
 
-/// Create a copy of SurahEntity
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AudioEntityCopyWith<$Res> get audio {
-  
-  return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
-    return _then(_self.copyWith(audio: value));
-  });
+  /// Create a copy of SurahEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AudioEntityCopyWith<$Res> get audio {
+    return $AudioEntityCopyWith<$Res>(_self.audio, (value) {
+      return _then(_self.copyWith(audio: value));
+    });
+  }
 }
-}
-
-// dart format on

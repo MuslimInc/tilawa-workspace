@@ -48,7 +48,7 @@ class DownloadAllButton extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               key: const Key('download_all_button'),
-              onPressed: isAllDownloaded
+              onPressed: isAllDownloaded || state.isPending
                   ? null
                   : () {
                       if (isDownloading) {
@@ -80,10 +80,20 @@ class DownloadAllButton extends StatelessWidget {
                 isAllDownloaded
                     ? context.l10n.allDownloaded
                     : isDownloading
-                    ? '${context.l10n.pause} ${(progress * 100).toInt()}%'
+                    ? context.l10n.pauseProgressWithCount(
+                        (progress * 100).toInt(),
+                        state.downloadedCount,
+                        state.totalCount,
+                      )
                     : (progress > 0 && progress < 1.0)
-                    ? context.l10n.completeDownloading
-                    : context.l10n.downloadAll,
+                    ? context.l10n.completeDownloadingWithCount(
+                        state.downloadedCount,
+                        state.totalCount,
+                      )
+                    : context.l10n.downloadAllWithCount(
+                        state.downloadedCount,
+                        state.totalCount,
+                      ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
