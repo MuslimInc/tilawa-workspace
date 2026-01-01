@@ -129,5 +129,32 @@ void main() {
         equals(const Duration(minutes: 1).inMilliseconds.toDouble()),
       );
     });
+
+    testWidgets('buffered slider onChanged callback executes without error', (
+      tester,
+    ) async {
+      // This test covers line 77: the buffered slider's empty onChanged callback
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SeekBar(
+              duration: Duration(minutes: 10),
+              position: Duration(minutes: 1),
+              bufferedPosition: Duration(minutes: 5),
+            ),
+          ),
+        ),
+      );
+
+      // Get the buffered slider (first one)
+      final Iterable<Slider> sliders = tester.widgetList<Slider>(
+        find.byType(Slider),
+      );
+      final Slider bufferedSlider = sliders.first;
+
+      // Manually invoke the onChanged callback to cover line 77
+      // The callback is intentionally empty, so just verify it doesn't throw
+      expect(() => bufferedSlider.onChanged?.call(50.0), returnsNormally);
+    });
   });
 }

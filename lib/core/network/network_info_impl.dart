@@ -5,10 +5,21 @@ import 'package:injectable/injectable.dart';
 
 import 'network_info.dart';
 
+typedef InternetLookup =
+    Future<List<InternetAddress>> Function(
+      String host, {
+      InternetAddressType type,
+    });
+
 @LazySingleton(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
-  NetworkInfoImpl(this._connectivity);
+  NetworkInfoImpl(
+    this._connectivity, {
+    this.internetLookup = InternetAddress.lookup,
+  });
+
   final Connectivity _connectivity;
+  final InternetLookup internetLookup;
 
   @override
   Future<bool> get isConnected async {
@@ -19,7 +30,7 @@ class NetworkInfoImpl implements NetworkInfo {
         return false;
       }
       // Double check with actual internet lookup
-      final List<InternetAddress> lookupResult = await InternetAddress.lookup(
+      final List<InternetAddress> lookupResult = await internetLookup(
         'google.com',
       );
       return lookupResult.isNotEmpty && lookupResult[0].rawAddress.isNotEmpty;
