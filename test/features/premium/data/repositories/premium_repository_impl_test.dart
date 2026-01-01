@@ -7,6 +7,7 @@ import 'package:tilawa/features/premium/data/repositories/premium_repository_imp
 import 'package:tilawa/features/premium/domain/entities/premium_status.dart';
 import 'package:tilawa/features/premium/domain/entities/subscription_plan.dart';
 
+import '../../../athkar/presentation/cubit/athkar_cubit_test.mocks.dart';
 import 'premium_repository_impl_test.mocks.dart';
 
 @GenerateMocks([PremiumLocalDataSource, PremiumRemoteDataSource])
@@ -14,13 +15,16 @@ void main() {
   late PremiumRepositoryImpl repository;
   late MockPremiumLocalDataSource mockLocalDataSource;
   late MockPremiumRemoteDataSource mockRemoteDataSource;
+  late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
     mockLocalDataSource = MockPremiumLocalDataSource();
     mockRemoteDataSource = MockPremiumRemoteDataSource();
+    mockAnalyticsService = MockAnalyticsService();
     repository = PremiumRepositoryImpl(
       mockLocalDataSource,
       mockRemoteDataSource,
+      mockAnalyticsService,
     );
   });
 
@@ -159,6 +163,15 @@ void main() {
         verify(mockRemoteDataSource.purchaseSubscription(tPlanId)).called(1);
         // Called once in getPremiumStatus and once in updatePremiumStatus
         verify(mockLocalDataSource.savePremiumStatus(any)).called(2);
+        // Verify analytics purchase event was logged
+        verify(
+          mockAnalyticsService.logPurchase(
+            any,
+            value: anyNamed('value'),
+            currency: anyNamed('currency'),
+            itemId: tPlanId,
+          ),
+        ).called(1);
       },
     );
 

@@ -19,13 +19,14 @@ import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/reciter_details_loader_state.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciter_details_loader.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciter_details_screen.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa/screens/reciter_details_loader.dart';
-import 'package:tilawa/screens/reciter_details_screen.dart';
 
-import '../features/downloads/helpers/mock_helper.mocks.dart' as download_mocks;
-import '../router/router_mock_helper.mocks.dart';
+import '../../../../features/downloads/helpers/mock_helper.mocks.dart'
+    as download_mocks;
+import '../../../../router/router_mock_helper.mocks.dart';
 
 class MockReciterDownloadBloc extends Mock implements ReciterDownloadBloc {}
 

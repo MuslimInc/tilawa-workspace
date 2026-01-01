@@ -50,7 +50,7 @@ void main() {
   Widget buildTestWidget() {
     return ScreenUtilPlusInit(
       designSize: const Size(375, 812),
-      builder: (_, __) => MaterialApp(
+      builder: (_, _) => MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: InheritedGoRouter(

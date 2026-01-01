@@ -9,6 +9,7 @@ import 'package:dartz_plus/dartz_plus.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:tilawa/core/errors/failures.dart' as _i5;
+import 'package:tilawa/core/services/analytics_service.dart' as _i11;
 import 'package:tilawa/core/usecases/usecase.dart' as _i7;
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart'
     as _i6;
@@ -86,4 +87,290 @@ class MockGetAthkarByCategoryUseCase extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Either<_i5.Failure, List<_i10.AthkarItem>>>);
+}
+
+/// A class which mocks [AnalyticsService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAnalyticsService extends _i1.Mock implements _i11.AnalyticsService {
+  MockAnalyticsService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> logEvent(String? name, {Map<String, Object>? parameters}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logEvent, [name], {#parameters: parameters}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logLogin({String? loginMethod}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logLogin, [], {#loginMethod: loginMethod}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logSignUp({String? signUpMethod}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logSignUp, [], {#signUpMethod: signUpMethod}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logScreenView(String? screenName, {String? screenClass}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logScreenView,
+              [screenName],
+              {#screenClass: screenClass},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logAudioPlay(
+    String? audioId, {
+    String? audioName,
+    String? artist,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logAudioPlay,
+              [audioId],
+              {#audioName: audioName, #artist: artist},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logAudioPause(String? audioId) =>
+      (super.noSuchMethod(
+            Invocation.method(#logAudioPause, [audioId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logAudioStop(String? audioId) =>
+      (super.noSuchMethod(
+            Invocation.method(#logAudioStop, [audioId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logAudioSeek(String? audioId, int? position) =>
+      (super.noSuchMethod(
+            Invocation.method(#logAudioSeek, [audioId, position]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logDownloadStart(
+    String? downloadId, {
+    String? fileName,
+    int? fileSize,
+    String? surahId,
+    String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logDownloadStart,
+              [downloadId],
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logDownloadComplete(
+    String? downloadId, {
+    String? fileName,
+    int? fileSize,
+    String? surahId,
+    String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logDownloadComplete,
+              [downloadId],
+              {
+                #fileName: fileName,
+                #fileSize: fileSize,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logDownloadCancel(
+    String? downloadId, {
+    String? fileName,
+    String? surahId,
+    String? reciterName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logDownloadCancel,
+              [downloadId],
+              {
+                #fileName: fileName,
+                #surahId: surahId,
+                #reciterName: reciterName,
+              },
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logPurchase(
+    String? transactionId, {
+    double? value,
+    String? currency,
+    String? itemId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logPurchase,
+              [transactionId],
+              {#value: value, #currency: currency, #itemId: itemId},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logSubscriptionStart(
+    String? subscriptionId, {
+    String? planId,
+    double? value,
+    String? currency,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logSubscriptionStart,
+              [subscriptionId],
+              {#planId: planId, #value: value, #currency: currency},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logSubscriptionCancel(
+    String? subscriptionId, {
+    String? planId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logSubscriptionCancel,
+              [subscriptionId],
+              {#planId: planId},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logSearch(String? searchTerm, {int? resultCount}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logSearch,
+              [searchTerm],
+              {#resultCount: resultCount},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logShare(String? contentType, {String? itemId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logShare, [contentType], {#itemId: itemId}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logFavorite(String? itemId, {String? itemType}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logFavorite, [itemId], {#itemType: itemType}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> logRating(int? rating, {String? itemId, String? itemType}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #logRating,
+              [rating],
+              {#itemId: itemId, #itemType: itemType},
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setUserId(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#setUserId, [userId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setUserProperty(String? name, String? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setUserProperty, [name, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> resetAnalyticsData() =>
+      (super.noSuchMethod(
+            Invocation.method(#resetAnalyticsData, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }

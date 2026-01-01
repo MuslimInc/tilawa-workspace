@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:credential_manager/credential_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -11,6 +12,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../../main.dart';
@@ -22,6 +24,9 @@ import '../services/firebase_initialization_service.dart';
 
 @module
 abstract class ExternalDependenciesModule {
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
+
   @singleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
@@ -86,6 +91,7 @@ abstract class ExternalDependenciesModule {
     AnalyticsService analyticsService,
     SharedPreferencesAsync prefs,
     RecitersRepository recitersRepository,
+    DownloadsRepository downloadsRepository,
   ) async {
     try {
       logger.d('Initializing audio service...');
@@ -94,6 +100,7 @@ abstract class ExternalDependenciesModule {
         analyticsService,
         prefs,
         recitersRepository,
+        downloadsRepository,
       );
 
       final AudioPlayerHandlerImpl audioHandler = await AudioService.init(
@@ -114,6 +121,7 @@ abstract class ExternalDependenciesModule {
         analyticsService,
         prefs,
         recitersRepository,
+        downloadsRepository,
       );
       logger.d('Fallback AudioPlayerHandler registered');
       return fallbackHandler;

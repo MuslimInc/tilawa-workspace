@@ -37,7 +37,9 @@ void main() {
       var callCount = 0;
       when(() => mockDataSource.isFileExists('path')).thenAnswer((_) {
         callCount++;
-        if (callCount < 2) return false;
+        if (callCount < 2) {
+          return false;
+        }
         return true;
       });
 

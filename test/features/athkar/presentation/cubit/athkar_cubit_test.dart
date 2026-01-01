@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/core/usecases/usecase.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
@@ -15,11 +16,16 @@ import 'package:tilawa/features/athkar/presentation/cubit/athkar_state.dart';
 
 import 'athkar_cubit_test.mocks.dart';
 
-@GenerateMocks([GetAthkarCategoriesUseCase, GetAthkarByCategoryUseCase])
+@GenerateMocks([
+  GetAthkarCategoriesUseCase,
+  GetAthkarByCategoryUseCase,
+  AnalyticsService,
+])
 void main() {
   late AthkarCubit cubit;
   late MockGetAthkarCategoriesUseCase mockGetCategories;
   late MockGetAthkarByCategoryUseCase mockGetAthkarByCategory;
+  late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
     provideDummy<ResultFuture<List<AthkarCategory>>>(
@@ -31,7 +37,12 @@ void main() {
 
     mockGetCategories = MockGetAthkarCategoriesUseCase();
     mockGetAthkarByCategory = MockGetAthkarByCategoryUseCase();
-    cubit = AthkarCubit(mockGetCategories, mockGetAthkarByCategory);
+    mockAnalyticsService = MockAnalyticsService();
+    cubit = AthkarCubit(
+      mockGetCategories,
+      mockGetAthkarByCategory,
+      mockAnalyticsService,
+    );
   });
 
   tearDown(() {

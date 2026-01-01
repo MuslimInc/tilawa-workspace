@@ -352,6 +352,10 @@
     "@favorites": {
         "description": "Favorites section title"
     },
+    "noFavorites": "لا توجد مفضلة",
+    "@noFavorites": {
+        "description": "No favorites message"
+    },
     "recent": "الأحدث",
     "@recent": {
         "description": "Recent section title"
@@ -534,7 +538,7 @@
     "@unableToSignInWithThirdPartyAccount": {
         "description": "Error message shown when third-party sign-in fails"
     },
-    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"
     },
@@ -798,13 +802,17 @@
     },
     "reciterRemovedFromFavorites": "تمت إزالة {reciterName} من المفضلة",
     "@reciterRemovedFromFavorites": {
-        "description": "Message when a reciter is removed from favorites",
+        "description": "Reciter removed from favorites message",
         "placeholders": {
             "reciterName": {
                 "type": "String",
                 "description": "The name of the reciter"
             }
         }
+    },
+    "allDownloaded": "تم التحميل بالكامل",
+    "@allDownloaded": {
+        "description": "Text shown when all surahs for a reciter are downloaded"
     },
     "undo": "تراجع",
     "@undo": {
@@ -870,9 +878,55 @@
     "@downloadAll": {
         "description": "Button to download all surahs"
     },
+    "downloadAllWithCount": "تحميل الكل ({downloaded}/{total})",
+    "@downloadAllWithCount": {
+        "description": "Button to download all surahs with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
     "downloadingAllSurahs": "جاري تحميل جميع السور...",
     "@downloadingAllSurahs": {
         "description": "Download progress message"
+    },
+    "completeDownloadingWithCount": "استكمال التحميل ({downloaded}/{total})",
+    "@completeDownloadingWithCount": {
+        "description": "Button text to complete downloading with count",
+        "placeholders": {
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "pauseProgressWithCount": "إيقاف {percent}% ({downloaded}/{total})",
+    "@pauseProgressWithCount": {
+        "description": "Pause progress with count",
+        "placeholders": {
+            "percent": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "downloaded": {
+                "type": "int",
+                "format": "decimalPattern"
+            },
+            "total": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
     },
     "completeDownloading": "استكمال التحميل",
     "@completeDownloading": {
@@ -973,5 +1027,9 @@
     "setTimer": "ضبط المؤقت",
     "@setTimer": {
         "description": "Set timer title"
+    },
+    "noInternetConnection": "لا يوجد اتصال بالإنترنت",
+    "@noInternetConnection": {
+        "description": "No internet connection message"
     }
 }

@@ -108,8 +108,8 @@ void main() {
 
       expect(selectedColor, isNotNull);
       expect(
-        selectedColor!.value,
-        isNot(Colors.red.value),
+        selectedColor,
+        isNot(Colors.red),
       ); // precise value depends on index
     });
 

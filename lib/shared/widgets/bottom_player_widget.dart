@@ -108,7 +108,12 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                 );
               },
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  8.h,
+                  16.w,
+                  20.h + MediaQuery.paddingOf(context).bottom,
+                ),
                 child: BottomPlayerUi(
                   audio: audio,
                   positionData: position,

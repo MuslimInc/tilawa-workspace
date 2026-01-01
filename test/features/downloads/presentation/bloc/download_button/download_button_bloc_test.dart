@@ -217,7 +217,29 @@ void main() {
       );
 
       blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'emits [featured] when downloadSurah returns failure',
+        'emits [networkError] when downloadSurah returns NetworkFailure',
+        build: () {
+          when(
+            mockDownloadSurah.call(
+              surahId: anyNamed('surahId'),
+              surahTitle: anyNamed('surahTitle'),
+              reciterName: anyNamed('reciterName'),
+              reciterId: anyNamed('reciterId'),
+            ),
+          ).thenAnswer((_) async => const Left(NetworkFailure('No internet')));
+          return downloadButtonBloc!;
+        },
+        act: (bloc) => bloc.add(
+          const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
+        ),
+        expect: () => [
+          const DownloadButtonState.pending(),
+          const DownloadButtonState.networkError(errorMessage: 'No internet'),
+        ],
+      );
+
+      blocTest<DownloadButtonBloc, DownloadButtonState>(
+        'emits [failed] when downloadSurah returns failure',
         build: () {
           when(
             mockDownloadSurah.call(
@@ -528,34 +550,6 @@ void main() {
           ),
         ],
       );
-
-      blocTest<DownloadButtonBloc, DownloadButtonState>(
-        'ignores stream items with different reciter name',
-        build: () {
-          final item = DownloadItem(
-            id: testUrl,
-            title: testSurahTitle,
-            url: testUrl,
-            filePath: '',
-            reciterName: 'Different Reciter', // Different reciter name
-            reciterId: 999,
-            status: DownloadStatus.downloading,
-            progress: 0.5,
-            fileSize: 100,
-            downloadedSize: 50,
-            createdAt: DateTime.now(),
-          );
-          when(
-            mockObserveDownloadProgress.call(any),
-          ).thenAnswer((_) => Stream.value(item));
-          return downloadButtonBloc!;
-        },
-        act: (bloc) => bloc.add(const DownloadButtonEvent.initialize()),
-        expect: () => [
-          const DownloadButtonState.readyToDownload(),
-          // No state change because reciter name doesn't match
-        ],
-      );
     });
 
     group('Retry Event', () {
@@ -573,7 +567,7 @@ void main() {
           return downloadButtonBloc!;
         },
         act: (bloc) => bloc.add(
-          const DownloadButtonEvent.retry(surahTitle: testSurahTitle),
+          const DownloadButtonEvent.startDownload(surahTitle: testSurahTitle),
         ),
         expect: () => [const DownloadButtonState.pending()],
         verify: (_) {

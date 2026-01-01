@@ -14,4 +14,7 @@ abstract class BatchDownloadRepository {
     List<({String url, String surahTitle, String reciterName, int reciterId})>
     items,
   );
+
+  /// Delete all downloads for a specific reciter
+  Future<void> deleteReciterDownloads(String reciterName);
 }

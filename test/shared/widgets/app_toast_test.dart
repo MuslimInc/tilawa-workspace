@@ -44,4 +44,65 @@ void main() {
     // Verify toast is gone
     expect(find.text(message), findsNothing);
   });
+
+  testWidgets(
+    'showing a new toast cancels the previous timer and removes old toast',
+    (tester) async {
+      // This test covers lines 20-21: _timer?.cancel() and _currentEntry?.remove()
+      const firstMessage = 'First Toast';
+      const secondMessage = 'Second Toast';
+      const duration = Duration(seconds: 4);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                return Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        AppToast.show(context, message: firstMessage);
+                      },
+                      child: const Text('Show First'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        AppToast.show(context, message: secondMessage);
+                      },
+                      child: const Text('Show Second'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show first toast
+      await tester.tap(find.text('Show First'));
+      await tester.pump();
+
+      // Verify first toast is visible
+      expect(find.text(firstMessage), findsOneWidget);
+
+      // Show second toast before the first one times out
+      // This triggers lines 20-21
+      await tester.tap(find.text('Show Second'));
+      await tester.pump();
+
+      // First toast should be removed and second toast should be visible
+      expect(find.text(firstMessage), findsNothing);
+      expect(find.text(secondMessage), findsOneWidget);
+
+      // Wait for duration to let second toast disappear
+      await tester.pump(duration);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Verify second toast is gone
+      expect(find.text(secondMessage), findsNothing);
+    },
+  );
 }

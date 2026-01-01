@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/network/network_info.dart';
 import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -58,6 +59,7 @@ import 'package:tilawa/features/reciters/domain/repositories/reciters_repository
     DownloadsRepository,
     RecitersRepository,
     AnalyticsService,
+    NetworkInfo,
     DownloadsBloc,
     AudioPlayerBloc,
     NavigationService,

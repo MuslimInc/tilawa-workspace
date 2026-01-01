@@ -15,11 +15,11 @@ import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
+import '../features/reciters/presentation/screens/reciter_details_loader.dart';
+import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
-import '../screens/reciter_details_loader.dart';
-import '../screens/reciter_details_screen.dart';
 import '../screens/route_list_screen.dart';
 import '../shared/widgets/expanded_player_screen.dart';
 

@@ -626,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get favorites;
 
+  /// No favorites message
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites'**
+  String get noFavorites;
+
   /// Recent section title
   ///
   /// In en, this message translates to:
@@ -869,7 +875,7 @@ abstract class AppLocalizations {
   /// Network error message
   ///
   /// In en, this message translates to:
-  /// **'Network error. Please check your connection.'**
+  /// **'Please check your internet connection'**
   String get networkError;
 
   /// Number of recitations available for a reciter
@@ -1178,11 +1184,17 @@ abstract class AppLocalizations {
   /// **'Resume audio from where you left off'**
   String get restorePlaybackStateSubtitle;
 
-  /// Message when a reciter is removed from favorites
+  /// Reciter removed from favorites message
   ///
   /// In en, this message translates to:
   /// **'Removed {reciterName} from favorites'**
   String reciterRemovedFromFavorites(String reciterName);
+
+  /// Text shown when all surahs for a reciter are downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'All Downloaded'**
+  String get allDownloaded;
 
   /// Undo button text
   ///
@@ -1280,11 +1292,29 @@ abstract class AppLocalizations {
   /// **'Download All'**
   String get downloadAll;
 
+  /// Button to download all surahs with count
+  ///
+  /// In en, this message translates to:
+  /// **'Download All ({downloaded}/{total})'**
+  String downloadAllWithCount(int downloaded, int total);
+
   /// Download progress message
   ///
   /// In en, this message translates to:
   /// **'Downloading all surahs...'**
   String get downloadingAllSurahs;
+
+  /// Button text to complete downloading with count
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Downloading ({downloaded}/{total})'**
+  String completeDownloadingWithCount(int downloaded, int total);
+
+  /// Pause progress with count
+  ///
+  /// In en, this message translates to:
+  /// **'Pause {percent}% ({downloaded}/{total})'**
+  String pauseProgressWithCount(int percent, int downloaded, int total);
 
   /// Button text to complete downloading remaining surahs
   ///
@@ -1435,6 +1465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set Timer'**
   String get setTimer;
+
+  /// No internet connection message
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetConnection;
 }
 
 class _AppLocalizationsDelegate

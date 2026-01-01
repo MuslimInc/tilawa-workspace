@@ -162,6 +162,10 @@ void main() {
     GetIt.instance.registerSingleton<DownloadQueueManager>(queueManager);
     await queueManager.initialize();
 
+    final mockAnalyticsService = MockAnalyticsService();
+    final mockNetworkInfo = MockNetworkInfo();
+    when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+
     repository = DownloadsRepositoryImpl(
       mockLocalDataSource,
       GetIt.instance<DownloadServiceInterface>(),
@@ -170,7 +174,30 @@ void main() {
       mockStatusSynchronizer,
       mockValidator,
       queueManager,
+      mockAnalyticsService,
+      mockNetworkInfo,
     );
+
+    // Stub AnalyticsService methods to avoid MissingStubError
+    when(
+      mockAnalyticsService.logDownloadStart(
+        any,
+        fileName: anyNamed('fileName'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      mockAnalyticsService.logDownloadComplete(
+        any,
+        fileName: anyNamed('fileName'),
+        fileSize: anyNamed('fileSize'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      mockAnalyticsService.logDownloadCancel(
+        any,
+        fileName: anyNamed('fileName'),
+      ),
+    ).thenAnswer((_) async {});
 
     // Stub logging to avoid noise
     // setupLogger(); // Assuming logger is accessible or mocked if needed

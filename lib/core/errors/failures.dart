@@ -24,3 +24,36 @@ class NetworkFailure extends Failure {
 class AudioFailure extends Failure {
   const AudioFailure([super.message]);
 }
+
+// Exception classes for throwing
+class NetworkException implements Exception {
+  NetworkException([this.message]);
+  final String? message;
+
+  @override
+  String toString() => message ?? 'Network exception';
+}
+
+class ServerException implements Exception {
+  ServerException([this.message]);
+  final String? message;
+
+  @override
+  String toString() => message ?? 'Server exception';
+}
+
+class CacheException implements Exception {
+  CacheException([this.message]);
+  final String? message;
+
+  @override
+  String toString() => message ?? 'Cache exception';
+}
+
+class AudioException implements Exception {
+  AudioException([this.message]);
+  final String? message;
+
+  @override
+  String toString() => message ?? 'Audio exception';
+}

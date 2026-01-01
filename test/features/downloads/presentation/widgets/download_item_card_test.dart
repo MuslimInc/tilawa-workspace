@@ -817,6 +817,86 @@ void main() {
       await tester.pumpAndSettle();
       expect(deleteCalled, isTrue);
     });
+
+    testWidgets(
+      'should show cancel button when downloading and trigger delete dialog',
+      (WidgetTester tester) async {
+        // This test covers line 118: the close_rounded button for downloading status
+        var deleteCalled = false;
+        final download = DownloadItem(
+          id: 'test_id',
+          title: 'Test Surah',
+          url: 'https://example.com/test.mp3',
+          filePath: '/path/to/test.mp3',
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.downloading,
+          progress: 0.5,
+          fileSize: 1024,
+          downloadedSize: 512,
+          createdAt: DateTime.now(),
+        );
+
+        await tester.pumpWidget(
+          createTestWidget(download, onDelete: () => deleteCalled = true),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify close button exists for downloading status
+        expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+
+        // Tap the close button
+        await tester.tap(find.byIcon(Icons.close_rounded));
+        await tester.pumpAndSettle();
+
+        // Dialog should appear
+        expect(find.text('Delete Download'), findsOneWidget);
+
+        // Click delete in dialog to confirm
+        await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+        await tester.pumpAndSettle();
+        expect(deleteCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'should show cancel button when pending and trigger delete dialog',
+      (WidgetTester tester) async {
+        // This test verifies the close button for pending status
+        var deleteCalled = false;
+        final download = DownloadItem(
+          id: 'test_id',
+          title: 'Test Surah',
+          url: 'https://example.com/test.mp3',
+          filePath: '/path/to/test.mp3',
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.pending,
+          progress: 0.0,
+          fileSize: 0,
+          downloadedSize: 0,
+          createdAt: DateTime.now(),
+        );
+
+        await tester.pumpWidget(
+          createTestWidget(download, onDelete: () => deleteCalled = true),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify close button exists for pending status
+        expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+
+        // Tap the close button
+        await tester.tap(find.byIcon(Icons.close_rounded));
+        await tester.pumpAndSettle();
+
+        // Dialog should appear
+        expect(find.text('Delete Download'), findsOneWidget);
+
+        // Cancel the dialog to verify it can be dismissed
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(deleteCalled, isFalse);
+      },
+    );
   });
 
   group('DownloadItemCard - Edge Cases', () {

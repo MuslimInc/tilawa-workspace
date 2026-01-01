@@ -30,7 +30,7 @@ void main() {
   Widget buildTestWidget() {
     return ScreenUtilPlusInit(
       designSize: const Size(375, 812),
-      builder: (_, __) => const MaterialApp(
+      builder: (_, _) => const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: OnboardingScreen(),
@@ -95,5 +95,31 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockOnboardingCubit.completeOnboarding()).called(1);
+  });
+
+  testWidgets('back button navigates to previous page', (tester) async {
+    // This test covers lines 114-115: back button onPressed callback
+    when(() => mockOnboardingCubit.state).thenReturn(OnboardingInitial());
+    when(() => mockOnboardingCubit.pageChanged(any())).thenReturn(null);
+
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    // Verify back button is NOT visible on first page
+    expect(find.byIcon(Icons.arrow_back_ios_new), findsNothing);
+
+    // Navigate to second page
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    // Verify back button IS visible on second page
+    expect(find.byIcon(Icons.arrow_back_ios_new), findsOneWidget);
+
+    // Tap back button to navigate to previous page
+    await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
+    await tester.pumpAndSettle();
+
+    // Back button should be hidden again on first page
+    expect(find.byIcon(Icons.arrow_back_ios_new), findsNothing);
   });
 }

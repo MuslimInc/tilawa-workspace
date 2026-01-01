@@ -26,6 +26,8 @@ class DownloadSurahUseCase {
         surahTitle: surahTitle,
       );
       return const Right(null);
+    } on NetworkFailure catch (e) {
+      return Left(e);
     } catch (e) {
       return Left(AudioFailure(e.toString()));
     }

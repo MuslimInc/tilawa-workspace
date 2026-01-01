@@ -17,6 +17,8 @@ import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/services/analytics_service.dart';
+import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
+import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
 import 'package:tilawa/shared/models/queue_state.dart';
@@ -93,6 +95,7 @@ class FakeAudioPlayerForNullSequence extends Fake implements AudioPlayer {
   AnalyticsService,
   SharedPreferencesAsync,
   RecitersRepository,
+  DownloadsRepository,
   AudioPlayer,
   AudioSession,
 ])
@@ -118,6 +121,7 @@ void main() {
   late MockAnalyticsService mockAnalytics;
   late MockSharedPreferencesAsync mockPrefs;
   late MockRecitersRepository mockRepo;
+  late MockDownloadsRepository mockDownloadsRepo;
   late MockAudioPlayer mockPlayer;
   late MockAudioSession mockAudioSession;
 
@@ -157,8 +161,14 @@ void main() {
     mockAnalytics = MockAnalyticsService();
     mockPrefs = MockSharedPreferencesAsync();
     mockRepo = MockRecitersRepository();
+    mockDownloadsRepo = MockDownloadsRepository();
     mockPlayer = MockAudioPlayer();
     mockAudioSession = MockAudioSession();
+
+    // Mock downloads repository to return null (no downloaded files) by default
+    when(
+      mockDownloadsRepo.getDownloadedFilePath(any, any),
+    ).thenAnswer((_) async => null);
 
     currentIndexSubject = BehaviorSubject<int?>.seeded(null);
     processingStateSubject = BehaviorSubject<ProcessingState>.seeded(
@@ -230,6 +240,7 @@ void main() {
       mockAnalytics,
       mockPrefs,
       mockRepo,
+      mockDownloadsRepo,
       player: mockPlayer,
       audioSession: mockAudioSession,
     );
@@ -297,6 +308,7 @@ void main() {
           mockAnalytics,
           mockPrefs,
           mockRepo,
+          mockDownloadsRepo,
           player: mockPlayer,
         );
 
@@ -906,6 +918,7 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
+        mockDownloadsRepo,
         player: mockPlayer,
       );
 
@@ -959,6 +972,7 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
+        mockDownloadsRepo,
         player: mockPlayer,
         audioSession: mockAudioSession,
       );
@@ -1018,7 +1032,13 @@ void main() {
     test('Constructor creates internal AudioPlayer when not provided', () {
       // verifies line 32
       try {
-        AudioPlayerHandlerImpl([], mockAnalytics, mockPrefs, mockRepo);
+        AudioPlayerHandlerImpl(
+          [],
+          mockAnalytics,
+          mockPrefs,
+          mockRepo,
+          mockDownloadsRepo,
+        );
       } catch (e) {
         // Line is covered even if it throws
       }
@@ -1067,6 +1087,7 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
+        mockDownloadsRepo,
         player: mockPlayer,
       );
 
@@ -1161,6 +1182,153 @@ void main() {
       // It uses _player.effectiveIndices directly.
 
       expect(index, 1);
+    });
+  });
+
+  group('Coverage for Previously Uncovered Lines', () {
+    test(
+      '_mapRepeatMode covers AudioServiceRepeatMode.one via queueState',
+      () async {
+        const item = MediaItem(id: '1', title: 'Test');
+        await handler.addQueueItem(item);
+        await captureAndUpdate();
+
+        await handler.setRepeatMode(AudioServiceRepeatMode.one);
+
+        // Read from queueState which calls _mapRepeatMode
+        final QueueState state = await handler.queueState.first;
+
+        expect(state.repeatMode, AudioRepeatMode.one);
+      },
+    );
+
+    test(
+      '_mapRepeatMode covers AudioServiceRepeatMode.all via queueState',
+      () async {
+        const item = MediaItem(id: '1', title: 'Test');
+        await handler.addQueueItem(item);
+        await captureAndUpdate();
+
+        await handler.setRepeatMode(AudioServiceRepeatMode.all);
+
+        // Read from queueState which calls _mapRepeatMode
+        final QueueState state = await handler.queueState.first;
+
+        expect(state.repeatMode, AudioRepeatMode.all);
+      },
+    );
+
+    test(
+      '_mapRepeatMode covers AudioServiceRepeatMode.group via queueState',
+      () async {
+        const item = MediaItem(id: '1', title: 'Test');
+        await handler.addQueueItem(item);
+        await captureAndUpdate();
+
+        // Directly set playbackState with group mode to avoid setRepeatMode's index issue
+        handler.playbackState.add(
+          handler.playbackState.value.copyWith(
+            repeatMode: AudioServiceRepeatMode.group,
+          ),
+        );
+
+        // Read from queueState which calls _mapRepeatMode
+        final QueueState state = await handler.queueState.first;
+
+        // Group maps to all in _mapRepeatMode
+        expect(state.repeatMode, AudioRepeatMode.all);
+      },
+    );
+
+    test('loadAudioPlayerData does not throw', () async {
+      // Should not throw
+      await handler.loadAudioPlayerData();
+      await handler.loadAudioPlayerData(restorePlayback: false);
+    });
+
+    test('_itemToSource handles download check errors gracefully', () async {
+      // Make getDownloadedFilePath throw an error
+      when(
+        mockDownloadsRepo.getDownloadedFilePath(any, any),
+      ).thenThrow(Exception('Download check failed'));
+
+      const item = MediaItem(
+        id: 'https://example.com/test.mp3',
+        title: 'Test',
+        artist: 'Test Artist',
+        extras: {'url': 'https://example.com/test.mp3'},
+      );
+
+      // Should not throw, should catch and log error
+      await handler.addQueueItem(item);
+      await captureAndUpdate();
+
+      // Verify it still works despite the error
+      expect(handler.queue.value, contains(item));
+
+      // Reset mock for other tests
+      when(
+        mockDownloadsRepo.getDownloadedFilePath(any, any),
+      ).thenAnswer((_) async => null);
+    });
+
+    test('_itemToSource uses local file when available', () async {
+      // Mock returning a local file path
+      when(
+        mockDownloadsRepo.getDownloadedFilePath(any, any),
+      ).thenAnswer((_) async => '/path/to/local/file.mp3');
+
+      const item = MediaItem(
+        id: 'https://example.com/test.mp3',
+        title: 'Test',
+        artist: 'Test Artist',
+        extras: {'url': 'https://example.com/test.mp3'},
+      );
+
+      await handler.addQueueItem(item);
+
+      // Verify local file path was checked
+      verify(
+        mockDownloadsRepo.getDownloadedFilePath(
+          'https://example.com/test.mp3',
+          'Test Artist',
+        ),
+      ).called(1);
+
+      // Reset mock for other tests
+      when(
+        mockDownloadsRepo.getDownloadedFilePath(any, any),
+      ).thenAnswer((_) async => null);
+    });
+
+    test('_broadcastState includes pause control when playing', () async {
+      const item = MediaItem(id: '1', title: 'Test');
+      await handler.addQueueItem(item);
+      await captureAndUpdate();
+
+      // Trigger playback event with playing=true
+      when(mockPlayer.playing).thenReturn(true);
+      playbackEventSubject.add(PlaybackEvent(updateTime: DateTime.now()));
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Verify pause control is in the state
+      final PlaybackState state = handler.playbackState.value;
+      expect(state.controls.any((c) => c.action == MediaAction.pause), isTrue);
+
+      // Reset for other tests
+      when(mockPlayer.playing).thenReturn(false);
+    });
+
+    test('playArtistPlaylist handles errors gracefully', () async {
+      // Make getReciters throw an error
+      when(mockRepo.getReciters()).thenThrow(Exception('Network error'));
+
+      // Should not throw, should catch and log error
+      await handler.playArtistPlaylist('Test Artist');
+
+      // Verify play was not called due to error
+      verifyNever(mockPlayer.play());
     });
   });
 }

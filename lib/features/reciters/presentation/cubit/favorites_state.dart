@@ -6,7 +6,7 @@ abstract class FavoritesState extends Equatable {
   const FavoritesState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class FavoritesInitial extends FavoritesState {}
@@ -14,12 +14,17 @@ class FavoritesInitial extends FavoritesState {}
 class FavoritesLoading extends FavoritesState {}
 
 class FavoritesLoaded extends FavoritesState {
-  const FavoritesLoaded({required this.favorites, required this.favoriteIds});
+  const FavoritesLoaded({
+    required this.favorites,
+    required this.favoriteIds,
+    this.removedReciter,
+  });
   final List<ReciterEntity> favorites;
   final Set<int> favoriteIds;
+  final ReciterEntity? removedReciter;
 
   @override
-  List<Object> get props => [favorites, favoriteIds];
+  List<Object?> get props => [favorites, favoriteIds, removedReciter];
 }
 
 class FavoritesError extends FavoritesState {

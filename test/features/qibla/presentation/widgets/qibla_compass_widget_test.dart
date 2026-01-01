@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(
       ScreenUtilPlusInit(
         designSize: const Size(375, 812),
-        builder: (_, __) => const MaterialApp(
+        builder: (_, _) => const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -34,5 +34,55 @@ void main() {
       findsWidgets,
     ); // Dial (and possibly others)
     expect(find.byType(Icon), findsOneWidget); // Needle (Icon)
+  });
+
+  testWidgets('shouldRepaint returns true when colorScheme changes', (
+    tester,
+  ) async {
+    // This test covers lines 267-269: shouldRepaint method
+    const direction = QiblaDirectionEntity(
+      qibla: 100,
+      direction: 45,
+      offset: 55,
+    );
+
+    // Initial build with default theme
+    await tester.pumpWidget(
+      ScreenUtilPlusInit(
+        designSize: const Size(375, 812),
+        builder: (_, _) => MaterialApp(
+          theme: ThemeData.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
+            body: Center(child: QiblaCompassWidget(qiblaDirection: direction)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QiblaCompassWidget), findsOneWidget);
+    expect(find.byType(CustomPaint), findsWidgets);
+
+    // Rebuild with different theme to trigger shouldRepaint
+    await tester.pumpWidget(
+      ScreenUtilPlusInit(
+        designSize: const Size(375, 812),
+        builder: (_, _) => MaterialApp(
+          theme: ThemeData.dark(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
+            body: Center(child: QiblaCompassWidget(qiblaDirection: direction)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Widget should still render correctly after theme change
+    expect(find.byType(QiblaCompassWidget), findsOneWidget);
+    expect(find.byType(CustomPaint), findsWidgets);
   });
 }

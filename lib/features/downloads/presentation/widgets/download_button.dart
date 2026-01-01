@@ -62,7 +62,28 @@ class DownloadButton extends StatelessWidget {
         bloc.add(const DownloadButtonEvent.initialize());
         return bloc;
       },
-      child: BlocBuilder<DownloadButtonBloc, DownloadButtonState>(
+      child: BlocConsumer<DownloadButtonBloc, DownloadButtonState>(
+        listenWhen: (previous, current) {
+          // Only trigger listener for downloading state if transitioning FROM a non-downloading state
+          return current.maybeMap(
+            downloading: (_) => previous.maybeMap(
+              downloading: (_) => false,
+              orElse: () => true,
+            ),
+            networkError: (_) => true, // Always show network errors
+            orElse: () => false,
+          );
+        },
+        listener: (context, state) {
+          state.whenOrNull(
+            networkError: (_) {
+              ToastUtils.showToast(msg: context.l10n.networkError);
+            },
+            downloading: (progress, _, _) {
+              ToastUtils.showToast(msg: l10n.downloadingSurah(surahTitle));
+            },
+          );
+        },
         buildWhen: (previous, current) {
           // Throttle progress updates to reduce rebuilds
           return current.maybeWhen(
@@ -87,9 +108,6 @@ class DownloadButton extends StatelessWidget {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
-                    ToastUtils.showToast(
-                      msg: l10n.downloadingSurah(surahTitle),
-                    );
                   },
                 ),
                 pending: () => _PendingDownloadButton(
@@ -109,35 +127,33 @@ class DownloadButton extends StatelessWidget {
                       },
                     ),
                 completed: () => const _CompletedDownloadButton(),
-                failed: (errorMessage) => _FailedDownloadButton(
-                  onRetry: () {
-                    context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.retry(surahTitle: surahTitle),
-                    );
-                  },
-                  errorMessage: errorMessage,
-                ),
-                cancelled: () => _CancelledDownloadButton(
-                  onRestart: () {
+                failed: (errorMessage) => _DefaultDownloadButton(
+                  onDownload: () {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
                   },
                 ),
-                paused: () => _PausedDownloadButton(
-                  onUnpause: () {
+                cancelled: () => _DefaultDownloadButton(
+                  onDownload: () {
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
                   },
                 ),
-                networkError: (errorMessage) => _FailedDownloadButton(
-                  onRetry: () {
+                paused: () => _DefaultDownloadButton(
+                  onDownload: () {
                     context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.retry(surahTitle: surahTitle),
+                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
                   },
-                  errorMessage: errorMessage ?? 'Network error',
+                ),
+                networkError: (errorMessage) => _DefaultDownloadButton(
+                  onDownload: () {
+                    context.read<DownloadButtonBloc>().add(
+                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                    );
+                  },
                 ),
               ),
             ),
@@ -167,47 +183,6 @@ class _CompletedDownloadButton extends StatelessWidget {
           ),
           child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
         ),
-      ),
-    );
-  }
-}
-
-/// Failed download state widget
-class _FailedDownloadButton extends StatelessWidget {
-  const _FailedDownloadButton({required this.onRetry, this.errorMessage});
-
-  final VoidCallback onRetry;
-  final String? errorMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: IconButton(
-        icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
-        tooltip: errorMessage ?? 'Retry download',
-        onPressed: onRetry,
-      ),
-    );
-  }
-}
-
-/// Cancelled download state widget
-class _CancelledDownloadButton extends StatelessWidget {
-  const _CancelledDownloadButton({required this.onRestart});
-
-  final VoidCallback onRestart;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: IconButton(
-        icon: Icon(Icons.download_rounded, color: Colors.grey.shade400),
-        tooltip: context.l10n.download,
-        onPressed: onRestart,
       ),
     );
   }
@@ -406,22 +381,6 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
           color: theme.primaryColor,
         ),
       ),
-    );
-  }
-}
-
-class _PausedDownloadButton extends StatelessWidget {
-  const _PausedDownloadButton({required this.onUnpause});
-
-  final VoidCallback onUnpause;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
-    return IconButton(
-      icon: const Icon(Icons.play_arrow_rounded),
-      tooltip: l10n.resume,
-      onPressed: onUnpause,
     );
   }
 }

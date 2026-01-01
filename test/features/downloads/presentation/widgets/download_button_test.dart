@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
@@ -179,6 +182,9 @@ void main() {
 
     // We expect a CircularProgressIndicator
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // Drain any pending timers from toast
+    await tester.pump(const Duration(seconds: 3));
   });
 
   testWidgets('shows check icon when downloaded', (tester) async {
@@ -249,6 +255,150 @@ void main() {
     ).called(1);
 
     // Drain any pending timers
+    await tester.pump(const Duration(seconds: 3));
+  });
+
+  testWidgets('only shows downloading toast once when progress updates', (
+    tester,
+  ) async {
+    final List<MethodCall> methodCalls = [];
+    const channel = MethodChannel('PonnamKarthik/fluttertoast');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      MethodCall methodCall,
+    ) async {
+      methodCalls.add(methodCall);
+      return true;
+    });
+
+    when(
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
+
+    final progressController = StreamController<DownloadItem>();
+    when(
+      () => mockDownloadsRepository.getDownloadProgress(any()),
+    ).thenAnswer((_) => progressController.stream);
+
+    await tester.pumpWidget(
+      createTestWidget(
+        const DownloadButton(
+          url: surahUrl,
+          surahTitle: surahTitle,
+          reciterName: reciterName,
+          reciterId: reciterId,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Start download
+    final item1 = DownloadItem(
+      id: '${surahUrl}_$reciterName',
+      title: surahTitle,
+      url: surahUrl,
+      filePath: 'path',
+      reciterName: reciterName,
+      reciterId: reciterId,
+      status: DownloadStatus.downloading,
+      progress: 0.1,
+      fileSize: 100,
+      downloadedSize: 10,
+      createdAt: DateTime.now(),
+    );
+    progressController.add(item1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Update progress
+    final DownloadItem item2 = item1.copyWith(
+      progress: 0.5,
+      downloadedSize: 50,
+    );
+    progressController.add(item2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Update progress again
+    final DownloadItem item3 = item2.copyWith(
+      progress: 0.9,
+      downloadedSize: 90,
+    );
+    progressController.add(item3);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Verify toast was only shown once for "downloading"
+    final List<MethodCall> toastCalls = methodCalls
+        .where((call) => call.method == 'showToast')
+        .toList();
+    expect(toastCalls.length, 1);
+    final toastArgs = toastCalls.first.arguments as Map<String, dynamic>;
+    expect(toastArgs['msg'], contains('Downloading'));
+
+    await progressController.close();
+    // Drain any pending timers from toast
+    await tester.pump(const Duration(seconds: 3));
+  });
+
+  testWidgets('shows localized network error toast on networkError state', (
+    tester,
+  ) async {
+    final List<MethodCall> methodCalls = [];
+    const channel = MethodChannel('PonnamKarthik/fluttertoast');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      MethodCall methodCall,
+    ) async {
+      methodCalls.add(methodCall);
+      return true;
+    });
+
+    // Mock initial state: not downloaded
+    when(
+      () => mockCheckSurahDownloadedUseCase.call(
+        surahId: any(named: 'surahId'),
+        reciterName: any(named: 'reciterName'),
+      ),
+    ).thenAnswer((_) async => const Right(false));
+
+    // Mock failure that triggers network error
+    when(
+      () => mockDownloadSurahUseCase.call(
+        surahId: any(named: 'surahId'),
+        surahTitle: any(named: 'surahTitle'),
+        reciterName: any(named: 'reciterName'),
+        reciterId: any(named: 'reciterId'),
+      ),
+    ).thenAnswer((_) async => const Left(NetworkFailure('No internet')));
+
+    await tester.pumpWidget(
+      createTestWidget(
+        const DownloadButton(
+          url: surahUrl,
+          surahTitle: surahTitle,
+          reciterName: reciterName,
+          reciterId: reciterId,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap to download
+    await tester.tap(find.byIcon(Icons.download_rounded));
+    await tester.pumpAndSettle();
+
+    // Verify network error toast (should be localized, so we check if it matches l10n key)
+    final List<MethodCall> toastCalls = methodCalls
+        .where((call) => call.method == 'showToast')
+        .toList();
+    expect(toastCalls.length, 1);
+    // Since we use the real localizations in createTestWidget, it should be the English string
+    final toastNetworkArgs = toastCalls.first.arguments as Map<String, dynamic>;
+    expect(toastNetworkArgs['msg'], contains('internet connection'));
+
+    // Drain any pending timers from toast
     await tester.pump(const Duration(seconds: 3));
   });
 }
