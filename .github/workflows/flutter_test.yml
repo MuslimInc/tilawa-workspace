@@ -46,10 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -60,6 +56,10 @@ jobs:
         with:
           flutter-version: "3.38.5"
           channel: "stable"
+          cache: true
+
+      - uses: shorebirdtech/setup-shorebird@v1
+        with:
           cache: true
 
       - name: Cache Pub packages
@@ -92,6 +92,7 @@ jobs:
           shorebird release android \
             --artifact apk \
             --target-platform android-arm,android-arm64,android-x64 \
+            --flutter-version=3.38.5 \
             --no-confirm
 
       - name: Upload APKs

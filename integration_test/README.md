@@ -40,6 +40,45 @@ The `surah_download_test.dart` file contains comprehensive tests for downloading
    - Downloads the searched surah
    - Verifies download starts correctly
 
+## Bottom Player Integration Tests
+
+The `bottom_player_test.dart` file contains comprehensive tests for the bottom player widget functionality when playing surahs.
+
+### Test Coverage
+
+1. **Playing Surah Shows Bottom Player** - Tapping a surah from reciter details displays the bottom player
+   - Navigates to reciter details screen
+   - Taps on a surah to start playback
+   - Verifies bottom player appears
+
+2. **Correct Info Display** - Bottom player shows correct surah and reciter info
+   - Verifies reciter name is displayed
+   - Verifies surah title is shown
+
+3. **Play/Pause Controls** - Play/Pause button toggles playback state
+   - Taps play/pause button
+   - Verifies button state changes
+
+4. **Skip Next** - Skip next button advances to next surah
+   - Taps next button in bottom player
+   - Verifies playback continues
+
+5. **Skip Previous** - Skip previous button goes to previous surah
+   - Starts from surah 2
+   - Taps previous button
+   - Verifies playback continues
+
+6. **Dismiss by Swiping** - Swiping down dismisses bottom player and stops playback
+   - Swipes bottom player down
+   - Verifies player is dismissed
+
+7. **Progress Indicator** - Bottom player shows linear progress indicator
+   - Verifies LinearProgressIndicator is present
+
+8. **Tap to Expand** - Tapping bottom player navigates to expanded player
+   - Taps on bottom player content
+   - Verifies navigation to expanded player
+
 ## Running Integration Tests
 
 ### Prerequisites
@@ -56,6 +95,8 @@ flutter test integration_test/
 
 # Or run a specific test file
 flutter test integration_test/surah_download_test.dart
+flutter test integration_test/bottom_player_test.dart
+flutter test integration_test/download_all_button_test.dart
 ```
 
 ### Run on Specific Platform
