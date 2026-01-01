@@ -63,7 +63,14 @@ class ReciterDownloadBloc
     Emitter<ReciterDownloadState> emit,
   ) async {
     // Clear previous error message
-    emit(state.copyWith());
+    emit(
+      ReciterDownloadState(
+        progress: state.progress,
+        isDownloadingAll: state.isDownloadingAll,
+        downloadedCount: state.downloadedCount,
+        totalCount: state.totalCount,
+      ),
+    );
 
     final Either<Failure, void> result = await _downloadAllSurahsUseCase(
       surahs: event.surahs,

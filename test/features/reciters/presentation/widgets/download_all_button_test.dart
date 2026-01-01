@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -130,6 +132,108 @@ void main() {
         find.byKey(const Key('download_all_button')),
       );
       expect(button.onPressed, isNull);
+    },
+  );
+  testWidgets('DownloadAllButton shows toast on network error', (tester) async {
+    // Stream controller to simulate state changes
+    final stateController = StreamController<ReciterDownloadState>.broadcast();
+    when(() => mockBloc.stream).thenAnswer((_) => stateController.stream);
+    when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
+
+    await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
+    await tester.pumpAndSettle();
+
+    // Emit error state
+    stateController.add(
+      const ReciterDownloadState(errorMessage: 'No internet connection'),
+    );
+    await tester.pumpAndSettle(); // Allow listener to react
+
+    // Verify MethodChannel call for toast
+    /*
+         Since we can't easily access the capture log from the existing setUp without modifying it widely,
+         we rely on the fact that if the code works, it calls the channel.
+         To verify it strictly, we'd need to check the log. 
+         Let's locally override the handler for this test.
+      */
+    var toastCalled = false;
+    const channel = MethodChannel('PonnamKarthik/fluttertoast');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          if (methodCall.method == 'showToast') {
+            toastCalled = true;
+          }
+          return true;
+        });
+
+    stateController.add(
+      const ReciterDownloadState(errorMessage: 'Another internet error'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(toastCalled, isTrue);
+    // Flush any pending timers from Toast
+    await tester.pump(const Duration(seconds: 2));
+
+    await stateController.close();
+  });
+
+  testWidgets(
+    'DownloadAllButton shows "Downloading..." toast when download starts',
+    (tester) async {
+      final stateController =
+          StreamController<ReciterDownloadState>.broadcast();
+      when(() => mockBloc.stream).thenAnswer((_) => stateController.stream);
+      when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
+
+      await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
+      await tester.pumpAndSettle();
+
+      var toastCalled = false;
+      const channel = MethodChannel('PonnamKarthik/fluttertoast');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+            if (methodCall.method == 'showToast' &&
+                methodCall.arguments['msg'] == 'Downloading all surahs...') {
+              toastCalled = true;
+            }
+            return true;
+          });
+
+      // Valid transition: isDownloadingAll: false -> true
+      stateController.add(const ReciterDownloadState(isDownloadingAll: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        toastCalled,
+        isTrue,
+        reason: 'Toast should show when downloading starts',
+      );
+      await tester.pump(const Duration(seconds: 2)); // flush timer
+      await stateController.close();
+    },
+  );
+
+  testWidgets(
+    'DownloadAllButton cancels download when button is pressed while downloading',
+    (tester) async {
+      // Initial state: Downloading
+      when(() => mockBloc.state).thenReturn(
+        const ReciterDownloadState(isDownloadingAll: true, progress: 0.5),
+      );
+
+      await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+
+      // Tap button to cancel/pause
+      await tester.tap(find.byKey(const Key('download_all_button')));
+      await tester.pump();
+
+      verify(
+        () => mockBloc.add(any(that: isA<CancelReciterDownloadAll>())),
+      ).called(1);
     },
   );
 }
