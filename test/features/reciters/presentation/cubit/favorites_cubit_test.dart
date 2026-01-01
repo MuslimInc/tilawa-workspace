@@ -132,7 +132,11 @@ void main() {
       act: (cubit) => cubit.toggleFavorite(tReciter),
       expect: () => [
         // Expect optimistic update: removed from favorites
-        const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        const FavoritesLoaded(
+          favorites: [],
+          favoriteIds: {},
+          removedReciter: tReciter,
+        ),
       ],
       verify: (_) {
         verify(mockToggleFavorite(1)).called(1);
@@ -155,7 +159,11 @@ void main() {
       act: (cubit) => cubit.toggleFavorite(tReciter),
       expect: () => [
         // Optimistic remove
-        const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        const FavoritesLoaded(
+          favorites: [],
+          favoriteIds: {},
+          removedReciter: tReciter,
+        ),
         FavoritesLoading(),
         const FavoritesError('Fail'),
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),

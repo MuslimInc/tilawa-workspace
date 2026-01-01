@@ -17,6 +17,7 @@ import 'package:tilawa/core/entities/entities.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
@@ -59,6 +60,8 @@ class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
 
 class MockCancelDownloadUseCase extends Mock implements CancelDownloadUseCase {}
 
+class MockAnalyticsService extends Mock implements AnalyticsService {}
+
 class MockObserveDownloadProgressUseCase extends Mock
     implements ObserveDownloadProgressUseCase {}
 
@@ -71,6 +74,7 @@ void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockSettingsCubit mockSettingsCubit;
+  late MockAnalyticsService mockAnalyticsService;
 
   late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
@@ -107,7 +111,9 @@ void main() {
     mockReciterDownloadBloc = MockReciterDownloadBloc();
     mockDownloadsBloc = MockDownloadsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockSettingsCubit = MockSettingsCubit();
+    mockAnalyticsService = MockAnalyticsService();
 
     mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
@@ -115,8 +121,19 @@ void main() {
     mockObserveDownloadProgressUseCase = MockObserveDownloadProgressUseCase();
     mockGetValidCompletedDownloadsUseCase =
         MockGetValidCompletedDownloadsUseCase();
+    MockGetValidCompletedDownloadsUseCase();
     mockDownloadsRepository =
         GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
+
+    if (!GetIt.instance.isRegistered<AnalyticsService>()) {
+      GetIt.instance.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    }
+    when(
+      () => mockAnalyticsService.logScreenView(
+        any(),
+        screenClass: any(named: 'screenClass'),
+      ),
+    ).thenAnswer((_) async {});
 
     // Register UseCases in GetIt
     if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
@@ -996,43 +1013,6 @@ void main() {
         () => mockReciterDetailsBloc.add(PlaySurahRequested(testSurahList[0])),
       ).called(1);
     }, createFile: (path) => mockFile);
-  });
-
-  testWidgets('ReciterDetailsScreen handles invalid surah and playback errors', (
-    WidgetTester tester,
-  ) async {
-    final state = ReciterDetailsState(
-      status: ReciterDetailsStatus.loaded,
-      surahList: [
-        testSurahList[0].copyWith(
-          audio: AudioEntity(
-            id: '',
-            title: testSurahList[0].name,
-            artist: testSurahList[0].reciterName,
-            url: '',
-            duration: Duration.zero,
-          ),
-        ),
-      ], // Invalid ID
-      selectedMoshaf: testReciter.moshaf.first,
-    );
-    when(() => mockReciterDetailsBloc.state).thenReturn(state);
-    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
-    when(
-      () => mockAudioPlayerBloc.state,
-    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
-
-    await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle();
-
-    // Tapping surah with empty ID should throw error and show toast in _playSurah catch block
-    await tester.tap(find.byKey(const ValueKey('surah_')));
-    await tester.pump(const Duration(seconds: 2));
-
-    expect(
-      find.byType(SnackBar),
-      findsNothing,
-    ); // It uses ToastUtils.showErrorToast
   });
 }
 

@@ -24,6 +24,7 @@ void main() {
         equals([
           0.5, // progress
           true, // isDownloadingAll
+          false, // isPending
           5, // downloadedCount
           10, // totalCount
           'error', // errorMessage

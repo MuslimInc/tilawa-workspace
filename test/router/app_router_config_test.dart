@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
+import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/features/athkar/presentation/screens/athkar_categories_screen.dart';
 import 'package:tilawa/features/athkar/presentation/screens/athkar_details_screen.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -49,6 +50,7 @@ void main() {
   late MockReciterDownloadBloc mockReciterDownloadBloc;
   late MockLocalizationBloc mockLocalizationBloc;
   late MockSettingsCubit mockSettingsCubit;
+  late FakeAnalyticsService fakeAnalyticsService;
 
   final GetIt getIt = GetIt.instance;
 
@@ -62,6 +64,7 @@ void main() {
     mockReciterDownloadBloc = MockReciterDownloadBloc();
     mockLocalizationBloc = MockLocalizationBloc();
     mockSettingsCubit = MockSettingsCubit();
+    fakeAnalyticsService = FakeAnalyticsService();
 
     when(mockGoRouterState.pageKey).thenReturn(const ValueKey('test'));
     when(mockGoRouterState.uri).thenReturn(Uri.parse('/test'));
@@ -73,6 +76,7 @@ void main() {
     getIt.registerFactory<ReciterDownloadBloc>(() => mockReciterDownloadBloc);
     getIt.registerFactory<LocalizationBloc>(() => mockLocalizationBloc);
     getIt.registerFactory<SettingsCubit>(() => mockSettingsCubit);
+    getIt.registerFactory<AnalyticsService>(() => fakeAnalyticsService);
 
     // Default state stubs
     when(mockAuthBloc.state).thenReturn(const AuthState.initial());
@@ -311,3 +315,8 @@ void main() {
 }
 
 class MockBuildContext extends Mock implements BuildContext {}
+
+class FakeAnalyticsService extends Fake implements AnalyticsService {
+  @override
+  Future<void> logScreenView(String screenName, {String? screenClass}) async {}
+}

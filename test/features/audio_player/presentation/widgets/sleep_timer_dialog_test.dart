@@ -28,15 +28,19 @@ void main() {
   });
 
   Future<void> pumpDialog(WidgetTester tester, Widget child) async {
-    final router = GoRouter(
+    late final GoRouter router;
+    router = GoRouter(
+      initialLocation: '/',
       routes: [
         GoRoute(
           path: '/',
           builder: (context, state) => const Scaffold(body: Text('Base')),
-        ),
-        GoRoute(
-          path: '/dialog',
-          builder: (context, state) => Scaffold(body: Center(child: child)),
+          routes: [
+            GoRoute(
+              path: 'dialog',
+              builder: (context, state) => Scaffold(body: Center(child: child)),
+            ),
+          ],
         ),
       ],
     );
@@ -55,7 +59,8 @@ void main() {
       ),
     );
 
-    await router.push('/dialog');
+    await tester.pump();
+    router.go('/dialog');
     await tester.pumpAndSettle();
   }
 

@@ -570,7 +570,7 @@ void main() {
         );
       });
 
-      test('should throw NetworkFailure if no internet connection', () async {
+      test('should throw NetworkException if no internet connection', () async {
         // Arrange
         when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
 
@@ -583,7 +583,7 @@ void main() {
             reciterName: testReciterName,
             reciterId: testReciterId,
           ),
-          throwsA(isA<NetworkFailure>()),
+          throwsA(isA<NetworkException>()),
         );
       });
 
@@ -813,7 +813,7 @@ void main() {
       const testReciterName = 'Reciter';
       const testReciterId = 1;
 
-      test('should throw NetworkFailure if no internet connection', () async {
+      test('should throw NetworkException if no internet connection', () async {
         // Arrange
         when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
 
@@ -822,7 +822,7 @@ void main() {
           () => repository.startDownloadBatch([
             (url: 'u1', surahTitle: 'ST1', reciterName: 'R1', reciterId: 1),
           ]),
-          throwsA(isA<NetworkFailure>()),
+          throwsA(isA<NetworkException>()),
         );
       });
 

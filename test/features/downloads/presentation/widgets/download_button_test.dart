@@ -335,7 +335,9 @@ void main() {
         .where((call) => call.method == 'showToast')
         .toList();
     expect(toastCalls.length, 1);
-    final toastArgs = toastCalls.first.arguments as Map<String, dynamic>;
+    final toastArgs = Map<String, dynamic>.from(
+      toastCalls.first.arguments as Map,
+    );
     expect(toastArgs['msg'], contains('Downloading'));
 
     await progressController.close();
@@ -395,7 +397,9 @@ void main() {
         .toList();
     expect(toastCalls.length, 1);
     // Since we use the real localizations in createTestWidget, it should be the English string
-    final toastNetworkArgs = toastCalls.first.arguments as Map<String, dynamic>;
+    final toastNetworkArgs = Map<String, dynamic>.from(
+      toastCalls.first.arguments as Map,
+    );
     expect(toastNetworkArgs['msg'], contains('internet connection'));
 
     // Drain any pending timers from toast

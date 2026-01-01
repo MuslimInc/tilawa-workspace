@@ -92,7 +92,8 @@ void main() {
       // We can look for the ColorIndicator with Colors.green
       final Finder greenIndicator = find.byWidgetPredicate((widget) {
         if (widget is ColorIndicator) {
-          return widget.hsvColor.toColor() == Colors.green;
+          return widget.hsvColor.toColor().toARGB32() ==
+              Colors.green.toARGB32();
         }
         return false;
       });
@@ -102,7 +103,7 @@ void main() {
       // Tap green indicator to select it
       await tester.tap(greenIndicator);
       await tester.pumpAndSettle();
-      expect(currentColor, Colors.green);
+      expect(currentColor.toARGB32(), Colors.green.toARGB32());
 
       // Add current color to history
       // Find the ColorIndicator that is NOT inside the ListView.
@@ -407,7 +408,7 @@ void main() {
     await tester.pump();
 
     // Should reset to pickerColor (Blue)
-    expect(currentColor, Colors.blue);
+    expect(currentColor.toARGB32(), Colors.blue.toARGB32());
   });
 
   group('HueRingPicker', () {

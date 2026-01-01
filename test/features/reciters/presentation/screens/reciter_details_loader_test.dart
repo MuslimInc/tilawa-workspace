@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
@@ -30,6 +31,11 @@ import '../../../../router/router_mock_helper.mocks.dart';
 
 class MockReciterDownloadBloc extends Mock implements ReciterDownloadBloc {}
 
+class FakeAnalyticsService extends Fake implements AnalyticsService {
+  @override
+  Future<void> logScreenView(String screenName, {String? screenClass}) async {}
+}
+
 void main() {
   late MockReciterDetailsLoaderCubit mockLoaderCubit;
   late MockAuthBloc mockAuthBloc;
@@ -39,6 +45,7 @@ void main() {
   late MockReciterDownloadBloc mockReciterDownloadBloc;
   late MockLocalizationBloc mockLocalizationBloc;
   late MockSettingsCubit mockSettingsCubit;
+  late FakeAnalyticsService fakeAnalyticsService;
   late download_mocks.MockDownloadsRepository mockDownloadsRepository;
   late download_mocks.MockCheckSurahDownloadedUseCase mockCheckSurahDownloaded;
   late download_mocks.MockDownloadSurahUseCase mockDownloadSurah;
@@ -80,6 +87,7 @@ void main() {
     mockReciterDownloadBloc = MockReciterDownloadBloc();
     mockLocalizationBloc = MockLocalizationBloc();
     mockSettingsCubit = MockSettingsCubit();
+    fakeAnalyticsService = FakeAnalyticsService();
 
     mockDownloadsRepository = download_mocks.MockDownloadsRepository();
     mockCheckSurahDownloaded = download_mocks.MockCheckSurahDownloadedUseCase();
@@ -99,6 +107,8 @@ void main() {
     getIt.registerLazySingleton<DownloadsRepository>(
       () => mockDownloadsRepository,
     );
+    getIt.registerLazySingleton<AnalyticsService>(() => fakeAnalyticsService);
+
     getIt.registerFactory<CheckSurahDownloadedUseCase>(
       () => mockCheckSurahDownloaded,
     );

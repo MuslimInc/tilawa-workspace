@@ -479,7 +479,7 @@ void main() {
             .where((call) => call.method == 'showToast')
             .toList();
         expect(toastCalls.length, 1);
-        final arguments = toastCalls.first.arguments as Map<String, dynamic>;
+        final arguments = toastCalls.first.arguments as Map;
         expect(arguments['msg'], contains('internet connection'));
 
         // Drain any pending timers from toast
