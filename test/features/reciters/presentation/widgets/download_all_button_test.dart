@@ -193,9 +193,11 @@ void main() {
       const channel = MethodChannel('PonnamKarthik/fluttertoast');
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-            if (methodCall.method == 'showToast' &&
-                methodCall.arguments['msg'] == 'Downloading all surahs...') {
-              toastCalled = true;
+            if (methodCall.method == 'showToast') {
+              final args = methodCall.arguments as Map<String, dynamic>;
+              if (args['msg'] == 'Downloading all surahs...') {
+                toastCalled = true;
+              }
             }
             return true;
           });

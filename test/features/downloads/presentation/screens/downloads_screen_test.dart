@@ -479,10 +479,8 @@ void main() {
             .where((call) => call.method == 'showToast')
             .toList();
         expect(toastCalls.length, 1);
-        expect(
-          toastCalls.first.arguments['msg'],
-          contains('internet connection'),
-        );
+        final arguments = toastCalls.first.arguments as Map<String, dynamic>;
+        expect(arguments['msg'], contains('internet connection'));
 
         // Drain any pending timers from toast
         await tester.pump(const Duration(seconds: 3));

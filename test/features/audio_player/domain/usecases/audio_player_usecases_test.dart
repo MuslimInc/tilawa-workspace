@@ -227,7 +227,6 @@ void main() {
     test(
       'LoadAudioPlayerDataUseCase should call repository.loadAudioPlayerData',
       () async {
-        const restorePlayback = true;
         when(
           () => repository.loadAudioPlayerData(),
         ).thenAnswer((_) async => const Right(null));

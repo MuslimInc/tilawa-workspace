@@ -233,7 +233,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
 
     if (!await _networkInfo.isConnected) {
-      throw const NetworkFailure('No internet connection');
+      throw NetworkException('No internet connection');
     }
 
     final String downloadsDir = await pathResolver.getDownloadsDir();
@@ -340,7 +340,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
 
     if (!await _networkInfo.isConnected) {
-      throw const NetworkFailure('No internet connection');
+      throw NetworkException('No internet connection');
     }
     final String downloadsDir = await pathResolver.getDownloadsDir();
     final List<

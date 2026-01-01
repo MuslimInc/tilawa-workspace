@@ -55,7 +55,7 @@ void main() {
       ),
     );
 
-    router.push('/dialog');
+    await router.push('/dialog');
     await tester.pumpAndSettle();
   }
 

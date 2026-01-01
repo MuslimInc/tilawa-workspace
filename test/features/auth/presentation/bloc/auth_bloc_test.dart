@@ -174,8 +174,10 @@ void main() {
         final state = AuthState.authenticated(user: tUser);
         final Map<String, dynamic>? json = authBloc.toJson(state);
         expect(json, isNotNull);
-        expect(json!['state'], 'authenticated');
-        expect(json['user']['id'], tUser.id);
+        final Map<String, dynamic> jsonData = json!;
+        expect(jsonData['state'], 'authenticated');
+        final userMap = jsonData['user'] as Map<String, dynamic>;
+        expect(userMap['id'], tUser.id);
 
         final AuthState? restoredState = authBloc.fromJson(json);
         expect(restoredState, state);

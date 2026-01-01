@@ -7,14 +7,12 @@ import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
-import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
@@ -58,9 +56,6 @@ class FakeNotificationPermissionService
 
   @override
   Future<void> requestPermissionOnFirstLaunch() async {}
-
-  @override
-  SharedPreferencesAsync get _prefs => throw UnimplementedError();
 }
 
 // Fake implementation of RecitersRepository
@@ -123,9 +118,6 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Surah Download Integration Tests', () {
-    late DownloadsRepository downloadsRepository;
-    late RecitersRepository recitersRepository;
-
     setUpAll(() async {
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
@@ -179,10 +171,6 @@ void main() {
       );
 
       await Future.delayed(const Duration(seconds: 2));
-
-      // Get repositories
-      downloadsRepository = getIt<DownloadsRepository>();
-      recitersRepository = getIt<RecitersRepository>();
     });
 
     tearDown(() async {
@@ -237,7 +225,6 @@ void main() {
       final Finder reciterCards = find.byType(ReciterCard);
 
       if (reciterCards.evaluate().isEmpty) {
-        print('No ReciterCards found! Dumping widget tree...');
         debugDumpApp();
       }
 
@@ -250,7 +237,6 @@ void main() {
 
       await tester.tap(reciterCardFinder);
       await tester.pumpAndSettle(); // Wait for navigation to details screen
-      print('Tapped reciter card');
 
       // Step 3: Find a download button that is NOT already downloaded
       // We look for DownloadButton widget directly
@@ -266,8 +252,6 @@ void main() {
       // Tap the first download button
       await tester.tap(downloadButtonFinder.first);
       await tester.pump(); // Start animation/process
-
-      print('Tapped download button');
 
       // Wait for download to likely complete or at least update state
       await tester.pump(const Duration(seconds: 2));
@@ -301,8 +285,6 @@ void main() {
         // Wait up to 60 seconds
         await tester.pump(const Duration(seconds: 1));
 
-        if (i % 5 == 0) print('Waiting for download to complete... $i/60');
-
         // Find by Icon data directly
         final Finder checkIconFinder = find.byIcon(Icons.check_circle);
 
@@ -319,28 +301,23 @@ void main() {
 
         // Diagnose other states
         if (find.byIcon(Icons.download_rounded).evaluate().isNotEmpty) {
-          if (i % 10 == 0) {
-            print('State: Default/Failed/Cancelled (Download Icon visible)');
-          }
+          // Default/Failed/Cancelled state
         } else if (find
             .byType(CircularProgressIndicator)
             .evaluate()
             .isNotEmpty) {
-          if (i % 10 == 0) {
-            print('State: Downloading (Progress Indicator visible)');
-          }
+          // Downloading state
         } else if (find
             .byIcon(Icons.hourglass_empty_rounded)
             .evaluate()
             .isNotEmpty) {
-          if (i % 10 == 0) print('State: Pending (Hourglass visible)');
+          // Pending state
         } else if (find.byIcon(Icons.error).evaluate().isNotEmpty) {
-          print('State: Error (Error Icon visible)');
+          // Error state
         }
       }
 
       if (!downloadCompleted) {
-        print('Download completion icon not found! Dumping widget tree...');
         debugDumpApp();
       }
 
@@ -403,7 +380,6 @@ void main() {
       final Finder downloadButtonFinder = find.byIcon(Icons.download_rounded);
 
       if (downloadButtonFinder.evaluate().isEmpty) {
-        print('No downloadable surahs found, skipping offline download test');
         return;
       }
 
@@ -416,18 +392,9 @@ void main() {
 
       // Verify network error toast or message appears
       // The app should show a network error message
-      final Finder networkErrorFinder = find.textContaining('network');
-      final Finder errorFinder = find.textContaining('error');
-
-      final bool errorShown =
-          networkErrorFinder.evaluate().isNotEmpty ||
-          errorFinder.evaluate().isNotEmpty;
 
       // Note: This might not work if network is actually available
       // This test is more of a documentation of expected behavior
-      print(
-        'Offline test: Error shown = $errorShown (requires manual airplane mode)',
-      );
     });
 
     testWidgets('Download Progress: Verify progress updates during download', (
@@ -464,7 +431,6 @@ void main() {
       final Finder downloadButtonFinder = find.byIcon(Icons.download_rounded);
 
       if (downloadButtonFinder.evaluate().isEmpty) {
-        print('No downloadable surahs found, skipping progress test');
         return;
       }
 
@@ -555,7 +521,6 @@ void main() {
       final Finder checkIconFinder = find.byIcon(Icons.check_circle);
 
       if (checkIconFinder.evaluate().isEmpty) {
-        print('No downloaded surahs found, skipping already downloaded test');
         return;
       }
 
@@ -615,7 +580,6 @@ void main() {
       final Finder downloadButtonFinder = find.byIcon(Icons.download_rounded);
 
       if (downloadButtonFinder.evaluate().isEmpty) {
-        print('No downloadable surahs found, skipping cancellation test');
         return;
       }
 
@@ -688,7 +652,6 @@ void main() {
       final Finder searchFieldFinder = find.byType(TextField);
 
       if (searchFieldFinder.evaluate().isEmpty) {
-        print('Search field not found, skipping search test');
         return;
       }
 
@@ -709,7 +672,6 @@ void main() {
       final Finder downloadButtonFinder = find.byIcon(Icons.download_rounded);
 
       if (downloadButtonFinder.evaluate().isEmpty) {
-        print('Searched surah already downloaded, skipping');
         return;
       }
 

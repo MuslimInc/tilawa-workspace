@@ -62,19 +62,13 @@ void main() {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        AppToast.show(
-                          context,
-                          message: firstMessage,
-                        );
+                        AppToast.show(context, message: firstMessage);
                       },
                       child: const Text('Show First'),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        AppToast.show(
-                          context,
-                          message: secondMessage,
-                        );
+                        AppToast.show(context, message: secondMessage);
                       },
                       child: const Text('Show Second'),
                     ),
