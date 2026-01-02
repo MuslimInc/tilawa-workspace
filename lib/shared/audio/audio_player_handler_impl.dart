@@ -15,6 +15,7 @@ import '../../core/entities/reciter_entity.dart';
 import '../../core/errors/failures.dart';
 import '../../core/services/analytics_service.dart';
 import '../../core/utils/surah_names.dart';
+import '../../core/utils/url_validator.dart';
 import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
@@ -282,6 +283,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     final String? reciterName = mediaItem.artist;
     final String url = mediaItem.extras?['url'] ?? mediaItem.id;
 
+    // Validate URL before proceeding
+    if (!UrlValidator.isValid(url)) {
+      log('Invalid audio URL for ${mediaItem.title}: $url');
+      throw ArgumentError('Invalid audio URL: $url');
+    }
+
     // Check if the surah is downloaded locally
     String? localFilePath;
     if (reciterName != null) {
@@ -296,9 +303,15 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     }
 
     // Use local file if available, otherwise use network URL
-    final Uri audioUri = localFilePath != null
-        ? Uri.file(localFilePath)
-        : Uri.parse(url);
+    final Uri audioUri;
+    try {
+      audioUri = localFilePath != null
+          ? Uri.file(localFilePath)
+          : Uri.parse(url);
+    } catch (e) {
+      log('Error parsing audio URI for ${mediaItem.title}: $e');
+      throw ArgumentError('Failed to parse audio URI: $url');
+    }
 
     log(
       'Loading audio: ${mediaItem.title} from ${localFilePath != null ? "local file" : "network"}: $audioUri',
@@ -345,14 +358,25 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       // NOTE: We used to call _player.stop() here, but it's unnecessary
       // and can cause extra state flickers. just_audio handles it.
 
+      // Validate all sources before attempting to set
+      if (sources.isEmpty) {
+        log('Warning: Attempting to set empty audio sources');
+      }
+
       // Set new audio sources
       await _player.setAudioSources(sources, initialIndex: initialIndex);
 
       log(
         'Successfully set ${sources.length} audio sources at index $initialIndex',
       );
-    } catch (e) {
-      log('Error setting audio sources: $e');
+    } catch (e, stackTrace) {
+      log('Error setting audio sources: $e\n$stackTrace');
+      // Broadcast error state
+      playbackState.add(
+        playbackState.value.copyWith(
+          processingState: audio_service.AudioProcessingState.error,
+        ),
+      );
       rethrow;
     } finally {
       // Small delay to let the event stream stabilize with the new index
@@ -514,15 +538,26 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> play() async {
-    await _player.play();
-    // Log analytics event
-    final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
-    if (currentItem != null) {
-      await _analyticsService.logAudioPlay(
-        currentItem.id,
-        audioName: currentItem.title,
-        artist: currentItem.artist,
+    try {
+      await _player.play();
+      // Log analytics event
+      final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
+      if (currentItem != null) {
+        await _analyticsService.logAudioPlay(
+          currentItem.id,
+          audioName: currentItem.title,
+          artist: currentItem.artist,
+        );
+      }
+    } catch (e) {
+      log('Error playing audio: $e');
+      // Broadcast error state
+      playbackState.add(
+        playbackState.value.copyWith(
+          processingState: audio_service.AudioProcessingState.error,
+        ),
       );
+      rethrow;
     }
   }
 
@@ -648,6 +683,14 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
                 final String formattedSurahId = surahId.padLeft(3, '0');
                 final audioId = '${moshaf.server}$formattedSurahId.mp3';
 
+                // Validate the constructed URL
+                if (!UrlValidator.isValid(audioId)) {
+                  log(
+                    'Skipping invalid audio URL: $audioId for surah $surahId',
+                  );
+                  continue; // Skip this entry
+                }
+
                 audioEntities.add(
                   AudioEntity(
                     id: audioId,
@@ -698,6 +741,13 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         final int surahNumber = int.parse(surahId);
         final String formattedSurahId = surahId.padLeft(3, '0');
         final audioId = '${moshaf.server}$formattedSurahId.mp3';
+
+        // Validate the constructed URL
+        if (!UrlValidator.isValid(audioId)) {
+          log('Skipping invalid audio URL: $audioId for surah $surahId');
+          continue; // Skip this entry
+        }
+
         final String surahName = await _getSurahName(surahNumber);
 
         audioEntities.add(

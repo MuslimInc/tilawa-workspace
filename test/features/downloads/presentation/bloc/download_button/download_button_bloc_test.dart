@@ -582,5 +582,185 @@ void main() {
         },
       );
     });
+
+    group('Bloc Lifecycle - Race Condition Prevention', () {
+      test('does not crash when stream emits after bloc is closed', () async {
+        final controller = StreamController<DownloadItem>();
+        when(
+          mockObserveDownloadProgress.call(any),
+        ).thenAnswer((_) => controller.stream);
+
+        final bloc = DownloadButtonBloc(
+          url: testUrl,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
+          checkSurahDownloaded: mockCheckSurahDownloaded,
+          downloadSurah: mockDownloadSurah,
+          cancelDownload: mockCancelDownload,
+          observeDownloadProgress: mockObserveDownloadProgress,
+        );
+
+        bloc.add(const DownloadButtonEvent.initialize());
+        await expectLater(
+          bloc.stream,
+          emitsThrough(const DownloadButtonState.readyToDownload()),
+        );
+
+        // Close the bloc (simulating navigation away)
+        await bloc.close();
+
+        // Now try to emit from the stream (simulating download progress update)
+        // This should NOT crash with "Cannot add new events after calling close"
+        controller.add(
+          DownloadItem(
+            id: testUrl,
+            title: testSurahTitle,
+            url: testUrl,
+            filePath: '',
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 100,
+            downloadedSize: 50,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        // Give the stream a chance to process
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Clean up
+        await controller.close();
+
+        // If we got here without crashing, the test passes
+        expect(true, isTrue);
+      });
+
+      test(
+        'handles multiple stream events after bloc close gracefully',
+        () async {
+          final controller = StreamController<DownloadItem>();
+          when(
+            mockObserveDownloadProgress.call(any),
+          ).thenAnswer((_) => controller.stream);
+
+          final bloc = DownloadButtonBloc(
+            url: testUrl,
+            reciterName: testReciterName,
+            reciterId: testReciterId,
+            checkSurahDownloaded: mockCheckSurahDownloaded,
+            downloadSurah: mockDownloadSurah,
+            cancelDownload: mockCancelDownload,
+            observeDownloadProgress: mockObserveDownloadProgress,
+          );
+
+          bloc.add(const DownloadButtonEvent.initialize());
+          await expectLater(
+            bloc.stream,
+            emitsThrough(const DownloadButtonState.readyToDownload()),
+          );
+
+          // Close the bloc
+          await bloc.close();
+
+          // Emit multiple events (simulating rapid download progress updates)
+          controller.add(
+            DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.downloading,
+              progress: 0.3,
+              fileSize: 100,
+              downloadedSize: 30,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          controller.add(
+            DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.downloading,
+              progress: 0.7,
+              fileSize: 100,
+              downloadedSize: 70,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          controller.add(
+            DownloadItem(
+              id: testUrl,
+              title: testSurahTitle,
+              url: testUrl,
+              filePath: '',
+              reciterName: testReciterName,
+              reciterId: testReciterId,
+              status: DownloadStatus.completed,
+              progress: 1.0,
+              fileSize: 100,
+              downloadedSize: 100,
+              createdAt: DateTime.now(),
+            ),
+          );
+
+          // Give the stream time to process
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          // Clean up
+          await controller.close();
+
+          // Test passes if no crash occurred
+          expect(true, isTrue);
+        },
+      );
+
+      test('handles stream error after bloc close gracefully', () async {
+        final controller = StreamController<DownloadItem>();
+        when(
+          mockObserveDownloadProgress.call(any),
+        ).thenAnswer((_) => controller.stream);
+
+        final bloc = DownloadButtonBloc(
+          url: testUrl,
+          reciterName: testReciterName,
+          reciterId: testReciterId,
+          checkSurahDownloaded: mockCheckSurahDownloaded,
+          downloadSurah: mockDownloadSurah,
+          cancelDownload: mockCancelDownload,
+          observeDownloadProgress: mockObserveDownloadProgress,
+        );
+
+        bloc.add(const DownloadButtonEvent.initialize());
+        await expectLater(
+          bloc.stream,
+          emitsThrough(const DownloadButtonState.readyToDownload()),
+        );
+
+        // Close the bloc
+        await bloc.close();
+
+        // Emit an error (simulating network error during download)
+        controller.addError(Exception('Network error'));
+
+        // Give the stream time to process
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Clean up
+        await controller.close();
+
+        // Test passes if no crash occurred
+        expect(true, isTrue);
+      });
+    });
   });
 }

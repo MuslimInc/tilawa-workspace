@@ -4,3 +4,4 @@ export 'crashlytics_service.dart';
 export 'firebase_analytics_service.dart';
 export 'firebase_initialization_service.dart';
 export 'notification_permission_service.dart';
+export 'user_email_service.dart';

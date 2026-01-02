@@ -39,6 +39,7 @@ import 'package:tilawa/core/services/firebase_initialization_service.dart'
 import 'package:tilawa/core/services/navigation_service.dart' as _i628;
 import 'package:tilawa/core/services/notification_permission_service.dart'
     as _i1039;
+import 'package:tilawa/core/services/user_email_service.dart' as _i597;
 import 'package:tilawa/core/wrappers/location_service_wrapper.dart' as _i527;
 import 'package:tilawa/core/wrappers/qibla_service_wrapper.dart' as _i119;
 import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
@@ -409,6 +410,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i119.QiblaServiceWrapper>(),
       ),
     );
+    gh.factoryParam<_i99.NetworkInfo, _i508.InternetLookup?, dynamic>(
+      (internetLookup, _) => _i508.NetworkInfoImpl(
+        gh<_i895.Connectivity>(),
+        internetLookup: internetLookup,
+      ),
+    );
     gh.lazySingleton<_i628.NavigationService>(
       () => _i628.NavigationServiceImpl(),
     );
@@ -478,9 +485,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i892.FirebaseMessaging>(),
       ),
     );
-    gh.lazySingleton<_i99.NetworkInfo>(
-      () => _i508.NetworkInfoImpl(gh<_i895.Connectivity>()),
-    );
     gh.lazySingleton<_i784.CredentialManagerAuthProvider>(
       () => _i784.CredentialManagerAuthProvider(
         gh<_i59.FirebaseAuth>(),
@@ -499,6 +503,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i889.UpdateSurahDownloadStatusUseCase>(
       () => _i889.UpdateSurahDownloadStatusUseCase(gh<_i697.SurahRepository>()),
+    );
+    gh.lazySingleton<_i597.UserEmailService>(
+      () => _i597.UserEmailServiceImpl(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i662.PlaylistsRepository>(
       () => _i159.PlaylistsRepositoryImpl(gh<_i470.PlaylistsLocalDataSource>()),

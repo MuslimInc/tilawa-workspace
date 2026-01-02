@@ -203,6 +203,11 @@ class DownloadButtonBloc
     _progressSubscription?.cancel();
     _progressSubscription = _observeDownloadProgress(_url).listen(
       (item) {
+        // Prevent adding events if bloc is already closed
+        if (isClosed) {
+          return;
+        }
+
         // Filter by reciter name?
         // The ID passed to observeDownloadProgress is the URL.
         // The returned item SHOULD match.
@@ -236,6 +241,10 @@ class DownloadButtonBloc
         }
       },
       onError: (error) {
+        // Prevent adding events if bloc is already closed
+        if (isClosed) {
+          return;
+        }
         add(
           const DownloadButtonEvent.failed(
             errorMessage: 'Progress stream error',

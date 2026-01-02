@@ -11,12 +11,12 @@ typedef InternetLookup =
       InternetAddressType type,
     });
 
-@LazySingleton(as: NetworkInfo)
+@Injectable(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
   NetworkInfoImpl(
     this._connectivity, {
-    this.internetLookup = InternetAddress.lookup,
-  });
+    @factoryParam InternetLookup? internetLookup,
+  }) : internetLookup = internetLookup ?? InternetAddress.lookup;
 
   final Connectivity _connectivity;
   final InternetLookup internetLookup;

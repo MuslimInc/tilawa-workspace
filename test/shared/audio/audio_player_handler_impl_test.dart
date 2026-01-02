@@ -277,7 +277,11 @@ void main() {
     test('addQueueItem adds item to playlist and updates player', () async {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
-      const item = MediaItem(id: '1', title: 'Test');
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
       await handler.addQueueItem(item);
       await captureAndUpdate();
 
@@ -288,8 +292,16 @@ void main() {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
       final items = [
-        const MediaItem(id: '1', title: 'Test 1'),
-        const MediaItem(id: '2', title: 'Test 2'),
+        const MediaItem(
+          id: '1',
+          title: 'Test 1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+        const MediaItem(
+          id: '2',
+          title: 'Test 2',
+          extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+        ),
       ];
       await handler.addQueueItems(items);
       final VerificationResult verification = verify(
@@ -306,8 +318,16 @@ void main() {
     });
 
     test('insertQueueItem inserts item at index', () async {
-      const item1 = MediaItem(id: '1', title: 'Test 1');
-      const item2 = MediaItem(id: '2', title: 'Test 2');
+      const item1 = MediaItem(
+        id: '1',
+        title: 'Test 1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: 'Test 2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItem(item1);
       await captureAndUpdate();
 
@@ -319,7 +339,11 @@ void main() {
     });
 
     test('removeQueueItem removes item from playlist', () async {
-      const item = MediaItem(id: '1', title: 'Test');
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
       await handler.addQueueItem(item);
       await captureAndUpdate();
 
@@ -330,8 +354,16 @@ void main() {
     });
 
     test('moveQueueItem moves item to new index', () async {
-      const item1 = MediaItem(id: '1', title: 'Test 1');
-      const item2 = MediaItem(id: '2', title: 'Test 2');
+      const item1 = MediaItem(
+        id: '1',
+        title: 'Test 1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: 'Test 2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItem(item1);
       await captureAndUpdate(); // Capture after add item 1
 
@@ -346,8 +378,16 @@ void main() {
     });
 
     test('updateMediaItem updates item in queue', () async {
-      const item = MediaItem(id: '1', title: 'Old Title');
-      const newItem = MediaItem(id: '1', title: 'New Title');
+      const item = MediaItem(
+        id: '1',
+        title: 'Old Title',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const newItem = MediaItem(
+        id: '1',
+        title: 'New Title',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
 
       await handler.addQueueItem(item);
       updateMockSequence();
@@ -425,8 +465,16 @@ void main() {
 
     test('skipToNext skips when index is valid', () async {
       when(mockPlayer.currentIndex).thenReturn(0);
-      const item1 = MediaItem(id: '1', title: '1');
-      const item2 = MediaItem(id: '2', title: '2');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: '2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItems([item1, item2]);
 
       await handler.skipToNext();
@@ -436,8 +484,16 @@ void main() {
 
     test('skipToNext does nothing when at end', () async {
       when(mockPlayer.currentIndex).thenReturn(1);
-      const item1 = MediaItem(id: '1', title: '1');
-      const item2 = MediaItem(id: '2', title: '2');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: '2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItems([item1, item2]);
 
       await handler.skipToNext();
@@ -447,8 +503,16 @@ void main() {
 
     test('skipToPrevious skips when index is valid', () async {
       when(mockPlayer.currentIndex).thenReturn(1);
-      const item1 = MediaItem(id: '1', title: '1');
-      const item2 = MediaItem(id: '2', title: '2');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: '2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItems([item1, item2]);
 
       await handler.skipToPrevious();
@@ -458,7 +522,11 @@ void main() {
 
     test('skipToPrevious does nothing when at beginning', () async {
       when(mockPlayer.currentIndex).thenReturn(0);
-      const item1 = MediaItem(id: '1', title: '1');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
       await handler.addQueueItems([item1]);
 
       await handler.skipToPrevious();
@@ -468,7 +536,11 @@ void main() {
 
     test('skipToPrevious does nothing when index is null', () async {
       when(mockPlayer.currentIndex).thenReturn(null);
-      const item1 = MediaItem(id: '1', title: '1');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
       await handler.addQueueItems([item1]);
 
       await handler.skipToPrevious();
@@ -477,7 +549,13 @@ void main() {
     });
 
     test('skipToQueueItem checks bounds', () async {
-      await handler.addQueueItem(const MediaItem(id: '1', title: '1'));
+      await handler.addQueueItem(
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+      );
 
       await handler.skipToQueueItem(-1);
       verifyNever(mockPlayer.seek(any, index: anyNamed('index')));
@@ -593,9 +671,21 @@ void main() {
 
       // Setup items
       final items = [
-        const MediaItem(id: '1', title: '1'),
-        const MediaItem(id: '2', title: '2'),
-        const MediaItem(id: '3', title: '3'),
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+        const MediaItem(
+          id: '2',
+          title: '2',
+          extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+        ),
+        const MediaItem(
+          id: '3',
+          title: '3',
+          extras: <String, dynamic>{'url': 'https://example.com/3.mp3'},
+        ),
       ];
 
       // Ensure indices match length so queue updates
@@ -638,8 +728,16 @@ void main() {
       clearInteractions(mockPlayer);
 
       final items = [
-        const MediaItem(id: '1', title: '1'),
-        const MediaItem(id: '2', title: '2'),
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+        const MediaItem(
+          id: '2',
+          title: '2',
+          extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+        ),
       ];
       await handler.addQueueItems(items);
 
@@ -775,7 +873,13 @@ void main() {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
 
-      final items = [const MediaItem(id: '1', title: '1')];
+      final items = [
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+      ];
 
       // Ensure indices match length
       shuffleIndicesSubject.add([0]);
@@ -799,8 +903,16 @@ void main() {
       clearInteractions(mockPlayer);
 
       // Setup initial state
-      const item1 = MediaItem(id: '1', title: '1');
-      const item2 = MediaItem(id: '2', title: '2');
+      const item1 = MediaItem(
+        id: '1',
+        title: '1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: '2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
       await handler.addQueueItems([item1, item2]);
 
       // Simulate shuffle mode enabled and indices available
@@ -853,7 +965,13 @@ void main() {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
 
-      final items = [const MediaItem(id: '1', title: '1')];
+      final items = [
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+      ];
 
       // Create a specific handler instance for this test
       final localHandler = AudioPlayerHandlerImpl(
@@ -907,7 +1025,13 @@ void main() {
         mockAudioSession.configure(any),
       ).thenThrow(Exception('Session failed'));
 
-      final items = [const MediaItem(id: '1', title: '1')];
+      final items = [
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+      ];
 
       // Create a specific handler instance with the mock session
       AudioPlayerHandlerImpl(
@@ -994,7 +1118,13 @@ void main() {
       ).thenThrow(Exception('Set sources failed'));
 
       expect(
-        () => handler.addQueueItem(const MediaItem(id: '1', title: '1')),
+        () => handler.addQueueItem(
+          const MediaItem(
+            id: '1',
+            title: '1',
+            extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+          ),
+        ),
         throwsException,
       );
     });
@@ -1045,8 +1175,16 @@ void main() {
       clearInteractions(mockPlayer);
 
       final items = [
-        const MediaItem(id: '1', title: '1'),
-        const MediaItem(id: '2', title: '2'),
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+        const MediaItem(
+          id: '2',
+          title: '2',
+          extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+        ),
       ];
       await handler.addQueueItems(items);
 
@@ -1067,7 +1205,13 @@ void main() {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
 
-      final items = [const MediaItem(id: '1', title: '1')];
+      final items = [
+        const MediaItem(
+          id: '1',
+          title: '1',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        ),
+      ];
       await handler.addQueueItems(items);
 
       shuffleModeEnabledSubject.add(true);
@@ -1132,7 +1276,11 @@ void main() {
     test(
       '_mapRepeatMode covers AudioServiceRepeatMode.one via queueState',
       () async {
-        const item = MediaItem(id: '1', title: 'Test');
+        const item = MediaItem(
+          id: '1',
+          title: 'Test',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
         await handler.addQueueItem(item);
         await captureAndUpdate();
 
@@ -1148,7 +1296,11 @@ void main() {
     test(
       '_mapRepeatMode covers AudioServiceRepeatMode.all via queueState',
       () async {
-        const item = MediaItem(id: '1', title: 'Test');
+        const item = MediaItem(
+          id: '1',
+          title: 'Test',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
         await handler.addQueueItem(item);
         await captureAndUpdate();
 
@@ -1164,7 +1316,11 @@ void main() {
     test(
       '_mapRepeatMode covers AudioServiceRepeatMode.group via queueState',
       () async {
-        const item = MediaItem(id: '1', title: 'Test');
+        const item = MediaItem(
+          id: '1',
+          title: 'Test',
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
         await handler.addQueueItem(item);
         await captureAndUpdate();
 
@@ -1245,7 +1401,11 @@ void main() {
     });
 
     test('_broadcastState includes pause control when playing', () async {
-      const item = MediaItem(id: '1', title: 'Test');
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
       await handler.addQueueItem(item);
       await captureAndUpdate();
 
@@ -1303,5 +1463,9 @@ void main() {
 
   test('AudioEntity should work correctly', () {
     // TODO: Implement test for AudioEntity
+  });
+
+  test('ArgumentError should work correctly', () {
+    // TODO: Implement test for ArgumentError
   });
 }
