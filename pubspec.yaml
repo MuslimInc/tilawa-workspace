@@ -2,7 +2,7 @@ name: tilawa
 description: An Audio Quran Player project.
 
 publish_to: "none"
-version: 1.0.3+4
+version: 0.0.1+1
 
 environment:
   sdk: ^3.10.4
