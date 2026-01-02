@@ -179,6 +179,134 @@ void main() {
     });
   });
 
+  group('AudioPlayerRepositoryImpl - playbackState Stream', () {
+    test('emits correct PlaybackStateEntity', () async {
+      playbackStateSubject.add(testPlaybackState);
+      queueSubject.add([testMediaItem]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>()
+              .having((s) => s.isPlaying, 'isPlaying', true)
+              .having(
+                (s) => s.processingState,
+                'processingState',
+                AudioProcessingStateStatus.ready,
+              )
+              .having((s) => s.currentIndex, 'currentIndex', 0)
+              .having((s) => s.queue.length, 'queue length', 1),
+        ),
+      );
+    });
+
+    test('maps AudioProcessingState.completed correctly', () async {
+      playbackStateSubject.add(
+        testPlaybackState.copyWith(
+          processingState: audio_service.AudioProcessingState.completed,
+        ),
+      );
+      queueSubject.add([]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>().having(
+            (s) => s.processingState,
+            'processingState',
+            AudioProcessingStateStatus.completed,
+          ),
+        ),
+      );
+    });
+
+    test('maps AudioProcessingState.error correctly', () async {
+      playbackStateSubject.add(
+        testPlaybackState.copyWith(
+          processingState: audio_service.AudioProcessingState.error,
+        ),
+      );
+      queueSubject.add([]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>().having(
+            (s) => s.processingState,
+            'processingState',
+            AudioProcessingStateStatus.error,
+          ),
+        ),
+      );
+    });
+
+    test('maps AudioProcessingState.idle correctly', () async {
+      playbackStateSubject.add(
+        testPlaybackState.copyWith(
+          processingState: audio_service.AudioProcessingState.idle,
+        ),
+      );
+      queueSubject.add([]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>().having(
+            (s) => s.processingState,
+            'processingState',
+            AudioProcessingStateStatus.idle,
+          ),
+        ),
+      );
+    });
+
+    test('maps AudioProcessingState.loading correctly', () async {
+      playbackStateSubject.add(
+        testPlaybackState.copyWith(
+          processingState: audio_service.AudioProcessingState.loading,
+        ),
+      );
+      queueSubject.add([]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>().having(
+            (s) => s.processingState,
+            'processingState',
+            AudioProcessingStateStatus.loading,
+          ),
+        ),
+      );
+    });
+
+    test('maps AudioProcessingState.buffering correctly', () async {
+      playbackStateSubject.add(
+        testPlaybackState.copyWith(
+          processingState: audio_service.AudioProcessingState.buffering,
+        ),
+      );
+      queueSubject.add([]);
+
+      await expectLater(
+        repository.playbackState,
+        emits(
+          isA<PlaybackStateEntity>().having(
+            (s) => s.processingState,
+            'processingState',
+            AudioProcessingStateStatus.buffering,
+          ),
+        ),
+      );
+    });
+  });
+
+  group('AudioPlayerRepositoryImpl - position Stream', () {
+    test('returns a stream', () {
+      expect(repository.position, isA<Stream<Duration>>());
+    });
+  });
+
   group('AudioPlayerRepositoryImpl - Playback Controls', () {
     test('play calls audioHandler.play and returns Right', () async {
       when(mockAudioHandler.play()).thenAnswer((_) async {});

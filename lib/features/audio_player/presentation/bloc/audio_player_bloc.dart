@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:dartz_plus/src/either.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/entities/audio.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
@@ -237,9 +239,17 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     StopAudio event,
     Emitter<AudioPlayerState> emit,
   ) async {
-    await _stopAudio();
-    // Cancel sleep timer on manual stop but keep the preference
-    add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
+    final Either<Failure, void> result = await _stopAudio();
+    await result.fold(
+      (failure) async {
+        emit(state.copyWith());
+      },
+      (success) async {
+        emit(const AudioPlayerState(status: AudioPlayerStatus.initial));
+      },
+    );
+    // // Cancel sleep timer on manual stop but keep the preference
+    // add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
   }
 
   Future<void> _onSkipToNext(

@@ -56,94 +56,108 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
-        listenWhen: (previous, current) =>
-            (previous.searchQuery != current.searchQuery &&
-                current.searchQuery.isEmpty) ||
-            (current.playCommand != null &&
-                previous.playCommand != current.playCommand) ||
-            (previous.status != current.status &&
-                current.status == ReciterDetailsStatus.loaded),
-        listener: (context, state) {
-          // Handle search clear
-          if (state.searchQuery.isEmpty && _searchController.text.isNotEmpty) {
-            _searchController.clear();
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
+              listenWhen: (previous, current) =>
+                  (previous.searchQuery != current.searchQuery &&
+                      current.searchQuery.isEmpty) ||
+                  (current.playCommand != null &&
+                      previous.playCommand != current.playCommand) ||
+                  (previous.status != current.status &&
+                      current.status == ReciterDetailsStatus.loaded),
+              listener: (context, state) {
+                // Handle search clear
+                if (state.searchQuery.isEmpty &&
+                    _searchController.text.isNotEmpty) {
+                  _searchController.clear();
+                }
 
-          // Handle playback command from Bloc
-          final PlaySurahCommand? command = state.playCommand;
-          if (command != null) {
-            context.read<AudioPlayerBloc>().add(
-              AudioPlayerEvent.playFromQueue(
-                command.playlist,
-                command.initialIndex,
-              ),
-            );
-          }
-
-          // Initialize ReciterDownloadBloc when surah list is loaded
-          if (state.status == ReciterDetailsStatus.loaded) {
-            context.read<ReciterDownloadBloc>().add(
-              InitializeReciterDownload(
-                reciterName: widget.reciter.name,
-                totalSurahs: state.surahList.length,
-                downloadedSurahIds: state.surahList
-                    .where((s) => s.isDownloaded)
-                    .map((s) => s.id)
-                    .toList(),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: CustomScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              restorationId: 'reciter_details_scroll_view',
-              slivers: [
-                _ReciterAppBar(reciter: widget.reciter),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _StickyHeaderDelegate(
-                    minHeight: 60.h,
-                    maxHeight: 60.h,
-                    child: ColoredBox(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: _ReciterSearchField(controller: _searchController),
+                // Handle playback command from Bloc
+                final PlaySurahCommand? command = state.playCommand;
+                if (command != null) {
+                  context.read<AudioPlayerBloc>().add(
+                    AudioPlayerEvent.playFromQueue(
+                      command.playlist,
+                      command.initialIndex,
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      if (widget.reciter.moshaf.length > 1)
-                        _MoshafSelector(reciter: widget.reciter, state: state),
-                      if (state.status == ReciterDetailsStatus.loaded &&
-                          state.surahList.isNotEmpty &&
-                          state.searchQuery.isEmpty)
-                        DownloadAllButton(
-                          reciter: widget.reciter,
-                          surahs: state.surahList,
+                  );
+                }
+
+                // Initialize ReciterDownloadBloc when surah list is loaded
+                if (state.status == ReciterDetailsStatus.loaded) {
+                  context.read<ReciterDownloadBloc>().add(
+                    InitializeReciterDownload(
+                      reciterName: widget.reciter.name,
+                      totalSurahs: state.surahList.length,
+                      downloadedSurahIds: state.surahList
+                          .where((s) => s.isDownloaded)
+                          .map((s) => s.id)
+                          .toList(),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                return GestureDetector(
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  child: CustomScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    restorationId: 'reciter_details_scroll_view',
+                    slivers: [
+                      _ReciterAppBar(reciter: widget.reciter),
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _StickyHeaderDelegate(
+                          minHeight: 60.h,
+                          maxHeight: 60.h,
+                          child: ColoredBox(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            child: _ReciterSearchField(
+                              controller: _searchController,
+                            ),
+                          ),
                         ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            if (widget.reciter.moshaf.length > 1)
+                              _MoshafSelector(
+                                reciter: widget.reciter,
+                                state: state,
+                              ),
+                            if (state.status == ReciterDetailsStatus.loaded &&
+                                state.surahList.isNotEmpty &&
+                                state.searchQuery.isEmpty)
+                              DownloadAllButton(
+                                reciter: widget.reciter,
+                                surahs: state.surahList,
+                              ),
+                          ],
+                        ),
+                      ),
+                      _ReciterDetailsContent(
+                        reciter: widget.reciter,
+                        state: state,
+                        onPlaySurah: (surah) {
+                          context.read<ReciterDetailsBloc>().add(
+                            PlaySurahRequested(surah),
+                          );
+                        },
+                      ),
                     ],
                   ),
-                ),
-                _ReciterDetailsContent(
-                  reciter: widget.reciter,
-                  state: state,
-                  onPlaySurah: (surah) {
-                    context.read<ReciterDetailsBloc>().add(
-                      PlaySurahRequested(surah),
-                    );
-                  },
-                ),
-              ],
+                );
+              },
             ),
-          );
-        },
+          ),
+          // Bottom player positioned at the bottom
+          const BottomPlayerWidget(),
+        ],
       ),
-      bottomNavigationBar: const BottomPlayerWidget(),
     );
   }
 }

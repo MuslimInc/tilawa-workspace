@@ -1,4 +1,3 @@
-export 'app_with_bottom_player.dart';
 export 'arabic_alphabet_scrollbar.dart';
 export 'bottom_player_widget.dart';
 export 'control_buttons.dart';

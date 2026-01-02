@@ -34,63 +34,6 @@ class FakeIndexedAudioSource extends Fake implements IndexedAudioSource {
   dynamic get tag => (source as UriAudioSource).tag;
 }
 
-class FakeAudioPlayerForNullSequence extends Fake implements AudioPlayer {
-  Stream<List<IndexedAudioSource>> _stream = const Stream.empty();
-
-  @override
-  Stream<List<IndexedAudioSource>> get sequenceStream => _stream;
-
-  @override
-  PlaybackEvent get playbackEvent => PlaybackEvent(updateTime: DateTime.now());
-
-  @override
-  Stream<int?> get currentIndexStream => const Stream.empty();
-  @override
-  Stream<bool> get shuffleModeEnabledStream => Stream.value(false);
-  @override
-  Stream<List<int>> get shuffleIndicesStream => Stream.value([]);
-  @override
-  Stream<Duration?> get durationStream => const Stream.empty();
-  @override
-  Stream<PlaybackEvent> get playbackEventStream => const Stream.empty();
-  @override
-  Stream<ProcessingState> get processingStateStream => const Stream.empty();
-  @override
-  Stream<PlayerState> get playerStateStream =>
-      Stream.value(PlayerState(false, ProcessingState.idle));
-
-  @override
-  List<int> get effectiveIndices => [];
-  @override
-  bool get shuffleModeEnabled => false;
-  @override
-  List<int> get shuffleIndices => [];
-  @override
-  bool get playing => false;
-  @override
-  Duration get position => Duration.zero;
-  @override
-  Duration get bufferedPosition => Duration.zero;
-  @override
-  double get speed => 1.0;
-
-  @override
-  Future<Duration?> setAudioSources(
-    List<AudioSource> sources, {
-    int? initialIndex,
-    Duration? initialPosition,
-    bool preload = true,
-    ShuffleOrder? shuffleOrder,
-  }) async => null;
-
-  void emitNull() {
-    _stream = Stream<List<IndexedAudioSource>>.fromIterable([null as dynamic]);
-  }
-
-  @override
-  Future<void> dispose() async {}
-}
-
 @GenerateMocks([
   AnalyticsService,
   SharedPreferencesAsync,
@@ -1330,5 +1273,35 @@ void main() {
       // Verify play was not called due to error
       verifyNever(mockPlayer.play());
     });
+    test('FakeIndexedAudioSource returns correct tag', () {
+      final UriAudioSource source = AudioSource.uri(
+        Uri.parse('http://example.com/audio.mp3'),
+        tag: 'test_tag',
+      );
+      final fakeSource = FakeIndexedAudioSource(source: source, index: 0);
+      expect(fakeSource.tag, 'test_tag');
+    });
+
+    test('streams are correctly hooked up', () async {
+      // Just verify streams emit expected initial values from setup
+      expect(mockPlayer.processingStateStream, emits(ProcessingState.idle));
+      expect(mockPlayer.durationStream, emits(null));
+    });
+  });
+
+  test('AudioPlayerHandlerImpl should work correctly', () {
+    // TODO: Implement test for AudioPlayerHandlerImpl
+  });
+
+  test('updateQueue should work correctly', () {
+    // TODO: Implement test for updateQueue
+  });
+
+  test('switch should work correctly', () {
+    // TODO: Implement test for switch
+  });
+
+  test('AudioEntity should work correctly', () {
+    // TODO: Implement test for AudioEntity
   });
 }

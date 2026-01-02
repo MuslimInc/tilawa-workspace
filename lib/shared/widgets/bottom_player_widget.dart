@@ -27,22 +27,7 @@ class BottomPlayerWidget extends StatefulWidget {
 class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   int? _currentReciterId;
   String? _currentReciterName;
-  bool _manuallyDismissed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the AudioPlayerBloc
-    // Check if playback restoration is enabled in settings
-    final bool restorePlayback = context
-        .read<SettingsCubit>()
-        .state
-        .restorePlaybackState;
-
-    context.read<AudioPlayerBloc>().add(
-      AudioPlayerEvent.loadAudioPlayerData(restorePlayback: restorePlayback),
-    );
-  }
+  bool _isDismissed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +38,11 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
             (!previous.isPlaying && current.isPlaying);
       },
       listener: (context, state) {
-        if (_manuallyDismissed) {
+        if (state.status == AudioPlayerStatus.initial) {}
+        // Reset dismissal state when audio changes
+        if (state.currentAudio != null) {
           setState(() {
-            _manuallyDismissed = false;
+            _isDismissed = false;
           });
         }
       },
@@ -65,7 +52,7 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
           final bool shouldShow =
               audio != null &&
               state.status == AudioPlayerStatus.success &&
-              !_manuallyDismissed;
+              !_isDismissed;
 
           // Hide if no media, error, or manually dismissed
           if (!shouldShow) {
@@ -97,11 +84,13 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             ),
             child: Dismissible(
-              key: ValueKey('bottom_player_${audio.id}'),
+              key: Key(audio.id),
+              // key: ValueKey(audio.id),
               direction: DismissDirection.down,
               onDismissed: (direction) {
+                // Immediately mark as dismissed to remove from tree
                 setState(() {
-                  _manuallyDismissed = true;
+                  _isDismissed = true;
                 });
                 context.read<AudioPlayerBloc>().add(
                   const AudioPlayerEvent.stopAudio(),
@@ -155,9 +144,6 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                   onClose: () {
                     // Provide haptic feedback for consistency
                     HapticFeedback.lightImpact();
-                    setState(() {
-                      _manuallyDismissed = true;
-                    });
                     context.read<AudioPlayerBloc>().add(
                       const AudioPlayerEvent.stopAudio(),
                     );
