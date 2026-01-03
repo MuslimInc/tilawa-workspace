@@ -688,7 +688,7 @@ class MockDownloadsRepository extends _i1.Mock
   _i5.Future<void> startDownload(
     String? url, {
     required String? title,
-    bool? showNotification = true,
+    bool? showNotification,
     required String? surahTitle,
     required String? reciterName,
     required int? reciterId,
