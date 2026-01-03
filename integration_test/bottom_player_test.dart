@@ -6,6 +6,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -79,6 +80,28 @@ Future<void> navigateToRecitersTab(WidgetTester tester) async {
   }
 
   await tester.pump(const Duration(seconds: 1));
+}
+
+/// Clean up at the end of a test to prevent pending frames and async issues
+Future<void> cleanupTest(WidgetTester tester) async {
+  debugPrint('Cleaning up test...');
+
+  // Drain pending frames without disposing the widget tree
+  // (disposing triggers theme rebuild which loads fonts)
+  try {
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+  } catch (e) {
+    debugPrint('Warning: Could not settle all frames: $e');
+    // Pump manually to drain as many frames as possible
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  // Allow async operations (audio, downloads) to complete
+  await Future.delayed(const Duration(seconds: 1));
+
+  debugPrint('Test cleanup complete');
 }
 
 /// Navigate to reciter details by tapping first reciter card
@@ -272,6 +295,9 @@ void main() {
 
   group('Bottom Player Integration Tests', () {
     setUpAll(() async {
+      // Disable Google Fonts runtime fetching to avoid network calls in tests
+      GoogleFonts.config.allowRuntimeFetching = false;
+
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
 
@@ -339,9 +365,14 @@ void main() {
     });
 
     tearDown(() async {
-      // Clean up after each test
+      // Allow any background operations to complete
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Clean up storage
       await HydratedBloc.storage.clear();
-      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Final settling period before next test
+      await Future.delayed(const Duration(seconds: 1));
     });
 
     testWidgets('Tapping a surah from reciter details shows bottom player', (
@@ -421,6 +452,9 @@ void main() {
 
       // Verify bottom player is visible
       expect(findBottomPlayer().evaluate().isNotEmpty, true);
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Bottom player displays correct surah and reciter info', (
@@ -462,6 +496,9 @@ void main() {
         true,
         reason: 'Bottom player should display reciter name',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Play/Pause button in bottom player toggles playback state', (
@@ -521,6 +558,9 @@ void main() {
         true,
         reason: 'Play/pause button should still be visible after tap',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Skip next button in bottom player advances to next surah', (
@@ -574,6 +614,9 @@ void main() {
         true,
         reason: 'Bottom player should remain visible after skipping',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets(
@@ -639,6 +682,9 @@ void main() {
           true,
           reason: 'Bottom player should remain visible after skipping',
         );
+
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
       },
     );
 
@@ -687,6 +733,9 @@ void main() {
       // After dismissal, the bottom player should not be visible
       // (it returns SizedBox.shrink when manually dismissed)
       debugPrint('Checking if bottom player is dismissed...');
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Bottom player shows linear progress indicator', (
@@ -728,6 +777,9 @@ void main() {
         true,
         reason: 'Bottom player should have a progress indicator',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Tapping bottom player navigates to expanded player', (
@@ -826,6 +878,9 @@ void main() {
           }
         }
       }
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
   });
 }

@@ -31,11 +31,14 @@ import 'package:tilawa/core/presentation/bloc/internet_status/internet_status_bl
 import 'package:tilawa/core/services/analytics_initialization_service.dart'
     as _i734;
 import 'package:tilawa/core/services/analytics_service.dart' as _i145;
+import 'package:tilawa/core/services/appsflyer_service.dart' as _i970;
+import 'package:tilawa/core/services/athkar_notification_service.dart' as _i35;
 import 'package:tilawa/core/services/crashlytics_service.dart' as _i600;
 import 'package:tilawa/core/services/device_token_service.dart' as _i172;
 import 'package:tilawa/core/services/firebase_analytics_service.dart' as _i495;
 import 'package:tilawa/core/services/firebase_initialization_service.dart'
     as _i977;
+import 'package:tilawa/core/services/luciq_service.dart' as _i636;
 import 'package:tilawa/core/services/navigation_service.dart' as _i628;
 import 'package:tilawa/core/services/notification_permission_service.dart'
     as _i1039;
@@ -62,6 +65,8 @@ import 'package:tilawa/features/audio_player/domain/repositories/audio_player_re
     as _i489;
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart'
     as _i28;
+import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart'
+    as _i702;
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart'
     as _i902;
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart'
@@ -371,6 +376,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i895.Connectivity>(
       () => externalDependenciesModule.connectivity,
     );
+    gh.lazySingleton<_i35.AthkarNotificationService>(
+      () => _i35.AthkarNotificationService(),
+    );
     gh.lazySingleton<_i527.LocationServiceWrapper>(
       () => _i527.LocationServiceWrapper(),
     );
@@ -419,6 +427,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i628.NavigationService>(
       () => _i628.NavigationServiceImpl(),
     );
+    gh.singleton<_i970.AppsFlyerService>(() => _i970.AppsFlyerServiceImpl());
     gh.lazySingleton<_i641.AudioPositionService>(
       () => _i641.AudioPositionServiceImpl(),
     );
@@ -439,6 +448,7 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i600.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
     );
+    gh.singleton<_i636.LuciqService>(() => _i636.LuciqServiceImpl());
     gh.lazySingleton<_i470.PlaylistsLocalDataSource>(
       () => _i470.PlaylistsLocalDataSourceImpl(
         gh<_i460.SharedPreferencesAsync>(),
@@ -879,6 +889,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i373.DownloadsRepository>(),
       ),
     );
+    gh.factory<_i702.CheckAudioPlayabilityUseCase>(
+      () => _i702.CheckAudioPlayabilityUseCase(
+        gh<_i99.NetworkInfo>(),
+        gh<_i373.DownloadsRepository>(),
+      ),
+    );
     gh.factory<_i817.CancelDownloadsForReciterUseCase>(
       () => _i817.CancelDownloadsForReciterUseCase(
         gh<_i373.DownloadsRepository>(),
@@ -1073,6 +1089,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i28.RemoveQueueItemUseCase>(),
         gh<_i28.MoveQueueItemUseCase>(),
         gh<_i28.LoadAudioPlayerDataUseCase>(),
+        gh<_i702.CheckAudioPlayabilityUseCase>(),
         gh<_i718.SettingsCubit>(),
       ),
     );

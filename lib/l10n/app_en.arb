@@ -1031,5 +1031,9 @@
     "noInternetConnection": "No Internet Connection",
     "@noInternetConnection": {
         "description": "No internet connection message"
+    },
+    "offlinePlaybackError": "This content is not available offline. Please download it first.",
+    "@offlinePlaybackError": {
+        "description": "Error shown when user tries to play undownloaded content while offline"
     }
 }

@@ -413,15 +413,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
     switch (parentMediaId) {
-      case audio_service.AudioService.recentRootId:
-        final Stream<Map<String, dynamic>> stream = _recentSubject.map(
-          (_) => <String, dynamic>{},
-        );
-        return stream.shareValueSeeded(<String, dynamic>{});
+      case '__RECENT__':
+        return _recentSubject.map((_) => <String, dynamic>{}).shareValue();
       default:
-        // return Stream.value(_mediaLibrary.items[parentMediaId])
-        //     .map((_) => <String, dynamic>{})
-        //     .shareValue();
         return super.subscribeToChildren(parentMediaId);
     }
   }

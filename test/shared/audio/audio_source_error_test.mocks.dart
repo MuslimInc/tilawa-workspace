@@ -7,7 +7,7 @@ import 'dart:async' as _i5;
 
 import 'package:audio_service/audio_service.dart' as _i2;
 import 'package:audio_session/audio_session.dart' as _i14;
-import 'package:dartz_plus/src/either.dart' as _i8;
+import 'package:dartz_plus/dartz_plus.dart' as _i8;
 import 'package:just_audio/just_audio.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i11;

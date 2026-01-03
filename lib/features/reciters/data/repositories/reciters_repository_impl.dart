@@ -47,7 +47,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
     try {
       final List<ReciterModel> models = await _getRecitersData();
       final List<ReciterEntity> entities = models
-          .map((m) => m.toEntity())
+          .map((m) => m.toReciterEntity())
           .toList();
       return Right(entities);
     } catch (e) {
@@ -64,7 +64,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
             (reciter) =>
                 reciter.name.toLowerCase().contains(query.toLowerCase()),
           )
-          .map((model) => model.toEntity())
+          .map((model) => model.toReciterEntity())
           .toList();
       return Right(filteredReciters);
     } catch (e) {
@@ -78,7 +78,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
       final List<ReciterModel> allReciters = await _getRecitersData();
       final List<ReciterEntity> filteredReciters = allReciters
           .where((reciter) => reciter.letter == letter)
-          .map((model) => model.toEntity())
+          .map((model) => model.toReciterEntity())
           .toList();
       return Right(filteredReciters);
     } catch (e) {
@@ -95,7 +95,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
           .firstOrNull;
 
       if (match != null) {
-        return Right(match.toEntity());
+        return Right(match.toReciterEntity());
       } else {
         return const Right(null);
       }
@@ -113,7 +113,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
 
       final List<ReciterEntity> favoriteReciters = allReciters
           .where((reciter) => favoriteIds.contains(reciter.id.toString()))
-          .map((model) => model.toEntity())
+          .map((model) => model.toReciterEntity())
           .toList();
 
       return Right(favoriteReciters);

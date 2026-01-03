@@ -17,6 +17,7 @@ import 'package:tilawa/core/entities/entities.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/network/network_info.dart';
 import 'package:tilawa/core/services/analytics_service.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
@@ -68,6 +69,8 @@ class MockObserveDownloadProgressUseCase extends Mock
 class MockGetValidCompletedDownloadsUseCase extends Mock
     implements GetValidCompletedDownloadsUseCase {}
 
+class MockNetworkInfo extends Mock implements NetworkInfo {}
+
 void main() {
   late MockReciterDetailsBloc mockReciterDetailsBloc;
   late MockReciterDownloadBloc mockReciterDownloadBloc;
@@ -83,6 +86,7 @@ void main() {
   late MockGetValidCompletedDownloadsUseCase
   mockGetValidCompletedDownloadsUseCase;
   late MockDownloadsRepository mockDownloadsRepository;
+  late MockNetworkInfo mockNetworkInfo;
 
   setUpAll(() {
     registerFallbackValue(const AudioPlayerEvent.playAudio());
@@ -94,6 +98,7 @@ void main() {
     GetIt.instance.registerSingleton<AudioPlayerHandler>(
       MockAudioPlayerHandler(),
     );
+    GetIt.instance.registerSingleton<NetworkInfo>(MockNetworkInfo());
   });
 
   tearDownAll(() {
@@ -124,9 +129,13 @@ void main() {
     MockGetValidCompletedDownloadsUseCase();
     mockDownloadsRepository =
         GetIt.instance<DownloadsRepository>() as MockDownloadsRepository;
+    mockNetworkInfo = GetIt.instance<NetworkInfo>() as MockNetworkInfo;
 
     if (!GetIt.instance.isRegistered<AnalyticsService>()) {
       GetIt.instance.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    }
+    if (!GetIt.instance.isRegistered<NetworkInfo>()) {
+      GetIt.instance.registerSingleton<NetworkInfo>(mockNetworkInfo);
     }
     when(
       () => mockAnalyticsService.logScreenView(
@@ -134,6 +143,11 @@ void main() {
         screenClass: any(named: 'screenClass'),
       ),
     ).thenAnswer((_) async {});
+
+    when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+    when(
+      () => mockNetworkInfo.onConnectivityChanged,
+    ).thenAnswer((_) => const Stream.empty());
 
     // Register UseCases in GetIt
     if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {

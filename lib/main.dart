@@ -14,8 +14,11 @@ import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/observers/app_bloc_observer.dart';
 import 'core/services/analytics_initialization_service.dart';
+import 'core/services/appsflyer_service.dart';
+import 'core/services/athkar_notification_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
+import 'core/services/luciq_service.dart';
 import 'core/services/notification_permission_service.dart';
 import 'features/downloads/data/services/downloads_initialization_service.dart';
 import 'features/notifications/domain/repositories/notifications_repository.dart';
@@ -26,46 +29,126 @@ import 'router/app_router.dart';
 final logger = Logger();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Wrap entire main in try-catch for catastrophic failures
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize AppRouter (registers JSON types)
-  AppRouter.init();
+    // Initialize AppRouter (registers JSON types)
+    AppRouter.init();
 
-  // Enable edge-to-edge display (Flutter recommended approach)
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // Enable edge-to-edge display (Flutter recommended approach)
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // Initialize Firebase first, then DI
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await configureDependencies();
+    // ========================================================================
+    // CRITICAL: Must complete before app starts (blocking)
+    // ========================================================================
 
-  // Initialize HydratedStorage
-  await _initializeHydratedStorage();
+    // Initialize Firebase first, then DI
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
+      logger.d('Firebase initialized successfully');
+    } catch (e, stackTrace) {
+      logger.d('CRITICAL: Firebase initialization failed: $e');
+      logger.d('Stack trace: $stackTrace');
+      // Continue anyway - app can work without Firebase
+    }
 
-  // Initialize Crashlytics first (handles error reporting)
-  await _initializeCrashlytics();
+    // Initialize DI container
+    try {
+      await configureDependencies();
+      logger.d('DI container initialized successfully');
+    } catch (e, stackTrace) {
+      logger.d('CRITICAL: DI initialization failed: $e');
+      logger.d('Stack trace: $stackTrace');
+      // This is critical - without DI, services can't be resolved
+      // But we'll try to continue for better error reporting
+    }
 
-  // Initialize Credential Manager
-  await _initializeCredentialManager();
+    // Initialize HydratedStorage (needed for BLoC state persistence)
+    try {
+      await _initializeHydratedStorage();
+    } catch (e) {
+      logger.d('Warning: HydratedStorage initialization failed: $e');
+      // App can work without state persistence
+    }
 
-  // Initialize Analytics
-  await _initializeAnalytics();
+    // Initialize Crashlytics (catches all errors from app start)
+    try {
+      await _initializeCrashlytics();
+    } catch (e) {
+      logger.d('Warning: Crashlytics initialization failed: $e');
+      // App can work without crash reporting
+    }
 
-  // Request notification permission on first launch
-  await _requestNotificationPermission();
+    Bloc.observer = AppBlocObserver();
 
-  // Initialize Notification Service (FCM)
-  await _initializeNotificationService();
+    // ========================================================================
+    // APP STARTS HERE - User sees UI immediately!
+    // ========================================================================
+    runApp(const QuranPlayerApp());
 
-  // Initialize downloads feature (resumes pending downloads)
-  await _initializeDownloads();
+    // ========================================================================
+    // NON-CRITICAL: Initialize in background after app is visible
+    // ========================================================================
+    _initializeNonCriticalServices();
+  } catch (e, stackTrace) {
+    // Catastrophic failure - log and try to start app anyway
+    logger.d('CATASTROPHIC ERROR in main(): $e');
+    logger.d('Stack trace: $stackTrace');
 
-  // Initialize Firebase data asynchronously after app starts
-  _initializeFirebaseDataAsync();
+    // Last resort: try to start the app with minimal initialization
+    try {
+      runApp(const QuranPlayerApp());
+    } catch (appError) {
+      logger.d('Failed to start app: $appError');
+      // At this point, nothing we can do
+      rethrow;
+    }
+  }
+}
 
-  Bloc.observer = AppBlocObserver();
+/// Initialize non-critical services in parallel after app launch
+/// This reduces perceived startup time significantly
+void _initializeNonCriticalServices() {
+  Future.microtask(() async {
+    try {
+      // Phase 1: Parallel initialization of independent services
+      // Using Dart 3 record-based .wait for clean parallel execution
+      await (
+        _initializeCredentialManager(),
+        _initializeAnalytics(),
+        _initializeAppsFlyer(),
+        _initializeLuciq(),
+      ).wait;
 
-  runApp(const QuranPlayerApp());
+      logger.d('Phase 1 services initialized (parallel)');
+
+      // Phase 2: Services that depend on user permissions or Phase 1
+      await _requestNotificationPermission();
+
+      // Phase 3: Parallel initialization of notification & downloads
+      await (
+        _initializeNotificationService(),
+        _initializeDownloads(),
+        _initializeAthkarNotifications(),
+      ).wait;
+
+      logger.d('Phase 2 & 3 services initialized');
+
+      // Phase 4: Firebase data (lowest priority, fire-and-forget)
+      _initializeFirebaseDataAsync();
+
+      logger.d('All non-critical services initialized successfully');
+    } catch (e) {
+      logger.d('Error during non-critical service initialization: $e');
+      // App continues to work even if these fail
+    }
+  });
 }
 
 @pragma('vm:entry-point')
@@ -172,5 +255,41 @@ Future<void> _initializeDownloads() async {
     await downloadsInitService.initialize();
   } catch (e) {
     logger.d('Warning: Could not initialize downloads: $e');
+  }
+}
+
+/// Initialize AppsFlyer attribution tracking
+Future<void> _initializeAppsFlyer() async {
+  try {
+    final AppsFlyerService appsFlyerService = getIt<AppsFlyerService>();
+    await appsFlyerService.initialize();
+    await appsFlyerService.startTracking();
+    logger.d('AppsFlyer initialized and tracking started');
+  } catch (e) {
+    logger.d('Warning: Could not initialize AppsFlyer: $e');
+  }
+}
+
+/// Initialize Luciq bug reporting
+Future<void> _initializeLuciq() async {
+  try {
+    final LuciqService luciqService = getIt<LuciqService>();
+    await luciqService.initialize();
+    logger.d('Luciq initialized successfully');
+  } catch (e) {
+    logger.d('Warning: Could not initialize Luciq: $e');
+  }
+}
+
+/// Initialize athkar notification scheduling
+Future<void> _initializeAthkarNotifications() async {
+  try {
+    final AthkarNotificationService athkarService =
+        getIt<AthkarNotificationService>();
+    await athkarService.initialize();
+    await athkarService.scheduleAthkarNotifications();
+    logger.d('Athkar notifications scheduled successfully');
+  } catch (e) {
+    logger.d('Warning: Could not initialize athkar notifications: $e');
   }
 }

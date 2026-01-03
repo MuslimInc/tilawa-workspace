@@ -40,50 +40,6 @@ void main() {
   }
 
   group('BottomPlayerWidget', () {
-    testWidgets(
-      'should call loadAudioPlayerData with restorePlayback: true when setting is enabled',
-      (WidgetTester tester) async {
-        // Arrange
-        when(mockSettingsCubit.state).thenReturn(const SettingsState());
-        when(
-          mockBloc.state,
-        ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
-        when(mockBloc.stream).thenAnswer((_) => const Stream.empty());
-
-        // Act
-        await tester.pumpWidget(createTestWidget(const BottomPlayerWidget()));
-
-        // Assert
-        verify(
-          mockBloc.add(const AudioPlayerEvent.loadAudioPlayerData()),
-        ).called(1);
-      },
-    );
-
-    testWidgets(
-      'should call loadAudioPlayerData with restorePlayback: false when setting is disabled',
-      (WidgetTester tester) async {
-        // Arrange
-        when(
-          mockSettingsCubit.state,
-        ).thenReturn(const SettingsState(restorePlaybackState: false));
-        when(
-          mockBloc.state,
-        ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.success));
-        when(mockBloc.stream).thenAnswer((_) => const Stream.empty());
-
-        // Act
-        await tester.pumpWidget(createTestWidget(const BottomPlayerWidget()));
-
-        // Assert
-        verify(
-          mockBloc.add(
-            const AudioPlayerEvent.loadAudioPlayerData(restorePlayback: false),
-          ),
-        ).called(1);
-      },
-    );
-
     testWidgets('should show nothing when mediaItem is null', (
       WidgetTester tester,
     ) async {

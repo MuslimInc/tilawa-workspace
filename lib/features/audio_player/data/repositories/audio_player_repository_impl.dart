@@ -41,7 +41,8 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
       );
 
   @override
-  Stream<Duration> get position => audio_service.AudioService.position;
+  Stream<Duration> get position =>
+      _audioHandler.playbackState.map((state) => state.position).distinct();
 
   @override
   Stream<List<AudioEntity>> get queue => _audioHandler.queue.map(

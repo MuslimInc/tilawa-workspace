@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/errors/failures.dart';
+import '../../../../../core/network/network_info.dart';
 import '../../../../../main.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/usecases/usecases.dart';
@@ -32,6 +33,7 @@ class DownloadButtonBloc
     required DownloadSurahUseCase downloadSurah,
     required CancelDownloadUseCase cancelDownload,
     required ObserveDownloadProgressUseCase observeDownloadProgress,
+    required NetworkInfo networkInfo,
     bool? initialIsDownloaded,
     bool? initialIsDownloading,
     double? initialProgress,
@@ -42,6 +44,7 @@ class DownloadButtonBloc
        _downloadSurah = downloadSurah,
        _cancelDownload = cancelDownload,
        _observeDownloadProgress = observeDownloadProgress,
+       _networkInfo = networkInfo,
        _initialIsDownloaded = initialIsDownloaded,
        _initialIsDownloading = initialIsDownloading,
        _initialProgress = initialProgress,
@@ -73,6 +76,7 @@ class DownloadButtonBloc
   final DownloadSurahUseCase _downloadSurah;
   final CancelDownloadUseCase _cancelDownload;
   final ObserveDownloadProgressUseCase _observeDownloadProgress;
+  final NetworkInfo _networkInfo;
 
   final bool? _initialIsDownloaded;
   final bool? _initialIsDownloading;
@@ -111,6 +115,7 @@ class DownloadButtonBloc
     String surahTitle,
     Emitter<DownloadButtonState> emit,
   ) async {
+    logger.i('[DownloadButtonBloc] _onStartDownload for $surahTitle');
     // Prevent double downloads
     final bool shouldIgnore = state.maybeMap(
       pending: (_) => true,
@@ -125,6 +130,17 @@ class DownloadButtonBloc
       return;
     }
 
+    if (!await _networkInfo.isConnected) {
+      logger.w('[DownloadButtonBloc] No internet connection');
+      emit(
+        const DownloadButtonState.networkError(
+          errorMessage: 'No internet connection',
+        ),
+      );
+      return;
+    }
+
+    logger.i('[DownloadButtonBloc] Emitting pending state');
     emit(const DownloadButtonState.pending());
     _listenToProgress();
 
@@ -200,6 +216,7 @@ class DownloadButtonBloc
   }
 
   void _listenToProgress() {
+    logger.i('[DownloadButtonBloc] _listenToProgress for $_url');
     _progressSubscription?.cancel();
     _progressSubscription = _observeDownloadProgress(_url).listen(
       (item) {

@@ -703,6 +703,7 @@ class _SurahCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         surah.name,
@@ -746,9 +747,7 @@ class _SurahCard extends StatelessWidget {
                       initialIsDownloading: surah.isDownloading,
                       initialProgress: surah.downloadProgress,
                     ),
-
                     SizedBox(width: 8.w),
-
                     // Play Button with cleaner look
                     if (!isCurrentItem)
                       Container(

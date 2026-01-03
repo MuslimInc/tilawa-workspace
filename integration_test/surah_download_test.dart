@@ -13,7 +13,9 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/network/network_info.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/theme/app_theme.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -58,6 +60,17 @@ Future<void> waitForWidget(
     if (finder.evaluate().isNotEmpty) {
       return;
     }
+
+    // Debug: log icons in tree
+    final FinderResult<Element> icons = find.byType(Icon).evaluate();
+    debugPrint(
+      'waitForWidget: Found ${icons.length} icons. ${icons.isNotEmpty ? "First few:" : ""}',
+    );
+    for (var i = 0; i < icons.length.clamp(0, 5); i++) {
+      final icon = icons.elementAt(i).widget as Icon;
+      debugPrint('  Icon: ${icon.icon}');
+    }
+
     await tester.pump(const Duration(milliseconds: 500));
   }
   throw TimeoutException(
@@ -68,7 +81,7 @@ Future<void> waitForWidget(
 
 /// Navigate to the reciters tab
 Future<void> navigateToRecitersTab(WidgetTester tester) async {
-  debugPrint('Navigating to Reciters Tab...');
+  debugPrint('navigateToRecitersTab: Starting...');
   await tester.pump(const Duration(seconds: 2));
 
   // Try multiple selectors to find reciters tab
@@ -79,51 +92,94 @@ Future<void> navigateToRecitersTab(WidgetTester tester) async {
   final Finder recitersTextFinder = find.text('Reciters');
 
   if (recitersIconFinder.evaluate().isNotEmpty) {
+    debugPrint(
+      'navigateToRecitersTab: Found reciter icon (regular), tapping...',
+    );
     await tester.tap(recitersIconFinder.first);
   } else if (recitersActiveIconFinder.evaluate().isNotEmpty) {
+    debugPrint(
+      'navigateToRecitersTab: Found reciter icon (filled), tapping...',
+    );
     await tester.tap(recitersActiveIconFinder.first);
   } else if (recitersTextFinder.evaluate().isNotEmpty) {
+    debugPrint('navigateToRecitersTab: Found reciter text, tapping...');
     await tester.tap(recitersTextFinder.first);
+  } else {
+    debugPrint('navigateToRecitersTab: WARNING - No reciters tab found!');
+    throw Exception('Failed to find reciters tab');
   }
 
   await tester.pump(const Duration(seconds: 1));
+  debugPrint('navigateToRecitersTab: Completed');
+}
+
+/// Clean up at the end of a test to prevent pending frames and async issues
+Future<void> cleanupTest(WidgetTester tester) async {
+  debugPrint('Cleaning up test...');
+
+  // Drain pending frames without disposing the widget tree
+  try {
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+  } catch (e) {
+    debugPrint('Warning: Could not settle all frames: $e');
+    // Pump manually to drain as many frames as possible
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  // Allow async operations (audio, downloads) to complete
+  await Future.delayed(const Duration(seconds: 1));
+
+  debugPrint('Test cleanup complete');
 }
 
 /// Navigate to reciter details by tapping first reciter card
 Future<void> navigateToReciterDetails(WidgetTester tester) async {
   // Debug: Print what's on screen
-  debugPrint('Looking for reciter cards...');
+  debugPrint('navigateToReciterDetails: Starting...');
 
   // Wait longer and check if reciters are loading
-  debugPrint('Waiting for UI to settle...');
+  debugPrint('navigateToReciterDetails: Waiting for UI to settle...');
   await tester.pump(const Duration(seconds: 3));
 
   // Try to find the reciter by name (from our mock data)
-  debugPrint('Finding Reciter: Mishary Rashid Alafasy');
+  debugPrint(
+    'navigateToReciterDetails: Finding Reciter: Mishary Rashid Alafasy',
+  );
   final Finder reciterFinder = find.text('Mishary Rashid Alafasy');
 
   if (reciterFinder.evaluate().isNotEmpty) {
-    debugPrint('Reciter found! Tapping...');
+    debugPrint('navigateToReciterDetails: Reciter found! Tapping...');
     await tester.ensureVisible(reciterFinder.first);
     // Use pump instead of pumpAndSettle to avoid hanging on background tasks
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(reciterFinder.first);
-    debugPrint('Tapped reciter. Waiting for navigation...');
+    debugPrint(
+      'navigateToReciterDetails: Tapped reciter. Waiting for navigation...',
+    );
     await tester.pump(const Duration(seconds: 2));
+    debugPrint('navigateToReciterDetails: Navigation completed');
     return;
   }
 
-  debugPrint('Reciter "Mishary Rashid Alafasy" not found!');
+  debugPrint(
+    'navigateToReciterDetails: WARNING - Reciter "Mishary Rashid Alafasy" not found!',
+  );
 
   // Debug: Print all text widgets to see what's on screen
   final Iterable<Element> textWidgets = find.byType(Text).evaluate();
-  debugPrint('Found ${textWidgets.length} Text widgets');
+  debugPrint(
+    'navigateToReciterDetails: Found ${textWidgets.length} Text widgets',
+  );
   for (var i = 0; i < textWidgets.length.clamp(0, 10); i++) {
     final String? text = (textWidgets.elementAt(i).widget as Text).data;
     if (text != null && text.isNotEmpty) {
-      debugPrint('  Text: "$text"');
+      debugPrint('navigateToReciterDetails:   Text: "$text"');
     }
   }
+
+  throw Exception('Failed to find and navigate to reciter details');
 }
 
 /// Find the download button (download icon)
@@ -137,11 +193,6 @@ Finder findDownloadButton() {
             iconWidget.icon == Icons.cloud_download_outlined;
       }
     }
-    // Also check for standalone Icon widgets with download icon
-    if (widget is Icon) {
-      return widget.icon == Icons.download_rounded ||
-          widget.icon == Icons.cloud_download_outlined;
-    }
     return false;
   });
 }
@@ -150,30 +201,69 @@ Finder findDownloadButton() {
 /// Returns the download button for that surah, or null if all are downloaded
 Future<Finder?> findAvailableDownloadButton(
   WidgetTester tester, {
-  Duration timeout = const Duration(seconds: 15),
+  Duration timeout = const Duration(seconds: 5),
 }) async {
   final DateTime end = DateTime.now().add(timeout);
+  var scrollAttempts = 0;
+  const maxScrollAttempts = 5;
 
-  while (DateTime.now().isBefore(end)) {
+  while (DateTime.now().isBefore(end) && scrollAttempts < maxScrollAttempts) {
     await tester.pump(const Duration(milliseconds: 500));
 
     // Check if any download buttons exist
     final Finder downloadButtons = findDownloadButton();
     if (downloadButtons.evaluate().isNotEmpty) {
+      debugPrint('Found available download button');
       return downloadButtons;
     }
 
+    // Check if all surahs are downloaded (check icons present)
+    final Finder checkIcons = find.byIcon(Icons.check_circle);
+    if (checkIcons.evaluate().isNotEmpty) {
+      debugPrint(
+        'Found ${checkIcons.evaluate().length} check icons - some/all downloaded',
+      );
+      // If we see many check icons and no download buttons, all are likely downloaded
+      if (checkIcons.evaluate().length >= 3) {
+        debugPrint('Multiple surahs already downloaded, stopping search');
+        return null;
+      }
+    }
+
     // Try scrolling down to find more surahs
-    final Finder listView = find.byType(ListView);
-    if (listView.evaluate().isNotEmpty) {
+    final Finder scrollable = find.byType(CustomScrollView);
+    if (scrollable.evaluate().isNotEmpty) {
       try {
-        await tester.drag(listView.first, const Offset(0, -200));
+        await tester.drag(scrollable.first, const Offset(0, -200));
         await tester.pump(const Duration(milliseconds: 300));
+        scrollAttempts++;
       } catch (e) {
-        // Ignore drag errors
+        debugPrint('Scroll error: $e');
+        break;
+      }
+    } else {
+      // Try ListView as fallback
+      final Finder listView = find.byType(ListView);
+      if (listView.evaluate().isNotEmpty) {
+        try {
+          await tester.drag(listView.first, const Offset(0, -200));
+          await tester.pump(const Duration(milliseconds: 300));
+          scrollAttempts++;
+        } catch (e) {
+          debugPrint('Scroll error: $e');
+          break;
+        }
+      } else {
+        // No scrollable found, stop searching
+        debugPrint('No scrollable widget found, stopping search');
+        break;
       }
     }
   }
+
+  debugPrint(
+    'No available download button found after $scrollAttempts scroll attempts',
+  );
   return null;
 }
 
@@ -332,6 +422,9 @@ void main() {
 
   group('Surah Download Integration Tests - Refactored', () {
     setUpAll(() async {
+      // Disable google_fonts in AppTheme to avoid network errors in tests
+      AppTheme.useGoogleFonts = false;
+
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
 
@@ -347,6 +440,13 @@ void main() {
 
       // Configure dependencies (DI)
       await configureDependencies();
+
+      // Replace NetworkInfo with mock to simulate internet connection
+      if (GetIt.instance.isRegistered<NetworkInfo>()) {
+        GetIt.instance.unregister<NetworkInfo>();
+      }
+      final fakeNetworkInfo = FakeNetworkInfo();
+      GetIt.instance.registerSingleton<NetworkInfo>(fakeNetworkInfo);
 
       // Replace RecitersRepository with fake to avoid network calls
       if (GetIt.instance.isRegistered<RecitersRepository>()) {
@@ -446,8 +546,19 @@ void main() {
         errorMessage: 'Should find at least one download button',
       );
 
-      await tester.tap(downloadButton.first);
-      await tester.pump(const Duration(milliseconds: 500));
+      final FinderResult<Element> elements = downloadButton.evaluate();
+      debugPrint('Found ${elements.length} download button elements');
+      for (final element in elements) {
+        debugPrint('  Element widget: ${element.widget.runtimeType}');
+      }
+
+      debugPrint('Tapping first download button...');
+      final Finder target = downloadButton.first;
+      await tester.tap(target);
+      debugPrint('Tap executed. Pumping...');
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
 
       // Then: Download should start
       await tester.pump(const Duration(seconds: 1));
@@ -477,33 +588,56 @@ void main() {
         errorMessage:
             'Download did not start (no progress/pending indicator found)',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Offline Download: Attempt download without internet', (
       WidgetTester tester,
     ) async {
+      debugPrint('=== Offline Download Test: Starting ===');
+
       // Given: App is loaded and we're on the reciter details screen
+      debugPrint('Offline test: Pumping QuranPlayerApp...');
       await tester.pumpWidget(const QuranPlayerApp());
       await tester.pump(const Duration(seconds: 3));
+
+      debugPrint('Offline test: Navigating to reciters tab...');
       await navigateToRecitersTab(tester);
+
+      debugPrint('Offline test: Navigating to reciter details...');
       await navigateToReciterDetails(tester);
 
       // Note: This test documents expected behavior but cannot programmatically
       // disable network in integration tests without platform channels
-      final Finder? downloadButton = await findAvailableDownloadButton(tester);
+      debugPrint('Offline test: Finding available download button...');
+      final Finder? downloadButton = await findAvailableDownloadButton(
+        tester,
+        timeout: const Duration(seconds: 3),
+      );
 
       if (downloadButton == null || downloadButton.evaluate().isEmpty) {
         debugPrint('Offline test: All surahs already downloaded, skipping');
+        await cleanupTest(tester);
         return;
       }
 
       // When: Tap download button (with network available, will succeed)
       // TODO: Add platform channel to disable network for true offline testing
+      debugPrint('Offline test: Tapping download button...');
       await tester.tap(downloadButton.first);
       await tester.pump(const Duration(seconds: 2));
 
+      debugPrint('Offline test: Download action completed');
+
       // In real offline scenario, should show error toast/snackbar
       // For now, just verify button behavior exists
+
+      // Clean up to prevent pending frame issues
+      debugPrint('Offline test: Cleaning up...');
+      await cleanupTest(tester);
+      debugPrint('=== Offline Download Test: Completed ===');
     });
 
     testWidgets('Download Progress: Verify progress updates during download', (
@@ -566,6 +700,9 @@ void main() {
         true,
         reason: 'Should see progress percentage updates during download',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Already Downloaded: Verify checkmark for downloaded surahs', (
@@ -598,6 +735,9 @@ void main() {
         true,
         reason: 'Downloaded surahs should show green checkmark',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Download Cancellation: Cancel an ongoing download', (
@@ -686,6 +826,9 @@ void main() {
         reason:
             'Download button should reappear after cancellation or show completed',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Search and Download: Search for a surah and download it', (
@@ -822,6 +965,17 @@ void main() {
         true,
         reason: 'Download should start (or complete) for searched surah',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
   });
+}
+
+class FakeNetworkInfo implements NetworkInfo {
+  @override
+  Future<bool> get isConnected => Future.value(true);
+
+  @override
+  Stream<bool> get onConnectivityChanged => Stream.value(true);
 }

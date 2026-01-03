@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
+  /// Toggle for using Google Fonts, can be disabled in tests
+  static bool useGoogleFonts = true;
+
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
@@ -48,7 +51,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: GoogleFonts.alexandria().fontFamily,
+      fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
     );
   }
 
@@ -70,7 +73,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: GoogleFonts.alexandria().fontFamily,
+      fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
     );
   }
 }

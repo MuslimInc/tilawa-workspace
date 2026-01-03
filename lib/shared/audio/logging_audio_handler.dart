@@ -6,28 +6,30 @@ import '../../main.dart';
 class LoggingAudioHandler extends CompositeAudioHandler {
   LoggingAudioHandler(super.inner) {
     playbackState.listen((state) {
-      _log('playbackState changed: $state');
+      _log('[LoggingAudioHandler] playbackState changed: $state');
     });
     queue.listen((queue) {
-      _log('queue changed: $queue');
+      _log('[LoggingAudioHandler] queue changed: $queue');
     });
     queueTitle.listen((queueTitle) {
-      _log('queueTitle changed: $queueTitle');
+      _log('[LoggingAudioHandler] queueTitle changed: $queueTitle');
     });
     mediaItem.listen((mediaItem) {
-      _log('mediaItem changed: $mediaItem');
+      _log('[LoggingAudioHandler] mediaItem changed: $mediaItem');
     });
     ratingStyle.listen((ratingStyle) {
-      _log('ratingStyle changed: $ratingStyle');
+      _log('[LoggingAudioHandler] ratingStyle changed: $ratingStyle');
     });
     androidPlaybackInfo.listen((androidPlaybackInfo) {
-      _log('androidPlaybackInfo changed: $androidPlaybackInfo');
+      _log(
+        '[LoggingAudioHandler] androidPlaybackInfo changed: $androidPlaybackInfo',
+      );
     });
     customEvent.listen((dynamic customEventStream) {
-      _log('customEvent changed: $customEventStream');
+      _log('[LoggingAudioHandler] customEvent changed: $customEventStream');
     });
     customState.listen((dynamic customState) {
-      _log('customState changed: $customState');
+      _log('[LoggingAudioHandler] customState changed: $customState');
     });
   }
 

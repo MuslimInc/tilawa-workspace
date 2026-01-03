@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
 
@@ -93,6 +94,11 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
 }
 
 void main() {
+  setUpAll(() {
+    provideDummy<Either<Failure, bool>>(const Right(false));
+    provideDummy<Either<Failure, void>>(const Right(null));
+  });
+
   group('Crash Verification - Prove Firebase Report is Accurate', () {
     test('WITHOUT FIX: Bloc DOES crash when stream emits after close '
         '(proves the Firebase crash was real)', () async {
@@ -365,6 +371,7 @@ void main() {
     late MockDownloadSurahUseCase mockDownloadSurah;
     late MockCancelDownloadUseCase mockCancelDownload;
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+    late MockNetworkInfo mockNetworkInfo;
 
     const testUrl = 'https://example.com/001.mp3';
     const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -376,6 +383,8 @@ void main() {
       mockDownloadSurah = MockDownloadSurahUseCase();
       mockCancelDownload = MockCancelDownloadUseCase();
       mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
+      mockNetworkInfo = MockNetworkInfo();
+      when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
       when(
         mockCheckSurahDownloaded.call(
@@ -411,6 +420,7 @@ void main() {
           downloadSurah: mockDownloadSurah,
           cancelDownload: mockCancelDownload,
           observeDownloadProgress: mockObserveDownloadProgress,
+          networkInfo: mockNetworkInfo,
         );
 
         // Initialize and start download

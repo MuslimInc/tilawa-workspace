@@ -1,17 +1,19 @@
 import 'dart:async';
 
-import 'package:dartz_plus/src/either.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/entities/audio.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/toast_utils.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
+import '../../domain/usecases/check_audio_playability_use_case.dart';
 import '../../domain/usecases/get_audio_streams_use_case.dart';
 
 part 'audio_player_bloc.freezed.dart';
@@ -40,6 +42,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._removeQueueItem,
     this._moveQueueItem,
     this._loadAudioPlayerData,
+    this._checkAudioPlayability,
     this._settingsCubit,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
@@ -95,6 +98,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final RemoveQueueItemUseCase _removeQueueItem;
   final MoveQueueItemUseCase _moveQueueItem;
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
+  final CheckAudioPlayabilityUseCase _checkAudioPlayability;
   final SettingsCubit _settingsCubit;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
@@ -245,7 +249,12 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         emit(state.copyWith());
       },
       (success) async {
-        emit(const AudioPlayerState(status: AudioPlayerStatus.initial));
+        emit(
+          AudioPlayerState(
+            status: AudioPlayerStatus.initial,
+            lastSleepTimerDuration: state.lastSleepTimerDuration,
+          ),
+        );
       },
     );
     // // Cancel sleep timer on manual stop but keep the preference
@@ -295,7 +304,34 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     PlayFromQueue event,
     Emitter<AudioPlayerState> emit,
   ) async {
-    await _playFromQueue(event.queue, event.index);
+    // Validate queue index
+    if (event.index < 0 || event.index >= event.queue.length) {
+      return;
+    }
+
+    // Get the audio to be played
+    final AudioEntity audio = event.queue[event.index];
+
+    // Check if playback is allowed (network + download status)
+    final Either<Failure, void> playabilityResult =
+        await _checkAudioPlayability(audio);
+
+    await playabilityResult.fold(
+      (failure) {
+        // Playback not allowed - show user-friendly toast
+        if (failure is OfflinePlaybackFailure || failure is NetworkFailure) {
+          ToastUtils.showErrorToast(
+            failure.message ??
+                'This content is not available offline. Please download it first.',
+          );
+        }
+        // Don't proceed with playback
+      },
+      (_) async {
+        // Playback allowed - proceed normally
+        await _playFromQueue(event.queue, event.index);
+      },
+    );
   }
 
   Future<void> _onAddQueueItem(

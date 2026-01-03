@@ -1471,6 +1471,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Internet Connection'**
   String get noInternetConnection;
+
+  /// Error shown when user tries to play undownloaded content while offline
+  ///
+  /// In en, this message translates to:
+  /// **'This content is not available offline. Please download it first.'**
+  String get offlinePlaybackError;
 }
 
 class _AppLocalizationsDelegate

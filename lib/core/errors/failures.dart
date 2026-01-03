@@ -25,6 +25,12 @@ class AudioFailure extends Failure {
   const AudioFailure([super.message]);
 }
 
+class OfflinePlaybackFailure extends NetworkFailure {
+  const OfflinePlaybackFailure([
+    super.message = 'Cannot play online content while offline',
+  ]);
+}
+
 // Exception classes for throwing
 class NetworkException implements Exception {
   NetworkException([this.message]);

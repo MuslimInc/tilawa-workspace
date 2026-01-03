@@ -1,3 +1,4 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/entities/moshaf_entity.dart';
@@ -7,6 +8,7 @@ part 'reciter_model.freezed.dart';
 part 'reciter_model.g.dart';
 
 @freezed
+@Mapper(ReciterEntity)
 abstract class ReciterModel with _$ReciterModel {
   const factory ReciterModel({
     required int id,
@@ -21,6 +23,7 @@ abstract class ReciterModel with _$ReciterModel {
 }
 
 @freezed
+@Mapper(MoshafEntity)
 abstract class MoshafModel with _$MoshafModel {
   const factory MoshafModel({
     required int id,
@@ -33,29 +36,4 @@ abstract class MoshafModel with _$MoshafModel {
 
   factory MoshafModel.fromJson(Map<String, dynamic> json) =>
       _$MoshafModelFromJson(json);
-}
-
-extension ReciterModelX on ReciterModel {
-  ReciterEntity toEntity() {
-    return ReciterEntity(
-      id: id,
-      name: name,
-      letter: letter,
-      date: date,
-      moshaf: moshaf.map((m) => m.toEntity()).toList(),
-    );
-  }
-}
-
-extension MoshafModelX on MoshafModel {
-  MoshafEntity toEntity() {
-    return MoshafEntity(
-      id: id,
-      name: name,
-      server: server,
-      surahTotal: surahTotal,
-      moshafType: moshafType,
-      surahList: surahList,
-    );
-  }
 }

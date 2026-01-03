@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
+import '../../../../core/network/network_info.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../data/services/downloads_initialization_service.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
@@ -54,6 +56,7 @@ class DownloadButton extends StatelessWidget {
           downloadSurah: getIt<DownloadSurahUseCase>(),
           cancelDownload: CancelDownloadUseCase(repo),
           observeDownloadProgress: ObserveDownloadProgressUseCase(repo),
+          networkInfo: getIt<NetworkInfo>(),
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,
           initialProgress: initialProgress,
@@ -105,6 +108,9 @@ class DownloadButton extends StatelessWidget {
                 initial: () => const _LoadingDownloadButton(),
                 readyToDownload: () => _DefaultDownloadButton(
                   onDownload: () {
+                    logger.i(
+                      '[DownloadButton] Tapped onDownload for $surahTitle',
+                    );
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );

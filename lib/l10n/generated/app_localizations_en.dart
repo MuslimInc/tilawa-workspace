@@ -771,4 +771,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noInternetConnection => 'No Internet Connection';
+
+  @override
+  String get offlinePlaybackError =>
+      'This content is not available offline. Please download it first.';
 }

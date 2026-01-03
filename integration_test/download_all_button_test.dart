@@ -6,6 +6,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
@@ -78,6 +79,28 @@ Future<void> navigateToRecitersTab(WidgetTester tester) async {
   }
 
   await tester.pump(const Duration(seconds: 1));
+}
+
+/// Clean up at the end of a test to prevent pending frames and async issues
+Future<void> cleanupTest(WidgetTester tester) async {
+  debugPrint('Cleaning up test...');
+
+  // Drain pending frames without disposing the widget tree
+  // (disposing triggers theme rebuild which loads fonts)
+  try {
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+  } catch (e) {
+    debugPrint('Warning: Could not settle all frames: $e');
+    // Pump manually to drain as many frames as possible
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  // Allow async operations (audio, downloads) to complete
+  await Future.delayed(const Duration(seconds: 1));
+
+  debugPrint('Test cleanup complete');
 }
 
 /// Navigate to reciter details by tapping first reciter card
@@ -265,6 +288,9 @@ void main() {
 
   group('DownloadAllButton Integration Tests', () {
     setUpAll(() async {
+      // Disable Google Fonts runtime fetching to avoid network calls in tests
+      GoogleFonts.config.allowRuntimeFetching = false;
+
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
 
@@ -332,9 +358,14 @@ void main() {
     });
 
     tearDown(() async {
-      // Clean up after each test
+      // Allow any background operations to complete
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Clean up storage
       await HydratedBloc.storage.clear();
-      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Final settling period before next test
+      await Future.delayed(const Duration(seconds: 1));
     });
 
     testWidgets('DownloadAllButton is visible on reciter details screen', (
@@ -369,6 +400,9 @@ void main() {
         true,
         reason: 'Download All button should be visible on reciter details',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Tapping DownloadAll starts downloading all surahs', (
@@ -424,6 +458,9 @@ void main() {
         true,
         reason: 'Download should start (show progress) or be already completed',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Progress updates are shown during download', (
@@ -496,6 +533,9 @@ void main() {
         true,
         reason: 'Should see progress percentage updates during download',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Pause/Cancel functionality works', (
@@ -572,6 +612,9 @@ void main() {
         reason:
             'After pause, should show download/resume button or completed state',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('All Downloaded state shows correctly', (
@@ -643,6 +686,9 @@ void main() {
           'Could not reach All Downloaded state within timeout, test skipped',
         );
       }
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Resume incomplete download shows correct label', (
@@ -676,6 +722,9 @@ void main() {
         reason:
             'Button should show Download All, Complete Downloading, or All Downloaded (in English or Arabic)',
       );
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets('Multiple rapid taps on DownloadAll button are handled safely', (
@@ -772,6 +821,9 @@ void main() {
       );
 
       debugPrint('Rapid tap test completed - app remained stable');
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
     });
 
     testWidgets(
@@ -902,6 +954,9 @@ void main() {
         debugPrint(
           'Pause/resume toggle test completed with $toggleCount toggles',
         );
+
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
       },
     );
   });

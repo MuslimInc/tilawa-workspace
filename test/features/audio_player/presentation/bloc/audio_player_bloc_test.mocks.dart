@@ -5,7 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
-import 'package:dartz_plus/src/either.dart' as _i5;
+import 'package:dartz_plus/dartz_plus.dart' as _i5;
 import 'package:hydrated_bloc/hydrated_bloc.dart' as _i11;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
@@ -15,6 +15,8 @@ import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart'
     as _i8;
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart'
     as _i3;
+import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart'
+    as _i12;
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart'
     as _i10;
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart'
@@ -641,4 +643,27 @@ class MockSettingsCubit extends _i1.Mock implements _i2.SettingsCubit {
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+}
+
+/// A class which mocks [CheckAudioPlayabilityUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockCheckAudioPlayabilityUseCase extends _i1.Mock
+    implements _i12.CheckAudioPlayabilityUseCase {
+  MockCheckAudioPlayabilityUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i5.Either<_i6.Failure, void>> call(_i9.AudioEntity? audio) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [audio]),
+            returnValue: _i4.Future<_i5.Either<_i6.Failure, void>>.value(
+              _i7.dummyValue<_i5.Either<_i6.Failure, void>>(
+                this,
+                Invocation.method(#call, [audio]),
+              ),
+            ),
+          )
+          as _i4.Future<_i5.Either<_i6.Failure, void>>);
 }
