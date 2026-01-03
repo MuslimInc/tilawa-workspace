@@ -1,13 +1,14 @@
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../main.dart';
+import '../../router/app_router.dart';
+import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 
 /// Service for scheduling daily athkar (remembrance) notifications
@@ -376,18 +377,28 @@ class AthkarNotificationService {
   void handleNotificationResponse(NotificationResponse response) {
     logger.d('[AthkarNotificationService] Notification tapped: ${response.id}');
 
-    // TODO: Implement navigation to athkar screen when it's available
-    // For now, just log the tap
+    final BuildContext? context = AppRouter.navigatorKey.currentContext;
+    if (context == null) {
+      logger.w('[AthkarNotificationService] Context is null, cannot navigate');
+      return;
+    }
+
     if (response.id == _morningAthkarNotificationId) {
       logger.d(
         '[AthkarNotificationService] Morning athkar notification tapped',
       );
-      // Navigate to morning athkar content
+      const AthkarDetailsRoute(
+        categoryId: 1,
+        categoryName: 'أذكار الصباح',
+      ).go(context);
     } else if (response.id == _eveningAthkarNotificationId) {
       logger.d(
         '[AthkarNotificationService] Evening athkar notification tapped',
       );
-      // Navigate to evening athkar content
+      const AthkarDetailsRoute(
+        categoryId: 2,
+        categoryName: 'أذكار المساء',
+      ).go(context);
     }
   }
 

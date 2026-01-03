@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3+3] - 2026-01-03
+
 ### Added
+
+- **Athkar Notifications**: Scheduled daily athkar reminders (Morning at 7 AM, Evening at 5 PM).
+- **Timezone Support**: Accurate notification scheduling across timezones (Cairo, Riyadh, Dubai, etc.).
+- **Appsflyer SDK**: Integrated for marketing analytics.
+- **Luciq SDK**: Integrated for bug reporting.
+- **Startup Optimization**: Parallelized non-critical service initialization for faster app launch.
 - Type-safe navigation with go_router_builder code generation
 - Generated route definitions with `@TypedGoRoute` annotations
 - Auto-completion support for route parameters
@@ -15,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generated `app_router_config.g.dart` with route mixins
 
 ### Changed
+
 - **BREAKING**: Navigation API completely refactored from string-based to type-safe routes
 - **BREAKING**: `context.go(AppRouter.path)` replaced with `const RouteClass().go(context)`
 - **BREAKING**: `context.push(AppRouter.path)` replaced with `const RouteClass().go(context)`
@@ -23,11 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Import statements updated from `app_router.dart` to `app_router_config.dart` in navigation components
 
 ### Removed
+
 - String-based navigation patterns
 - Manual route definitions in `app_router.dart`
 - `go_router` imports from navigation components (replaced with `app_router_config.dart`)
 
 ### Fixed
+
 - Eliminated runtime string parsing for navigation
 - Improved refactoring safety for route changes
 - Better IDE support with auto-completion for route parameters
@@ -35,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 #### Migration Scope
+
 - **Files Updated**: 7 navigation components
 - **Routes Migrated**: 8 route definitions
 - **Navigation Calls**: 8+ instances updated
@@ -43,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### New Navigation Patterns
 
 **Before (String-based):**
+
 ```dart
 context.go(AppRouter.login);
 context.push(AppRouter.premium);
@@ -50,6 +63,7 @@ context.push('/reciter/123', extra: reciter);
 ```
 
 **After (Type-safe):**
+
 ```dart
 const LoginRoute().go(context);
 const PremiumRoute().go(context);
@@ -59,6 +73,7 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 #### Route Definitions
 
 **Generated Routes:**
+
 - `HomeRoute` - Main application screen
 - `ReciterDetailsRoute` - Reciter details with parameters
 - `ExpandedPlayerRoute` - Audio player expanded view
@@ -71,9 +86,11 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 #### Build Configuration
 
 **Dependencies Added:**
+
 - `go_router_builder: ^4.1.1` (dev dependency)
 
 **Build Runner:**
+
 - Code generation via `dart run build_runner build`
 - Automatic route mixin generation
 - Type-safe route factory methods
@@ -89,11 +106,13 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 #### Migration Impact
 
 **Breaking Changes:**
+
 - All navigation calls must be updated to use new route classes
 - Route parameters now require explicit typing
 - Import statements need to reference `app_router_config.dart`
 
 **Compatibility:**
+
 - Router configuration remains compatible with existing GoRouter setup
 - Error handling and redirects preserved
 - Theme and localization integration unchanged
@@ -102,4 +121,4 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 
 ## Previous Versions
 
-*Previous changelog entries would be documented here*
+_Previous changelog entries would be documented here_
