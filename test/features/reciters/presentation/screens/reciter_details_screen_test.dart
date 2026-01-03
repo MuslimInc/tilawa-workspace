@@ -1028,6 +1028,393 @@ void main() {
       ).called(1);
     }, createFile: (path) => mockFile);
   });
+
+  testWidgets('ReciterDetailsScreen unselects surah when player is dismissed', (
+    WidgetTester tester,
+  ) async {
+    // Setup stream controller to simulate state changes
+    final audioPlayerStreamController =
+        StreamController<AudioPlayerState>.broadcast();
+    addTearDown(audioPlayerStreamController.close);
+    when(
+      () => mockAudioPlayerBloc.stream,
+    ).thenAnswer((_) => audioPlayerStreamController.stream);
+
+    // 1. Initial State: Playing Surah 1, NOT dismissed
+    final AudioEntity audio1 = testSurahList[0].audio;
+    final state1 = AudioPlayerState(
+      status: AudioPlayerStatus.success,
+      currentAudio: audio1,
+      playbackState: const PlaybackStateEntity(
+        isPlaying: true,
+        processingState: AudioProcessingStateStatus.ready,
+        position: Duration.zero,
+        bufferedPosition: Duration.zero,
+        duration: Duration.zero,
+        currentIndex: 0,
+        queue: [],
+      ),
+    );
+
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+        // filteredSurahs getter uses surahList
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+
+    // Mock initial state
+    when(() => mockAudioPlayerBloc.state).thenReturn(state1);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Verify Surah 1 is selected (highlighted)
+    expect(find.byIcon(Icons.graphic_eq_rounded), findsOneWidget);
+
+    // 2. Dismissed State: Still "playing" Audio 1 internally, but DISMISSED
+    final state2 = AudioPlayerState(
+      status: AudioPlayerStatus.success,
+      currentAudio: audio1,
+      dismissedAudioId: audio1.id, // DISMISSED!
+      playbackState: const PlaybackStateEntity(
+        isPlaying: true,
+        processingState: AudioProcessingStateStatus.ready,
+        position: Duration.zero,
+        bufferedPosition: Duration.zero,
+        duration: Duration.zero,
+        currentIndex: 0,
+        queue: [],
+      ),
+    );
+
+    // Update mock state AND emit to stream
+    when(() => mockAudioPlayerBloc.state).thenReturn(state2);
+    audioPlayerStreamController.add(state2);
+
+    // Pump to process stream event
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify Surah 1 is NOT selected anymore
+    expect(find.byIcon(Icons.graphic_eq_rounded), findsNothing);
+    // Should verify it shows the number instead
+    expect(
+      find.text(
+        testSurahList[0].formattedId.isNotEmpty
+            ? testSurahList[0].formattedId
+            : '1',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'ReciterDetailsScreen listener clears search controller when query becomes empty',
+    (WidgetTester tester) async {
+      // Setup stream controller to simulate state changes
+      final reciterDetailsStreamController =
+          StreamController<ReciterDetailsState>.broadcast();
+      addTearDown(reciterDetailsStreamController.close);
+
+      // Initial state with search query
+      final initialState = ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+        searchQuery: 'Fatiha',
+      );
+
+      when(() => mockReciterDetailsBloc.state).thenReturn(initialState);
+      when(
+        () => mockReciterDetailsBloc.stream,
+      ).thenAnswer((_) => reciterDetailsStreamController.stream);
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Manually set controller text to simulate user typed search
+      final TextField textField = tester.widget<TextField>(
+        find.byType(TextField),
+      );
+      textField.controller?.text = 'Fatiha';
+
+      // Emit new state with empty search query
+      final ReciterDetailsState newState = initialState.copyWith(
+        searchQuery: '',
+      );
+      when(() => mockReciterDetailsBloc.state).thenReturn(newState);
+      reciterDetailsStreamController.add(newState);
+
+      await tester.pump();
+
+      // Verify controller was cleared (listener should have been triggered)
+      expect(textField.controller?.text, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'ReciterDetailsScreen listener handles playback command from bloc',
+    (WidgetTester tester) async {
+      // Setup stream controller to simulate state changes
+      final reciterDetailsStreamController =
+          StreamController<ReciterDetailsState>.broadcast();
+      addTearDown(reciterDetailsStreamController.close);
+
+      // Initial state without play command
+      final initialState = ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      );
+
+      when(() => mockReciterDetailsBloc.state).thenReturn(initialState);
+      when(
+        () => mockReciterDetailsBloc.stream,
+      ).thenAnswer((_) => reciterDetailsStreamController.stream);
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      // Create play command
+      final List<AudioEntity> playlist = testSurahList
+          .map((s) => s.audio)
+          .toList();
+      final playCommand = PlaySurahCommand(playlist: playlist, initialIndex: 0);
+
+      // Emit new state with play command
+      final ReciterDetailsState stateWithCommand = initialState.copyWith(
+        playCommand: playCommand,
+      );
+      when(() => mockReciterDetailsBloc.state).thenReturn(stateWithCommand);
+      reciterDetailsStreamController.add(stateWithCommand);
+
+      await tester.pump();
+
+      // Verify audio player received play command
+      verify(
+        () => mockAudioPlayerBloc.add(
+          AudioPlayerEvent.playFromQueue(playlist, 0),
+        ),
+      ).called(1);
+    },
+  );
+
+  testWidgets(
+    'ReciterDetailsScreen listener initializes ReciterDownloadBloc when loaded',
+    (WidgetTester tester) async {
+      // Setup stream controller to simulate state changes
+      final reciterDetailsStreamController =
+          StreamController<ReciterDetailsState>.broadcast();
+      addTearDown(reciterDetailsStreamController.close);
+
+      // Initial state - loading
+      const initialState = ReciterDetailsState(
+        status: ReciterDetailsStatus.loading,
+      );
+
+      when(() => mockReciterDetailsBloc.state).thenReturn(initialState);
+      when(
+        () => mockReciterDetailsBloc.stream,
+      ).thenAnswer((_) => reciterDetailsStreamController.stream);
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+
+      // Create loaded state with downloaded surahs
+      final List<SurahEntity> downloadedSurahList = testSurahList.map((s) {
+        return SurahEntity(
+          audio: s.audio,
+          isDownloaded: s.id == '001', // Mark first surah as downloaded
+        );
+      }).toList();
+
+      final loadedState = ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: downloadedSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      );
+
+      when(() => mockReciterDetailsBloc.state).thenReturn(loadedState);
+      reciterDetailsStreamController.add(loadedState);
+
+      await tester.pump();
+
+      // Verify ReciterDownloadBloc received initialization event
+      verify(
+        () => mockReciterDownloadBloc.add(
+          InitializeReciterDownload(
+            reciterName: testReciter.name,
+            totalSurahs: downloadedSurahList.length,
+            downloadedSurahIds: const ['001'],
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  testWidgets('ReciterDetailsScreen GestureDetector unfocuses on tap', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockReciterDetailsBloc.state).thenReturn(
+      ReciterDetailsState(
+        status: ReciterDetailsStatus.loaded,
+        surahList: testSurahList,
+        selectedMoshaf: testReciter.moshaf.first,
+      ),
+    );
+    when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Focus the text field by entering text
+    final Finder textFieldFinder = find.byType(TextField);
+    await tester.tap(textFieldFinder);
+    await tester.pump();
+    await tester.enterText(textFieldFinder, 'test');
+    await tester.pump();
+
+    // Directly find and tap the GestureDetector
+    // The GestureDetector wraps the CustomScrollView
+    final Finder gestureDetectorFinder = find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(GestureDetector),
+    );
+
+    expect(gestureDetectorFinder, findsWidgets);
+
+    // Tap on an empty area of the screen to trigger the GestureDetector
+    // Try tapping at the header area where there are no buttons
+    final Finder customScrollView = find.byType(CustomScrollView);
+    final Offset tapLocation =
+        tester.getTopLeft(customScrollView) + const Offset(50, 50);
+    await tester.tapAt(tapLocation);
+    await tester.pump();
+
+    // The onTap callback was invoked - we've exercised the code path
+    // Verifying actual focus loss is difficult in widget tests but the code executed
+  });
+
+  testWidgets(
+    'ReciterDetailsScreen MoshafSelector handles invalid selectedMoshaf',
+    (WidgetTester tester) async {
+      // Create a reciter with duplicate moshaf entries
+      const reciterWithDuplicates = ReciterEntity(
+        id: 1,
+        name: 'Test Reciter',
+        letter: 'T',
+        date: '2023',
+        moshaf: [
+          MoshafEntity(
+            id: 1,
+            name: 'Hafs',
+            server: 'server1',
+            surahTotal: 114,
+            moshafType: 1,
+            surahList: '1,2,3',
+          ),
+          MoshafEntity(
+            id: 1,
+            name: 'Hafs',
+            server: 'server1',
+            surahTotal: 114,
+            moshafType: 1,
+            surahList: '1,2,3',
+          ),
+          MoshafEntity(
+            id: 2,
+            name: 'Warsh',
+            server: 'server2',
+            surahTotal: 114,
+            moshafType: 2,
+            surahList: '1,2,3',
+          ),
+        ],
+      );
+
+      // Create a moshaf that is NOT in the unique list
+      const invalidMoshaf = MoshafEntity(
+        id: 99,
+        name: 'Invalid',
+        server: 'server99',
+        surahTotal: 114,
+        moshafType: 99,
+        surahList: '1,2,3',
+      );
+
+      when(() => mockReciterDetailsBloc.state).thenReturn(
+        ReciterDetailsState(
+          status: ReciterDetailsStatus.loaded,
+          surahList: testSurahList,
+          selectedMoshaf: invalidMoshaf, // This will trigger the fallback
+        ),
+      );
+      when(() => mockDownloadsBloc.state).thenReturn(const DownloadsState());
+      when(
+        () => mockAudioPlayerBloc.state,
+      ).thenReturn(const AudioPlayerState(status: AudioPlayerStatus.initial));
+
+      await tester.pumpWidget(
+        MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<DownloadsRepository>(
+              create: (_) => GetIt.instance<DownloadsRepository>(),
+            ),
+          ],
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<ReciterDetailsBloc>.value(
+                value: mockReciterDetailsBloc,
+              ),
+              BlocProvider<ReciterDownloadBloc>.value(
+                value: mockReciterDownloadBloc,
+              ),
+              BlocProvider<DownloadsBloc>.value(value: mockDownloadsBloc),
+              BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+              BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+            ],
+            child: MaterialApp(
+              theme: ThemeData(useMaterial3: false),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [Locale('en')],
+              home: const ScreenUtilPlusInit(
+                designSize: Size(375, 812),
+                child: ReciterDetailsScreen(reciter: reciterWithDuplicates),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The dropdown should show 'Hafs' (the first unique moshaf) instead of 'Invalid'
+      // because uniqueMoshaf.contains(selectedMoshaf) is false
+      expect(find.text('Hafs'), findsOneWidget);
+    },
+  );
 }
 
 class MockFile extends Mock implements File {

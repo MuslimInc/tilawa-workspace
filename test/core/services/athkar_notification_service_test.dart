@@ -417,13 +417,7 @@ class TestTimezoneAthkarNotificationService extends AthkarNotificationService {
 }
 
 class TestInvalidTimezoneAthkarNotificationService
-    extends AthkarNotificationService {
-  @override
-  Future<String?> _getLocalTimeZone() async {
-    // Return an invalid timezone name that will cause getLocation to throw
-    return 'InvalidTimeZone/DoesNotExist';
-  }
-}
+    extends AthkarNotificationService {}
 
 class TestTimezoneErrorAthkarNotificationService
     extends AthkarNotificationService {

@@ -28,7 +28,14 @@ import 'router/app_router.dart';
 
 final logger = Logger();
 
-Future<void> main() async {
+@visibleForTesting
+Future<void> bootstrap({
+  Function(Widget)? runner,
+  Future<void> Function()? diConfigurator,
+}) async {
+  final void Function(Widget) run = runner ?? runApp;
+  final Future<void> Function() configureDI =
+      diConfigurator ?? configureDependencies;
   // Wrap entire main in try-catch for catastrophic failures
   try {
     WidgetsFlutterBinding.ensureInitialized();
@@ -48,9 +55,7 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
       logger.d('Firebase initialized successfully');
     } catch (e, stackTrace) {
       logger.d('CRITICAL: Firebase initialization failed: $e');
@@ -60,7 +65,7 @@ Future<void> main() async {
 
     // Initialize DI container
     try {
-      await configureDependencies();
+      await configureDI();
       logger.d('DI container initialized successfully');
     } catch (e, stackTrace) {
       logger.d('CRITICAL: DI initialization failed: $e');
@@ -71,7 +76,7 @@ Future<void> main() async {
 
     // Initialize HydratedStorage (needed for BLoC state persistence)
     try {
-      await _initializeHydratedStorage();
+      await initializeHydratedStorage();
     } catch (e) {
       logger.d('Warning: HydratedStorage initialization failed: $e');
       // App can work without state persistence
@@ -79,7 +84,7 @@ Future<void> main() async {
 
     // Initialize Crashlytics (catches all errors from app start)
     try {
-      await _initializeCrashlytics();
+      await initializeCrashlytics();
     } catch (e) {
       logger.d('Warning: Crashlytics initialization failed: $e');
       // App can work without crash reporting
@@ -90,20 +95,20 @@ Future<void> main() async {
     // ========================================================================
     // APP STARTS HERE - User sees UI immediately!
     // ========================================================================
-    runApp(const QuranPlayerApp());
+    run(const QuranPlayerApp());
 
     // ========================================================================
     // NON-CRITICAL: Initialize in background after app is visible
     // ========================================================================
-    _initializeNonCriticalServices();
+    initializeNonCriticalServices();
   } catch (e, stackTrace) {
     // Catastrophic failure - log and try to start app anyway
-    logger.d('CATASTROPHIC ERROR in main(): $e');
+    logger.d('CATASTROPHIC ERROR in bootstrap(): $e');
     logger.d('Stack trace: $stackTrace');
 
     // Last resort: try to start the app with minimal initialization
     try {
-      runApp(const QuranPlayerApp());
+      run(const QuranPlayerApp());
     } catch (appError) {
       logger.d('Failed to start app: $appError');
       // At this point, nothing we can do
@@ -112,36 +117,41 @@ Future<void> main() async {
   }
 }
 
+Future<void> main() async {
+  await bootstrap();
+}
+
 /// Initialize non-critical services in parallel after app launch
 /// This reduces perceived startup time significantly
-void _initializeNonCriticalServices() {
+@visibleForTesting
+void initializeNonCriticalServices() {
   Future.microtask(() async {
     try {
       // Phase 1: Parallel initialization of independent services
       // Using Dart 3 record-based .wait for clean parallel execution
       await (
-        _initializeCredentialManager(),
-        _initializeAnalytics(),
-        _initializeAppsFlyer(),
-        _initializeLuciq(),
+        initializeCredentialManager(),
+        initializeAnalytics(),
+        initializeAppsFlyer(),
+        initializeLuciq(),
       ).wait;
 
       logger.d('Phase 1 services initialized (parallel)');
 
       // Phase 2: Services that depend on user permissions or Phase 1
-      await _requestNotificationPermission();
+      await requestNotificationPermission();
 
       // Phase 3: Parallel initialization of notification & downloads
       await (
-        _initializeNotificationService(),
-        _initializeDownloads(),
-        _initializeAthkarNotifications(),
+        initializeNotificationService(),
+        initializeDownloads(),
+        initializeAthkarNotifications(),
       ).wait;
 
       logger.d('Phase 2 & 3 services initialized');
 
       // Phase 4: Firebase data (lowest priority, fire-and-forget)
-      _initializeFirebaseDataAsync();
+      await initializeFirebaseDataAsync();
 
       logger.d('All non-critical services initialized successfully');
     } catch (e) {
@@ -152,12 +162,13 @@ void _initializeNonCriticalServices() {
 }
 
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 /// Initialize Notification Service
-Future<void> _initializeNotificationService() async {
+@visibleForTesting
+Future<void> initializeNotificationService() async {
   try {
     final NotificationsRepository notificationsRepository =
         getIt<NotificationsRepository>();
@@ -171,7 +182,8 @@ Future<void> _initializeNotificationService() async {
 }
 
 /// Initialize HydratedStorage for bloc state persistence
-Future<void> _initializeHydratedStorage() async {
+@visibleForTesting
+Future<void> initializeHydratedStorage() async {
   try {
     HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: kIsWeb
@@ -186,7 +198,8 @@ Future<void> _initializeHydratedStorage() async {
 }
 
 /// Initialize Credential Manager with Google Client ID
-Future<void> _initializeCredentialManager() async {
+@visibleForTesting
+Future<void> initializeCredentialManager() async {
   try {
     final CredentialManager credentialManager = getIt<CredentialManager>();
     await credentialManager.init(
@@ -200,7 +213,8 @@ Future<void> _initializeCredentialManager() async {
 }
 
 /// Initialize Crashlytics
-Future<void> _initializeCrashlytics() async {
+@visibleForTesting
+Future<void> initializeCrashlytics() async {
   try {
     final CrashlyticsService crashlyticsService = getIt<CrashlyticsService>();
     await crashlyticsService.initialize();
@@ -211,7 +225,8 @@ Future<void> _initializeCrashlytics() async {
 }
 
 /// Initialize Analytics
-Future<void> _initializeAnalytics() async {
+@visibleForTesting
+Future<void> initializeAnalytics() async {
   try {
     final AnalyticsInitializationService analyticsInitService =
         getIt<AnalyticsInitializationService>();
@@ -223,7 +238,8 @@ Future<void> _initializeAnalytics() async {
 }
 
 /// Request notification permission on first launch
-Future<void> _requestNotificationPermission() async {
+@visibleForTesting
+Future<void> requestNotificationPermission() async {
   try {
     final NotificationPermissionService notificationPermissionService =
         getIt<NotificationPermissionService>();
@@ -235,20 +251,20 @@ Future<void> _requestNotificationPermission() async {
 }
 
 /// Initialize Firebase data asynchronously to avoid blocking main thread
-void _initializeFirebaseDataAsync() {
-  Future.microtask(() async {
-    try {
-      final FirebaseInitializationService firebaseInitService =
-          getIt<FirebaseInitializationService>();
-      await firebaseInitService.initializeFirebaseData();
-    } catch (e) {
-      logger.d('Warning: Could not initialize Firebase data: $e');
-    }
-  });
+@visibleForTesting
+Future<void> initializeFirebaseDataAsync() async {
+  try {
+    final FirebaseInitializationService firebaseInitService =
+        getIt<FirebaseInitializationService>();
+    await firebaseInitService.initializeFirebaseData();
+  } catch (e) {
+    logger.d('Warning: Could not initialize Firebase data: $e');
+  }
 }
 
 /// Initialize downloads feature
-Future<void> _initializeDownloads() async {
+@visibleForTesting
+Future<void> initializeDownloads() async {
   try {
     final DownloadsInitializationService downloadsInitService =
         getIt<DownloadsInitializationService>();
@@ -259,7 +275,8 @@ Future<void> _initializeDownloads() async {
 }
 
 /// Initialize AppsFlyer attribution tracking
-Future<void> _initializeAppsFlyer() async {
+@visibleForTesting
+Future<void> initializeAppsFlyer() async {
   try {
     final AppsFlyerService appsFlyerService = getIt<AppsFlyerService>();
     await appsFlyerService.initialize();
@@ -271,7 +288,8 @@ Future<void> _initializeAppsFlyer() async {
 }
 
 /// Initialize Luciq bug reporting
-Future<void> _initializeLuciq() async {
+@visibleForTesting
+Future<void> initializeLuciq() async {
   try {
     final LuciqService luciqService = getIt<LuciqService>();
     await luciqService.initialize();
@@ -282,7 +300,8 @@ Future<void> _initializeLuciq() async {
 }
 
 /// Initialize athkar notification scheduling
-Future<void> _initializeAthkarNotifications() async {
+@visibleForTesting
+Future<void> initializeAthkarNotifications() async {
   try {
     final AthkarNotificationService athkarService =
         getIt<AthkarNotificationService>();

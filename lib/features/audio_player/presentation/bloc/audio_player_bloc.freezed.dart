@@ -2078,6 +2078,7 @@ class AudioTimerExpired implements AudioPlayerEvent {
 
 /// @nodoc
 mixin _$AudioPlayerState {
+  AudioPlayerStatus get status;
   AudioEntity? get currentAudio;
   PlaybackStateEntity? get playbackState;
   PositionData? get positionData;
@@ -2087,7 +2088,7 @@ mixin _$AudioPlayerState {
   AudioShuffleMode get shuffleMode;
   DateTime? get sleepTimerTargetTime;
   Duration? get lastSleepTimerDuration;
-  AudioPlayerStatus get status;
+  String? get dismissedAudioId;
 
   /// Create a copy of AudioPlayerState
   /// with the given fields replaced by the non-null parameter values.
@@ -2107,6 +2108,7 @@ mixin _$AudioPlayerState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AudioPlayerState &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.currentAudio, currentAudio) ||
                 other.currentAudio == currentAudio) &&
             (identical(other.playbackState, playbackState) ||
@@ -2123,13 +2125,15 @@ mixin _$AudioPlayerState {
                 other.sleepTimerTargetTime == sleepTimerTargetTime) &&
             (identical(other.lastSleepTimerDuration, lastSleepTimerDuration) ||
                 other.lastSleepTimerDuration == lastSleepTimerDuration) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.dismissedAudioId, dismissedAudioId) ||
+                other.dismissedAudioId == dismissedAudioId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    status,
     currentAudio,
     playbackState,
     positionData,
@@ -2139,12 +2143,12 @@ mixin _$AudioPlayerState {
     shuffleMode,
     sleepTimerTargetTime,
     lastSleepTimerDuration,
-    status,
+    dismissedAudioId,
   );
 
   @override
   String toString() {
-    return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, status: $status)';
+    return 'AudioPlayerState(status: $status, currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, dismissedAudioId: $dismissedAudioId)';
   }
 }
 
@@ -2156,6 +2160,7 @@ abstract mixin class $AudioPlayerStateCopyWith<$Res> {
   ) = _$AudioPlayerStateCopyWithImpl;
   @useResult
   $Res call({
+    AudioPlayerStatus status,
     AudioEntity? currentAudio,
     PlaybackStateEntity? playbackState,
     PositionData? positionData,
@@ -2165,7 +2170,7 @@ abstract mixin class $AudioPlayerStateCopyWith<$Res> {
     AudioShuffleMode shuffleMode,
     DateTime? sleepTimerTargetTime,
     Duration? lastSleepTimerDuration,
-    AudioPlayerStatus status,
+    String? dismissedAudioId,
   });
 
   $AudioEntityCopyWith<$Res>? get currentAudio;
@@ -2186,6 +2191,7 @@ class _$AudioPlayerStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? status = null,
     Object? currentAudio = freezed,
     Object? playbackState = freezed,
     Object? positionData = freezed,
@@ -2195,10 +2201,14 @@ class _$AudioPlayerStateCopyWithImpl<$Res>
     Object? shuffleMode = null,
     Object? sleepTimerTargetTime = freezed,
     Object? lastSleepTimerDuration = freezed,
-    Object? status = null,
+    Object? dismissedAudioId = freezed,
   }) {
     return _then(
       _self.copyWith(
+        status: null == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as AudioPlayerStatus,
         currentAudio: freezed == currentAudio
             ? _self.currentAudio
             : currentAudio // ignore: cast_nullable_to_non_nullable
@@ -2235,10 +2245,10 @@ class _$AudioPlayerStateCopyWithImpl<$Res>
             ? _self.lastSleepTimerDuration
             : lastSleepTimerDuration // ignore: cast_nullable_to_non_nullable
                   as Duration?,
-        status: null == status
-            ? _self.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as AudioPlayerStatus,
+        dismissedAudioId: freezed == dismissedAudioId
+            ? _self.dismissedAudioId
+            : dismissedAudioId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -2380,6 +2390,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
+      AudioPlayerStatus status,
       AudioEntity? currentAudio,
       PlaybackStateEntity? playbackState,
       PositionData? positionData,
@@ -2389,7 +2400,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
       AudioShuffleMode shuffleMode,
       DateTime? sleepTimerTargetTime,
       Duration? lastSleepTimerDuration,
-      AudioPlayerStatus status,
+      String? dismissedAudioId,
     )?
     $default, {
     required TResult orElse(),
@@ -2398,6 +2409,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
     switch (_that) {
       case _AudioPlayerState() when $default != null:
         return $default(
+          _that.status,
           _that.currentAudio,
           _that.playbackState,
           _that.positionData,
@@ -2407,7 +2419,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
           _that.shuffleMode,
           _that.sleepTimerTargetTime,
           _that.lastSleepTimerDuration,
-          _that.status,
+          _that.dismissedAudioId,
         );
       case _:
         return orElse();
@@ -2430,6 +2442,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
+      AudioPlayerStatus status,
       AudioEntity? currentAudio,
       PlaybackStateEntity? playbackState,
       PositionData? positionData,
@@ -2439,7 +2452,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
       AudioShuffleMode shuffleMode,
       DateTime? sleepTimerTargetTime,
       Duration? lastSleepTimerDuration,
-      AudioPlayerStatus status,
+      String? dismissedAudioId,
     )
     $default,
   ) {
@@ -2447,6 +2460,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
     switch (_that) {
       case _AudioPlayerState():
         return $default(
+          _that.status,
           _that.currentAudio,
           _that.playbackState,
           _that.positionData,
@@ -2456,7 +2470,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
           _that.shuffleMode,
           _that.sleepTimerTargetTime,
           _that.lastSleepTimerDuration,
-          _that.status,
+          _that.dismissedAudioId,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -2478,6 +2492,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
+      AudioPlayerStatus status,
       AudioEntity? currentAudio,
       PlaybackStateEntity? playbackState,
       PositionData? positionData,
@@ -2487,7 +2502,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
       AudioShuffleMode shuffleMode,
       DateTime? sleepTimerTargetTime,
       Duration? lastSleepTimerDuration,
-      AudioPlayerStatus status,
+      String? dismissedAudioId,
     )?
     $default,
   ) {
@@ -2495,6 +2510,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
     switch (_that) {
       case _AudioPlayerState() when $default != null:
         return $default(
+          _that.status,
           _that.currentAudio,
           _that.playbackState,
           _that.positionData,
@@ -2504,7 +2520,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
           _that.shuffleMode,
           _that.sleepTimerTargetTime,
           _that.lastSleepTimerDuration,
-          _that.status,
+          _that.dismissedAudioId,
         );
       case _:
         return null;
@@ -2517,6 +2533,7 @@ extension AudioPlayerStatePatterns on AudioPlayerState {
 @JsonSerializable(explicitToJson: true)
 class _AudioPlayerState extends AudioPlayerState {
   const _AudioPlayerState({
+    required this.status,
     this.currentAudio,
     this.playbackState,
     this.positionData,
@@ -2526,11 +2543,13 @@ class _AudioPlayerState extends AudioPlayerState {
     this.shuffleMode = AudioShuffleMode.none,
     this.sleepTimerTargetTime,
     this.lastSleepTimerDuration,
-    required this.status,
+    this.dismissedAudioId,
   }) : super._();
   factory _AudioPlayerState.fromJson(Map<String, dynamic> json) =>
       _$AudioPlayerStateFromJson(json);
 
+  @override
+  final AudioPlayerStatus status;
   @override
   final AudioEntity? currentAudio;
   @override
@@ -2554,7 +2573,7 @@ class _AudioPlayerState extends AudioPlayerState {
   @override
   final Duration? lastSleepTimerDuration;
   @override
-  final AudioPlayerStatus status;
+  final String? dismissedAudioId;
 
   /// Create a copy of AudioPlayerState
   /// with the given fields replaced by the non-null parameter values.
@@ -2574,6 +2593,7 @@ class _AudioPlayerState extends AudioPlayerState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _AudioPlayerState &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.currentAudio, currentAudio) ||
                 other.currentAudio == currentAudio) &&
             (identical(other.playbackState, playbackState) ||
@@ -2590,13 +2610,15 @@ class _AudioPlayerState extends AudioPlayerState {
                 other.sleepTimerTargetTime == sleepTimerTargetTime) &&
             (identical(other.lastSleepTimerDuration, lastSleepTimerDuration) ||
                 other.lastSleepTimerDuration == lastSleepTimerDuration) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.dismissedAudioId, dismissedAudioId) ||
+                other.dismissedAudioId == dismissedAudioId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    status,
     currentAudio,
     playbackState,
     positionData,
@@ -2606,12 +2628,12 @@ class _AudioPlayerState extends AudioPlayerState {
     shuffleMode,
     sleepTimerTargetTime,
     lastSleepTimerDuration,
-    status,
+    dismissedAudioId,
   );
 
   @override
   String toString() {
-    return 'AudioPlayerState(currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, status: $status)';
+    return 'AudioPlayerState(status: $status, currentAudio: $currentAudio, playbackState: $playbackState, positionData: $positionData, volume: $volume, speed: $speed, repeatMode: $repeatMode, shuffleMode: $shuffleMode, sleepTimerTargetTime: $sleepTimerTargetTime, lastSleepTimerDuration: $lastSleepTimerDuration, dismissedAudioId: $dismissedAudioId)';
   }
 }
 
@@ -2625,6 +2647,7 @@ abstract mixin class _$AudioPlayerStateCopyWith<$Res>
   @override
   @useResult
   $Res call({
+    AudioPlayerStatus status,
     AudioEntity? currentAudio,
     PlaybackStateEntity? playbackState,
     PositionData? positionData,
@@ -2634,7 +2657,7 @@ abstract mixin class _$AudioPlayerStateCopyWith<$Res>
     AudioShuffleMode shuffleMode,
     DateTime? sleepTimerTargetTime,
     Duration? lastSleepTimerDuration,
-    AudioPlayerStatus status,
+    String? dismissedAudioId,
   });
 
   @override
@@ -2658,6 +2681,7 @@ class __$AudioPlayerStateCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? status = null,
     Object? currentAudio = freezed,
     Object? playbackState = freezed,
     Object? positionData = freezed,
@@ -2667,10 +2691,14 @@ class __$AudioPlayerStateCopyWithImpl<$Res>
     Object? shuffleMode = null,
     Object? sleepTimerTargetTime = freezed,
     Object? lastSleepTimerDuration = freezed,
-    Object? status = null,
+    Object? dismissedAudioId = freezed,
   }) {
     return _then(
       _AudioPlayerState(
+        status: null == status
+            ? _self.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as AudioPlayerStatus,
         currentAudio: freezed == currentAudio
             ? _self.currentAudio
             : currentAudio // ignore: cast_nullable_to_non_nullable
@@ -2707,10 +2735,10 @@ class __$AudioPlayerStateCopyWithImpl<$Res>
             ? _self.lastSleepTimerDuration
             : lastSleepTimerDuration // ignore: cast_nullable_to_non_nullable
                   as Duration?,
-        status: null == status
-            ? _self.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as AudioPlayerStatus,
+        dismissedAudioId: freezed == dismissedAudioId
+            ? _self.dismissedAudioId
+            : dismissedAudioId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

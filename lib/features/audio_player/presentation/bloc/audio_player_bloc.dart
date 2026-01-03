@@ -179,6 +179,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       state.copyWith(
         status: AudioPlayerStatus.success,
         currentAudio: event.audio,
+        // Preserve dismissedAudioId.
+        // Logic: specific ID is dismissed until explicitly played or cleared.
       ),
     );
   }
@@ -187,10 +189,14 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     UpdatePlaybackStateEntity event,
     Emitter<AudioPlayerState> emit,
   ) {
+    // If we start playing, always un-dismiss
+    final bool isPlaying = event.playbackState.isPlaying;
+
     emit(
       state.copyWith(
         status: AudioPlayerStatus.success,
         playbackState: event.playbackState,
+        dismissedAudioId: isPlaying ? null : state.dismissedAudioId,
       ),
     );
   }
@@ -222,6 +228,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     PlayAudio event,
     Emitter<AudioPlayerState> emit,
   ) async {
+    // Optimistically un-dismiss when play is requested
+    emit(state.copyWith(dismissedAudioId: null));
     await _playAudio();
     // Start sleep timer if a duration was previously selected and feature is enabled
     if (_settingsCubit.state.isSleepTimerEnabled &&
@@ -249,10 +257,12 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         emit(state.copyWith());
       },
       (success) async {
+        // Change status to initial and mark current audio as dismissed.
+        // We preserve currentAudio to ensure we know "which" audio was dismissed.
         emit(
-          AudioPlayerState(
+          state.copyWith(
             status: AudioPlayerStatus.initial,
-            lastSleepTimerDuration: state.lastSleepTimerDuration,
+            dismissedAudioId: state.currentAudio?.id,
           ),
         );
       },

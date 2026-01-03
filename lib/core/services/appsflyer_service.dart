@@ -193,14 +193,14 @@ class AppsFlyerServiceImpl implements AppsFlyerService {
   /// Set up callbacks for attribution and deep linking
   void _setupCallbacks() {
     // Conversion data callback (install attribution)
-    _appsflyerSdk.onInstallConversionData((Map<String, dynamic> data) {
+    _appsflyerSdk.onInstallConversionData((dynamic data) {
       logger.d('AppsFlyer install conversion data: $data');
       // Handle attribution data here
       // Example: Check if user came from specific campaign
     });
 
     // App open attribution callback (deep linking)
-    _appsflyerSdk.onAppOpenAttribution((Map<String, dynamic> data) {
+    _appsflyerSdk.onAppOpenAttribution((dynamic data) {
       logger.d('AppsFlyer app open attribution: $data');
       // Handle deep linking data here
     });

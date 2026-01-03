@@ -8,6 +8,7 @@ part of 'audio_player_bloc.dart';
 
 _AudioPlayerState _$AudioPlayerStateFromJson(Map<String, dynamic> json) =>
     _AudioPlayerState(
+      status: $enumDecode(_$AudioPlayerStatusEnumMap, json['status']),
       currentAudio: json['currentAudio'] == null
           ? null
           : AudioEntity.fromJson(json['currentAudio'] as Map<String, dynamic>),
@@ -35,11 +36,12 @@ _AudioPlayerState _$AudioPlayerStateFromJson(Map<String, dynamic> json) =>
           : Duration(
               microseconds: (json['lastSleepTimerDuration'] as num).toInt(),
             ),
-      status: $enumDecode(_$AudioPlayerStatusEnumMap, json['status']),
+      dismissedAudioId: json['dismissedAudioId'] as String?,
     );
 
 Map<String, dynamic> _$AudioPlayerStateToJson(_AudioPlayerState instance) =>
     <String, dynamic>{
+      'status': _$AudioPlayerStatusEnumMap[instance.status]!,
       'currentAudio': instance.currentAudio?.toJson(),
       'playbackState': instance.playbackState?.toJson(),
       'positionData': instance.positionData?.toJson(),
@@ -49,8 +51,14 @@ Map<String, dynamic> _$AudioPlayerStateToJson(_AudioPlayerState instance) =>
       'shuffleMode': _$AudioShuffleModeEnumMap[instance.shuffleMode]!,
       'sleepTimerTargetTime': instance.sleepTimerTargetTime?.toIso8601String(),
       'lastSleepTimerDuration': instance.lastSleepTimerDuration?.inMicroseconds,
-      'status': _$AudioPlayerStatusEnumMap[instance.status]!,
+      'dismissedAudioId': instance.dismissedAudioId,
     };
+
+const _$AudioPlayerStatusEnumMap = {
+  AudioPlayerStatus.initial: 'initial',
+  AudioPlayerStatus.loading: 'loading',
+  AudioPlayerStatus.success: 'success',
+};
 
 const _$AudioRepeatModeEnumMap = {
   AudioRepeatMode.none: 'none',
@@ -61,10 +69,4 @@ const _$AudioRepeatModeEnumMap = {
 const _$AudioShuffleModeEnumMap = {
   AudioShuffleMode.none: 'none',
   AudioShuffleMode.all: 'all',
-};
-
-const _$AudioPlayerStatusEnumMap = {
-  AudioPlayerStatus.initial: 'initial',
-  AudioPlayerStatus.loading: 'loading',
-  AudioPlayerStatus.success: 'success',
 };
