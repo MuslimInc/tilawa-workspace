@@ -22,6 +22,7 @@ import 'core/services/luciq_service.dart';
 import 'core/services/notification_permission_service.dart';
 import 'features/downloads/data/services/downloads_initialization_service.dart';
 import 'features/notifications/domain/repositories/notifications_repository.dart';
+import 'features/notifications/presentation/services/fcm_service.dart';
 import 'firebase_options.dart';
 import 'quran_player_app.dart';
 import 'router/app_router.dart';
@@ -175,9 +176,15 @@ Future<void> initializeNotificationService() async {
     await notificationsRepository.requestPermission();
     await notificationsRepository.getToken();
     await notificationsRepository.initializeListeners();
-    logger.d('Notification Repository initialized successfully');
+
+    final FCMService fcmService = getIt<FCMService>();
+    fcmService.initialize();
+
+    logger.d(
+      'Notification Repository and FCM Service initialized successfully',
+    );
   } catch (e) {
-    logger.d('Warning: Could not initialize Notification Repository: $e');
+    logger.d('Warning: Could not initialize Notification services: $e');
   }
 }
 

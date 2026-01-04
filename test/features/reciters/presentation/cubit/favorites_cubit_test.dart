@@ -171,6 +171,34 @@ void main() {
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
+      'ignores subsequent calls while a toggle is pending (debouncing)',
+      build: () {
+        when(mockToggleFavorite(any)).thenAnswer((_) async {
+          // Simulate network delay
+          await Future.delayed(const Duration(milliseconds: 100));
+          return const Right(null);
+        });
+        return cubit;
+      },
+      seed: () => const FavoritesLoaded(favorites: [], favoriteIds: {}),
+      act: (cubit) async {
+        // Fire twice rapidly
+        cubit.toggleFavorite(tReciter);
+        cubit.toggleFavorite(tReciter);
+        // Wait for potential completion
+        await Future.delayed(const Duration(milliseconds: 200));
+      },
+      expect: () => [
+        // Expect only one optimistic update
+        const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      ],
+      verify: (_) {
+        // usecase should only be called once
+        verify(mockToggleFavorite(1)).called(1);
+      },
+    );
+
+    blocTest<FavoritesCubit, FavoritesState>(
       'handles toggle when state is not FavoritesLoaded (covers fallback)',
       build: () {
         when(

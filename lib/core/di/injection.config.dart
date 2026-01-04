@@ -45,8 +45,6 @@ import 'package:tilawa/core/services/notification_permission_service.dart'
 import 'package:tilawa/core/services/user_email_service.dart' as _i597;
 import 'package:tilawa/core/wrappers/location_service_wrapper.dart' as _i527;
 import 'package:tilawa/core/wrappers/qibla_service_wrapper.dart' as _i119;
-import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
-    as _i895;
 import 'package:tilawa/features/athkar/data/datasources/athkar_local_datasource.dart'
     as _i650;
 import 'package:tilawa/features/athkar/data/repositories/athkar_repository_impl.dart'
@@ -71,6 +69,7 @@ import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_u
     as _i902;
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart'
     as _i433;
+import 'package:tilawa/features/auth/data/auth_service.dart' as _i610;
 import 'package:tilawa/features/auth/data/providers/auth_provider_factory.dart'
     as _i399;
 import 'package:tilawa/features/auth/data/providers/credential_manager_auth_provider.dart'
@@ -198,6 +197,8 @@ import 'package:tilawa/features/notifications/data/repositories/notifications_re
     as _i25;
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart'
     as _i549;
+import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart'
+    as _i1071;
 import 'package:tilawa/features/onboarding/data/repositories/onboarding_repository_impl.dart'
     as _i186;
 import 'package:tilawa/features/onboarding/domain/repositories/onboarding_repository.dart'
@@ -274,6 +275,8 @@ import 'package:tilawa/features/qibla/domain/usecases/request_location_permissio
     as _i649;
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart'
     as _i275;
+import 'package:tilawa/features/reciters/data/datasources/reciters_favorites_datasource.dart'
+    as _i775;
 import 'package:tilawa/features/reciters/data/datasources/reciters_local_datasource.dart'
     as _i831;
 import 'package:tilawa/features/reciters/data/datasources/reciters_remote_datasource.dart'
@@ -288,6 +291,8 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
     as _i362;
 import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart'
     as _i961;
+import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart'
+    as _i300;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i184;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart'
@@ -338,8 +343,8 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final externalDependenciesModule = _$ExternalDependenciesModule();
     final downloadsModule = _$DownloadsModule();
-    gh.factory<_i895.AlphabetScrollbarBloc>(
-      () => _i895.AlphabetScrollbarBloc(),
+    gh.factory<_i300.AlphabetScrollbarBloc>(
+      () => _i300.AlphabetScrollbarBloc(),
     );
     gh.factory<_i884.ThemeCubit>(() => _i884.ThemeCubit());
     gh.singleton<_i974.FirebaseFirestore>(
@@ -490,15 +495,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i614.CredentialManager>(),
       ),
     );
-    gh.lazySingleton<_i371.NotificationsRemoteDataSource>(
-      () => _i371.NotificationsRemoteDataSourceImpl(
-        gh<_i892.FirebaseMessaging>(),
-      ),
-    );
     gh.lazySingleton<_i784.CredentialManagerAuthProvider>(
       () => _i784.CredentialManagerAuthProvider(
         gh<_i59.FirebaseAuth>(),
         gh<_i614.CredentialManager>(),
+      ),
+    );
+    gh.lazySingleton<_i371.NotificationsRemoteDataSource>(
+      () => _i371.NotificationsRemoteDataSourceImpl(
+        gh<_i892.FirebaseMessaging>(),
+        gh<_i974.FirebaseFirestore>(),
       ),
     );
     gh.lazySingleton<_i307.UserRepository>(
@@ -528,6 +534,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i650.AthkarLocalDataSource>(
       () =>
           _i650.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
+    );
+    gh.lazySingleton<_i610.AuthService>(
+      () => _i610.AuthService(auth: gh<_i59.FirebaseAuth>()),
     );
     gh.singleton<_i935.GetDownloadStatusUseCase>(
       () =>
@@ -565,18 +574,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i145.AnalyticsService>(
       () => _i495.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
+    gh.lazySingleton<_i775.RecitersFavoritesDataSource>(
+      () =>
+          _i775.RecitersFavoritesDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
     gh.factory<_i892.CheckOnboardingStatus>(
       () => _i892.CheckOnboardingStatus(gh<_i958.OnboardingRepository>()),
     );
     gh.factory<_i995.CompleteOnboarding>(
       () => _i995.CompleteOnboarding(gh<_i958.OnboardingRepository>()),
-    );
-    gh.lazySingleton<_i1039.RecitersRepository>(
-      () => _i16.RecitersRepositoryImpl(
-        gh<_i259.RecitersRemoteDataSource>(),
-        gh<_i831.RecitersLocalDataSource>(),
-        gh<_i460.SharedPreferencesAsync>(),
-      ),
     );
     gh.lazySingleton<_i652.AthkarRepository>(
       () => _i150.AthkarRepositoryImpl(
@@ -609,6 +615,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i633.SignOut>(() => _i633.SignOut(gh<_i742.AuthRepository>()));
     gh.singleton<_i561.GetCurrentUserUseCase>(
       () => _i561.GetCurrentUserUseCase(gh<_i742.AuthRepository>()),
+    );
+    gh.lazySingleton<_i1039.RecitersRepository>(
+      () => _i16.RecitersRepositoryImpl(
+        gh<_i259.RecitersRemoteDataSource>(),
+        gh<_i831.RecitersLocalDataSource>(),
+        gh<_i775.RecitersFavoritesDataSource>(),
+        gh<_i610.AuthService>(),
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
     );
     gh.lazySingleton<_i210.GetAthkarByCategoryUseCase>(
       () => _i210.GetAthkarByCategoryUseCase(gh<_i652.AthkarRepository>()),
@@ -732,6 +747,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i498.ReciterDetailsLoaderCubit>(
       () => _i498.ReciterDetailsLoaderCubit(gh<_i1039.RecitersRepository>()),
+    );
+    gh.lazySingleton<_i1071.FCMService>(
+      () => _i1071.FCMService(
+        gh<_i610.AuthService>(),
+        gh<_i648.SyncDeviceTokenUseCase>(),
+        gh<_i172.DeviceTokenService>(),
+      ),
     );
     gh.lazySingleton<_i183.BatchDownloadManager>(
       () => _i183.BatchDownloadManager(
