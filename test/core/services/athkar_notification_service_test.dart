@@ -67,6 +67,10 @@ void main() {
       ).thenAnswer((_) async {});
 
       when(mockNotificationsPlugin.cancel(any)).thenAnswer((_) async {});
+
+      when(
+        mockNotificationsPlugin.getNotificationAppLaunchDetails(),
+      ).thenAnswer((_) async => null);
     });
 
     // Reset config after tests
@@ -155,6 +159,32 @@ void main() {
         service.notifications = mockNotificationsPlugin;
 
         await service.initialize(); // Should not throw and fallback to UTC
+      });
+
+      test('should handle app launch from notification', () async {
+        const response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 1001,
+        );
+
+        when(
+          mockNotificationsPlugin.getNotificationAppLaunchDetails(),
+        ).thenAnswer(
+          (_) async => const NotificationAppLaunchDetails(
+            true,
+            notificationResponse: response,
+          ),
+        );
+
+        await service.initialize();
+
+        // Since handleNotificationResponse calls the router, and we can't easily mock the router
+        // in this unit test without refactoring, we mainly verify that getNotificationAppLaunchDetails was called.
+        // In a real integration test, we would verify navigation.
+        verify(
+          mockNotificationsPlugin.getNotificationAppLaunchDetails(),
+        ).called(1);
       });
     });
 
@@ -337,6 +367,55 @@ void main() {
         ).thenThrow(Exception('Test scheduling failed'));
 
         await service.scheduleTestNotification(); // Should not throw
+      });
+    });
+
+    group('scheduleDebugAthkarNotification', () {
+      test('should schedule debug morning athkar', () async {
+        await service.scheduleDebugAthkarNotification(isMorning: true);
+
+        verify(
+          mockNotificationsPlugin.zonedSchedule(
+            1001, // Morning ID
+            'أذكار الصباح',
+            'حان وقت أذكار الصباح 🌅',
+            any,
+            any,
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            // No matchDateTimeComponents expected for debug
+          ),
+        ).called(1);
+      });
+
+      test('should schedule debug evening athkar', () async {
+        await service.scheduleDebugAthkarNotification(isMorning: false);
+
+        verify(
+          mockNotificationsPlugin.zonedSchedule(
+            1002, // Evening ID
+            'أذكار المساء',
+            'حان وقت أذكار المساء 🌙',
+            any,
+            any,
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+          ),
+        ).called(1);
+      });
+
+      test('should not schedule if disabled', () async {
+        NotificationConfig.enableLocalNotifications = false;
+        await service.scheduleDebugAthkarNotification(isMorning: true);
+
+        verifyNever(
+          mockNotificationsPlugin.zonedSchedule(
+            any,
+            any,
+            any,
+            any,
+            any,
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+          ),
+        );
       });
     });
 

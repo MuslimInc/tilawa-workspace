@@ -91,6 +91,19 @@ class AthkarNotificationService {
         onDidReceiveNotificationResponse: handleNotificationResponse,
       );
 
+      // Check if app was launched from a notification
+      final NotificationAppLaunchDetails? details = await _notifications
+          .getNotificationAppLaunchDetails();
+
+      if (details != null &&
+          details.didNotificationLaunchApp &&
+          details.notificationResponse != null) {
+        logger.d(
+          '[AthkarNotificationService] App launched from notification: ${details.notificationResponse?.id}',
+        );
+        handleNotificationResponse(details.notificationResponse!);
+      }
+
       // Create notification channel for Android
       if (isAndroid) {
         final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
@@ -190,8 +203,6 @@ class AthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
-        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
         color: Color(0xFF1AADC5),
       );
 
@@ -238,8 +249,6 @@ class AthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
-        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
         color: Color(0xFF1AADC5),
       );
 
@@ -317,8 +326,6 @@ class AthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
-        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
         color: Color(0xFF1AADC5),
       );
 
@@ -350,6 +357,72 @@ class AthkarNotificationService {
       logger.e(
         '[AthkarNotificationService] Error scheduling test notification: $e',
       );
+    }
+  }
+
+  /// Schedule a debug athkar notification with custom delay
+  /// [isMorning] determines if it should act as morning or evening athkar
+  /// This is useful for verifying routing logic as it uses the real notification IDs
+  Future<void> scheduleDebugAthkarNotification({
+    required bool isMorning,
+    Duration delay = const Duration(minutes: 1),
+  }) async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+
+    if (!_initialized) {
+      await initialize();
+    }
+
+    try {
+      final tz.TZDateTime scheduledDate = tz.TZDateTime.now(
+        tz.local,
+      ).add(delay);
+      final int id = isMorning
+          ? _morningAthkarNotificationId
+          : _eveningAthkarNotificationId;
+      final title = isMorning ? 'أذكار الصباح' : 'أذكار المساء';
+      final body = isMorning
+          ? 'حان وقت أذكار الصباح 🌅'
+          : 'حان وقت أذكار المساء 🌙';
+
+      const androidDetails = AndroidNotificationDetails(
+        _athkarChannelId,
+        _athkarChannelName,
+        channelDescription: _athkarChannelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Color(0xFF1AADC5),
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        // No matchDateTimeComponents because we want a one-off test
+      );
+
+      logger.d(
+        '[AthkarNotificationService] Debug athkar ($title) scheduled for: $scheduledDate',
+      );
+    } catch (e) {
+      logger.e('[AthkarNotificationService] Error scheduling debug athkar: $e');
     }
   }
 
@@ -390,7 +463,7 @@ class AthkarNotificationService {
       const AthkarDetailsRoute(
         categoryId: 1,
         categoryName: 'أذكار الصباح',
-      ).go(context);
+      ).push(context);
     } else if (response.id == _eveningAthkarNotificationId) {
       logger.d(
         '[AthkarNotificationService] Evening athkar notification tapped',
@@ -398,7 +471,7 @@ class AthkarNotificationService {
       const AthkarDetailsRoute(
         categoryId: 2,
         categoryName: 'أذكار المساء',
-      ).go(context);
+      ).push(context);
     }
   }
 
