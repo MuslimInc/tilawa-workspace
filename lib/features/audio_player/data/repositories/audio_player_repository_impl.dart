@@ -18,43 +18,47 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   final AudioPositionService _positionService;
 
   @override
-  Stream<AudioEntity?> get currentAudio => _audioHandler.mediaItem.map(
-    (item) => item != null ? _mapMediaItemToEntity(item) : null,
-  );
+  Stream<AudioEntity?> get currentAudio => _audioHandler.mediaItem
+      .map((item) => item != null ? _mapMediaItemToEntity(item) : null)
+      .distinct();
 
   @override
   Stream<PlaybackStateEntity> get playbackState =>
       Rx.combineLatest2<
-        audio_service.PlaybackState,
-        List<audio_service.MediaItem>,
-        PlaybackStateEntity
-      >(
-        _audioHandler.playbackState,
-        _audioHandler.queue,
-        (state, queue) => PlaybackStateEntity(
-          isPlaying: state.playing,
-          processingState: _mapProcessingStateToEntity(state.processingState),
-          position: state.position,
-          bufferedPosition: state.bufferedPosition,
-          duration: _audioHandler.mediaItem.value?.duration ?? Duration.zero,
-          currentIndex: state.queueIndex ?? 0,
-          queue: queue.map(_mapMediaItemToEntity).toList(),
-        ),
-      );
+            audio_service.PlaybackState,
+            List<audio_service.MediaItem>,
+            PlaybackStateEntity
+          >(
+            _audioHandler.playbackState,
+            _audioHandler.queue,
+            (state, queue) => PlaybackStateEntity(
+              isPlaying: state.playing,
+              processingState: _mapProcessingStateToEntity(
+                state.processingState,
+              ),
+              position: state.position,
+              bufferedPosition: state.bufferedPosition,
+              duration:
+                  _audioHandler.mediaItem.value?.duration ?? Duration.zero,
+              currentIndex: state.queueIndex ?? 0,
+              queue: queue.map(_mapMediaItemToEntity).toList(),
+            ),
+          )
+          .distinct();
 
   @override
   Stream<Duration> get position => _positionService.position;
 
   @override
-  Stream<List<AudioEntity>> get queue => _audioHandler.queue.map(
-    (items) => items.map(_mapMediaItemToEntity).toList(),
-  );
+  Stream<List<AudioEntity>> get queue => _audioHandler.queue
+      .map((items) => items.map(_mapMediaItemToEntity).toList())
+      .distinct();
 
   @override
-  Stream<double> get speed => _audioHandler.speed;
+  Stream<double> get speed => _audioHandler.speed.distinct();
 
   @override
-  Stream<double> get volume => _audioHandler.volume;
+  Stream<double> get volume => _audioHandler.volume.distinct();
 
   @override
   PlaybackStateEntity get getPlaybackState {
