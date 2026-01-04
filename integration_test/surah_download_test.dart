@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/network/network_info.dart';
+import 'package:tilawa/core/services/athkar_notification_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/theme/app_theme.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
@@ -387,6 +389,42 @@ class FakeNotificationPermissionService
   Future<void> requestPermissionOnFirstLaunch() async {}
 }
 
+/// Fake implementation of AthkarNotificationService
+class FakeAthkarNotificationService implements AthkarNotificationService {
+  @override
+  FlutterLocalNotificationsPlugin notifications =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  bool get isAndroid => false;
+
+  @override
+  String getTimeZoneOffsetString() {
+    return '+00:00';
+  }
+
+  @override
+  void handleNotificationResponse(NotificationResponse response) {}
+
+  @override
+  Future<void> cancelAllAthkarNotifications() async {}
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> scheduleAthkarNotifications() async {}
+
+  @override
+  Future<void> scheduleDebugAthkarNotification({
+    required bool isMorning,
+    Duration delay = const Duration(minutes: 1),
+  }) async {}
+
+  @override
+  Future<void> scheduleTestNotification({int minutesFromNow = 1}) async {}
+}
+
 /// Fake implementation of RecitersRepository
 class FakeRecitersRepository implements RecitersRepository {
   @override
@@ -518,6 +556,14 @@ void main() {
       }
       GetIt.instance.registerSingleton<NotificationPermissionService>(
         FakeNotificationPermissionService(),
+      );
+
+      // Register FakeAthkarNotificationService
+      if (GetIt.instance.isRegistered<AthkarNotificationService>()) {
+        GetIt.instance.unregister<AthkarNotificationService>();
+      }
+      GetIt.instance.registerSingleton<AthkarNotificationService>(
+        FakeAthkarNotificationService(),
       );
 
       // Initialize HydratedStorage
