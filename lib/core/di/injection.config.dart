@@ -981,15 +981,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i563.AudioPlayerHandler>(),
       ),
     );
+    gh.lazySingleton<_i489.AudioPlayerRepository>(
+      () => _i198.AudioPlayerRepositoryImpl(
+        gh<_i563.AudioPlayerHandler>(),
+        gh<_i641.AudioPositionService>(),
+      ),
+    );
     gh.factory<_i510.ReciterDownloadBloc>(
       () => _i510.ReciterDownloadBloc(
         gh<_i645.DownloadAllSurahsUseCase>(),
         gh<_i817.CancelDownloadsForReciterUseCase>(),
         gh<_i446.ObserveReciterDownloadsUseCase>(),
       ),
-    );
-    gh.lazySingleton<_i489.AudioPlayerRepository>(
-      () => _i198.AudioPlayerRepositoryImpl(gh<_i563.AudioPlayerHandler>()),
     );
     gh.factory<_i28.PlayAudioUseCase>(
       () => _i28.PlayAudioUseCase(gh<_i489.AudioPlayerRepository>()),

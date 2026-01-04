@@ -11,8 +11,11 @@ import 'package:rxdart/rxdart.dart' as _i2;
 import 'package:tilawa/core/entities/audio.dart' as _i7;
 import 'package:tilawa/core/entities/moshaf_entity.dart' as _i9;
 import 'package:tilawa/core/entities/reciter_entity.dart' as _i8;
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart'
+    as _i10;
 import 'package:tilawa/shared/audio/audio_player_handler.dart' as _i3;
 import 'package:tilawa/shared/models/queue_state.dart' as _i5;
+import 'package:tilawa/shared/services/audio_position_service.dart' as _i11;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -421,6 +424,13 @@ class MockAudioPlayerHandler extends _i1.Mock
           as _i2.ValueStream<Map<String, dynamic>>);
 
   @override
+  void setRecitersRepository(_i10.RecitersRepository? repository) =>
+      super.noSuchMethod(
+        Invocation.method(#setRecitersRepository, [repository]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   _i4.Future<void> prepare() =>
       (super.noSuchMethod(
             Invocation.method(#prepare, []),
@@ -648,4 +658,22 @@ class MockAudioPlayerHandler extends _i1.Mock
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+}
+
+/// A class which mocks [AudioPositionService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAudioPositionService extends _i1.Mock
+    implements _i11.AudioPositionService {
+  MockAudioPositionService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Stream<Duration> get position =>
+      (super.noSuchMethod(
+            Invocation.getter(#position),
+            returnValue: _i4.Stream<Duration>.empty(),
+          )
+          as _i4.Stream<Duration>);
 }

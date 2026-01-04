@@ -10,12 +10,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/config/language_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/theme/app_theme.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
@@ -24,6 +28,9 @@ import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/quran_player_app.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/services/audio_position_service.dart';
+import 'package:tilawa/shared/widgets/bottom_player_widget.dart';
 
 /// Integration tests for the bottom player widget functionality
 ///
@@ -43,18 +50,28 @@ import 'package:tilawa/router/app_router.dart';
 Future<void> waitForWidget(
   WidgetTester tester,
   Finder finder, {
-  Duration timeout = const Duration(seconds: 10),
+  Duration timeout = const Duration(seconds: 15),
   String? errorMessage,
 }) async {
+  debugPrint('Waiting for widget: ${finder.description}...');
   final DateTime end = DateTime.now().add(timeout);
+  var count = 0;
   while (DateTime.now().isBefore(end)) {
     if (finder.evaluate().isNotEmpty) {
+      debugPrint('Widget found: ${finder.description}');
       return;
     }
     await tester.pump(const Duration(milliseconds: 500));
+    count++;
+    if (count % 4 == 0) {
+      debugPrint(
+        'Still waiting for ${finder.description}... (${count * 0.5}s)',
+      );
+    }
   }
   throw TimeoutException(
-    errorMessage ?? 'Widget not found after ${timeout.inSeconds} seconds',
+    errorMessage ??
+        'Widget not found after ${timeout.inSeconds} seconds: ${finder.description}',
     timeout,
   );
 }
@@ -110,8 +127,8 @@ Future<void> navigateToReciterDetails(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 3));
 
   // Try to find the reciter by name (from our mock data)
-  debugPrint('Finding Reciter: Mishary Rashid Alafasy');
-  final Finder reciterFinder = find.text('Mishary Rashid Alafasy');
+  debugPrint('Finding Reciter: Mishary Alafasi');
+  final Finder reciterFinder = find.text('Mishary Alafasi');
 
   if (reciterFinder.evaluate().isNotEmpty) {
     debugPrint('Reciter found! Tapping...');
@@ -123,7 +140,7 @@ Future<void> navigateToReciterDetails(WidgetTester tester) async {
     return;
   }
 
-  debugPrint('Reciter "Mishary Rashid Alafasy" not found!');
+  debugPrint('Reciter "Mishary Alafasi" not found!');
 
   // Debug: Print all text widgets to see what's on screen
   final Iterable<Element> textWidgets = find.byType(Text).evaluate();
@@ -138,19 +155,28 @@ Future<void> navigateToReciterDetails(WidgetTester tester) async {
 
 /// Find a surah card by its key pattern
 Finder findSurahCard(int surahNumber) {
-  return find.byKey(ValueKey('surah_$surahNumber'));
+  // Try both the old pattern and the new URL-based pattern
+  final String paddedNumber = surahNumber.toString().padLeft(3, '0');
+  return find.byWidgetPredicate((widget) {
+    if (widget.key is ValueKey) {
+      final keyStr = widget.key.toString();
+      // Check for surah_1 pattern (legacy)
+      if (keyStr == "ValueKey('surah_$surahNumber')") {
+        return true;
+      }
+      // Check for surah_001 pattern (URL-based)
+      if (keyStr.contains("ValueKey('surah_") &&
+          keyStr.contains(paddedNumber)) {
+        return true;
+      }
+    }
+    return false;
+  });
 }
 
 /// Find the bottom player widget
 Finder findBottomPlayer() {
-  return find.byWidgetPredicate((widget) {
-    // Look for the dismissible key pattern used in bottom player
-    if (widget is Dismissible) {
-      final keyStr = widget.key.toString();
-      return keyStr.contains('bottom_player_');
-    }
-    return false;
-  });
+  return find.byType(BottomPlayerWidget);
 }
 
 /// Find the play/pause button in the bottom player
@@ -237,7 +263,7 @@ class FakeRecitersRepository implements RecitersRepository {
     return const Right([
       ReciterEntity(
         id: 1,
-        name: 'Mishary Rashid Alafasy',
+        name: 'Mishary Alafasi',
         letter: 'M',
         date: '2024-01-01',
         moshaf: [
@@ -286,6 +312,12 @@ class FakeRecitersRepository implements RecitersRepository {
   }
 }
 
+/// Fake implementation of AudioPositionService
+class FakeAudioPositionService implements AudioPositionService {
+  @override
+  Stream<Duration> get position => Stream.value(Duration.zero);
+}
+
 // ============================================================================
 // Test Suite
 // ============================================================================
@@ -297,6 +329,9 @@ void main() {
     setUpAll(() async {
       // Disable Google Fonts runtime fetching to avoid network calls in tests
       GoogleFonts.config.allowRuntimeFetching = false;
+
+      // Disable google_fonts in AppTheme to avoid font loading errors
+      AppTheme.useGoogleFonts = false;
 
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
@@ -311,10 +346,22 @@ void main() {
         );
       }
 
+      // Set language to English to match test expectations
+      // This must be done before configureDependencies so that repositories
+      // pick up the correct language from the start.
+      SharedPreferences.setMockInitialValues({
+        LanguageConfig.languageKey: 'en',
+      });
+      // Also set it using the new SharedPreferencesAsync API
+      await SharedPreferencesAsync().setString(
+        LanguageConfig.languageKey,
+        'en',
+      );
+
       // Configure dependencies (DI)
       await configureDependencies();
 
-      // Replace RecitersRepository with fake to avoid network calls
+      // Replace RecitersRepository with fake to avoid network calls in Blocs/UI
       if (GetIt.instance.isRegistered<RecitersRepository>()) {
         GetIt.instance.unregister<RecitersRepository>();
       }
@@ -329,6 +376,13 @@ void main() {
       GetIt.instance.registerSingleton<GetRecitersUseCase>(
         GetRecitersUseCase(GetIt.instance<RecitersRepository>()),
       );
+
+      // Ensure AudioPlayerHandler uses the fake repository
+      if (GetIt.instance.isRegistered<AudioPlayerHandler>()) {
+        GetIt.instance<AudioPlayerHandler>().setRecitersRepository(
+          GetIt.instance<RecitersRepository>(),
+        );
+      }
 
       // Replace GetCurrentUserUseCase to mock authenticated user
       if (GetIt.instance.isRegistered<GetCurrentUserUseCase>()) {
@@ -354,6 +408,14 @@ void main() {
         FakeNotificationPermissionService(),
       );
 
+      // Replace AudioPositionService to avoid platform channel issues
+      if (GetIt.instance.isRegistered<AudioPositionService>()) {
+        GetIt.instance.unregister<AudioPositionService>();
+      }
+      GetIt.instance.registerSingleton<AudioPositionService>(
+        FakeAudioPositionService(),
+      );
+
       // Initialize HydratedStorage
       HydratedBloc.storage = await HydratedStorage.build(
         storageDirectory: HydratedStorageDirectory(
@@ -365,8 +427,28 @@ void main() {
     });
 
     tearDown(() async {
+      // Stop audio to ensure clean state for next test
+      try {
+        if (GetIt.instance.isRegistered<AudioPlayerHandler>()) {
+          final AudioPlayerHandler audioHandler =
+              GetIt.instance<AudioPlayerHandler>();
+          await audioHandler.stop();
+        }
+
+        // Reset AudioPlayerBloc state to ensure isolation
+        if (GetIt.instance.isRegistered<AudioPlayerBloc>()) {
+          GetIt.instance<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.resetAudioPlayer(),
+          );
+          // Small delay to allow state to settle
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      } catch (e) {
+        debugPrint('Warning: Could not clean up in tearDown: $e');
+      }
+
       // Allow any background operations to complete
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 1));
 
       // Clean up storage
       await HydratedBloc.storage.clear();
@@ -444,10 +526,28 @@ void main() {
 
       // Then: Bottom player should appear
       // Wait for audio to start loading and bottom player to show
-      await waitForWidget(
-        tester,
-        findBottomPlayer(),
-        errorMessage: 'Bottom player should appear after tapping a surah',
+      debugPrint('Waiting for bottom player to appear...');
+      var bottomPlayerFound = false;
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 500));
+        if (findBottomPlayer().evaluate().isNotEmpty) {
+          debugPrint('Bottom player appeared after ${i * 0.5} seconds');
+          bottomPlayerFound = true;
+          break;
+        }
+        if (i % 4 == 0) {
+          debugPrint('Still waiting for bottom player... (${i * 0.5}s)');
+        }
+      }
+
+      if (!bottomPlayerFound) {
+        debugPrint('Bottom player never appeared - test will fail');
+      }
+
+      expect(
+        findBottomPlayer().evaluate().isNotEmpty,
+        true,
+        reason: 'Bottom player should appear after tapping a surah',
       );
 
       // Verify bottom player is visible
@@ -490,7 +590,7 @@ void main() {
       await waitForWidget(tester, findBottomPlayer());
 
       // Then: Bottom player should show reciter name
-      final Finder reciterNameFinder = find.text('Mishary Rashid Alafasy');
+      final Finder reciterNameFinder = find.text('Mishary Alafasi');
       expect(
         reciterNameFinder.evaluate().isNotEmpty,
         true,
@@ -598,10 +698,11 @@ void main() {
       // When: Find and tap the next button
       final Finder nextButton = findBottomPlayerNextButton();
 
-      if (nextButton.evaluate().isEmpty) {
-        debugPrint('Skip next button not found');
-        return;
-      }
+      expect(
+        nextButton.evaluate().isNotEmpty,
+        true,
+        reason: 'Skip next button should be visible',
+      );
 
       // Get current surah title before skipping
       debugPrint('Tapping skip next button...');
@@ -667,10 +768,11 @@ void main() {
         // When: Find and tap the previous button
         final Finder previousButton = findBottomPlayerPreviousButton();
 
-        if (previousButton.evaluate().isEmpty) {
-          debugPrint('Skip previous button not found');
-          return;
-        }
+        expect(
+          previousButton.evaluate().isNotEmpty,
+          true,
+          reason: 'Skip previous button should be visible',
+        );
 
         debugPrint('Tapping skip previous button...');
         await tester.tap(previousButton.first);
@@ -698,18 +800,39 @@ void main() {
       await navigateToReciterDetails(tester);
       await tester.pump(const Duration(seconds: 2));
 
+      // Debug: Print all available keys
+      debugPrint('=== DEBUG: Looking for surah cards ===');
+      final Iterable<Element> keyWidgets = find
+          .byWidgetPredicate((w) => w.key != null)
+          .evaluate();
+      debugPrint('Found ${keyWidgets.length} widgets with keys:');
+      for (var i = 0; i < keyWidgets.length.clamp(0, 10); i++) {
+        final Widget widget = keyWidgets.elementAt(i).widget;
+        debugPrint('  Key: ${widget.key}');
+      }
+
       // Start playing a surah
       final Finder surahKeyFinder = findSurahCard(1);
       final Finder surahFinder = find.textContaining('001');
 
       Finder surahToTap;
       if (surahKeyFinder.evaluate().isNotEmpty) {
+        debugPrint('Found surah by key pattern');
         surahToTap = surahKeyFinder;
       } else if (surahFinder.evaluate().isNotEmpty) {
+        debugPrint('Found surah by text pattern');
         surahToTap = surahFinder;
       } else {
-        debugPrint('No surah found to tap');
-        return;
+        debugPrint('No surah found to tap - trying text search for any surah');
+        // Try to find any surah by looking for common surah names
+        final Finder anySurahFinder = find.textContaining('Al-Fatih');
+        if (anySurahFinder.evaluate().isNotEmpty) {
+          surahToTap = anySurahFinder;
+          debugPrint('Found Al-Fatihah surah');
+        } else {
+          debugPrint('No surah found to tap');
+          return;
+        }
       }
 
       await tester.ensureVisible(surahToTap.first);
@@ -878,6 +1001,56 @@ void main() {
           }
         }
       }
+
+      // Clean up to prevent pending frame issues
+      await cleanupTest(tester);
+    });
+
+    testWidgets('Swiping down dismisses bottom player', (
+      WidgetTester tester,
+    ) async {
+      // Given: App is loaded and audio is playing
+      await tester.pumpWidget(const QuranPlayerApp());
+      await tester.pump(const Duration(seconds: 3));
+      await navigateToRecitersTab(tester);
+      await navigateToReciterDetails(tester);
+      await tester.pump(const Duration(seconds: 2));
+
+      // Start playing a surah
+      final Finder surahKeyFinder = findSurahCard(1);
+      final Finder surahFinder = find.textContaining('001');
+
+      Finder surahToTap;
+      if (surahKeyFinder.evaluate().isNotEmpty) {
+        surahToTap = surahKeyFinder;
+      } else if (surahFinder.evaluate().isNotEmpty) {
+        surahToTap = surahFinder;
+      } else {
+        debugPrint('No surah found to tap');
+        return;
+      }
+
+      await tester.ensureVisible(surahToTap.first);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(surahToTap.first);
+      await tester.pump(const Duration(seconds: 2));
+
+      // Wait for bottom player to appear
+      final Finder bottomPlayer = findBottomPlayer();
+      await waitForWidget(tester, bottomPlayer);
+
+      // Verify bottom player is showing
+      expect(bottomPlayer.evaluate().isNotEmpty, true);
+
+      // When: Swipe down on the bottom player using fling for better dismissal detection
+      await tester.fling(bottomPlayer, const Offset(0, 500), 1000);
+      await tester.pumpAndSettle();
+
+      // Ensure the dismissal animation and state update complete
+      await tester.pump(const Duration(seconds: 1));
+
+      // Then: Bottom player should be dismissed (not findable)
+      expect(findBottomPlayer(), findsNothing);
 
       // Clean up to prevent pending frame issues
       await cleanupTest(tester);

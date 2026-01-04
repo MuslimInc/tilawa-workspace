@@ -46,6 +46,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._settingsCubit,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
+    on<ResetAudioPlayer>(_onResetAudioPlayer);
     on<LoadAudioPlayerData>(_onLoadAudioPlayerData);
     on<UpdateAudio>(_onUpdateAudio);
     on<UpdatePlaybackStateEntity>(_onUpdatePlaybackStateEntity);
@@ -174,6 +175,13 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     return super.close();
   }
 
+  void _onResetAudioPlayer(
+    ResetAudioPlayer event,
+    Emitter<AudioPlayerState> emit,
+  ) {
+    emit(const AudioPlayerState(status: AudioPlayerStatus.initial));
+  }
+
   void _onUpdateAudio(UpdateAudio event, Emitter<AudioPlayerState> emit) {
     emit(
       state.copyWith(
@@ -257,18 +265,22 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         emit(state.copyWith());
       },
       (success) async {
+        // Stop the internal timer
+        _sleepTimer?.cancel();
+        _sleepTimer = null;
+
         // Change status to initial and mark current audio as dismissed.
         // We preserve currentAudio to ensure we know "which" audio was dismissed.
+        // Also clear the sleep timer target time.
         emit(
           state.copyWith(
             status: AudioPlayerStatus.initial,
             dismissedAudioId: state.currentAudio?.id,
+            sleepTimerTargetTime: null,
           ),
         );
       },
     );
-    // // Cancel sleep timer on manual stop but keep the preference
-    // add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
   }
 
   Future<void> _onSkipToNext(

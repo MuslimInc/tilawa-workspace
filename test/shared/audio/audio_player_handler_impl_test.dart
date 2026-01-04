@@ -211,9 +211,24 @@ void main() {
       'playbackState should immediately reflect target index during loading',
       () async {
         final testQueue = [
-          const MediaItem(id: '1', title: 'Surah 1', artist: 'Reciter'),
-          const MediaItem(id: '2', title: 'Surah 2', artist: 'Reciter'),
-          const MediaItem(id: '3', title: 'Surah 3', artist: 'Reciter'),
+          const MediaItem(
+            id: '1',
+            title: 'Surah 1',
+            artist: 'Reciter',
+            extras: {'url': 'https://example.com/1.mp3'},
+          ),
+          const MediaItem(
+            id: '2',
+            title: 'Surah 2',
+            artist: 'Reciter',
+            extras: {'url': 'https://example.com/2.mp3'},
+          ),
+          const MediaItem(
+            id: '3',
+            title: 'Surah 3',
+            artist: 'Reciter',
+            extras: {'url': 'https://example.com/3.mp3'},
+          ),
         ];
 
         // Start listening to playbackState

@@ -45,7 +45,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final List<audio_service.MediaItem> newList;
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
-  final RecitersRepository _recitersRepository;
+  RecitersRepository _recitersRepository;
   final DownloadsRepository _downloadsRepository;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
@@ -879,6 +879,14 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     _playlist.addAll(await _itemsToSources(queue));
     await _safeSetAudioSources(_playlist, initialIndex: index);
     await play();
+  }
+
+  @override
+  void setRecitersRepository(RecitersRepository repository) {
+    _recitersRepository = repository;
+    // Clear cache to force use of new repository
+    _cachedReciters = null;
+    _lastCacheTime = null;
   }
 }
 

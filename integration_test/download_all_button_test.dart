@@ -15,6 +15,7 @@ import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/theme/app_theme.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -85,20 +86,11 @@ Future<void> navigateToRecitersTab(WidgetTester tester) async {
 Future<void> cleanupTest(WidgetTester tester) async {
   debugPrint('Cleaning up test...');
 
-  // Drain pending frames without disposing the widget tree
-  // (disposing triggers theme rebuild which loads fonts)
-  try {
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-  } catch (e) {
-    debugPrint('Warning: Could not settle all frames: $e');
-    // Pump manually to drain as many frames as possible
-    for (var i = 0; i < 10; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
+  // Just pump a few times instead of pumpAndSettle
+  // (pumpAndSettle hangs when downloads are active with continuous progress updates)
+  for (var i = 0; i < 5; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
   }
-
-  // Allow async operations (audio, downloads) to complete
-  await Future.delayed(const Duration(seconds: 1));
 
   debugPrint('Test cleanup complete');
 }
@@ -291,6 +283,9 @@ void main() {
       // Disable Google Fonts runtime fetching to avoid network calls in tests
       GoogleFonts.config.allowRuntimeFetching = false;
 
+      // Disable google_fonts in AppTheme to avoid font loading errors
+      AppTheme.useGoogleFonts = false;
+
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
 
@@ -458,6 +453,16 @@ void main() {
         true,
         reason: 'Download should start (show progress) or be already completed',
       );
+
+      // Cancel the downloads if they started
+      if (downloadStarted) {
+        debugPrint('Canceling downloads...');
+        // Tap the pause button to stop downloads
+        if (pauseIcon.evaluate().isNotEmpty) {
+          await tester.tap(pauseIcon.first);
+          await tester.pump(const Duration(milliseconds: 500));
+        }
+      }
 
       // Clean up to prevent pending frame issues
       await cleanupTest(tester);

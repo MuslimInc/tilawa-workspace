@@ -52,6 +52,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(ResetAudioPlayer value)? resetAudioPlayer,
     TResult Function(LoadAudioPlayerData value)? loadAudioPlayerData,
     TResult Function(UpdateAudio value)? updateAudio,
     TResult Function(UpdatePlaybackStateEntity value)?
@@ -82,6 +83,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer() when resetAudioPlayer != null:
+        return resetAudioPlayer(_that);
       case LoadAudioPlayerData() when loadAudioPlayerData != null:
         return loadAudioPlayerData(_that);
       case UpdateAudio() when updateAudio != null:
@@ -152,6 +155,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(ResetAudioPlayer value) resetAudioPlayer,
     required TResult Function(LoadAudioPlayerData value) loadAudioPlayerData,
     required TResult Function(UpdateAudio value) updateAudio,
     required TResult Function(UpdatePlaybackStateEntity value)
@@ -181,6 +185,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer():
+        return resetAudioPlayer(_that);
       case LoadAudioPlayerData():
         return loadAudioPlayerData(_that);
       case UpdateAudio():
@@ -248,6 +254,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(ResetAudioPlayer value)? resetAudioPlayer,
     TResult? Function(LoadAudioPlayerData value)? loadAudioPlayerData,
     TResult? Function(UpdateAudio value)? updateAudio,
     TResult? Function(UpdatePlaybackStateEntity value)?
@@ -277,6 +284,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer() when resetAudioPlayer != null:
+        return resetAudioPlayer(_that);
       case LoadAudioPlayerData() when loadAudioPlayerData != null:
         return loadAudioPlayerData(_that);
       case UpdateAudio() when updateAudio != null:
@@ -346,6 +355,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? resetAudioPlayer,
     TResult Function(bool restorePlayback)? loadAudioPlayerData,
     TResult Function(AudioEntity? audio)? updateAudio,
     TResult Function(PlaybackStateEntity playbackState)?
@@ -376,6 +386,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer() when resetAudioPlayer != null:
+        return resetAudioPlayer();
       case LoadAudioPlayerData() when loadAudioPlayerData != null:
         return loadAudioPlayerData(_that.restorePlayback);
       case UpdateAudio() when updateAudio != null:
@@ -446,6 +458,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() resetAudioPlayer,
     required TResult Function(bool restorePlayback) loadAudioPlayerData,
     required TResult Function(AudioEntity? audio) updateAudio,
     required TResult Function(PlaybackStateEntity playbackState)
@@ -475,6 +488,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer():
+        return resetAudioPlayer();
       case LoadAudioPlayerData():
         return loadAudioPlayerData(_that.restorePlayback);
       case UpdateAudio():
@@ -542,6 +557,7 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? resetAudioPlayer,
     TResult? Function(bool restorePlayback)? loadAudioPlayerData,
     TResult? Function(AudioEntity? audio)? updateAudio,
     TResult? Function(PlaybackStateEntity playbackState)?
@@ -571,6 +587,8 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
   }) {
     final _that = this;
     switch (_that) {
+      case ResetAudioPlayer() when resetAudioPlayer != null:
+        return resetAudioPlayer();
       case LoadAudioPlayerData() when loadAudioPlayerData != null:
         return loadAudioPlayerData(_that.restorePlayback);
       case UpdateAudio() when updateAudio != null:
@@ -624,6 +642,26 @@ extension AudioPlayerEventPatterns on AudioPlayerEvent {
       case _:
         return null;
     }
+  }
+}
+
+/// @nodoc
+
+class ResetAudioPlayer implements AudioPlayerEvent {
+  const ResetAudioPlayer();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is ResetAudioPlayer);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'AudioPlayerEvent.resetAudioPlayer()';
   }
 }
 

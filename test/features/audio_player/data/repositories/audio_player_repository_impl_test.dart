@@ -9,12 +9,14 @@ import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/audio_player/data/repositories/audio_player_repository_impl.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/services/audio_position_service.dart';
 
 import 'audio_player_repository_impl_test.mocks.dart';
 
-@GenerateMocks([AudioPlayerHandler])
+@GenerateMocks([AudioPlayerHandler, AudioPositionService])
 void main() {
   late MockAudioPlayerHandler mockAudioHandler;
+  late MockAudioPositionService mockPositionService;
   late AudioPlayerRepositoryImpl repository;
 
   late BehaviorSubject<audio_service.MediaItem?> mediaItemSubject;
@@ -22,6 +24,7 @@ void main() {
   late BehaviorSubject<List<audio_service.MediaItem>> queueSubject;
   late BehaviorSubject<double> volumeSubject;
   late BehaviorSubject<double> speedSubject;
+  late BehaviorSubject<Duration> positionSubject;
 
   final testMediaItem = audio_service.MediaItem(
     id: 'test-id',
@@ -49,10 +52,12 @@ void main() {
     when(mockAudioHandler.queue).thenAnswer((_) => queueSubject);
     when(mockAudioHandler.volume).thenAnswer((_) => volumeSubject);
     when(mockAudioHandler.speed).thenAnswer((_) => speedSubject);
+    when(mockPositionService.position).thenAnswer((_) => positionSubject);
   }
 
   setUp(() {
     mockAudioHandler = MockAudioPlayerHandler();
+    mockPositionService = MockAudioPositionService();
 
     mediaItemSubject = BehaviorSubject<audio_service.MediaItem?>.seeded(null);
     playbackStateSubject = BehaviorSubject<audio_service.PlaybackState>.seeded(
@@ -61,10 +66,14 @@ void main() {
     queueSubject = BehaviorSubject<List<audio_service.MediaItem>>.seeded([]);
     volumeSubject = BehaviorSubject<double>.seeded(1.0);
     speedSubject = BehaviorSubject<double>.seeded(1.0);
+    positionSubject = BehaviorSubject<Duration>.seeded(Duration.zero);
 
     setupMocks();
 
-    repository = AudioPlayerRepositoryImpl(mockAudioHandler);
+    repository = AudioPlayerRepositoryImpl(
+      mockAudioHandler,
+      mockPositionService,
+    );
   });
 
   tearDown(() {
@@ -73,6 +82,7 @@ void main() {
     queueSubject.close();
     volumeSubject.close();
     speedSubject.close();
+    positionSubject.close();
   });
 
   group('AudioPlayerRepositoryImpl - currentAudio Stream', () {
@@ -302,8 +312,31 @@ void main() {
   });
 
   group('AudioPlayerRepositoryImpl - position Stream', () {
-    test('returns a stream', () {
+    test('returns the position stream from positionService', () {
       expect(repository.position, isA<Stream<Duration>>());
+    });
+
+    test('emits real-time position updates', () async {
+      // Create a sequence of positions to simulate real-time updates
+      final List<Duration> positions = [
+        Duration.zero,
+        const Duration(seconds: 1),
+        const Duration(seconds: 2),
+        const Duration(seconds: 3),
+      ];
+
+      // Use expectLater to listen for emissions
+      final Future<void> expectation = expectLater(
+        repository.position,
+        emitsInOrder(positions),
+      );
+
+      // Add positions to the stream
+      for (final Duration p in positions.skip(1)) {
+        positionSubject.add(p);
+      }
+
+      await expectation;
     });
   });
 

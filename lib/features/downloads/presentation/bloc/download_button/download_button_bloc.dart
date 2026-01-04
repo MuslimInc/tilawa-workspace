@@ -225,13 +225,6 @@ class DownloadButtonBloc
           return;
         }
 
-        // Filter by reciter name?
-        // The ID passed to observeDownloadProgress is the URL.
-        // The returned item SHOULD match.
-        // if (item.reciterName != _reciterName) {
-        //   return;
-        // }
-
         switch (item.status) {
           case DownloadStatus.pending:
             // Emit pending state when stream indicates download is queued

@@ -33,10 +33,9 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
     return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
         final AudioEntity? audio = state.currentAudio;
-        final bool shouldShow = state.shouldShowBottomPlayer;
 
         // Hide if no media, error, or manually dismissed
-        if (!shouldShow || audio == null) {
+        if (!state.shouldShowBottomPlayer || audio == null) {
           return const SizedBox.shrink();
         }
 

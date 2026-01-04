@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/network/network_info.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
@@ -27,17 +28,22 @@ class MockCheckSurahDownloadedUseCase extends Mock
 
 class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
 
+class MockNetworkInfo extends Mock implements NetworkInfo {}
+
 void main() {
   late MockDownloadsBloc mockDownloadsBloc;
   late MockDownloadsRepository mockDownloadsRepository;
   late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
+  late MockNetworkInfo mockNetworkInfo;
 
   setUp(() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockDownloadsRepository = MockDownloadsRepository();
     mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
+    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
+    mockNetworkInfo = MockNetworkInfo();
 
     // Register mocks in GetIt
     if (!GetIt.instance.isRegistered<CheckSurahDownloadedUseCase>()) {
@@ -54,6 +60,9 @@ void main() {
       GetIt.instance.registerSingleton<DownloadsRepository>(
         mockDownloadsRepository,
       );
+    }
+    if (!GetIt.instance.isRegistered<NetworkInfo>()) {
+      GetIt.instance.registerSingleton<NetworkInfo>(mockNetworkInfo);
     }
 
     // Default stub for repository
@@ -76,6 +85,9 @@ void main() {
     when(
       () => mockDownloadsRepository.downloadUpdates,
     ).thenAnswer((_) => const Stream.empty());
+
+    // Default network connected
+    when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     // Mock fluttertoast channel
     const channel = MethodChannel('PonnamKarthik/fluttertoast');

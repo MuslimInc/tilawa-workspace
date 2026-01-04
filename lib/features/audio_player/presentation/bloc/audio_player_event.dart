@@ -2,6 +2,7 @@ part of 'audio_player_bloc.dart';
 
 @freezed
 sealed class AudioPlayerEvent with _$AudioPlayerEvent {
+  const factory AudioPlayerEvent.resetAudioPlayer() = ResetAudioPlayer;
   const factory AudioPlayerEvent.loadAudioPlayerData({
     @Default(true) bool restorePlayback,
   }) = LoadAudioPlayerData;

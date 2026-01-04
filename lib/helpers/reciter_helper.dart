@@ -34,12 +34,13 @@ class ReciterHelper {
       final String? reciterName = audio.artist;
       if (reciterName != null && reciterName.isNotEmpty) {
         try {
+          final String cleanReciterName = reciterName.trim().toLowerCase();
           return reciters.firstWhere(
-            (reciter) => reciter.name == reciterName,
+            (reciter) => reciter.name.trim().toLowerCase() == cleanReciterName,
             orElse: () => throw StateError('Reciter not found'),
           );
         } catch (e) {
-          logger.d('Reciter not found by name: $reciterName');
+          logger.d('Reciter not found by name: "$reciterName"');
         }
       }
 
