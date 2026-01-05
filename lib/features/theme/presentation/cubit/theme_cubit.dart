@@ -71,8 +71,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         ThemeMode.dark => 'dark',
         ThemeMode.system => 'system',
       },
-      // ignore: deprecated_member_use
-      'primaryColor': state.primaryColor.value,
+      'primaryColor': state.primaryColor.toARGB32(),
       'useSystemTheme': state.useSystemTheme,
     };
   }

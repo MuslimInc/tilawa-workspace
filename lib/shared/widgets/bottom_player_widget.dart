@@ -27,134 +27,105 @@ class BottomPlayerWidget extends StatefulWidget {
 class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   int? _currentReciterId;
   String? _currentReciterName;
-  bool _isDismissed = false;
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AudioPlayerBloc, AudioPlayerState>(
-      listenWhen: (previous, current) {
-        // Reset manual dismissal if current audio changes or we start playing again
-        return previous.currentAudio != current.currentAudio ||
-            (!previous.isPlaying && current.isPlaying);
-      },
-      listener: (context, state) {
-        if (state.status == AudioPlayerStatus.initial) {}
-        // Reset dismissal state when audio changes
-        if (state.currentAudio != null) {
-          setState(() {
-            _isDismissed = false;
-          });
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+      builder: (context, state) {
+        final AudioEntity? audio = state.currentAudio;
+
+        // Hide if no media, error, or manually dismissed
+        if (!state.shouldShowBottomPlayer || audio == null) {
+          return const SizedBox.shrink();
         }
-      },
-      child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-        builder: (context, state) {
-          final AudioEntity? audio = state.currentAudio;
-          final bool shouldShow =
-              audio != null &&
-              state.status == AudioPlayerStatus.success &&
-              !_isDismissed;
 
-          // Hide if no media, error, or manually dismissed
-          if (!shouldShow) {
-            return const SizedBox.shrink();
-          }
+        // Load reciter ID if it's not cached or if the reciter name changed
+        if (_currentReciterId == null || _currentReciterName != audio.artist) {
+          _loadReciterId(audio);
+        }
 
-          // Load reciter ID if it's not cached or if the reciter name changed
-          if (_currentReciterId == null ||
-              _currentReciterName != audio.artist) {
-            _loadReciterId(audio);
-          }
+        final PositionData position =
+            state.positionData ??
+            const PositionData(
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration.zero,
+            );
 
-          final PositionData position =
-              state.positionData ??
-              const PositionData(
-                position: Duration.zero,
-                bufferedPosition: Duration.zero,
-                duration: Duration.zero,
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            border: Border(
+              top: BorderSide(color: Theme.of(context).colorScheme.surface),
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+          ),
+          child: Dismissible(
+            key: Key(audio.id),
+            direction: DismissDirection.down,
+            onDismissed: (direction) {
+              context.read<AudioPlayerBloc>().add(
+                const AudioPlayerEvent.stopAudio(),
               );
-
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.1),
-              border: Border(
-                top: BorderSide(color: Theme.of(context).colorScheme.surface),
+            },
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                8.h,
+                16.w,
+                20.h + MediaQuery.paddingOf(context).bottom,
               ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-            ),
-            child: Dismissible(
-              key: Key(audio.id),
-              // key: ValueKey(audio.id),
-              direction: DismissDirection.down,
-              onDismissed: (direction) {
-                // Immediately mark as dismissed to remove from tree
-                setState(() {
-                  _isDismissed = true;
-                });
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.stopAudio(),
-                );
-              },
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16.w,
-                  8.h,
-                  16.w,
-                  20.h + MediaQuery.paddingOf(context).bottom,
-                ),
-                child: BottomPlayerUi(
-                  audio: audio,
-                  positionData: position,
-                  isPlaying: state.isPlaying,
-                  canGoPrevious: state.canGoPrevious,
-                  canGoNext: state.canGoNext,
-                  isSleepTimerActive: state.isSleepTimerActive,
-                  isSleepTimerEnabled: context
-                      .watch<SettingsCubit>()
-                      .state
-                      .isSleepTimerEnabled,
-                  onPlayPause: () {
-                    if (state.isPlaying) {
-                      context.read<AudioPlayerBloc>().add(
-                        const AudioPlayerEvent.pauseAudio(),
-                      );
-                    } else {
-                      context.read<AudioPlayerBloc>().add(
-                        const AudioPlayerEvent.playAudio(),
-                      );
-                    }
-                  },
-                  onPrevious: () {
+              child: BottomPlayerUi(
+                audio: audio,
+                positionData: position,
+                isPlaying: state.isPlaying,
+                canGoPrevious: state.canGoPrevious,
+                canGoNext: state.canGoNext,
+                isSleepTimerActive: state.isSleepTimerActive,
+                isSleepTimerEnabled: context
+                    .watch<SettingsCubit>()
+                    .state
+                    .isSleepTimerEnabled,
+                onPlayPause: () {
+                  if (state.isPlaying) {
                     context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.skipToPrevious(),
+                      const AudioPlayerEvent.pauseAudio(),
                     );
-                  },
-                  onNext: () {
+                  } else {
                     context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.skipToNext(),
+                      const AudioPlayerEvent.playAudio(),
                     );
-                  },
-                  onSleepTimerTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const SleepTimerDialog(),
-                    );
-                  },
-                  onClose: () {
-                    // Provide haptic feedback for consistency
-                    HapticFeedback.lightImpact();
-                    context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.stopAudio(),
-                    );
-                  },
-                  onTap: () => const ExpandedPlayerRoute().push(context),
-                ),
+                  }
+                },
+                onPrevious: () {
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToPrevious(),
+                  );
+                },
+                onNext: () {
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToNext(),
+                  );
+                },
+                onSleepTimerTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const SleepTimerDialog(),
+                  );
+                },
+                onClose: () {
+                  // Provide haptic feedback for consistency
+                  HapticFeedback.lightImpact();
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.stopAudio(),
+                  );
+                },
+                onTap: () => const ExpandedPlayerRoute().push(context),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 

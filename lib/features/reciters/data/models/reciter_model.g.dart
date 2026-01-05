@@ -44,3 +44,57 @@ Map<String, dynamic> _$MoshafModelToJson(_MoshafModel instance) =>
       'moshaf_type': instance.moshafType,
       'surah_list': instance.surahList,
     };
+
+// **************************************************************************
+// MapperGenerator
+// **************************************************************************
+
+extension ReciterModelToReciterEntityMapper on ReciterModel {
+  ReciterEntity toReciterEntity() {
+    return ReciterEntity(
+      id: id,
+      name: name,
+      letter: letter,
+      date: date,
+      moshaf: moshaf.map((e) => e.toMoshafEntity()).toList(),
+    );
+  }
+}
+
+extension ReciterEntityToReciterModelMapper on ReciterEntity {
+  ReciterModel toReciterModel() {
+    return ReciterModel(
+      id: id,
+      name: name,
+      letter: letter,
+      date: date,
+      moshaf: moshaf.map((e) => e.toMoshafModel()).toList(),
+    );
+  }
+}
+
+extension MoshafModelToMoshafEntityMapper on MoshafModel {
+  MoshafEntity toMoshafEntity() {
+    return MoshafEntity(
+      id: id,
+      name: name,
+      server: server,
+      surahTotal: surahTotal,
+      moshafType: moshafType,
+      surahList: surahList,
+    );
+  }
+}
+
+extension MoshafEntityToMoshafModelMapper on MoshafEntity {
+  MoshafModel toMoshafModel() {
+    return MoshafModel(
+      id: id,
+      name: name,
+      server: server,
+      surahTotal: surahTotal,
+      moshafType: moshafType,
+      surahList: surahList,
+    );
+  }
+}

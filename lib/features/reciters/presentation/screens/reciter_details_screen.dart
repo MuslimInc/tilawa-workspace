@@ -630,20 +630,21 @@ class _SurahCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     // Combine selectors to reduce overhead and subscription count
-    final (
-      bool isPlaying,
-      bool isCurrentItem,
-    ) = context.select<AudioPlayerBloc, (bool, bool)>((bloc) {
-      final AudioEntity? currentAudio = bloc.state.currentAudio;
-      final PlaybackStateEntity? playbackState = bloc.state.playbackState;
+    final (bool isPlaying, bool isCurrentItem) = context
+        .select<AudioPlayerBloc, (bool, bool)>((bloc) {
+          final AudioEntity? currentAudio = bloc.state.currentAudio;
+          final PlaybackStateEntity? playbackState = bloc.state.playbackState;
+          final bool shouldShowPlayer = bloc.state.shouldShowBottomPlayer;
 
-      final bool isCurrent =
-          currentAudio?.id == surah.id || currentAudio?.url == surah.audio.url;
+          final bool isCurrent =
+              shouldShowPlayer &&
+              (currentAudio?.id == surah.id ||
+                  currentAudio?.url == surah.audio.url);
 
-      final bool playing = isCurrent && (playbackState?.isPlaying ?? false);
+          final bool playing = isCurrent && (playbackState?.isPlaying ?? false);
 
-      return (playing, isCurrent);
-    });
+          return (playing, isCurrent);
+        });
 
     return RepaintBoundary(
       child: Material(
@@ -703,6 +704,7 @@ class _SurahCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         surah.name,
@@ -746,9 +748,7 @@ class _SurahCard extends StatelessWidget {
                       initialIsDownloading: surah.isDownloading,
                       initialProgress: surah.downloadProgress,
                     ),
-
                     SizedBox(width: 8.w),
-
                     // Play Button with cleaner look
                     if (!isCurrentItem)
                       Container(

@@ -5,7 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
-import 'package:dartz_plus/src/either.dart' as _i4;
+import 'package:dartz_plus/dartz_plus.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:tilawa/core/errors/failures.dart' as _i5;

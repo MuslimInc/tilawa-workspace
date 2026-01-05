@@ -63,6 +63,10 @@
 	<string>This app needs access to your location to calculate the Qibla direction.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs access to your location to calculate the Qibla direction.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to attach screenshots to bug reports.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to record screen videos for bug reports.</string>
 	<key>GIDClientID</key>
 	<string>181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>

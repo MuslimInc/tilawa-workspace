@@ -76,6 +76,15 @@ class MockNotificationsRemoteDataSource extends _i1.Mock
             returnValue: _i4.Future<String?>.value(),
           )
           as _i4.Future<String?>);
+
+  @override
+  _i4.Future<void> saveToken(String? userId, String? token) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveToken, [userId, token]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [NotificationSettings].

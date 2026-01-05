@@ -6,6 +6,7 @@ enum AudioPlayerStatus { initial, loading, success }
 abstract class AudioPlayerState with _$AudioPlayerState {
   @JsonSerializable(explicitToJson: true)
   const factory AudioPlayerState({
+    required AudioPlayerStatus status,
     AudioEntity? currentAudio,
     PlaybackStateEntity? playbackState,
     PositionData? positionData,
@@ -15,7 +16,7 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     @Default(AudioShuffleMode.none) AudioShuffleMode shuffleMode,
     DateTime? sleepTimerTargetTime,
     Duration? lastSleepTimerDuration,
-    required AudioPlayerStatus status,
+    String? dismissedAudioId,
   }) = _AudioPlayerState;
 
   factory AudioPlayerState.fromJson(Map<String, dynamic> json) =>
@@ -26,7 +27,7 @@ abstract class AudioPlayerState with _$AudioPlayerState {
   QueueState get queueState => QueueState(
     queue: playbackState?.queue ?? [],
     queueIndex: playbackState?.currentIndex,
-    shuffleIndices: null, // Not yet implemented in PlaybackStateEntity
+    shuffleIndices: null,
     repeatMode: repeatMode,
   );
 
@@ -37,4 +38,9 @@ abstract class AudioPlayerState with _$AudioPlayerState {
   AudioEntity? get mediaItem => currentAudio;
   bool get hasAudio => currentAudio != null;
   bool get isSleepTimerActive => sleepTimerTargetTime != null;
+
+  bool get shouldShowBottomPlayer =>
+      currentAudio != null &&
+      status == AudioPlayerStatus.success &&
+      dismissedAudioId != currentAudio?.id;
 }

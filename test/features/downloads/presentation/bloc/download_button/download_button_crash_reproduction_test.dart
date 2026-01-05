@@ -31,6 +31,7 @@ void main() {
   late MockDownloadSurahUseCase mockDownloadSurah;
   late MockCancelDownloadUseCase mockCancelDownload;
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+  late MockNetworkInfo mockNetworkInfo;
 
   const testUrl = 'https://example.com/001.mp3';
   const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -42,6 +43,8 @@ void main() {
     mockDownloadSurah = MockDownloadSurahUseCase();
     mockCancelDownload = MockCancelDownloadUseCase();
     mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
+    mockNetworkInfo = MockNetworkInfo();
+    when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     when(
       mockCheckSurahDownloaded.call(
@@ -79,6 +82,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        networkInfo: mockNetworkInfo,
       );
 
       // 2. Initialize and start download (normal user flow)
@@ -209,6 +213,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        networkInfo: mockNetworkInfo,
       );
 
       bloc.add(const DownloadButtonEvent.initialize());
@@ -251,6 +256,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        networkInfo: mockNetworkInfo,
       );
 
       bloc.add(const DownloadButtonEvent.initialize());

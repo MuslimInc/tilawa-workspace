@@ -11,6 +11,8 @@ import 'package:rxdart/rxdart.dart' as _i2;
 import 'package:tilawa/core/entities/audio.dart' as _i7;
 import 'package:tilawa/core/entities/moshaf_entity.dart' as _i9;
 import 'package:tilawa/core/entities/reciter_entity.dart' as _i8;
+import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart'
+    as _i10;
 import 'package:tilawa/shared/audio/audio_player_handler.dart' as _i3;
 import 'package:tilawa/shared/models/queue_state.dart' as _i5;
 
@@ -419,6 +421,13 @@ class MockAudioPlayerHandler extends _i1.Mock
             ),
           )
           as _i2.ValueStream<Map<String, dynamic>>);
+
+  @override
+  void setRecitersRepository(_i10.RecitersRepository? repository) =>
+      super.noSuchMethod(
+        Invocation.method(#setRecitersRepository, [repository]),
+        returnValueForMissingStub: null,
+      );
 
   @override
   _i4.Future<void> prepare() =>

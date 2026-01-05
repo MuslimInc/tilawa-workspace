@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../core/entities/audio.dart';
 import '../../core/entities/moshaf_entity.dart';
 import '../../core/entities/reciter_entity.dart';
+import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../models/queue_state.dart';
 
 abstract class AudioPlayerHandler implements AudioHandler {
@@ -80,4 +81,7 @@ abstract class AudioPlayerHandler implements AudioHandler {
   ]);
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId);
+
+  /// Set reciters repository (used for testing)
+  void setRecitersRepository(RecitersRepository repository);
 }

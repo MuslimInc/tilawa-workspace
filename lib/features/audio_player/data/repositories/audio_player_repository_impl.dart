@@ -6,53 +6,59 @@ import 'package:rxdart/rxdart.dart';
 import '../../../../core/entities/audio.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
+import '../../../../shared/services/audio_position_service.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/repositories/audio_player_repository.dart';
 
 @LazySingleton(as: AudioPlayerRepository)
 class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
-  AudioPlayerRepositoryImpl(this._audioHandler);
+  AudioPlayerRepositoryImpl(this._audioHandler, this._positionService);
 
   final AudioPlayerHandler _audioHandler;
+  final AudioPositionService _positionService;
 
   @override
-  Stream<AudioEntity?> get currentAudio => _audioHandler.mediaItem.map(
-    (item) => item != null ? _mapMediaItemToEntity(item) : null,
-  );
+  Stream<AudioEntity?> get currentAudio => _audioHandler.mediaItem
+      .map((item) => item != null ? _mapMediaItemToEntity(item) : null)
+      .distinct();
 
   @override
   Stream<PlaybackStateEntity> get playbackState =>
       Rx.combineLatest2<
-        audio_service.PlaybackState,
-        List<audio_service.MediaItem>,
-        PlaybackStateEntity
-      >(
-        _audioHandler.playbackState,
-        _audioHandler.queue,
-        (state, queue) => PlaybackStateEntity(
-          isPlaying: state.playing,
-          processingState: _mapProcessingStateToEntity(state.processingState),
-          position: state.position,
-          bufferedPosition: state.bufferedPosition,
-          duration: _audioHandler.mediaItem.value?.duration ?? Duration.zero,
-          currentIndex: state.queueIndex ?? 0,
-          queue: queue.map(_mapMediaItemToEntity).toList(),
-        ),
-      );
+            audio_service.PlaybackState,
+            List<audio_service.MediaItem>,
+            PlaybackStateEntity
+          >(
+            _audioHandler.playbackState,
+            _audioHandler.queue,
+            (state, queue) => PlaybackStateEntity(
+              isPlaying: state.playing,
+              processingState: _mapProcessingStateToEntity(
+                state.processingState,
+              ),
+              position: state.position,
+              bufferedPosition: state.bufferedPosition,
+              duration:
+                  _audioHandler.mediaItem.value?.duration ?? Duration.zero,
+              currentIndex: state.queueIndex ?? 0,
+              queue: queue.map(_mapMediaItemToEntity).toList(),
+            ),
+          )
+          .distinct();
 
   @override
-  Stream<Duration> get position => audio_service.AudioService.position;
+  Stream<Duration> get position => _positionService.position;
 
   @override
-  Stream<List<AudioEntity>> get queue => _audioHandler.queue.map(
-    (items) => items.map(_mapMediaItemToEntity).toList(),
-  );
+  Stream<List<AudioEntity>> get queue => _audioHandler.queue
+      .map((items) => items.map(_mapMediaItemToEntity).toList())
+      .distinct();
 
   @override
-  Stream<double> get speed => _audioHandler.speed;
+  Stream<double> get speed => _audioHandler.speed.distinct();
 
   @override
-  Stream<double> get volume => _audioHandler.volume;
+  Stream<double> get volume => _audioHandler.volume.distinct();
 
   @override
   PlaybackStateEntity get getPlaybackState {
@@ -178,20 +184,20 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   AudioProcessingStateStatus _mapProcessingStateToEntity(
     audio_service.AudioProcessingState serviceState,
   ) {
-    switch (serviceState) {
-      case audio_service.AudioProcessingState.idle:
-        return AudioProcessingStateStatus.idle;
-      case audio_service.AudioProcessingState.loading:
-        return AudioProcessingStateStatus.loading;
-      case audio_service.AudioProcessingState.buffering:
-        return AudioProcessingStateStatus.buffering;
-      case audio_service.AudioProcessingState.ready:
-        return AudioProcessingStateStatus.ready;
-      case audio_service.AudioProcessingState.completed:
-        return AudioProcessingStateStatus.completed;
-      case audio_service.AudioProcessingState.error:
-        return AudioProcessingStateStatus.error;
-    }
+    return switch (serviceState) {
+      audio_service.AudioProcessingState.idle =>
+        AudioProcessingStateStatus.idle,
+      audio_service.AudioProcessingState.loading =>
+        AudioProcessingStateStatus.loading,
+      audio_service.AudioProcessingState.buffering =>
+        AudioProcessingStateStatus.buffering,
+      audio_service.AudioProcessingState.ready =>
+        AudioProcessingStateStatus.ready,
+      audio_service.AudioProcessingState.completed =>
+        AudioProcessingStateStatus.completed,
+      audio_service.AudioProcessingState.error =>
+        AudioProcessingStateStatus.error,
+    };
   }
 
   AudioEntity _mapMediaItemToEntity(audio_service.MediaItem item) {
@@ -223,24 +229,19 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   audio_service.AudioServiceRepeatMode _mapRepeatModeToService(
     AudioRepeatMode mode,
   ) {
-    switch (mode) {
-      case AudioRepeatMode.none:
-        return audio_service.AudioServiceRepeatMode.none;
-      case AudioRepeatMode.one:
-        return audio_service.AudioServiceRepeatMode.one;
-      case AudioRepeatMode.all:
-        return audio_service.AudioServiceRepeatMode.all;
-    }
+    return switch (mode) {
+      AudioRepeatMode.none => audio_service.AudioServiceRepeatMode.none,
+      AudioRepeatMode.one => audio_service.AudioServiceRepeatMode.one,
+      AudioRepeatMode.all => audio_service.AudioServiceRepeatMode.all,
+    };
   }
 
   audio_service.AudioServiceShuffleMode _mapShuffleModeToService(
     AudioShuffleMode mode,
   ) {
-    switch (mode) {
-      case AudioShuffleMode.none:
-        return audio_service.AudioServiceShuffleMode.none;
-      case AudioShuffleMode.all:
-        return audio_service.AudioServiceShuffleMode.all;
-    }
+    return switch (mode) {
+      AudioShuffleMode.none => audio_service.AudioServiceShuffleMode.none,
+      AudioShuffleMode.all => audio_service.AudioServiceShuffleMode.all,
+    };
   }
 }

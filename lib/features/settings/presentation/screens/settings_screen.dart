@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -381,7 +380,7 @@ class SettingsScreen extends StatelessWidget {
   String _getColorName(BuildContext context, Color color) {
     // Check if the color is in options
     final bool isKnownColor = ThemeCubit.colorOptions.any(
-      (element) => element.color.value == color.value,
+      (element) => element.color.toARGB32() == color.toARGB32(),
     );
 
     if (!isKnownColor) {
@@ -389,7 +388,7 @@ class SettingsScreen extends StatelessWidget {
     }
 
     final AppColorOption option = ThemeCubit.colorOptions.firstWhere(
-      (element) => element.color.value == color.value,
+      (element) => element.color.toARGB32() == color.toARGB32(),
       orElse: () => ThemeCubit.colorOptions.first,
     );
     return _getLocalizedColorName(context, option.name);
@@ -423,7 +422,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             ...ThemeCubit.colorOptions.map((option) {
-              final isSelected = option.color.value == currentColor.value;
+              final isSelected =
+                  option.color.toARGB32() == currentColor.toARGB32();
               return ListTile(
                 onTap: () {
                   context.read<ThemeCubit>().setPrimaryColor(option.color);
@@ -471,13 +471,15 @@ class SettingsScreen extends StatelessWidget {
                 style: TextStyle(
                   fontWeight:
                       !ThemeCubit.colorOptions.any(
-                        (opt) => opt.color.value == currentColor.value,
+                        (opt) =>
+                            opt.color.toARGB32() == currentColor.toARGB32(),
                       )
                       ? FontWeight.bold
                       : FontWeight.normal,
                   color:
                       !ThemeCubit.colorOptions.any(
-                        (opt) => opt.color.value == currentColor.value,
+                        (opt) =>
+                            opt.color.toARGB32() == currentColor.toARGB32(),
                       )
                       ? currentColor
                       : null,
@@ -485,7 +487,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               trailing:
                   !ThemeCubit.colorOptions.any(
-                    (opt) => opt.color.value == currentColor.value,
+                    (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
                   )
                   ? Icon(FluentIcons.checkmark_24_regular, color: currentColor)
                   : null,
@@ -816,7 +818,7 @@ class _SwitchSettingsTile extends StatelessWidget {
                 Switch.adaptive(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: theme.primaryColor,
+                  activeTrackColor: theme.primaryColor,
                 ),
               ],
             ),

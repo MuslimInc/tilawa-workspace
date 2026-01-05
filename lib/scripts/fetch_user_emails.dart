@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import '../features/downloads/data/services/downloads_initialization_service.dart';
 import '../firebase_options.dart';
 
 Future<void> main() async {
-  print('🚀 Initializing Firebase...');
+  logger.i('🚀 Initializing Firebase...');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  print('📧 Fetching user emails from Firestore...\n');
+  logger.i('📧 Fetching user emails from Firestore...\n');
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   try {
@@ -24,17 +25,16 @@ Future<void> main() async {
         .cast<String>()
         .toList();
 
-    print('✅ Found ${emails.length} user email(s):\n');
+    logger.i('✅ Found ${emails.length} user email(s):\n');
     if (emails.isEmpty) {
-      print('   No users found in the database.\n');
+      logger.i('   No users found in the database.\n');
     } else {
       for (var i = 0; i < emails.length; i++) {
-        print('   ${i + 1}. ${emails[i]}');
+        logger.i('   ${i + 1}. ${emails[i]}');
       }
     }
-    print('');
   } catch (e, stackTrace) {
-    print('❌ Error fetching emails: $e');
-    print('Stack trace: $stackTrace\n');
+    logger.e('❌ Error fetching emails: $e');
+    logger.e('Stack trace: $stackTrace\n');
   }
 }

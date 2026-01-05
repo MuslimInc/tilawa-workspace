@@ -14,6 +14,24 @@
 -dontwarn io.flutter.embedding.**
 
 # ============================================
+# Flutter Local Notifications
+# ============================================
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+
+# ============================================
+# Gson (Required for notification data serialization)
+# ============================================
+-keepattributes Signature
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.** { *; }
+
+# ============================================
+# Java Desugaring (j$.util)
+# ============================================
+-dontwarn j$.util.**
+-keep class j$.util.** { *; }
+
+# ============================================
 # Audio service classes (required for audio playback)
 # ============================================
 -keep class com.ryanheise.audioservice.** { *; }

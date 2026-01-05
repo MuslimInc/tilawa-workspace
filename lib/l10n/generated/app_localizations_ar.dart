@@ -764,4 +764,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get offlinePlaybackError =>
+      'هذا المحتوى غير متاح بدون اتصال. يرجى تنزيله أولاً.';
 }

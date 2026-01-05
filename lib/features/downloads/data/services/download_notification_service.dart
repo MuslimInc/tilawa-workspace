@@ -133,7 +133,6 @@ class DownloadNotificationService {
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
           color: const Color(0xFF1AADC5),
-          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -217,7 +216,6 @@ class DownloadNotificationService {
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
           color: const Color(0xFF1AADC5),
-          largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -378,7 +376,6 @@ class DownloadNotificationService {
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
         color: Color(0xFF1AADC5),
-        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -420,7 +417,6 @@ class DownloadNotificationService {
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
         color: Colors.red,
-        largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
       );
 
       const iosDetails = DarwinNotificationDetails(

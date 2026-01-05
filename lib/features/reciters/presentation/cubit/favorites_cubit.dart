@@ -17,6 +17,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   final ToggleFavoriteReciterUseCase _toggleFavorite;
 
   Set<int> _currentFavoriteIds = {};
+  final Set<int> _pendingReciterIds = {};
 
   Future<void> loadFavorites() async {
     emit(FavoritesLoading());
@@ -39,53 +40,62 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   }
 
   Future<void> toggleFavorite(ReciterEntity reciter) async {
-    // Optimistic update
-    final bool isFav = _isFavorite(reciter.id);
-    if (isFav) {
-      _currentFavoriteIds.remove(reciter.id);
-    } else {
-      _currentFavoriteIds.add(reciter.id);
+    if (_pendingReciterIds.contains(reciter.id)) {
+      return;
     }
+    _pendingReciterIds.add(reciter.id);
 
-    // Emit loaded state immediately with updated IDs to reflect UI change fast
-    if (state is FavoritesLoaded) {
-      final List<ReciterEntity> currentReciters =
-          (state as FavoritesLoaded).favorites;
-      List<ReciterEntity> updatedReciters;
+    try {
+      // Optimistic update
+      final bool isFav = _isFavorite(reciter.id);
       if (isFav) {
-        updatedReciters = currentReciters
-            .where((r) => r.id != reciter.id)
-            .toList();
+        _currentFavoriteIds.remove(reciter.id);
       } else {
-        updatedReciters = [...currentReciters, reciter];
+        _currentFavoriteIds.add(reciter.id);
       }
-      emit(
-        FavoritesLoaded(
-          favorites: updatedReciters,
-          favoriteIds: Set.from(_currentFavoriteIds),
-          removedReciter: isFav ? reciter : null,
-        ),
-      );
-    }
 
-    final Either<Failure, void> result = await _toggleFavorite(reciter.id);
-
-    result.fold(
-      (failure) {
-        // Revert on failure
+      // Emit loaded state immediately with updated IDs to reflect UI change fast
+      if (state is FavoritesLoaded) {
+        final List<ReciterEntity> currentReciters =
+            (state as FavoritesLoaded).favorites;
+        List<ReciterEntity> updatedReciters;
         if (isFav) {
-          _currentFavoriteIds.add(reciter.id);
+          updatedReciters = currentReciters
+              .where((r) => r.id != reciter.id)
+              .toList();
         } else {
-          _currentFavoriteIds.remove(reciter.id);
+          updatedReciters = [...currentReciters, reciter];
         }
-        loadFavorites(); // Re-sync with source of truth
-        emit(FavoritesError(failure.message ?? 'Unknown Error'));
-      },
-      (_) {
-        // Success - ensure our list is fully synced or just rely on optimistic
-        // Depending on UX requirements, better to keep it optimistic.
-      },
-    );
+        emit(
+          FavoritesLoaded(
+            favorites: updatedReciters,
+            favoriteIds: Set.from(_currentFavoriteIds),
+            removedReciter: isFav ? reciter : null,
+          ),
+        );
+      }
+
+      final Either<Failure, void> result = await _toggleFavorite(reciter.id);
+
+      result.fold(
+        (failure) {
+          // Revert on failure
+          if (isFav) {
+            _currentFavoriteIds.add(reciter.id);
+          } else {
+            _currentFavoriteIds.remove(reciter.id);
+          }
+          loadFavorites(); // Re-sync with source of truth
+          emit(FavoritesError(failure.message ?? 'Unknown Error'));
+        },
+        (_) {
+          // Success - ensure our list is fully synced or just rely on optimistic
+          // Depending on UX requirements, better to keep it optimistic.
+        },
+      );
+    } finally {
+      _pendingReciterIds.remove(reciter.id);
+    }
   }
 
   bool _isFavorite(int id) {

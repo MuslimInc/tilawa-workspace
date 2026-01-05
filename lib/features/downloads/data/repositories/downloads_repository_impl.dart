@@ -4,7 +4,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/config/config.dart';
 import '../../../../core/config/notification_config.dart';
 import '../../../../core/constants/analytics_constants.dart';
 import '../../../../core/errors/failures.dart';
@@ -217,7 +216,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> startDownload(
     String url, {
     required String title,
-    bool showNotification = NotificationConfig.enableLocalNotifications,
+    bool? showNotification,
     required String surahTitle,
     required String reciterName,
     required int reciterId,
@@ -306,7 +305,8 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         title: surahTitle,
         reciterName: reciterName,
         reciterId: reciterId,
-        showNotification: showNotification,
+        showNotification:
+            showNotification ?? NotificationConfig.enableLocalNotifications,
       );
 
       // Update status to pending if it was queued (not immediately started)

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
@@ -29,12 +31,15 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> saveDeviceToken(String userId, String token) async {
-    final DocumentReference<Map<String, dynamic>> userRef = _firestore
+    await _firestore
         .collection('users')
-        .doc(userId);
-
-    await userRef.set({
-      'tokens': FieldValue.arrayUnion([token]),
-    }, SetOptions(merge: true));
+        .doc(userId)
+        .collection('fcm_tokens')
+        .doc(token)
+        .set({
+          'token': token,
+          'createdAt': FieldValue.serverTimestamp(),
+          'platform': Platform.isAndroid ? 'android' : 'ios',
+        });
   }
 }

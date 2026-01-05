@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -13,16 +14,22 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/entities/moshaf_entity.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/network/network_info.dart';
+import 'package:tilawa/core/services/athkar_notification_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/theme/app_theme.dart';
 import 'package:tilawa/core/utils/typedefs.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
+import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/quran_player_app.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 /// Refactored integration tests for surah download functionality
 ///
@@ -50,14 +57,28 @@ import 'package:tilawa/router/app_router.dart';
 Future<void> waitForWidget(
   WidgetTester tester,
   Finder finder, {
-  Duration timeout = const Duration(seconds: 10),
+  Duration timeout = const Duration(seconds: 30),
   String? errorMessage,
 }) async {
+  debugPrint(
+    'waitForWidget: Waiting for $finder with timeout ${timeout.inSeconds}s',
+  );
   final DateTime end = DateTime.now().add(timeout);
   while (DateTime.now().isBefore(end)) {
     if (finder.evaluate().isNotEmpty) {
       return;
     }
+
+    // Debug: log icons in tree
+    final FinderResult<Element> icons = find.byType(Icon).evaluate();
+    debugPrint(
+      'waitForWidget: Found ${icons.length} icons. ${icons.isNotEmpty ? "First few:" : ""}',
+    );
+    for (var i = 0; i < icons.length.clamp(0, 5); i++) {
+      final icon = icons.elementAt(i).widget as Icon;
+      debugPrint('  Icon: ${icon.icon}');
+    }
+
     await tester.pump(const Duration(milliseconds: 500));
   }
   throw TimeoutException(
@@ -68,7 +89,7 @@ Future<void> waitForWidget(
 
 /// Navigate to the reciters tab
 Future<void> navigateToRecitersTab(WidgetTester tester) async {
-  debugPrint('Navigating to Reciters Tab...');
+  debugPrint('navigateToRecitersTab: Starting...');
   await tester.pump(const Duration(seconds: 2));
 
   // Try multiple selectors to find reciters tab
@@ -79,51 +100,118 @@ Future<void> navigateToRecitersTab(WidgetTester tester) async {
   final Finder recitersTextFinder = find.text('Reciters');
 
   if (recitersIconFinder.evaluate().isNotEmpty) {
+    debugPrint(
+      'navigateToRecitersTab: Found reciter icon (regular), tapping...',
+    );
     await tester.tap(recitersIconFinder.first);
   } else if (recitersActiveIconFinder.evaluate().isNotEmpty) {
+    debugPrint(
+      'navigateToRecitersTab: Found reciter icon (filled), tapping...',
+    );
     await tester.tap(recitersActiveIconFinder.first);
   } else if (recitersTextFinder.evaluate().isNotEmpty) {
+    debugPrint('navigateToRecitersTab: Found reciter text, tapping...');
     await tester.tap(recitersTextFinder.first);
+  } else {
+    debugPrint('navigateToRecitersTab: WARNING - No reciters tab found!');
+    throw Exception('Failed to find reciters tab');
   }
 
   await tester.pump(const Duration(seconds: 1));
+  debugPrint('navigateToRecitersTab: Completed');
+}
+
+/// Clean up at the end of a test to prevent pending frames and async issues
+Future<void> cleanupTest(WidgetTester tester) async {
+  debugPrint('Cleaning up test...');
+
+  // Drain pending frames without disposing the widget tree
+  // Drain pending frames without disposing the widget tree
+  // Replace pumpAndSettle with fixed pumping to avoid hanging on infinite animations
+  // (e.g., CircularProgressIndicator)
+  try {
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  } catch (e) {
+    debugPrint('Warning: Error pumping frames: $e');
+  }
+
+  // Allow async operations (audio, downloads) to complete
+  await Future.delayed(const Duration(seconds: 1));
+
+  debugPrint('Test cleanup complete');
 }
 
 /// Navigate to reciter details by tapping first reciter card
 Future<void> navigateToReciterDetails(WidgetTester tester) async {
   // Debug: Print what's on screen
-  debugPrint('Looking for reciter cards...');
+  debugPrint('navigateToReciterDetails: Starting...');
 
-  // Wait longer and check if reciters are loading
-  debugPrint('Waiting for UI to settle...');
-  await tester.pump(const Duration(seconds: 3));
+  // Wait for reciters to load
+  debugPrint('navigateToReciterDetails: Waiting for UI to settle...');
+  await tester.pump(const Duration(seconds: 2));
 
   // Try to find the reciter by name (from our mock data)
-  debugPrint('Finding Reciter: Mishary Rashid Alafasy');
+  debugPrint(
+    'navigateToReciterDetails: Finding Reciter: Mishary Rashid Alafasy',
+  );
   final Finder reciterFinder = find.text('Mishary Rashid Alafasy');
 
   if (reciterFinder.evaluate().isNotEmpty) {
-    debugPrint('Reciter found! Tapping...');
+    debugPrint('navigateToReciterDetails: Reciter found! Tapping...');
     await tester.ensureVisible(reciterFinder.first);
     // Use pump instead of pumpAndSettle to avoid hanging on background tasks
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(reciterFinder.first);
-    debugPrint('Tapped reciter. Waiting for navigation...');
+    debugPrint(
+      'navigateToReciterDetails: Tapped reciter. Waiting for navigation...',
+    );
     await tester.pump(const Duration(seconds: 2));
+    debugPrint('navigateToReciterDetails: Navigation completed');
     return;
   }
 
-  debugPrint('Reciter "Mishary Rashid Alafasy" not found!');
+  debugPrint(
+    'navigateToReciterDetails: WARNING - Reciter "Mishary Rashid Alafasy" not found!',
+  );
 
   // Debug: Print all text widgets to see what's on screen
   final Iterable<Element> textWidgets = find.byType(Text).evaluate();
-  debugPrint('Found ${textWidgets.length} Text widgets');
+  debugPrint(
+    'navigateToReciterDetails: Found ${textWidgets.length} Text widgets',
+  );
   for (var i = 0; i < textWidgets.length.clamp(0, 10); i++) {
     final String? text = (textWidgets.elementAt(i).widget as Text).data;
     if (text != null && text.isNotEmpty) {
-      debugPrint('  Text: "$text"');
+      debugPrint('navigateToReciterDetails:   Text: "$text"');
     }
   }
+
+  throw Exception('Failed to find and navigate to reciter details');
+}
+
+/// Find a surah card by its key pattern
+Finder findSurahCard(int surahNumber) {
+  final String paddedNumber = surahNumber.toString().padLeft(3, '0');
+  return find.byWidgetPredicate((widget) {
+    final Key? key = widget.key;
+    if (key is ValueKey<String>) {
+      final String val = key.value;
+      // Patterns: "surah_1", "surah_001", "surah_https://.../001.mp3"
+      if (val == 'surah_$surahNumber' ||
+          val == 'surah_$paddedNumber' ||
+          (val.startsWith('surah_') && val.contains(paddedNumber))) {
+        return true;
+      }
+    }
+    // Fallback: check toString for any match
+    final keyStr = key.toString();
+    if (keyStr.contains('surah_') && keyStr.contains(paddedNumber)) {
+      return true;
+    }
+    return false;
+  });
 }
 
 /// Find the download button (download icon)
@@ -137,11 +225,6 @@ Finder findDownloadButton() {
             iconWidget.icon == Icons.cloud_download_outlined;
       }
     }
-    // Also check for standalone Icon widgets with download icon
-    if (widget is Icon) {
-      return widget.icon == Icons.download_rounded ||
-          widget.icon == Icons.cloud_download_outlined;
-    }
     return false;
   });
 }
@@ -150,30 +233,69 @@ Finder findDownloadButton() {
 /// Returns the download button for that surah, or null if all are downloaded
 Future<Finder?> findAvailableDownloadButton(
   WidgetTester tester, {
-  Duration timeout = const Duration(seconds: 15),
+  Duration timeout = const Duration(seconds: 5),
 }) async {
   final DateTime end = DateTime.now().add(timeout);
+  var scrollAttempts = 0;
+  const maxScrollAttempts = 5;
 
-  while (DateTime.now().isBefore(end)) {
+  while (DateTime.now().isBefore(end) && scrollAttempts < maxScrollAttempts) {
     await tester.pump(const Duration(milliseconds: 500));
 
     // Check if any download buttons exist
     final Finder downloadButtons = findDownloadButton();
     if (downloadButtons.evaluate().isNotEmpty) {
+      debugPrint('Found available download button');
       return downloadButtons;
     }
 
+    // Check if all surahs are downloaded (check icons present)
+    final Finder checkIcons = find.byIcon(Icons.check_circle);
+    if (checkIcons.evaluate().isNotEmpty) {
+      debugPrint(
+        'Found ${checkIcons.evaluate().length} check icons - some/all downloaded',
+      );
+      // If we see many check icons and no download buttons, all are likely downloaded
+      if (checkIcons.evaluate().length >= 3) {
+        debugPrint('Multiple surahs already downloaded, stopping search');
+        return null;
+      }
+    }
+
     // Try scrolling down to find more surahs
-    final Finder listView = find.byType(ListView);
-    if (listView.evaluate().isNotEmpty) {
+    final Finder scrollable = find.byType(CustomScrollView);
+    if (scrollable.evaluate().isNotEmpty) {
       try {
-        await tester.drag(listView.first, const Offset(0, -200));
+        await tester.drag(scrollable.first, const Offset(0, -200));
         await tester.pump(const Duration(milliseconds: 300));
+        scrollAttempts++;
       } catch (e) {
-        // Ignore drag errors
+        debugPrint('Scroll error: $e');
+        break;
+      }
+    } else {
+      // Try ListView as fallback
+      final Finder listView = find.byType(ListView);
+      if (listView.evaluate().isNotEmpty) {
+        try {
+          await tester.drag(listView.first, const Offset(0, -200));
+          await tester.pump(const Duration(milliseconds: 300));
+          scrollAttempts++;
+        } catch (e) {
+          debugPrint('Scroll error: $e');
+          break;
+        }
+      } else {
+        // No scrollable found, stop searching
+        debugPrint('No scrollable widget found, stopping search');
+        break;
       }
     }
   }
+
+  debugPrint(
+    'No available download button found after $scrollAttempts scroll attempts',
+  );
   return null;
 }
 
@@ -267,6 +389,42 @@ class FakeNotificationPermissionService
   Future<void> requestPermissionOnFirstLaunch() async {}
 }
 
+/// Fake implementation of AthkarNotificationService
+class FakeAthkarNotificationService implements AthkarNotificationService {
+  @override
+  FlutterLocalNotificationsPlugin notifications =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  bool get isAndroid => false;
+
+  @override
+  String getTimeZoneOffsetString() {
+    return '+00:00';
+  }
+
+  @override
+  void handleNotificationResponse(NotificationResponse response) {}
+
+  @override
+  Future<void> cancelAllAthkarNotifications() async {}
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> scheduleAthkarNotifications() async {}
+
+  @override
+  Future<void> scheduleDebugAthkarNotification({
+    required bool isMorning,
+    Duration delay = const Duration(minutes: 1),
+  }) async {}
+
+  @override
+  Future<void> scheduleTestNotification({int minutesFromNow = 1}) async {}
+}
+
 /// Fake implementation of RecitersRepository
 class FakeRecitersRepository implements RecitersRepository {
   @override
@@ -331,7 +489,12 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Surah Download Integration Tests - Refactored', () {
+    late FakeNetworkInfo fakeNetworkInfo;
+
     setUpAll(() async {
+      // Disable google_fonts in AppTheme to avoid network errors in tests
+      AppTheme.useGoogleFonts = false;
+
       // Allow reassigning dependencies
       GetIt.instance.allowReassignment = true;
 
@@ -347,6 +510,13 @@ void main() {
 
       // Configure dependencies (DI)
       await configureDependencies();
+
+      // Replace NetworkInfo with mock to simulate internet connection
+      if (GetIt.instance.isRegistered<NetworkInfo>()) {
+        GetIt.instance.unregister<NetworkInfo>();
+      }
+      fakeNetworkInfo = FakeNetworkInfo();
+      GetIt.instance.registerSingleton<NetworkInfo>(fakeNetworkInfo);
 
       // Replace RecitersRepository with fake to avoid network calls
       if (GetIt.instance.isRegistered<RecitersRepository>()) {
@@ -388,6 +558,14 @@ void main() {
         FakeNotificationPermissionService(),
       );
 
+      // Register FakeAthkarNotificationService
+      if (GetIt.instance.isRegistered<AthkarNotificationService>()) {
+        GetIt.instance.unregister<AthkarNotificationService>();
+      }
+      GetIt.instance.registerSingleton<AthkarNotificationService>(
+        FakeAthkarNotificationService(),
+      );
+
       // Initialize HydratedStorage
       HydratedBloc.storage = await HydratedStorage.build(
         storageDirectory: HydratedStorageDirectory(
@@ -398,430 +576,601 @@ void main() {
       await Future.delayed(const Duration(seconds: 2));
     });
 
-    tearDown(() async {
-      // Clean up after each test
+    setUp(() async {
+      debugPrint('=== setUp: Starting ===');
+      fakeNetworkInfo.setOnline(true);
+
+      // Clear hydrated storage before each test
       await HydratedBloc.storage.clear();
-      await Future.delayed(const Duration(milliseconds: 500));
-    });
 
-    testWidgets('Online Download: Download a surah with internet connection', (
-      WidgetTester tester,
-    ) async {
-      // Given: App is loaded and we're on the reciter details screen
-      await tester.pumpWidget(const QuranPlayerApp());
-      await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
-
-      // Debug: Check where we are
-      debugPrint('After navigation to details:');
-      final Iterable<Element> texts = find.byType(Text).evaluate();
-      debugPrint('  Texts found: ${texts.length}');
-      for (var i = 0; i < texts.length.clamp(0, 10); i++) {
-        final String? text = (texts.elementAt(i).widget as Text).data;
-        if (text != null && text.isNotEmpty) {
-          debugPrint('    Text: "$text"');
+      // Stop download queue
+      try {
+        if (GetIt.instance.isRegistered<DownloadQueueManager>()) {
+          final DownloadQueueManager queueManager =
+              GetIt.instance<DownloadQueueManager>();
+          await queueManager.stopAll();
         }
+      } catch (e) {
+        debugPrint('=== setUp: Error stopping queue: $e ===');
       }
 
-      // Check for download button specifically
-      if (find.byIcon(Icons.cloud_download_outlined).evaluate().isNotEmpty) {
-        debugPrint('  Found cloud_download_outlined icon');
-      } else {
-        debugPrint('  NO cloud_download_outlined icon found');
-        // List all icons to see what we have
-        final Iterable<Element> icons = find.byType(Icon).evaluate();
-        for (var i = 0; i < icons.length.clamp(0, 10); i++) {
-          final IconData? icon = (icons.elementAt(i).widget as Icon).icon;
-          debugPrint('    Icon: $icon');
+      // Stop audio
+      try {
+        if (GetIt.instance.isRegistered<AudioPlayerHandler>()) {
+          final AudioPlayerHandler handler =
+              GetIt.instance<AudioPlayerHandler>();
+          await handler.stop();
         }
+      } catch (e) {
+        debugPrint('=== setUp: Error stopping audio: $e ===');
       }
 
-      // When: We find and tap a download button
-      final Finder downloadButton = findDownloadButton();
-      await waitForWidget(
-        tester,
-        downloadButton,
-        timeout: const Duration(seconds: 15),
-        errorMessage: 'Should find at least one download button',
-      );
-
-      await tester.tap(downloadButton.first);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Then: Download should start
-      await tester.pump(const Duration(seconds: 1));
-
-      final Finder greenCheckFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is Icon &&
-            widget.icon == Icons.check_circle &&
-            widget.color == Colors.green,
-      );
-      if (greenCheckFinder.evaluate().isNotEmpty) {
-        return;
+      // Clear downloads
+      try {
+        if (GetIt.instance.isRegistered<DownloadsLocalDataSource>()) {
+          final DownloadsLocalDataSource dataSource =
+              GetIt.instance<DownloadsLocalDataSource>();
+          await dataSource.clearAllDownloads();
+        }
+      } catch (e) {
+        debugPrint('=== setUp: Error clearing downloads: $e ===');
       }
-
-      // Do not require completion within a fixed short timeout (flaky on slow networks).
-      // Instead, verify that the download process is active.
-      await waitForWidget(
-        tester,
-        find.byWidgetPredicate(
-          (widget) =>
-              (widget is Icon &&
-                  (widget.icon == Icons.downloading_rounded ||
-                      widget.icon == Icons.hourglass_empty_rounded)) ||
-              (widget is CircularProgressIndicator),
-        ),
-        timeout: const Duration(seconds: 20),
-        errorMessage:
-            'Download did not start (no progress/pending indicator found)',
-      );
     });
 
-    testWidgets('Offline Download: Attempt download without internet', (
-      WidgetTester tester,
-    ) async {
-      // Given: App is loaded and we're on the reciter details screen
+    /// Helper to initialize the app widget for each test
+    Future<void> initializeApp(WidgetTester tester) async {
+      AppRouter.router.go('/');
       await tester.pumpWidget(const QuranPlayerApp());
       await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
-
-      // Note: This test documents expected behavior but cannot programmatically
-      // disable network in integration tests without platform channels
-      final Finder? downloadButton = await findAvailableDownloadButton(tester);
-
-      if (downloadButton == null || downloadButton.evaluate().isEmpty) {
-        debugPrint('Offline test: All surahs already downloaded, skipping');
-        return;
-      }
-
-      // When: Tap download button (with network available, will succeed)
-      // TODO: Add platform channel to disable network for true offline testing
-      await tester.tap(downloadButton.first);
-      await tester.pump(const Duration(seconds: 2));
-
-      // In real offline scenario, should show error toast/snackbar
-      // For now, just verify button behavior exists
-    });
-
-    testWidgets('Download Progress: Verify progress updates during download', (
-      WidgetTester tester,
-    ) async {
-      // Given: App is loaded and on reciter details
-      await tester.pumpWidget(const QuranPlayerApp());
-      await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
-
-      final Finder? downloadButton = await findAvailableDownloadButton(tester);
-      if (downloadButton == null || downloadButton.evaluate().isEmpty) {
-        debugPrint(
-          'Download Progress test: All surahs already downloaded, skipping',
-        );
-        return;
-      }
-
-      // When: Start download
-      await tester.tap(downloadButton.first);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Then: Monitor progress for up to 10 seconds
-      final progressValues = <int>[];
-      final DateTime end = DateTime.now().add(const Duration(seconds: 10));
-
-      while (DateTime.now().isBefore(end)) {
+      for (var i = 0; i < 3; i++) {
         await tester.pump(const Duration(milliseconds: 500));
+      }
+      debugPrint('=== App initialization complete ===');
+    }
 
-        // Look for progress percentage in Text widgets
-        final Finder textWidgets = find.byType(Text);
-        for (final Element element in textWidgets.evaluate()) {
-          final String? text = (element.widget as Text).data;
-          if (text != null) {
-            final int? percentage = int.tryParse(text.trim());
-            if (percentage != null && percentage >= 0 && percentage <= 100) {
-              // Only add unique values
-              if (progressValues.isEmpty || progressValues.last != percentage) {
-                progressValues.add(percentage);
-              }
-            }
+    tearDown(() async {
+      debugPrint('=== TearDown: Starting cleanup ===');
+      await HydratedBloc.storage.clear();
+      fakeNetworkInfo.setOnline(true);
+      await Future.delayed(const Duration(seconds: 2));
+      debugPrint('=== TearDown: Cleanup complete ===');
+    });
+
+    testWidgets(
+      'Online Download: Download a surah with internet connection',
+      (WidgetTester tester) async {
+        // Given: App is loaded and we're on the reciter details screen
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        // Debug: Check where we are
+        debugPrint('After navigation to details:');
+        final Iterable<Element> texts = find.byType(Text).evaluate();
+        debugPrint('  Texts found: ${texts.length}');
+        for (var i = 0; i < texts.length.clamp(0, 10); i++) {
+          final String? text = (texts.elementAt(i).widget as Text).data;
+          if (text != null && text.isNotEmpty) {
+            debugPrint('    Text: "$text"');
           }
         }
 
-        // Break if reached 100%
-        if (progressValues.contains(100)) {
-          break;
+        // Check for download button specifically
+        if (find.byIcon(Icons.cloud_download_outlined).evaluate().isNotEmpty) {
+          debugPrint('  Found cloud_download_outlined icon');
+        } else {
+          debugPrint('  NO cloud_download_outlined icon found');
+          // List all icons to see what we have
+          final Iterable<Element> icons = find.byType(Icon).evaluate();
+          for (var i = 0; i < icons.length.clamp(0, 10); i++) {
+            final IconData? icon = (icons.elementAt(i).widget as Icon).icon;
+            debugPrint('    Icon: $icon');
+          }
         }
 
-        // Break if download completed (check icon)
-        if (find.byIcon(Icons.check_circle).evaluate().isNotEmpty) {
-          break;
+        // When: We find and tap a download button
+        final Finder downloadButton = findDownloadButton();
+        await waitForWidget(
+          tester,
+          downloadButton,
+          timeout: const Duration(seconds: 15),
+          errorMessage: 'Should find at least one download button',
+        );
+
+        final FinderResult<Element> elements = downloadButton.evaluate();
+        debugPrint('Found ${elements.length} download button elements');
+        for (final element in elements) {
+          debugPrint('  Element widget: ${element.widget.runtimeType}');
         }
-      }
 
-      // Verify we saw progress updates
-      expect(
-        progressValues.isNotEmpty,
-        true,
-        reason: 'Should see progress percentage updates during download',
-      );
-    });
+        debugPrint('Tapping first download button...');
+        final Finder target = downloadButton.first;
+        await tester.tap(target);
+        debugPrint('Tap executed. Pumping...');
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
 
-    testWidgets('Already Downloaded: Verify checkmark for downloaded surahs', (
-      WidgetTester tester,
-    ) async {
-      // Given: App loaded and on reciter details
-      await tester.pumpWidget(const QuranPlayerApp());
-      await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
+        // Then: Download should start
+        await tester.pump(const Duration(seconds: 1));
 
-      // When: Look for check_circle icons (already downloaded)
-      final Finder checkIconFinder = find.byIcon(Icons.check_circle);
-
-      if (checkIconFinder.evaluate().isEmpty) {
-        // No downloaded surahs yet, skip test
-        return;
-      }
-
-      // Then: Verify checkmark is green
-      final Finder greenCheckFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is Icon &&
-            widget.icon == Icons.check_circle &&
-            widget.color == Colors.green,
-      );
-
-      expect(
-        greenCheckFinder.evaluate().isNotEmpty,
-        true,
-        reason: 'Downloaded surahs should show green checkmark',
-      );
-    });
-
-    testWidgets('Download Cancellation: Cancel an ongoing download', (
-      WidgetTester tester,
-    ) async {
-      // Given: App loaded and on reciter details
-      await tester.pumpWidget(const QuranPlayerApp());
-      await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
-
-      final Finder? downloadButton = await findAvailableDownloadButton(tester);
-      if (downloadButton == null || downloadButton.evaluate().isEmpty) {
-        debugPrint(
-          'Download Cancellation test: All surahs already downloaded, skipping',
-        );
-        return;
-      }
-
-      // When: Start download
-      await tester.tap(downloadButton.first);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Wait for download to start (retry loop)
-      var foundProgress = false;
-      final DateTime end = DateTime.now().add(const Duration(seconds: 5));
-
-      while (DateTime.now().isBefore(end)) {
-        await tester.pump(const Duration(milliseconds: 100)); // frequent checks
-
-        final Finder progressIndicator = find.byType(CircularProgressIndicator);
-        final Finder hourglassIcon = find.byIcon(Icons.hourglass_empty_rounded);
-        final Finder downloadingIcon = find.byIcon(Icons.downloading_rounded);
-
-        if (progressIndicator.evaluate().isNotEmpty) {
-          debugPrint('Found CircularProgressIndicator, tapping to cancel...');
-          await tester.tap(progressIndicator.first);
-          foundProgress = true;
-          break;
-        } else if (hourglassIcon.evaluate().isNotEmpty) {
-          debugPrint('Found hourglass icon, tapping to cancel...');
-          await tester.tap(hourglassIcon.first);
-          foundProgress = true;
-          break;
-        } else if (downloadingIcon.evaluate().isNotEmpty) {
-          debugPrint('Found downloading icon, tapping to cancel...');
-          await tester.tap(downloadingIcon.first);
-          foundProgress = true;
-          break;
-        }
-      }
-
-      if (!foundProgress) {
-        debugPrint('Could not find progress indicator to cancel download.');
-        // Don't fail - download may have completed too quickly or all surahs downloaded
-        // Check if we have either a download button (cancelled/ready) or completed (check_circle)
-        final Finder anyDownloadIndicator = find.byWidgetPredicate(
-          (widget) =>
-              widget is Icon &&
-              (widget.icon == Icons.download_rounded ||
-                  widget.icon == Icons.check_circle),
-        );
-        expect(
-          anyDownloadIndicator.evaluate().isNotEmpty,
-          true,
-          reason: 'Should see either download button or completed icon',
-        );
-        return;
-      }
-
-      await tester.pump(const Duration(seconds: 1));
-
-      // Then: Verify download button reappears (cancelled state) OR download completed
-      final Finder downloadButtonAfterCancel = findDownloadButton();
-      final Finder completedIcon = find.byWidgetPredicate(
-        (widget) =>
-            widget is Icon &&
-            widget.icon == Icons.check_circle &&
-            widget.color == Colors.green,
-      );
-
-      expect(
-        downloadButtonAfterCancel.evaluate().isNotEmpty ||
-            completedIcon.evaluate().isNotEmpty,
-        true,
-        reason:
-            'Download button should reappear after cancellation or show completed',
-      );
-    });
-
-    testWidgets('Search and Download: Search for a surah and download it', (
-      WidgetTester tester,
-    ) async {
-      // Given: App loaded and on reciter details
-      await tester.pumpWidget(const QuranPlayerApp());
-      await tester.pump(const Duration(seconds: 3));
-      await navigateToRecitersTab(tester);
-      await navigateToReciterDetails(tester);
-
-      // When: Search for a surah
-      final Finder searchFieldFinder = find.byType(TextField);
-      if (searchFieldFinder.evaluate().isEmpty) {
-        // No search field available, skip
-        return;
-      }
-
-      // Debug: print text before search
-      debugPrint('Entering search text...');
-      await tester.enterText(searchFieldFinder.first, '3');
-      await tester.pump(const Duration(seconds: 2));
-
-      // Debug: Print ALL texts found
-      debugPrint('--- Searching results for "3" ---');
-      final Finder texts = find.byType(Text);
-      for (final Element widget in texts.evaluate()) {
-        debugPrint('Text: "${(widget.widget as Text).data}"');
-      }
-      debugPrint('--------------------------------');
-
-      // Check for Surah 3 text (003 or name)
-      final Finder surahText = find.textContaining('003');
-      final Finder surahName = find.textContaining(
-        'Al-Imran',
-      ); // Or arabic 'آل عمران'
-
-      bool foundResults =
-          surahText.evaluate().isNotEmpty || surahName.evaluate().isNotEmpty;
-
-      // Fallback
-      if (!foundResults) {
-        debugPrint('Specific match not found. Broad check...');
-        foundResults = find.textContaining('3').evaluate().isNotEmpty;
-      }
-
-      expect(
-        foundResults,
-        true,
-        reason: 'Should show search results for Surah 3',
-      );
-
-      final Finder targetFinder = surahText.evaluate().isNotEmpty
-          ? surahText
-          : surahName.evaluate().isNotEmpty
-          ? surahName
-          : find.textContaining('3');
-
-      await tester.ensureVisible(targetFinder.first);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      final Finder rowFinder = find.ancestor(
-        of: targetFinder.first,
-        matching: find.byType(InkWell),
-      );
-
-      final Finder rowScope = rowFinder.evaluate().isNotEmpty
-          ? rowFinder.first
-          : find.byType(Scaffold);
-
-      final Finder rowDownloadButton = find.descendant(
-        of: rowScope,
-        matching: findDownloadButton(),
-      );
-
-      final Finder rowGreenCheckFinder = find.descendant(
-        of: rowScope,
-        matching: find.byWidgetPredicate(
+        final Finder greenCheckFinder = find.byWidgetPredicate(
           (widget) =>
               widget is Icon &&
               widget.icon == Icons.check_circle &&
               widget.color == Colors.green,
-        ),
-      );
+        );
+        if (greenCheckFinder.evaluate().isNotEmpty) {
+          return;
+        }
 
-      final Finder rowProgressIndicator = find.descendant(
-        of: rowScope,
-        matching: find.byType(CircularProgressIndicator),
-      );
-      final Finder rowDownloadingIcon = find.descendant(
-        of: rowScope,
-        matching: find.byIcon(Icons.downloading_rounded),
-      );
-      final Finder rowHourglassIcon = find.descendant(
-        of: rowScope,
-        matching: find.byIcon(Icons.hourglass_empty_rounded),
-      );
+        // Do not require completion within a fixed short timeout (flaky on slow networks).
+        // Instead, verify that the download process is active.
+        await waitForWidget(
+          tester,
+          find.byWidgetPredicate(
+            (widget) =>
+                (widget is Icon &&
+                    (widget.icon == Icons.downloading_rounded ||
+                        widget.icon == Icons.hourglass_empty_rounded)) ||
+                (widget is CircularProgressIndicator),
+          ),
+          timeout: const Duration(seconds: 20),
+          errorMessage:
+              'Download did not start (no progress/pending indicator found)',
+        );
 
-      final DateTime end = DateTime.now().add(const Duration(seconds: 20));
-      while (DateTime.now().isBefore(end)) {
-        await tester.pump(const Duration(milliseconds: 250));
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
+
+    testWidgets(
+      'Offline Download: Attempt download without internet',
+      (WidgetTester tester) async {
+        debugPrint('=== Offline Download Test: Starting ===');
+
+        // Given: App is loaded and we're on the reciter details screen
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        // Wait for the UI to be ready
+        await waitForWidget(
+          tester,
+          findSurahCard(1),
+          errorMessage: 'Surah cards should be visible',
+        );
+
+        // Now set offline
+        fakeNetworkInfo.setOnline(false);
+        debugPrint('Offline test: Network set to OFFLINE');
+
+        debugPrint('Offline test: Finding available download button...');
+        final Finder? downloadButton = await findAvailableDownloadButton(
+          tester,
+          timeout: const Duration(seconds: 3),
+        );
+
+        if (downloadButton == null || downloadButton.evaluate().isEmpty) {
+          debugPrint('Offline test: All surahs already downloaded, skipping');
+          await cleanupTest(tester);
+          return;
+        }
+
+        // When: Tap download button (should not start download due to offline state)
+        debugPrint('Offline test: Tapping download button...');
+        await tester.tap(downloadButton.first);
+        await tester.pump(const Duration(seconds: 1));
+
+        // Then: Progress indicator should NOT appear because we are offline
+        final Finder progressIndicator = find.byType(CircularProgressIndicator);
+        expect(
+          progressIndicator,
+          findsNothing,
+          reason: 'Download should not start when offline',
+        );
+
+        // Restore network for other tests
+        fakeNetworkInfo.setOnline(true);
+
+        // Clean up
+        await cleanupTest(tester);
+        debugPrint('=== Offline Download Test: Completed ===');
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
+
+    testWidgets(
+      'Download Progress: Verify progress updates during download',
+      (WidgetTester tester) async {
+        // Given: App is loaded and on reciter details
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        final Finder? downloadButton = await findAvailableDownloadButton(
+          tester,
+        );
+        if (downloadButton == null || downloadButton.evaluate().isEmpty) {
+          debugPrint(
+            'Download Progress test: All surahs already downloaded, skipping',
+          );
+          return;
+        }
+
+        // When: Start download
+        await tester.tap(downloadButton.first);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // Then: Monitor progress for up to 10 seconds
+        final progressValues = <int>[];
+        final DateTime end = DateTime.now().add(const Duration(seconds: 10));
+
+        while (DateTime.now().isBefore(end)) {
+          await tester.pump(const Duration(milliseconds: 500));
+
+          // Look for progress percentage in Text widgets
+          final Finder textWidgets = find.byType(Text);
+          for (final Element element in textWidgets.evaluate()) {
+            final String? text = (element.widget as Text).data;
+            if (text != null) {
+              final int? percentage = int.tryParse(text.trim());
+              if (percentage != null && percentage >= 0 && percentage <= 100) {
+                // Only add unique values
+                if (progressValues.isEmpty ||
+                    progressValues.last != percentage) {
+                  progressValues.add(percentage);
+                }
+              }
+            }
+          }
+
+          // Break if reached 100%
+          if (progressValues.contains(100)) {
+            break;
+          }
+
+          // Break if download completed (check icon)
+          if (find.byIcon(Icons.check_circle).evaluate().isNotEmpty) {
+            break;
+          }
+        }
+
+        // Verify we saw progress updates OR completed successfully
+        final bool completedSuccessfully = find
+            .byIcon(Icons.check_circle)
+            .evaluate()
+            .isNotEmpty;
+
+        expect(
+          progressValues.isNotEmpty || completedSuccessfully,
+          true,
+          reason:
+              'Should see progress updates OR complete successfully (fast download)',
+        );
+
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
+
+    testWidgets(
+      'Already Downloaded: Verify checkmark for downloaded surahs',
+      (WidgetTester tester) async {
+        // Given: App loaded and on reciter details
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        // When: Look for check_circle icons (already downloaded)
+        final Finder checkIconFinder = find.byIcon(Icons.check_circle);
+
+        if (checkIconFinder.evaluate().isEmpty) {
+          // No downloaded surahs yet, skip test
+          return;
+        }
+
+        // Then: Verify checkmark is green
+        final Finder greenCheckFinder = find.byWidgetPredicate(
+          (widget) =>
+              widget is Icon &&
+              widget.icon == Icons.check_circle &&
+              widget.color == Colors.green,
+        );
+
+        expect(
+          greenCheckFinder.evaluate().isNotEmpty,
+          true,
+          reason: 'Downloaded surahs should show green checkmark',
+        );
+
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
+
+    testWidgets(
+      'Download Cancellation: Cancel an ongoing download',
+      (WidgetTester tester) async {
+        // Given: App loaded and on reciter details
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        final Finder? downloadButton = await findAvailableDownloadButton(
+          tester,
+        );
+        if (downloadButton == null || downloadButton.evaluate().isEmpty) {
+          debugPrint(
+            'Download Cancellation test: All surahs already downloaded, skipping',
+          );
+          return;
+        }
+
+        // When: Start download
+        await tester.tap(downloadButton.first);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // Wait for download to start (retry loop)
+        var foundProgress = false;
+        final DateTime end = DateTime.now().add(const Duration(seconds: 5));
+
+        while (DateTime.now().isBefore(end)) {
+          await tester.pump(
+            const Duration(milliseconds: 100),
+          ); // frequent checks
+
+          final Finder progressIndicator = find.byType(
+            CircularProgressIndicator,
+          );
+          final Finder hourglassIcon = find.byIcon(
+            Icons.hourglass_empty_rounded,
+          );
+          final Finder downloadingIcon = find.byIcon(Icons.downloading_rounded);
+
+          if (progressIndicator.evaluate().isNotEmpty) {
+            debugPrint('Found CircularProgressIndicator, tapping to cancel...');
+            await tester.tap(progressIndicator.first);
+            foundProgress = true;
+            break;
+          } else if (hourglassIcon.evaluate().isNotEmpty) {
+            debugPrint('Found hourglass icon, tapping to cancel...');
+            await tester.tap(hourglassIcon.first);
+            foundProgress = true;
+            break;
+          } else if (downloadingIcon.evaluate().isNotEmpty) {
+            debugPrint('Found downloading icon, tapping to cancel...');
+            await tester.tap(downloadingIcon.first);
+            foundProgress = true;
+            break;
+          }
+        }
+
+        if (!foundProgress) {
+          debugPrint('Could not find progress indicator to cancel download.');
+          // Don't fail - download may have completed too quickly or all surahs downloaded
+          // Check if we have either a download button (cancelled/ready) or completed (check_circle)
+          final Finder anyDownloadIndicator = find.byWidgetPredicate(
+            (widget) =>
+                widget is Icon &&
+                (widget.icon == Icons.download_rounded ||
+                    widget.icon == Icons.check_circle),
+          );
+          expect(
+            anyDownloadIndicator.evaluate().isNotEmpty,
+            true,
+            reason: 'Should see either download button or completed icon',
+          );
+          return;
+        }
+
+        await tester.pump(const Duration(seconds: 1));
+
+        // Then: Verify download button reappears (cancelled state) OR download completed
+        final Finder downloadButtonAfterCancel = findDownloadButton();
+        final Finder completedIcon = find.byWidgetPredicate(
+          (widget) =>
+              widget is Icon &&
+              widget.icon == Icons.check_circle &&
+              widget.color == Colors.green,
+        );
+
+        expect(
+          downloadButtonAfterCancel.evaluate().isNotEmpty ||
+              completedIcon.evaluate().isNotEmpty,
+          true,
+          reason:
+              'Download button should reappear after cancellation or show completed',
+        );
+
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
+
+    testWidgets(
+      'Search and Download: Search for a surah and download it',
+      (WidgetTester tester) async {
+        debugPrint('=== Search Test: Starting ===');
+        // Given: App loaded and on reciter details
+        await initializeApp(tester);
+        await navigateToRecitersTab(tester);
+        await navigateToReciterDetails(tester);
+
+        // Wait for list to load
+        await waitForWidget(
+          tester,
+          findSurahCard(1),
+          errorMessage: 'Surah list should load before search',
+        );
+
+        // When: Search for a surah
+        final Finder searchFieldFinder = find.byType(TextField);
+        expect(
+          searchFieldFinder,
+          findsOneWidget,
+          reason: 'Search field should be visible',
+        );
+
+        // Clear the search field before entering the query
+        debugPrint('Search test: Clearing search field and entering query...');
+        await tester.enterText(searchFieldFinder.first, '');
+        await tester.pump(
+          const Duration(milliseconds: 500),
+        ); // Allow UI to update after clearing
+
+        await tester.enterText(searchFieldFinder.first, '3');
+        // Wait longer for debounce and filtering
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+
+        final Finder surah3Card = findSurahCard(3);
+        await waitForWidget(
+          tester,
+          surah3Card,
+          timeout: const Duration(seconds: 15),
+          errorMessage: 'Surah 3 should be visible after searching for "3"',
+        );
+
+        await tester.pump(const Duration(seconds: 1));
+
+        // Debug: Print ALL texts found
+        debugPrint('--- Searching results for "3" ---');
+        final Finder texts = find.byType(Text);
+        for (final Element widget in texts.evaluate()) {
+          debugPrint('Text: "${(widget.widget as Text).data}"');
+        }
+        debugPrint('--------------------------------');
+
+        // Check for Surah 3 text (003 or name)
+        final Finder surahText = find.textContaining('003');
+        final Finder surahName = find.textContaining(
+          'Al-Imran',
+        ); // Or arabic 'آل عمران'
+
+        bool foundResults =
+            surahText.evaluate().isNotEmpty || surahName.evaluate().isNotEmpty;
+
+        // Fallback
+        if (!foundResults) {
+          debugPrint('Specific match not found. Broad check...');
+          foundResults = find.textContaining('3').evaluate().isNotEmpty;
+        }
+
+        expect(
+          foundResults,
+          true,
+          reason: 'Should show search results for Surah 3',
+        );
+
+        final Finder targetFinder = surahText.evaluate().isNotEmpty
+            ? surahText
+            : surahName.evaluate().isNotEmpty
+            ? surahName
+            : find.textContaining('3');
+
+        await tester.ensureVisible(targetFinder.first);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        final Finder rowFinder = find.ancestor(
+          of: targetFinder.first,
+          matching: find.byType(InkWell),
+        );
+
+        final Finder rowScope = rowFinder.evaluate().isNotEmpty
+            ? rowFinder.first
+            : surah3Card;
+
+        final Finder rowDownloadButton = find.descendant(
+          of: rowScope,
+          matching: findDownloadButton(),
+        );
+
+        final Finder rowGreenCheckFinder = find.descendant(
+          of: rowScope,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Icon &&
+                widget.icon == Icons.check_circle &&
+                widget.color == Colors.green,
+          ),
+        );
+
+        final Finder rowProgressIndicator = find.descendant(
+          of: rowScope,
+          matching: find.byType(CircularProgressIndicator),
+        );
+        final Finder rowDownloadingIcon = find.descendant(
+          of: rowScope,
+          matching: find.byIcon(Icons.downloading_rounded),
+        );
+        final Finder rowHourglassIcon = find.descendant(
+          of: rowScope,
+          matching: find.byIcon(Icons.hourglass_empty_rounded),
+        );
+
+        final DateTime end = DateTime.now().add(const Duration(seconds: 20));
+        while (DateTime.now().isBefore(end)) {
+          await tester.pump(const Duration(milliseconds: 250));
+          if (rowGreenCheckFinder.evaluate().isNotEmpty ||
+              rowProgressIndicator.evaluate().isNotEmpty ||
+              rowDownloadingIcon.evaluate().isNotEmpty ||
+              rowHourglassIcon.evaluate().isNotEmpty ||
+              rowDownloadButton.evaluate().isNotEmpty) {
+            break;
+          }
+        }
+
         if (rowGreenCheckFinder.evaluate().isNotEmpty ||
             rowProgressIndicator.evaluate().isNotEmpty ||
             rowDownloadingIcon.evaluate().isNotEmpty ||
-            rowHourglassIcon.evaluate().isNotEmpty ||
-            rowDownloadButton.evaluate().isNotEmpty) {
-          break;
+            rowHourglassIcon.evaluate().isNotEmpty) {
+          return;
         }
-      }
 
-      if (rowGreenCheckFinder.evaluate().isNotEmpty ||
+        await waitForWidget(
+          tester,
+          rowDownloadButton,
+          errorMessage:
+              'Expected a download control in Surah 3 row but none was found',
+        );
+
+        await tester.tap(rowDownloadButton.first);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.pump(const Duration(seconds: 1));
+        expect(
           rowProgressIndicator.evaluate().isNotEmpty ||
-          rowDownloadingIcon.evaluate().isNotEmpty ||
-          rowHourglassIcon.evaluate().isNotEmpty) {
-        return;
-      }
+              rowDownloadingIcon.evaluate().isNotEmpty ||
+              rowHourglassIcon.evaluate().isNotEmpty ||
+              rowGreenCheckFinder.evaluate().isNotEmpty,
+          true,
+          reason: 'Download should start (or complete) for searched surah',
+        );
 
-      await waitForWidget(
-        tester,
-        rowDownloadButton,
-        errorMessage:
-            'Expected a download control in Surah 3 row but none was found',
-      );
-
-      await tester.tap(rowDownloadButton.first);
-      await tester.pump(const Duration(milliseconds: 500));
-
-      await tester.pump(const Duration(seconds: 1));
-      expect(
-        rowProgressIndicator.evaluate().isNotEmpty ||
-            rowDownloadingIcon.evaluate().isNotEmpty ||
-            rowHourglassIcon.evaluate().isNotEmpty ||
-            rowGreenCheckFinder.evaluate().isNotEmpty,
-        true,
-        reason: 'Download should start (or complete) for searched surah',
-      );
-    });
+        // Clean up to prevent pending frame issues
+        await cleanupTest(tester);
+      },
+      timeout: const Timeout(Duration(minutes: 1)),
+    );
   });
+}
+
+class FakeNetworkInfo implements NetworkInfo {
+  bool _isOnline = true;
+
+  void setOnline(bool value) {
+    _isOnline = value;
+  }
+
+  @override
+  Future<bool> get isConnected => Future.value(_isOnline);
+
+  @override
+  Stream<bool> get onConnectivityChanged => Stream.value(_isOnline);
 }

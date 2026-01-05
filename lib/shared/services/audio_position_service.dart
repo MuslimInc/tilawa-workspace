@@ -8,5 +8,5 @@ abstract class AudioPositionService {
 @LazySingleton(as: AudioPositionService)
 class AudioPositionServiceImpl implements AudioPositionService {
   @override
-  Stream<Duration> get position => AudioService.position;
+  Stream<Duration> get position => AudioService.position.distinct();
 }

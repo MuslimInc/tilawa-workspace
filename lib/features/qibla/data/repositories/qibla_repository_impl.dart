@@ -18,7 +18,7 @@ class QiblaRepositoryImpl implements QiblaRepository {
         direction: qiblaDirection.direction,
         offset: qiblaDirection.offset,
       );
-    });
+    }).distinct();
   }
 
   @override

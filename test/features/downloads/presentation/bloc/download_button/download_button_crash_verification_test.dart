@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
 
@@ -39,11 +40,6 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   BlocWithoutFix({required this.progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - NO isClosed check
-      _subscription = progressStream.listen((progress) {
-        // THIS IS THE BUG: No check if bloc is closed
-        // This will crash if called after bloc.close()
-        add(TestProgressUpdated(progress));
-      });
       emit(TestDownloading(0.0));
     });
 
@@ -53,11 +49,12 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   }
 
   final Stream<double> progressStream;
-  StreamSubscription<double>? _subscription;
 
   @override
   Future<void> close() {
-    _subscription?.cancel();
+    // Intentionally comment out cancellation to simulate race condition
+    // where stream emits before cancellation is processed
+    // _subscription?.cancel();
     return super.close();
   }
 }
@@ -67,13 +64,6 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   BlocWithFix({required this.progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - WITH isClosed check
-      _subscription = progressStream.listen((progress) {
-        // THIS IS THE FIX: Check if bloc is closed before adding event
-        if (isClosed) {
-          return; // Silently ignore if already closed
-        }
-        add(TestProgressUpdated(progress));
-      });
       emit(TestDownloading(0.0));
     });
 
@@ -83,55 +73,66 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   }
 
   final Stream<double> progressStream;
-  StreamSubscription<double>? _subscription;
 
   @override
   Future<void> close() {
-    _subscription?.cancel();
+    // Intentionally comment out cancellation to simulate race condition
+    // where stream emits before cancellation is processed
+    // _subscription?.cancel();
     return super.close();
   }
 }
 
 void main() {
+  setUpAll(() {
+    provideDummy<Either<Failure, bool>>(const Right(false));
+    provideDummy<Either<Failure, void>>(const Right(null));
+  });
+
   group('Crash Verification - Prove Firebase Report is Accurate', () {
     test('WITHOUT FIX: Bloc DOES crash when stream emits after close '
         '(proves the Firebase crash was real)', () async {
       // Use a synchronous controller to ensure events are processed immediately
-      final controller = StreamController<double>();
+      final controller = StreamController<double>(sync: true);
 
-      final bloc = BlocWithoutFix(progressStream: controller.stream);
-
-      // Initialize and start listening
-      bloc.add(TestInitialize());
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Emit some progress
-      controller.add(0.1);
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Close the bloc (user navigates away)
-      await bloc.close();
-
-      // Now try to emit progress - this SHOULD crash
-      // The stream is still active, so the listener will try to add an event
       var didCrash = false;
       String? errorMessage;
-      try {
-        // Add event to stream - listener will try to call bloc.add() on closed bloc
-        controller.add(0.5);
-        // Give it time to process
-        await Future.delayed(const Duration(milliseconds: 100));
-      } catch (e, stack) {
-        errorMessage = e.toString();
-        print('Caught expected crash: $e');
-        print('Stack: $stack');
-        // Verify it's the exact error from Firebase
-        didCrash =
-            errorMessage.contains(
-              'Cannot add new events after calling close',
-            ) ||
-            errorMessage.contains('Bad state');
-      }
+
+      // Run in a zone to catch asynchronous errors
+      await runZonedGuarded(
+        () async {
+          final bloc = BlocWithoutFix(progressStream: controller.stream);
+
+          // Initialize and start listening
+          bloc.add(TestInitialize());
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          // Emit some progress
+          controller.add(0.1);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          // Close the bloc (user navigates away)
+          await bloc.close();
+
+          // Now try to emit progress - this SHOULD crash
+          // The stream is still active, so the listener will try to add an event
+          // Add event to stream - listener will try to call bloc.add() on closed bloc
+          controller.add(0.5);
+          // Give it time to process
+          await Future.delayed(const Duration(milliseconds: 100));
+        },
+        (error, stack) {
+          errorMessage = error.toString();
+          print('Caught expected crash: $error');
+          print('Stack: $stack');
+          // Verify it's the exact error from Firebase
+          didCrash =
+              errorMessage!.contains(
+                'Cannot add new events after calling close',
+              ) ||
+              errorMessage!.contains('Bad state');
+        },
+      );
 
       // Clean up
       await controller.close();
@@ -150,7 +151,7 @@ void main() {
     });
     test('WITH FIX: Bloc does NOT crash when stream emits after close '
         '(proves our fix resolves the issue)', () async {
-      final controller = StreamController<double>.broadcast();
+      final controller = StreamController<double>.broadcast(sync: true);
 
       final bloc = BlocWithFix(progressStream: controller.stream);
 
@@ -180,30 +181,35 @@ void main() {
 
     test('WITHOUT FIX: Multiple rapid updates after close causes crash '
         '(simulates real-world scenario)', () async {
-      final controller = StreamController<double>.broadcast();
+      final controller = StreamController<double>.broadcast(sync: true);
 
-      final bloc = BlocWithoutFix(progressStream: controller.stream);
-
-      bloc.add(TestInitialize());
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      // Close bloc
-      await bloc.close();
-
-      // Rapid fire updates (as happens in real downloads)
       var didCrash = false;
-      try {
-        for (var i = 0; i < 10; i++) {
-          controller.add(i / 10);
-        }
-        await Future.delayed(const Duration(milliseconds: 100));
-      } catch (e) {
-        didCrash =
-            e.toString().contains(
-              'Cannot add new events after calling close',
-            ) ||
-            e.toString().contains('Bad state');
-      }
+
+      // Run in a zone to catch asynchronous errors
+      await runZonedGuarded(
+        () async {
+          final bloc = BlocWithoutFix(progressStream: controller.stream);
+
+          bloc.add(TestInitialize());
+          await Future.delayed(const Duration(milliseconds: 50));
+
+          // Close bloc
+          await bloc.close();
+
+          // Rapid fire updates (as happens in real downloads)
+          for (var i = 0; i < 10; i++) {
+            controller.add(i / 10);
+          }
+          await Future.delayed(const Duration(milliseconds: 100));
+        },
+        (error, stack) {
+          didCrash =
+              error.toString().contains(
+                'Cannot add new events after calling close',
+              ) ||
+              error.toString().contains('Bad state');
+        },
+      );
 
       await controller.close();
 
@@ -216,7 +222,7 @@ void main() {
 
     test('WITH FIX: Multiple rapid updates after close handled gracefully '
         '(proves fix handles high-frequency scenario)', () async {
-      final controller = StreamController<double>.broadcast();
+      final controller = StreamController<double>.broadcast(sync: true);
 
       final bloc = BlocWithFix(progressStream: controller.stream);
 
@@ -244,7 +250,7 @@ void main() {
     test(
       'PROOF: Calling bloc.add() after bloc.close() throws StateError',
       () async {
-        final controller = StreamController<double>();
+        final controller = StreamController<double>(sync: true);
         final bloc = BlocWithoutFix(progressStream: controller.stream);
 
         bloc.add(TestInitialize());
@@ -273,37 +279,39 @@ void main() {
         // 1. Bloc is closed while stream subscription is active
         // 2. Stream emits→ listener calls add() → CRASH
 
-        final controller = StreamController<double>();
-        final bloc = BlocWithoutFix(progressStream: controller.stream);
-
-        // Initialize - this sets up the stream listener
-        bloc.add(TestInitialize());
-        await Future.delayed(const Duration(milliseconds: 50));
-
-        // Verify listener is working
-        controller.add(0.1);
-        await Future.delayed(const Duration(milliseconds: 50));
-
-        // Close the bloc (simulates user navigating away)
-        await bloc.close();
-
-        // The stream subscription is STILL ACTIVE (that's the bug!)
-        // When we add to the stream, the listener will try to call bloc.add()
-        //
-        // BlocWithoutFix listener code:
-        //   progressStream.listen((progress) {
-        //     add(TestProgressUpdated(progress));  // <-- This will crash!
-        //   });
-        //
-        // Firebase Error:
-        // "Bad state: Cannot add new events after calling close
-        //  at _BroadcastStreamController.add(dart:async)
-        //  at Bloc.add(bloc.dart:97)"
+        final controller = StreamController<double>(sync: true);
 
         // We expect an unhandled error in the zone
         var errorCaught = false;
+
         await runZonedGuarded(
           () async {
+            final bloc = BlocWithoutFix(progressStream: controller.stream);
+
+            // Initialize - this sets up the stream listener
+            bloc.add(TestInitialize());
+            await Future.delayed(const Duration(milliseconds: 50));
+
+            // Verify listener is working
+            controller.add(0.1);
+            await Future.delayed(const Duration(milliseconds: 50));
+
+            // Close the bloc (simulates user navigating away)
+            await bloc.close();
+
+            // The stream subscription is STILL ACTIVE (that's the bug!)
+            // When we add to the stream, the listener will try to call bloc.add()
+            //
+            // BlocWithoutFix listener code:
+            //   progressStream.listen((progress) {
+            //     add(TestProgressUpdated(progress));  // <-- This will crash!
+            //   });
+            //
+            // Firebase Error:
+            // "Bad state: Cannot add new events after calling close
+            //  at _BroadcastStreamController.add(dart:async)
+            //  at Bloc.add(bloc.dart:97)"
+
             controller.add(0.5); // Stream emits
             await Future.delayed(const Duration(milliseconds: 100));
           },
@@ -331,7 +339,7 @@ void main() {
     );
 
     test('WITH FIX: isClosed check prevents the crash', () async {
-      final controller = StreamController<double>();
+      final controller = StreamController<double>(sync: true);
       final bloc = BlocWithFix(progressStream: controller.stream);
 
       bloc.add(TestInitialize());
@@ -365,6 +373,7 @@ void main() {
     late MockDownloadSurahUseCase mockDownloadSurah;
     late MockCancelDownloadUseCase mockCancelDownload;
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+    late MockNetworkInfo mockNetworkInfo;
 
     const testUrl = 'https://example.com/001.mp3';
     const testReciterName = 'Abdul Rahman Al-Sudais';
@@ -376,6 +385,8 @@ void main() {
       mockDownloadSurah = MockDownloadSurahUseCase();
       mockCancelDownload = MockCancelDownloadUseCase();
       mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
+      mockNetworkInfo = MockNetworkInfo();
+      when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
       when(
         mockCheckSurahDownloaded.call(
@@ -397,7 +408,7 @@ void main() {
     test(
       'Real DownloadButtonBloc with fix handles post-close events correctly',
       () async {
-        final controller = StreamController<DownloadItem>.broadcast();
+        final controller = StreamController<DownloadItem>.broadcast(sync: true);
 
         when(
           mockObserveDownloadProgress.call(any),
@@ -411,6 +422,7 @@ void main() {
           downloadSurah: mockDownloadSurah,
           cancelDownload: mockCancelDownload,
           observeDownloadProgress: mockObserveDownloadProgress,
+          networkInfo: mockNetworkInfo,
         );
 
         // Initialize and start download

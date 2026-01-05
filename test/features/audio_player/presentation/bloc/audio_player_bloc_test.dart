@@ -8,6 +8,7 @@ import 'package:tilawa/core/entities/audio.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
+import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
@@ -36,6 +37,7 @@ import 'audio_player_bloc_test.mocks.dart';
   LoadAudioPlayerDataUseCase,
   GetAudioStreamsUseCase,
   SettingsCubit,
+  CheckAudioPlayabilityUseCase,
 ])
 void main() {
   setUpAll(() async {
@@ -66,6 +68,7 @@ void main() {
   late MockLoadAudioPlayerDataUseCase mockLoadAudioPlayerData;
   late MockGetAudioStreamsUseCase mockGetAudioStreams;
   late MockSettingsCubit mockSettingsCubit;
+  late MockCheckAudioPlayabilityUseCase mockCheckAudioPlayability;
 
   late BehaviorSubject<AudioEntity?> currentAudioSubject;
   late BehaviorSubject<PlaybackStateEntity> playbackStateSubject;
@@ -100,7 +103,9 @@ void main() {
     volumeSubject = BehaviorSubject<double>.seeded(1.0);
     speedSubject = BehaviorSubject<double>.seeded(1.0);
     positionSubject = BehaviorSubject<Duration>();
+    mockGetAudioStreams = MockGetAudioStreamsUseCase();
     mockSettingsCubit = MockSettingsCubit();
+    mockCheckAudioPlayability = MockCheckAudioPlayabilityUseCase();
 
     // Setup mock streams
     when(
@@ -151,6 +156,7 @@ void main() {
       mockRemoveQueueItem,
       mockMoveQueueItem,
       mockLoadAudioPlayerData,
+      mockCheckAudioPlayability,
       mockSettingsCubit,
     );
   }
@@ -601,6 +607,10 @@ void main() {
       when(
         mockSetPlaybackSpeed.call(any),
       ).thenAnswer((_) async => const Right(null));
+      // Default to allowing playback
+      when(
+        mockCheckAudioPlayability.call(any),
+      ).thenAnswer((_) async => const Right(null));
     });
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
@@ -670,9 +680,22 @@ void main() {
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'PlayFromQueue should call mockPlayFromQueue',
       build: () => buildBloc(),
-      act: (bloc) => bloc.add(const AudioPlayerEvent.playFromQueue([], 0)),
+      act: (bloc) => bloc.add(
+        const AudioPlayerEvent.playFromQueue([
+          AudioEntity(id: '1', title: 't', url: 'u', duration: Duration.zero),
+        ], 0),
+      ),
       verify: (_) {
-        verify(mockPlayFromQueue([], 0)).called(1);
+        verify(
+          mockPlayFromQueue([
+            const AudioEntity(
+              id: '1',
+              title: 't',
+              url: 'u',
+              duration: Duration.zero,
+            ),
+          ], 0),
+        ).called(1);
       },
     );
 
@@ -924,6 +947,11 @@ void main() {
               'lastSleepTimerDuration',
               const Duration(minutes: 10),
             ),
+        isA<AudioPlayerState>().having(
+          (s) => s.lastSleepTimerDuration,
+          'lastSleepTimerDuration',
+          const Duration(minutes: 10),
+        ),
       ],
     );
 

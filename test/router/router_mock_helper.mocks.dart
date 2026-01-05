@@ -10,8 +10,6 @@ import 'package:go_router/src/state.dart' as _i17;
 import 'package:hydrated_bloc/hydrated_bloc.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i11;
-import 'package:tilawa/features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart'
-    as _i6;
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart'
     as _i3;
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart' as _i2;
@@ -23,6 +21,8 @@ import 'package:tilawa/features/localization/presentation/bloc/localization_bloc
     as _i16;
 import 'package:tilawa/features/playlists/presentation/bloc/playlists_bloc.dart'
     as _i18;
+import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart'
+    as _i6;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart'
     as _i8;
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart'

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../core/entities/reciter_entity.dart';
-import '../../features/alphabet_scrollbar/presentation/bloc/alphabet_scrollbar_bloc.dart';
+import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 
 class ArabicAlphabetScrollbar extends StatelessWidget {
   const ArabicAlphabetScrollbar({

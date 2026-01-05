@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,15 +55,27 @@ void main() {
       expect(docSnapshot.data()!['existingField'], 'value');
     });
 
-    test('saveDeviceToken should add token to tokens array', () async {
-      // Act
-      await userRepository.saveDeviceToken('user_123', 'token_abc');
+    test(
+      'saveDeviceToken should save token to fcm_tokens sub-collection',
+      () async {
+        // Act
+        await userRepository.saveDeviceToken('user_123', 'token_abc');
 
-      // Assert
-      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
-          await fakeFirestore.collection('users').doc('user_123').get();
-      expect(docSnapshot.exists, true);
-      expect(docSnapshot.data()!['tokens'], contains('token_abc'));
-    });
+        // Assert
+        final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+            await fakeFirestore
+                .collection('users')
+                .doc('user_123')
+                .collection('fcm_tokens')
+                .doc('token_abc')
+                .get();
+        expect(docSnapshot.exists, true);
+        expect(docSnapshot.data()!['token'], 'token_abc');
+        expect(
+          docSnapshot.data()!['platform'],
+          Platform.isAndroid ? 'android' : 'ios',
+        );
+      },
+    );
   });
 }

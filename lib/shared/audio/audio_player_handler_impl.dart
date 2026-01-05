@@ -45,7 +45,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final List<audio_service.MediaItem> newList;
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
-  final RecitersRepository _recitersRepository;
+  RecitersRepository _recitersRepository;
   final DownloadsRepository _downloadsRepository;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
@@ -413,15 +413,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
     switch (parentMediaId) {
-      case audio_service.AudioService.recentRootId:
-        final Stream<Map<String, dynamic>> stream = _recentSubject.map(
-          (_) => <String, dynamic>{},
-        );
-        return stream.shareValueSeeded(<String, dynamic>{});
+      case '__RECENT__':
+        return _recentSubject.map((_) => <String, dynamic>{}).shareValue();
       default:
-        // return Stream.value(_mediaLibrary.items[parentMediaId])
-        //     .map((_) => <String, dynamic>{})
-        //     .shareValue();
         return super.subscribeToChildren(parentMediaId);
     }
   }
@@ -885,6 +879,14 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     _playlist.addAll(await _itemsToSources(queue));
     await _safeSetAudioSources(_playlist, initialIndex: index);
     await play();
+  }
+
+  @override
+  void setRecitersRepository(RecitersRepository repository) {
+    _recitersRepository = repository;
+    // Clear cache to force use of new repository
+    _cachedReciters = null;
+    _lastCacheTime = null;
   }
 }
 

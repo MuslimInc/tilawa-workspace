@@ -131,4 +131,88 @@ void main() {
       verifyNever(mockDataSource.requestPermission());
     });
   });
+
+  group('getQiblaDirection - distinct() behavior', () {
+    test(
+      'filters duplicate QiblaDirectionEntity emissions with same values',
+      () async {
+        // Arrange
+        const direction1 = QiblaDirection(10, 20, 30);
+        const direction2 = QiblaDirection(
+          10,
+          20,
+          30,
+        ); // Same values, different instance
+        const direction3 = QiblaDirection(40, 50, 60); // Different values
+
+        final Stream<QiblaDirection> streamController = Stream.fromIterable([
+          direction1,
+          direction2,
+          direction3,
+        ]);
+
+        when(mockDataSource.qiblaStream).thenAnswer((_) => streamController);
+
+        // Act
+        final List<QiblaDirectionEntity> emissions = await repository
+            .getQiblaDirection()
+            .toList();
+
+        // Assert - should have 2 emissions since direction1 and direction2 are equal
+        expect(emissions.length, 2);
+        expect(emissions[0].qibla, 10);
+        expect(emissions[1].qibla, 40);
+      },
+    );
+
+    test('emits all values when they are different', () async {
+      // Arrange
+      const direction1 = QiblaDirection(10, 20, 30);
+      const direction2 = QiblaDirection(15, 25, 35);
+      const direction3 = QiblaDirection(20, 30, 40);
+
+      final Stream<QiblaDirection> streamController = Stream.fromIterable([
+        direction1,
+        direction2,
+        direction3,
+      ]);
+
+      when(mockDataSource.qiblaStream).thenAnswer((_) => streamController);
+
+      // Act
+      final List<QiblaDirectionEntity> emissions = await repository
+          .getQiblaDirection()
+          .toList();
+
+      // Assert - all values should be emitted since they are all different
+      expect(emissions.length, 3);
+      expect(emissions[0].qibla, 10);
+      expect(emissions[1].qibla, 15);
+      expect(emissions[2].qibla, 20);
+    });
+
+    test('QiblaDirectionEntity equality works correctly for distinct()', () {
+      // Verify that QiblaDirectionEntity implements equality correctly
+      // which is required for distinct() to work
+      const entity1 = QiblaDirectionEntity(
+        qibla: 10,
+        direction: 20,
+        offset: 30,
+      );
+      const entity2 = QiblaDirectionEntity(
+        qibla: 10,
+        direction: 20,
+        offset: 30,
+      );
+      const entity3 = QiblaDirectionEntity(
+        qibla: 40,
+        direction: 50,
+        offset: 60,
+      );
+
+      expect(entity1, equals(entity2));
+      expect(entity1, isNot(equals(entity3)));
+      expect(entity1.hashCode, equals(entity2.hashCode));
+    });
+  });
 }
