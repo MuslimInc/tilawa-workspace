@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5+5] - 2026-01-05
+
+### Added
+
+- **R8 Configuration**: Enabled optimized resource shrinking for release builds.
+- **ProGuard Rules**: Added comprehensive rules for `flutter_local_notifications`, `Gson`, and Java desugaring.
+
+### Fixed
+
+- **Release Mode Notifications**: Resolved issues where notifications failed in release mode due to code shrinking.
+- **Notification Resources**: Removed `largeIcon` reference to fix resource resolution issues in release builds.
+
+## [0.0.4+4] - 2026-01-04
+
+### Added
+
+- **FCM Service**: Integrated Firebase Cloud Messaging for push notifications.
+- **Notification Handling**: Added launch handling, debug scheduling, and Android exact alarm permissions.
+- **Reciter Favorites**: Added datasource for managing favorite reciters.
+- **Integration Tests**: Introduced fake `AthkarNotificationService` for robust integration testing.
+
+### Changed
+
+- **Refactoring**: Moved `AlphaScrollbarBloc` to the `reciters` feature for better domain cohesion.
+- **Audio Player**: Integrated `audio_service` and `rxdart` into the audio player bloc; refactored position handling to `AudioPositionService`.
+- **App Startup**: Refactored initialization logic for better performance and error handling.
+- **Dependencies**: Updated `dartz_plus` packages.
+
+### Fixed
+
+- **Stream Emissions**: Implemented distinct filtering for audio and qibla streams to prevent duplicate states.
+- **Download Tests**: Added network connectivity checks to improve test reliability.
+
 ## [0.0.3+3] - 2026-01-03
 
 ### Added
