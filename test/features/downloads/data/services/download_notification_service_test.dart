@@ -7,10 +7,47 @@ import 'package:mockito/mockito.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tilawa/core/entities/reciter_entity.dart';
 import 'package:tilawa/core/errors/failures.dart';
+import 'package:tilawa/core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
+
+// Fake dispatcher for testing
+class FakeNotificationDispatcher implements INotificationDispatcher {
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  void registerHandler({
+    required String serviceId,
+    required Set<int> notificationIds,
+    required NotificationHandler handler,
+  }) {}
+
+  @override
+  void registerPayloadHandler({
+    required String serviceId,
+    required bool Function(String? payload) matcher,
+    required NotificationHandler handler,
+  }) {}
+
+  @override
+  void unregisterHandler(String serviceId) {}
+
+  @override
+  Future<NotificationAppLaunchDetails?>
+  getNotificationAppLaunchDetails() async => null;
+
+  @override
+  Future<bool> processLaunchNotification() async => false;
+
+  @override
+  FlutterLocalNotificationsPlugin get notificationsPlugin => _plugin;
+}
 
 // Mock platform implementation for testing
 class MockFlutterLocalNotificationsPlatform extends Mock
@@ -50,14 +87,17 @@ void main() {
   late DownloadNotificationService service;
   late MockRecitersRepository mockRecitersRepository;
   late MockNavigationService mockNavigationService;
+  late FakeNotificationDispatcher fakeDispatcher;
 
   setUp(() {
     provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
     mockRecitersRepository = MockRecitersRepository();
     mockNavigationService = MockNavigationService();
+    fakeDispatcher = FakeNotificationDispatcher();
     service = DownloadNotificationService(
       mockRecitersRepository,
       mockNavigationService,
+      fakeDispatcher,
     );
     // return null by default for location to allow navigation
     when(mockNavigationService.getCurrentLocation()).thenReturn(null);
@@ -501,9 +541,10 @@ void main() {
       verifyZeroInteractions(mockNavigationService);
     });
 
-    test('should handle json decode error gracefully', () async {
+    test('should ignore non-JSON payloads', () async {
       // Arrange
-      const payload = 'invalid json {'; // Invalid JSON
+      const payload =
+          'plain_text_payload'; // Not JSON, not a download notification
       const response = NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         payload: payload,
@@ -512,8 +553,7 @@ void main() {
       // Act
       await service.handleNotificationResponse(response);
 
-      // Assert
-      // Should catch exception and log error, no calls to repo
+      // Assert - should not interact with any dependencies
       verifyZeroInteractions(mockRecitersRepository);
       verifyZeroInteractions(mockNavigationService);
     });

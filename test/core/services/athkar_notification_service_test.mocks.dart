@@ -5,7 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
-import 'package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart'
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     as _i2;
 import 'package:flutter_local_notifications/src/initialization_settings.dart'
     as _i4;
@@ -31,6 +31,9 @@ import 'package:flutter_local_notifications/src/types.dart' as _i9;
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart'
     as _i5;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:shared_preferences/src/shared_preferences_async.dart' as _i17;
+import 'package:tilawa/core/services/interfaces/notification_dispatcher_interface.dart'
+    as _i18;
 import 'package:timezone/timezone.dart' as _i7;
 
 // ignore_for_file: type=lint
@@ -47,6 +50,14 @@ import 'package:timezone/timezone.dart' as _i7;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
+
+class _FakeFlutterLocalNotificationsPlugin_0 extends _i1.SmartFake
+    implements _i2.FlutterLocalNotificationsPlugin {
+  _FakeFlutterLocalNotificationsPlugin_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(parent, parentInvocation);
+}
 
 /// A class which mocks [FlutterLocalNotificationsPlugin].
 ///
@@ -568,4 +579,225 @@ class MockAndroidFlutterLocalNotificationsPlugin extends _i1.Mock
             ),
           )
           as _i3.Future<List<_i5.ActiveNotification>>);
+}
+
+/// A class which mocks [SharedPreferencesAsync].
+///
+/// See the documentation for Mockito's code generation for more information.
+// ignore: must_be_immutable
+class MockSharedPreferencesAsync extends _i1.Mock
+    implements _i17.SharedPreferencesAsync {
+  MockSharedPreferencesAsync() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<Set<String>> getKeys({Set<String>? allowList}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getKeys, [], {#allowList: allowList}),
+            returnValue: _i3.Future<Set<String>>.value(<String>{}),
+          )
+          as _i3.Future<Set<String>>);
+
+  @override
+  _i3.Future<Map<String, Object?>> getAll({Set<String>? allowList}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getAll, [], {#allowList: allowList}),
+            returnValue: _i3.Future<Map<String, Object?>>.value(
+              <String, Object?>{},
+            ),
+          )
+          as _i3.Future<Map<String, Object?>>);
+
+  @override
+  _i3.Future<bool?> getBool(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#getBool, [key]),
+            returnValue: _i3.Future<bool?>.value(),
+          )
+          as _i3.Future<bool?>);
+
+  @override
+  _i3.Future<int?> getInt(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#getInt, [key]),
+            returnValue: _i3.Future<int?>.value(),
+          )
+          as _i3.Future<int?>);
+
+  @override
+  _i3.Future<double?> getDouble(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#getDouble, [key]),
+            returnValue: _i3.Future<double?>.value(),
+          )
+          as _i3.Future<double?>);
+
+  @override
+  _i3.Future<String?> getString(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#getString, [key]),
+            returnValue: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<List<String>?> getStringList(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#getStringList, [key]),
+            returnValue: _i3.Future<List<String>?>.value(),
+          )
+          as _i3.Future<List<String>?>);
+
+  @override
+  _i3.Future<bool> containsKey(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#containsKey, [key]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setBool(String? key, bool? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setBool, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setInt(String? key, int? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setInt, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setDouble(String? key, double? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDouble, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setString(String? key, String? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setString, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setStringList(String? key, List<String>? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setStringList, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> remove(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#remove, [key]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> clear({Set<String>? allowList}) =>
+      (super.noSuchMethod(
+            Invocation.method(#clear, [], {#allowList: allowList}),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [INotificationDispatcher].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockINotificationDispatcher extends _i1.Mock
+    implements _i18.INotificationDispatcher {
+  MockINotificationDispatcher() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.FlutterLocalNotificationsPlugin get notificationsPlugin =>
+      (super.noSuchMethod(
+            Invocation.getter(#notificationsPlugin),
+            returnValue: _FakeFlutterLocalNotificationsPlugin_0(
+              this,
+              Invocation.getter(#notificationsPlugin),
+            ),
+          )
+          as _i2.FlutterLocalNotificationsPlugin);
+
+  @override
+  _i3.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  void registerHandler({
+    required String? serviceId,
+    required Set<int>? notificationIds,
+    required _i18.NotificationHandler? handler,
+  }) => super.noSuchMethod(
+    Invocation.method(#registerHandler, [], {
+      #serviceId: serviceId,
+      #notificationIds: notificationIds,
+      #handler: handler,
+    }),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void registerPayloadHandler({
+    required String? serviceId,
+    required bool Function(String?)? matcher,
+    required _i18.NotificationHandler? handler,
+  }) => super.noSuchMethod(
+    Invocation.method(#registerPayloadHandler, [], {
+      #serviceId: serviceId,
+      #matcher: matcher,
+      #handler: handler,
+    }),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void unregisterHandler(String? serviceId) => super.noSuchMethod(
+    Invocation.method(#unregisterHandler, [serviceId]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i3.Future<_i5.NotificationAppLaunchDetails?>
+  getNotificationAppLaunchDetails() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNotificationAppLaunchDetails, []),
+            returnValue: _i3.Future<_i5.NotificationAppLaunchDetails?>.value(),
+          )
+          as _i3.Future<_i5.NotificationAppLaunchDetails?>);
+
+  @override
+  _i3.Future<bool> processLaunchNotification() =>
+      (super.noSuchMethod(
+            Invocation.method(#processLaunchNotification, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 }

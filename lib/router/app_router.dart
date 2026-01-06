@@ -13,6 +13,11 @@ class AppRouter {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
+  /// Flag to disable state restoration when launched from notification
+  /// This is set before the router is created and prevents restoration
+  /// from overriding the notification navigation.
+  static bool disableStateRestoration = false;
+
   static String? redirect(BuildContext context, GoRouterState state) {
     // For now, we'll handle auth redirects in the UI
     return null;
@@ -41,7 +46,9 @@ class AppRouter {
     navigatorKey: navigatorKey,
     initialLocation: const SplashRoute().location,
     debugLogDiagnostics: true,
-    restorationScopeId: 'router',
+    // Disable restoration when launched from notification to prevent
+    // the restored state from overriding notification navigation
+    restorationScopeId: disableStateRestoration ? null : 'router',
     redirect: redirect,
     routes: $appRoutes,
     errorBuilder: errorBuilder,

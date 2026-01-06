@@ -7,6 +7,7 @@ import '../core/di/injection.dart';
 import '../core/extensions.dart';
 import '../core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import '../core/presentation/widgets/offline_indicator_widget.dart';
+import '../core/services/interfaces/athkar_notification_service_interface.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -52,6 +53,17 @@ class _MainScreenState extends State<MainScreen> {
               });
             },
             child: Scaffold(
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  /// TODO: implement push notification
+                  final IAthkarNotificationService notificationService =
+                      getIt<IAthkarNotificationService>();
+                  notificationService.scheduleDebugAthkarNotification(
+                    isMorning: true,
+                  );
+                },
+                child: const Icon(Icons.play_arrow),
+              ),
               body: Column(
                 children: [
                   const OfflineIndicatorWidget(),

@@ -2,7 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
 import '../../domain/repositories/downloads_repository.dart';
-import 'download_notification_service.dart';
+import '../../domain/services/download_notification_service_interface.dart';
 
 final logger = Logger();
 
@@ -14,7 +14,7 @@ class DownloadsInitializationService {
   );
 
   final DownloadsRepository _downloadsRepository;
-  final DownloadNotificationService _downloadNotificationService;
+  final IDownloadNotificationService _downloadNotificationService;
 
   /// Initialize downloads feature
   /// This checks for any pending or stuck downloads and resumes them

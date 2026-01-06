@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -10,15 +11,28 @@ import '../../main.dart';
 import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
+import 'interfaces/athkar_notification_service_interface.dart';
+import 'interfaces/notification_dispatcher_interface.dart';
 
 /// Service for scheduling daily athkar (remembrance) notifications
 ///
 /// Schedules two daily notifications:
 /// - 7:00 AM: Morning athkar (أذكار الصباح)
 /// - 5:00 PM: Evening athkar (أذكار المساء)
-@lazySingleton
-class AthkarNotificationService {
-  AthkarNotificationService();
+@LazySingleton(as: IAthkarNotificationService)
+class AthkarNotificationService implements IAthkarNotificationService {
+  AthkarNotificationService(this._prefs, this._dispatcher);
+
+  final SharedPreferencesAsync _prefs;
+  final INotificationDispatcher _dispatcher;
+  static const String _lastHandledPayloadKey =
+      'last_handled_notification_payload';
+  static const String _lastHandledTimestampKey =
+      'last_handled_notification_timestamp';
+
+  /// Maximum time (in seconds) for a notification to be considered valid for launch handling.
+  /// This prevents old sticky intents from triggering navigation on app restart.
+  static const int _notificationValidityDurationSeconds = 60;
 
   /// Channel ID for athkar notifications
   static const String _athkarChannelId = 'com.tilawa.app.athkar';
@@ -30,17 +44,19 @@ class AthkarNotificationService {
   static const int _morningAthkarNotificationId = 1001;
   static const int _eveningAthkarNotificationId = 1002;
 
-  FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  /// Get notification IDs for external use (e.g., dispatcher registration)
+  static Set<int> get notificationIds => {
+    _morningAthkarNotificationId,
+    _eveningAthkarNotificationId,
+  };
 
-  @visibleForTesting
-  set notifications(FlutterLocalNotificationsPlugin value) {
-    _notifications = value;
-  }
+  FlutterLocalNotificationsPlugin get _notifications =>
+      _dispatcher.notificationsPlugin;
 
   bool _initialized = false;
 
   /// Initialize the notification service
+  @override
   Future<void> initialize() async {
     if (!NotificationConfig.enableLocalNotifications) {
       logger.d('[AthkarNotificationService] Notifications disabled in config');
@@ -75,34 +91,15 @@ class AthkarNotificationService {
         tz.setLocalLocation(tz.UTC);
       }
 
-      // Initialize notification plugin
-      const androidSettings = AndroidInitializationSettings(
-        'ic_launcher_monochrome',
+      // Initialize the dispatcher (which initializes the shared notification plugin)
+      await _dispatcher.initialize();
+
+      // Register our handler with the dispatcher
+      _dispatcher.registerHandler(
+        serviceId: 'athkar',
+        notificationIds: notificationIds,
+        handler: handleNotificationResponse,
       );
-      const iosSettings = DarwinInitializationSettings();
-
-      const initSettings = InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      );
-
-      await _notifications.initialize(
-        initSettings,
-        onDidReceiveNotificationResponse: handleNotificationResponse,
-      );
-
-      // Check if app was launched from a notification
-      final NotificationAppLaunchDetails? details = await _notifications
-          .getNotificationAppLaunchDetails();
-
-      if (details != null &&
-          details.didNotificationLaunchApp &&
-          details.notificationResponse != null) {
-        logger.d(
-          '[AthkarNotificationService] App launched from notification: ${details.notificationResponse?.id}',
-        );
-        handleNotificationResponse(details.notificationResponse!);
-      }
 
       // Create notification channel for Android
       if (isAndroid) {
@@ -133,19 +130,124 @@ class AthkarNotificationService {
     }
   }
 
+  /// Check if the app was launched from an athkar notification
+  /// Returns the notification response if so, null otherwise.
+  ///
+  /// This method uses multiple validation strategies:
+  /// 1. Payload de-duplication to prevent handling the same notification twice
+  /// 2. Timestamp validation to prevent old sticky intents from triggering navigation
+  @override
+  Future<NotificationResponse?> checkLaunchNotification() async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    final NotificationAppLaunchDetails? details = await _dispatcher
+        .getNotificationAppLaunchDetails();
+
+    if (details != null &&
+        details.didNotificationLaunchApp &&
+        details.notificationResponse != null) {
+      final int? id = details.notificationResponse?.id;
+      final String? payload = details.notificationResponse?.payload;
+
+      // De-duplication check
+      // We REQUIRE a payload to handle de-duplication correctly.
+      // If payload is empty (legacy notification), we ignore it to prevent
+      // sticky intent loops on hot restart.
+      if (payload != null && payload.isNotEmpty) {
+        final String? lastHandled = await _prefs.getString(
+          _lastHandledPayloadKey,
+        );
+
+        if (lastHandled == payload) {
+          logger.d(
+            '[AthkarNotificationService] Ignoring already handled payload: $payload',
+          );
+          return null;
+        }
+
+        // Extract timestamp from payload and validate it's recent
+        final int? payloadTimestamp = _extractTimestampFromPayload(payload);
+        if (payloadTimestamp != null) {
+          final int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+          final int ageInSeconds =
+              (currentTimestamp - payloadTimestamp) ~/ 1000;
+
+          if (ageInSeconds > _notificationValidityDurationSeconds) {
+            logger.d(
+              '[AthkarNotificationService] Ignoring stale notification (age: ${ageInSeconds}s): $payload',
+            );
+            // Mark as handled to prevent future checks
+            await _prefs.setString(_lastHandledPayloadKey, payload);
+            return null;
+          }
+        }
+
+        // Mark as handled with timestamp
+        await _prefs.setString(_lastHandledPayloadKey, payload);
+        await _prefs.setInt(
+          _lastHandledTimestampKey,
+          DateTime.now().millisecondsSinceEpoch,
+        );
+
+        if (id == _morningAthkarNotificationId ||
+            id == _eveningAthkarNotificationId) {
+          logger.d(
+            '[AthkarNotificationService] Valid notification tap detected: $payload',
+          );
+          return details.notificationResponse;
+        }
+      } else {
+        logger.d(
+          '[AthkarNotificationService] Ignoring empty payload to prevent sticky intent loop',
+        );
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  /// Extract the timestamp from a notification payload
+  /// Payload format: "morning_athkar_1234567890" or "evening_athkar_1234567890"
+  int? _extractTimestampFromPayload(String payload) {
+    try {
+      final List<String> parts = payload.split('_');
+      if (parts.length >= 3) {
+        return int.tryParse(parts.last);
+      }
+    } catch (e) {
+      logger.w(
+        '[AthkarNotificationService] Failed to extract timestamp from payload: $payload',
+      );
+    }
+    return null;
+  }
+
+  /// Clear the stored launch notification data
+  /// Call this after successfully handling a notification navigation
+  @override
+  Future<void> clearLaunchNotificationData() async {
+    try {
+      await _prefs.remove(_lastHandledPayloadKey);
+      await _prefs.remove(_lastHandledTimestampKey);
+      logger.d('[AthkarNotificationService] Cleared launch notification data');
+    } catch (e) {
+      logger.e(
+        '[AthkarNotificationService] Error clearing launch notification data: $e',
+      );
+    }
+  }
+
   /// Get the local timezone name for the device
   Future<String?> _getLocalTimeZone() async {
     try {
       // For Android and iOS, we can try to get the system timezone
       // This is a simple approach - in production you might want to use
       // a package like flutter_native_timezone for more accuracy
-      // For Android and iOS, we can try to get the system timezone
-      // This is a simple approach - in production you might want to use
-      // a package like flutter_native_timezone for more accuracy
 
       // Map common offsets to timezone names
-      // This is simplified - you may want to use flutter_native_timezone
-      // for production to get the exact timezone
       final String offset = getTimeZoneOffsetString();
 
       if (offset.contains('2:00:00')) {
@@ -170,6 +272,7 @@ class AthkarNotificationService {
   }
 
   /// Schedule athkar notifications (both morning and evening)
+  @override
   Future<void> scheduleAthkarNotifications() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -226,6 +329,7 @@ class AthkarNotificationService {
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'morning_athkar_${scheduledDate.millisecondsSinceEpoch}',
       );
 
       logger.d(
@@ -272,6 +376,7 @@ class AthkarNotificationService {
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}',
       );
 
       logger.d(
@@ -306,6 +411,7 @@ class AthkarNotificationService {
 
   /// Schedule a test notification (for testing purposes)
   /// Schedules a notification [minutesFromNow] minutes in the future
+  @override
   Future<void> scheduleTestNotification({int minutesFromNow = 1}) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -363,9 +469,10 @@ class AthkarNotificationService {
   /// Schedule a debug athkar notification with custom delay
   /// [isMorning] determines if it should act as morning or evening athkar
   /// This is useful for verifying routing logic as it uses the real notification IDs
+  @override
   Future<void> scheduleDebugAthkarNotification({
     required bool isMorning,
-    Duration delay = const Duration(minutes: 1),
+    Duration delay = const Duration(seconds: 3),
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -408,6 +515,10 @@ class AthkarNotificationService {
         iOS: iosDetails,
       );
 
+      final athkarPayload = isMorning
+          ? 'morning_athkar_${scheduledDate.millisecondsSinceEpoch}'
+          : 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}';
+
       await _notifications.zonedSchedule(
         id,
         title,
@@ -415,7 +526,7 @@ class AthkarNotificationService {
         scheduledDate,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        // No matchDateTimeComponents because we want a one-off test
+        payload: athkarPayload,
       );
 
       logger.d(
@@ -427,6 +538,7 @@ class AthkarNotificationService {
   }
 
   /// Cancel all athkar notifications
+  @override
   Future<void> cancelAllAthkarNotifications() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -445,33 +557,66 @@ class AthkarNotificationService {
     }
   }
 
-  /// Handle notification tap
-  @visibleForTesting
-  void handleNotificationResponse(NotificationResponse response) {
+  /// Handle notification tap (foreground/background)
+  /// This also marks the payload as handled to prevent duplicate navigation on hot restart
+  @override
+  Future<void> handleNotificationResponse(NotificationResponse response) async {
     logger.d('[AthkarNotificationService] Notification tapped: ${response.id}');
 
-    final BuildContext? context = AppRouter.navigatorKey.currentContext;
-    if (context == null) {
-      logger.w('[AthkarNotificationService] Context is null, cannot navigate');
-      return;
+    final String? payload = response.payload;
+
+    // Check if this payload was already handled (de-duplication)
+    if (payload != null && payload.isNotEmpty) {
+      final String? lastHandled = await _prefs.getString(
+        _lastHandledPayloadKey,
+      );
+      if (lastHandled == payload) {
+        logger.d(
+          '[AthkarNotificationService] Ignoring already handled notification: $payload',
+        );
+        return;
+      }
+
+      // Mark as handled to prevent duplicate navigation
+      await _prefs.setString(_lastHandledPayloadKey, payload);
+      await _prefs.setInt(
+        _lastHandledTimestampKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      logger.d(
+        '[AthkarNotificationService] Marked payload as handled: $payload',
+      );
     }
 
     if (response.id == _morningAthkarNotificationId) {
       logger.d(
-        '[AthkarNotificationService] Morning athkar notification tapped',
+        '[AthkarNotificationService] Morning athkar notification tapped - navigating',
       );
-      const AthkarDetailsRoute(
+      const route = AthkarDetailsRoute(
         categoryId: 1,
         categoryName: 'أذكار الصباح',
-      ).push(context);
+      );
+      // Use go to ensure clean navigation from any state
+      _navigateToRoute(route.location);
     } else if (response.id == _eveningAthkarNotificationId) {
       logger.d(
-        '[AthkarNotificationService] Evening athkar notification tapped',
+        '[AthkarNotificationService] Evening athkar notification tapped - navigating',
       );
-      const AthkarDetailsRoute(
+      const route = AthkarDetailsRoute(
         categoryId: 2,
         categoryName: 'أذكار المساء',
-      ).push(context);
+      );
+      // Use go to ensure clean navigation from any state
+      _navigateToRoute(route.location);
+    }
+  }
+
+  /// Navigate to a route, catching errors in test environments
+  void _navigateToRoute(String location) {
+    try {
+      AppRouter.router.push(location);
+    } catch (e) {
+      logger.w('[AthkarNotificationService] Navigation failed: $e');
     }
   }
 

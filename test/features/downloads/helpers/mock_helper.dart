@@ -3,6 +3,7 @@ import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/network/network_info.dart';
 import 'package:tilawa/core/services/analytics_service.dart';
+import 'package:tilawa/core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart';
@@ -88,6 +89,7 @@ import 'package:tilawa/features/reciters/domain/repositories/reciters_repository
     RemoveFromDownloadQueueUseCase,
     DownloadStatusMapper,
     SharedPreferencesAsync,
+    INotificationDispatcher,
   ],
   customMocks: [MockSpec<Dio>(as: #MockDio)],
 )

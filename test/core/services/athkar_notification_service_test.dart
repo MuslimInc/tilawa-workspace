@@ -2,13 +2,17 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/services/athkar_notification_service.dart';
+import 'package:tilawa/core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 @GenerateMocks([
   FlutterLocalNotificationsPlugin,
   AndroidFlutterLocalNotificationsPlugin,
+  SharedPreferencesAsync,
+  INotificationDispatcher,
 ])
 import 'athkar_notification_service_test.mocks.dart';
 
@@ -19,6 +23,8 @@ void main() {
     late AthkarNotificationService service;
     late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
     late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
+    late MockSharedPreferencesAsync mockPrefs;
+    late MockINotificationDispatcher mockDispatcher;
 
     setUp(() {
       // Initialize timezone for tests
@@ -26,9 +32,28 @@ void main() {
 
       mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
       mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
+      mockPrefs = MockSharedPreferencesAsync();
+      mockDispatcher = MockINotificationDispatcher();
 
-      service = AthkarNotificationService();
-      service.notifications = mockNotificationsPlugin;
+      // Mock dispatcher to return our mock plugin
+      when(mockDispatcher.initialize()).thenAnswer((_) async {
+        return;
+      });
+      when(
+        mockDispatcher.notificationsPlugin,
+      ).thenReturn(mockNotificationsPlugin);
+      when(
+        mockDispatcher.registerHandler(
+          serviceId: anyNamed('serviceId'),
+          notificationIds: anyNamed('notificationIds'),
+          handler: anyNamed('handler'),
+        ),
+      ).thenReturn(null);
+      when(
+        mockDispatcher.getNotificationAppLaunchDetails(),
+      ).thenAnswer((_) async => null);
+
+      service = AthkarNotificationService(mockPrefs, mockDispatcher);
 
       // Default mock behavior
       when(
@@ -69,8 +94,13 @@ void main() {
       when(mockNotificationsPlugin.cancel(any)).thenAnswer((_) async {});
 
       when(
-        mockNotificationsPlugin.getNotificationAppLaunchDetails(),
+        mockDispatcher.getNotificationAppLaunchDetails(),
       ).thenAnswer((_) async => null);
+
+      when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+      when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+        return;
+      });
     });
 
     // Reset config after tests
@@ -84,15 +114,15 @@ void main() {
         expect(service, isA<AthkarNotificationService>());
       });
 
-      test('should initialize notification plugin', () async {
+      test('should initialize dispatcher', () async {
         await service.initialize();
 
+        verify(mockDispatcher.initialize()).called(1);
         verify(
-          mockNotificationsPlugin.initialize(
-            any,
-            onDidReceiveNotificationResponse: anyNamed(
-              'onDidReceiveNotificationResponse',
-            ),
+          mockDispatcher.registerHandler(
+            serviceId: 'athkar',
+            notificationIds: anyNamed('notificationIds'),
+            handler: anyNamed('handler'),
           ),
         ).called(1);
       });
@@ -101,41 +131,27 @@ void main() {
         NotificationConfig.enableLocalNotifications = false;
         await service.initialize();
 
-        verifyNever(
-          mockNotificationsPlugin.initialize(
-            any,
-            onDidReceiveNotificationResponse: anyNamed(
-              'onDidReceiveNotificationResponse',
-            ),
-          ),
-        );
+        verifyNever(mockDispatcher.initialize());
       });
 
       test('should not initialize twice if already initialized', () async {
         await service.initialize();
-        reset(mockNotificationsPlugin);
+        reset(mockDispatcher);
+        // Re-setup mock after reset
+        when(mockDispatcher.initialize()).thenAnswer((_) async {
+          return;
+        });
+        when(
+          mockDispatcher.notificationsPlugin,
+        ).thenReturn(mockNotificationsPlugin);
 
         await service.initialize(); // Second call
 
-        verifyNever(
-          mockNotificationsPlugin.initialize(
-            any,
-            onDidReceiveNotificationResponse: anyNamed(
-              'onDidReceiveNotificationResponse',
-            ),
-          ),
-        );
+        verifyNever(mockDispatcher.initialize());
       });
 
       test('should handle initialization error gracefully', () async {
-        when(
-          mockNotificationsPlugin.initialize(
-            any,
-            onDidReceiveNotificationResponse: anyNamed(
-              'onDidReceiveNotificationResponse',
-            ),
-          ),
-        ).thenThrow(Exception('Init failed'));
+        when(mockDispatcher.initialize()).thenThrow(Exception('Init failed'));
 
         await service.initialize(); // Should not throw
 
@@ -146,19 +162,24 @@ void main() {
       test(
         'should handle timezone detection error and fallback to UTC',
         () async {
-          final service = TestTimezoneErrorAthkarNotificationService();
-          service.notifications = mockNotificationsPlugin;
+          final testService = TestTimezoneErrorAthkarNotificationService(
+            mockPrefs,
+            mockDispatcher,
+          );
 
-          await service.initialize(); // Should not throw and fallback to UTC
+          await testService
+              .initialize(); // Should not throw and fallback to UTC
         },
       );
 
       test('should handle invalid timezone name and fallback to UTC', () async {
         // Test with an invalid timezone that will cause getLocation to fail
-        final service = TestInvalidTimezoneAthkarNotificationService();
-        service.notifications = mockNotificationsPlugin;
+        final testService = TestInvalidTimezoneAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+        );
 
-        await service.initialize(); // Should not throw and fallback to UTC
+        await testService.initialize(); // Should not throw and fallback to UTC
       });
 
       test('should handle app launch from notification', () async {
@@ -168,9 +189,7 @@ void main() {
           id: 1001,
         );
 
-        when(
-          mockNotificationsPlugin.getNotificationAppLaunchDetails(),
-        ).thenAnswer(
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
           (_) async => const NotificationAppLaunchDetails(
             true,
             notificationResponse: response,
@@ -179,11 +198,14 @@ void main() {
 
         await service.initialize();
 
-        // Since handleNotificationResponse calls the router, and we can't easily mock the router
-        // in this unit test without refactoring, we mainly verify that getNotificationAppLaunchDetails was called.
-        // In a real integration test, we would verify navigation.
+        // Verify the dispatcher was initialized and handler was registered
+        verify(mockDispatcher.initialize()).called(1);
         verify(
-          mockNotificationsPlugin.getNotificationAppLaunchDetails(),
+          mockDispatcher.registerHandler(
+            serviceId: 'athkar',
+            notificationIds: anyNamed('notificationIds'),
+            handler: anyNamed('handler'),
+          ),
         ).called(1);
       });
     });
@@ -201,6 +223,7 @@ void main() {
             any,
             androidScheduleMode: anyNamed('androidScheduleMode'),
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).called(1);
 
@@ -213,6 +236,7 @@ void main() {
             any,
             androidScheduleMode: anyNamed('androidScheduleMode'),
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).called(1);
       });
@@ -251,35 +275,72 @@ void main() {
     });
 
     group('notification interactions', () {
-      test('should handle morning athkar tap', () {
+      test('should handle morning athkar tap', () async {
         const response = NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 1001, // Morning ID
         );
 
-        service.handleNotificationResponse(response);
+        await service.handleNotificationResponse(response);
         // Verified it runs without error (logging happened)
       });
 
-      test('should handle evening athkar tap', () {
+      test('should handle evening athkar tap', () async {
         const response = NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 1002, // Evening ID
         );
 
-        service.handleNotificationResponse(response);
+        await service.handleNotificationResponse(response);
       });
 
-      test('should handle other notification tap', () {
+      test('should handle other notification tap', () async {
         const response = NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 9999, // Other ID
         );
 
-        service.handleNotificationResponse(response);
+        await service.handleNotificationResponse(response);
+      });
+
+      test(
+        'should mark payload as handled to prevent duplicate navigation on hot restart',
+        () async {
+          const payload = 'morning_athkar_1234567890';
+          const response = NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            id: 1001,
+            payload: payload,
+          );
+
+          when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+
+          await service.handleNotificationResponse(response);
+
+          verify(
+            mockPrefs.setString('last_handled_notification_payload', payload),
+          ).called(1);
+          verify(
+            mockPrefs.setInt('last_handled_notification_timestamp', any),
+          ).called(1);
+        },
+      );
+
+      test('should not mark empty payload as handled', () async {
+        const response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 1001,
+          payload: '',
+        );
+
+        await service.handleNotificationResponse(response);
+
+        verifyNever(mockPrefs.setString(any, any));
       });
     });
 
@@ -304,6 +365,228 @@ void main() {
         ).thenThrow(Exception('Cancel failed'));
 
         await service.cancelAllAthkarNotifications(); // Should not throw
+      });
+    });
+
+    group('checkLaunchNotification', () {
+      test('should return null when no notification launched app', () async {
+        when(
+          mockDispatcher.getNotificationAppLaunchDetails(),
+        ).thenAnswer((_) async => null);
+
+        final NotificationResponse? result = await service
+            .checkLaunchNotification();
+
+        expect(result, isNull);
+      });
+
+      test('should return null when payload is empty', () async {
+        const response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 1001,
+          payload: '',
+        );
+
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+          (_) async => const NotificationAppLaunchDetails(
+            true,
+            notificationResponse: response,
+          ),
+        );
+
+        final NotificationResponse? result = await service
+            .checkLaunchNotification();
+
+        expect(result, isNull);
+      });
+
+      test('should return null when payload was already handled', () async {
+        const payload = 'morning_athkar_1234567890';
+        const response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 1001,
+          payload: payload,
+        );
+
+        when(mockPrefs.getString(any)).thenAnswer((_) async => payload);
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+          (_) async => const NotificationAppLaunchDetails(
+            true,
+            notificationResponse: response,
+          ),
+        );
+
+        final NotificationResponse? result = await service
+            .checkLaunchNotification();
+
+        expect(result, isNull);
+      });
+
+      test(
+        'should return null when notification is stale (older than 60 seconds)',
+        () async {
+          // Timestamp from 2 minutes ago
+          final int staleTimestamp =
+              DateTime.now().millisecondsSinceEpoch - 120000;
+          final payload = 'morning_athkar_$staleTimestamp';
+          final response = NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            id: 1001,
+            payload: payload,
+          );
+
+          when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+          when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+            (_) async => NotificationAppLaunchDetails(
+              true,
+              notificationResponse: response,
+            ),
+          );
+
+          final NotificationResponse? result = await service
+              .checkLaunchNotification();
+
+          expect(result, isNull);
+          // Verify it was marked as handled to prevent future checks
+          verify(mockPrefs.setString(any, payload)).called(1);
+        },
+      );
+
+      test(
+        'should return response for valid recent morning notification',
+        () async {
+          // Timestamp from 5 seconds ago
+          final int recentTimestamp =
+              DateTime.now().millisecondsSinceEpoch - 5000;
+          final payload = 'morning_athkar_$recentTimestamp';
+          final response = NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            id: 1001,
+            payload: payload,
+          );
+
+          when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+          when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+          when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+            (_) async => NotificationAppLaunchDetails(
+              true,
+              notificationResponse: response,
+            ),
+          );
+
+          final NotificationResponse? result = await service
+              .checkLaunchNotification();
+
+          expect(result, isNotNull);
+          expect(result?.id, 1001);
+          expect(result?.payload, payload);
+        },
+      );
+
+      test(
+        'should return response for valid recent evening notification',
+        () async {
+          final int recentTimestamp =
+              DateTime.now().millisecondsSinceEpoch - 5000;
+          final payload = 'evening_athkar_$recentTimestamp';
+          final response = NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            id: 1002,
+            payload: payload,
+          );
+
+          when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+          when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+          when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+            (_) async => NotificationAppLaunchDetails(
+              true,
+              notificationResponse: response,
+            ),
+          );
+
+          final NotificationResponse? result = await service
+              .checkLaunchNotification();
+
+          expect(result, isNotNull);
+          expect(result?.id, 1002);
+        },
+      );
+
+      test('should return null for non-athkar notification id', () async {
+        final int recentTimestamp =
+            DateTime.now().millisecondsSinceEpoch - 5000;
+        final payload = 'other_notification_$recentTimestamp';
+        final response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 9999, // Not an athkar notification ID
+          payload: payload,
+        );
+
+        when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+        when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+          (_) async => NotificationAppLaunchDetails(
+            true,
+            notificationResponse: response,
+          ),
+        );
+
+        final NotificationResponse? result = await service
+            .checkLaunchNotification();
+
+        expect(result, isNull);
+      });
+
+      test('should handle payload without timestamp gracefully', () async {
+        const payload = 'invalid_payload';
+        const response = NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          id: 1001,
+          payload: payload,
+        );
+
+        when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+        when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+          (_) async => const NotificationAppLaunchDetails(
+            true,
+            notificationResponse: response,
+          ),
+        );
+
+        // Should not throw and should still process the notification
+        // (timestamp validation skipped when parsing fails)
+        final NotificationResponse? result = await service
+            .checkLaunchNotification();
+
+        expect(result, isNotNull);
+      });
+    });
+
+    group('clearLaunchNotificationData', () {
+      test('should clear stored notification data', () async {
+        when(mockPrefs.remove(any)).thenAnswer((_) async {});
+
+        await service.clearLaunchNotificationData();
+
+        verify(mockPrefs.remove('last_handled_notification_payload')).called(1);
+        verify(
+          mockPrefs.remove('last_handled_notification_timestamp'),
+        ).called(1);
+      });
+
+      test('should handle clear error gracefully', () async {
+        when(mockPrefs.remove(any)).thenThrow(Exception('Remove failed'));
+
+        // Should not throw
+        await service.clearLaunchNotificationData();
       });
     });
 
@@ -383,6 +666,7 @@ void main() {
             any,
             androidScheduleMode: anyNamed('androidScheduleMode'),
             // No matchDateTimeComponents expected for debug
+            payload: anyNamed('payload'), // Added payload check
           ),
         ).called(1);
       });
@@ -398,6 +682,7 @@ void main() {
             any,
             any,
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            payload: anyNamed('payload'),
           ),
         ).called(1);
       });
@@ -414,6 +699,7 @@ void main() {
             any,
             any,
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            payload: anyNamed('payload'),
           ),
         );
       });
@@ -433,8 +719,10 @@ void main() {
 
     group('Android platform specifics', () {
       test('should create notification channel on Android', () async {
-        final androidService = TestAndroidAthkarNotificationService();
-        androidService.notifications = mockNotificationsPlugin;
+        final androidService = TestAndroidAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+        );
 
         await androidService.initialize();
 
@@ -444,43 +732,62 @@ void main() {
 
     group('timezone detection logic', () {
       test('should detect Cairo timezone (+2)', () async {
-        final service = TestTimezoneAthkarNotificationService('2:00:00.000000');
-        service.notifications = mockNotificationsPlugin;
+        final testService = TestTimezoneAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+          '2:00:00.000000',
+        );
 
-        await service.initialize();
+        await testService.initialize();
 
         // Cannot easily verify internal state without public getter or checking logger
         // But we rely on coverage report showing lines covered
       });
 
       test('should detect Riyadh timezone (+3)', () async {
-        final service = TestTimezoneAthkarNotificationService('3:00:00.000000');
-        service.notifications = mockNotificationsPlugin;
-        await service.initialize();
+        final testService = TestTimezoneAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+          '3:00:00.000000',
+        );
+        await testService.initialize();
       });
 
       test('should detect Dubai timezone (+4)', () async {
-        final service = TestTimezoneAthkarNotificationService('4:00:00.000000');
-        service.notifications = mockNotificationsPlugin;
-        await service.initialize();
+        final testService = TestTimezoneAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+          '4:00:00.000000',
+        );
+        await testService.initialize();
       });
 
       test('should fallback to UTC for unknown offset', () async {
-        final service = TestTimezoneAthkarNotificationService('0:00:00.000000');
-        service.notifications = mockNotificationsPlugin;
-        await service.initialize();
+        final testService = TestTimezoneAthkarNotificationService(
+          mockPrefs,
+          mockDispatcher,
+          '0:00:00.000000',
+        );
+        await testService.initialize();
       });
     });
   });
 }
 
 class TestAndroidAthkarNotificationService extends AthkarNotificationService {
+  TestAndroidAthkarNotificationService(super.prefs, super.dispatcher);
+
   @override
   bool get isAndroid => true;
 }
 
 class TestTimezoneAthkarNotificationService extends AthkarNotificationService {
-  TestTimezoneAthkarNotificationService(this.mockOffset);
+  TestTimezoneAthkarNotificationService(
+    super.prefs,
+    super.dispatcher,
+    this.mockOffset,
+  );
+
   final String mockOffset;
 
   @override
@@ -496,10 +803,14 @@ class TestTimezoneAthkarNotificationService extends AthkarNotificationService {
 }
 
 class TestInvalidTimezoneAthkarNotificationService
-    extends AthkarNotificationService {}
+    extends AthkarNotificationService {
+  TestInvalidTimezoneAthkarNotificationService(super.prefs, super.dispatcher);
+}
 
 class TestTimezoneErrorAthkarNotificationService
     extends AthkarNotificationService {
+  TestTimezoneErrorAthkarNotificationService(super.prefs, super.dispatcher);
+
   @override
   String getTimeZoneOffsetString() {
     throw Exception('Timezone detection failed');

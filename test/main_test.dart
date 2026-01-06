@@ -7,9 +7,9 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/appsflyer_service.dart';
-import 'package:tilawa/core/services/athkar_notification_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
+import 'package:tilawa/core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa/core/services/luciq_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
@@ -41,7 +41,7 @@ class MockFirebaseInitializationService extends Mock
     implements FirebaseInitializationService {}
 
 class MockAthkarNotificationService extends Mock
-    implements AthkarNotificationService {}
+    implements IAthkarNotificationService {}
 
 class MockStorage extends Mock implements Storage {}
 
@@ -131,7 +131,7 @@ void main() {
     getIt.registerSingleton<DownloadsInitializationService>(mockDownloads);
     getIt.registerSingleton<CredentialManager>(mockCredentialManager);
     getIt.registerSingleton<FirebaseInitializationService>(mockFirebaseInit);
-    getIt.registerSingleton<AthkarNotificationService>(mockAthkarService);
+    getIt.registerSingleton<IAthkarNotificationService>(mockAthkarService);
 
     // Stubs
     when(() => mockCrashlytics.initialize()).thenAnswer((_) async {});

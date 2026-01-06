@@ -9,32 +9,40 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/config/notification_config.dart';
 import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/interfaces/notification_dispatcher_interface.dart';
 import '../../../../core/services/navigation_service.dart';
 import '../../../../main.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/services/download_notification_service_interface.dart';
 
 /// Service for showing custom download notifications with proper title formatting
-@lazySingleton
-class DownloadNotificationService {
-  DownloadNotificationService(this._recitersRepository, this._navigator);
+@LazySingleton(as: IDownloadNotificationService)
+class DownloadNotificationService implements IDownloadNotificationService {
+  DownloadNotificationService(
+    this._recitersRepository,
+    this._navigator,
+    this._dispatcher,
+  );
 
   final RecitersRepository _recitersRepository;
   final NavigationService _navigator;
+  final INotificationDispatcher _dispatcher;
 
   /// Channel ID for download notifications
   static const String _downloadChannelId = 'com.tilawa.app.downloads';
   static const String _downloadChannelName = 'Downloads';
   static const String _downloadChannelDescription = 'Shows download progress';
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin get _notifications =>
+      _dispatcher.notificationsPlugin;
 
   bool _initialized = false;
   final Map<String, int> _notificationIds = {};
 
   /// Initialize the notification service
+  @override
   Future<void> initialize() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -45,20 +53,15 @@ class DownloadNotificationService {
     }
 
     try {
-      const androidSettings = AndroidInitializationSettings(
-        'ic_launcher_monochrome',
-      );
-      // Request all necessary permissions for iOS notifications
-      const iosSettings = DarwinInitializationSettings();
+      // Initialize the dispatcher (which initializes the shared notification plugin)
+      await _dispatcher.initialize();
 
-      const initSettings = InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      );
-
-      await _notifications.initialize(
-        initSettings,
-        onDidReceiveNotificationResponse: handleNotificationResponse,
+      // Register our payload handler with the dispatcher
+      // Download notifications use JSON payloads with reciterName
+      _dispatcher.registerPayloadHandler(
+        serviceId: 'downloads',
+        matcher: _isDownloadPayload,
+        handler: handleNotificationResponse,
       );
 
       // Create notification channel for Android
@@ -87,12 +90,24 @@ class DownloadNotificationService {
     }
   }
 
+  /// Check if a payload belongs to download notifications
+  bool _isDownloadPayload(String? payload) {
+    if (payload == null) return false;
+    try {
+      final Map<String, dynamic> data = jsonDecode(payload);
+      return data.containsKey('reciterName');
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Show a download progress notification
   ///
   /// [pendingMessage] - Localized message for pending status (e.g., "Waiting to start...")
   /// [progressMessage] - Localized message for progress (e.g., "Downloading: 50%")
   /// [completeMessage] - Localized message for completed status
   /// [failedMessage] - Localized message for failed status
+  @override
   Future<void> showDownloadProgress({
     required String downloadId,
     required String title,
@@ -180,6 +195,7 @@ class DownloadNotificationService {
   }
 
   /// Show a batch download progress notification
+  @override
   Future<void> showBatchDownloadProgress({
     required String batchId,
     required String title,
@@ -259,6 +275,7 @@ class DownloadNotificationService {
   }
 
   /// Cancel a download notification
+  @override
   Future<void> cancelNotification(String downloadId) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -272,6 +289,7 @@ class DownloadNotificationService {
   }
 
   /// Cancel all download notifications
+  @override
   Future<void> cancelAllNotifications() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -282,6 +300,7 @@ class DownloadNotificationService {
   }
 
   /// Handle notification tap
+  @override
   @visibleForTesting
   Future<void> handleNotificationResponse(NotificationResponse response) async {
     if (!NotificationConfig.enableLocalNotifications) {
@@ -298,12 +317,18 @@ class DownloadNotificationService {
       final String? reciterName = data['reciterName'];
 
       if (reciterName != null) {
-        // Don't wait for navigation
         await _navigateToReciter(reciterName);
       }
+    } on FormatException catch (e) {
+      // Not a JSON payload - not a download notification, ignore it
+      // Other notification services handle their own payloads independently
+      logger.d(
+        'DownloadNotificationService: Ignoring non-download notification due to invalid JSON payload. '
+        'Payload: $payload, error: $e',
+      );
     } catch (e) {
       logger.e(
-        'DoownloadNotificationService: Error handling notification tap: $e',
+        'DownloadNotificationService: Error handling notification tap: $e',
       );
     }
   }

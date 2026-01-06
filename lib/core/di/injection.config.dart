@@ -38,8 +38,13 @@ import 'package:tilawa/core/services/device_token_service.dart' as _i172;
 import 'package:tilawa/core/services/firebase_analytics_service.dart' as _i495;
 import 'package:tilawa/core/services/firebase_initialization_service.dart'
     as _i977;
+import 'package:tilawa/core/services/interfaces/athkar_notification_service_interface.dart'
+    as _i136;
+import 'package:tilawa/core/services/interfaces/notification_dispatcher_interface.dart'
+    as _i136;
 import 'package:tilawa/core/services/luciq_service.dart' as _i636;
 import 'package:tilawa/core/services/navigation_service.dart' as _i628;
+import 'package:tilawa/core/services/notification_dispatcher.dart' as _i752;
 import 'package:tilawa/core/services/notification_permission_service.dart'
     as _i1039;
 import 'package:tilawa/core/services/user_email_service.dart' as _i597;
@@ -133,6 +138,8 @@ import 'package:tilawa/features/downloads/domain/repositories/downloads_reposito
     as _i373;
 import 'package:tilawa/features/downloads/domain/repositories/single_download_repository.dart'
     as _i218;
+import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart'
+    as _i568;
 import 'package:tilawa/features/downloads/domain/usecases/cancel_download_use_case.dart'
     as _i807;
 import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart'
@@ -381,9 +388,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i895.Connectivity>(
       () => externalDependenciesModule.connectivity,
     );
-    gh.lazySingleton<_i35.AthkarNotificationService>(
-      () => _i35.AthkarNotificationService(),
-    );
     gh.lazySingleton<_i527.LocationServiceWrapper>(
       () => _i527.LocationServiceWrapper(),
     );
@@ -431,6 +435,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i628.NavigationService>(
       () => _i628.NavigationServiceImpl(),
+    );
+    gh.lazySingleton<_i136.INotificationDispatcher>(
+      () => _i752.NotificationDispatcher(),
     );
     gh.singleton<_i970.AppsFlyerService>(() => _i970.AppsFlyerServiceImpl());
     gh.lazySingleton<_i641.AudioPositionService>(
@@ -559,6 +566,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1072.InternetStatusBloc>(
       () => _i1072.InternetStatusBloc(gh<_i99.NetworkInfo>()),
     );
+    gh.lazySingleton<_i136.IAthkarNotificationService>(
+      () => _i35.AthkarNotificationService(
+        gh<_i460.SharedPreferencesAsync>(),
+        gh<_i136.INotificationDispatcher>(),
+      ),
+    );
     gh.lazySingleton<_i366.PremiumRemoteDataSource>(
       () => _i366.PremiumRemoteDataSourceImpl(
         gh<_i974.FirebaseFirestore>(),
@@ -664,6 +677,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i603.UpdatePlaylistUseCase>(
       () => _i603.UpdatePlaylistUseCase(gh<_i662.PlaylistsRepository>()),
     );
+    gh.lazySingleton<_i568.IDownloadNotificationService>(
+      () => _i409.DownloadNotificationService(
+        gh<_i1039.RecitersRepository>(),
+        gh<_i628.NavigationService>(),
+        gh<_i136.INotificationDispatcher>(),
+      ),
+    );
     gh.singleton<_i326.GetCurrentLanguageUseCase>(
       () => _i326.GetCurrentLanguageUseCase(gh<_i67.LocalizationRepository>()),
     );
@@ -687,12 +707,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1069.GetAthkarCategoriesUseCase>(),
         gh<_i210.GetAthkarByCategoryUseCase>(),
         gh<_i145.AnalyticsService>(),
-      ),
-    );
-    gh.lazySingleton<_i409.DownloadNotificationService>(
-      () => _i409.DownloadNotificationService(
-        gh<_i1039.RecitersRepository>(),
-        gh<_i628.NavigationService>(),
       ),
     );
     gh.factory<_i712.GetSplashNextRouteUseCase>(
@@ -748,23 +762,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i498.ReciterDetailsLoaderCubit>(
       () => _i498.ReciterDetailsLoaderCubit(gh<_i1039.RecitersRepository>()),
     );
-    gh.lazySingleton<_i1071.FCMService>(
-      () => _i1071.FCMService(
-        gh<_i610.AuthService>(),
-        gh<_i648.SyncDeviceTokenUseCase>(),
-        gh<_i172.DeviceTokenService>(),
-      ),
-    );
     gh.lazySingleton<_i183.BatchDownloadManager>(
       () => _i183.BatchDownloadManager(
         gh<_i463.DownloadServiceInterface>(),
-        gh<_i409.DownloadNotificationService>(),
+        gh<_i568.IDownloadNotificationService>(),
       ),
     );
     gh.lazySingleton<_i420.DownloadQueueManager>(
       () => _i420.DownloadQueueManager(
         gh<_i463.DownloadServiceInterface>(),
-        gh<_i409.DownloadNotificationService>(),
+        gh<_i568.IDownloadNotificationService>(),
+      ),
+    );
+    gh.lazySingleton<_i1071.FCMService>(
+      () => _i1071.FCMService(
+        gh<_i610.AuthService>(),
+        gh<_i648.SyncDeviceTokenUseCase>(),
+        gh<_i172.DeviceTokenService>(),
       ),
     );
     gh.factory<_i522.LocalizationBloc>(
@@ -799,9 +813,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i672.RecitersBloc>(
       () => _i672.RecitersBloc(gh<_i362.GetRecitersUseCase>()),
     );
-    gh.factory<_i887.SplashCubit>(
-      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
-    );
     gh.factory<_i275.QiblaBloc>(
       () => _i275.QiblaBloc(
         gh<_i696.GetQiblaDirectionUseCase>(),
@@ -813,6 +824,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i204.RemoveFromDownloadQueueUseCase(
         gh<_i420.DownloadQueueManager>(),
       ),
+    );
+    gh.factory<_i887.SplashCubit>(
+      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
     );
     gh.factory<_i447.AuthBloc>(
       () => _i447.AuthBloc(
@@ -847,6 +861,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i420.DownloadQueueManager>(),
         gh<_i145.AnalyticsService>(),
         gh<_i99.NetworkInfo>(),
+      ),
+    );
+    gh.singleton<_i671.DownloadsInitializationService>(
+      () => _i671.DownloadsInitializationService(
+        gh<_i373.DownloadsRepository>(),
+        gh<_i568.IDownloadNotificationService>(),
       ),
     );
     gh.singleton<_i527.CheckSurahDownloadStatusUseCase>(
@@ -983,12 +1003,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i405.ConvertAudioEntitiesToSurahsUseCase>(),
         gh<_i863.RefreshSurahDownloadStatusUseCase>(),
         gh<_i274.GetValidCompletedDownloadsUseCase>(),
-      ),
-    );
-    gh.singleton<_i671.DownloadsInitializationService>(
-      () => _i671.DownloadsInitializationService(
-        gh<_i373.DownloadsRepository>(),
-        gh<_i409.DownloadNotificationService>(),
       ),
     );
     gh.lazySingleton<_i868.PlayAllDownloadsUseCase>(
