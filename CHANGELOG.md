@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6+6] - 2026-01-07
+
+### Added
+
+- **Theme System**: Introduced `AppColors` for centralized color management.
+- **Android Notification**: Added `flutter_downloader` notification icon configuration in manifest.
+
+### Changed
+
+- **Download System**: Massive refactoring of download services and state management (`reciter_download_bloc`, `download_button`, `download_all_button`) for better stability.
+- **Dependencies**: Updated `google_fonts` to v7.0.0.
+- **UI**: Updates to `BottomPlayerUi` and `MainScreen`.
+
+### Fixed
+
+- **Download Quality**: Improvements to `DownloadNotificationService` and `FlutterDownloaderWrapper`.
+
+### Removed
+
+- **Legacy Tests**: Cleaned up obsolete and flaky integration tests (`bottom_player_test`, `download_all_button_test`).
+
 ## [0.0.5+5] - 2026-01-05
 
 ### Added

@@ -85,52 +85,32 @@ class BottomPlayerUi extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 child: Row(
                   children: [
-                    // Album Art
-                    Hero(
-                      tag: 'audio_player',
-                      createRectTween: (begin, end) {
-                        return MaterialRectCenterArcTween(
-                          begin: begin,
-                          end: end,
-                        );
-                      },
-                      placeholderBuilder: (context, heroSize, child) {
-                        return Container(
-                          width: 48.w,
-                          height: 48.w,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
-                            color: Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1),
-                          ),
-                        );
-                      },
-                      child: Material(
-                        type: MaterialType.transparency,
-                        child: Container(
-                          width: 48.w,
-                          height: 48.w,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
-                            color: Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1),
-                          ),
-                          child: audio.artUri != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  child: CachedNetworkImage(
-                                    imageUrl: audio.artUri.toString(),
-                                    fit: BoxFit.cover,
-                                    errorWidget: (context, error, stackTrace) =>
-                                        _buildDefaultIcon(context),
-                                    placeholder: (context, url) =>
-                                        _buildDefaultIcon(context),
-                                  ),
-                                )
-                              : _buildDefaultIcon(context),
+                    // Album Art - no Hero to avoid duplicate tag conflicts
+                    // during page transitions when multiple bottom players exist
+                    Material(
+                      type: MaterialType.transparency,
+                      child: Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.r),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.1),
                         ),
+                        child: audio.artUri != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: CachedNetworkImage(
+                                  imageUrl: audio.artUri.toString(),
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, error, stackTrace) =>
+                                      _buildDefaultIcon(context),
+                                  placeholder: (context, url) =>
+                                      _buildDefaultIcon(context),
+                                ),
+                              )
+                            : _buildDefaultIcon(context),
                       ),
                     ),
 

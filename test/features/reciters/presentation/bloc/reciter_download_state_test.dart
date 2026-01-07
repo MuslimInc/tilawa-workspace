@@ -95,5 +95,93 @@ void main() {
         },
       );
     });
+
+    group('shouldShowError', () {
+      test('returns true when error message changes from null to value', () {
+        const previous = ReciterDownloadState();
+        const current = ReciterDownloadState(errorMessage: 'Network error');
+
+        expect(current.shouldShowError(previous), isTrue);
+      });
+
+      test('returns false when error message is null', () {
+        const previous = ReciterDownloadState();
+        const current = ReciterDownloadState();
+
+        expect(current.shouldShowError(previous), isFalse);
+      });
+
+      test('returns false when error message remains the same', () {
+        const previous = ReciterDownloadState(errorMessage: 'Error');
+        const current = ReciterDownloadState(errorMessage: 'Error');
+
+        expect(current.shouldShowError(previous), isFalse);
+      });
+
+      test('returns true when error message changes to different value', () {
+        const previous = ReciterDownloadState(errorMessage: 'Error 1');
+        const current = ReciterDownloadState(errorMessage: 'Error 2');
+
+        expect(current.shouldShowError(previous), isTrue);
+      });
+    });
+
+    group('shouldShowDownloadStarted', () {
+      test('returns true when transitioning from pending to downloading', () {
+        const previous = ReciterDownloadState(isPending: true);
+        const current = ReciterDownloadState(isDownloadingAll: true);
+
+        expect(current.shouldShowDownloadStarted(previous), isTrue);
+      });
+
+      test('returns false when discovering ongoing download on navigation', () {
+        const previous = ReciterDownloadState();
+        const current = ReciterDownloadState(isDownloadingAll: true);
+
+        expect(current.shouldShowDownloadStarted(previous), isFalse);
+      });
+
+      test('returns false when already downloading', () {
+        const previous = ReciterDownloadState(isDownloadingAll: true);
+        const current = ReciterDownloadState(isDownloadingAll: true);
+
+        expect(current.shouldShowDownloadStarted(previous), isFalse);
+      });
+
+      test('returns false when pending but not downloading', () {
+        const previous = ReciterDownloadState(isPending: true);
+        const current = ReciterDownloadState(isPending: true);
+
+        expect(current.shouldShowDownloadStarted(previous), isFalse);
+      });
+    });
+
+    group('isNetworkError', () {
+      test('returns true when error contains "No internet"', () {
+        const state = ReciterDownloadState(
+          errorMessage: 'No internet connection',
+        );
+
+        expect(state.isNetworkError, isTrue);
+      });
+
+      test('returns true when error contains "internet"', () {
+        const state = ReciterDownloadState(errorMessage: 'Check your internet');
+
+        expect(state.isNetworkError, isTrue);
+      });
+
+      test('returns false when error message is null', () {
+        const state = ReciterDownloadState();
+
+        expect(state.isNetworkError, isFalse);
+      });
+
+      test('returns false when error does not contain internet keywords', () {
+        const state = ReciterDownloadState(errorMessage: 'Server error');
+
+        expect(state.isNetworkError, isFalse);
+      });
+    });
   });
 }

@@ -11,6 +11,7 @@ import '../../main.dart';
 import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
+import '../theme/app_colors.dart';
 import 'interfaces/athkar_notification_service_interface.dart';
 import 'interfaces/notification_dispatcher_interface.dart';
 
@@ -306,7 +307,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        color: Color(0xFF1AADC5),
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.notificationAccent,
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -353,7 +355,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        color: Color(0xFF1AADC5),
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.notificationAccent,
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -432,7 +435,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        color: Color(0xFF1AADC5),
+        color: AppColors.notificationAccent,
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -500,7 +503,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        color: Color(0xFF1AADC5),
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.notificationAccent,
       );
 
       const iosDetails = DarwinNotificationDetails(

@@ -85,7 +85,7 @@ void main() {
 
       expect(snapshot.exists, true);
       expect(snapshot.data()?['token'], tToken);
-      expect(snapshot.data()?['platform'], 'flutter');
+      expect(snapshot.data()?['platform'], 'ios');
     });
   });
 }

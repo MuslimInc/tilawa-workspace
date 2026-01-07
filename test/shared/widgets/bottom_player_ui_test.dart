@@ -205,8 +205,9 @@ void main() {
       await tester.pumpWidget(createWidget(onTap: () => wasPressed = true));
       await tester.pumpAndSettle();
 
-      // Tap on the Hero widget which wraps the album art (part of the tappable area)
-      await tester.tap(find.byType(Hero));
+      // Tap on the LinearProgressIndicator which is part of the tappable area
+      // The entire BottomPlayerUi is wrapped in a GestureDetector with onTap
+      await tester.tap(find.byType(LinearProgressIndicator));
       expect(wasPressed, isTrue);
     });
 
@@ -239,35 +240,10 @@ void main() {
       expect(error, isA<Widget>());
     });
 
-    testWidgets('handles Hero callbacks (coverage)', (tester) async {
-      await tester.pumpWidget(createWidget());
-      await tester.pumpAndSettle();
-
-      final Hero hero = tester.widget<Hero>(find.byType(Hero));
-      final Element context = tester.element(find.byType(BottomPlayerUi));
-
-      // Hit createRectTween (lines 91-95)
-      const rect = Rect.fromLTRB(0, 0, 100, 100);
-      final Tween<Rect?> tween = hero.createRectTween!(rect, rect);
-      expect(tween, isA<MaterialRectCenterArcTween>());
-
-      // Hit placeholderBuilder (lines 97-108)
-      final Widget placeholder = hero.placeholderBuilder!(
-        context,
-        const Size(48, 48),
-        Container(),
-      );
-      expect(placeholder, isA<Widget>());
-    });
-
-    testWidgets('renders Hero widget with correct tag', (tester) async {
-      await tester.pumpWidget(createWidget());
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Hero), findsOneWidget);
-      final Hero hero = tester.widget(find.byType(Hero));
-      expect(hero.tag, 'audio_player');
-    });
+    // Note: Hero widget was removed from BottomPlayerUi to avoid
+    // duplicate tag conflicts during page transitions. The onTap
+    // functionality is now handled by a GestureDetector wrapping
+    // the entire widget.
 
     testWidgets('shows pause icon when playing', (tester) async {
       await tester.pumpWidget(createWidget(isPlaying: true));

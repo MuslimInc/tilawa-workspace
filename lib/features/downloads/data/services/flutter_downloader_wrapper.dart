@@ -33,7 +33,7 @@ class FlutterDownloaderWrapper {
       url: url,
       savedDir: savedDir,
       fileName: fileName,
-      headers: headers ?? {}, // Fix: pass empty map if null
+      headers: headers ?? {},
       showNotification: showNotification,
       openFileFromNotification: openFileFromNotification,
       requiresStorageNotLow: requiresStorageNotLow,

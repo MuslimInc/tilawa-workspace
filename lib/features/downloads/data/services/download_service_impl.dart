@@ -290,7 +290,6 @@ class DownloadServiceImpl implements DownloadServiceInterface {
         url: url,
         savedDir: savedDir,
         fileName: fileName,
-        showNotification: showNotification,
         openFileFromNotification: false,
         title: title,
       );

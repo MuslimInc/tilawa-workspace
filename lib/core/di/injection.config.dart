@@ -813,6 +813,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i672.RecitersBloc>(
       () => _i672.RecitersBloc(gh<_i362.GetRecitersUseCase>()),
     );
+    gh.factory<_i887.SplashCubit>(
+      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
+    );
     gh.factory<_i275.QiblaBloc>(
       () => _i275.QiblaBloc(
         gh<_i696.GetQiblaDirectionUseCase>(),
@@ -824,9 +827,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i204.RemoveFromDownloadQueueUseCase(
         gh<_i420.DownloadQueueManager>(),
       ),
-    );
-    gh.factory<_i887.SplashCubit>(
-      () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
     );
     gh.factory<_i447.AuthBloc>(
       () => _i447.AuthBloc(

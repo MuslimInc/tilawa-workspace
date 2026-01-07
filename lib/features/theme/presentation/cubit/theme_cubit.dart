@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
-    this.primaryColor = const Color(0xFF1AADC5), // Default primary color
+    this.primaryColor = AppColors.defaultPrimary,
     this.useSystemTheme = true,
   });
   final ThemeMode mode;
@@ -30,10 +31,10 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   ThemeCubit() : super(const ThemeState(mode: ThemeMode.system));
 
   static const List<AppColorOption> colorOptions = [
-    AppColorOption(name: 'Cyan', color: Color(0xFF1AADC5)),
-    AppColorOption(name: 'Green', color: Color(0xFF4CAF50)),
-    AppColorOption(name: 'Brown', color: Color(0xFF795548)),
-    AppColorOption(name: 'Purple', color: Color(0xFF9C27B0)),
+    AppColorOption(name: 'Cyan', color: AppColors.primaryCyan),
+    AppColorOption(name: 'Green', color: AppColors.primaryGreen),
+    AppColorOption(name: 'Brown', color: AppColors.primaryBrown),
+    AppColorOption(name: 'Purple', color: AppColors.primaryPurple),
   ];
 
   @override
@@ -49,9 +50,9 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         _ => ThemeMode.system,
       };
 
-      final primaryColor = colorValue != null
+      final Color primaryColor = colorValue != null
           ? Color(colorValue)
-          : const Color(0xFF1AADC5);
+          : AppColors.defaultPrimary;
 
       return ThemeState(
         mode: mode,

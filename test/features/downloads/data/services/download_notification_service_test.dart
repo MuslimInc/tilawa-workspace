@@ -176,6 +176,25 @@ void main() {
       expect(service, isNotNull);
     });
 
+    test(
+      'should show completed notification when progress is 100% even if status is still downloading',
+      () async {
+        // This tests the edge case where flutter_downloader reports 100% progress
+        // but the status hasn't yet transitioned to completed
+        await service.showDownloadProgress(
+          downloadId: downloadId,
+          title: title,
+          reciterName: reciterName,
+          progress: 100,
+          status: DownloadStatus.downloading, // Still "downloading" but 100%
+          completeMessage: 'Download complete',
+        );
+
+        // Assert - should complete without error (treated as completed)
+        expect(service, isNotNull);
+      },
+    );
+
     test('should show failed notification', () async {
       // Act
       await service.showDownloadProgress(

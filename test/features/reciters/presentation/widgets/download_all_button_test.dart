@@ -157,28 +157,9 @@ void main() {
       expect(button.onPressed, isNull);
     },
   );
-  testWidgets('DownloadAllButton shows toast on network error', (tester) async {
-    // Stream controller to simulate state changes
-    final stateController = StreamController<ReciterDownloadState>.broadcast();
-    when(() => mockBloc.stream).thenAnswer((_) => stateController.stream);
-    when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
 
-    await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
-    await tester.pumpAndSettle();
-
-    // Emit error state
-    stateController.add(
-      const ReciterDownloadState(errorMessage: 'No internet connection'),
-    );
-    await tester.pumpAndSettle(); // Allow listener to react
-
-    // Verify MethodChannel call for toast
-    /*
-         Since we can't easily access the capture log from the existing setUp without modifying it widely,
-         we rely on the fact that if the code works, it calls the channel.
-         To verify it strictly, we'd need to check the log. 
-         Let's locally override the handler for this test.
-      */
+  testWidgets('DownloadAllButton shows network error toast', (tester) async {
+    // Setup mock toast handler
     var toastCalled = false;
     const channel = MethodChannel('PonnamKarthik/fluttertoast');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -189,55 +170,24 @@ void main() {
           return true;
         });
 
-    stateController.add(
-      const ReciterDownloadState(errorMessage: 'Another internet error'),
+    // Setup bloc to emit network error state
+    whenListen(
+      mockBloc,
+      Stream.fromIterable([
+        const ReciterDownloadState(),
+        const ReciterDownloadState(errorMessage: 'No internet connection'),
+      ]),
+      initialState: const ReciterDownloadState(),
     );
-    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
+    await tester.pump(); // Trigger the state change
 
     expect(toastCalled, isTrue);
-    // Flush any pending timers from Toast
+
+    // Handle pending timers from Toast
     await tester.pump(const Duration(seconds: 2));
-
-    await stateController.close();
   });
-
-  testWidgets(
-    'DownloadAllButton shows "Downloading..." toast when download starts',
-    (tester) async {
-      final stateController =
-          StreamController<ReciterDownloadState>.broadcast();
-      when(() => mockBloc.stream).thenAnswer((_) => stateController.stream);
-      when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
-
-      await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
-      await tester.pumpAndSettle();
-
-      var toastCalled = false;
-      const channel = MethodChannel('PonnamKarthik/fluttertoast');
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-            if (methodCall.method == 'showToast') {
-              final args = methodCall.arguments as Map<dynamic, dynamic>;
-              if (args['msg'].toString() == 'Downloading all surahs...') {
-                toastCalled = true;
-              }
-            }
-            return true;
-          });
-
-      // Valid transition: isDownloadingAll: false -> true
-      stateController.add(const ReciterDownloadState(isDownloadingAll: true));
-      await tester.pumpAndSettle();
-
-      expect(
-        toastCalled,
-        isTrue,
-        reason: 'Toast should show when downloading starts',
-      );
-      await tester.pump(const Duration(seconds: 2)); // flush timer
-      await stateController.close();
-    },
-  );
 
   testWidgets(
     'DownloadAllButton cancels download when button is pressed while downloading',

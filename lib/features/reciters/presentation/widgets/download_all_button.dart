@@ -22,21 +22,10 @@ class DownloadAllButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
-        listenWhen: (previous, current) {
-          final bool errorChanged =
-              previous.errorMessage != current.errorMessage &&
-              current.errorMessage != null;
-          final bool startedDownloading =
-              !previous.isDownloadingAll && current.isDownloadingAll;
-          return errorChanged || startedDownloading;
-        },
+        listenWhen: (previous, current) => current.shouldShowError(previous),
         listener: (context, state) {
-          if (state.errorMessage != null &&
-              (state.errorMessage!.contains('No internet') ||
-                  state.errorMessage!.contains('internet'))) {
+          if (state.isNetworkError) {
             ToastUtils.showToast(msg: context.l10n.networkError);
-          } else if (state.isDownloadingAll) {
-            ToastUtils.showToast(msg: context.l10n.downloadingAllSurahs);
           }
         },
         builder: (context, state) {

@@ -11,6 +11,7 @@ import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/interfaces/notification_dispatcher_interface.dart';
 import '../../../../core/services/navigation_service.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../main.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
@@ -131,9 +132,15 @@ class DownloadNotificationService implements IDownloadNotificationService {
     final notificationTitle = '$reciterName - $title';
 
     try {
-      if (status == DownloadStatus.downloading ||
-          status == DownloadStatus.pending) {
-        // Show progress notification
+      // Treat 100% progress as completed even if status hasn't updated yet
+      final bool isEffectivelyCompleted =
+          status == DownloadStatus.completed ||
+          (status == DownloadStatus.downloading && progress >= 100);
+
+      if (!isEffectivelyCompleted &&
+          (status == DownloadStatus.downloading ||
+              status == DownloadStatus.pending)) {
+        // Show progress notification (only for < 100%)
         final androidDetails = AndroidNotificationDetails(
           _downloadChannelId,
           _downloadChannelName,
@@ -147,7 +154,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
           progress: progress,
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
-          color: const Color(0xFF1AADC5),
+          icon: 'ic_launcher_monochrome',
+          color: AppColors.notificationAccent,
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -170,7 +178,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           notificationDetails,
           payload: jsonEncode({'reciterName': reciterName}),
         );
-      } else if (status == DownloadStatus.completed) {
+      } else if (isEffectivelyCompleted) {
         // Show completed notification
         await _showCompletedNotification(
           notificationId: notificationId,
@@ -231,7 +239,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
           progress: progress,
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
-          color: const Color(0xFF1AADC5),
+          icon: 'ic_launcher_monochrome',
+          color: AppColors.notificationAccent,
         );
 
         const iosDetails = DarwinNotificationDetails(
@@ -400,7 +409,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
         _downloadChannelId,
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
-        color: Color(0xFF1AADC5),
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.notificationAccent,
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -441,7 +451,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
         _downloadChannelId,
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
-        color: Colors.red,
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.error,
       );
 
       const iosDetails = DarwinNotificationDetails(

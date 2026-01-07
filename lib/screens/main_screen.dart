@@ -1,4 +1,5 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -53,17 +54,19 @@ class _MainScreenState extends State<MainScreen> {
               });
             },
             child: Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  /// TODO: implement push notification
-                  final IAthkarNotificationService notificationService =
-                      getIt<IAthkarNotificationService>();
-                  notificationService.scheduleDebugAthkarNotification(
-                    isMorning: true,
-                  );
-                },
-                child: const Icon(Icons.play_arrow),
-              ),
+              floatingActionButton: kDebugMode
+                  ? FloatingActionButton(
+                      onPressed: () {
+                        /// TODO: implement push notification
+                        final IAthkarNotificationService notificationService =
+                            getIt<IAthkarNotificationService>();
+                        notificationService.scheduleDebugAthkarNotification(
+                          isMorning: true,
+                        );
+                      },
+                      child: const Icon(Icons.play_arrow),
+                    )
+                  : null,
               body: Column(
                 children: [
                   const OfflineIndicatorWidget(),

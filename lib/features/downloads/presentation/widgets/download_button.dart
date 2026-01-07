@@ -5,7 +5,6 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/network/network_info.dart';
 import '../../../../core/utils/toast_utils.dart';
-import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/services/downloads_initialization_service.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/usecases/usecases.dart';
@@ -37,7 +36,6 @@ class DownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
     return BlocProvider(
       create: (context) {
         // Try provider first, fall back to GetIt if provider isn't available
@@ -66,40 +64,17 @@ class DownloadButton extends StatelessWidget {
         return bloc;
       },
       child: BlocConsumer<DownloadButtonBloc, DownloadButtonState>(
-        listenWhen: (previous, current) {
-          // Only trigger listener for downloading state if transitioning FROM a non-downloading state
-          return current.maybeMap(
-            downloading: (_) => previous.maybeMap(
-              downloading: (_) => false,
-              orElse: () => true,
-            ),
-            networkError: (_) => true, // Always show network errors
-            orElse: () => false,
-          );
-        },
+        listenWhen: (previous, current) =>
+            current.shouldShowNetworkError(previous),
         listener: (context, state) {
           state.whenOrNull(
             networkError: (_) {
               ToastUtils.showToast(msg: context.l10n.networkError);
             },
-            downloading: (progress, _, _) {
-              ToastUtils.showToast(msg: l10n.downloadingSurah(surahTitle));
-            },
           );
         },
-        buildWhen: (previous, current) {
-          // Throttle progress updates to reduce rebuilds
-          return current.maybeWhen(
-            downloading: (currProgress, _, _) {
-              return previous.maybeWhen(
-                downloading: (prevProgress, _, _) =>
-                    (currProgress - prevProgress).abs() > 0.02, // 2% threshold
-                orElse: () => true,
-              );
-            },
-            orElse: () => true,
-          );
-        },
+        buildWhen: (previous, current) =>
+            current.hasSignificantProgressChange(previous),
         builder: (context, state) {
           return RepaintBoundary(
             child: AnimatedSwitcher(

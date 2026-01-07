@@ -19,6 +19,26 @@ class ReciterDownloadState extends Equatable {
 
   bool get isAllDownloaded => totalCount > 0 && downloadedCount == totalCount;
 
+  /// Determines if error message should be shown
+  /// Returns true when error message changes from null to a value
+  bool shouldShowError(ReciterDownloadState previous) {
+    return errorMessage != null && previous.errorMessage != errorMessage;
+  }
+
+  /// Determines if download started toast should be shown
+  /// Returns true only for user-initiated downloads (after pending state)
+  /// Returns false when discovering ongoing downloads on navigation
+  bool shouldShowDownloadStarted(ReciterDownloadState previous) {
+    return !previous.isDownloadingAll && isDownloadingAll && previous.isPending;
+  }
+
+  /// Checks if error is a network-related error
+  bool get isNetworkError {
+    return errorMessage != null &&
+        (errorMessage!.contains('No internet') ||
+            errorMessage!.contains('internet'));
+  }
+
   @override
   List<Object?> get props => [
     progress,

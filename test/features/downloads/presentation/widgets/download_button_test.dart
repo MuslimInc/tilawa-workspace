@@ -270,96 +270,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
   });
 
-  testWidgets('only shows downloading toast once when progress updates', (
-    tester,
-  ) async {
-    final List<MethodCall> methodCalls = [];
-    const channel = MethodChannel('PonnamKarthik/fluttertoast');
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
-      MethodCall methodCall,
-    ) async {
-      methodCalls.add(methodCall);
-      return true;
-    });
-
-    when(
-      () => mockCheckSurahDownloadedUseCase.call(
-        surahId: any(named: 'surahId'),
-        reciterName: any(named: 'reciterName'),
-      ),
-    ).thenAnswer((_) async => const Right(false));
-
-    final progressController = StreamController<DownloadItem>();
-    when(
-      () => mockDownloadsRepository.getDownloadProgress(any()),
-    ).thenAnswer((_) => progressController.stream);
-
-    await tester.pumpWidget(
-      createTestWidget(
-        const DownloadButton(
-          url: surahUrl,
-          surahTitle: surahTitle,
-          reciterName: reciterName,
-          reciterId: reciterId,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Start download
-    final item1 = DownloadItem(
-      id: '${surahUrl}_$reciterName',
-      title: surahTitle,
-      url: surahUrl,
-      filePath: 'path',
-      reciterName: reciterName,
-      reciterId: reciterId,
-      status: DownloadStatus.downloading,
-      progress: 0.1,
-      fileSize: 100,
-      downloadedSize: 10,
-      createdAt: DateTime.now(),
-    );
-    progressController.add(item1);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    // Update progress
-    final DownloadItem item2 = item1.copyWith(
-      progress: 0.5,
-      downloadedSize: 50,
-    );
-    progressController.add(item2);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    // Update progress again
-    final DownloadItem item3 = item2.copyWith(
-      progress: 0.9,
-      downloadedSize: 90,
-    );
-    progressController.add(item3);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    // Verify toast was only shown once for "downloading"
-    final List<MethodCall> toastCalls = methodCalls
-        .where((call) => call.method == 'showToast')
-        .toList();
-    expect(toastCalls.length, 1);
-    final toastArgs = Map<String, dynamic>.from(
-      toastCalls.first.arguments as Map,
-    );
-    expect(toastArgs['msg'], contains('Downloading'));
-
-    await progressController.close();
-    // Drain any pending timers from toast
-    await tester.pump(const Duration(seconds: 3));
-  });
-
-  testWidgets('shows localized network error toast on networkError state', (
-    tester,
-  ) async {
+  testWidgets('shows network error toast when offline', (tester) async {
     final List<MethodCall> methodCalls = [];
     const channel = MethodChannel('PonnamKarthik/fluttertoast');
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
@@ -377,7 +288,7 @@ void main() {
       ),
     ).thenAnswer((_) async => const Right(false));
 
-    // Mock failure that triggers network error
+    // Mock network failure
     when(
       () => mockDownloadSurahUseCase.call(
         surahId: any(named: 'surahId'),
@@ -403,16 +314,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.download_rounded));
     await tester.pumpAndSettle();
 
-    // Verify network error toast (should be localized, so we check if it matches l10n key)
+    // Verify network error toast was shown
     final List<MethodCall> toastCalls = methodCalls
         .where((call) => call.method == 'showToast')
         .toList();
     expect(toastCalls.length, 1);
-    // Since we use the real localizations in createTestWidget, it should be the English string
-    final toastNetworkArgs = Map<String, dynamic>.from(
+    final toastArgs = Map<String, dynamic>.from(
       toastCalls.first.arguments as Map,
     );
-    expect(toastNetworkArgs['msg'], contains('internet connection'));
+    expect(toastArgs['msg'], contains('internet connection'));
 
     // Drain any pending timers from toast
     await tester.pump(const Duration(seconds: 3));
