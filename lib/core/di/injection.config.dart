@@ -31,7 +31,6 @@ import 'package:tilawa/core/presentation/bloc/internet_status/internet_status_bl
 import 'package:tilawa/core/services/analytics_initialization_service.dart'
     as _i734;
 import 'package:tilawa/core/services/analytics_service.dart' as _i145;
-import 'package:tilawa/core/services/appsflyer_service.dart' as _i970;
 import 'package:tilawa/core/services/athkar_notification_service.dart' as _i35;
 import 'package:tilawa/core/services/crashlytics_service.dart' as _i600;
 import 'package:tilawa/core/services/device_token_service.dart' as _i172;
@@ -439,7 +438,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i136.INotificationDispatcher>(
       () => _i752.NotificationDispatcher(),
     );
-    gh.singleton<_i970.AppsFlyerService>(() => _i970.AppsFlyerServiceImpl());
     gh.lazySingleton<_i641.AudioPositionService>(
       () => _i641.AudioPositionServiceImpl(),
     );

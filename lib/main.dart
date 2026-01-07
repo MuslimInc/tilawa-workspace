@@ -15,7 +15,6 @@ import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/observers/app_bloc_observer.dart';
 import 'core/services/analytics_initialization_service.dart';
-import 'core/services/appsflyer_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
 import 'core/services/interfaces/athkar_notification_service_interface.dart';
@@ -145,7 +144,6 @@ void initializeNonCriticalServices() {
       await (
         initializeCredentialManager(),
         initializeAnalytics(),
-        initializeAppsFlyer(),
         initializeLuciq(),
       ).wait;
       logger.d('Phase 1 services initialized (parallel)');
@@ -299,19 +297,6 @@ Future<void> initializeDownloads() async {
     await downloadsInitService.initialize();
   } catch (e) {
     logger.d('Warning: Could not initialize downloads: $e');
-  }
-}
-
-/// Initialize AppsFlyer attribution tracking
-@visibleForTesting
-Future<void> initializeAppsFlyer() async {
-  try {
-    final AppsFlyerService appsFlyerService = getIt<AppsFlyerService>();
-    await appsFlyerService.initialize();
-    await appsFlyerService.startTracking();
-    logger.d('AppsFlyer initialized and tracking started');
-  } catch (e) {
-    logger.d('Warning: Could not initialize AppsFlyer: $e');
   }
 }
 

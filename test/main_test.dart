@@ -6,7 +6,6 @@ import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
-import 'package:tilawa/core/services/appsflyer_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
 import 'package:tilawa/core/services/interfaces/athkar_notification_service_interface.dart';
@@ -21,8 +20,6 @@ class MockCrashlyticsService extends Mock implements CrashlyticsService {}
 
 class MockAnalyticsInitService extends Mock
     implements AnalyticsInitializationService {}
-
-class MockAppsFlyerService extends Mock implements AppsFlyerService {}
 
 class MockLuciqService extends Mock implements LuciqService {}
 
@@ -51,7 +48,6 @@ void main() {
   // Define mocks
   late MockCrashlyticsService mockCrashlytics;
   late MockAnalyticsInitService mockAnalytics;
-  late MockAppsFlyerService mockAppsFlyer;
   late MockLuciqService mockLuciq;
   late MockNotificationPermissionService mockNotificationPermission;
   late MockNotificationsRepository mockNotificationsRepo;
@@ -107,7 +103,6 @@ void main() {
   setUp(() {
     mockCrashlytics = MockCrashlyticsService();
     mockAnalytics = MockAnalyticsInitService();
-    mockAppsFlyer = MockAppsFlyerService();
     mockLuciq = MockLuciqService();
     mockNotificationPermission = MockNotificationPermissionService();
     mockNotificationsRepo = MockNotificationsRepository();
@@ -122,7 +117,6 @@ void main() {
     // Register mocks
     getIt.registerSingleton<CrashlyticsService>(mockCrashlytics);
     getIt.registerSingleton<AnalyticsInitializationService>(mockAnalytics);
-    getIt.registerSingleton<AppsFlyerService>(mockAppsFlyer);
     getIt.registerSingleton<LuciqService>(mockLuciq);
     getIt.registerSingleton<NotificationPermissionService>(
       mockNotificationPermission,
@@ -136,8 +130,6 @@ void main() {
     // Stubs
     when(() => mockCrashlytics.initialize()).thenAnswer((_) async {});
     when(() => mockAnalytics.initialize()).thenAnswer((_) async {});
-    when(() => mockAppsFlyer.initialize()).thenAnswer((_) async {});
-    when(() => mockAppsFlyer.startTracking()).thenAnswer((_) async {});
     when(() => mockLuciq.initialize()).thenAnswer((_) async {});
     when(
       () => mockNotificationPermission.requestPermissionOnFirstLaunch(),
@@ -281,18 +273,6 @@ void main() {
       when(() => mockDownloads.initialize()).thenThrow(Exception('Fail'));
       await initializeDownloads();
       verify(() => mockDownloads.initialize()).called(1);
-    });
-
-    test('initializeAppsFlyer success', () async {
-      await initializeAppsFlyer();
-      verify(() => mockAppsFlyer.initialize()).called(1);
-      verify(() => mockAppsFlyer.startTracking()).called(1);
-    });
-
-    test('initializeAppsFlyer failure', () async {
-      when(() => mockAppsFlyer.initialize()).thenThrow(Exception('Fail'));
-      await initializeAppsFlyer();
-      verify(() => mockAppsFlyer.initialize()).called(1);
     });
 
     test('initializeLuciq success', () async {
