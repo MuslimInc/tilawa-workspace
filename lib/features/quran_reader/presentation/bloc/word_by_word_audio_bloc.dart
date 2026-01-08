@@ -26,7 +26,12 @@ abstract class WordByWordAudioState with _$WordByWordAudioState {
 @injectable
 class WordByWordAudioBloc
     extends Bloc<WordByWordAudioEvent, WordByWordAudioState> {
-  WordByWordAudioBloc({AudioPlayer? player})
+  /// Creates a new [WordByWordAudioBloc].
+  ///
+  /// The [player] parameter is for testing only. In production, the static
+  /// [_globalPlayer] is used automatically.
+  @factoryMethod
+  WordByWordAudioBloc({@factoryParam AudioPlayer? player})
     : _player = player ?? _globalPlayer,
       super(const WordByWordAudioState()) {
     on<_PlayWord>(_onPlayWord);

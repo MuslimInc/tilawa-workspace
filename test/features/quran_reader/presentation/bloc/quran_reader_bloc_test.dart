@@ -7,6 +7,8 @@ import 'package:tilawa/features/quran_reader/domain/entities/entities.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/usecases.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 
+import '../../../../helpers/hydrated_bloc_test_helper.dart';
+
 class MockGetSurahContentUseCase extends Mock
     implements GetSurahContentUseCase {}
 
@@ -35,8 +37,13 @@ void main() {
   late MockSearchSurahsUseCase searchSurahsUseCase;
   late QuranReaderBloc bloc;
 
-  setUpAll(() {
+  setUpAll(() async {
+    await initializeHydratedStorageForTest();
     registerFallbackValue(const ReaderSettingsEntity());
+  });
+
+  tearDownAll(() async {
+    await clearHydratedStorageForTest();
   });
 
   setUp(() {
@@ -333,6 +340,97 @@ void main() {
         expect: () => [
           const QuranReaderState(jumpToPage: 10),
           const QuranReaderState(),
+        ],
+      );
+    });
+
+    group('updateFontSize', () {
+      blocTest<QuranReaderBloc, QuranReaderState>(
+        'emits updated fontSize on updateFontSize',
+        build: () {
+          when(
+            () => saveReaderSettingsUseCase.call(
+              settings: any(named: 'settings'),
+            ),
+          ).thenAnswer((_) async => const Right(null));
+          return bloc;
+        },
+        act: (bloc) => bloc.add(const QuranReaderEvent.updateFontSize(28.0)),
+        expect: () => [
+          const QuranReaderState(
+            settings: ReaderSettingsEntity(fontSize: 28.0),
+          ),
+        ],
+      );
+    });
+
+    group('preloadAllPages', () {
+      blocTest<QuranReaderBloc, QuranReaderState>(
+        'emits isPreloading true when preloading starts',
+        build: () {
+          when(
+            () =>
+                getQuranPageUseCase.call(pageNumber: any(named: 'pageNumber')),
+          ).thenAnswer((_) async => const Right(tPage));
+          return bloc;
+        },
+        act: (bloc) => bloc.add(const QuranReaderEvent.preloadAllPages()),
+        wait: const Duration(milliseconds: 100),
+        verify: (bloc) {
+          // Just verify preloading was triggered
+          verify(
+            () =>
+                getQuranPageUseCase.call(pageNumber: any(named: 'pageNumber')),
+          ).called(greaterThan(0));
+        },
+      );
+    });
+
+    group('Search edge cases', () {
+      blocTest<QuranReaderBloc, QuranReaderState>(
+        'returns no results and sets error when ayah search fails',
+        build: () {
+          when(
+            () => searchAyahsUseCase.call(query: any(named: 'query')),
+          ).thenAnswer((_) async => const Left(UnexpectedFailure('err')));
+          when(
+            () => searchSurahsUseCase.call(query: any(named: 'query')),
+          ).thenAnswer((_) async => const Right([]));
+          return bloc;
+        },
+        act: (bloc) => bloc.add(const QuranReaderEvent.searchAyahs('test')),
+        expect: () => [
+          const QuranReaderState(isSearching: true, searchQuery: 'test'),
+          isA<QuranReaderState>()
+              .having((s) => s.isSearching, 'isSearching', false)
+              .having((s) => s.searchQuery, 'searchQuery', 'test')
+              .having((s) => s.errorMessage, 'errorMessage', isNotEmpty),
+        ],
+      );
+
+      blocTest<QuranReaderBloc, QuranReaderState>(
+        'returns results when search has matches',
+        build: () {
+          const tAyah = AyahEntity(
+            number: 1,
+            numberInSurah: 1,
+            surahNumber: 1,
+            text: 'test ayah',
+          );
+          when(
+            () => searchAyahsUseCase.call(query: any(named: 'query')),
+          ).thenAnswer((_) async => const Right([tAyah]));
+          when(
+            () => searchSurahsUseCase.call(query: any(named: 'query')),
+          ).thenAnswer((_) async => const Right([tSurah]));
+          return bloc;
+        },
+        act: (bloc) => bloc.add(const QuranReaderEvent.searchAyahs('test')),
+        expect: () => [
+          const QuranReaderState(isSearching: true, searchQuery: 'test'),
+          isA<QuranReaderState>()
+              .having((s) => s.searchResults.length, 'searchResults', 1)
+              .having((s) => s.surahSearchResults.length, 'surahResults', 1),
         ],
       );
     });

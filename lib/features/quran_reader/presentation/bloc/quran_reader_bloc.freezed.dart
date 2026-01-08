@@ -63,6 +63,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function(_SearchAyahs value)? searchAyahs,
     TResult Function(_ClearSearch value)? clearSearch,
     TResult Function(_JumpToPage value)? jumpToPage,
+    TResult Function(_PreloadAllPages value)? preloadAllPages,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -89,6 +90,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch(_that);
       case _JumpToPage() when jumpToPage != null:
         return jumpToPage(_that);
+      case _PreloadAllPages() when preloadAllPages != null:
+        return preloadAllPages(_that);
       case _:
         return orElse();
     }
@@ -120,6 +123,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function(_SearchAyahs value) searchAyahs,
     required TResult Function(_ClearSearch value) clearSearch,
     required TResult Function(_JumpToPage value) jumpToPage,
+    required TResult Function(_PreloadAllPages value) preloadAllPages,
   }) {
     final _that = this;
     switch (_that) {
@@ -145,6 +149,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch(_that);
       case _JumpToPage():
         return jumpToPage(_that);
+      case _PreloadAllPages():
+        return preloadAllPages(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -175,6 +181,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function(_SearchAyahs value)? searchAyahs,
     TResult? Function(_ClearSearch value)? clearSearch,
     TResult? Function(_JumpToPage value)? jumpToPage,
+    TResult? Function(_PreloadAllPages value)? preloadAllPages,
   }) {
     final _that = this;
     switch (_that) {
@@ -200,6 +207,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch(_that);
       case _JumpToPage() when jumpToPage != null:
         return jumpToPage(_that);
+      case _PreloadAllPages() when preloadAllPages != null:
+        return preloadAllPages(_that);
       case _:
         return null;
     }
@@ -230,6 +239,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function(String query)? searchAyahs,
     TResult Function()? clearSearch,
     TResult Function(int pageNumber)? jumpToPage,
+    TResult Function()? preloadAllPages,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -256,6 +266,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch();
       case _JumpToPage() when jumpToPage != null:
         return jumpToPage(_that.pageNumber);
+      case _PreloadAllPages() when preloadAllPages != null:
+        return preloadAllPages();
       case _:
         return orElse();
     }
@@ -287,6 +299,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function(String query) searchAyahs,
     required TResult Function() clearSearch,
     required TResult Function(int pageNumber) jumpToPage,
+    required TResult Function() preloadAllPages,
   }) {
     final _that = this;
     switch (_that) {
@@ -312,6 +325,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch();
       case _JumpToPage():
         return jumpToPage(_that.pageNumber);
+      case _PreloadAllPages():
+        return preloadAllPages();
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -342,6 +357,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function(String query)? searchAyahs,
     TResult? Function()? clearSearch,
     TResult? Function(int pageNumber)? jumpToPage,
+    TResult? Function()? preloadAllPages,
   }) {
     final _that = this;
     switch (_that) {
@@ -367,6 +383,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return clearSearch();
       case _JumpToPage() when jumpToPage != null:
         return jumpToPage(_that.pageNumber);
+      case _PreloadAllPages() when preloadAllPages != null:
+        return preloadAllPages();
       case _:
         return null;
     }
@@ -974,6 +992,26 @@ class __$JumpToPageCopyWithImpl<$Res> implements _$JumpToPageCopyWith<$Res> {
 }
 
 /// @nodoc
+
+class _PreloadAllPages implements QuranReaderEvent {
+  const _PreloadAllPages();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _PreloadAllPages);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'QuranReaderEvent.preloadAllPages()';
+  }
+}
+
+/// @nodoc
 mixin _$QuranReaderState {
   QuranReaderStatus get status;
   SurahContentEntity? get currentSurah;
@@ -987,6 +1025,9 @@ mixin _$QuranReaderState {
   int? get scrollToAyah;
   int? get jumpToPage;
   String get errorMessage;
+  bool get isPreloading;
+  int get pagesLoaded;
+  int get totalPagesToLoad;
 
   /// Create a copy of QuranReaderState
   /// with the given fields replaced by the non-null parameter values.
@@ -1028,7 +1069,13 @@ mixin _$QuranReaderState {
             (identical(other.jumpToPage, jumpToPage) ||
                 other.jumpToPage == jumpToPage) &&
             (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage));
+                other.errorMessage == errorMessage) &&
+            (identical(other.isPreloading, isPreloading) ||
+                other.isPreloading == isPreloading) &&
+            (identical(other.pagesLoaded, pagesLoaded) ||
+                other.pagesLoaded == pagesLoaded) &&
+            (identical(other.totalPagesToLoad, totalPagesToLoad) ||
+                other.totalPagesToLoad == totalPagesToLoad));
   }
 
   @override
@@ -1046,11 +1093,14 @@ mixin _$QuranReaderState {
     scrollToAyah,
     jumpToPage,
     errorMessage,
+    isPreloading,
+    pagesLoaded,
+    totalPagesToLoad,
   );
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
   }
 }
 
@@ -1074,6 +1124,9 @@ abstract mixin class $QuranReaderStateCopyWith<$Res> {
     int? scrollToAyah,
     int? jumpToPage,
     String errorMessage,
+    bool isPreloading,
+    int pagesLoaded,
+    int totalPagesToLoad,
   });
 
   $SurahContentEntityCopyWith<$Res>? get currentSurah;
@@ -1106,6 +1159,9 @@ class _$QuranReaderStateCopyWithImpl<$Res>
     Object? scrollToAyah = freezed,
     Object? jumpToPage = freezed,
     Object? errorMessage = null,
+    Object? isPreloading = null,
+    Object? pagesLoaded = null,
+    Object? totalPagesToLoad = null,
   }) {
     return _then(
       _self.copyWith(
@@ -1157,6 +1213,18 @@ class _$QuranReaderStateCopyWithImpl<$Res>
             ? _self.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable
                   as String,
+        isPreloading: null == isPreloading
+            ? _self.isPreloading
+            : isPreloading // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        pagesLoaded: null == pagesLoaded
+            ? _self.pagesLoaded
+            : pagesLoaded // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalPagesToLoad: null == totalPagesToLoad
+            ? _self.totalPagesToLoad
+            : totalPagesToLoad // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -1306,6 +1374,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
       int? scrollToAyah,
       int? jumpToPage,
       String errorMessage,
+      bool isPreloading,
+      int pagesLoaded,
+      int totalPagesToLoad,
     )?
     $default, {
     required TResult orElse(),
@@ -1326,6 +1397,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.scrollToAyah,
           _that.jumpToPage,
           _that.errorMessage,
+          _that.isPreloading,
+          _that.pagesLoaded,
+          _that.totalPagesToLoad,
         );
       case _:
         return orElse();
@@ -1360,6 +1434,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
       int? scrollToAyah,
       int? jumpToPage,
       String errorMessage,
+      bool isPreloading,
+      int pagesLoaded,
+      int totalPagesToLoad,
     )
     $default,
   ) {
@@ -1379,6 +1456,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.scrollToAyah,
           _that.jumpToPage,
           _that.errorMessage,
+          _that.isPreloading,
+          _that.pagesLoaded,
+          _that.totalPagesToLoad,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -1412,6 +1492,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
       int? scrollToAyah,
       int? jumpToPage,
       String errorMessage,
+      bool isPreloading,
+      int pagesLoaded,
+      int totalPagesToLoad,
     )?
     $default,
   ) {
@@ -1431,6 +1514,9 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.scrollToAyah,
           _that.jumpToPage,
           _that.errorMessage,
+          _that.isPreloading,
+          _that.pagesLoaded,
+          _that.totalPagesToLoad,
         );
       case _:
         return null;
@@ -1454,6 +1540,9 @@ class _QuranReaderState implements QuranReaderState {
     this.scrollToAyah,
     this.jumpToPage,
     this.errorMessage = '',
+    this.isPreloading = false,
+    this.pagesLoaded = 0,
+    this.totalPagesToLoad = 604,
   }) : _pages = pages,
        _searchResults = searchResults,
        _surahSearchResults = surahSearchResults;
@@ -1509,6 +1598,15 @@ class _QuranReaderState implements QuranReaderState {
   @override
   @JsonKey()
   final String errorMessage;
+  @override
+  @JsonKey()
+  final bool isPreloading;
+  @override
+  @JsonKey()
+  final int pagesLoaded;
+  @override
+  @JsonKey()
+  final int totalPagesToLoad;
 
   /// Create a copy of QuranReaderState
   /// with the given fields replaced by the non-null parameter values.
@@ -1548,7 +1646,13 @@ class _QuranReaderState implements QuranReaderState {
             (identical(other.jumpToPage, jumpToPage) ||
                 other.jumpToPage == jumpToPage) &&
             (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage));
+                other.errorMessage == errorMessage) &&
+            (identical(other.isPreloading, isPreloading) ||
+                other.isPreloading == isPreloading) &&
+            (identical(other.pagesLoaded, pagesLoaded) ||
+                other.pagesLoaded == pagesLoaded) &&
+            (identical(other.totalPagesToLoad, totalPagesToLoad) ||
+                other.totalPagesToLoad == totalPagesToLoad));
   }
 
   @override
@@ -1566,11 +1670,14 @@ class _QuranReaderState implements QuranReaderState {
     scrollToAyah,
     jumpToPage,
     errorMessage,
+    isPreloading,
+    pagesLoaded,
+    totalPagesToLoad,
   );
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
   }
 }
 
@@ -1596,6 +1703,9 @@ abstract mixin class _$QuranReaderStateCopyWith<$Res>
     int? scrollToAyah,
     int? jumpToPage,
     String errorMessage,
+    bool isPreloading,
+    int pagesLoaded,
+    int totalPagesToLoad,
   });
 
   @override
@@ -1631,6 +1741,9 @@ class __$QuranReaderStateCopyWithImpl<$Res>
     Object? scrollToAyah = freezed,
     Object? jumpToPage = freezed,
     Object? errorMessage = null,
+    Object? isPreloading = null,
+    Object? pagesLoaded = null,
+    Object? totalPagesToLoad = null,
   }) {
     return _then(
       _QuranReaderState(
@@ -1682,6 +1795,18 @@ class __$QuranReaderStateCopyWithImpl<$Res>
             ? _self.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable
                   as String,
+        isPreloading: null == isPreloading
+            ? _self.isPreloading
+            : isPreloading // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        pagesLoaded: null == pagesLoaded
+            ? _self.pagesLoaded
+            : pagesLoaded // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalPagesToLoad: null == totalPagesToLoad
+            ? _self.totalPagesToLoad
+            : totalPagesToLoad // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }

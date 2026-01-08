@@ -1,6 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -40,6 +40,8 @@ class QuranReaderEvent with _$QuranReaderEvent {
   const factory QuranReaderEvent.clearSearch() = _ClearSearch;
 
   const factory QuranReaderEvent.jumpToPage(int pageNumber) = _JumpToPage;
+
+  const factory QuranReaderEvent.preloadAllPages() = _PreloadAllPages;
 }
 
 // States
@@ -70,13 +72,19 @@ abstract class QuranReaderState with _$QuranReaderState {
     int? jumpToPage,
 
     @Default('') String errorMessage,
+
+    @Default(false) bool isPreloading,
+
+    @Default(0) int pagesLoaded,
+
+    @Default(604) int totalPagesToLoad,
   }) = _QuranReaderState;
 }
 
 enum QuranReaderStatus { initial, loading, loaded, error }
 
 @injectable
-class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
+class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
   QuranReaderBloc(
     this._getSurahContentUseCase,
 
@@ -113,6 +121,8 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     on<_ClearSearch>(_onClearSearch);
 
     on<_JumpToPage>(_onJumpToPage);
+
+    on<_PreloadAllPages>(_onPreloadAllPages);
   }
 
   final GetSurahContentUseCase _getSurahContentUseCase;
@@ -369,5 +379,118 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     // Immediately clear so the UI only sees the jump command once
 
     emit(state.copyWith(jumpToPage: null));
+  }
+
+  /// Preloads all 604 Quran pages in parallel batches.
+  Future<void> _onPreloadAllPages(
+    _PreloadAllPages event,
+    Emitter<QuranReaderState> emit,
+  ) async {
+    // If already preloaded, skip
+    if (state.pages.length >= 604) {
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        isPreloading: true,
+        pagesLoaded: state.pages.length,
+        totalPagesToLoad: 604,
+      ),
+    );
+
+    const batchSize = 10;
+    final Map<int, QuranPageEntity> allPages = Map.from(state.pages);
+
+    for (var start = 1; start <= 604; start += batchSize) {
+      if (isClosed) {
+        return;
+      }
+
+      final int end = (start + batchSize - 1).clamp(1, 604);
+      final List<Future<void>> batch = [];
+
+      for (var pageNum = start; pageNum <= end; pageNum++) {
+        // Skip already loaded pages
+        if (allPages.containsKey(pageNum)) {
+          continue;
+        }
+
+        batch.add(
+          _getQuranPageUseCase.call(pageNumber: pageNum).then((result) {
+            result.fold(
+              (failure) {
+                // Log error but continue loading other pages
+              },
+              (page) {
+                allPages[page.pageNumber] = page;
+              },
+            );
+          }),
+        );
+      }
+
+      await Future.wait(batch);
+
+      emit(
+        state.copyWith(pages: Map.from(allPages), pagesLoaded: allPages.length),
+      );
+    }
+
+    emit(
+      state.copyWith(
+        isPreloading: false,
+        status: QuranReaderStatus.loaded,
+        pages: allPages,
+        pagesLoaded: allPages.length,
+      ),
+    );
+  }
+
+  @override
+  QuranReaderState? fromJson(Map<String, dynamic> json) {
+    try {
+      // Restore pages from hydrated storage
+      final Map<int, QuranPageEntity> pages = {};
+      if (json['pages'] != null && json['pages'] is Map) {
+        final pagesJson = json['pages'] as Map<String, dynamic>;
+        for (final MapEntry<String, dynamic> entry in pagesJson.entries) {
+          final int pageNum = int.parse(entry.key);
+          final pageData = entry.value as Map<String, dynamic>;
+          pages[pageNum] = QuranPageEntity.fromJson(pageData);
+        }
+      }
+
+      if (pages.isNotEmpty) {
+        return QuranReaderState(
+          status: QuranReaderStatus.loaded,
+          pages: pages,
+          pagesLoaded: pages.length,
+        );
+      }
+      return const QuranReaderState();
+    } catch (e) {
+      return const QuranReaderState();
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(QuranReaderState state) {
+    // Only persist if pages are loaded
+    if (state.pages.isEmpty) {
+      return null;
+    }
+
+    try {
+      // Serialize pages map to JSON
+      final Map<String, dynamic> pagesJson = {};
+      for (final MapEntry<int, QuranPageEntity> entry in state.pages.entries) {
+        pagesJson[entry.key.toString()] = entry.value.toJson();
+      }
+
+      return {'pages': pagesJson};
+    } catch (e) {
+      return null;
+    }
   }
 }

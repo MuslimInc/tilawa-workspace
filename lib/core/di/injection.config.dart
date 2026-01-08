@@ -349,6 +349,10 @@ import 'package:tilawa/features/quran_reader/data/datasources/datasources.dart'
     as _i284;
 import 'package:tilawa/features/quran_reader/data/datasources/quran_datasource.dart'
     as _i650;
+import 'package:tilawa/features/quran_reader/data/datasources/quran_local_datasource.dart'
+    as _i763;
+import 'package:tilawa/features/quran_reader/data/datasources/quran_remote_datasource.dart'
+    as _i477;
 import 'package:tilawa/features/quran_reader/data/datasources/reader_settings_datasource.dart'
     as _i359;
 import 'package:tilawa/features/quran_reader/data/datasources/search_remote_datasource.dart'
@@ -567,6 +571,9 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i600.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
     );
+    gh.lazySingleton<_i477.QuranRemoteDataSource>(
+      () => _i477.QuranRemoteDataSourceImpl(dio: gh<_i361.Dio>()),
+    );
     gh.singleton<_i636.LuciqService>(() => _i636.LuciqServiceImpl());
     gh.lazySingleton<_i470.PlaylistsLocalDataSource>(
       () => _i470.PlaylistsLocalDataSourceImpl(
@@ -594,15 +601,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i259.RecitersRemoteDataSource>(
       () => _i259.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i650.QuranDataSource>(
-      () => _i650.QuranDataSourceImpl(dio: gh<_i361.Dio>()),
-    );
     gh.lazySingleton<_i537.PremiumLocalDataSource>(
       () =>
           _i537.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
-    );
-    gh.factory<_i312.WordByWordAudioBloc>(
-      () => _i312.WordByWordAudioBloc(player: gh<_i501.AudioPlayer>()),
     );
     gh.factory<_i884.SearchRemoteDataSource>(
       () => _i884.SearchRemoteDataSource(gh<_i361.Dio>()),
@@ -615,6 +616,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i213.BookmarksLocalDataSourceImpl(
         gh<_i460.SharedPreferencesAsync>(),
       ),
+    );
+    gh.lazySingleton<_i763.QuranLocalDataSource>(
+      () =>
+          _i763.QuranLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
     );
     gh.lazySingleton<_i67.LocalizationRepository>(
       () => _i116.LocalizationRepositoryImpl(
@@ -673,16 +678,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i371.NotificationsRemoteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i664.QuranReaderRepository>(
-      () => _i827.QuranReaderRepositoryImpl(
-        gh<_i284.QuranDataSource>(),
-        gh<_i284.ReaderSettingsDataSource>(),
-        gh<_i284.SearchRemoteDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i650.AthkarLocalDataSource>(
       () =>
           _i650.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
+    );
+    gh.factoryParam<_i312.WordByWordAudioBloc, _i501.AudioPlayer?, dynamic>(
+      (player, _) => _i312.WordByWordAudioBloc(player: player),
     );
     gh.lazySingleton<_i314.HistoryRepository>(
       () => _i48.HistoryRepositoryImpl(gh<_i603.HistoryLocalDataSource>()),
@@ -749,6 +750,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i145.AnalyticsService>(
       () => _i495.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.lazySingleton<_i650.QuranDataSource>(
+      () => _i650.QuranDataSourceImpl(
+        gh<_i763.QuranLocalDataSource>(),
+        gh<_i477.QuranRemoteDataSource>(),
+      ),
     );
     gh.lazySingleton<_i775.RecitersFavoritesDataSource>(
       () =>
@@ -849,28 +856,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i136.INotificationDispatcher>(),
       ),
     );
-    gh.factory<_i1009.GetQuranPageUseCase>(
-      () => _i1009.GetQuranPageUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i622.GetSurahContentUseCase>(
-      () => _i622.GetSurahContentUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i708.LoadReaderSettingsUseCase>(
-      () => _i708.LoadReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i816.SaveLastReadPositionUseCase>(
-      () =>
-          _i816.SaveLastReadPositionUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i330.SaveReaderSettingsUseCase>(
-      () => _i330.SaveReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i239.SearchAyahsUseCase>(
-      () => _i239.SearchAyahsUseCase(gh<_i664.QuranReaderRepository>()),
-    );
-    gh.factory<_i201.SearchSurahsUseCase>(
-      () => _i201.SearchSurahsUseCase(gh<_i664.QuranReaderRepository>()),
-    );
     gh.singleton<_i326.GetCurrentLanguageUseCase>(
       () => _i326.GetCurrentLanguageUseCase(gh<_i67.LocalizationRepository>()),
     );
@@ -902,17 +887,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i931.SignInWithGoogleUseCase(
         gh<_i742.AuthRepository>(),
         gh<_i307.UserRepository>(),
-      ),
-    );
-    gh.factory<_i960.QuranReaderBloc>(
-      () => _i960.QuranReaderBloc(
-        gh<_i454.GetSurahContentUseCase>(),
-        gh<_i454.GetQuranPageUseCase>(),
-        gh<_i454.LoadReaderSettingsUseCase>(),
-        gh<_i454.SaveReaderSettingsUseCase>(),
-        gh<_i454.SaveLastReadPositionUseCase>(),
-        gh<_i454.SearchAyahsUseCase>(),
-        gh<_i454.SearchSurahsUseCase>(),
       ),
     );
     gh.factory<_i117.AthkarCubit>(
@@ -1037,6 +1011,13 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i860.ToggleFavoritePlaylistUseCase>(),
       ),
     );
+    gh.lazySingleton<_i664.QuranReaderRepository>(
+      () => _i827.QuranReaderRepositoryImpl(
+        gh<_i284.QuranDataSource>(),
+        gh<_i284.ReaderSettingsDataSource>(),
+        gh<_i284.SearchRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i718.SettingsCubit>(
       () => _i718.SettingsCubit(gh<_i420.DownloadQueueManager>()),
     );
@@ -1088,6 +1069,39 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i633.SignOut>(),
         gh<_i561.GetCurrentUserUseCase>(),
         gh<_i648.SyncDeviceTokenUseCase>(),
+      ),
+    );
+    gh.factory<_i1009.GetQuranPageUseCase>(
+      () => _i1009.GetQuranPageUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i622.GetSurahContentUseCase>(
+      () => _i622.GetSurahContentUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i708.LoadReaderSettingsUseCase>(
+      () => _i708.LoadReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i816.SaveLastReadPositionUseCase>(
+      () =>
+          _i816.SaveLastReadPositionUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i330.SaveReaderSettingsUseCase>(
+      () => _i330.SaveReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i239.SearchAyahsUseCase>(
+      () => _i239.SearchAyahsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i201.SearchSurahsUseCase>(
+      () => _i201.SearchSurahsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i960.QuranReaderBloc>(
+      () => _i960.QuranReaderBloc(
+        gh<_i454.GetSurahContentUseCase>(),
+        gh<_i454.GetQuranPageUseCase>(),
+        gh<_i454.LoadReaderSettingsUseCase>(),
+        gh<_i454.SaveReaderSettingsUseCase>(),
+        gh<_i454.SaveLastReadPositionUseCase>(),
+        gh<_i454.SearchAyahsUseCase>(),
+        gh<_i454.SearchSurahsUseCase>(),
       ),
     );
     gh.lazySingleton<_i767.DownloadRecoveryService>(

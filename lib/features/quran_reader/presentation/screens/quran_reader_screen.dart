@@ -43,7 +43,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   }
 
   void _loadSettings() {
-    context.read<QuranReaderBloc>().add(const QuranReaderEvent.loadSettings());
+    final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
+    bloc.add(const QuranReaderEvent.loadSettings());
+    bloc.add(const QuranReaderEvent.preloadAllPages());
   }
 
   @override
@@ -149,6 +151,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   }
 
   Widget _buildContent(BuildContext context, QuranReaderState state) {
+    // Show preloading progress
+    if (state.isPreloading) {
+      final double progress = state.pagesLoaded / state.totalPagesToLoad;
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(value: progress),
+            const SizedBox(height: 16),
+            Text(
+              'Loading Quran pages... ${state.pagesLoaded}/${state.totalPagesToLoad}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      );
+    }
+
     // If we have no pages and are loading, show global loader
     if (state.status == QuranReaderStatus.loading && state.pages.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -176,14 +196,19 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       );
     }
 
-    // PageView
+    // PageView - all pages are preloaded
     return PageView.builder(
       controller: _pageController,
       itemCount: 604, // Standard Madani Mushaf pages
       onPageChanged: (index) {
         final int pageNum = index + 1;
-        // Pre-load next page logic could go here
-        context.read<QuranReaderBloc>().add(QuranReaderEvent.loadPage(pageNum));
+        // Update current page in state for UI display
+        final QuranPageEntity? page = state.pages[pageNum];
+        if (page != null) {
+          context.read<QuranReaderBloc>().add(
+            QuranReaderEvent.loadPage(pageNum),
+          );
+        }
       },
       itemBuilder: (context, index) {
         final int pageNum = index + 1;
@@ -192,13 +217,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         if (pageEntity != null) {
           return QuranPageWidget(page: pageEntity);
         } else {
-          // Trigger load if not loading and not loaded
-          // Using post-frame callback to avoid state change during build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<QuranReaderBloc>().add(
-              QuranReaderEvent.loadPage(pageNum),
-            );
-          });
+          // Fallback: page not yet loaded (shouldn't happen after preload)
           return const Center(child: CircularProgressIndicator());
         }
       },
