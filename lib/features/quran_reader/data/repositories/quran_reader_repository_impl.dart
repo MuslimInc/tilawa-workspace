@@ -6,10 +6,15 @@ import '../datasources/datasources.dart';
 
 @LazySingleton(as: QuranReaderRepository)
 class QuranReaderRepositoryImpl implements QuranReaderRepository {
-  QuranReaderRepositoryImpl(this._quranDataSource, this._settingsDataSource);
+  QuranReaderRepositoryImpl(
+    this._quranDataSource,
+    this._readerSettingsDataSource,
+    this._searchRemoteDataSource,
+  );
 
   final QuranDataSource _quranDataSource;
-  final ReaderSettingsDataSource _settingsDataSource;
+  final ReaderSettingsDataSource _readerSettingsDataSource;
+  final SearchRemoteDataSource _searchRemoteDataSource;
 
   @override
   Future<SurahContentEntity> getSurahContent(int surahNumber) async {
@@ -39,7 +44,43 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
 
   @override
   Future<List<AyahEntity>> searchAyahs(String query) async {
+    // 1. Try remote search
+    final List<RemoteSearchResult> remoteResults = await _searchRemoteDataSource
+        .search(query);
+
+    if (remoteResults.isNotEmpty) {
+      final List<AyahEntity> results = [];
+      for (final remote in remoteResults) {
+        final List<String> parts = remote.verseKey.split(':');
+        if (parts.length == 2) {
+          final int? surahNum = int.tryParse(parts[0]);
+          final int? ayahNum = int.tryParse(parts[1]);
+          if (surahNum != null && ayahNum != null) {
+            final AyahEntity? ayah = await _quranDataSource.getAyah(
+              surahNumber: surahNum,
+              ayahNumber: ayahNum,
+            );
+            if (ayah != null) {
+              // Attach the translation snippet if available, stripping HTML tags
+              final String? snippet = remote.translation?.replaceAll(
+                RegExp(r'<[^>]*>'),
+                '',
+              );
+              results.add(ayah.copyWith(translation: snippet));
+            }
+          }
+        }
+      }
+      if (results.isNotEmpty) return results;
+    }
+
+    // 2. Fallback to local search
     return _quranDataSource.searchAyahs(query);
+  }
+
+  @override
+  Future<List<SurahContentEntity>> searchSurahs(String query) async {
+    return _quranDataSource.searchSurahs(query);
   }
 
   @override
@@ -65,12 +106,12 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
 
   @override
   Future<void> saveSettings(ReaderSettingsEntity settings) async {
-    await _settingsDataSource.saveSettings(settings);
+    await _readerSettingsDataSource.saveSettings(settings);
   }
 
   @override
   Future<ReaderSettingsEntity> loadSettings() async {
-    return _settingsDataSource.loadSettings();
+    return _readerSettingsDataSource.loadSettings();
   }
 
   @override
@@ -79,7 +120,7 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     int? ayahNumber,
     int? page,
   }) async {
-    await _settingsDataSource.saveLastReadPosition(
+    await _readerSettingsDataSource.saveLastReadPosition(
       surahNumber: surahNumber,
       ayahNumber: ayahNumber,
       page: page,
@@ -89,7 +130,7 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   @override
   Future<({int? surahNumber, int? ayahNumber, int? page})>
   getLastReadPosition() async {
-    return _settingsDataSource.getLastReadPosition();
+    return _readerSettingsDataSource.getLastReadPosition();
   }
 
   @override

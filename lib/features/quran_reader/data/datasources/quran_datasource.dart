@@ -16,6 +16,7 @@ abstract class QuranDataSource {
   Future<QuranPageEntity> getPage(int pageNumber);
   Future<List<AyahEntity>> getJuz(int juzNumber);
   Future<List<AyahEntity>> searchAyahs(String query);
+  Future<List<SurahContentEntity>> searchSurahs(String query);
   Future<Map<String, List<QuranWord>>> getPageWords(int pageNumber);
 }
 
@@ -27,6 +28,7 @@ class QuranDataSourceImpl implements QuranDataSource {
 
   Map<String, dynamic>? _quranData;
   List<dynamic>? _surahList;
+  final Map<int, QuranPageEntity> _pageCache = {};
 
   /// Load Quran data from assets
   Future<void> _ensureDataLoaded() async {
@@ -50,12 +52,76 @@ class QuranDataSourceImpl implements QuranDataSource {
       } else {
         throw const FormatException('Unexpected Quran data format');
       }
+
+      // Pre-calculate all pages
+      _preloadPages();
     } catch (e) {
       // If file doesn't exist or parse error, initialize with empty structure
       _quranData = {
         'data': {'surahs': []},
       };
       _surahList = [];
+    }
+  }
+
+  void _preloadPages() {
+    if (_surahList == null || _surahList!.isEmpty) return;
+
+    // Temporary map to hold ayahs for each page
+    final Map<int, List<PageAyahInfo>> pageAyahsMap = {};
+    final Map<int, int> pageJuzMap = {};
+    final Map<int, int> pageHizbMap = {};
+
+    for (final surah in _surahList!) {
+      final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
+      final String surahName = surah['name'] as String? ?? '';
+      final int surahNum = surah['number'] as int? ?? 0;
+      final String surahNameEnglish = surah['englishName'] as String? ?? '';
+
+      for (final ayah in surahAyahs) {
+        final int page = ayah['page'] as int? ?? 0;
+        if (page == 0) continue;
+
+        if (!pageAyahsMap.containsKey(page)) {
+          pageAyahsMap[page] = [];
+        }
+
+        // Capture Juz/Hizb for the page if not already set
+        // (Using the first ayah of the page effectively)
+        if (!pageJuzMap.containsKey(page) && ayah['juz'] != null) {
+          pageJuzMap[page] = ayah['juz'] as int;
+        }
+        if (!pageHizbMap.containsKey(page) && ayah['hizbQuarter'] != null) {
+          final hizbQuarter = ayah['hizbQuarter'] as int;
+          pageHizbMap[page] = (hizbQuarter / 4).ceil();
+        }
+
+        final int ayahNum = ayah['numberInSurah'] as int? ?? 0;
+
+        pageAyahsMap[page]!.add(
+          PageAyahInfo(
+            surahNumber: surahNum,
+            surahName: surahName,
+            surahNameEnglish: surahNameEnglish,
+            ayahNumber: ayahNum,
+            text: ayah['text'] as String? ?? '',
+          ),
+        );
+      }
+    }
+
+    // Convert to QuranPageEntity
+    for (var i = 1; i <= 604; i++) {
+      final List<PageAyahInfo> ayahs = pageAyahsMap[i] ?? [];
+      final int juz = pageJuzMap[i] ?? ((i - 1) ~/ 20) + 1;
+      final int hizb = pageHizbMap[i] ?? ((i - 1) ~/ 10) + 1;
+
+      _pageCache[i] = QuranPageEntity(
+        pageNumber: i,
+        ayahs: ayahs,
+        juz: juz,
+        hizb: hizb,
+      );
     }
   }
 
@@ -133,66 +199,16 @@ class QuranDataSourceImpl implements QuranDataSource {
   Future<QuranPageEntity> getPage(int pageNumber) async {
     await _ensureDataLoaded();
 
-    final List<PageAyahInfo> pageAyahs = [];
-    int? pageJuz;
-    int? pageHizbQuarter;
-
-    if (_surahList == null || _surahList!.isEmpty) {
-      return QuranPageEntity(
-        pageNumber: pageNumber,
-        ayahs: [],
-        juz: ((pageNumber - 1) ~/ 20) + 1,
-        hizb: ((pageNumber - 1) ~/ 10) + 1,
-      );
+    if (_pageCache.containsKey(pageNumber)) {
+      return _pageCache[pageNumber]!;
     }
 
-    // Fetch word-by-word data for the page (Prototype)
-    final Map<String, List<QuranWord>> wordsMap = await getPageWords(
-      pageNumber,
-    );
-
-    for (final surah in _surahList!) {
-      final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
-      final String surahName = surah['name'] as String? ?? '';
-      final int surahNum = surah['number'] as int? ?? 0;
-
-      for (final ayah in surahAyahs) {
-        if (ayah['page'] == pageNumber) {
-          if (pageJuz == null && ayah['juz'] != null) {
-            pageJuz = ayah['juz'] as int;
-          }
-          if (pageHizbQuarter == null && ayah['hizbQuarter'] != null) {
-            pageHizbQuarter = ayah['hizbQuarter'] as int;
-          }
-
-          final int ayahNum = ayah['numberInSurah'] as int? ?? 0;
-          final verseKey = '$surahNum:$ayahNum';
-
-          pageAyahs.add(
-            PageAyahInfo(
-              surahNumber: surahNum,
-              surahName: surahName,
-              surahNameEnglish: surah['englishName'] as String? ?? '',
-              ayahNumber: ayahNum,
-              text: ayah['text'] as String? ?? '',
-              words: wordsMap[verseKey],
-            ),
-          );
-        }
-      }
-    }
-
-    // Determine juz and hizb from the first ayah on the page, or calculate if empty
-    final int juz = pageJuz ?? ((pageNumber - 1) ~/ 20) + 1;
-    final int hizb = pageHizbQuarter != null
-        ? (pageHizbQuarter / 4).ceil()
-        : ((pageNumber - 1) ~/ 10) + 1;
-
+    // Fallback if cache missed (should not happen if preload works)
     return QuranPageEntity(
       pageNumber: pageNumber,
-      ayahs: pageAyahs,
-      juz: juz,
-      hizb: hizb,
+      ayahs: [],
+      juz: ((pageNumber - 1) ~/ 20) + 1,
+      hizb: ((pageNumber - 1) ~/ 10) + 1,
     );
   }
 
@@ -232,7 +248,7 @@ class QuranDataSourceImpl implements QuranDataSource {
     await _ensureDataLoaded();
 
     final List<AyahEntity> results = [];
-    final String normalizedQuery = query.toLowerCase();
+    final String normalizedQuery = _normalizeArabic(query);
 
     if (_surahList == null || _surahList!.isEmpty) {
       return results;
@@ -241,14 +257,16 @@ class QuranDataSourceImpl implements QuranDataSource {
     for (final surah in _surahList!) {
       final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
       for (final ayah in surahAyahs) {
-        final String text = ayah['text']?.toString().toLowerCase() ?? '';
-        if (text.contains(normalizedQuery)) {
+        final String text = ayah['text']?.toString() ?? '';
+        final String normalizedText = _normalizeArabic(text);
+
+        if (normalizedText.contains(normalizedQuery)) {
           results.add(
             AyahEntity(
               number: ayah['number'] ?? 0,
               numberInSurah: ayah['numberInSurah'] ?? 0,
               surahNumber: surah['number'] ?? 0,
-              text: ayah['text'] ?? '',
+              text: text, // Return original text for display
               juz: ayah['juz'],
               page: ayah['page'],
             ),
@@ -258,6 +276,77 @@ class QuranDataSourceImpl implements QuranDataSource {
     }
 
     return results;
+  }
+
+  @override
+  Future<List<SurahContentEntity>> searchSurahs(String query) async {
+    await _ensureDataLoaded();
+
+    final String normalizedQuery = _normalizeArabic(query.toLowerCase());
+    final List<SurahContentEntity> results = [];
+
+    // Filter _surahInfoList directly
+    for (var i = 0; i < _surahInfoList.length; i++) {
+      final _SurahInfo info = _surahInfoList[i];
+      final int surahNumber = i + 1;
+
+      final String nameAr = info.nameAr;
+      final String nameEn = info.nameEn;
+      final String nameEnLower = nameEn.toLowerCase();
+
+      final String normalizedNameAr = _normalizeArabic(nameAr);
+      final String normalizedNameEn = _normalizeArabic(nameEnLower);
+
+      if (normalizedNameAr.contains(normalizedQuery) ||
+          normalizedNameEn.contains(normalizedQuery) ||
+          surahNumber.toString() == normalizedQuery) {
+        // We construct a lightweight entity (no ayahs) for search results
+        // Or we can fetch the full content if needed, but for search list lightweight is better.
+        // However, SurahContentEntity requires list of Ayahs. We can pass empty for now.
+        results.add(
+          SurahContentEntity(
+            number: surahNumber,
+            name: nameAr,
+            nameEnglish: nameEn,
+            nameTranslation: info.meaning,
+            revelationType: info.type,
+            numberOfAyahs: info.ayahCount,
+            ayahs: const [],
+            startPage: _surahList != null && _surahList!.length >= surahNumber
+                ? (_surahList![i]['ayahs'] as List).first['page'] as int
+                : null,
+          ),
+        );
+      }
+    }
+
+    return results;
+  }
+
+  /// Normalizes Arabic text by removing diacritics and unifying Alef forms
+  String _normalizeArabic(String text) {
+    if (text.isEmpty) return text;
+
+    var normalized = text;
+
+    // Remove diacritics (Tashkeel)
+    // Range includes Fatha, Damma, Kasra, Sukun, Shadda, Tanwin, etc.
+    // Also removes Quranic specific marks like superscript Alef
+    normalized = normalized.replaceAll(
+      RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]'),
+      '',
+    );
+
+    // Normalize Alef forms (أ, إ, آ -> ا)
+    normalized = normalized.replaceAll(RegExp(r'[أإآ]'), 'ا');
+
+    // Normalize Ya/Alef Maqsura (ى -> ي) - Optional but good for looser search
+    normalized = normalized.replaceAll('ى', 'ي');
+
+    // Normalize Ta Marbuta (ة -> ه) - Optional but good for looser search
+    normalized = normalized.replaceAll('ة', 'ه');
+
+    return normalized;
   }
 
   /// Generate mock surah content for demonstration

@@ -19,6 +19,7 @@ import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import '../features/quran_reader/presentation/bloc/word_by_word_audio_bloc.dart';
 import '../features/quran_reader/presentation/screens/quran_reader_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
@@ -281,10 +282,15 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<QuranReaderBloc>()
-            ..add(QuranReaderEvent.loadSurah(surahNumber)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              getIt<QuranReaderBloc>()
+                ..add(QuranReaderEvent.loadSurah(surahNumber)),
+        ),
+        BlocProvider(create: (context) => getIt<WordByWordAudioBloc>()),
+      ],
       child: QuranReaderScreen(
         surahNumber: surahNumber,
         initialAyah: ayahNumber,

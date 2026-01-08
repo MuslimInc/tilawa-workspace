@@ -62,6 +62,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function(_SaveLastRead value)? saveLastRead,
     TResult Function(_SearchAyahs value)? searchAyahs,
     TResult Function(_ClearSearch value)? clearSearch,
+    TResult Function(_JumpToPage value)? jumpToPage,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -86,6 +87,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that);
       case _ClearSearch() when clearSearch != null:
         return clearSearch(_that);
+      case _JumpToPage() when jumpToPage != null:
+        return jumpToPage(_that);
       case _:
         return orElse();
     }
@@ -116,6 +119,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function(_SaveLastRead value) saveLastRead,
     required TResult Function(_SearchAyahs value) searchAyahs,
     required TResult Function(_ClearSearch value) clearSearch,
+    required TResult Function(_JumpToPage value) jumpToPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -139,6 +143,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that);
       case _ClearSearch():
         return clearSearch(_that);
+      case _JumpToPage():
+        return jumpToPage(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -168,6 +174,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function(_SaveLastRead value)? saveLastRead,
     TResult? Function(_SearchAyahs value)? searchAyahs,
     TResult? Function(_ClearSearch value)? clearSearch,
+    TResult? Function(_JumpToPage value)? jumpToPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -191,6 +198,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that);
       case _ClearSearch() when clearSearch != null:
         return clearSearch(_that);
+      case _JumpToPage() when jumpToPage != null:
+        return jumpToPage(_that);
       case _:
         return null;
     }
@@ -220,6 +229,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function(int surahNumber, int? ayahNumber)? saveLastRead,
     TResult Function(String query)? searchAyahs,
     TResult Function()? clearSearch,
+    TResult Function(int pageNumber)? jumpToPage,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -244,6 +254,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that.query);
       case _ClearSearch() when clearSearch != null:
         return clearSearch();
+      case _JumpToPage() when jumpToPage != null:
+        return jumpToPage(_that.pageNumber);
       case _:
         return orElse();
     }
@@ -274,6 +286,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function(int surahNumber, int? ayahNumber) saveLastRead,
     required TResult Function(String query) searchAyahs,
     required TResult Function() clearSearch,
+    required TResult Function(int pageNumber) jumpToPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -297,6 +310,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that.query);
       case _ClearSearch():
         return clearSearch();
+      case _JumpToPage():
+        return jumpToPage(_that.pageNumber);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -326,6 +341,7 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function(int surahNumber, int? ayahNumber)? saveLastRead,
     TResult? Function(String query)? searchAyahs,
     TResult? Function()? clearSearch,
+    TResult? Function(int pageNumber)? jumpToPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -349,6 +365,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return searchAyahs(_that.query);
       case _ClearSearch() when clearSearch != null:
         return clearSearch();
+      case _JumpToPage() when jumpToPage != null:
+        return jumpToPage(_that.pageNumber);
       case _:
         return null;
     }
@@ -891,6 +909,71 @@ class _ClearSearch implements QuranReaderEvent {
 }
 
 /// @nodoc
+
+class _JumpToPage implements QuranReaderEvent {
+  const _JumpToPage(this.pageNumber);
+
+  final int pageNumber;
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$JumpToPageCopyWith<_JumpToPage> get copyWith =>
+      __$JumpToPageCopyWithImpl<_JumpToPage>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _JumpToPage &&
+            (identical(other.pageNumber, pageNumber) ||
+                other.pageNumber == pageNumber));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, pageNumber);
+
+  @override
+  String toString() {
+    return 'QuranReaderEvent.jumpToPage(pageNumber: $pageNumber)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$JumpToPageCopyWith<$Res>
+    implements $QuranReaderEventCopyWith<$Res> {
+  factory _$JumpToPageCopyWith(
+    _JumpToPage value,
+    $Res Function(_JumpToPage) _then,
+  ) = __$JumpToPageCopyWithImpl;
+  @useResult
+  $Res call({int pageNumber});
+}
+
+/// @nodoc
+class __$JumpToPageCopyWithImpl<$Res> implements _$JumpToPageCopyWith<$Res> {
+  __$JumpToPageCopyWithImpl(this._self, this._then);
+
+  final _JumpToPage _self;
+  final $Res Function(_JumpToPage) _then;
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({Object? pageNumber = null}) {
+    return _then(
+      _JumpToPage(
+        null == pageNumber
+            ? _self.pageNumber
+            : pageNumber // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
 mixin _$QuranReaderState {
   QuranReaderStatus get status;
   SurahContentEntity? get currentSurah;
@@ -898,9 +981,11 @@ mixin _$QuranReaderState {
   Map<int, QuranPageEntity> get pages;
   ReaderSettingsEntity get settings;
   List<AyahEntity> get searchResults;
+  List<SurahContentEntity> get surahSearchResults;
   String get searchQuery;
   bool get isSearching;
   int? get scrollToAyah;
+  int? get jumpToPage;
   String get errorMessage;
 
   /// Create a copy of QuranReaderState
@@ -930,12 +1015,18 @@ mixin _$QuranReaderState {
               other.searchResults,
               searchResults,
             ) &&
+            const DeepCollectionEquality().equals(
+              other.surahSearchResults,
+              surahSearchResults,
+            ) &&
             (identical(other.searchQuery, searchQuery) ||
                 other.searchQuery == searchQuery) &&
             (identical(other.isSearching, isSearching) ||
                 other.isSearching == isSearching) &&
             (identical(other.scrollToAyah, scrollToAyah) ||
                 other.scrollToAyah == scrollToAyah) &&
+            (identical(other.jumpToPage, jumpToPage) ||
+                other.jumpToPage == jumpToPage) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -949,15 +1040,17 @@ mixin _$QuranReaderState {
     const DeepCollectionEquality().hash(pages),
     settings,
     const DeepCollectionEquality().hash(searchResults),
+    const DeepCollectionEquality().hash(surahSearchResults),
     searchQuery,
     isSearching,
     scrollToAyah,
+    jumpToPage,
     errorMessage,
   );
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, errorMessage: $errorMessage)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage)';
   }
 }
 
@@ -975,9 +1068,11 @@ abstract mixin class $QuranReaderStateCopyWith<$Res> {
     Map<int, QuranPageEntity> pages,
     ReaderSettingsEntity settings,
     List<AyahEntity> searchResults,
+    List<SurahContentEntity> surahSearchResults,
     String searchQuery,
     bool isSearching,
     int? scrollToAyah,
+    int? jumpToPage,
     String errorMessage,
   });
 
@@ -1005,9 +1100,11 @@ class _$QuranReaderStateCopyWithImpl<$Res>
     Object? pages = null,
     Object? settings = null,
     Object? searchResults = null,
+    Object? surahSearchResults = null,
     Object? searchQuery = null,
     Object? isSearching = null,
     Object? scrollToAyah = freezed,
+    Object? jumpToPage = freezed,
     Object? errorMessage = null,
   }) {
     return _then(
@@ -1036,6 +1133,10 @@ class _$QuranReaderStateCopyWithImpl<$Res>
             ? _self.searchResults
             : searchResults // ignore: cast_nullable_to_non_nullable
                   as List<AyahEntity>,
+        surahSearchResults: null == surahSearchResults
+            ? _self.surahSearchResults
+            : surahSearchResults // ignore: cast_nullable_to_non_nullable
+                  as List<SurahContentEntity>,
         searchQuery: null == searchQuery
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable
@@ -1047,6 +1148,10 @@ class _$QuranReaderStateCopyWithImpl<$Res>
         scrollToAyah: freezed == scrollToAyah
             ? _self.scrollToAyah
             : scrollToAyah // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        jumpToPage: freezed == jumpToPage
+            ? _self.jumpToPage
+            : jumpToPage // ignore: cast_nullable_to_non_nullable
                   as int?,
         errorMessage: null == errorMessage
             ? _self.errorMessage
@@ -1195,9 +1300,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
       Map<int, QuranPageEntity> pages,
       ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
+      List<SurahContentEntity> surahSearchResults,
       String searchQuery,
       bool isSearching,
       int? scrollToAyah,
+      int? jumpToPage,
       String errorMessage,
     )?
     $default, {
@@ -1213,9 +1320,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.pages,
           _that.settings,
           _that.searchResults,
+          _that.surahSearchResults,
           _that.searchQuery,
           _that.isSearching,
           _that.scrollToAyah,
+          _that.jumpToPage,
           _that.errorMessage,
         );
       case _:
@@ -1245,9 +1354,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
       Map<int, QuranPageEntity> pages,
       ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
+      List<SurahContentEntity> surahSearchResults,
       String searchQuery,
       bool isSearching,
       int? scrollToAyah,
+      int? jumpToPage,
       String errorMessage,
     )
     $default,
@@ -1262,9 +1373,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.pages,
           _that.settings,
           _that.searchResults,
+          _that.surahSearchResults,
           _that.searchQuery,
           _that.isSearching,
           _that.scrollToAyah,
+          _that.jumpToPage,
           _that.errorMessage,
         );
       case _:
@@ -1293,9 +1406,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
       Map<int, QuranPageEntity> pages,
       ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
+      List<SurahContentEntity> surahSearchResults,
       String searchQuery,
       bool isSearching,
       int? scrollToAyah,
+      int? jumpToPage,
       String errorMessage,
     )?
     $default,
@@ -1310,9 +1425,11 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.pages,
           _that.settings,
           _that.searchResults,
+          _that.surahSearchResults,
           _that.searchQuery,
           _that.isSearching,
           _that.scrollToAyah,
+          _that.jumpToPage,
           _that.errorMessage,
         );
       case _:
@@ -1331,12 +1448,15 @@ class _QuranReaderState implements QuranReaderState {
     final Map<int, QuranPageEntity> pages = const {},
     this.settings = const ReaderSettingsEntity(),
     final List<AyahEntity> searchResults = const [],
+    final List<SurahContentEntity> surahSearchResults = const [],
     this.searchQuery = '',
     this.isSearching = false,
     this.scrollToAyah,
+    this.jumpToPage,
     this.errorMessage = '',
   }) : _pages = pages,
-       _searchResults = searchResults;
+       _searchResults = searchResults,
+       _surahSearchResults = surahSearchResults;
 
   @override
   @JsonKey()
@@ -1366,6 +1486,16 @@ class _QuranReaderState implements QuranReaderState {
     return EqualUnmodifiableListView(_searchResults);
   }
 
+  final List<SurahContentEntity> _surahSearchResults;
+  @override
+  @JsonKey()
+  List<SurahContentEntity> get surahSearchResults {
+    if (_surahSearchResults is EqualUnmodifiableListView)
+      return _surahSearchResults;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_surahSearchResults);
+  }
+
   @override
   @JsonKey()
   final String searchQuery;
@@ -1374,6 +1504,8 @@ class _QuranReaderState implements QuranReaderState {
   final bool isSearching;
   @override
   final int? scrollToAyah;
+  @override
+  final int? jumpToPage;
   @override
   @JsonKey()
   final String errorMessage;
@@ -1403,12 +1535,18 @@ class _QuranReaderState implements QuranReaderState {
               other._searchResults,
               _searchResults,
             ) &&
+            const DeepCollectionEquality().equals(
+              other._surahSearchResults,
+              _surahSearchResults,
+            ) &&
             (identical(other.searchQuery, searchQuery) ||
                 other.searchQuery == searchQuery) &&
             (identical(other.isSearching, isSearching) ||
                 other.isSearching == isSearching) &&
             (identical(other.scrollToAyah, scrollToAyah) ||
                 other.scrollToAyah == scrollToAyah) &&
+            (identical(other.jumpToPage, jumpToPage) ||
+                other.jumpToPage == jumpToPage) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -1422,15 +1560,17 @@ class _QuranReaderState implements QuranReaderState {
     const DeepCollectionEquality().hash(_pages),
     settings,
     const DeepCollectionEquality().hash(_searchResults),
+    const DeepCollectionEquality().hash(_surahSearchResults),
     searchQuery,
     isSearching,
     scrollToAyah,
+    jumpToPage,
     errorMessage,
   );
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, errorMessage: $errorMessage)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage)';
   }
 }
 
@@ -1450,9 +1590,11 @@ abstract mixin class _$QuranReaderStateCopyWith<$Res>
     Map<int, QuranPageEntity> pages,
     ReaderSettingsEntity settings,
     List<AyahEntity> searchResults,
+    List<SurahContentEntity> surahSearchResults,
     String searchQuery,
     bool isSearching,
     int? scrollToAyah,
+    int? jumpToPage,
     String errorMessage,
   });
 
@@ -1483,9 +1625,11 @@ class __$QuranReaderStateCopyWithImpl<$Res>
     Object? pages = null,
     Object? settings = null,
     Object? searchResults = null,
+    Object? surahSearchResults = null,
     Object? searchQuery = null,
     Object? isSearching = null,
     Object? scrollToAyah = freezed,
+    Object? jumpToPage = freezed,
     Object? errorMessage = null,
   }) {
     return _then(
@@ -1514,6 +1658,10 @@ class __$QuranReaderStateCopyWithImpl<$Res>
             ? _self._searchResults
             : searchResults // ignore: cast_nullable_to_non_nullable
                   as List<AyahEntity>,
+        surahSearchResults: null == surahSearchResults
+            ? _self._surahSearchResults
+            : surahSearchResults // ignore: cast_nullable_to_non_nullable
+                  as List<SurahContentEntity>,
         searchQuery: null == searchQuery
             ? _self.searchQuery
             : searchQuery // ignore: cast_nullable_to_non_nullable
@@ -1525,6 +1673,10 @@ class __$QuranReaderStateCopyWithImpl<$Res>
         scrollToAyah: freezed == scrollToAyah
             ? _self.scrollToAyah
             : scrollToAyah // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        jumpToPage: freezed == jumpToPage
+            ? _self.jumpToPage
+            : jumpToPage // ignore: cast_nullable_to_non_nullable
                   as int?,
         errorMessage: null == errorMessage
             ? _self.errorMessage

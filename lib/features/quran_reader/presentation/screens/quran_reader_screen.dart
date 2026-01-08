@@ -57,6 +57,19 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     return Scaffold(
       body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
         listener: (context, state) {
+          // Handle programmatic jumps (e.g., from search)
+          if (state.jumpToPage != null) {
+            final int page = state.jumpToPage!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_pageController.hasClients) {
+                _pageController.jumpToPage(page - 1);
+                context.read<QuranReaderBloc>().add(
+                  QuranReaderEvent.loadPage(page),
+                );
+              }
+            });
+          }
+
           // Handle initial navigation to surah's start page
           if (state.currentSurah != null && _firstLoad) {
             final int startPage = state.currentSurah!.startPage ?? 1;
@@ -88,7 +101,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                 // Top bar
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
-                  top: _showControls ? 0 : -100,
+                  top: _showControls ? 0 : -200,
                   left: 0,
                   right: 0,
                   child: QuranReaderAppBar(
@@ -113,23 +126,18 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                 // Bottom controls
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
-                  bottom: _showControls ? 0 : -100,
+                  bottom: _showControls ? 0 : -200,
                   left: 0,
                   right: 0,
                   child: QuranReaderBottomBar(
-                    surahNumber: widget.surahNumber,
-                    settings: state.settings,
-                    onFontSizeChanged: (size) {
+                    currentPage: state.currentPage?.pageNumber ?? 1,
+                    totalPages: 604,
+                    onPageChanged: (page) {
+                      _pageController.jumpToPage(page - 1);
                       context.read<QuranReaderBloc>().add(
-                        QuranReaderEvent.updateFontSize(size),
+                        QuranReaderEvent.loadPage(page),
                       );
                     },
-                    onPreviousSurah: widget.surahNumber > 1
-                        ? () => _navigateToSurah(widget.surahNumber - 1)
-                        : null,
-                    onNextSurah: widget.surahNumber < 114
-                        ? () => _navigateToSurah(widget.surahNumber + 1)
-                        : null,
                   ),
                 ),
               ],
@@ -194,12 +202,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
           return const Center(child: CircularProgressIndicator());
         }
       },
-    );
-  }
-
-  void _navigateToSurah(int surahNumber) {
-    context.read<QuranReaderBloc>().add(
-      QuranReaderEvent.loadSurah(surahNumber),
     );
   }
 

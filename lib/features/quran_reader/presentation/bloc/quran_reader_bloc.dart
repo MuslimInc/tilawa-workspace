@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/entities.dart';
+import '../../domain/usecases/search_surahs_use_case.dart';
 import '../../domain/usecases/usecases.dart';
 
 part 'quran_reader_bloc.freezed.dart';
@@ -27,6 +28,7 @@ class QuranReaderEvent with _$QuranReaderEvent {
   }) = _SaveLastRead;
   const factory QuranReaderEvent.searchAyahs(String query) = _SearchAyahs;
   const factory QuranReaderEvent.clearSearch() = _ClearSearch;
+  const factory QuranReaderEvent.jumpToPage(int pageNumber) = _JumpToPage;
 }
 
 // States
@@ -39,9 +41,11 @@ abstract class QuranReaderState with _$QuranReaderState {
     @Default({}) Map<int, QuranPageEntity> pages,
     @Default(ReaderSettingsEntity()) ReaderSettingsEntity settings,
     @Default([]) List<AyahEntity> searchResults,
+    @Default([]) List<SurahContentEntity> surahSearchResults,
     @Default('') String searchQuery,
     @Default(false) bool isSearching,
     int? scrollToAyah,
+    int? jumpToPage,
     @Default('') String errorMessage,
   }) = _QuranReaderState;
 }
@@ -57,6 +61,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     this._saveReaderSettingsUseCase,
     this._saveLastReadPositionUseCase,
     this._searchAyahsUseCase,
+    this._searchSurahsUseCase,
   ) : super(const QuranReaderState()) {
     on<_LoadSurah>(_onLoadSurah);
     on<_LoadPage>(_onLoadPage);
@@ -68,6 +73,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     on<_SaveLastRead>(_onSaveLastRead);
     on<_SearchAyahs>(_onSearchAyahs);
     on<_ClearSearch>(_onClearSearch);
+    on<_JumpToPage>(_onJumpToPage);
   }
 
   final GetSurahContentUseCase _getSurahContentUseCase;
@@ -76,6 +82,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   final SaveReaderSettingsUseCase _saveReaderSettingsUseCase;
   final SaveLastReadPositionUseCase _saveLastReadPositionUseCase;
   final SearchAyahsUseCase _searchAyahsUseCase;
+  final SearchSurahsUseCase _searchSurahsUseCase;
 
   Future<void> _onLoadSurah(
     _LoadSurah event,
@@ -93,9 +100,16 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
           errorMessage: failure.toString(),
         ),
       ),
-      (surah) => emit(
-        state.copyWith(status: QuranReaderStatus.loaded, currentSurah: surah),
-      ),
+      (surah) {
+        emit(
+          state.copyWith(status: QuranReaderStatus.loaded, currentSurah: surah),
+        );
+        // If we have a start page, trigger a jump
+        final int? startPage = surah.startPage;
+        if (startPage != null) {
+          add(QuranReaderEvent.jumpToPage(startPage));
+        }
+      },
     );
   }
 
@@ -207,20 +221,58 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
 
     emit(state.copyWith(isSearching: true, searchQuery: event.query));
 
-    final Either<Failure, List<AyahEntity>> result = await _searchAyahsUseCase
-        .call(query: event.query);
+    final Future<Either<Failure, List<AyahEntity>>> searchAyahsFuture =
+        _searchAyahsUseCase.call(query: event.query);
+    final Future<Either<Failure, List<SurahContentEntity>>> searchSurahsFuture =
+        _searchSurahsUseCase.call(query: event.query);
 
-    result.fold(
-      (failure) => emit(
-        state.copyWith(isSearching: false, errorMessage: failure.toString()),
+    final List<Either<Failure, List<Object>>> results = await Future.wait([
+      searchAyahsFuture,
+      searchSurahsFuture,
+    ]);
+
+    final ayahsResult = results[0] as Either<Failure, List<AyahEntity>>;
+    final surahsResult =
+        results[1] as Either<Failure, List<SurahContentEntity>>;
+
+    List<AyahEntity> ayahs = [];
+    List<SurahContentEntity> surahs = [];
+    String? error;
+
+    ayahsResult.fold(
+      (failure) => error = failure.toString(),
+      (data) => ayahs = data,
+    );
+
+    surahsResult.fold(
+      (failure) => error = failure.toString(),
+      (data) => surahs = data,
+    );
+
+    emit(
+      state.copyWith(
+        isSearching: false,
+        searchResults: ayahs,
+        surahSearchResults: surahs,
+        errorMessage: error ?? '',
       ),
-      (ayahs) => emit(state.copyWith(isSearching: false, searchResults: ayahs)),
     );
   }
 
   void _onClearSearch(_ClearSearch event, Emitter<QuranReaderState> emit) {
     emit(
-      state.copyWith(searchQuery: '', searchResults: [], isSearching: false),
+      state.copyWith(
+        searchQuery: '',
+        searchResults: [],
+        surahSearchResults: [],
+        isSearching: false,
+      ),
     );
+  }
+
+  void _onJumpToPage(_JumpToPage event, Emitter<QuranReaderState> emit) {
+    emit(state.copyWith(jumpToPage: event.pageNumber));
+    // Immediately clear so the UI only sees the jump command once
+    emit(state.copyWith(jumpToPage: null));
   }
 }

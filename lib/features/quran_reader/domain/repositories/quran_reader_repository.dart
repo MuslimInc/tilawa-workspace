@@ -19,6 +19,7 @@ abstract class QuranReaderRepository {
 
   /// Search ayahs by text
   Future<List<AyahEntity>> searchAyahs(String query);
+  Future<List<SurahContentEntity>> searchSurahs(String query);
 
   /// Get translation for an ayah
   Future<String?> getTranslation({

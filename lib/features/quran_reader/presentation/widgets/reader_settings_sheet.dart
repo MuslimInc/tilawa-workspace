@@ -82,8 +82,8 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                     _buildSectionTitle(context, context.l10n.fontSize),
                     Slider(
                       value: _settings.fontSize,
-                      min: 16,
-                      max: 40,
+                      min: 20,
+                      max: 60,
                       divisions: 12,
                       label: _settings.fontSize.round().toString(),
                       onChanged: (value) {
