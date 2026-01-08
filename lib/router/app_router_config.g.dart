@@ -22,6 +22,10 @@ List<RouteBase> get $appRoutes => [
   $qiblaRoute,
   $routeListRoute,
   $splashRoute,
+  $bookmarksRoute,
+  $historyRoute,
+  $prayerTimesRoute,
+  $quranReaderRoute,
 ];
 
 RouteBase get $homeRoute =>
@@ -407,4 +411,125 @@ mixin $SplashRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $bookmarksRoute =>
+    GoRouteData.$route(path: '/bookmarks', factory: $BookmarksRoute._fromState);
+
+mixin $BookmarksRoute on GoRouteData {
+  static BookmarksRoute _fromState(GoRouterState state) =>
+      const BookmarksRoute();
+
+  @override
+  String get location => GoRouteData.$location('/bookmarks');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $historyRoute =>
+    GoRouteData.$route(path: '/history', factory: $HistoryRoute._fromState);
+
+mixin $HistoryRoute on GoRouteData {
+  static HistoryRoute _fromState(GoRouterState state) => const HistoryRoute();
+
+  @override
+  String get location => GoRouteData.$location('/history');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $prayerTimesRoute => GoRouteData.$route(
+  path: '/prayer-times',
+  factory: $PrayerTimesRoute._fromState,
+);
+
+mixin $PrayerTimesRoute on GoRouteData {
+  static PrayerTimesRoute _fromState(GoRouterState state) =>
+      const PrayerTimesRoute();
+
+  @override
+  String get location => GoRouteData.$location('/prayer-times');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $quranReaderRoute => GoRouteData.$route(
+  path: '/quran-reader/:surahNumber',
+  factory: $QuranReaderRoute._fromState,
+);
+
+mixin $QuranReaderRoute on GoRouteData {
+  static QuranReaderRoute _fromState(GoRouterState state) => QuranReaderRoute(
+    surahNumber: int.parse(state.pathParameters['surahNumber']!),
+    ayahNumber: _$convertMapValue(
+      'ayah-number',
+      state.uri.queryParameters,
+      int.tryParse,
+    ),
+  );
+
+  QuranReaderRoute get _self => this as QuranReaderRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/quran-reader/${Uri.encodeComponent(_self.surahNumber.toString())}',
+    queryParams: {
+      if (_self.ayahNumber != null) 'ayah-number': _self.ayahNumber!.toString(),
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
 }

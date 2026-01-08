@@ -1,9 +1,13 @@
 export 'audio_player/audio_player.dart';
 export 'auth/auth.dart';
+export 'bookmarks/bookmarks.dart';
 export 'downloads/downloads.dart';
+export 'history/history.dart';
 export 'localization/localization.dart';
 export 'playlists/playlists.dart';
+export 'prayer_times/prayer_times.dart';
 export 'premium/premium.dart';
+export 'quran_reader/quran_reader.dart';
 export 'reciters/reciters.dart';
 export 'settings/settings.dart';
 export 'surah/surah.dart';

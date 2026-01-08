@@ -1,9 +1,11 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
+import '../../../../router/app_router_config.dart';
 import '../bloc/qibla_bloc.dart';
 import '../widgets/qibla_compass_widget.dart';
 
@@ -20,7 +22,17 @@ class QiblaScreen extends StatelessWidget {
           getIt<QiblaBloc>()..add(const CheckLocationService()),
       child: Scaffold(
         backgroundColor: colorScheme.surface,
-        appBar: AppBar(elevation: 0, title: Text(context.l10n.qiblaDirection)),
+        appBar: AppBar(
+          elevation: 0,
+          title: Text(context.l10n.qiblaDirection),
+          actions: [
+            IconButton(
+              icon: const Icon(FluentIcons.clock_24_regular),
+              tooltip: context.l10n.prayerTimes,
+              onPressed: () => const PrayerTimesRoute().push(context),
+            ),
+          ],
+        ),
         body: SafeArea(
           child: CustomScrollView(
             slivers: [

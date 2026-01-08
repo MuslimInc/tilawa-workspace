@@ -7,6 +7,14 @@ abstract class Failure extends Equatable {
 
   @override
   List<Object?> get props => [message];
+
+  // Factory methods for easier failure creation
+  static Failure unexpectedError(String message) => UnexpectedFailure(message);
+  static Failure validationError(String message) => ValidationFailure(message);
+  static Failure permissionDenied(String message) => PermissionFailure(message);
+  static Failure cacheError(String message) => CacheFailure(message);
+  static Failure serverError(String message) => ServerFailure(message);
+  static Failure networkError(String message) => NetworkFailure(message);
 }
 
 class ServerFailure extends Failure {
@@ -62,4 +70,17 @@ class AudioException implements Exception {
 
   @override
   String toString() => message ?? 'Audio exception';
+}
+
+// Additional failure types for new features
+class ValidationFailure extends Failure {
+  const ValidationFailure([super.message]);
+}
+
+class PermissionFailure extends Failure {
+  const PermissionFailure([super.message]);
+}
+
+class UnexpectedFailure extends Failure {
+  const UnexpectedFailure([super.message]);
 }

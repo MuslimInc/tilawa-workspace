@@ -768,4 +768,294 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get offlinePlaybackError =>
       'هذا المحتوى غير متاح بدون اتصال. يرجى تنزيله أولاً.';
+
+  @override
+  String get bookmarks => 'العلامات المرجعية';
+
+  @override
+  String get addBookmark => 'إضافة علامة مرجعية';
+
+  @override
+  String get deleteBookmark => 'حذف العلامة المرجعية';
+
+  @override
+  String get editBookmark => 'تعديل العلامة المرجعية';
+
+  @override
+  String get searchBookmarks => 'البحث في العلامات المرجعية...';
+
+  @override
+  String get noBookmarksYet => 'لا توجد علامات مرجعية بعد';
+
+  @override
+  String get noBookmarksDescription =>
+      'احفظ لحظاتك المفضلة أثناء الاستماع إلى القرآن';
+
+  @override
+  String get bookmarkAdded => 'تمت إضافة العلامة المرجعية';
+
+  @override
+  String get bookmarkDeleted => 'تم حذف العلامة المرجعية';
+
+  @override
+  String get bookmarkLabel => 'التسمية (اختياري)';
+
+  @override
+  String get deleteBookmarkConfirmation =>
+      'هل أنت متأكد من حذف هذه العلامة المرجعية؟';
+
+  @override
+  String get listeningHistory => 'سجل الاستماع';
+
+  @override
+  String get noHistoryYet => 'لا يوجد سجل بعد';
+
+  @override
+  String get noHistoryDescription => 'سيظهر سجل الاستماع الخاص بك هنا';
+
+  @override
+  String get clearHistory => 'مسح السجل';
+
+  @override
+  String get clearHistoryConfirmation => 'هل أنت متأكد من مسح كل سجل الاستماع؟';
+
+  @override
+  String get historyDeleted => 'تم حذف السجل';
+
+  @override
+  String get totalSurahs => 'إجمالي السور';
+
+  @override
+  String get totalListeningTime => 'إجمالي الوقت';
+
+  @override
+  String get searchHistory => 'البحث في السجل...';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String playedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم التشغيل $count مرات',
+      one: 'تم التشغيل مرة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get prayerTimes => 'مواقيت الصلاة';
+
+  @override
+  String get prayerSettings => 'إعدادات الصلاة';
+
+  @override
+  String get fajr => 'الفجر';
+
+  @override
+  String get sunrise => 'الشروق';
+
+  @override
+  String get dhuhr => 'الظهر';
+
+  @override
+  String get asr => 'العصر';
+
+  @override
+  String get maghrib => 'المغرب';
+
+  @override
+  String get isha => 'العشاء';
+
+  @override
+  String get nextPrayer => 'الصلاة القادمة';
+
+  @override
+  String get calculationMethod => 'طريقة الحساب';
+
+  @override
+  String get asrCalculation => 'حساب العصر';
+
+  @override
+  String get displayOptions => 'خيارات العرض';
+
+  @override
+  String get use24HourFormat => 'استخدام تنسيق 24 ساعة';
+
+  @override
+  String get showSunrise => 'إظهار الشروق';
+
+  @override
+  String get locationRequired => 'الموقع مطلوب';
+
+  @override
+  String get locationRequiredDescription =>
+      'تتطلب مواقيت الصلاة موقعك للحساب بدقة';
+
+  @override
+  String get enableLocation => 'تفعيل الموقع';
+
+  @override
+  String get updateLocation => 'تحديث الموقع';
+
+  @override
+  String get currentLocation => 'الموقع الحالي';
+
+  @override
+  String get hours => 'ساعات';
+
+  @override
+  String get minutes => 'دقائق';
+
+  @override
+  String get seconds => 'ثواني';
+
+  @override
+  String get at => 'في';
+
+  @override
+  String get monthly => 'شهري';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get enableNotifications => 'تفعيل الإشعارات';
+
+  @override
+  String minutesBefore(int count) {
+    return 'قبل $count دقائق';
+  }
+
+  @override
+  String get readerSettings => 'إعدادات القراءة';
+
+  @override
+  String get fontSize => 'حجم الخط';
+
+  @override
+  String get lineHeight => 'ارتفاع السطر';
+
+  @override
+  String get fontType => 'نوع الخط';
+
+  @override
+  String get showTranslation => 'إظهار الترجمة';
+
+  @override
+  String get showAyahNumbers => 'إظهار أرقام الآيات';
+
+  @override
+  String get showTransliteration => 'إظهار النطق';
+
+  @override
+  String get ayah => 'آية';
+
+  @override
+  String get ayahs => 'آيات';
+
+  @override
+  String get surahNotFound => 'السورة غير موجودة';
+
+  @override
+  String get playAyah => 'تشغيل الآية';
+
+  @override
+  String get copyAyah => 'نسخ الآية';
+
+  @override
+  String get shareAyah => 'مشاركة الآية';
+
+  @override
+  String get searchAyahs => 'البحث في الآيات';
+
+  @override
+  String get searchAyahsHint => 'أدخل نص عربي للبحث...';
+
+  @override
+  String get enterSearchQuery => 'أدخل كلمة للبحث';
+
+  @override
+  String get noResultsFound => 'لم يتم العثور على نتائج';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get continueReading => 'متابعة القراءة';
+
+  @override
+  String get lastRead => 'آخر قراءة';
+
+  @override
+  String get goToAyah => 'الذهاب إلى الآية';
+
+  @override
+  String get juz => 'جزء';
+
+  @override
+  String get page => 'صفحة';
+
+  @override
+  String get verses => 'آيات';
+
+  @override
+  String get meccan => 'مكية';
+
+  @override
+  String get medinan => 'مدنية';
+
+  @override
+  String get bookmarkUpdated => 'تم تحديث العلامة المرجعية';
+
+  @override
+  String get noBookmarksFound => 'لم يتم العثور على علامات مرجعية';
+
+  @override
+  String get noBookmarks => 'لا توجد علامات مرجعية';
+
+  @override
+  String get tryDifferentSearch => 'جرب كلمة بحث مختلفة';
+
+  @override
+  String get noBookmarksHint =>
+      'أضف علامة مرجعية للحظاتك المفضلة أثناء الاستماع';
+
+  @override
+  String get editBookmarkLabel => 'تعديل تسمية العلامة المرجعية';
+
+  @override
+  String get enterBookmarkLabel => 'أدخل تسمية العلامة المرجعية';
+
+  @override
+  String get noSearchResults => 'لا توجد نتائج بحث';
+
+  @override
+  String get clearAll => 'مسح الكل';
+
+  @override
+  String get timeAdjustments => 'تعديلات الوقت';
+
+  @override
+  String get day => 'يوم';
+
+  @override
+  String get features => 'المميزات';
+
+  @override
+  String get quranReader => 'قارئ القرآن';
+
+  @override
+  String get copiedToClipboard => 'تم النسخ';
+
+  @override
+  String get errorPlayingAudio => 'خطأ في تشغيل الصوت';
+
+  @override
+  String get comingSoon => 'قريباً';
 }

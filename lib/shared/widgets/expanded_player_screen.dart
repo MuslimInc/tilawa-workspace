@@ -201,7 +201,7 @@ class _ExpandedPlayerScreenState extends State<ExpandedPlayerScreen>
                           Expanded(
                             child: Center(
                               child: Hero(
-                                tag: 'audio_player',
+                                tag: 'audio_player_${audio.id}',
                                 createRectTween: (begin, end) {
                                   return MaterialRectCenterArcTween(
                                     begin: begin,

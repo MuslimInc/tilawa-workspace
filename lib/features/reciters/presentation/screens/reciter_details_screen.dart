@@ -11,6 +11,7 @@ import '../../../../core/entities/reciter_entity.dart';
 import '../../../../core/extensions.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/theme/color_scheme.dart';
+import '../../../../router/router.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../downloads/presentation/widgets/download_button.dart';
@@ -651,6 +652,7 @@ class _SurahCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16.r),
+          onLongPress: () => _showSurahOptionsSheet(context, surah),
           onTap: () {
             if (isCurrentItem) {
               if (isPlaying) {
@@ -785,6 +787,63 @@ class _SurahCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showSurahOptionsSheet(BuildContext context, SurahEntity surah) {
+    final ThemeData theme = Theme.of(context);
+    // Extract surah number from formatted ID or use index
+    final int surahNumber = int.tryParse(surah.formattedId) ?? (index + 1);
+
+    showModalBottomSheet<void>(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 12.h),
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: theme.dividerColor,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              surah.name,
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.h),
+            Divider(height: 1, color: theme.dividerColor),
+            ListTile(
+              leading: Icon(Icons.menu_book_rounded, color: theme.primaryColor),
+              title: Text(context.l10n.quranReader),
+              subtitle: Text(context.l10n.continueReading),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                QuranReaderRoute(surahNumber: surahNumber).push(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.bookmark_outline_rounded,
+                color: theme.primaryColor,
+              ),
+              title: Text(context.l10n.addBookmark),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                const BookmarksRoute().push(context);
+              },
+            ),
+            SizedBox(height: 16.h),
+          ],
         ),
       ),
     );
