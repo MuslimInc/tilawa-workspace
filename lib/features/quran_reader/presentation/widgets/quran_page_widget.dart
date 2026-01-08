@@ -142,13 +142,14 @@ class _SurahTextSectionState extends State<SurahTextSection> {
 
   @override
   Widget build(BuildContext context) {
-    for (final TapGestureRecognizer r in recognizers) {
-      r.dispose();
-    }
-    recognizers.clear();
-
     return BlocBuilder<WordByWordAudioBloc, WordByWordAudioState>(
       builder: (context, state) {
+        // Clear previous recognizers before building new ones to avoid leaks
+        for (final TapGestureRecognizer r in recognizers) {
+          r.dispose();
+        }
+        recognizers.clear();
+
         final int? playingId = state.playingWordId;
         final spans = <InlineSpan>[];
 

@@ -26,18 +26,23 @@ abstract class WordByWordAudioState with _$WordByWordAudioState {
 @injectable
 class WordByWordAudioBloc
     extends Bloc<WordByWordAudioEvent, WordByWordAudioState> {
-  WordByWordAudioBloc() : super(const WordByWordAudioState()) {
+  WordByWordAudioBloc({AudioPlayer? player})
+    : _player = player ?? _globalPlayer,
+      super(const WordByWordAudioState()) {
     on<_PlayWord>(_onPlayWord);
     on<_StopAudio>(_onStopAudio);
     on<_PlayerStateChanged>(_onPlayerStateChanged);
 
     // Listen to player state changes
-    _globalPlayer.playerStateStream.listen((playerState) {
+    _player.playerStateStream.listen((playerState) {
       if (!isClosed) {
         add(WordByWordAudioEvent.playerStateChanged(playerState));
       }
     });
   }
+
+  final AudioPlayer _player;
+
   // Using a static player to ensure only one audio plays at a time globally for this feature
   static final AudioPlayer _globalPlayer = AudioPlayer();
 
@@ -51,12 +56,12 @@ class WordByWordAudioBloc
     }
 
     try {
-      await _globalPlayer.stop();
+      await _player.stop();
       emit(state.copyWith(playingWordId: event.wordId, isPlaying: true));
 
       final fullUrl = 'https://audio.qurancdn.com/${event.url}';
-      await _globalPlayer.setUrl(fullUrl);
-      await _globalPlayer.play();
+      await _player.setUrl(fullUrl);
+      await _player.play();
     } catch (e) {
       emit(state.copyWith(playingWordId: null, isPlaying: false));
     }
@@ -66,7 +71,7 @@ class WordByWordAudioBloc
     _StopAudio event,
     Emitter<WordByWordAudioState> emit,
   ) async {
-    await _globalPlayer.stop();
+    await _player.stop();
     emit(state.copyWith(playingWordId: null, isPlaying: false));
   }
 

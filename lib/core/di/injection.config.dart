@@ -22,6 +22,7 @@ import 'package:flutter/services.dart' as _i281;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:just_audio/just_audio.dart' as _i501;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:tilawa/core/di/external_dependencies_module.dart' as _i133;
 import 'package:tilawa/core/network/network_info.dart' as _i99;
@@ -444,7 +445,6 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final externalDependenciesModule = _$ExternalDependenciesModule();
     final downloadsModule = _$DownloadsModule();
-    gh.factory<_i312.WordByWordAudioBloc>(() => _i312.WordByWordAudioBloc());
     gh.factory<_i300.AlphabetScrollbarBloc>(
       () => _i300.AlphabetScrollbarBloc(),
     );
@@ -594,11 +594,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i259.RecitersRemoteDataSource>(
       () => _i259.RecitersRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i650.QuranDataSource>(
+      () => _i650.QuranDataSourceImpl(dio: gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i537.PremiumLocalDataSource>(
       () =>
           _i537.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
     );
-    gh.lazySingleton<_i650.QuranDataSource>(() => _i650.QuranDataSourceImpl());
+    gh.factory<_i312.WordByWordAudioBloc>(
+      () => _i312.WordByWordAudioBloc(player: gh<_i501.AudioPlayer>()),
+    );
     gh.factory<_i884.SearchRemoteDataSource>(
       () => _i884.SearchRemoteDataSource(gh<_i361.Dio>()),
     );
@@ -899,6 +904,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i307.UserRepository>(),
       ),
     );
+    gh.factory<_i960.QuranReaderBloc>(
+      () => _i960.QuranReaderBloc(
+        gh<_i454.GetSurahContentUseCase>(),
+        gh<_i454.GetQuranPageUseCase>(),
+        gh<_i454.LoadReaderSettingsUseCase>(),
+        gh<_i454.SaveReaderSettingsUseCase>(),
+        gh<_i454.SaveLastReadPositionUseCase>(),
+        gh<_i454.SearchAyahsUseCase>(),
+        gh<_i454.SearchSurahsUseCase>(),
+      ),
+    );
     gh.factory<_i117.AthkarCubit>(
       () => _i117.AthkarCubit(
         gh<_i1069.GetAthkarCategoriesUseCase>(),
@@ -933,17 +949,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i145.AnalyticsService>(),
         gh<_i59.FirebaseAuth>(),
         gh<_i600.CrashlyticsService>(),
-      ),
-    );
-    gh.factory<_i960.QuranReaderBloc>(
-      () => _i960.QuranReaderBloc(
-        gh<_i454.GetSurahContentUseCase>(),
-        gh<_i454.GetQuranPageUseCase>(),
-        gh<_i454.LoadReaderSettingsUseCase>(),
-        gh<_i454.SaveReaderSettingsUseCase>(),
-        gh<_i454.SaveLastReadPositionUseCase>(),
-        gh<_i454.SearchAyahsUseCase>(),
-        gh<_i201.SearchSurahsUseCase>(),
       ),
     );
     gh.lazySingleton<_i105.CheckDownloadAccessUseCase>(

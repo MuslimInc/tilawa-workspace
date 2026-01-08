@@ -40,6 +40,9 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   BlocWithoutFix({required this.progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - NO isClosed check
+      progressStream.listen((progress) {
+        add(TestProgressUpdated(progress));
+      });
       emit(TestDownloading(0.0));
     });
 
@@ -64,6 +67,10 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   BlocWithFix({required this.progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - WITH isClosed check
+      progressStream.listen((progress) {
+        if (isClosed) return;
+        add(TestProgressUpdated(progress));
+      });
       emit(TestDownloading(0.0));
     });
 
