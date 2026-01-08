@@ -293,7 +293,7 @@ class QuranDataSourceImpl implements QuranDataSource {
     try {
       final Response<dynamic> response = await _dio.get(
         'https://api.quran.com/api/v4/verses/by_page/$pageNumber',
-        queryParameters: {'words': true, 'word_fields': 'text_uthmani'},
+        queryParameters: {'words': true, 'word_fields': 'text_uthmani,code_v1'},
       );
 
       final data = response.data;

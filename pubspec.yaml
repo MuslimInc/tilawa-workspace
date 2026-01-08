@@ -106,6 +106,7 @@ flutter:
     - assets/images/qibla_dial.png
     - assets/images/qibla_needle.png
     - shorebird.yaml
+    - assets/surahNames/
   fonts:
     - family: QCF_P001
       fonts:
