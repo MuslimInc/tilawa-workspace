@@ -90,6 +90,9 @@ _QuranWord _$QuranWordFromJson(Map<String, dynamic> json) => _QuranWord(
       : WordTransliteration.fromJson(
           json['transliteration'] as Map<String, dynamic>,
         ),
+  renderedText: json['renderedText'] as String?,
+  fontFamily: json['fontFamily'] as String?,
+  lineHeight: (json['lineHeight'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$QuranWordToJson(_QuranWord instance) =>
@@ -103,6 +106,9 @@ Map<String, dynamic> _$QuranWordToJson(_QuranWord instance) =>
       'char_type_name': instance.charTypeName,
       'translation': instance.translation?.toJson(),
       'transliteration': instance.transliteration?.toJson(),
+      'renderedText': instance.renderedText,
+      'fontFamily': instance.fontFamily,
+      'lineHeight': instance.lineHeight,
     };
 
 _WordTranslation _$WordTranslationFromJson(Map<String, dynamic> json) =>

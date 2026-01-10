@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/quran_reader_bloc.dart';
+import '../bloc/settings/quran_settings_bloc.dart';
 import '../widgets/quran_reader_content.dart';
 import '../widgets/widgets.dart';
 
@@ -37,7 +38,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   void _loadSettings() {
     final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
-    bloc.add(const QuranReaderEvent.loadSettings());
+    // Settings are now loaded by AppProviders globally
+    // bloc.add(const QuranReaderEvent.loadSettings());
+
     // Trigger initial Surah load
     bloc.add(QuranReaderEvent.loadSurah(widget.surahNumber));
     // Also preload pages structure
@@ -85,13 +88,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                 builder: (context, state) {
                   // Show loading when initializing
                   if (state.isPreloading ||
-                      state.pages[1]?.ayahs.isEmpty == true) {
+                      (state.pages[1]?.ayahs.isEmpty ?? false)) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   return QuranReaderContent(
                     pages: state.pages.values.toList(),
                     pageController: _pageController,
+                    fontSize: 28.0, // Default font size
                     onPageChanged: (index) {
                       final int page = index + 1;
                       // Just update the tracker, no need to fetch content anymore
@@ -104,34 +108,40 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
               ),
 
               // Top bar
-              BlocBuilder<QuranReaderBloc, QuranReaderState>(
+              BlocBuilder<QuranSettingsBloc, QuranSettingsState>(
                 buildWhen: (previous, current) =>
-                    previous.currentPage != current.currentPage ||
-                    previous.currentSurah != current.currentSurah ||
                     previous.settings != current.settings,
-                builder: (context, state) {
-                  return AnimatedPositioned(
-                    duration: const Duration(milliseconds: 300),
-                    top: _showControls ? 0 : -200,
-                    left: 0,
-                    right: 0,
-                    child: QuranReaderAppBar(
-                      title:
-                          state.currentPage?.ayahs.firstOrNull?.surahName ??
-                          state.currentSurah?.name ??
-                          '',
-                      subtitle:
-                          state
-                              .currentPage
-                              ?.ayahs
-                              .firstOrNull
-                              ?.surahNameEnglish ??
-                          state.currentSurah?.nameEnglish ??
-                          '',
-                      onBack: () => Navigator.of(context).pop(),
-                      onSearch: () => _showSearchDialog(context),
-                      onSettings: () => _showSettingsSheet(context, state),
-                    ),
+                builder: (context, settingsState) {
+                  return BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                    buildWhen: (previous, current) =>
+                        previous.currentPage != current.currentPage ||
+                        previous.currentSurah != current.currentSurah,
+                    builder: (context, state) {
+                      return AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        top: _showControls ? 0 : -200,
+                        left: 0,
+                        right: 0,
+                        child: QuranReaderAppBar(
+                          title:
+                              state.currentPage?.ayahs.firstOrNull?.surahName ??
+                              state.currentSurah?.name ??
+                              '',
+                          subtitle:
+                              state
+                                  .currentPage
+                                  ?.ayahs
+                                  .firstOrNull
+                                  ?.surahNameEnglish ??
+                              state.currentSurah?.nameEnglish ??
+                              '',
+                          onBack: () => Navigator.of(context).pop(),
+                          onSearch: () => _showSearchDialog(context),
+                          onSettings: () =>
+                              _showSettingsSheet(context, settingsState),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -175,15 +185,15 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  void _showSettingsSheet(BuildContext context, QuranReaderState state) {
-    final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
+  void _showSettingsSheet(BuildContext context, QuranSettingsState state) {
+    final QuranSettingsBloc settingsBloc = context.read<QuranSettingsBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (modalContext) => ReaderSettingsSheet(
         settings: state.settings,
         onSettingsChanged: (settings) {
-          bloc.add(QuranReaderEvent.updateSettings(settings));
+          settingsBloc.add(QuranSettingsEvent.updateSettings(settings));
         },
       ),
     );

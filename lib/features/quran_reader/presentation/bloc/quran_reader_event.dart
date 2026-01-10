@@ -6,16 +6,6 @@ class QuranReaderEvent with _$QuranReaderEvent {
 
   const factory QuranReaderEvent.loadPage(int pageNumber) = _LoadPage;
 
-  const factory QuranReaderEvent.loadSettings() = _LoadSettings;
-
-  const factory QuranReaderEvent.updateSettings(ReaderSettingsEntity settings) =
-      _UpdateSettings;
-
-  const factory QuranReaderEvent.updateFontSize(double fontSize) =
-      _UpdateFontSize;
-
-  const factory QuranReaderEvent.toggleTranslation() = _ToggleTranslation;
-
   const factory QuranReaderEvent.scrollToAyah(int ayahNumber) = _ScrollToAyah;
 
   const factory QuranReaderEvent.saveLastRead({

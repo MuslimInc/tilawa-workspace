@@ -54,10 +54,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_LoadSurah value)? loadSurah,
     TResult Function(_LoadPage value)? loadPage,
-    TResult Function(_LoadSettings value)? loadSettings,
-    TResult Function(_UpdateSettings value)? updateSettings,
-    TResult Function(_UpdateFontSize value)? updateFontSize,
-    TResult Function(_ToggleTranslation value)? toggleTranslation,
     TResult Function(_ScrollToAyah value)? scrollToAyah,
     TResult Function(_SaveLastRead value)? saveLastRead,
     TResult Function(_SearchAyahs value)? searchAyahs,
@@ -74,14 +70,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that);
       case _LoadPage() when loadPage != null:
         return loadPage(_that);
-      case _LoadSettings() when loadSettings != null:
-        return loadSettings(_that);
-      case _UpdateSettings() when updateSettings != null:
-        return updateSettings(_that);
-      case _UpdateFontSize() when updateFontSize != null:
-        return updateFontSize(_that);
-      case _ToggleTranslation() when toggleTranslation != null:
-        return toggleTranslation(_that);
       case _ScrollToAyah() when scrollToAyah != null:
         return scrollToAyah(_that);
       case _SaveLastRead() when saveLastRead != null:
@@ -120,10 +108,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult map<TResult extends Object?>({
     required TResult Function(_LoadSurah value) loadSurah,
     required TResult Function(_LoadPage value) loadPage,
-    required TResult Function(_LoadSettings value) loadSettings,
-    required TResult Function(_UpdateSettings value) updateSettings,
-    required TResult Function(_UpdateFontSize value) updateFontSize,
-    required TResult Function(_ToggleTranslation value) toggleTranslation,
     required TResult Function(_ScrollToAyah value) scrollToAyah,
     required TResult Function(_SaveLastRead value) saveLastRead,
     required TResult Function(_SearchAyahs value) searchAyahs,
@@ -139,14 +123,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that);
       case _LoadPage():
         return loadPage(_that);
-      case _LoadSettings():
-        return loadSettings(_that);
-      case _UpdateSettings():
-        return updateSettings(_that);
-      case _UpdateFontSize():
-        return updateFontSize(_that);
-      case _ToggleTranslation():
-        return toggleTranslation(_that);
       case _ScrollToAyah():
         return scrollToAyah(_that);
       case _SaveLastRead():
@@ -184,10 +160,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_LoadSurah value)? loadSurah,
     TResult? Function(_LoadPage value)? loadPage,
-    TResult? Function(_LoadSettings value)? loadSettings,
-    TResult? Function(_UpdateSettings value)? updateSettings,
-    TResult? Function(_UpdateFontSize value)? updateFontSize,
-    TResult? Function(_ToggleTranslation value)? toggleTranslation,
     TResult? Function(_ScrollToAyah value)? scrollToAyah,
     TResult? Function(_SaveLastRead value)? saveLastRead,
     TResult? Function(_SearchAyahs value)? searchAyahs,
@@ -203,14 +175,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that);
       case _LoadPage() when loadPage != null:
         return loadPage(_that);
-      case _LoadSettings() when loadSettings != null:
-        return loadSettings(_that);
-      case _UpdateSettings() when updateSettings != null:
-        return updateSettings(_that);
-      case _UpdateFontSize() when updateFontSize != null:
-        return updateFontSize(_that);
-      case _ToggleTranslation() when toggleTranslation != null:
-        return toggleTranslation(_that);
       case _ScrollToAyah() when scrollToAyah != null:
         return scrollToAyah(_that);
       case _SaveLastRead() when saveLastRead != null:
@@ -248,10 +212,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(int surahNumber)? loadSurah,
     TResult Function(int pageNumber)? loadPage,
-    TResult Function()? loadSettings,
-    TResult Function(ReaderSettingsEntity settings)? updateSettings,
-    TResult Function(double fontSize)? updateFontSize,
-    TResult Function()? toggleTranslation,
     TResult Function(int ayahNumber)? scrollToAyah,
     TResult Function(int surahNumber, int? ayahNumber)? saveLastRead,
     TResult Function(String query)? searchAyahs,
@@ -268,14 +228,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that.surahNumber);
       case _LoadPage() when loadPage != null:
         return loadPage(_that.pageNumber);
-      case _LoadSettings() when loadSettings != null:
-        return loadSettings();
-      case _UpdateSettings() when updateSettings != null:
-        return updateSettings(_that.settings);
-      case _UpdateFontSize() when updateFontSize != null:
-        return updateFontSize(_that.fontSize);
-      case _ToggleTranslation() when toggleTranslation != null:
-        return toggleTranslation();
       case _ScrollToAyah() when scrollToAyah != null:
         return scrollToAyah(_that.ayahNumber);
       case _SaveLastRead() when saveLastRead != null:
@@ -314,10 +266,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult when<TResult extends Object?>({
     required TResult Function(int surahNumber) loadSurah,
     required TResult Function(int pageNumber) loadPage,
-    required TResult Function() loadSettings,
-    required TResult Function(ReaderSettingsEntity settings) updateSettings,
-    required TResult Function(double fontSize) updateFontSize,
-    required TResult Function() toggleTranslation,
     required TResult Function(int ayahNumber) scrollToAyah,
     required TResult Function(int surahNumber, int? ayahNumber) saveLastRead,
     required TResult Function(String query) searchAyahs,
@@ -333,14 +281,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that.surahNumber);
       case _LoadPage():
         return loadPage(_that.pageNumber);
-      case _LoadSettings():
-        return loadSettings();
-      case _UpdateSettings():
-        return updateSettings(_that.settings);
-      case _UpdateFontSize():
-        return updateFontSize(_that.fontSize);
-      case _ToggleTranslation():
-        return toggleTranslation();
       case _ScrollToAyah():
         return scrollToAyah(_that.ayahNumber);
       case _SaveLastRead():
@@ -378,10 +318,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(int surahNumber)? loadSurah,
     TResult? Function(int pageNumber)? loadPage,
-    TResult? Function()? loadSettings,
-    TResult? Function(ReaderSettingsEntity settings)? updateSettings,
-    TResult? Function(double fontSize)? updateFontSize,
-    TResult? Function()? toggleTranslation,
     TResult? Function(int ayahNumber)? scrollToAyah,
     TResult? Function(int surahNumber, int? ayahNumber)? saveLastRead,
     TResult? Function(String query)? searchAyahs,
@@ -397,14 +333,6 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return loadSurah(_that.surahNumber);
       case _LoadPage() when loadPage != null:
         return loadPage(_that.pageNumber);
-      case _LoadSettings() when loadSettings != null:
-        return loadSettings();
-      case _UpdateSettings() when updateSettings != null:
-        return updateSettings(_that.settings);
-      case _UpdateFontSize() when updateFontSize != null:
-        return updateFontSize(_that.fontSize);
-      case _ToggleTranslation() when toggleTranslation != null:
-        return toggleTranslation();
       case _ScrollToAyah() when scrollToAyah != null:
         return scrollToAyah(_that.ayahNumber);
       case _SaveLastRead() when saveLastRead != null:
@@ -552,190 +480,6 @@ class __$LoadPageCopyWithImpl<$Res> implements _$LoadPageCopyWith<$Res> {
                   as int,
       ),
     );
-  }
-}
-
-/// @nodoc
-
-class _LoadSettings implements QuranReaderEvent {
-  const _LoadSettings();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _LoadSettings);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'QuranReaderEvent.loadSettings()';
-  }
-}
-
-/// @nodoc
-
-class _UpdateSettings implements QuranReaderEvent {
-  const _UpdateSettings(this.settings);
-
-  final ReaderSettingsEntity settings;
-
-  /// Create a copy of QuranReaderEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$UpdateSettingsCopyWith<_UpdateSettings> get copyWith =>
-      __$UpdateSettingsCopyWithImpl<_UpdateSettings>(this, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _UpdateSettings &&
-            (identical(other.settings, settings) ||
-                other.settings == settings));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, settings);
-
-  @override
-  String toString() {
-    return 'QuranReaderEvent.updateSettings(settings: $settings)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$UpdateSettingsCopyWith<$Res>
-    implements $QuranReaderEventCopyWith<$Res> {
-  factory _$UpdateSettingsCopyWith(
-    _UpdateSettings value,
-    $Res Function(_UpdateSettings) _then,
-  ) = __$UpdateSettingsCopyWithImpl;
-  @useResult
-  $Res call({ReaderSettingsEntity settings});
-
-  $ReaderSettingsEntityCopyWith<$Res> get settings;
-}
-
-/// @nodoc
-class __$UpdateSettingsCopyWithImpl<$Res>
-    implements _$UpdateSettingsCopyWith<$Res> {
-  __$UpdateSettingsCopyWithImpl(this._self, this._then);
-
-  final _UpdateSettings _self;
-  final $Res Function(_UpdateSettings) _then;
-
-  /// Create a copy of QuranReaderEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  $Res call({Object? settings = null}) {
-    return _then(
-      _UpdateSettings(
-        null == settings
-            ? _self.settings
-            : settings // ignore: cast_nullable_to_non_nullable
-                  as ReaderSettingsEntity,
-      ),
-    );
-  }
-
-  /// Create a copy of QuranReaderEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $ReaderSettingsEntityCopyWith<$Res> get settings {
-    return $ReaderSettingsEntityCopyWith<$Res>(_self.settings, (value) {
-      return _then(_self.copyWith(settings: value));
-    });
-  }
-}
-
-/// @nodoc
-
-class _UpdateFontSize implements QuranReaderEvent {
-  const _UpdateFontSize(this.fontSize);
-
-  final double fontSize;
-
-  /// Create a copy of QuranReaderEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$UpdateFontSizeCopyWith<_UpdateFontSize> get copyWith =>
-      __$UpdateFontSizeCopyWithImpl<_UpdateFontSize>(this, _$identity);
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _UpdateFontSize &&
-            (identical(other.fontSize, fontSize) ||
-                other.fontSize == fontSize));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, fontSize);
-
-  @override
-  String toString() {
-    return 'QuranReaderEvent.updateFontSize(fontSize: $fontSize)';
-  }
-}
-
-/// @nodoc
-abstract mixin class _$UpdateFontSizeCopyWith<$Res>
-    implements $QuranReaderEventCopyWith<$Res> {
-  factory _$UpdateFontSizeCopyWith(
-    _UpdateFontSize value,
-    $Res Function(_UpdateFontSize) _then,
-  ) = __$UpdateFontSizeCopyWithImpl;
-  @useResult
-  $Res call({double fontSize});
-}
-
-/// @nodoc
-class __$UpdateFontSizeCopyWithImpl<$Res>
-    implements _$UpdateFontSizeCopyWith<$Res> {
-  __$UpdateFontSizeCopyWithImpl(this._self, this._then);
-
-  final _UpdateFontSize _self;
-  final $Res Function(_UpdateFontSize) _then;
-
-  /// Create a copy of QuranReaderEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  $Res call({Object? fontSize = null}) {
-    return _then(
-      _UpdateFontSize(
-        null == fontSize
-            ? _self.fontSize
-            : fontSize // ignore: cast_nullable_to_non_nullable
-                  as double,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-
-class _ToggleTranslation implements QuranReaderEvent {
-  const _ToggleTranslation();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _ToggleTranslation);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'QuranReaderEvent.toggleTranslation()';
   }
 }
 
@@ -1207,7 +951,6 @@ mixin _$QuranReaderState {
   SurahContentEntity? get currentSurah;
   QuranPageEntity? get currentPage;
   Map<int, QuranPageEntity> get pages;
-  ReaderSettingsEntity get settings;
   List<AyahEntity> get searchResults;
   List<SurahContentEntity> get surahSearchResults;
   String get searchQuery;
@@ -1240,8 +983,6 @@ mixin _$QuranReaderState {
             (identical(other.currentPage, currentPage) ||
                 other.currentPage == currentPage) &&
             const DeepCollectionEquality().equals(other.pages, pages) &&
-            (identical(other.settings, settings) ||
-                other.settings == settings) &&
             const DeepCollectionEquality().equals(
               other.searchResults,
               searchResults,
@@ -1275,7 +1016,6 @@ mixin _$QuranReaderState {
     currentSurah,
     currentPage,
     const DeepCollectionEquality().hash(pages),
-    settings,
     const DeepCollectionEquality().hash(searchResults),
     const DeepCollectionEquality().hash(surahSearchResults),
     searchQuery,
@@ -1290,7 +1030,7 @@ mixin _$QuranReaderState {
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
   }
 }
 
@@ -1306,7 +1046,6 @@ abstract mixin class $QuranReaderStateCopyWith<$Res> {
     SurahContentEntity? currentSurah,
     QuranPageEntity? currentPage,
     Map<int, QuranPageEntity> pages,
-    ReaderSettingsEntity settings,
     List<AyahEntity> searchResults,
     List<SurahContentEntity> surahSearchResults,
     String searchQuery,
@@ -1321,7 +1060,6 @@ abstract mixin class $QuranReaderStateCopyWith<$Res> {
 
   $SurahContentEntityCopyWith<$Res>? get currentSurah;
   $QuranPageEntityCopyWith<$Res>? get currentPage;
-  $ReaderSettingsEntityCopyWith<$Res> get settings;
 }
 
 /// @nodoc
@@ -1341,7 +1079,6 @@ class _$QuranReaderStateCopyWithImpl<$Res>
     Object? currentSurah = freezed,
     Object? currentPage = freezed,
     Object? pages = null,
-    Object? settings = null,
     Object? searchResults = null,
     Object? surahSearchResults = null,
     Object? searchQuery = null,
@@ -1371,10 +1108,6 @@ class _$QuranReaderStateCopyWithImpl<$Res>
             ? _self.pages
             : pages // ignore: cast_nullable_to_non_nullable
                   as Map<int, QuranPageEntity>,
-        settings: null == settings
-            ? _self.settings
-            : settings // ignore: cast_nullable_to_non_nullable
-                  as ReaderSettingsEntity,
         searchResults: null == searchResults
             ? _self.searchResults
             : searchResults // ignore: cast_nullable_to_non_nullable
@@ -1444,16 +1177,6 @@ class _$QuranReaderStateCopyWithImpl<$Res>
 
     return $QuranPageEntityCopyWith<$Res>(_self.currentPage!, (value) {
       return _then(_self.copyWith(currentPage: value));
-    });
-  }
-
-  /// Create a copy of QuranReaderState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $ReaderSettingsEntityCopyWith<$Res> get settings {
-    return $ReaderSettingsEntityCopyWith<$Res>(_self.settings, (value) {
-      return _then(_self.copyWith(settings: value));
     });
   }
 }
@@ -1556,7 +1279,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
       SurahContentEntity? currentSurah,
       QuranPageEntity? currentPage,
       Map<int, QuranPageEntity> pages,
-      ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
       List<SurahContentEntity> surahSearchResults,
       String searchQuery,
@@ -1579,7 +1301,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.currentSurah,
           _that.currentPage,
           _that.pages,
-          _that.settings,
           _that.searchResults,
           _that.surahSearchResults,
           _that.searchQuery,
@@ -1616,7 +1337,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
       SurahContentEntity? currentSurah,
       QuranPageEntity? currentPage,
       Map<int, QuranPageEntity> pages,
-      ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
       List<SurahContentEntity> surahSearchResults,
       String searchQuery,
@@ -1638,7 +1358,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.currentSurah,
           _that.currentPage,
           _that.pages,
-          _that.settings,
           _that.searchResults,
           _that.surahSearchResults,
           _that.searchQuery,
@@ -1674,7 +1393,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
       SurahContentEntity? currentSurah,
       QuranPageEntity? currentPage,
       Map<int, QuranPageEntity> pages,
-      ReaderSettingsEntity settings,
       List<AyahEntity> searchResults,
       List<SurahContentEntity> surahSearchResults,
       String searchQuery,
@@ -1696,7 +1414,6 @@ extension QuranReaderStatePatterns on QuranReaderState {
           _that.currentSurah,
           _that.currentPage,
           _that.pages,
-          _that.settings,
           _that.searchResults,
           _that.surahSearchResults,
           _that.searchQuery,
@@ -1722,7 +1439,6 @@ class _QuranReaderState implements QuranReaderState {
     this.currentSurah,
     this.currentPage,
     final Map<int, QuranPageEntity> pages = const {},
-    this.settings = const ReaderSettingsEntity(),
     final List<AyahEntity> searchResults = const [],
     final List<SurahContentEntity> surahSearchResults = const [],
     this.searchQuery = '',
@@ -1753,9 +1469,6 @@ class _QuranReaderState implements QuranReaderState {
     return EqualUnmodifiableMapView(_pages);
   }
 
-  @override
-  @JsonKey()
-  final ReaderSettingsEntity settings;
   final List<AyahEntity> _searchResults;
   @override
   @JsonKey()
@@ -1817,8 +1530,6 @@ class _QuranReaderState implements QuranReaderState {
             (identical(other.currentPage, currentPage) ||
                 other.currentPage == currentPage) &&
             const DeepCollectionEquality().equals(other._pages, _pages) &&
-            (identical(other.settings, settings) ||
-                other.settings == settings) &&
             const DeepCollectionEquality().equals(
               other._searchResults,
               _searchResults,
@@ -1852,7 +1563,6 @@ class _QuranReaderState implements QuranReaderState {
     currentSurah,
     currentPage,
     const DeepCollectionEquality().hash(_pages),
-    settings,
     const DeepCollectionEquality().hash(_searchResults),
     const DeepCollectionEquality().hash(_surahSearchResults),
     searchQuery,
@@ -1867,7 +1577,7 @@ class _QuranReaderState implements QuranReaderState {
 
   @override
   String toString() {
-    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, settings: $settings, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
+    return 'QuranReaderState(status: $status, currentSurah: $currentSurah, currentPage: $currentPage, pages: $pages, searchResults: $searchResults, surahSearchResults: $surahSearchResults, searchQuery: $searchQuery, isSearching: $isSearching, scrollToAyah: $scrollToAyah, jumpToPage: $jumpToPage, errorMessage: $errorMessage, isPreloading: $isPreloading, pagesLoaded: $pagesLoaded, totalPagesToLoad: $totalPagesToLoad)';
   }
 }
 
@@ -1885,7 +1595,6 @@ abstract mixin class _$QuranReaderStateCopyWith<$Res>
     SurahContentEntity? currentSurah,
     QuranPageEntity? currentPage,
     Map<int, QuranPageEntity> pages,
-    ReaderSettingsEntity settings,
     List<AyahEntity> searchResults,
     List<SurahContentEntity> surahSearchResults,
     String searchQuery,
@@ -1902,8 +1611,6 @@ abstract mixin class _$QuranReaderStateCopyWith<$Res>
   $SurahContentEntityCopyWith<$Res>? get currentSurah;
   @override
   $QuranPageEntityCopyWith<$Res>? get currentPage;
-  @override
-  $ReaderSettingsEntityCopyWith<$Res> get settings;
 }
 
 /// @nodoc
@@ -1923,7 +1630,6 @@ class __$QuranReaderStateCopyWithImpl<$Res>
     Object? currentSurah = freezed,
     Object? currentPage = freezed,
     Object? pages = null,
-    Object? settings = null,
     Object? searchResults = null,
     Object? surahSearchResults = null,
     Object? searchQuery = null,
@@ -1953,10 +1659,6 @@ class __$QuranReaderStateCopyWithImpl<$Res>
             ? _self._pages
             : pages // ignore: cast_nullable_to_non_nullable
                   as Map<int, QuranPageEntity>,
-        settings: null == settings
-            ? _self.settings
-            : settings // ignore: cast_nullable_to_non_nullable
-                  as ReaderSettingsEntity,
         searchResults: null == searchResults
             ? _self._searchResults
             : searchResults // ignore: cast_nullable_to_non_nullable
@@ -2026,16 +1728,6 @@ class __$QuranReaderStateCopyWithImpl<$Res>
 
     return $QuranPageEntityCopyWith<$Res>(_self.currentPage!, (value) {
       return _then(_self.copyWith(currentPage: value));
-    });
-  }
-
-  /// Create a copy of QuranReaderState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $ReaderSettingsEntityCopyWith<$Res> get settings {
-    return $ReaderSettingsEntityCopyWith<$Res>(_self.settings, (value) {
-      return _then(_self.copyWith(settings: value));
     });
   }
 }

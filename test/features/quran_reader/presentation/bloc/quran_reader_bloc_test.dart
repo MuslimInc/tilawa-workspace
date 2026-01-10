@@ -15,12 +15,6 @@ class MockGetSurahContentUseCase extends Mock
 
 class MockGetQuranPageUseCase extends Mock implements GetQuranPageUseCase {}
 
-class MockLoadReaderSettingsUseCase extends Mock
-    implements LoadReaderSettingsUseCase {}
-
-class MockSaveReaderSettingsUseCase extends Mock
-    implements SaveReaderSettingsUseCase {}
-
 class MockSaveLastReadPositionUseCase extends Mock
     implements SaveLastReadPositionUseCase {}
 
@@ -33,8 +27,7 @@ class MockGetAllPagesUseCase extends Mock implements GetAllPagesUseCase {}
 void main() {
   late MockGetSurahContentUseCase getSurahContentUseCase;
   late MockGetQuranPageUseCase getQuranPageUseCase;
-  late MockLoadReaderSettingsUseCase loadReaderSettingsUseCase;
-  late MockSaveReaderSettingsUseCase saveReaderSettingsUseCase;
+
   late MockSaveLastReadPositionUseCase saveLastReadPositionUseCase;
   late MockSearchAyahsUseCase searchAyahsUseCase;
   late MockSearchSurahsUseCase searchSurahsUseCase;
@@ -80,8 +73,6 @@ void main() {
   setUp(() {
     getSurahContentUseCase = MockGetSurahContentUseCase();
     getQuranPageUseCase = MockGetQuranPageUseCase();
-    loadReaderSettingsUseCase = MockLoadReaderSettingsUseCase();
-    saveReaderSettingsUseCase = MockSaveReaderSettingsUseCase();
     saveLastReadPositionUseCase = MockSaveLastReadPositionUseCase();
     searchAyahsUseCase = MockSearchAyahsUseCase();
     searchSurahsUseCase = MockSearchSurahsUseCase();
@@ -95,8 +86,6 @@ void main() {
     bloc = QuranReaderBloc(
       getSurahContentUseCase,
       getQuranPageUseCase,
-      loadReaderSettingsUseCase,
-      saveReaderSettingsUseCase,
       saveLastReadPositionUseCase,
       searchAyahsUseCase,
       searchSurahsUseCase,
@@ -231,8 +220,6 @@ void main() {
           return QuranReaderBloc(
             getSurahContentUseCase,
             getQuranPageUseCase,
-            loadReaderSettingsUseCase,
-            saveReaderSettingsUseCase,
             saveLastReadPositionUseCase,
             searchAyahsUseCase,
             searchSurahsUseCase,
@@ -241,83 +228,9 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadPage(1)),
         expect: () => [
-          isA<QuranReaderState>().having(
-            (s) => s.isPreloading,
-            'isPreloading (start)',
-            true,
-          ),
           isA<QuranReaderState>()
               .having((s) => s.currentPage?.pageNumber, 'pageNumber', 1)
-              .having((s) => s.status, 'status', QuranReaderStatus.loaded)
-              .having(
-                (s) => s.isPreloading,
-                'isPreloading (during load)',
-                true,
-              ),
-          isA<QuranReaderState>()
-              .having((s) => s.isPreloading, 'isPreloading (end)', false)
               .having((s) => s.status, 'status', QuranReaderStatus.loaded),
-        ],
-      );
-    });
-
-    group('Settings', () {
-      blocTest<QuranReaderBloc, QuranReaderState>(
-        'emits updated settings on loadSettings',
-        build: () {
-          when(() => loadReaderSettingsUseCase.call()).thenAnswer(
-            (_) async => const Right(ReaderSettingsEntity(fontSize: 25.0)),
-          );
-          return bloc;
-        },
-        act: (bloc) => bloc.add(const QuranReaderEvent.loadSettings()),
-        expect: () => [
-          QuranReaderState(
-            settings: const ReaderSettingsEntity(fontSize: 25.0),
-            pages: initialPages,
-          ),
-        ],
-      );
-
-      blocTest<QuranReaderBloc, QuranReaderState>(
-        'emits updated settings on updateSettings',
-        build: () {
-          when(
-            () => saveReaderSettingsUseCase.call(
-              settings: any(named: 'settings'),
-            ),
-          ).thenAnswer((_) async => const Right(null));
-          return bloc;
-        },
-        act: (bloc) => bloc.add(
-          const QuranReaderEvent.updateSettings(
-            ReaderSettingsEntity(fontSize: 35.0),
-          ),
-        ),
-        expect: () => [
-          QuranReaderState(
-            settings: const ReaderSettingsEntity(fontSize: 35.0),
-            pages: initialPages,
-          ),
-        ],
-      );
-
-      blocTest<QuranReaderBloc, QuranReaderState>(
-        'emits updated settings on toggleTranslation',
-        build: () {
-          when(
-            () => saveReaderSettingsUseCase.call(
-              settings: any(named: 'settings'),
-            ),
-          ).thenAnswer((_) async => const Right(null));
-          return bloc;
-        },
-        act: (bloc) => bloc.add(const QuranReaderEvent.toggleTranslation()),
-        expect: () => [
-          QuranReaderState(
-            settings: const ReaderSettingsEntity(showTranslation: false),
-            pages: initialPages,
-          ),
         ],
       );
     });
@@ -397,34 +310,13 @@ void main() {
       );
     });
 
-    group('updateFontSize', () {
-      blocTest<QuranReaderBloc, QuranReaderState>(
-        'emits updated fontSize on updateFontSize',
-        build: () {
-          when(
-            () => saveReaderSettingsUseCase.call(
-              settings: any(named: 'settings'),
-            ),
-          ).thenAnswer((_) async => const Right(null));
-          return bloc;
-        },
-        act: (bloc) => bloc.add(const QuranReaderEvent.updateFontSize(28.0)),
-        expect: () => [
-          QuranReaderState(
-            settings: const ReaderSettingsEntity(fontSize: 28.0),
-            pages: initialPages,
-          ),
-        ],
-      );
-    });
-
     group('preloadAllPages', () {
       blocTest<QuranReaderBloc, QuranReaderState>(
         'emits [loading, loaded] with full pages on success',
         build: () {
           when(
             () => getAllPagesUseCase.call(),
-          ).thenAnswer((_) async => const Right({}));
+          ).thenAnswer((_) async => Right(initialPages));
           return bloc;
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.preloadAllPages()),
@@ -487,7 +379,11 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.searchAyahs('test')),
         expect: () => [
-          const QuranReaderState(isSearching: true, searchQuery: 'test'),
+          QuranReaderState(
+            isSearching: true,
+            searchQuery: 'test',
+            pages: initialPages,
+          ),
           isA<QuranReaderState>()
               .having((s) => s.searchResults.length, 'searchResults', 1)
               .having((s) => s.surahSearchResults.length, 'surahResults', 1),

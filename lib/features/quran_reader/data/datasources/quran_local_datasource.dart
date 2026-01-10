@@ -261,12 +261,54 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
           _parseJson,
           jsonString,
         );
-        return QuranPageEntity.fromJson(jsonMap);
+        final diskPage = QuranPageEntity.fromJson(jsonMap);
+
+        // Check for invalid cache (missing rendered properties)
+        // If we find corrupted words (e.g. renderedText is null), repair them.
+        final bool needsRepair = diskPage.ayahs
+            .expand<QuranWord>((a) => a.words ?? [])
+            .any((w) => w.renderedText == null && w.charTypeName != 'end');
+
+        if (needsRepair) {
+          debugPrint('Repairing invalidated cache for page $pageNumber');
+          final QuranPageEntity repairedPage = _repairPage(diskPage);
+          // Save repaired version back to disk
+          await _savePageToDisk(repairedPage);
+          return repairedPage;
+        }
+
+        return diskPage;
       }
     } catch (e) {
       debugPrint('Error loading page $pageNumber from disk: $e');
     }
     return null;
+  }
+
+  QuranPageEntity _repairPage(QuranPageEntity page) {
+    // Pre-compute font family for this page (QCF fonts are page-specific)
+    final pageFont = 'QCF_P${page.pageNumber.toString().padLeft(3, '0')}';
+
+    final List<PageAyahInfo> updatedAyahs = page.ayahs.map((ayah) {
+      if (ayah.words == null) return ayah;
+
+      final List<QuranWord> processedWords = ayah.words!.map((word) {
+        // If already has renderedText, keep it (unless we want to force refresh?
+        // Safe to re-compute to be sure).
+        final bool hasCodeV1 = word.codeV1 != null && word.codeV1!.isNotEmpty;
+        return word.copyWith(
+          renderedText: hasCodeV1
+              ? word.codeV1
+              : (word.textUthmani ?? word.text),
+          fontFamily: hasCodeV1 ? pageFont : 'Amiri',
+          lineHeight: hasCodeV1 ? 1.6 : 2.2,
+        );
+      }).toList();
+
+      return ayah.copyWith(words: processedWords);
+    }).toList();
+
+    return page.copyWith(ayahs: updatedAyahs);
   }
 
   Future<void> _savePageToDisk(QuranPageEntity page) async {
@@ -287,21 +329,40 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   @override
   Future<QuranPageEntity> getPage(int pageNumber) async {
+    QuranPageEntity? memoryPage;
+
     // 1. Check Memory
     if (_pageCache.containsKey(pageNumber)) {
-      return _pageCache[pageNumber]!;
+      memoryPage = _pageCache[pageNumber];
+      if (memoryPage != null) {
+        // If we have fully enriched words, return immediately
+        final bool hasWords =
+            memoryPage.ayahs.isNotEmpty &&
+            memoryPage.ayahs.first.words != null &&
+            memoryPage.ayahs.first.words!.isNotEmpty;
+
+        if (hasWords) {
+          return memoryPage;
+        }
+      }
     }
 
-    // 2. Check Disk
-    final QuranPageEntity? cachedPage = await _loadPageFromDisk(pageNumber);
-    if (cachedPage != null) {
-      _pageCache[pageNumber] = cachedPage;
-      // Trigger asset loading in background to populate surah lists/metadata
-      _ensureDataLoaded();
-      return cachedPage;
+    // 2. Check Disk (if memory is missing or incomplete)
+    // _savePageToDisk is only called for enriched pages, so any disk hit is better than raw memory
+    final QuranPageEntity? diskPage = await _loadPageFromDisk(pageNumber);
+    if (diskPage != null) {
+      _pageCache[pageNumber] = diskPage;
+      // Trigger asset loading in background to populate surah lists/metadata if needed
+      await _ensureDataLoaded();
+      return diskPage;
     }
 
-    // 3. Fallback to Asset
+    // 3. Fallback to Memory (if we had a raw version)
+    if (memoryPage != null) {
+      return memoryPage;
+    }
+
+    // 4. Fallback to Asset
     await _ensureDataLoaded();
 
     if (_pageCache.containsKey(pageNumber)) {
@@ -331,10 +392,31 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
       return;
     }
 
+    // Pre-compute font family for this page (QCF fonts are page-specific)
+    final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
+
     final QuranPageEntity page = _pageCache[pageNumber]!;
     final List<PageAyahInfo> updatedAyahs = page.ayahs.map((ayah) {
       final verseKey = '${ayah.surahNumber}:${ayah.ayahNumber}';
-      return ayah.copyWith(words: words[verseKey]);
+      final List<QuranWord>? ayahWords = words[verseKey];
+
+      if (ayahWords == null) {
+        return ayah;
+      }
+
+      // Pre-compute rendering values for each word
+      final List<QuranWord> processedWords = ayahWords.map((word) {
+        final bool hasCodeV1 = word.codeV1 != null && word.codeV1!.isNotEmpty;
+        return word.copyWith(
+          renderedText: hasCodeV1
+              ? word.codeV1
+              : (word.textUthmani ?? word.text),
+          fontFamily: hasCodeV1 ? pageFont : 'Amiri',
+          lineHeight: hasCodeV1 ? 1.6 : 2.2,
+        );
+      }).toList();
+
+      return ayah.copyWith(words: processedWords);
     }).toList();
 
     final QuranPageEntity updatedPage = page.copyWith(ayahs: updatedAyahs);

@@ -13,8 +13,6 @@ abstract class QuranReaderState with _$QuranReaderState {
 
     @Default({}) Map<int, QuranPageEntity> pages,
 
-    @Default(ReaderSettingsEntity()) ReaderSettingsEntity settings,
-
     @Default([]) List<AyahEntity> searchResults,
 
     @Default([]) List<SurahContentEntity> surahSearchResults,

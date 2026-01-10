@@ -9,6 +9,7 @@ import '../../features/localization/presentation/bloc/localization_bloc.dart';
 import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import '../../features/quran_reader/presentation/bloc/settings/quran_settings_bloc.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
@@ -59,9 +60,17 @@ class AppProviders {
 
     // Quran Reader provider with preloading
     BlocProvider<QuranReaderBloc>(
+      lazy: false,
       create: (context) =>
           getIt<QuranReaderBloc>()
             ..add(const QuranReaderEvent.preloadAllPages()),
+    ),
+
+    BlocProvider<QuranSettingsBloc>(
+      lazy: false,
+      create: (context) =>
+          getIt<QuranSettingsBloc>()
+            ..add(const QuranSettingsEvent.loadSettings()),
     ),
   ];
 

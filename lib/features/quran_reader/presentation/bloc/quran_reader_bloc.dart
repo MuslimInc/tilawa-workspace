@@ -19,10 +19,6 @@ class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
 
     this._getQuranPageUseCase,
 
-    this._loadReaderSettingsUseCase,
-
-    this._saveReaderSettingsUseCase,
-
     this._saveLastReadPositionUseCase,
 
     this._searchAyahsUseCase,
@@ -32,14 +28,6 @@ class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
     on<_LoadSurah>(_onLoadSurah);
 
     on<_LoadPage>(_onLoadPage);
-
-    on<_LoadSettings>(_onLoadSettings);
-
-    on<_UpdateSettings>(_onUpdateSettings);
-
-    on<_UpdateFontSize>(_onUpdateFontSize);
-
-    on<_ToggleTranslation>(_onToggleTranslation);
 
     on<_ScrollToAyah>(_onScrollToAyah);
 
@@ -79,10 +67,6 @@ class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
   final GetSurahContentUseCase _getSurahContentUseCase;
 
   final GetQuranPageUseCase _getQuranPageUseCase;
-
-  final LoadReaderSettingsUseCase _loadReaderSettingsUseCase;
-
-  final SaveReaderSettingsUseCase _saveReaderSettingsUseCase;
 
   final SaveLastReadPositionUseCase _saveLastReadPositionUseCase;
 
@@ -233,56 +217,8 @@ class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
     }
   }
 
-  Future<void> _onLoadSettings(
-    _LoadSettings event,
-
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final Either<Failure, ReaderSettingsEntity> result =
-        await _loadReaderSettingsUseCase.call();
-
-    result.fold((failure) {
-      // Use default settings on error
-    }, (settings) => emit(state.copyWith(settings: settings)));
-  }
-
-  Future<void> _onUpdateSettings(
-    _UpdateSettings event,
-
-    Emitter<QuranReaderState> emit,
-  ) async {
-    await _saveReaderSettingsUseCase.call(settings: event.settings);
-
-    emit(state.copyWith(settings: event.settings));
-  }
-
-  Future<void> _onUpdateFontSize(
-    _UpdateFontSize event,
-
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final ReaderSettingsEntity newSettings = state.settings.copyWith(
-      fontSize: event.fontSize,
-    );
-
-    await _saveReaderSettingsUseCase.call(settings: newSettings);
-
-    emit(state.copyWith(settings: newSettings));
-  }
-
-  Future<void> _onToggleTranslation(
-    _ToggleTranslation event,
-
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final ReaderSettingsEntity newSettings = state.settings.copyWith(
-      showTranslation: !state.settings.showTranslation,
-    );
-
-    await _saveReaderSettingsUseCase.call(settings: newSettings);
-
-    emit(state.copyWith(settings: newSettings));
-  }
+  // NOTE: Settings logic moved to QuranSettingsBloc
+  // _onLoadSettings and _onUpdateSettings handlers removed
 
   void _onScrollToAyah(_ScrollToAyah event, Emitter<QuranReaderState> emit) {
     emit(state.copyWith(scrollToAyah: event.ayahNumber));
@@ -431,26 +367,13 @@ class QuranReaderBloc extends HydratedBloc<QuranReaderEvent, QuranReaderState> {
 
   @override
   QuranReaderState? fromJson(Map<String, dynamic> json) {
-    try {
-      if (json['settings'] != null) {
-        return QuranReaderState(
-          settings: ReaderSettingsEntity.fromJson(
-            Map<String, dynamic>.from(json['settings'] as Map),
-          ),
-        );
-      }
-      return const QuranReaderState();
-    } catch (e) {
-      return const QuranReaderState();
-    }
+    // State persistence logic if needed for other things than settings
+    return const QuranReaderState();
   }
 
   @override
   Map<String, dynamic>? toJson(QuranReaderState state) {
-    try {
-      return {'settings': state.settings.toJson()};
-    } catch (e) {
-      return null;
-    }
+    // State persistence logic if needed
+    return null;
   }
 }

@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/quran_reader/domain/entities/entities.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import 'package:tilawa/features/quran_reader/presentation/bloc/settings/quran_settings_bloc.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/word_by_word_audio_bloc.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_reader_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/widgets.dart';
@@ -15,6 +16,10 @@ import 'package:tilawa/l10n/l10n.dart';
 
 class MockQuranReaderBloc extends MockBloc<QuranReaderEvent, QuranReaderState>
     implements QuranReaderBloc {}
+
+class MockQuranSettingsBloc
+    extends MockBloc<QuranSettingsEvent, QuranSettingsState>
+    implements QuranSettingsBloc {}
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
@@ -25,18 +30,24 @@ class MockWordByWordAudioBloc
 
 void main() {
   late MockQuranReaderBloc mockQuranReaderBloc;
+  late MockQuranSettingsBloc mockQuranSettingsBloc;
   late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockWordByWordAudioBloc mockWordByWordAudioBloc;
   final GetIt getIt = GetIt.instance;
 
   setUp(() {
     mockQuranReaderBloc = MockQuranReaderBloc();
+    mockQuranSettingsBloc = MockQuranSettingsBloc();
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockWordByWordAudioBloc = MockWordByWordAudioBloc();
 
     when(
       () => mockWordByWordAudioBloc.state,
     ).thenReturn(const WordByWordAudioState());
+
+    when(
+      () => mockQuranSettingsBloc.state,
+    ).thenReturn(const QuranSettingsState());
 
     if (getIt.isRegistered<AudioPlayerBloc>()) {
       getIt.unregister<AudioPlayerBloc>();
@@ -60,6 +71,7 @@ void main() {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<QuranReaderBloc>.value(value: mockQuranReaderBloc),
+          BlocProvider<QuranSettingsBloc>.value(value: mockQuranSettingsBloc),
           BlocProvider<WordByWordAudioBloc>.value(
             value: mockWordByWordAudioBloc,
           ),

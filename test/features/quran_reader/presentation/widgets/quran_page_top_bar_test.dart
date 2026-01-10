@@ -4,34 +4,46 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import 'package:tilawa/features/quran_reader/presentation/bloc/settings/quran_settings_bloc.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/quran_page_top_bar.dart';
 
 class MockQuranReaderBloc extends MockBloc<QuranReaderEvent, QuranReaderState>
     implements QuranReaderBloc {}
 
+class MockQuranSettingsBloc
+    extends MockBloc<QuranSettingsEvent, QuranSettingsState>
+    implements QuranSettingsBloc {}
+
 void main() {
   late MockQuranReaderBloc mockBloc;
+  late MockQuranSettingsBloc mockSettingsBloc;
 
   setUp(() {
     mockBloc = MockQuranReaderBloc();
+    mockSettingsBloc = MockQuranSettingsBloc();
     when(() => mockBloc.state).thenReturn(const QuranReaderState());
+    when(() => mockSettingsBloc.state).thenReturn(const QuranSettingsState());
   });
+
+  Widget createWidget(Widget child) {
+    return MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<QuranReaderBloc>.value(value: mockBloc),
+          BlocProvider<QuranSettingsBloc>.value(value: mockSettingsBloc),
+        ],
+        child: Scaffold(body: child),
+      ),
+    );
+  }
 
   group('QuranPageTopBar', () {
     testWidgets('should display surah name and juz number', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<QuranReaderBloc>.value(
-            value: mockBloc,
-            child: const Scaffold(
-              body: QuranPageTopBar(
-                surahNameEnglish: 'Al-Fatiha',
-                juzNumber: 1,
-              ),
-            ),
-          ),
+        createWidget(
+          const QuranPageTopBar(surahNameEnglish: 'Al-Fatiha', juzNumber: 1),
         ),
       );
 
@@ -43,16 +55,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<QuranReaderBloc>.value(
-            value: mockBloc,
-            child: const Scaffold(
-              body: QuranPageTopBar(
-                surahNameEnglish: 'Al-Baqara',
-                juzNumber: 2,
-              ),
-            ),
-          ),
+        createWidget(
+          const QuranPageTopBar(surahNameEnglish: 'Al-Baqara', juzNumber: 2),
         ),
       );
 
@@ -67,18 +71,15 @@ void main() {
         Stream.fromIterable([const QuranReaderState()]),
         initialState: const QuranReaderState(),
       );
+      whenListen(
+        mockSettingsBloc,
+        Stream.fromIterable([const QuranSettingsState()]),
+        initialState: const QuranSettingsState(),
+      );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<QuranReaderBloc>.value(
-            value: mockBloc,
-            child: const Scaffold(
-              body: QuranPageTopBar(
-                surahNameEnglish: 'Al-Baqara',
-                juzNumber: 2,
-              ),
-            ),
-          ),
+        createWidget(
+          const QuranPageTopBar(surahNameEnglish: 'Al-Baqara', juzNumber: 2),
         ),
       );
 
@@ -95,13 +96,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<QuranReaderBloc>.value(
-            value: mockBloc,
-            child: const Scaffold(
-              body: QuranPageTopBar(surahNameEnglish: 'Al-Kahf', juzNumber: 15),
-            ),
-          ),
+        createWidget(
+          const QuranPageTopBar(surahNameEnglish: 'Al-Kahf', juzNumber: 15),
         ),
       );
 

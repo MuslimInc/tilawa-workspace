@@ -381,6 +381,8 @@ import 'package:tilawa/features/quran_reader/domain/usecases/usecases.dart'
     as _i454;
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart'
     as _i960;
+import 'package:tilawa/features/quran_reader/presentation/bloc/settings/quran_settings_bloc.dart'
+    as _i700;
 import 'package:tilawa/features/quran_reader/presentation/bloc/word_by_word_audio_bloc.dart'
     as _i312;
 import 'package:tilawa/features/reciters/data/datasources/reciters_favorites_datasource.dart'
@@ -1098,6 +1100,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i439.GetAllPagesUseCase>(
       () => _i439.GetAllPagesUseCase(gh<_i664.QuranReaderRepository>()),
     );
+    gh.factory<_i700.QuranSettingsBloc>(
+      () => _i700.QuranSettingsBloc(
+        gh<_i708.LoadReaderSettingsUseCase>(),
+        gh<_i330.SaveReaderSettingsUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i767.DownloadRecoveryService>(
       () => _i767.DownloadRecoveryService(
         gh<_i463.DownloadServiceInterface>(),
@@ -1109,8 +1117,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i960.QuranReaderBloc(
         gh<_i454.GetSurahContentUseCase>(),
         gh<_i454.GetQuranPageUseCase>(),
-        gh<_i454.LoadReaderSettingsUseCase>(),
-        gh<_i454.SaveReaderSettingsUseCase>(),
         gh<_i454.SaveLastReadPositionUseCase>(),
         gh<_i454.SearchAyahsUseCase>(),
         gh<_i454.SearchSurahsUseCase>(),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../bloc/quran_reader_bloc.dart';
+import '../bloc/settings/quran_settings_bloc.dart';
 
 class QuranPageTopBar extends StatelessWidget {
   const QuranPageTopBar({
@@ -58,17 +58,17 @@ class QuranPageTopBar extends StatelessWidget {
   }
 
   void _showTextSettings(BuildContext context) {
-    final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
+    final QuranSettingsBloc settingsBloc = context.read<QuranSettingsBloc>();
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFFFFFBF3),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (modalContext) {
         return BlocProvider.value(
-          value: bloc,
-          child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
+          value: settingsBloc,
+          child: BlocBuilder<QuranSettingsBloc, QuranSettingsState>(
             builder: (context, state) {
               return Container(
                 padding: const EdgeInsets.all(24),
@@ -101,8 +101,8 @@ class QuranPageTopBar extends StatelessWidget {
                             activeColor: Colors.amber[900],
                             inactiveColor: Colors.brown.withValues(alpha: 0.2),
                             onChanged: (value) {
-                              context.read<QuranReaderBloc>().add(
-                                QuranReaderEvent.updateFontSize(value),
+                              settingsBloc.add(
+                                QuranSettingsEvent.updateFontSize(value),
                               );
                             },
                           ),

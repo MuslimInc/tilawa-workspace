@@ -84,6 +84,12 @@ abstract class QuranWord with _$QuranWord {
     @JsonKey(name: 'char_type_name') String? charTypeName,
     @JsonKey(name: 'translation') WordTranslation? translation,
     @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+
+    // Pre-computed rendering values (set in data layer)
+    // Pre-computed rendering values (set in data layer)
+    String? renderedText,
+    String? fontFamily,
+    double? lineHeight,
   }) = _QuranWord;
 
   factory QuranWord.fromJson(Map<String, dynamic> json) =>

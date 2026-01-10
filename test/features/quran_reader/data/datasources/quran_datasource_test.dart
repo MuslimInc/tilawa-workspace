@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tilawa/features/quran_reader/data/datasources/quran_datasource.dart';
 import 'package:tilawa/features/quran_reader/data/datasources/quran_local_datasource.dart';
 import 'package:tilawa/features/quran_reader/data/datasources/quran_remote_datasource.dart';
@@ -625,6 +626,118 @@ void main() {
         // Should not throw
         await localDataSource.updatePageWithWords(999, tWords);
       });
+
+      test(
+        'should allow update with empty codeV1 falling back to Uthmani',
+        () async {
+          setupMockAsset();
+          await localDataSource.getPage(1);
+
+          final tWords = {
+            '1:1': [
+              const QuranWord(
+                id: 1,
+                position: 1,
+                text: 'Fallback',
+                textUthmani: 'UthmaniFallback',
+                codeV1: '', // Empty codeV1
+                charTypeName: 'word',
+              ),
+            ],
+          };
+
+          await localDataSource.updatePageWithWords(1, tWords);
+          final QuranPageEntity updatedPage = await localDataSource.getPage(1);
+
+          final QuranWord word = updatedPage.ayahs.first.words!.first;
+          expect(word.renderedText, 'UthmaniFallback');
+          expect(word.fontFamily, 'Amiri');
+        },
+      );
+
+      test('should serialize and deserialize renderedText correctly', () async {
+        final List<Map<String, Object>> tWords = [
+          {
+            'id': 1,
+            'position': 1,
+            'text': 'Enriched',
+            'text_uthmani': 'Enriched',
+            'char_type_name': 'word',
+            'code_v1': 'Code1',
+          },
+        ];
+
+        // 1. Convert simple JSON to entities
+        final Map<String, Object> wordMap = tWords.first;
+        final QuranWord word = QuranWord.fromJson(
+          wordMap,
+        ).copyWith(renderedText: 'Code1', fontFamily: 'QCF_P001');
+
+        // 2. Serialize to JSON
+        final Map<String, dynamic> json = word.toJson();
+        expect(json['renderedText'], 'Code1');
+        expect(json['fontFamily'], 'QCF_P001');
+
+        // 3. Deserialize from JSON
+        final loadedWord = QuranWord.fromJson(json);
+        expect(loadedWord.renderedText, 'Code1');
+        expect(loadedWord.fontFamily, 'QCF_P001');
+      });
+
+      test('should repair invalid cache on load', () async {
+        setupMockAsset();
+
+        // 1. Create a "broken" page cache (persisting missing renderedText)
+        final brokenPageDir = Directory(
+          '${(await getApplicationDocumentsDirectory()).path}/quran_pages_cache',
+        );
+        if (!await brokenPageDir.exists()) {
+          await brokenPageDir.create(recursive: true);
+        }
+
+        const brokenWord = QuranWord(
+          id: 1,
+          position: 1,
+          text: 'Broken',
+          textUthmani: 'Fixed',
+          codeV1: 'CodeFixed',
+          charTypeName: 'word',
+          // renderedText is intentionally NULL here
+        );
+
+        const brokenPage = QuranPageEntity(
+          pageNumber: 99,
+          ayahs: [
+            PageAyahInfo(
+              surahNumber: 1,
+              surahName: 'S',
+              surahNameEnglish: 'S',
+              ayahNumber: 1,
+              text: 'A',
+              words: [brokenWord],
+            ),
+          ],
+          juz: 1,
+          hizb: 1,
+        );
+
+        final file = File('${brokenPageDir.path}/99.json');
+        await file.writeAsString(jsonEncode(brokenPage.toJson()));
+
+        // 2. Load the page via DataSource
+        // This should trigger _loadPageFromDisk -> find nulls -> _repairPage
+        final QuranPageEntity loadedPage = await localDataSource.getPage(99);
+
+        // 3. Verify it was repaired
+        final QuranWord loadedWord = loadedPage.ayahs.first.words!.first;
+        expect(loadedWord.renderedText, 'CodeFixed');
+        expect(loadedWord.fontFamily, 'QCF_P099');
+
+        // 4. Verify the file on disk was also updated (self-healing)
+        final repairedJson = jsonDecode(await file.readAsString());
+        final repairedWordJson = repairedJson['ayahs'][0]['words'][0];
+        expect(repairedWordJson['renderedText'], 'CodeFixed');
+      });
     });
 
     group('Caching', () {
@@ -686,6 +799,69 @@ void main() {
         expect(result.pageNumber, 1);
         expect(result.juz, 99);
       });
+
+      test(
+        'should upgrade to enriched page from disk when memory has raw page',
+        () async {
+          setupMockAsset();
+          final cacheDir = Directory('${tempDir.path}/quran_pages_cache');
+          await cacheDir.create(recursive: true);
+          final file = File('${cacheDir.path}/1.json');
+
+          // 1. Ensure no file on disk initially
+          if (file.existsSync()) {
+            await file.delete();
+          }
+
+          // 2. Load Raw Page from Asset -> Memory
+          final QuranPageEntity rawPage = await localDataSource.getPage(1);
+          // Verify it matches raw asset data
+          expect(
+            rawPage.ayahs.first.words,
+            isNull,
+            reason: 'First load should be raw (no words)',
+          );
+
+          // 3. Write Enriched Page to Disk (simulate background save or previous session)
+          final List<Map<String, Object>> tWords = [
+            {
+              'id': 1,
+              'position': 1,
+              'text': 'Enriched',
+              'text_uthmani': 'Enriched',
+              'char_type_name': 'word',
+            },
+          ];
+          final Map<String, Object> enrichedPageJson = {
+            'pageNumber': 1,
+            'ayahs': [
+              {
+                'surahNumber': 1,
+                'ayahNumber': 1,
+                'text': 'Raw Text',
+                'surahName': 'Test',
+                'surahNameEnglish': 'Test',
+                'words': tWords,
+              },
+            ],
+            'juz': 1,
+            'hizb': 1,
+          };
+          await file.writeAsString(jsonEncode(enrichedPageJson));
+
+          // 4. Call getPage(1) again
+          // Because memory is "incomplete" (NULL words), it should check disk
+          final QuranPageEntity upgradedPage = await localDataSource.getPage(1);
+
+          // 5. Verify we got the enriched version
+          expect(
+            upgradedPage.ayahs.first.words,
+            isNotNull,
+            reason: 'Should have upgraded to enriched page from disk',
+          );
+          expect(upgradedPage.ayahs.first.words!.first.text, 'Enriched');
+        },
+      );
     });
   });
 

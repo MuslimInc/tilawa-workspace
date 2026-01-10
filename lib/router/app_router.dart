@@ -44,7 +44,7 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
-    initialLocation: const SplashRoute().location,
+    initialLocation: const QuranReaderRoute(surahNumber: 1).location,
     debugLogDiagnostics: true,
     // Disable restoration when launched from notification to prevent
     // the restored state from overriding notification navigation

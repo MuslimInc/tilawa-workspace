@@ -1460,7 +1460,11 @@ mixin _$QuranWord {
   @JsonKey(name: 'translation')
   WordTranslation? get translation;
   @JsonKey(name: 'transliteration')
-  WordTransliteration? get transliteration;
+  WordTransliteration? get transliteration; // Pre-computed rendering values (set in data layer)
+  // Pre-computed rendering values (set in data layer)
+  String? get renderedText;
+  String? get fontFamily;
+  double? get lineHeight;
 
   /// Create a copy of QuranWord
   /// with the given fields replaced by the non-null parameter values.
@@ -1491,7 +1495,13 @@ mixin _$QuranWord {
             (identical(other.translation, translation) ||
                 other.translation == translation) &&
             (identical(other.transliteration, transliteration) ||
-                other.transliteration == transliteration));
+                other.transliteration == transliteration) &&
+            (identical(other.renderedText, renderedText) ||
+                other.renderedText == renderedText) &&
+            (identical(other.fontFamily, fontFamily) ||
+                other.fontFamily == fontFamily) &&
+            (identical(other.lineHeight, lineHeight) ||
+                other.lineHeight == lineHeight));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1507,11 +1517,14 @@ mixin _$QuranWord {
     charTypeName,
     translation,
     transliteration,
+    renderedText,
+    fontFamily,
+    lineHeight,
   );
 
   @override
   String toString() {
-    return 'QuranWord(id: $id, position: $position, text: $text, textUthmani: $textUthmani, audioUrl: $audioUrl, codeV1: $codeV1, charTypeName: $charTypeName, translation: $translation, transliteration: $transliteration)';
+    return 'QuranWord(id: $id, position: $position, text: $text, textUthmani: $textUthmani, audioUrl: $audioUrl, codeV1: $codeV1, charTypeName: $charTypeName, translation: $translation, transliteration: $transliteration, renderedText: $renderedText, fontFamily: $fontFamily, lineHeight: $lineHeight)';
   }
 }
 
@@ -1530,6 +1543,9 @@ abstract mixin class $QuranWordCopyWith<$Res> {
     @JsonKey(name: 'char_type_name') String? charTypeName,
     @JsonKey(name: 'translation') WordTranslation? translation,
     @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+    String? renderedText,
+    String? fontFamily,
+    double? lineHeight,
   });
 
   $WordTranslationCopyWith<$Res>? get translation;
@@ -1557,6 +1573,9 @@ class _$QuranWordCopyWithImpl<$Res> implements $QuranWordCopyWith<$Res> {
     Object? charTypeName = freezed,
     Object? translation = freezed,
     Object? transliteration = freezed,
+    Object? renderedText = freezed,
+    Object? fontFamily = freezed,
+    Object? lineHeight = freezed,
   }) {
     return _then(
       _self.copyWith(
@@ -1596,6 +1615,18 @@ class _$QuranWordCopyWithImpl<$Res> implements $QuranWordCopyWith<$Res> {
             ? _self.transliteration
             : transliteration // ignore: cast_nullable_to_non_nullable
                   as WordTransliteration?,
+        renderedText: freezed == renderedText
+            ? _self.renderedText
+            : renderedText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        fontFamily: freezed == fontFamily
+            ? _self.fontFamily
+            : fontFamily // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        lineHeight: freezed == lineHeight
+            ? _self.lineHeight
+            : lineHeight // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -1732,6 +1763,9 @@ extension QuranWordPatterns on QuranWord {
       @JsonKey(name: 'char_type_name') String? charTypeName,
       @JsonKey(name: 'translation') WordTranslation? translation,
       @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+      String? renderedText,
+      String? fontFamily,
+      double? lineHeight,
     )?
     $default, {
     required TResult orElse(),
@@ -1749,6 +1783,9 @@ extension QuranWordPatterns on QuranWord {
           _that.charTypeName,
           _that.translation,
           _that.transliteration,
+          _that.renderedText,
+          _that.fontFamily,
+          _that.lineHeight,
         );
       case _:
         return orElse();
@@ -1780,6 +1817,9 @@ extension QuranWordPatterns on QuranWord {
       @JsonKey(name: 'char_type_name') String? charTypeName,
       @JsonKey(name: 'translation') WordTranslation? translation,
       @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+      String? renderedText,
+      String? fontFamily,
+      double? lineHeight,
     )
     $default,
   ) {
@@ -1796,6 +1836,9 @@ extension QuranWordPatterns on QuranWord {
           _that.charTypeName,
           _that.translation,
           _that.transliteration,
+          _that.renderedText,
+          _that.fontFamily,
+          _that.lineHeight,
         );
       case _:
         throw StateError('Unexpected subclass');
@@ -1826,6 +1869,9 @@ extension QuranWordPatterns on QuranWord {
       @JsonKey(name: 'char_type_name') String? charTypeName,
       @JsonKey(name: 'translation') WordTranslation? translation,
       @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+      String? renderedText,
+      String? fontFamily,
+      double? lineHeight,
     )?
     $default,
   ) {
@@ -1842,6 +1888,9 @@ extension QuranWordPatterns on QuranWord {
           _that.charTypeName,
           _that.translation,
           _that.transliteration,
+          _that.renderedText,
+          _that.fontFamily,
+          _that.lineHeight,
         );
       case _:
         return null;
@@ -1862,6 +1911,9 @@ class _QuranWord implements QuranWord {
     @JsonKey(name: 'char_type_name') this.charTypeName,
     @JsonKey(name: 'translation') this.translation,
     @JsonKey(name: 'transliteration') this.transliteration,
+    this.renderedText,
+    this.fontFamily,
+    this.lineHeight,
   });
   factory _QuranWord.fromJson(Map<String, dynamic> json) =>
       _$QuranWordFromJson(json);
@@ -1890,6 +1942,14 @@ class _QuranWord implements QuranWord {
   @override
   @JsonKey(name: 'transliteration')
   final WordTransliteration? transliteration;
+  // Pre-computed rendering values (set in data layer)
+  // Pre-computed rendering values (set in data layer)
+  @override
+  final String? renderedText;
+  @override
+  final String? fontFamily;
+  @override
+  final double? lineHeight;
 
   /// Create a copy of QuranWord
   /// with the given fields replaced by the non-null parameter values.
@@ -1923,7 +1983,13 @@ class _QuranWord implements QuranWord {
             (identical(other.translation, translation) ||
                 other.translation == translation) &&
             (identical(other.transliteration, transliteration) ||
-                other.transliteration == transliteration));
+                other.transliteration == transliteration) &&
+            (identical(other.renderedText, renderedText) ||
+                other.renderedText == renderedText) &&
+            (identical(other.fontFamily, fontFamily) ||
+                other.fontFamily == fontFamily) &&
+            (identical(other.lineHeight, lineHeight) ||
+                other.lineHeight == lineHeight));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1939,11 +2005,14 @@ class _QuranWord implements QuranWord {
     charTypeName,
     translation,
     transliteration,
+    renderedText,
+    fontFamily,
+    lineHeight,
   );
 
   @override
   String toString() {
-    return 'QuranWord(id: $id, position: $position, text: $text, textUthmani: $textUthmani, audioUrl: $audioUrl, codeV1: $codeV1, charTypeName: $charTypeName, translation: $translation, transliteration: $transliteration)';
+    return 'QuranWord(id: $id, position: $position, text: $text, textUthmani: $textUthmani, audioUrl: $audioUrl, codeV1: $codeV1, charTypeName: $charTypeName, translation: $translation, transliteration: $transliteration, renderedText: $renderedText, fontFamily: $fontFamily, lineHeight: $lineHeight)';
   }
 }
 
@@ -1966,6 +2035,9 @@ abstract mixin class _$QuranWordCopyWith<$Res>
     @JsonKey(name: 'char_type_name') String? charTypeName,
     @JsonKey(name: 'translation') WordTranslation? translation,
     @JsonKey(name: 'transliteration') WordTransliteration? transliteration,
+    String? renderedText,
+    String? fontFamily,
+    double? lineHeight,
   });
 
   @override
@@ -1995,6 +2067,9 @@ class __$QuranWordCopyWithImpl<$Res> implements _$QuranWordCopyWith<$Res> {
     Object? charTypeName = freezed,
     Object? translation = freezed,
     Object? transliteration = freezed,
+    Object? renderedText = freezed,
+    Object? fontFamily = freezed,
+    Object? lineHeight = freezed,
   }) {
     return _then(
       _QuranWord(
@@ -2034,6 +2109,18 @@ class __$QuranWordCopyWithImpl<$Res> implements _$QuranWordCopyWith<$Res> {
             ? _self.transliteration
             : transliteration // ignore: cast_nullable_to_non_nullable
                   as WordTransliteration?,
+        renderedText: freezed == renderedText
+            ? _self.renderedText
+            : renderedText // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        fontFamily: freezed == fontFamily
+            ? _self.fontFamily
+            : fontFamily // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        lineHeight: freezed == lineHeight
+            ? _self.lineHeight
+            : lineHeight // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
