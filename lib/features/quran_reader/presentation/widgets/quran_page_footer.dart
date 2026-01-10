@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class QuranPageFooter extends StatelessWidget {
   const QuranPageFooter({
@@ -28,7 +27,7 @@ class QuranPageFooter extends StatelessWidget {
             children: [
               Text(
                 'Hizb $hizbNumber',
-                style: GoogleFonts.amiri(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.brown.shade800,
@@ -42,7 +41,7 @@ class QuranPageFooter extends StatelessWidget {
               ),
               Text(
                 '$pageNumber',
-                style: GoogleFonts.amiri(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.brown.shade800,

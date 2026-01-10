@@ -103,8 +103,9 @@ flutter:
   assets:
     - assets/images/
     - assets/json/
-    - assets/data/
     - assets/images/qibla_dial.png
     - assets/images/qibla_needle.png
     - shorebird.yaml
     - assets/surahNames/
+    - assets/quranlines/
+    - assets/markers/

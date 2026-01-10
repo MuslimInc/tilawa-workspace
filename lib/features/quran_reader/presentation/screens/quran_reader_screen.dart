@@ -87,15 +87,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                 },
                 builder: (context, state) {
                   // Show loading when initializing
-                  if (state.isPreloading ||
-                      (state.pages[1]?.ayahs.isEmpty ?? false)) {
+                  // Show loading when initializing
+                  if (state.isPreloading) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   return QuranReaderContent(
                     pages: state.pages.values.toList(),
                     pageController: _pageController,
-                    fontSize: 28.0, // Default font size
                     onPageChanged: (index) {
                       final int page = index + 1;
                       // Just update the tracker, no need to fetch content anymore

@@ -9,13 +9,11 @@ class QuranReaderContent extends StatelessWidget {
     super.key,
     required this.pages,
     required this.pageController,
-    required this.fontSize,
     this.onPageChanged,
   });
 
   final List<QuranPageEntity> pages;
   final PageController pageController;
-  final double fontSize;
   final void Function(int)? onPageChanged;
 
   @override
@@ -30,7 +28,7 @@ class QuranReaderContent extends StatelessWidget {
         onPageChanged?.call(index);
       },
       itemBuilder: (context, index) {
-        return QuranPageWidget(page: pages[index], fontSize: fontSize);
+        return QuranPageWidget(page: pages[index]);
       },
     );
   }

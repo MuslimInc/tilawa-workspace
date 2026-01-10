@@ -56,7 +56,6 @@ class QuranReaderAppBar extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontFamily: 'Amiri',
                         fontWeight: FontWeight.bold,
                         height: 1.2,
                       ),

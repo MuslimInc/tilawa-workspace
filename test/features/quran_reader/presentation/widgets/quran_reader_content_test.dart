@@ -43,9 +43,8 @@ void main() {
   Widget createWidgetUnderTest(
     List<QuranPageEntity> pages,
     PageController pageController,
-    Function(int)? onPageChanged, {
-    double fontSize = 28.0,
-  }) {
+    Function(int)? onPageChanged,
+  ) {
     return MaterialApp(
       home: MultiBlocProvider(
         providers: [
@@ -59,7 +58,6 @@ void main() {
           body: QuranReaderContent(
             pages: pages,
             pageController: pageController,
-            fontSize: fontSize,
             onPageChanged: onPageChanged,
           ),
         ),
