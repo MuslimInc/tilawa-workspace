@@ -39,7 +39,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
           Text(
             context.l10n.nextPrayer,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onPrimary.withOpacity(0.8),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
             ),
           ),
 
@@ -88,7 +88,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
           Text(
             '${context.l10n.at} ${nextPrayer.formattedTime12Hour}',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onPrimary.withOpacity(0.9),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -115,7 +115,7 @@ class _CountdownUnit extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.onPrimary.withOpacity(0.2),
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -130,7 +130,7 @@ class _CountdownUnit extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onPrimary.withOpacity(0.7),
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.7),
           ),
         ),
       ],

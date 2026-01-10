@@ -46,7 +46,9 @@ class SurahMetadataRepository {
   /// Search surahs by name (Arabic or English) or number.
   static List<SurahMetadata> search(String query) {
     final String normalizedQuery = query.toLowerCase().trim();
-    if (normalizedQuery.isEmpty) return [];
+    if (normalizedQuery.isEmpty) {
+      return [];
+    }
 
     return _surahList.where((surah) {
       return surah.nameArabic.contains(query) ||

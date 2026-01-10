@@ -1,12 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/entities.dart';
 import '../models/surah_metadata.dart';
 import 'arabic_text_utils.dart';
+
+// Top-level function for compute
+Map<String, dynamic> _parseJson(String jsonString) {
+  return jsonDecode(jsonString) as Map<String, dynamic>;
+}
+
+String _encodeJson(Map<String, dynamic> json) {
+  return jsonEncode(json);
+}
 
 /// Data source for loading Quran data from local assets.
 ///
@@ -25,6 +37,9 @@ abstract class QuranLocalDataSource {
   /// Gets all ayahs for a specific page.
   Future<QuranPageEntity> getPage(int pageNumber);
 
+  /// Gets all pages.
+  Future<Map<int, QuranPageEntity>> getAllPages();
+
   /// Gets all ayahs for a specific juz.
   Future<List<AyahEntity>> getJuz(int juzNumber);
 
@@ -35,7 +50,11 @@ abstract class QuranLocalDataSource {
   Future<List<SurahContentEntity>> searchSurahs(String query);
 
   /// Updates page cache with word data.
-  void updatePageWithWords(int pageNumber, Map<String, List<QuranWord>> words);
+
+  Future<void> updatePageWithWords(
+    int pageNumber,
+    Map<String, List<QuranWord>> words,
+  );
 }
 
 @LazySingleton(as: QuranLocalDataSource)
@@ -51,14 +70,16 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
   /// Ensures Quran data is loaded from assets.
   Future<void> _ensureDataLoaded() async {
-    if (_quranData != null) return;
+    if (_quranData != null) {
+      return;
+    }
 
     try {
       final String jsonString = await _assetBundle.loadString(
         'assets/data/quran.json',
       );
 
-      final parsed = jsonDecode(jsonString) as Map<String, dynamic>;
+      final Map<String, dynamic> parsed = await compute(_parseJson, jsonString);
 
       if (parsed.containsKey('data') && parsed['data'] is Map) {
         _quranData = parsed;
@@ -80,7 +101,9 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
   }
 
   void _preloadPages() {
-    if (_surahList == null || _surahList!.isEmpty) return;
+    if (_surahList == null || _surahList!.isEmpty) {
+      return;
+    }
 
     final Map<int, List<PageAyahInfo>> pageAyahsMap = {};
     final Map<int, int> pageJuzMap = {};
@@ -94,7 +117,9 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
 
       for (final ayah in surahAyahs) {
         final int page = ayah['page'] as int? ?? 0;
-        if (page == 0) continue;
+        if (page == 0) {
+          continue;
+        }
 
         pageAyahsMap.putIfAbsent(page, () => []);
 
@@ -122,6 +147,10 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
     }
 
     for (var i = 1; i <= 604; i++) {
+      if (_pageCache.containsKey(i)) {
+        continue;
+      }
+
       final List<PageAyahInfo> ayahs = pageAyahsMap[i] ?? [];
       final int juz = pageJuzMap[i] ?? ((i - 1) ~/ 20) + 1;
       final int hizb = pageHizbMap[i] ?? ((i - 1) ~/ 10) + 1;
@@ -197,8 +226,82 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
     return surah.getAyahByNumber(ayahNumber);
   }
 
+  Directory? _cacheDir;
+
+  Future<void> _initCacheDir() async {
+    if (_cacheDir != null) {
+      return;
+    }
+    try {
+      final Directory docsDir = await getApplicationDocumentsDirectory();
+      _cacheDir = Directory('${docsDir.path}/quran_pages_cache');
+      if (!await _cacheDir!.exists()) {
+        await _cacheDir!.create(recursive: true);
+      }
+    } catch (e) {
+      debugPrint('Error initializing cache dir: $e');
+    }
+  }
+
+  Future<QuranPageEntity?> _loadPageFromDisk(int pageNumber) async {
+    try {
+      await _initCacheDir();
+      if (_cacheDir == null) {
+        return null;
+      }
+
+      final file = File('${_cacheDir!.path}/$pageNumber.json');
+      if (await file.exists()) {
+        final String jsonString = await file.readAsString();
+        if (jsonString.isEmpty) {
+          return null;
+        }
+
+        final Map<String, dynamic> jsonMap = await compute(
+          _parseJson,
+          jsonString,
+        );
+        return QuranPageEntity.fromJson(jsonMap);
+      }
+    } catch (e) {
+      debugPrint('Error loading page $pageNumber from disk: $e');
+    }
+    return null;
+  }
+
+  Future<void> _savePageToDisk(QuranPageEntity page) async {
+    try {
+      await _initCacheDir();
+      if (_cacheDir == null) {
+        return;
+      }
+
+      final file = File('${_cacheDir!.path}/${page.pageNumber}.json');
+      final Map<String, dynamic> jsonMap = page.toJson();
+      final String jsonString = await compute(_encodeJson, jsonMap);
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      debugPrint('Error saving page ${page.pageNumber} to disk: $e');
+    }
+  }
+
   @override
   Future<QuranPageEntity> getPage(int pageNumber) async {
+    // 1. Check Memory
+    if (_pageCache.containsKey(pageNumber)) {
+      return _pageCache[pageNumber]!;
+    }
+
+    // 2. Check Disk
+    final QuranPageEntity? cachedPage = await _loadPageFromDisk(pageNumber);
+    if (cachedPage != null) {
+      _pageCache[pageNumber] = cachedPage;
+      // Trigger asset loading in background to populate surah lists/metadata
+      _ensureDataLoaded();
+      return cachedPage;
+    }
+
+    // 3. Fallback to Asset
     await _ensureDataLoaded();
 
     if (_pageCache.containsKey(pageNumber)) {
@@ -214,8 +317,19 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
   }
 
   @override
-  void updatePageWithWords(int pageNumber, Map<String, List<QuranWord>> words) {
-    if (!_pageCache.containsKey(pageNumber)) return;
+  Future<Map<int, QuranPageEntity>> getAllPages() async {
+    await _ensureDataLoaded();
+    return Map.from(_pageCache);
+  }
+
+  @override
+  Future<void> updatePageWithWords(
+    int pageNumber,
+    Map<String, List<QuranWord>> words,
+  ) async {
+    if (!_pageCache.containsKey(pageNumber)) {
+      return;
+    }
 
     final QuranPageEntity page = _pageCache[pageNumber]!;
     final List<PageAyahInfo> updatedAyahs = page.ayahs.map((ayah) {
@@ -223,7 +337,11 @@ class QuranLocalDataSourceImpl implements QuranLocalDataSource {
       return ayah.copyWith(words: words[verseKey]);
     }).toList();
 
-    _pageCache[pageNumber] = page.copyWith(ayahs: updatedAyahs);
+    final QuranPageEntity updatedPage = page.copyWith(ayahs: updatedAyahs);
+    _pageCache[pageNumber] = updatedPage;
+
+    // Persist to disk
+    await _savePageToDisk(updatedPage);
   }
 
   @override

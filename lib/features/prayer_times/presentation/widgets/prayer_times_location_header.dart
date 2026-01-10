@@ -20,7 +20,7 @@ class PrayerTimesLocationHeader extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Row(
         children: [
           Icon(Icons.location_on, color: theme.colorScheme.primary, size: 20),

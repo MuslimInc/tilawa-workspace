@@ -64,6 +64,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function(_ClearSearch value)? clearSearch,
     TResult Function(_JumpToPage value)? jumpToPage,
     TResult Function(_PreloadAllPages value)? preloadAllPages,
+    TResult Function(_PrefetchPages value)? prefetchPages,
+    TResult Function(_UpdateCurrentPage value)? updateCurrentPage,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -92,6 +94,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that);
       case _PreloadAllPages() when preloadAllPages != null:
         return preloadAllPages(_that);
+      case _PrefetchPages() when prefetchPages != null:
+        return prefetchPages(_that);
+      case _UpdateCurrentPage() when updateCurrentPage != null:
+        return updateCurrentPage(_that);
       case _:
         return orElse();
     }
@@ -124,6 +130,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function(_ClearSearch value) clearSearch,
     required TResult Function(_JumpToPage value) jumpToPage,
     required TResult Function(_PreloadAllPages value) preloadAllPages,
+    required TResult Function(_PrefetchPages value) prefetchPages,
+    required TResult Function(_UpdateCurrentPage value) updateCurrentPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -151,6 +159,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that);
       case _PreloadAllPages():
         return preloadAllPages(_that);
+      case _PrefetchPages():
+        return prefetchPages(_that);
+      case _UpdateCurrentPage():
+        return updateCurrentPage(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -182,6 +194,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function(_ClearSearch value)? clearSearch,
     TResult? Function(_JumpToPage value)? jumpToPage,
     TResult? Function(_PreloadAllPages value)? preloadAllPages,
+    TResult? Function(_PrefetchPages value)? prefetchPages,
+    TResult? Function(_UpdateCurrentPage value)? updateCurrentPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -209,6 +223,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that);
       case _PreloadAllPages() when preloadAllPages != null:
         return preloadAllPages(_that);
+      case _PrefetchPages() when prefetchPages != null:
+        return prefetchPages(_that);
+      case _UpdateCurrentPage() when updateCurrentPage != null:
+        return updateCurrentPage(_that);
       case _:
         return null;
     }
@@ -240,6 +258,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult Function()? clearSearch,
     TResult Function(int pageNumber)? jumpToPage,
     TResult Function()? preloadAllPages,
+    TResult Function(List<int> pageNumbers)? prefetchPages,
+    TResult Function(QuranPageEntity page)? updateCurrentPage,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -268,6 +288,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that.pageNumber);
       case _PreloadAllPages() when preloadAllPages != null:
         return preloadAllPages();
+      case _PrefetchPages() when prefetchPages != null:
+        return prefetchPages(_that.pageNumbers);
+      case _UpdateCurrentPage() when updateCurrentPage != null:
+        return updateCurrentPage(_that.page);
       case _:
         return orElse();
     }
@@ -300,6 +324,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     required TResult Function() clearSearch,
     required TResult Function(int pageNumber) jumpToPage,
     required TResult Function() preloadAllPages,
+    required TResult Function(List<int> pageNumbers) prefetchPages,
+    required TResult Function(QuranPageEntity page) updateCurrentPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -327,6 +353,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that.pageNumber);
       case _PreloadAllPages():
         return preloadAllPages();
+      case _PrefetchPages():
+        return prefetchPages(_that.pageNumbers);
+      case _UpdateCurrentPage():
+        return updateCurrentPage(_that.page);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -358,6 +388,8 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
     TResult? Function()? clearSearch,
     TResult? Function(int pageNumber)? jumpToPage,
     TResult? Function()? preloadAllPages,
+    TResult? Function(List<int> pageNumbers)? prefetchPages,
+    TResult? Function(QuranPageEntity page)? updateCurrentPage,
   }) {
     final _that = this;
     switch (_that) {
@@ -385,6 +417,10 @@ extension QuranReaderEventPatterns on QuranReaderEvent {
         return jumpToPage(_that.pageNumber);
       case _PreloadAllPages() when preloadAllPages != null:
         return preloadAllPages();
+      case _PrefetchPages() when prefetchPages != null:
+        return prefetchPages(_that.pageNumbers);
+      case _UpdateCurrentPage() when updateCurrentPage != null:
+        return updateCurrentPage(_that.page);
       case _:
         return null;
     }
@@ -1008,6 +1044,160 @@ class _PreloadAllPages implements QuranReaderEvent {
   @override
   String toString() {
     return 'QuranReaderEvent.preloadAllPages()';
+  }
+}
+
+/// @nodoc
+
+class _PrefetchPages implements QuranReaderEvent {
+  const _PrefetchPages(final List<int> pageNumbers)
+    : _pageNumbers = pageNumbers;
+
+  final List<int> _pageNumbers;
+  List<int> get pageNumbers {
+    if (_pageNumbers is EqualUnmodifiableListView) return _pageNumbers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_pageNumbers);
+  }
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$PrefetchPagesCopyWith<_PrefetchPages> get copyWith =>
+      __$PrefetchPagesCopyWithImpl<_PrefetchPages>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _PrefetchPages &&
+            const DeepCollectionEquality().equals(
+              other._pageNumbers,
+              _pageNumbers,
+            ));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_pageNumbers),
+  );
+
+  @override
+  String toString() {
+    return 'QuranReaderEvent.prefetchPages(pageNumbers: $pageNumbers)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$PrefetchPagesCopyWith<$Res>
+    implements $QuranReaderEventCopyWith<$Res> {
+  factory _$PrefetchPagesCopyWith(
+    _PrefetchPages value,
+    $Res Function(_PrefetchPages) _then,
+  ) = __$PrefetchPagesCopyWithImpl;
+  @useResult
+  $Res call({List<int> pageNumbers});
+}
+
+/// @nodoc
+class __$PrefetchPagesCopyWithImpl<$Res>
+    implements _$PrefetchPagesCopyWith<$Res> {
+  __$PrefetchPagesCopyWithImpl(this._self, this._then);
+
+  final _PrefetchPages _self;
+  final $Res Function(_PrefetchPages) _then;
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({Object? pageNumbers = null}) {
+    return _then(
+      _PrefetchPages(
+        null == pageNumbers
+            ? _self._pageNumbers
+            : pageNumbers // ignore: cast_nullable_to_non_nullable
+                  as List<int>,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _UpdateCurrentPage implements QuranReaderEvent {
+  const _UpdateCurrentPage(this.page);
+
+  final QuranPageEntity page;
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$UpdateCurrentPageCopyWith<_UpdateCurrentPage> get copyWith =>
+      __$UpdateCurrentPageCopyWithImpl<_UpdateCurrentPage>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _UpdateCurrentPage &&
+            (identical(other.page, page) || other.page == page));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, page);
+
+  @override
+  String toString() {
+    return 'QuranReaderEvent.updateCurrentPage(page: $page)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$UpdateCurrentPageCopyWith<$Res>
+    implements $QuranReaderEventCopyWith<$Res> {
+  factory _$UpdateCurrentPageCopyWith(
+    _UpdateCurrentPage value,
+    $Res Function(_UpdateCurrentPage) _then,
+  ) = __$UpdateCurrentPageCopyWithImpl;
+  @useResult
+  $Res call({QuranPageEntity page});
+
+  $QuranPageEntityCopyWith<$Res> get page;
+}
+
+/// @nodoc
+class __$UpdateCurrentPageCopyWithImpl<$Res>
+    implements _$UpdateCurrentPageCopyWith<$Res> {
+  __$UpdateCurrentPageCopyWithImpl(this._self, this._then);
+
+  final _UpdateCurrentPage _self;
+  final $Res Function(_UpdateCurrentPage) _then;
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({Object? page = null}) {
+    return _then(
+      _UpdateCurrentPage(
+        null == page
+            ? _self.page
+            : page // ignore: cast_nullable_to_non_nullable
+                  as QuranPageEntity,
+      ),
+    );
+  }
+
+  /// Create a copy of QuranReaderEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $QuranPageEntityCopyWith<$Res> get page {
+    return $QuranPageEntityCopyWith<$Res>(_self.page, (value) {
+      return _then(_self.copyWith(page: value));
+    });
   }
 }
 

@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/entities/audio.dart';
-import '../../../../core/extensions.dart';
-import '../../../../core/utils/toast_utils.dart';
-import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../../domain/entities/entities.dart';
 import '../bloc/quran_reader_bloc.dart';
-import '../widgets/quran_page_widget.dart';
+import '../widgets/quran_reader_content.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for reading Quran text.
@@ -45,6 +38,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   void _loadSettings() {
     final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
     bloc.add(const QuranReaderEvent.loadSettings());
+    // Trigger initial Surah load
+    bloc.add(QuranReaderEvent.loadSurah(widget.surahNumber));
+    // Also preload pages structure
     bloc.add(const QuranReaderEvent.preloadAllPages());
   }
 
@@ -57,170 +53,116 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
+      body: BlocListener<QuranReaderBloc, QuranReaderState>(
         listener: (context, state) {
           // Handle programmatic jumps (e.g., from search)
           if (state.jumpToPage != null) {
-            final int page = state.jumpToPage!;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_pageController.hasClients) {
-                _pageController.jumpToPage(page - 1);
-                context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.loadPage(page),
-                );
-              }
-            });
+            _jumpToPageAndLoad(state.jumpToPage!);
           }
 
           // Handle initial navigation to surah's start page
           if (state.currentSurah != null && _firstLoad) {
             final int startPage = state.currentSurah!.startPage ?? 1;
-            // Post frame to ensure controller is attached
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_pageController.hasClients) {
-                _pageController.jumpToPage(startPage - 1);
-                // Trigger load for the start page
-                context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.loadPage(startPage),
-                );
-              }
-            });
+            _jumpToPageAndLoad(startPage);
             _firstLoad = false;
           }
         },
-        builder: (context, state) {
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _showControls = !_showControls;
-              });
-            },
-            child: Stack(
-              children: [
-                // Main content
-                _buildContent(context, state),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _showControls = !_showControls;
+            });
+          },
+          child: Stack(
+            children: [
+              // Main content
+              BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                buildWhen: (previous, current) {
+                  return previous.status != current.status ||
+                      previous.pages != current.pages ||
+                      previous.isPreloading != current.isPreloading;
+                },
+                builder: (context, state) {
+                  // Show loading when initializing
+                  if (state.isPreloading ||
+                      state.pages[1]?.ayahs.isEmpty == true) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                // Top bar
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  top: _showControls ? 0 : -200,
-                  left: 0,
-                  right: 0,
-                  child: QuranReaderAppBar(
-                    title:
-                        state.currentPage?.ayahs.firstOrNull?.surahName ??
-                        state.currentSurah?.name ??
-                        '',
-                    subtitle:
-                        state
-                            .currentPage
-                            ?.ayahs
-                            .firstOrNull
-                            ?.surahNameEnglish ??
-                        state.currentSurah?.nameEnglish ??
-                        '',
-                    onBack: () => Navigator.of(context).pop(),
-                    onSearch: () => _showSearchDialog(context),
-                    onSettings: () => _showSettingsSheet(context, state),
-                  ),
-                ),
-
-                // Bottom controls
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  bottom: _showControls ? 0 : -200,
-                  left: 0,
-                  right: 0,
-                  child: QuranReaderBottomBar(
-                    currentPage: state.currentPage?.pageNumber ?? 1,
-                    totalPages: 604,
-                    onPageChanged: (page) {
-                      _pageController.jumpToPage(page - 1);
+                  return QuranReaderContent(
+                    pages: state.pages.values.toList(),
+                    pageController: _pageController,
+                    onPageChanged: (index) {
+                      final int page = index + 1;
+                      // Just update the tracker, no need to fetch content anymore
                       context.read<QuranReaderBloc>().add(
                         QuranReaderEvent.loadPage(page),
                       );
                     },
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+                  );
+                },
+              ),
+
+              // Top bar
+              BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                buildWhen: (previous, current) =>
+                    previous.currentPage != current.currentPage ||
+                    previous.currentSurah != current.currentSurah ||
+                    previous.settings != current.settings,
+                builder: (context, state) {
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    top: _showControls ? 0 : -200,
+                    left: 0,
+                    right: 0,
+                    child: QuranReaderAppBar(
+                      title:
+                          state.currentPage?.ayahs.firstOrNull?.surahName ??
+                          state.currentSurah?.name ??
+                          '',
+                      subtitle:
+                          state
+                              .currentPage
+                              ?.ayahs
+                              .firstOrNull
+                              ?.surahNameEnglish ??
+                          state.currentSurah?.nameEnglish ??
+                          '',
+                      onBack: () => Navigator.of(context).pop(),
+                      onSearch: () => _showSearchDialog(context),
+                      onSettings: () => _showSettingsSheet(context, state),
+                    ),
+                  );
+                },
+              ),
+
+              // Bottom controls
+              BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                buildWhen: (previous, current) =>
+                    previous.currentPage != current.currentPage,
+                builder: (context, state) {
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    bottom: _showControls ? 0 : -200,
+                    left: 0,
+                    right: 0,
+                    child: QuranReaderBottomBar(
+                      currentPage: state.currentPage?.pageNumber ?? 1,
+                      totalPages: 604,
+                      onPageChanged: (page) {
+                        _pageController.jumpToPage(page - 1);
+                        context.read<QuranReaderBloc>().add(
+                          QuranReaderEvent.loadPage(page),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, QuranReaderState state) {
-    // Show preloading progress
-    if (state.isPreloading) {
-      final double progress = state.pagesLoaded / state.totalPagesToLoad;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(value: progress),
-            const SizedBox(height: 16),
-            Text(
-              'Loading Quran pages... ${state.pagesLoaded}/${state.totalPagesToLoad}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
-      );
-    }
-
-    // If we have no pages and are loading, show global loader
-    if (state.status == QuranReaderStatus.loading && state.pages.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.status == QuranReaderStatus.error && state.pages.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(state.errorMessage, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.loadSurah(widget.surahNumber),
-                );
-              },
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // PageView - all pages are preloaded
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: 604, // Standard Madani Mushaf pages
-      onPageChanged: (index) {
-        final int pageNum = index + 1;
-        // Update current page in state for UI display
-        final QuranPageEntity? page = state.pages[pageNum];
-        if (page != null) {
-          context.read<QuranReaderBloc>().add(
-            QuranReaderEvent.loadPage(pageNum),
-          );
-        }
-      },
-      itemBuilder: (context, index) {
-        final int pageNum = index + 1;
-        final QuranPageEntity? pageEntity = state.pages[pageNum];
-
-        if (pageEntity != null) {
-          return QuranPageWidget(page: pageEntity);
-        } else {
-          // Fallback: page not yet loaded (shouldn't happen after preload)
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
     );
   }
 
@@ -247,71 +189,21 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     );
   }
 
-  void _showAyahOptionsSheet(BuildContext context, AyahEntity ayah) {
-    final QuranReaderState state = context.read<QuranReaderBloc>().state;
-    final String surahName =
-        state.currentSurah?.nameEnglish ?? 'Surah ${ayah.surahNumber}';
+  /// Robustly attempts to jump to a page and load its data.
+  /// Retries until [PageController] has clients attached.
+  void _jumpToPageAndLoad(int pageNumber) {
+    if (!mounted) return;
 
-    showModalBottomSheet(
-      context: context,
-      builder: (modalContext) => AyahOptionsSheet(
-        ayah: ayah,
-        onCopy: () {
-          _copyAyahToClipboard(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-        onShare: () {
-          _shareAyah(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-        onBookmark: () {
-          // TODO: Add bookmark functionality
-          ToastUtils.showToast(msg: context.l10n.comingSoon);
-          Navigator.pop(modalContext);
-        },
-        onPlay: () {
-          _playAyahAudio(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-      ),
-    );
-  }
-
-  void _copyAyahToClipboard(AyahEntity ayah, String surahName) {
-    final text =
-        '${ayah.text}\n\n- $surahName, ${context.l10n.ayah} ${ayah.numberInSurah}';
-    Clipboard.setData(ClipboardData(text: text));
-    ToastUtils.showSuccessToast(context.l10n.copiedToClipboard);
-  }
-
-  void _shareAyah(AyahEntity ayah, String surahName) {
-    final text =
-        '${ayah.text}\n\n- $surahName, ${context.l10n.ayah} ${ayah.numberInSurah}';
-    Clipboard.setData(ClipboardData(text: text));
-    ToastUtils.showSuccessToast('Copied to clipboard for sharing');
-  }
-
-  void _playAyahAudio(AyahEntity ayah, String surahName) {
-    final audioUrl =
-        'https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayah.number}.mp3';
-
-    final audioEntity = AudioEntity(
-      id: 'ayah_${ayah.surahNumber}_${ayah.numberInSurah}',
-      title: '$surahName - ${context.l10n.ayah} ${ayah.numberInSurah}',
-      url: audioUrl,
-      duration: const Duration(seconds: 30),
-      artist: 'Mishary Rashid Alafasy',
-      album: surahName,
-    );
-
-    try {
-      final AudioPlayerBloc audioBloc = getIt<AudioPlayerBloc>();
-      audioBloc.add(AudioPlayerEvent.playFromQueue([audioEntity], 0));
-      ToastUtils.showToast(
-        msg: 'Playing: ${context.l10n.ayah} ${ayah.numberInSurah}',
-      );
-    } catch (e) {
-      ToastUtils.showErrorToast(context.l10n.errorPlayingAudio);
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(pageNumber - 1);
+      // Just track the page change
+      final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
+      bloc.add(QuranReaderEvent.loadPage(pageNumber));
+    } else {
+      // Retry in next frame if controller not yet attached
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _jumpToPageAndLoad(pageNumber);
+      });
     }
   }
 }

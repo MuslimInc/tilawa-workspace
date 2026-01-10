@@ -65,7 +65,9 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
 
   Future<void> _checkForNotificationOnResume() async {
     // Guard against concurrent checks
-    if (_isCheckingNotification) return;
+    if (_isCheckingNotification) {
+      return;
+    }
     _isCheckingNotification = true;
 
     try {
@@ -83,7 +85,9 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
   }
 
   Future<void> _processLaunchNotificationIfNeeded() async {
-    if (_hasProcessedLaunchNotification) return;
+    if (_hasProcessedLaunchNotification) {
+      return;
+    }
     _hasProcessedLaunchNotification = true;
 
     try {

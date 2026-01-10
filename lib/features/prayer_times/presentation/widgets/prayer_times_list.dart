@@ -70,7 +70,7 @@ class PrayerTimeCard extends StatelessWidget {
       color: isNext
           ? theme.colorScheme.primaryContainer
           : hasPassed
-          ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
+          ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
           : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

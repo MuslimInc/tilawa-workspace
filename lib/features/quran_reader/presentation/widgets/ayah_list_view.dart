@@ -91,7 +91,7 @@ class SurahHeaderWidget extends StatelessWidget {
           Text(
             surah.nameTranslation,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onPrimary.withOpacity(0.8),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(height: 12),
@@ -121,7 +121,7 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.onPrimary.withOpacity(0.2),
+        color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -180,7 +180,7 @@ class AyahWidget extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: theme.dividerColor.withOpacity(0.3),
+              color: theme.dividerColor.withValues(alpha: 0.3),
               width: 0.5,
             ),
           ),

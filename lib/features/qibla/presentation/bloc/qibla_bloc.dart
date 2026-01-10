@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -15,6 +17,11 @@ import '../../domain/usecases/request_location_permission_use_case.dart';
 part 'qibla_event.dart';
 part 'qibla_state.dart';
 
+/// Event transformer for throttling events
+EventTransformer<T> throttle<T>(Duration duration) {
+  return (events, mapper) => events.throttle(duration).switchMap(mapper);
+}
+
 @injectable
 class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   QiblaBloc(
@@ -22,10 +29,19 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     this._checkLocationService,
     this._requestLocationPermission,
   ) : super(const QiblaState()) {
-    on<CheckLocationService>(_onCheckLocationService);
-    on<RequestLocationPermission>(_onRequestLocationPermission);
-    on<StartQiblaStream>(_onStartQiblaStream);
-    on<UpdateQiblaDirection>(_onUpdateQiblaDirection);
+    on<CheckLocationService>(
+      _onCheckLocationService,
+      transformer: sequential(),
+    );
+    on<RequestLocationPermission>(
+      _onRequestLocationPermission,
+      transformer: sequential(),
+    );
+    on<StartQiblaStream>(_onStartQiblaStream, transformer: restartable());
+    on<UpdateQiblaDirection>(
+      _onUpdateQiblaDirection,
+      transformer: throttle(const Duration(milliseconds: 100)),
+    );
     on<QiblaErrorOccurred>(_onQiblaErrorOccurred);
   }
 
@@ -105,20 +121,22 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
       await _qiblaSubscription?.cancel();
       _qiblaSubscription = _getQiblaDirection(const NoParams())
+          .throttle(const Duration(milliseconds: 100))
           .timeout(
-            const Duration(seconds: 3),
-            onTimeout: (sink) {
-              sink.addError(
-                'Sensors not responding. If you are on a Simulator, Compass is not supported.',
-              );
-            },
+            const Duration(seconds: 10),
+            onTimeout: (sink) => sink.addError(
+              'Sensors not responding. If you are on a Simulator, Compass is not supported.',
+            ),
           )
-          .listen(
-            (direction) => add(UpdateQiblaDirection(direction)),
-            onError: (error) {
-              add(QiblaErrorOccurred(error.toString()));
-            },
-          );
+          .listen((direction) {
+            // Normalize values to 0-360 range for cleaner data and logs
+            final normalizedDirection = QiblaDirectionEntity(
+              qibla: direction.qibla % 360,
+              direction: direction.direction % 360,
+              offset: direction.offset % 360,
+            );
+            add(UpdateQiblaDirection(normalizedDirection));
+          }, onError: (e) => add(QiblaErrorOccurred(e.toString())));
     } catch (e) {
       emit(
         state.copyWith(status: QiblaStatus.error, errorMessage: e.toString()),

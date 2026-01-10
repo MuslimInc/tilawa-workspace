@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/errors/failures.dart';
 import 'package:tilawa/features/quran_reader/domain/entities/entities.dart';
+import 'package:tilawa/features/quran_reader/domain/usecases/get_all_pages_use_case.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/usecases.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 
@@ -27,6 +28,8 @@ class MockSearchAyahsUseCase extends Mock implements SearchAyahsUseCase {}
 
 class MockSearchSurahsUseCase extends Mock implements SearchSurahsUseCase {}
 
+class MockGetAllPagesUseCase extends Mock implements GetAllPagesUseCase {}
+
 void main() {
   late MockGetSurahContentUseCase getSurahContentUseCase;
   late MockGetQuranPageUseCase getQuranPageUseCase;
@@ -35,7 +38,35 @@ void main() {
   late MockSaveLastReadPositionUseCase saveLastReadPositionUseCase;
   late MockSearchAyahsUseCase searchAyahsUseCase;
   late MockSearchSurahsUseCase searchSurahsUseCase;
+  late MockGetAllPagesUseCase getAllPagesUseCase;
   late QuranReaderBloc bloc;
+
+  const tSurah = SurahContentEntity(
+    number: 1,
+    name: 'Al-Fatiha',
+    nameEnglish: 'The Opening',
+    nameTranslation: 'The Opening',
+    revelationType: 'Meccan',
+    numberOfAyahs: 7,
+    ayahs: [],
+    startPage: 1,
+  );
+
+  const tPage = QuranPageEntity(pageNumber: 1, ayahs: [], juz: 1, hizb: 1);
+
+  Map<int, QuranPageEntity> getInitialPages() {
+    return {
+      for (int i = 1; i <= 604; i++)
+        i: QuranPageEntity(
+          pageNumber: i,
+          ayahs: [],
+          juz: ((i - 1) ~/ 20) + 1,
+          hizb: ((i - 1) ~/ 10) + 1,
+        ),
+    };
+  }
+
+  final Map<int, QuranPageEntity> initialPages = getInitialPages();
 
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -54,6 +85,12 @@ void main() {
     saveLastReadPositionUseCase = MockSaveLastReadPositionUseCase();
     searchAyahsUseCase = MockSearchAyahsUseCase();
     searchSurahsUseCase = MockSearchSurahsUseCase();
+    getAllPagesUseCase = MockGetAllPagesUseCase();
+
+    // Stub for preloadAllPages which is called in constructor
+    when(
+      () => getQuranPageUseCase.call(pageNumber: any(named: 'pageNumber')),
+    ).thenAnswer((_) async => const Right(tPage));
 
     bloc = QuranReaderBloc(
       getSurahContentUseCase,
@@ -63,25 +100,13 @@ void main() {
       saveLastReadPositionUseCase,
       searchAyahsUseCase,
       searchSurahsUseCase,
+      getAllPagesUseCase,
     );
   });
 
   tearDown(() {
     bloc.close();
   });
-
-  const tSurah = SurahContentEntity(
-    number: 1,
-    name: 'Al-Fatiha',
-    nameEnglish: 'The Opening',
-    nameTranslation: 'The Opening',
-    revelationType: 'Meccan',
-    numberOfAyahs: 7,
-    ayahs: [],
-    startPage: 1,
-  );
-
-  const tPage = QuranPageEntity(pageNumber: 1, ayahs: [], juz: 1, hizb: 1);
 
   group('QuranReaderBloc', () {
     test('initial state should be initial', () {
@@ -101,19 +126,25 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadSurah(1)),
         expect: () => [
-          const QuranReaderState(status: QuranReaderStatus.loading),
-          const QuranReaderState(
+          QuranReaderState(
+            status: QuranReaderStatus.loading,
+            pages: initialPages,
+          ),
+          QuranReaderState(
             status: QuranReaderStatus.loaded,
             currentSurah: tSurah,
+            pages: initialPages,
           ),
-          const QuranReaderState(
+          QuranReaderState(
             status: QuranReaderStatus.loaded,
             currentSurah: tSurah,
             jumpToPage: 1,
+            pages: initialPages,
           ),
-          const QuranReaderState(
+          QuranReaderState(
             status: QuranReaderStatus.loaded,
             currentSurah: tSurah,
+            pages: initialPages,
           ),
         ],
       );
@@ -130,10 +161,14 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadSurah(1)),
         expect: () => [
-          const QuranReaderState(status: QuranReaderStatus.loading),
-          const QuranReaderState(
+          QuranReaderState(
+            status: QuranReaderStatus.loading,
+            pages: initialPages,
+          ),
+          QuranReaderState(
             status: QuranReaderStatus.error,
             errorMessage: 'UnexpectedFailure(err)',
+            pages: initialPages,
           ),
         ],
       );
@@ -151,12 +186,11 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadPage(1)),
         expect: () => [
-          const QuranReaderState(status: QuranReaderStatus.loading),
-          const QuranReaderState(
-            status: QuranReaderStatus.loaded,
-            currentPage: tPage,
-            pages: {1: tPage},
-          ),
+          isA<QuranReaderState>()
+              .having((s) => s.status, 'status', QuranReaderStatus.loaded)
+              .having((s) => s.currentPage, 'currentPage', tPage)
+              .having((s) => s.pages[1], 'pages[1]', tPage)
+              .having((s) => s.pages.length, 'pages.length', 604),
         ],
       );
 
@@ -171,10 +205,10 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadPage(1)),
         expect: () => [
-          const QuranReaderState(status: QuranReaderStatus.loading),
-          const QuranReaderState(
+          QuranReaderState(
             status: QuranReaderStatus.error,
             errorMessage: 'UnexpectedFailure(err)',
+            pages: initialPages,
           ),
         ],
       );
@@ -202,15 +236,27 @@ void main() {
             saveLastReadPositionUseCase,
             searchAyahsUseCase,
             searchSurahsUseCase,
+            getAllPagesUseCase,
           )..emit(QuranReaderState(pages: {1: pageWithWords}));
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadPage(1)),
         expect: () => [
           isA<QuranReaderState>().having(
-            (s) => s.currentPage?.pageNumber,
-            'pageNumber',
-            1,
+            (s) => s.isPreloading,
+            'isPreloading (start)',
+            true,
           ),
+          isA<QuranReaderState>()
+              .having((s) => s.currentPage?.pageNumber, 'pageNumber', 1)
+              .having((s) => s.status, 'status', QuranReaderStatus.loaded)
+              .having(
+                (s) => s.isPreloading,
+                'isPreloading (during load)',
+                true,
+              ),
+          isA<QuranReaderState>()
+              .having((s) => s.isPreloading, 'isPreloading (end)', false)
+              .having((s) => s.status, 'status', QuranReaderStatus.loaded),
         ],
       );
     });
@@ -226,8 +272,9 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.loadSettings()),
         expect: () => [
-          const QuranReaderState(
-            settings: ReaderSettingsEntity(fontSize: 25.0),
+          QuranReaderState(
+            settings: const ReaderSettingsEntity(fontSize: 25.0),
+            pages: initialPages,
           ),
         ],
       );
@@ -248,8 +295,9 @@ void main() {
           ),
         ),
         expect: () => [
-          const QuranReaderState(
-            settings: ReaderSettingsEntity(fontSize: 35.0),
+          QuranReaderState(
+            settings: const ReaderSettingsEntity(fontSize: 35.0),
+            pages: initialPages,
           ),
         ],
       );
@@ -266,8 +314,9 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.toggleTranslation()),
         expect: () => [
-          const QuranReaderState(
-            settings: ReaderSettingsEntity(showTranslation: false),
+          QuranReaderState(
+            settings: const ReaderSettingsEntity(showTranslation: false),
+            pages: initialPages,
           ),
         ],
       );
@@ -287,8 +336,12 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.searchAyahs('test')),
         expect: () => [
-          const QuranReaderState(isSearching: true, searchQuery: 'test'),
-          const QuranReaderState(searchQuery: 'test'),
+          QuranReaderState(
+            isSearching: true,
+            searchQuery: 'test',
+            pages: initialPages,
+          ),
+          QuranReaderState(searchQuery: 'test', pages: initialPages),
         ],
       );
 
@@ -296,7 +349,7 @@ void main() {
         'clears search on clearSearch',
         build: () => bloc,
         act: (bloc) => bloc.add(const QuranReaderEvent.clearSearch()),
-        expect: () => [const QuranReaderState()],
+        expect: () => [QuranReaderState(pages: initialPages)],
       );
     });
 
@@ -306,8 +359,8 @@ void main() {
         build: () => bloc,
         act: (bloc) => bloc.add(const QuranReaderEvent.scrollToAyah(5)),
         expect: () => [
-          const QuranReaderState(scrollToAyah: 5),
-          const QuranReaderState(),
+          QuranReaderState(scrollToAyah: 5, pages: initialPages),
+          QuranReaderState(pages: initialPages),
         ],
       );
 
@@ -338,8 +391,8 @@ void main() {
         build: () => bloc,
         act: (bloc) => bloc.add(const QuranReaderEvent.jumpToPage(10)),
         expect: () => [
-          const QuranReaderState(jumpToPage: 10),
-          const QuranReaderState(),
+          QuranReaderState(jumpToPage: 10, pages: initialPages),
+          QuranReaderState(pages: initialPages),
         ],
       );
     });
@@ -357,8 +410,9 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.updateFontSize(28.0)),
         expect: () => [
-          const QuranReaderState(
-            settings: ReaderSettingsEntity(fontSize: 28.0),
+          QuranReaderState(
+            settings: const ReaderSettingsEntity(fontSize: 28.0),
+            pages: initialPages,
           ),
         ],
       );
@@ -366,23 +420,24 @@ void main() {
 
     group('preloadAllPages', () {
       blocTest<QuranReaderBloc, QuranReaderState>(
-        'emits isPreloading true when preloading starts',
+        'emits [loading, loaded] with full pages on success',
         build: () {
           when(
-            () =>
-                getQuranPageUseCase.call(pageNumber: any(named: 'pageNumber')),
-          ).thenAnswer((_) async => const Right(tPage));
+            () => getAllPagesUseCase.call(),
+          ).thenAnswer((_) async => const Right({}));
           return bloc;
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.preloadAllPages()),
-        wait: const Duration(milliseconds: 100),
-        verify: (bloc) {
-          // Just verify preloading was triggered
-          verify(
-            () =>
-                getQuranPageUseCase.call(pageNumber: any(named: 'pageNumber')),
-          ).called(greaterThan(0));
-        },
+        expect: () => [
+          isA<QuranReaderState>().having(
+            (p) => p.isPreloading,
+            'loading',
+            true,
+          ),
+          isA<QuranReaderState>()
+              .having((p) => p.isPreloading, 'loading', false)
+              .having((p) => p.pages, 'pages', isNotEmpty),
+        ],
       );
     });
 
@@ -400,11 +455,16 @@ void main() {
         },
         act: (bloc) => bloc.add(const QuranReaderEvent.searchAyahs('test')),
         expect: () => [
-          const QuranReaderState(isSearching: true, searchQuery: 'test'),
+          QuranReaderState(
+            isSearching: true,
+            searchQuery: 'test',
+            pages: initialPages,
+          ),
           isA<QuranReaderState>()
               .having((s) => s.isSearching, 'isSearching', false)
               .having((s) => s.searchQuery, 'searchQuery', 'test')
-              .having((s) => s.errorMessage, 'errorMessage', isNotEmpty),
+              .having((s) => s.errorMessage, 'errorMessage', isNotEmpty)
+              .having((s) => s.pages, 'pages', initialPages),
         ],
       );
 
@@ -432,6 +492,50 @@ void main() {
               .having((s) => s.searchResults.length, 'searchResults', 1)
               .having((s) => s.surahSearchResults.length, 'surahResults', 1),
         ],
+      );
+    });
+
+    group('prefetchPages', () {
+      const tPage2 = QuranPageEntity(
+        pageNumber: 2,
+        ayahs: [
+          PageAyahInfo(
+            surahNumber: 2,
+            surahName: 'Al-Baqarah',
+            surahNameEnglish: 'The Cow',
+            ayahNumber: 1,
+            text: 'Alif Lam Mim',
+          ),
+        ],
+        juz: 1,
+        hizb: 1,
+      );
+
+      blocTest<QuranReaderBloc, QuranReaderState>(
+        'adds pages to state without changing currentPage',
+        build: () {
+          when(
+            () => getQuranPageUseCase.call(pageNumber: 2),
+          ).thenAnswer((_) async => const Right(tPage2));
+          return bloc;
+        },
+        seed: () => QuranReaderState(
+          status: QuranReaderStatus.loaded,
+          currentPage: tPage,
+          pages: {...initialPages, 1: tPage},
+        ),
+        act: (bloc) => bloc.add(const QuranReaderEvent.prefetchPages([2])),
+        wait: const Duration(milliseconds: 500),
+        expect: () => [
+          isA<QuranReaderState>()
+              .having((s) => s.currentPage, 'currentPage', tPage)
+              .having((s) => s.pages[1], 'pages[1]', tPage)
+              .having((s) => s.pages[2], 'pages[2]', tPage2)
+              .having((s) => s.pages.length, 'pages.length', 604),
+        ],
+        verify: (_) {
+          verify(() => getQuranPageUseCase.call(pageNumber: 2)).called(1);
+        },
       );
     });
   });

@@ -30,26 +30,34 @@ class _QuranPageWidgetState extends State<QuranPageWidget> {
     final pageFontFamily =
         'QCF_P${widget.page.pageNumber.toString().padLeft(3, '0')}';
 
-    // Group Ayahs by Surah
-    final Map<int, List<PageAyahInfo>> ayahsBySurah = {};
-    for (final PageAyahInfo ayah in widget.page.ayahs) {
-      ayahsBySurah.putIfAbsent(ayah.surahNumber, () => []).add(ayah);
-    }
-
-    final List<MapEntry<int, List<PageAyahInfo>>> surahEntries = ayahsBySurah
-        .entries
-        .toList();
-
-    // Data for Top and Bottom Bars
-    final PageAyahInfo firstAyah = widget.page.ayahs.first;
-    final String surahNameEnglish = firstAyah.surahNameEnglish;
-    final int juzNumber = widget.page.juz;
-    final int hizbNumber = widget.page.hizb;
-    final int pageNumber = widget.page.pageNumber;
-
     return BlocBuilder<QuranReaderBloc, QuranReaderState>(
+      buildWhen: (previous, current) {
+        return previous.settings.fontSize != current.settings.fontSize ||
+            // Rebuild if we get updated page content (e.g. loaded words)
+            previous.pages[widget.page.pageNumber] !=
+                current.pages[widget.page.pageNumber];
+      },
       builder: (context, state) {
         final double currentFontSize = state.settings.fontSize;
+        // Use the latest version of the page from the state, or fallback to the widget's initial version
+        final QuranPageEntity page =
+            state.pages[widget.page.pageNumber] ?? widget.page;
+
+        // Data for Top and Bottom Bars
+        final PageAyahInfo? firstAyah = page.ayahs.firstOrNull;
+        final String surahNameEnglish = firstAyah?.surahNameEnglish ?? '';
+        final int juzNumber = page.juz;
+        final int hizbNumber = page.hizb;
+        final int pageNumber = page.pageNumber;
+
+        // Group Ayahs by Surah
+        final Map<int, List<PageAyahInfo>> ayahsBySurah = {};
+        for (final PageAyahInfo ayah in page.ayahs) {
+          ayahsBySurah.putIfAbsent(ayah.surahNumber, () => []).add(ayah);
+        }
+
+        final List<MapEntry<int, List<PageAyahInfo>>> surahEntries =
+            ayahsBySurah.entries.toList();
 
         return ColoredBox(
           color: const Color(0xFFFFFBF3), // Cream background
@@ -70,35 +78,37 @@ class _QuranPageWidgetState extends State<QuranPageWidget> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: surahEntries.expand((entry) {
-                      final int surahNum = entry.key;
-                      final List<PageAyahInfo> ayahs = entry.value;
-                      final widgets = <Widget>[];
+                    children: page.ayahs.isEmpty
+                        ? [const SizedBox(height: 50)] // Placeholder height
+                        : surahEntries.expand((entry) {
+                            final int surahNum = entry.key;
+                            final List<PageAyahInfo> ayahs = entry.value;
+                            final widgets = <Widget>[];
 
-                      // Check if start of Surah
-                      final bool isStartOfSurah = ayahs.any(
-                        (a) => a.ayahNumber == 1,
-                      );
+                            // Check if start of Surah
+                            final bool isStartOfSurah = ayahs.any(
+                              (a) => a.ayahNumber == 1,
+                            );
 
-                      if (isStartOfSurah) {
-                        widgets.add(SurahHeader(surahNumber: surahNum));
-                      }
+                            if (isStartOfSurah) {
+                              widgets.add(SurahHeader(surahNumber: surahNum));
+                            }
 
-                      // Text Content
-                      widgets.add(
-                        SurahTextSection(
-                          ayahs: ayahs,
-                          fontFamily: pageFontFamily,
-                          fontSize: currentFontSize,
-                        ),
-                      );
+                            // Text Content
+                            widgets.add(
+                              SurahTextSection(
+                                ayahs: ayahs,
+                                fontFamily: pageFontFamily,
+                                fontSize: currentFontSize,
+                              ),
+                            );
 
-                      if (entry.key != surahEntries.last.key) {
-                        widgets.add(const SizedBox(height: 24));
-                      }
+                            if (entry.key != surahEntries.last.key) {
+                              widgets.add(const SizedBox(height: 24));
+                            }
 
-                      return widgets;
-                    }).toList(),
+                            return widgets;
+                          }).toList(),
                   ),
                 ),
               ),

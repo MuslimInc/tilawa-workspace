@@ -14,6 +14,9 @@ abstract class QuranReaderRepository {
   /// Get ayahs for a specific page
   Future<QuranPageEntity> getPage(int pageNumber);
 
+  /// Get all pages
+  Future<Map<int, QuranPageEntity>> getAllPages();
+
   /// Get ayahs for a specific juz
   Future<List<AyahEntity>> getJuz(int juzNumber);
 

@@ -361,6 +361,8 @@ import 'package:tilawa/features/quran_reader/data/repositories/quran_reader_repo
     as _i827;
 import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart'
     as _i664;
+import 'package:tilawa/features/quran_reader/domain/usecases/get_all_pages_use_case.dart'
+    as _i439;
 import 'package:tilawa/features/quran_reader/domain/usecases/get_quran_page_use_case.dart'
     as _i1009;
 import 'package:tilawa/features/quran_reader/domain/usecases/get_surah_content_use_case.dart'
@@ -1093,6 +1095,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i201.SearchSurahsUseCase>(
       () => _i201.SearchSurahsUseCase(gh<_i664.QuranReaderRepository>()),
     );
+    gh.lazySingleton<_i439.GetAllPagesUseCase>(
+      () => _i439.GetAllPagesUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.lazySingleton<_i767.DownloadRecoveryService>(
+      () => _i767.DownloadRecoveryService(
+        gh<_i463.DownloadServiceInterface>(),
+        gh<_i49.DownloadValidator>(),
+        gh<_i420.DownloadQueueManager>(),
+      ),
+    );
     gh.factory<_i960.QuranReaderBloc>(
       () => _i960.QuranReaderBloc(
         gh<_i454.GetSurahContentUseCase>(),
@@ -1102,13 +1114,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i454.SaveLastReadPositionUseCase>(),
         gh<_i454.SearchAyahsUseCase>(),
         gh<_i454.SearchSurahsUseCase>(),
-      ),
-    );
-    gh.lazySingleton<_i767.DownloadRecoveryService>(
-      () => _i767.DownloadRecoveryService(
-        gh<_i463.DownloadServiceInterface>(),
-        gh<_i49.DownloadValidator>(),
-        gh<_i420.DownloadQueueManager>(),
+        gh<_i439.GetAllPagesUseCase>(),
       ),
     );
     gh.lazySingleton<_i881.DownloadStatusSynchronizer>(

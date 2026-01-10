@@ -130,11 +130,13 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
 
                   return Container(
                     color: isToday
-                        ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                        ? theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.3,
+                          )
                         : (index % 2 == 0
                               ? theme.colorScheme.surface
                               : theme.colorScheme.surfaceContainerHighest
-                                    .withOpacity(0.3)),
+                                    .withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(
                       vertical: 8,
                       horizontal: 4,

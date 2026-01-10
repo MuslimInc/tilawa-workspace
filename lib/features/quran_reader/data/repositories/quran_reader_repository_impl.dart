@@ -38,6 +38,11 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   }
 
   @override
+  Future<Map<int, QuranPageEntity>> getAllPages() async {
+    return _quranDataSource.getAllPages();
+  }
+
+  @override
   Future<List<AyahEntity>> getJuz(int juzNumber) async {
     return _quranDataSource.getJuz(juzNumber);
   }
@@ -71,7 +76,9 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
           }
         }
       }
-      if (results.isNotEmpty) return results;
+      if (results.isNotEmpty) {
+        return results;
+      }
     }
 
     // 2. Fallback to local search

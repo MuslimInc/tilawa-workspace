@@ -26,12 +26,16 @@ class SearchRemoteDataSource {
         final List<dynamic> results = response.data['results'] ?? [];
         return results
             .map((e) {
-              final String verseKey = e['verse_key']?.toString() ?? '';
-              final List<dynamic> translations = e['translations'] ?? [];
+              final item = e as Map<String, dynamic>;
+              final String verseKey = item['verse_key']?.toString() ?? '';
+              final List<dynamic> translations =
+                  item['translations'] as List<dynamic>? ?? [];
               String? translationSnippet;
 
               if (translations.isNotEmpty) {
-                translationSnippet = translations.first['text']?.toString();
+                final firstTranslation =
+                    translations.first as Map<String, dynamic>;
+                translationSnippet = firstTranslation['text']?.toString();
                 // The API provides HTML tags like <em> for highlights.
                 // We can keep them for now and clean them up in the UI or here.
               }

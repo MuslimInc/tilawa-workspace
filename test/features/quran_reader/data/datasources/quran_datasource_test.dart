@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
@@ -140,7 +141,7 @@ void main() {
           ).thenAnswer((_) async => tWords);
           when(
             () => mockLocalDataSource.updatePageWithWords(1, tWords),
-          ).thenReturn(null);
+          ).thenAnswer((_) async {});
 
           final QuranPageEntity result = await dataSource.getPage(1);
 
@@ -328,9 +329,39 @@ void main() {
       },
     };
 
-    setUp(() {
+    late Directory tempDir;
+
+    setUp(() async {
       mockAssetBundle = MockAssetBundle();
+      tempDir = await Directory.systemTemp.createTemp();
+
+      // Mock path_provider channel for ALL local datasource tests
+      const channel = MethodChannel('plugins.flutter.io/path_provider');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+            if (methodCall.method == 'getApplicationDocumentsDirectory') {
+              return tempDir.path;
+            }
+            return null;
+          });
+
       localDataSource = QuranLocalDataSourceImpl(assetBundle: mockAssetBundle);
+    });
+
+    tearDown(() {
+      try {
+        if (tempDir.existsSync()) {
+          tempDir.deleteSync(recursive: true);
+        }
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('plugins.flutter.io/path_provider'),
+            null,
+          );
     });
 
     void setupMockAsset({Map<String, dynamic>? data, bool fail = false}) {
@@ -569,7 +600,7 @@ void main() {
           ],
         };
 
-        localDataSource.updatePageWithWords(1, tWords);
+        await localDataSource.updatePageWithWords(1, tWords);
 
         final QuranPageEntity updatedPage = await localDataSource.getPage(1);
         // Words should be updated
@@ -592,7 +623,68 @@ void main() {
         };
 
         // Should not throw
-        localDataSource.updatePageWithWords(999, tWords);
+        await localDataSource.updatePageWithWords(999, tWords);
+      });
+    });
+
+    group('Caching', () {
+      test('should save page to disk when updated with words', () async {
+        setupMockAsset();
+        // 1. Populate memory cache
+        await localDataSource.getPage(1);
+
+        // 2. Update with words
+        final words = {
+          '1:1': [
+            const QuranWord(
+              id: 1,
+              position: 1,
+              text: 'Test',
+              textUthmani: 'Test',
+              charTypeName: 'word',
+            ),
+          ],
+        };
+        await localDataSource.updatePageWithWords(1, words);
+
+        // 3. Wait slightly for async file write
+        // await Future.delayed(const Duration(milliseconds: 200)); // No longer needed as we await the call
+
+        // 4. Verify file exists
+        final file = File('${tempDir.path}/quran_pages_cache/1.json');
+        expect(file.existsSync(), true);
+
+        final String jsonString = await file.readAsString();
+        final jsonMap = jsonDecode(jsonString);
+        expect(jsonMap['pageNumber'], 1);
+
+        // Navigate json structure: ayahs -> [0] -> words -> [0] -> text
+        final ayahs = jsonMap['ayahs'] as List;
+        final wordsList = ayahs[0]['words'] as List;
+        expect(wordsList[0]['text'], 'Test');
+      });
+
+      test('should load page from disk if available', () async {
+        // 1. Create dummy cached file in temp dir
+        final cacheDir = Directory('${tempDir.path}/quran_pages_cache');
+        await cacheDir.create(recursive: true);
+
+        final Map<String, Object> cachedPageJson = {
+          'pageNumber': 1,
+          'ayahs': [],
+          'juz': 99, // Unique value to verify source
+          'hizb': 5,
+        };
+        await File(
+          '${cacheDir.path}/1.json',
+        ).writeAsString(jsonEncode(cachedPageJson));
+
+        // 2. Get page (should hit disk)
+        final QuranPageEntity result = await localDataSource.getPage(1);
+
+        // 3. Verify it's our cached page
+        expect(result.pageNumber, 1);
+        expect(result.juz, 99);
       });
     });
   });

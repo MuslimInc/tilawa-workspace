@@ -21,6 +21,9 @@ abstract class QuranDataSource {
   /// Gets page data including ayahs and words.
   Future<QuranPageEntity> getPage(int pageNumber);
 
+  /// Gets all pages.
+  Future<Map<int, QuranPageEntity>> getAllPages();
+
   /// Gets all ayahs for a juz.
   Future<List<AyahEntity>> getJuz(int juzNumber);
 
@@ -77,7 +80,7 @@ class QuranDataSourceImpl implements QuranDataSource {
       final Map<String, List<QuranWord>> words = await _remoteDataSource
           .getPageWords(pageNumber);
       if (words.isNotEmpty) {
-        _localDataSource.updatePageWithWords(pageNumber, words);
+        await _localDataSource.updatePageWithWords(pageNumber, words);
         return _localDataSource.getPage(pageNumber);
       }
     } catch (e) {
@@ -85,6 +88,11 @@ class QuranDataSourceImpl implements QuranDataSource {
     }
 
     return page;
+  }
+
+  @override
+  Future<Map<int, QuranPageEntity>> getAllPages() {
+    return _localDataSource.getAllPages();
   }
 
   @override
