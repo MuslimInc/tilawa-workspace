@@ -775,4 +775,295 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlinePlaybackError =>
       'This content is not available offline. Please download it first.';
+
+  @override
+  String get bookmarks => 'Bookmarks';
+
+  @override
+  String get addBookmark => 'Add Bookmark';
+
+  @override
+  String get deleteBookmark => 'Delete Bookmark';
+
+  @override
+  String get editBookmark => 'Edit Bookmark';
+
+  @override
+  String get searchBookmarks => 'Search bookmarks...';
+
+  @override
+  String get noBookmarksYet => 'No Bookmarks Yet';
+
+  @override
+  String get noBookmarksDescription =>
+      'Save your favorite moments while listening to the Quran';
+
+  @override
+  String get bookmarkAdded => 'Bookmark added';
+
+  @override
+  String get bookmarkDeleted => 'Bookmark deleted';
+
+  @override
+  String get bookmarkLabel => 'Label (optional)';
+
+  @override
+  String get deleteBookmarkConfirmation =>
+      'Are you sure you want to delete this bookmark?';
+
+  @override
+  String get listeningHistory => 'Listening History';
+
+  @override
+  String get noHistoryYet => 'No History Yet';
+
+  @override
+  String get noHistoryDescription => 'Your listening history will appear here';
+
+  @override
+  String get clearHistory => 'Clear History';
+
+  @override
+  String get clearHistoryConfirmation =>
+      'Are you sure you want to clear all listening history?';
+
+  @override
+  String get historyDeleted => 'History deleted';
+
+  @override
+  String get totalSurahs => 'Total Surahs';
+
+  @override
+  String get totalListeningTime => 'Total Time';
+
+  @override
+  String get searchHistory => 'Search history...';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String playedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Played $count times',
+      one: 'Played 1 time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get prayerTimes => 'Prayer Times';
+
+  @override
+  String get prayerSettings => 'Prayer Settings';
+
+  @override
+  String get fajr => 'Fajr';
+
+  @override
+  String get sunrise => 'Sunrise';
+
+  @override
+  String get dhuhr => 'Dhuhr';
+
+  @override
+  String get asr => 'Asr';
+
+  @override
+  String get maghrib => 'Maghrib';
+
+  @override
+  String get isha => 'Isha';
+
+  @override
+  String get nextPrayer => 'Next Prayer';
+
+  @override
+  String get calculationMethod => 'Calculation Method';
+
+  @override
+  String get asrCalculation => 'Asr Calculation';
+
+  @override
+  String get displayOptions => 'Display Options';
+
+  @override
+  String get use24HourFormat => 'Use 24-hour format';
+
+  @override
+  String get showSunrise => 'Show Sunrise';
+
+  @override
+  String get locationRequired => 'Location Required';
+
+  @override
+  String get locationRequiredDescription =>
+      'Prayer times require your location to calculate accurately';
+
+  @override
+  String get enableLocation => 'Enable Location';
+
+  @override
+  String get updateLocation => 'Update Location';
+
+  @override
+  String get currentLocation => 'Current Location';
+
+  @override
+  String get hours => 'hours';
+
+  @override
+  String get minutes => 'minutes';
+
+  @override
+  String get seconds => 'seconds';
+
+  @override
+  String get at => 'at';
+
+  @override
+  String get monthly => 'Monthly';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String minutesBefore(int count) {
+    return '$count minutes before';
+  }
+
+  @override
+  String get readerSettings => 'Reader Settings';
+
+  @override
+  String get fontSize => 'Font Size';
+
+  @override
+  String get lineHeight => 'Line Height';
+
+  @override
+  String get fontType => 'Font Type';
+
+  @override
+  String get showTranslation => 'Show Translation';
+
+  @override
+  String get showAyahNumbers => 'Show Ayah Numbers';
+
+  @override
+  String get showTransliteration => 'Show Transliteration';
+
+  @override
+  String get ayah => 'Ayah';
+
+  @override
+  String get ayahs => 'Ayahs';
+
+  @override
+  String get surahNotFound => 'Surah not found';
+
+  @override
+  String get playAyah => 'Play Ayah';
+
+  @override
+  String get copyAyah => 'Copy Ayah';
+
+  @override
+  String get shareAyah => 'Share Ayah';
+
+  @override
+  String get searchAyahs => 'Search Ayahs';
+
+  @override
+  String get searchAyahsHint => 'Enter Arabic text to search...';
+
+  @override
+  String get enterSearchQuery => 'Enter a search query';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get continueReading => 'Continue Reading';
+
+  @override
+  String get lastRead => 'Last Read';
+
+  @override
+  String get goToAyah => 'Go to Ayah';
+
+  @override
+  String get juz => 'Juz';
+
+  @override
+  String get page => 'Page';
+
+  @override
+  String get verses => 'Verses';
+
+  @override
+  String get meccan => 'Meccan';
+
+  @override
+  String get medinan => 'Medinan';
+
+  @override
+  String get bookmarkUpdated => 'Bookmark updated';
+
+  @override
+  String get noBookmarksFound => 'No bookmarks found';
+
+  @override
+  String get noBookmarks => 'No bookmarks';
+
+  @override
+  String get tryDifferentSearch => 'Try a different search term';
+
+  @override
+  String get noBookmarksHint =>
+      'Bookmark your favorite moments while listening';
+
+  @override
+  String get editBookmarkLabel => 'Edit Bookmark Label';
+
+  @override
+  String get enterBookmarkLabel => 'Enter bookmark label';
+
+  @override
+  String get noSearchResults => 'No search results';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get timeAdjustments => 'Time Adjustments';
+
+  @override
+  String get day => 'Day';
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get quranReader => 'Quran Reader';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get errorPlayingAudio => 'Error playing audio';
+
+  @override
+  String get comingSoon => 'Coming soon';
 }

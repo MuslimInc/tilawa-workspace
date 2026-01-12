@@ -1477,6 +1477,558 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This content is not available offline. Please download it first.'**
   String get offlinePlaybackError;
+
+  /// Bookmarks screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get bookmarks;
+
+  /// Add bookmark button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Bookmark'**
+  String get addBookmark;
+
+  /// Delete bookmark button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Bookmark'**
+  String get deleteBookmark;
+
+  /// Edit bookmark button text
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Bookmark'**
+  String get editBookmark;
+
+  /// Search bookmarks hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search bookmarks...'**
+  String get searchBookmarks;
+
+  /// No bookmarks empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No Bookmarks Yet'**
+  String get noBookmarksYet;
+
+  /// No bookmarks empty state description
+  ///
+  /// In en, this message translates to:
+  /// **'Save your favorite moments while listening to the Quran'**
+  String get noBookmarksDescription;
+
+  /// Bookmark added confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark added'**
+  String get bookmarkAdded;
+
+  /// Bookmark deleted confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark deleted'**
+  String get bookmarkDeleted;
+
+  /// Bookmark label input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get bookmarkLabel;
+
+  /// Delete bookmark confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this bookmark?'**
+  String get deleteBookmarkConfirmation;
+
+  /// Listening history screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Listening History'**
+  String get listeningHistory;
+
+  /// No history empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No History Yet'**
+  String get noHistoryYet;
+
+  /// No history empty state description
+  ///
+  /// In en, this message translates to:
+  /// **'Your listening history will appear here'**
+  String get noHistoryDescription;
+
+  /// Clear history button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History'**
+  String get clearHistory;
+
+  /// Clear history confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all listening history?'**
+  String get clearHistoryConfirmation;
+
+  /// History deleted confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'History deleted'**
+  String get historyDeleted;
+
+  /// Total surahs listened label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Surahs'**
+  String get totalSurahs;
+
+  /// Total listening time label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Time'**
+  String get totalListeningTime;
+
+  /// Search history hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search history...'**
+  String get searchHistory;
+
+  /// Today date label
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// Yesterday date label
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// Number of times played
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Played 1 time} other{Played {count} times}}'**
+  String playedTimes(int count);
+
+  /// Prayer times screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times'**
+  String get prayerTimes;
+
+  /// Prayer settings title
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Settings'**
+  String get prayerSettings;
+
+  /// Fajr prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Fajr'**
+  String get fajr;
+
+  /// Sunrise time label
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get sunrise;
+
+  /// Dhuhr prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Dhuhr'**
+  String get dhuhr;
+
+  /// Asr prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Asr'**
+  String get asr;
+
+  /// Maghrib prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Maghrib'**
+  String get maghrib;
+
+  /// Isha prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Isha'**
+  String get isha;
+
+  /// Next prayer label
+  ///
+  /// In en, this message translates to:
+  /// **'Next Prayer'**
+  String get nextPrayer;
+
+  /// Prayer calculation method label
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation Method'**
+  String get calculationMethod;
+
+  /// Asr calculation method label
+  ///
+  /// In en, this message translates to:
+  /// **'Asr Calculation'**
+  String get asrCalculation;
+
+  /// Display options section title
+  ///
+  /// In en, this message translates to:
+  /// **'Display Options'**
+  String get displayOptions;
+
+  /// 24-hour format toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Use 24-hour format'**
+  String get use24HourFormat;
+
+  /// Show sunrise toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Show Sunrise'**
+  String get showSunrise;
+
+  /// Location required title
+  ///
+  /// In en, this message translates to:
+  /// **'Location Required'**
+  String get locationRequired;
+
+  /// Location required description
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times require your location to calculate accurately'**
+  String get locationRequiredDescription;
+
+  /// Enable location button text
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Location'**
+  String get enableLocation;
+
+  /// Update location button text
+  ///
+  /// In en, this message translates to:
+  /// **'Update Location'**
+  String get updateLocation;
+
+  /// Current location label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Location'**
+  String get currentLocation;
+
+  /// Hours label
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get hours;
+
+  /// Minutes label
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get minutes;
+
+  /// Seconds label
+  ///
+  /// In en, this message translates to:
+  /// **'seconds'**
+  String get seconds;
+
+  /// At preposition for time
+  ///
+  /// In en, this message translates to:
+  /// **'at'**
+  String get at;
+
+  /// Monthly view tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthly;
+
+  /// Notifications section title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Enable notifications toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get enableNotifications;
+
+  /// Minutes before prayer notification
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes before'**
+  String minutesBefore(int count);
+
+  /// Reader settings title
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Settings'**
+  String get readerSettings;
+
+  /// Font size setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get fontSize;
+
+  /// Line height setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Line Height'**
+  String get lineHeight;
+
+  /// Font type setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Font Type'**
+  String get fontType;
+
+  /// Show translation toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Show Translation'**
+  String get showTranslation;
+
+  /// Show ayah numbers toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Show Ayah Numbers'**
+  String get showAyahNumbers;
+
+  /// Show transliteration toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Show Transliteration'**
+  String get showTransliteration;
+
+  /// Ayah label
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah'**
+  String get ayah;
+
+  /// Ayahs plural label
+  ///
+  /// In en, this message translates to:
+  /// **'Ayahs'**
+  String get ayahs;
+
+  /// Surah not found error message
+  ///
+  /// In en, this message translates to:
+  /// **'Surah not found'**
+  String get surahNotFound;
+
+  /// Play ayah option
+  ///
+  /// In en, this message translates to:
+  /// **'Play Ayah'**
+  String get playAyah;
+
+  /// Copy ayah option
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Ayah'**
+  String get copyAyah;
+
+  /// Share ayah option
+  ///
+  /// In en, this message translates to:
+  /// **'Share Ayah'**
+  String get shareAyah;
+
+  /// Search ayahs title
+  ///
+  /// In en, this message translates to:
+  /// **'Search Ayahs'**
+  String get searchAyahs;
+
+  /// Search ayahs hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Arabic text to search...'**
+  String get searchAyahsHint;
+
+  /// Enter search query message
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a search query'**
+  String get enterSearchQuery;
+
+  /// No search results message
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsFound;
+
+  /// Close button text
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// Continue reading button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Reading'**
+  String get continueReading;
+
+  /// Last read position label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Read'**
+  String get lastRead;
+
+  /// Go to ayah option
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Ayah'**
+  String get goToAyah;
+
+  /// Juz label
+  ///
+  /// In en, this message translates to:
+  /// **'Juz'**
+  String get juz;
+
+  /// Page label
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get page;
+
+  /// Verses label
+  ///
+  /// In en, this message translates to:
+  /// **'Verses'**
+  String get verses;
+
+  /// Meccan surah type
+  ///
+  /// In en, this message translates to:
+  /// **'Meccan'**
+  String get meccan;
+
+  /// Medinan surah type
+  ///
+  /// In en, this message translates to:
+  /// **'Medinan'**
+  String get medinan;
+
+  /// Bookmark updated confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark updated'**
+  String get bookmarkUpdated;
+
+  /// No bookmarks found in search
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks found'**
+  String get noBookmarksFound;
+
+  /// No bookmarks message
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks'**
+  String get noBookmarks;
+
+  /// Try different search suggestion
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get tryDifferentSearch;
+
+  /// No bookmarks hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark your favorite moments while listening'**
+  String get noBookmarksHint;
+
+  /// Edit bookmark label dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Bookmark Label'**
+  String get editBookmarkLabel;
+
+  /// Enter bookmark label hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter bookmark label'**
+  String get enterBookmarkLabel;
+
+  /// No search results message
+  ///
+  /// In en, this message translates to:
+  /// **'No search results'**
+  String get noSearchResults;
+
+  /// Clear all button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAll;
+
+  /// Time adjustments section title
+  ///
+  /// In en, this message translates to:
+  /// **'Time Adjustments'**
+  String get timeAdjustments;
+
+  /// Day label for calendar
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get day;
+
+  /// Features section title in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get features;
+
+  /// Quran reader feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Reader'**
+  String get quranReader;
+
+  /// Message shown when text is copied
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// Error message when audio fails to play
+  ///
+  /// In en, this message translates to:
+  /// **'Error playing audio'**
+  String get errorPlayingAudio;
+
+  /// Message for features not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
 }
 
 class _AppLocalizationsDelegate

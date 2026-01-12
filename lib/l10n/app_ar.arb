@@ -1035,5 +1035,387 @@
     "offlinePlaybackError": "هذا المحتوى غير متاح بدون اتصال. يرجى تنزيله أولاً.",
     "@offlinePlaybackError": {
         "description": "Error shown when user tries to play undownloaded content while offline"
+    },
+    "bookmarks": "العلامات المرجعية",
+    "@bookmarks": {
+        "description": "Bookmarks screen title"
+    },
+    "addBookmark": "إضافة علامة مرجعية",
+    "@addBookmark": {
+        "description": "Add bookmark button text"
+    },
+    "deleteBookmark": "حذف العلامة المرجعية",
+    "@deleteBookmark": {
+        "description": "Delete bookmark button text"
+    },
+    "editBookmark": "تعديل العلامة المرجعية",
+    "@editBookmark": {
+        "description": "Edit bookmark button text"
+    },
+    "searchBookmarks": "البحث في العلامات المرجعية...",
+    "@searchBookmarks": {
+        "description": "Search bookmarks hint text"
+    },
+    "noBookmarksYet": "لا توجد علامات مرجعية بعد",
+    "@noBookmarksYet": {
+        "description": "No bookmarks empty state title"
+    },
+    "noBookmarksDescription": "احفظ لحظاتك المفضلة أثناء الاستماع إلى القرآن",
+    "@noBookmarksDescription": {
+        "description": "No bookmarks empty state description"
+    },
+    "bookmarkAdded": "تمت إضافة العلامة المرجعية",
+    "@bookmarkAdded": {
+        "description": "Bookmark added confirmation message"
+    },
+    "bookmarkDeleted": "تم حذف العلامة المرجعية",
+    "@bookmarkDeleted": {
+        "description": "Bookmark deleted confirmation message"
+    },
+    "bookmarkLabel": "التسمية (اختياري)",
+    "@bookmarkLabel": {
+        "description": "Bookmark label input hint"
+    },
+    "deleteBookmarkConfirmation": "هل أنت متأكد من حذف هذه العلامة المرجعية؟",
+    "@deleteBookmarkConfirmation": {
+        "description": "Delete bookmark confirmation message"
+    },
+    "listeningHistory": "سجل الاستماع",
+    "@listeningHistory": {
+        "description": "Listening history screen title"
+    },
+    "noHistoryYet": "لا يوجد سجل بعد",
+    "@noHistoryYet": {
+        "description": "No history empty state title"
+    },
+    "noHistoryDescription": "سيظهر سجل الاستماع الخاص بك هنا",
+    "@noHistoryDescription": {
+        "description": "No history empty state description"
+    },
+    "clearHistory": "مسح السجل",
+    "@clearHistory": {
+        "description": "Clear history button text"
+    },
+    "clearHistoryConfirmation": "هل أنت متأكد من مسح كل سجل الاستماع؟",
+    "@clearHistoryConfirmation": {
+        "description": "Clear history confirmation message"
+    },
+    "historyDeleted": "تم حذف السجل",
+    "@historyDeleted": {
+        "description": "History deleted confirmation message"
+    },
+    "totalSurahs": "إجمالي السور",
+    "@totalSurahs": {
+        "description": "Total surahs listened label"
+    },
+    "totalListeningTime": "إجمالي الوقت",
+    "@totalListeningTime": {
+        "description": "Total listening time label"
+    },
+    "searchHistory": "البحث في السجل...",
+    "@searchHistory": {
+        "description": "Search history hint text"
+    },
+    "today": "اليوم",
+    "@today": {
+        "description": "Today date label"
+    },
+    "yesterday": "أمس",
+    "@yesterday": {
+        "description": "Yesterday date label"
+    },
+    "playedTimes": "{count, plural, =1{تم التشغيل مرة واحدة} other{تم التشغيل {count} مرات}}",
+    "@playedTimes": {
+        "description": "Number of times played",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "prayerTimes": "مواقيت الصلاة",
+    "@prayerTimes": {
+        "description": "Prayer times screen title"
+    },
+    "prayerSettings": "إعدادات الصلاة",
+    "@prayerSettings": {
+        "description": "Prayer settings title"
+    },
+    "fajr": "الفجر",
+    "@fajr": {
+        "description": "Fajr prayer name"
+    },
+    "sunrise": "الشروق",
+    "@sunrise": {
+        "description": "Sunrise time label"
+    },
+    "dhuhr": "الظهر",
+    "@dhuhr": {
+        "description": "Dhuhr prayer name"
+    },
+    "asr": "العصر",
+    "@asr": {
+        "description": "Asr prayer name"
+    },
+    "maghrib": "المغرب",
+    "@maghrib": {
+        "description": "Maghrib prayer name"
+    },
+    "isha": "العشاء",
+    "@isha": {
+        "description": "Isha prayer name"
+    },
+    "nextPrayer": "الصلاة القادمة",
+    "@nextPrayer": {
+        "description": "Next prayer label"
+    },
+    "calculationMethod": "طريقة الحساب",
+    "@calculationMethod": {
+        "description": "Prayer calculation method label"
+    },
+    "asrCalculation": "حساب العصر",
+    "@asrCalculation": {
+        "description": "Asr calculation method label"
+    },
+    "displayOptions": "خيارات العرض",
+    "@displayOptions": {
+        "description": "Display options section title"
+    },
+    "use24HourFormat": "استخدام تنسيق 24 ساعة",
+    "@use24HourFormat": {
+        "description": "24-hour format toggle label"
+    },
+    "showSunrise": "إظهار الشروق",
+    "@showSunrise": {
+        "description": "Show sunrise toggle label"
+    },
+    "locationRequired": "الموقع مطلوب",
+    "@locationRequired": {
+        "description": "Location required title"
+    },
+    "locationRequiredDescription": "تتطلب مواقيت الصلاة موقعك للحساب بدقة",
+    "@locationRequiredDescription": {
+        "description": "Location required description"
+    },
+    "enableLocation": "تفعيل الموقع",
+    "@enableLocation": {
+        "description": "Enable location button text"
+    },
+    "updateLocation": "تحديث الموقع",
+    "@updateLocation": {
+        "description": "Update location button text"
+    },
+    "currentLocation": "الموقع الحالي",
+    "@currentLocation": {
+        "description": "Current location label"
+    },
+    "hours": "ساعات",
+    "@hours": {
+        "description": "Hours label"
+    },
+    "minutes": "دقائق",
+    "@minutes": {
+        "description": "Minutes label"
+    },
+    "seconds": "ثواني",
+    "@seconds": {
+        "description": "Seconds label"
+    },
+    "at": "في",
+    "@at": {
+        "description": "At preposition for time"
+    },
+    "monthly": "شهري",
+    "@monthly": {
+        "description": "Monthly view tab title"
+    },
+    "notifications": "الإشعارات",
+    "@notifications": {
+        "description": "Notifications section title"
+    },
+    "enableNotifications": "تفعيل الإشعارات",
+    "@enableNotifications": {
+        "description": "Enable notifications toggle label"
+    },
+    "minutesBefore": "قبل {count} دقائق",
+    "@minutesBefore": {
+        "description": "Minutes before prayer notification",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "readerSettings": "إعدادات القراءة",
+    "@readerSettings": {
+        "description": "Reader settings title"
+    },
+    "fontSize": "حجم الخط",
+    "@fontSize": {
+        "description": "Font size setting label"
+    },
+    "lineHeight": "ارتفاع السطر",
+    "@lineHeight": {
+        "description": "Line height setting label"
+    },
+    "fontType": "نوع الخط",
+    "@fontType": {
+        "description": "Font type setting label"
+    },
+    "showTranslation": "إظهار الترجمة",
+    "@showTranslation": {
+        "description": "Show translation toggle label"
+    },
+    "showAyahNumbers": "إظهار أرقام الآيات",
+    "@showAyahNumbers": {
+        "description": "Show ayah numbers toggle label"
+    },
+    "showTransliteration": "إظهار النطق",
+    "@showTransliteration": {
+        "description": "Show transliteration toggle label"
+    },
+    "ayah": "آية",
+    "@ayah": {
+        "description": "Ayah label"
+    },
+    "ayahs": "آيات",
+    "@ayahs": {
+        "description": "Ayahs plural label"
+    },
+    "surahNotFound": "السورة غير موجودة",
+    "@surahNotFound": {
+        "description": "Surah not found error message"
+    },
+    "playAyah": "تشغيل الآية",
+    "@playAyah": {
+        "description": "Play ayah option"
+    },
+    "copyAyah": "نسخ الآية",
+    "@copyAyah": {
+        "description": "Copy ayah option"
+    },
+    "shareAyah": "مشاركة الآية",
+    "@shareAyah": {
+        "description": "Share ayah option"
+    },
+    "searchAyahs": "البحث في الآيات",
+    "@searchAyahs": {
+        "description": "Search ayahs title"
+    },
+    "searchAyahsHint": "أدخل نص عربي للبحث...",
+    "@searchAyahsHint": {
+        "description": "Search ayahs hint text"
+    },
+    "enterSearchQuery": "أدخل كلمة للبحث",
+    "@enterSearchQuery": {
+        "description": "Enter search query message"
+    },
+    "noResultsFound": "لم يتم العثور على نتائج",
+    "@noResultsFound": {
+        "description": "No search results message"
+    },
+    "close": "إغلاق",
+    "@close": {
+        "description": "Close button text"
+    },
+    "continueReading": "متابعة القراءة",
+    "@continueReading": {
+        "description": "Continue reading button text"
+    },
+    "lastRead": "آخر قراءة",
+    "@lastRead": {
+        "description": "Last read position label"
+    },
+    "goToAyah": "الذهاب إلى الآية",
+    "@goToAyah": {
+        "description": "Go to ayah option"
+    },
+    "juz": "جزء",
+    "@juz": {
+        "description": "Juz label"
+    },
+    "page": "صفحة",
+    "@page": {
+        "description": "Page label"
+    },
+    "verses": "آيات",
+    "@verses": {
+        "description": "Verses label"
+    },
+    "meccan": "مكية",
+    "@meccan": {
+        "description": "Meccan surah type"
+    },
+    "medinan": "مدنية",
+    "@medinan": {
+        "description": "Medinan surah type"
+    },
+    "bookmarkUpdated": "تم تحديث العلامة المرجعية",
+    "@bookmarkUpdated": {
+        "description": "Bookmark updated confirmation message"
+    },
+    "noBookmarksFound": "لم يتم العثور على علامات مرجعية",
+    "@noBookmarksFound": {
+        "description": "No bookmarks found in search"
+    },
+    "noBookmarks": "لا توجد علامات مرجعية",
+    "@noBookmarks": {
+        "description": "No bookmarks message"
+    },
+    "tryDifferentSearch": "جرب كلمة بحث مختلفة",
+    "@tryDifferentSearch": {
+        "description": "Try different search suggestion"
+    },
+    "noBookmarksHint": "أضف علامة مرجعية للحظاتك المفضلة أثناء الاستماع",
+    "@noBookmarksHint": {
+        "description": "No bookmarks hint text"
+    },
+    "editBookmarkLabel": "تعديل تسمية العلامة المرجعية",
+    "@editBookmarkLabel": {
+        "description": "Edit bookmark label dialog title"
+    },
+    "enterBookmarkLabel": "أدخل تسمية العلامة المرجعية",
+    "@enterBookmarkLabel": {
+        "description": "Enter bookmark label hint"
+    },
+    "noSearchResults": "لا توجد نتائج بحث",
+    "@noSearchResults": {
+        "description": "No search results message"
+    },
+    "clearAll": "مسح الكل",
+    "@clearAll": {
+        "description": "Clear all button text"
+    },
+    "cancel": "إلغاء",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "timeAdjustments": "تعديلات الوقت",
+    "@timeAdjustments": {
+        "description": "Time adjustments section title"
+    },
+    "day": "يوم",
+    "@day": {
+        "description": "Day label for calendar"
+    },
+    "features": "المميزات",
+    "@features": {
+        "description": "Features section title in settings"
+    },
+    "quranReader": "قارئ القرآن",
+    "@quranReader": {
+        "description": "Quran reader feature title"
+    },
+    "copiedToClipboard": "تم النسخ",
+    "@copiedToClipboard": {
+        "description": "Message shown when text is copied"
+    },
+    "errorPlayingAudio": "خطأ في تشغيل الصوت",
+    "@errorPlayingAudio": {
+        "description": "Error message when audio fails to play"
+    },
+    "comingSoon": "قريباً",
+    "@comingSoon": {
+        "description": "Message for features not yet implemented"
     }
 }

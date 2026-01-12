@@ -96,6 +96,26 @@ import 'package:tilawa/features/auth/domain/usecases/sign_out.dart' as _i633;
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart'
     as _i648;
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart' as _i447;
+import 'package:tilawa/features/bookmarks/data/datasources/bookmarks_local_datasource.dart'
+    as _i213;
+import 'package:tilawa/features/bookmarks/data/repositories/bookmarks_repository_impl.dart'
+    as _i1039;
+import 'package:tilawa/features/bookmarks/domain/repositories/bookmarks_repository.dart'
+    as _i475;
+import 'package:tilawa/features/bookmarks/domain/usecases/create_bookmark_use_case.dart'
+    as _i16;
+import 'package:tilawa/features/bookmarks/domain/usecases/delete_bookmark_use_case.dart'
+    as _i850;
+import 'package:tilawa/features/bookmarks/domain/usecases/get_all_bookmarks_use_case.dart'
+    as _i840;
+import 'package:tilawa/features/bookmarks/domain/usecases/search_bookmarks_use_case.dart'
+    as _i389;
+import 'package:tilawa/features/bookmarks/domain/usecases/update_bookmark_label_use_case.dart'
+    as _i456;
+import 'package:tilawa/features/bookmarks/domain/usecases/usecases.dart'
+    as _i520;
+import 'package:tilawa/features/bookmarks/presentation/bloc/bookmarks_bloc.dart'
+    as _i372;
 import 'package:tilawa/features/downloads/data/datasources/downloads_local_datasource.dart'
     as _i965;
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart'
@@ -185,6 +205,27 @@ import 'package:tilawa/features/downloads/domain/usecases/validate_downloaded_fi
     as _i628;
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart'
     as _i354;
+import 'package:tilawa/features/history/data/datasources/history_local_datasource.dart'
+    as _i603;
+import 'package:tilawa/features/history/data/repositories/history_repository_impl.dart'
+    as _i48;
+import 'package:tilawa/features/history/domain/repositories/history_repository.dart'
+    as _i314;
+import 'package:tilawa/features/history/domain/usecases/add_or_update_history_use_case.dart'
+    as _i636;
+import 'package:tilawa/features/history/domain/usecases/clear_all_history_use_case.dart'
+    as _i346;
+import 'package:tilawa/features/history/domain/usecases/delete_history_use_case.dart'
+    as _i703;
+import 'package:tilawa/features/history/domain/usecases/get_all_history_use_case.dart'
+    as _i959;
+import 'package:tilawa/features/history/domain/usecases/get_recent_history_use_case.dart'
+    as _i367;
+import 'package:tilawa/features/history/domain/usecases/search_history_use_case.dart'
+    as _i21;
+import 'package:tilawa/features/history/domain/usecases/usecases.dart' as _i234;
+import 'package:tilawa/features/history/presentation/bloc/history_bloc.dart'
+    as _i185;
 import 'package:tilawa/features/localization/data/datasources/localization_local_datasource.dart'
     as _i678;
 import 'package:tilawa/features/localization/data/repositories/localization_repository_impl.dart'
@@ -241,6 +282,28 @@ import 'package:tilawa/features/playlists/domain/usecases/usecases.dart'
     as _i860;
 import 'package:tilawa/features/playlists/presentation/bloc/playlists_bloc.dart'
     as _i137;
+import 'package:tilawa/features/prayer_times/data/datasources/datasources.dart'
+    as _i139;
+import 'package:tilawa/features/prayer_times/data/datasources/location_datasource.dart'
+    as _i684;
+import 'package:tilawa/features/prayer_times/data/datasources/prayer_settings_datasource.dart'
+    as _i845;
+import 'package:tilawa/features/prayer_times/data/repositories/prayer_times_repository_impl.dart'
+    as _i731;
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart'
+    as _i173;
+import 'package:tilawa/features/prayer_times/domain/usecases/get_monthly_prayer_times_use_case.dart'
+    as _i620;
+import 'package:tilawa/features/prayer_times/domain/usecases/get_prayer_times_use_case.dart'
+    as _i398;
+import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart'
+    as _i585;
+import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart'
+    as _i930;
+import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart'
+    as _i590;
+import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart'
+    as _i713;
 import 'package:tilawa/features/premium/data/datasources/premium_local_datasource.dart'
     as _i537;
 import 'package:tilawa/features/premium/data/datasources/premium_remote_datasource.dart'
@@ -281,6 +344,32 @@ import 'package:tilawa/features/qibla/domain/usecases/request_location_permissio
     as _i649;
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart'
     as _i275;
+import 'package:tilawa/features/quran_reader/data/datasources/datasources.dart'
+    as _i284;
+import 'package:tilawa/features/quran_reader/data/datasources/quran_datasource.dart'
+    as _i650;
+import 'package:tilawa/features/quran_reader/data/datasources/reader_settings_datasource.dart'
+    as _i359;
+import 'package:tilawa/features/quran_reader/data/repositories/quran_reader_repository_impl.dart'
+    as _i827;
+import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart'
+    as _i664;
+import 'package:tilawa/features/quran_reader/domain/usecases/get_quran_page_use_case.dart'
+    as _i1009;
+import 'package:tilawa/features/quran_reader/domain/usecases/get_surah_content_use_case.dart'
+    as _i622;
+import 'package:tilawa/features/quran_reader/domain/usecases/load_reader_settings_use_case.dart'
+    as _i708;
+import 'package:tilawa/features/quran_reader/domain/usecases/save_last_read_position_use_case.dart'
+    as _i816;
+import 'package:tilawa/features/quran_reader/domain/usecases/save_reader_settings_use_case.dart'
+    as _i330;
+import 'package:tilawa/features/quran_reader/domain/usecases/search_ayahs_use_case.dart'
+    as _i239;
+import 'package:tilawa/features/quran_reader/domain/usecases/usecases.dart'
+    as _i454;
+import 'package:tilawa/features/quran_reader/presentation/bloc/quran_reader_bloc.dart'
+    as _i960;
 import 'package:tilawa/features/reciters/data/datasources/reciters_favorites_datasource.dart'
     as _i775;
 import 'package:tilawa/features/reciters/data/datasources/reciters_local_datasource.dart'
@@ -413,6 +502,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i896.DownloadIsolateManager>(),
       ),
     );
+    gh.lazySingleton<_i359.ReaderSettingsDataSource>(
+      () => _i359.ReaderSettingsDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
+    );
+    gh.lazySingleton<_i845.PrayerSettingsDataSource>(
+      () => _i845.PrayerSettingsDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
+    );
     gh.lazySingleton<_i958.OnboardingRepository>(
       () => _i186.OnboardingRepositoryImpl(gh<_i460.SharedPreferencesAsync>()),
     );
@@ -454,6 +553,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.lazySingleton<_i684.LocationDataSource>(
+      () => _i684.LocationDataSourceImpl(),
+    );
     gh.singleton<_i600.CrashlyticsService>(
       () =>
           _i600.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
@@ -471,6 +573,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i49.DownloadValidator>(
       () => _i49.DownloadValidator(gh<_i965.DownloadsLocalDataSource>()),
     );
+    gh.lazySingleton<_i173.PrayerTimesRepository>(
+      () => _i731.PrayerTimesRepositoryImpl(
+        gh<_i139.PrayerSettingsDataSource>(),
+        gh<_i139.LocationDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i1039.NotificationPermissionService>(
       () => _i1039.NotificationPermissionService(
         gh<_i460.SharedPreferencesAsync>(),
@@ -482,6 +590,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i537.PremiumLocalDataSource>(
       () =>
           _i537.PremiumLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
+    );
+    gh.lazySingleton<_i650.QuranDataSource>(() => _i650.QuranDataSourceImpl());
+    gh.lazySingleton<_i603.HistoryLocalDataSource>(
+      () =>
+          _i603.HistoryLocalDataSourceImpl(gh<_i460.SharedPreferencesAsync>()),
+    );
+    gh.lazySingleton<_i213.BookmarksLocalDataSource>(
+      () => _i213.BookmarksLocalDataSourceImpl(
+        gh<_i460.SharedPreferencesAsync>(),
+      ),
     );
     gh.lazySingleton<_i67.LocalizationRepository>(
       () => _i116.LocalizationRepositoryImpl(
@@ -499,6 +617,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i116.GoogleSignIn>(),
         gh<_i614.CredentialManager>(),
       ),
+    );
+    gh.lazySingleton<_i475.BookmarksRepository>(
+      () =>
+          _i1039.BookmarksRepositoryImpl(gh<_i213.BookmarksLocalDataSource>()),
     );
     gh.lazySingleton<_i784.CredentialManagerAuthProvider>(
       () => _i784.CredentialManagerAuthProvider(
@@ -540,6 +662,15 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i650.AthkarLocalDataSourceImpl(assetBundle: gh<_i281.AssetBundle>()),
     );
+    gh.lazySingleton<_i314.HistoryRepository>(
+      () => _i48.HistoryRepositoryImpl(gh<_i603.HistoryLocalDataSource>()),
+    );
+    gh.lazySingleton<_i664.QuranReaderRepository>(
+      () => _i827.QuranReaderRepositoryImpl(
+        gh<_i284.QuranDataSource>(),
+        gh<_i284.ReaderSettingsDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i610.AuthService>(
       () => _i610.AuthService(auth: gh<_i59.FirebaseAuth>()),
     );
@@ -576,6 +707,24 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i59.FirebaseAuth>(),
       ),
     );
+    gh.lazySingleton<_i636.AddOrUpdateHistoryUseCase>(
+      () => _i636.AddOrUpdateHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
+    gh.lazySingleton<_i346.ClearAllHistoryUseCase>(
+      () => _i346.ClearAllHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
+    gh.lazySingleton<_i703.DeleteHistoryUseCase>(
+      () => _i703.DeleteHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
+    gh.lazySingleton<_i959.GetAllHistoryUseCase>(
+      () => _i959.GetAllHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
+    gh.lazySingleton<_i367.GetRecentHistoryUseCase>(
+      () => _i367.GetRecentHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
+    gh.lazySingleton<_i21.SearchHistoryUseCase>(
+      () => _i21.SearchHistoryUseCase(gh<_i314.HistoryRepository>()),
+    );
     gh.factory<_i648.SyncDeviceTokenUseCase>(
       () => _i648.SyncDeviceTokenUseCase(
         gh<_i307.UserRepository>(),
@@ -595,17 +744,26 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i995.CompleteOnboarding>(
       () => _i995.CompleteOnboarding(gh<_i958.OnboardingRepository>()),
     );
+    gh.factory<_i590.GetCurrentLocationUseCase>(
+      () => _i590.GetCurrentLocationUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i620.GetMonthlyPrayerTimesUseCase>(
+      () =>
+          _i620.GetMonthlyPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i398.GetPrayerTimesUseCase>(
+      () => _i398.GetPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i585.LoadPrayerSettingsUseCase>(
+      () => _i585.LoadPrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i930.SavePrayerSettingsUseCase>(
+      () => _i930.SavePrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
     gh.lazySingleton<_i652.AthkarRepository>(
       () => _i150.AthkarRepositoryImpl(
         gh<_i650.AthkarLocalDataSource>(),
         gh<_i145.AnalyticsService>(),
-      ),
-    );
-    gh.singleton<_i734.AnalyticsInitializationService>(
-      () => _i734.AnalyticsInitializationService(
-        gh<_i145.AnalyticsService>(),
-        gh<_i59.FirebaseAuth>(),
-        gh<_i600.CrashlyticsService>(),
       ),
     );
     gh.factory<_i144.CheckLocationServiceUseCase>(
@@ -642,13 +800,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1069.GetAthkarCategoriesUseCase>(
       () => _i1069.GetAthkarCategoriesUseCase(gh<_i652.AthkarRepository>()),
     );
-    gh.lazySingleton<_i422.PremiumRepository>(
-      () => _i437.PremiumRepositoryImpl(
-        gh<_i537.PremiumLocalDataSource>(),
-        gh<_i366.PremiumRemoteDataSource>(),
-        gh<_i145.AnalyticsService>(),
-      ),
-    );
     gh.singleton<_i1039.AddItemToPlaylistUseCase>(
       () => _i1039.AddItemToPlaylistUseCase(gh<_i662.PlaylistsRepository>()),
     );
@@ -682,11 +833,45 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i136.INotificationDispatcher>(),
       ),
     );
+    gh.factory<_i1009.GetQuranPageUseCase>(
+      () => _i1009.GetQuranPageUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i622.GetSurahContentUseCase>(
+      () => _i622.GetSurahContentUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i708.LoadReaderSettingsUseCase>(
+      () => _i708.LoadReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i816.SaveLastReadPositionUseCase>(
+      () =>
+          _i816.SaveLastReadPositionUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i330.SaveReaderSettingsUseCase>(
+      () => _i330.SaveReaderSettingsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
+    gh.factory<_i239.SearchAyahsUseCase>(
+      () => _i239.SearchAyahsUseCase(gh<_i664.QuranReaderRepository>()),
+    );
     gh.singleton<_i326.GetCurrentLanguageUseCase>(
       () => _i326.GetCurrentLanguageUseCase(gh<_i67.LocalizationRepository>()),
     );
     gh.singleton<_i586.SetLanguageUseCase>(
       () => _i586.SetLanguageUseCase(gh<_i67.LocalizationRepository>()),
+    );
+    gh.lazySingleton<_i16.CreateBookmarkUseCase>(
+      () => _i16.CreateBookmarkUseCase(gh<_i475.BookmarksRepository>()),
+    );
+    gh.lazySingleton<_i850.DeleteBookmarkUseCase>(
+      () => _i850.DeleteBookmarkUseCase(gh<_i475.BookmarksRepository>()),
+    );
+    gh.lazySingleton<_i840.GetAllBookmarksUseCase>(
+      () => _i840.GetAllBookmarksUseCase(gh<_i475.BookmarksRepository>()),
+    );
+    gh.lazySingleton<_i389.SearchBookmarksUseCase>(
+      () => _i389.SearchBookmarksUseCase(gh<_i475.BookmarksRepository>()),
+    );
+    gh.lazySingleton<_i456.UpdateBookmarkLabelUseCase>(
+      () => _i456.UpdateBookmarkLabelUseCase(gh<_i475.BookmarksRepository>()),
     );
     gh.singleton<_i977.FirebaseInitializationService>(
       () => externalDependenciesModule.firebaseInitializationService(
@@ -707,10 +892,33 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i145.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i422.PremiumRepository>(
+      () => _i437.PremiumRepositoryImpl(
+        gh<_i537.PremiumLocalDataSource>(),
+        gh<_i366.PremiumRemoteDataSource>(),
+        gh<_i145.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i712.GetSplashNextRouteUseCase>(
       () => _i712.GetSplashNextRouteUseCase(
         gh<_i561.GetCurrentUserUseCase>(),
         gh<_i892.CheckOnboardingStatus>(),
+      ),
+    );
+    gh.factory<_i185.HistoryBloc>(
+      () => _i185.HistoryBloc(
+        gh<_i234.GetAllHistoryUseCase>(),
+        gh<_i234.GetRecentHistoryUseCase>(),
+        gh<_i234.DeleteHistoryUseCase>(),
+        gh<_i234.ClearAllHistoryUseCase>(),
+        gh<_i234.SearchHistoryUseCase>(),
+      ),
+    );
+    gh.singleton<_i734.AnalyticsInitializationService>(
+      () => _i734.AnalyticsInitializationService(
+        gh<_i145.AnalyticsService>(),
+        gh<_i59.FirebaseAuth>(),
+        gh<_i600.CrashlyticsService>(),
       ),
     );
     gh.lazySingleton<_i105.CheckDownloadAccessUseCase>(
@@ -814,6 +1022,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i887.SplashCubit>(
       () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
     );
+    gh.factory<_i713.PrayerTimesBloc>(
+      () => _i713.PrayerTimesBloc(
+        gh<_i590.GetPrayerTimesUseCase>(),
+        gh<_i590.GetMonthlyPrayerTimesUseCase>(),
+        gh<_i590.GetCurrentLocationUseCase>(),
+        gh<_i590.SavePrayerSettingsUseCase>(),
+        gh<_i590.LoadPrayerSettingsUseCase>(),
+      ),
+    );
     gh.factory<_i275.QiblaBloc>(
       () => _i275.QiblaBloc(
         gh<_i696.GetQiblaDirectionUseCase>(),
@@ -824,6 +1041,25 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i204.RemoveFromDownloadQueueUseCase>(
       () => _i204.RemoveFromDownloadQueueUseCase(
         gh<_i420.DownloadQueueManager>(),
+      ),
+    );
+    gh.factory<_i372.BookmarksBloc>(
+      () => _i372.BookmarksBloc(
+        getAllBookmarksUseCase: gh<_i520.GetAllBookmarksUseCase>(),
+        createBookmarkUseCase: gh<_i520.CreateBookmarkUseCase>(),
+        deleteBookmarkUseCase: gh<_i520.DeleteBookmarkUseCase>(),
+        updateBookmarkLabelUseCase: gh<_i520.UpdateBookmarkLabelUseCase>(),
+        searchBookmarksUseCase: gh<_i520.SearchBookmarksUseCase>(),
+      ),
+    );
+    gh.factory<_i960.QuranReaderBloc>(
+      () => _i960.QuranReaderBloc(
+        gh<_i454.GetSurahContentUseCase>(),
+        gh<_i454.GetQuranPageUseCase>(),
+        gh<_i454.LoadReaderSettingsUseCase>(),
+        gh<_i454.SaveReaderSettingsUseCase>(),
+        gh<_i454.SaveLastReadPositionUseCase>(),
+        gh<_i454.SearchAyahsUseCase>(),
       ),
     );
     gh.factory<_i447.AuthBloc>(
@@ -860,6 +1096,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i145.AnalyticsService>(),
         gh<_i99.NetworkInfo>(),
       ),
+    );
+    gh.factory<_i405.ConvertAudioEntitiesToSurahsUseCase>(
+      () => _i405.ConvertAudioEntitiesToSurahsUseCase(
+        gh<_i697.SurahRepository>(),
+        gh<_i373.DownloadsRepository>(),
+        gh<_i1039.RecitersRepository>(),
+      ),
+    );
+    await gh.singletonAsync<_i563.AudioPlayerHandler>(
+      () => externalDependenciesModule.audioPlayerHandler(
+        gh<List<_i87.MediaItem>>(),
+        gh<_i145.AnalyticsService>(),
+        gh<_i460.SharedPreferencesAsync>(),
+        gh<_i1039.RecitersRepository>(),
+        gh<_i373.DownloadsRepository>(),
+      ),
+      preResolve: true,
     );
     gh.singleton<_i671.DownloadsInitializationService>(
       () => _i671.DownloadsInitializationService(
@@ -953,6 +1206,24 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1039.RecitersRepository>(),
       ),
     );
+    gh.lazySingleton<_i868.PlayAllDownloadsUseCase>(
+      () => _i868.PlayAllDownloadsUseCase(
+        gh<_i373.DownloadsRepository>(),
+        gh<_i563.AudioPlayerHandler>(),
+      ),
+    );
+    gh.lazySingleton<_i912.PlayDownloadUseCase>(
+      () => _i912.PlayDownloadUseCase(
+        gh<_i373.DownloadsRepository>(),
+        gh<_i563.AudioPlayerHandler>(),
+      ),
+    );
+    gh.lazySingleton<_i489.AudioPlayerRepository>(
+      () => _i198.AudioPlayerRepositoryImpl(
+        gh<_i563.AudioPlayerHandler>(),
+        gh<_i641.AudioPositionService>(),
+      ),
+    );
     gh.factory<_i387.SurahBloc>(
       () => _i387.SurahBloc(
         gh<_i792.GetSurahsForReciterUseCase>(),
@@ -977,56 +1248,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i645.DownloadAllSurahsUseCase>(
       () => _i645.DownloadAllSurahsUseCase(gh<_i549.BatchDownloadRepository>()),
-    );
-    gh.factory<_i405.ConvertAudioEntitiesToSurahsUseCase>(
-      () => _i405.ConvertAudioEntitiesToSurahsUseCase(
-        gh<_i697.SurahRepository>(),
-        gh<_i373.DownloadsRepository>(),
-        gh<_i1039.RecitersRepository>(),
-      ),
-    );
-    await gh.singletonAsync<_i563.AudioPlayerHandler>(
-      () => externalDependenciesModule.audioPlayerHandler(
-        gh<List<_i87.MediaItem>>(),
-        gh<_i145.AnalyticsService>(),
-        gh<_i460.SharedPreferencesAsync>(),
-        gh<_i1039.RecitersRepository>(),
-        gh<_i373.DownloadsRepository>(),
-      ),
-      preResolve: true,
-    );
-    gh.factory<_i184.ReciterDetailsBloc>(
-      () => _i184.ReciterDetailsBloc(
-        gh<_i563.AudioPlayerHandler>(),
-        gh<_i405.ConvertAudioEntitiesToSurahsUseCase>(),
-        gh<_i863.RefreshSurahDownloadStatusUseCase>(),
-        gh<_i274.GetValidCompletedDownloadsUseCase>(),
-      ),
-    );
-    gh.lazySingleton<_i868.PlayAllDownloadsUseCase>(
-      () => _i868.PlayAllDownloadsUseCase(
-        gh<_i373.DownloadsRepository>(),
-        gh<_i563.AudioPlayerHandler>(),
-      ),
-    );
-    gh.lazySingleton<_i912.PlayDownloadUseCase>(
-      () => _i912.PlayDownloadUseCase(
-        gh<_i373.DownloadsRepository>(),
-        gh<_i563.AudioPlayerHandler>(),
-      ),
-    );
-    gh.lazySingleton<_i489.AudioPlayerRepository>(
-      () => _i198.AudioPlayerRepositoryImpl(
-        gh<_i563.AudioPlayerHandler>(),
-        gh<_i641.AudioPositionService>(),
-      ),
-    );
-    gh.factory<_i510.ReciterDownloadBloc>(
-      () => _i510.ReciterDownloadBloc(
-        gh<_i645.DownloadAllSurahsUseCase>(),
-        gh<_i817.CancelDownloadsForReciterUseCase>(),
-        gh<_i446.ObserveReciterDownloadsUseCase>(),
-      ),
     );
     gh.factory<_i28.PlayAudioUseCase>(
       () => _i28.PlayAudioUseCase(gh<_i489.AudioPlayerRepository>()),
@@ -1082,6 +1303,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i902.GetAudioStreamsUseCase>(
       () => _i902.GetAudioStreamsUseCase(gh<_i489.AudioPlayerRepository>()),
     );
+    gh.factory<_i184.ReciterDetailsBloc>(
+      () => _i184.ReciterDetailsBloc(
+        gh<_i563.AudioPlayerHandler>(),
+        gh<_i405.ConvertAudioEntitiesToSurahsUseCase>(),
+        gh<_i863.RefreshSurahDownloadStatusUseCase>(),
+        gh<_i274.GetValidCompletedDownloadsUseCase>(),
+      ),
+    );
     gh.factory<_i354.DownloadsBloc>(
       () => _i354.DownloadsBloc(
         getDownloadsByReciter: gh<_i605.GetDownloadsByReciterUseCase>(),
@@ -1128,6 +1357,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i28.LoadAudioPlayerDataUseCase>(),
         gh<_i702.CheckAudioPlayabilityUseCase>(),
         gh<_i718.SettingsCubit>(),
+      ),
+    );
+    gh.factory<_i510.ReciterDownloadBloc>(
+      () => _i510.ReciterDownloadBloc(
+        gh<_i645.DownloadAllSurahsUseCase>(),
+        gh<_i817.CancelDownloadsForReciterUseCase>(),
+        gh<_i446.ObserveReciterDownloadsUseCase>(),
       ),
     );
     return this;

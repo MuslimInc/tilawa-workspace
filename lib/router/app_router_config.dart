@@ -8,10 +8,18 @@ import '../core/extensions.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
+import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../features/downloads/presentation/screens/downloads_screen.dart';
+import '../features/history/presentation/bloc/history_bloc.dart';
+import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
+import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
+import '../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import '../features/quran_reader/presentation/screens/quran_reader_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -218,5 +226,69 @@ class SplashRoute extends GoRouteData with $SplashRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SplashScreen();
+  }
+}
+
+@TypedGoRoute<BookmarksRoute>(path: '/bookmarks')
+class BookmarksRoute extends GoRouteData with $BookmarksRoute {
+  const BookmarksRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (context) =>
+          getIt<BookmarksBloc>()..add(const BookmarksEvent.load()),
+      child: const BookmarksScreen(),
+    );
+  }
+}
+
+@TypedGoRoute<HistoryRoute>(path: '/history')
+class HistoryRoute extends GoRouteData with $HistoryRoute {
+  const HistoryRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (context) =>
+          getIt<HistoryBloc>()..add(const HistoryEvent.loadAllHistory()),
+      child: const HistoryScreen(),
+    );
+  }
+}
+
+@TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times')
+class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
+  const PrayerTimesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (context) =>
+          getIt<PrayerTimesBloc>()
+            ..add(const PrayerTimesEvent.loadPrayerTimes()),
+      child: const PrayerTimesScreen(),
+    );
+  }
+}
+
+@TypedGoRoute<QuranReaderRoute>(path: '/quran-reader/:surahNumber')
+class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
+  const QuranReaderRoute({required this.surahNumber, this.ayahNumber});
+
+  final int surahNumber;
+  final int? ayahNumber;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (context) =>
+          getIt<QuranReaderBloc>()
+            ..add(QuranReaderEvent.loadSurah(surahNumber)),
+      child: QuranReaderScreen(
+        surahNumber: surahNumber,
+        initialAyah: ayahNumber,
+      ),
+    );
   }
 }

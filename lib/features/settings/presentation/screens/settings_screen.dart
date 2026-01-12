@@ -142,6 +142,47 @@ class SettingsScreen extends StatelessWidget {
 
               SizedBox(height: 24.h),
 
+              // Features Group
+              _SettingsGroup(
+                title: context.l10n.features,
+                children: [
+                  _SettingsTile(
+                    icon: FluentIcons.bookmark_24_regular,
+                    title: context.l10n.bookmarks,
+                    subtitle: context.l10n.noBookmarksHint,
+                    onTap: () => const BookmarksRoute().push(context),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16.r),
+                    ),
+                  ),
+                  _SettingsTile(
+                    icon: FluentIcons.history_24_regular,
+                    title: context.l10n.listeningHistory,
+                    subtitle: context.l10n.noHistoryDescription,
+                    onTap: () => const HistoryRoute().push(context),
+                  ),
+                  _SettingsTile(
+                    icon: FluentIcons.clock_24_regular,
+                    title: context.l10n.prayerTimes,
+                    subtitle: context.l10n.locationRequiredDescription,
+                    onTap: () => const PrayerTimesRoute().push(context),
+                  ),
+                  _SettingsTile(
+                    icon: FluentIcons.book_24_regular,
+                    title: context.l10n.quranReader,
+                    subtitle: context.l10n.continueReading,
+                    onTap: () =>
+                        const QuranReaderRoute(surahNumber: 1).push(context),
+                    showDivider: false,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(16.r),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 24.h),
+
               // Downloads Group
               _SettingsGroup(
                 title: context.l10n.downloads,

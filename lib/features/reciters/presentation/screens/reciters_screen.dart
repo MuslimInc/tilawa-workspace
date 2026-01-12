@@ -103,7 +103,21 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 foregroundColor: theme.colorScheme.onPrimaryContainer,
                 child: const Icon(Icons.favorite_rounded),
               ),
-              appBar: AppBar(title: Text(l10n.reciters)),
+              appBar: AppBar(
+                title: Text(l10n.reciters),
+                actions: [
+                  IconButton(
+                    icon: const Icon(FluentIcons.bookmark_24_regular),
+                    tooltip: l10n.bookmarks,
+                    onPressed: () => const BookmarksRoute().push(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(FluentIcons.history_24_regular),
+                    tooltip: l10n.listeningHistory,
+                    onPressed: () => const HistoryRoute().push(context),
+                  ),
+                ],
+              ),
               body: Column(
                 children: [
                   // Search bar and letter filter

@@ -1035,5 +1035,387 @@
     "offlinePlaybackError": "This content is not available offline. Please download it first.",
     "@offlinePlaybackError": {
         "description": "Error shown when user tries to play undownloaded content while offline"
+    },
+    "bookmarks": "Bookmarks",
+    "@bookmarks": {
+        "description": "Bookmarks screen title"
+    },
+    "addBookmark": "Add Bookmark",
+    "@addBookmark": {
+        "description": "Add bookmark button text"
+    },
+    "deleteBookmark": "Delete Bookmark",
+    "@deleteBookmark": {
+        "description": "Delete bookmark button text"
+    },
+    "editBookmark": "Edit Bookmark",
+    "@editBookmark": {
+        "description": "Edit bookmark button text"
+    },
+    "searchBookmarks": "Search bookmarks...",
+    "@searchBookmarks": {
+        "description": "Search bookmarks hint text"
+    },
+    "noBookmarksYet": "No Bookmarks Yet",
+    "@noBookmarksYet": {
+        "description": "No bookmarks empty state title"
+    },
+    "noBookmarksDescription": "Save your favorite moments while listening to the Quran",
+    "@noBookmarksDescription": {
+        "description": "No bookmarks empty state description"
+    },
+    "bookmarkAdded": "Bookmark added",
+    "@bookmarkAdded": {
+        "description": "Bookmark added confirmation message"
+    },
+    "bookmarkDeleted": "Bookmark deleted",
+    "@bookmarkDeleted": {
+        "description": "Bookmark deleted confirmation message"
+    },
+    "bookmarkLabel": "Label (optional)",
+    "@bookmarkLabel": {
+        "description": "Bookmark label input hint"
+    },
+    "deleteBookmarkConfirmation": "Are you sure you want to delete this bookmark?",
+    "@deleteBookmarkConfirmation": {
+        "description": "Delete bookmark confirmation message"
+    },
+    "listeningHistory": "Listening History",
+    "@listeningHistory": {
+        "description": "Listening history screen title"
+    },
+    "noHistoryYet": "No History Yet",
+    "@noHistoryYet": {
+        "description": "No history empty state title"
+    },
+    "noHistoryDescription": "Your listening history will appear here",
+    "@noHistoryDescription": {
+        "description": "No history empty state description"
+    },
+    "clearHistory": "Clear History",
+    "@clearHistory": {
+        "description": "Clear history button text"
+    },
+    "clearHistoryConfirmation": "Are you sure you want to clear all listening history?",
+    "@clearHistoryConfirmation": {
+        "description": "Clear history confirmation message"
+    },
+    "historyDeleted": "History deleted",
+    "@historyDeleted": {
+        "description": "History deleted confirmation message"
+    },
+    "totalSurahs": "Total Surahs",
+    "@totalSurahs": {
+        "description": "Total surahs listened label"
+    },
+    "totalListeningTime": "Total Time",
+    "@totalListeningTime": {
+        "description": "Total listening time label"
+    },
+    "searchHistory": "Search history...",
+    "@searchHistory": {
+        "description": "Search history hint text"
+    },
+    "today": "Today",
+    "@today": {
+        "description": "Today date label"
+    },
+    "yesterday": "Yesterday",
+    "@yesterday": {
+        "description": "Yesterday date label"
+    },
+    "playedTimes": "{count, plural, =1{Played 1 time} other{Played {count} times}}",
+    "@playedTimes": {
+        "description": "Number of times played",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "prayerTimes": "Prayer Times",
+    "@prayerTimes": {
+        "description": "Prayer times screen title"
+    },
+    "prayerSettings": "Prayer Settings",
+    "@prayerSettings": {
+        "description": "Prayer settings title"
+    },
+    "fajr": "Fajr",
+    "@fajr": {
+        "description": "Fajr prayer name"
+    },
+    "sunrise": "Sunrise",
+    "@sunrise": {
+        "description": "Sunrise time label"
+    },
+    "dhuhr": "Dhuhr",
+    "@dhuhr": {
+        "description": "Dhuhr prayer name"
+    },
+    "asr": "Asr",
+    "@asr": {
+        "description": "Asr prayer name"
+    },
+    "maghrib": "Maghrib",
+    "@maghrib": {
+        "description": "Maghrib prayer name"
+    },
+    "isha": "Isha",
+    "@isha": {
+        "description": "Isha prayer name"
+    },
+    "nextPrayer": "Next Prayer",
+    "@nextPrayer": {
+        "description": "Next prayer label"
+    },
+    "calculationMethod": "Calculation Method",
+    "@calculationMethod": {
+        "description": "Prayer calculation method label"
+    },
+    "asrCalculation": "Asr Calculation",
+    "@asrCalculation": {
+        "description": "Asr calculation method label"
+    },
+    "displayOptions": "Display Options",
+    "@displayOptions": {
+        "description": "Display options section title"
+    },
+    "use24HourFormat": "Use 24-hour format",
+    "@use24HourFormat": {
+        "description": "24-hour format toggle label"
+    },
+    "showSunrise": "Show Sunrise",
+    "@showSunrise": {
+        "description": "Show sunrise toggle label"
+    },
+    "locationRequired": "Location Required",
+    "@locationRequired": {
+        "description": "Location required title"
+    },
+    "locationRequiredDescription": "Prayer times require your location to calculate accurately",
+    "@locationRequiredDescription": {
+        "description": "Location required description"
+    },
+    "enableLocation": "Enable Location",
+    "@enableLocation": {
+        "description": "Enable location button text"
+    },
+    "updateLocation": "Update Location",
+    "@updateLocation": {
+        "description": "Update location button text"
+    },
+    "currentLocation": "Current Location",
+    "@currentLocation": {
+        "description": "Current location label"
+    },
+    "hours": "hours",
+    "@hours": {
+        "description": "Hours label"
+    },
+    "minutes": "minutes",
+    "@minutes": {
+        "description": "Minutes label"
+    },
+    "seconds": "seconds",
+    "@seconds": {
+        "description": "Seconds label"
+    },
+    "at": "at",
+    "@at": {
+        "description": "At preposition for time"
+    },
+    "monthly": "Monthly",
+    "@monthly": {
+        "description": "Monthly view tab title"
+    },
+    "notifications": "Notifications",
+    "@notifications": {
+        "description": "Notifications section title"
+    },
+    "enableNotifications": "Enable Notifications",
+    "@enableNotifications": {
+        "description": "Enable notifications toggle label"
+    },
+    "minutesBefore": "{count} minutes before",
+    "@minutesBefore": {
+        "description": "Minutes before prayer notification",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "readerSettings": "Reader Settings",
+    "@readerSettings": {
+        "description": "Reader settings title"
+    },
+    "fontSize": "Font Size",
+    "@fontSize": {
+        "description": "Font size setting label"
+    },
+    "lineHeight": "Line Height",
+    "@lineHeight": {
+        "description": "Line height setting label"
+    },
+    "fontType": "Font Type",
+    "@fontType": {
+        "description": "Font type setting label"
+    },
+    "showTranslation": "Show Translation",
+    "@showTranslation": {
+        "description": "Show translation toggle label"
+    },
+    "showAyahNumbers": "Show Ayah Numbers",
+    "@showAyahNumbers": {
+        "description": "Show ayah numbers toggle label"
+    },
+    "showTransliteration": "Show Transliteration",
+    "@showTransliteration": {
+        "description": "Show transliteration toggle label"
+    },
+    "ayah": "Ayah",
+    "@ayah": {
+        "description": "Ayah label"
+    },
+    "ayahs": "Ayahs",
+    "@ayahs": {
+        "description": "Ayahs plural label"
+    },
+    "surahNotFound": "Surah not found",
+    "@surahNotFound": {
+        "description": "Surah not found error message"
+    },
+    "playAyah": "Play Ayah",
+    "@playAyah": {
+        "description": "Play ayah option"
+    },
+    "copyAyah": "Copy Ayah",
+    "@copyAyah": {
+        "description": "Copy ayah option"
+    },
+    "shareAyah": "Share Ayah",
+    "@shareAyah": {
+        "description": "Share ayah option"
+    },
+    "searchAyahs": "Search Ayahs",
+    "@searchAyahs": {
+        "description": "Search ayahs title"
+    },
+    "searchAyahsHint": "Enter Arabic text to search...",
+    "@searchAyahsHint": {
+        "description": "Search ayahs hint text"
+    },
+    "enterSearchQuery": "Enter a search query",
+    "@enterSearchQuery": {
+        "description": "Enter search query message"
+    },
+    "noResultsFound": "No results found",
+    "@noResultsFound": {
+        "description": "No search results message"
+    },
+    "close": "Close",
+    "@close": {
+        "description": "Close button text"
+    },
+    "continueReading": "Continue Reading",
+    "@continueReading": {
+        "description": "Continue reading button text"
+    },
+    "lastRead": "Last Read",
+    "@lastRead": {
+        "description": "Last read position label"
+    },
+    "goToAyah": "Go to Ayah",
+    "@goToAyah": {
+        "description": "Go to ayah option"
+    },
+    "juz": "Juz",
+    "@juz": {
+        "description": "Juz label"
+    },
+    "page": "Page",
+    "@page": {
+        "description": "Page label"
+    },
+    "verses": "Verses",
+    "@verses": {
+        "description": "Verses label"
+    },
+    "meccan": "Meccan",
+    "@meccan": {
+        "description": "Meccan surah type"
+    },
+    "medinan": "Medinan",
+    "@medinan": {
+        "description": "Medinan surah type"
+    },
+    "bookmarkUpdated": "Bookmark updated",
+    "@bookmarkUpdated": {
+        "description": "Bookmark updated confirmation message"
+    },
+    "noBookmarksFound": "No bookmarks found",
+    "@noBookmarksFound": {
+        "description": "No bookmarks found in search"
+    },
+    "noBookmarks": "No bookmarks",
+    "@noBookmarks": {
+        "description": "No bookmarks message"
+    },
+    "tryDifferentSearch": "Try a different search term",
+    "@tryDifferentSearch": {
+        "description": "Try different search suggestion"
+    },
+    "noBookmarksHint": "Bookmark your favorite moments while listening",
+    "@noBookmarksHint": {
+        "description": "No bookmarks hint text"
+    },
+    "editBookmarkLabel": "Edit Bookmark Label",
+    "@editBookmarkLabel": {
+        "description": "Edit bookmark label dialog title"
+    },
+    "enterBookmarkLabel": "Enter bookmark label",
+    "@enterBookmarkLabel": {
+        "description": "Enter bookmark label hint"
+    },
+    "noSearchResults": "No search results",
+    "@noSearchResults": {
+        "description": "No search results message"
+    },
+    "clearAll": "Clear All",
+    "@clearAll": {
+        "description": "Clear all button text"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button text"
+    },
+    "timeAdjustments": "Time Adjustments",
+    "@timeAdjustments": {
+        "description": "Time adjustments section title"
+    },
+    "day": "Day",
+    "@day": {
+        "description": "Day label for calendar"
+    },
+    "features": "Features",
+    "@features": {
+        "description": "Features section title in settings"
+    },
+    "quranReader": "Quran Reader",
+    "@quranReader": {
+        "description": "Quran reader feature title"
+    },
+    "copiedToClipboard": "Copied to clipboard",
+    "@copiedToClipboard": {
+        "description": "Message shown when text is copied"
+    },
+    "errorPlayingAudio": "Error playing audio",
+    "@errorPlayingAudio": {
+        "description": "Error message when audio fails to play"
+    },
+    "comingSoon": "Coming soon",
+    "@comingSoon": {
+        "description": "Message for features not yet implemented"
     }
 }
