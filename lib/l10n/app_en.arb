@@ -800,6 +800,10 @@
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
     },
+    "timeRemaining": "Time Remaining",
+    "@timeRemaining": {
+        "description": "Label for the time remaining until next prayer"
+    },
     "reciterRemovedFromFavorites": "Removed {reciterName} from favorites",
     "@reciterRemovedFromFavorites": {
         "description": "Reciter removed from favorites message",

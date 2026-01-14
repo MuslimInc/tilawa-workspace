@@ -1184,6 +1184,12 @@ abstract class AppLocalizations {
   /// **'Resume audio from where you left off'**
   String get restorePlaybackStateSubtitle;
 
+  /// Label for the time remaining until next prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Time Remaining'**
+  String get timeRemaining;
+
   /// Reciter removed from favorites message
   ///
   /// In en, this message translates to:

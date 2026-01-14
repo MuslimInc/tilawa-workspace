@@ -584,6 +584,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get restorePlaybackStateSubtitle => 'استئناف الصوت من حيث توقفت';
 
   @override
+  String get timeRemaining => 'الوقت المتبقي';
+
+  @override
   String reciterRemovedFromFavorites(String reciterName) {
     return 'تمت إزالة $reciterName من المفضلة';
   }

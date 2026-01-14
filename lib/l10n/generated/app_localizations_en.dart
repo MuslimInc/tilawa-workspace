@@ -587,6 +587,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Resume audio from where you left off';
 
   @override
+  String get timeRemaining => 'Time Remaining';
+
+  @override
   String reciterRemovedFromFavorites(String reciterName) {
     return 'Removed $reciterName from favorites';
   }

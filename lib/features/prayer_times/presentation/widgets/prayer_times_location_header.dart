@@ -5,62 +5,61 @@ import '../../../../core/extensions.dart';
 class PrayerTimesLocationHeader extends StatelessWidget {
   const PrayerTimesLocationHeader({
     super.key,
-    this.locationName,
+    required this.locationName,
+    required this.isLoading,
     required this.onUpdateLocation,
-    this.isLoading = false,
   });
 
   final String? locationName;
-  final VoidCallback onUpdateLocation;
   final bool isLoading;
+  final VoidCallback onUpdateLocation;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Material(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(50), // Pill shape
+    return Align(
+      child: Card(
+        color: theme.colorScheme.surface,
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.1),
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.hardEdge,
         child: InkWell(
-          onTap: onUpdateLocation,
-          borderRadius: BorderRadius.circular(50),
+          onTap: isLoading ? null : onUpdateLocation,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              mainAxisSize: MainAxisSize.min, // Center content
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.location_on,
-                  color: theme.colorScheme.primary,
+                  Icons.location_on_outlined,
                   size: 18,
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    locationName ?? context.l10n.currentLocation,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                Text(
+                  locationName ?? context.l10n.currentLocation,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 8),
                 if (isLoading)
-                  const SizedBox(
+                  SizedBox(
                     width: 14,
                     height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
+                    ),
                   )
                 else
                   Icon(
-                    Icons.refresh,
-                    size: 18,
-                    color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
               ],
             ),

@@ -23,93 +23,138 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final int seconds = timeUntil.inSeconds.remainder(60);
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.primaryContainer,
-          ],
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
+          colors: [theme.colorScheme.primary, theme.colorScheme.tertiary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
+      child: Stack(
         children: [
-          // Next prayer label
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              context.l10n.nextPrayer.toUpperCase(),
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.bold,
-              ),
+          // Background decoration
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              Icons.mosque,
+              size: 150,
+              color: Colors.white.withValues(alpha: 0.1),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Top row: Label and Time
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_filled,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.l10n.nextPrayer.toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      nextPrayer.formattedTime12Hour,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
-          const SizedBox(height: 16),
+                // Center: Prayer Name
+                Text(
+                  (isArabic
+                          ? nextPrayer.type.displayNameAr
+                          : nextPrayer.type.displayName)
+                      .toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displayMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                    height: 1.0,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.timeRemaining,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-          // Prayer name
-          Text(
-            isArabic
-                ? nextPrayer.type.displayNameAr
-                : nextPrayer.type.displayName,
-            style: theme.textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onPrimary,
-              height: 1.0,
+                // Bottom: Countdown
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _CountdownUnit(
+                      value: hours.toString().padLeft(2, '0'),
+                      label: context.l10n.hours,
+                    ),
+                    _CountdownSeparator(),
+                    _CountdownUnit(
+                      value: minutes.toString().padLeft(2, '0'),
+                      label: context.l10n.minutes,
+                    ),
+                    _CountdownSeparator(),
+                    _CountdownUnit(
+                      value: seconds.toString().padLeft(2, '0'),
+                      label: context.l10n.seconds,
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Prayer time
-          Text(
-            '${context.l10n.at} ${nextPrayer.formattedTime12Hour}',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Countdown timer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _CountdownUnit(
-                value: hours.toString().padLeft(2, '0'),
-                label: context.l10n.hours,
-                theme: theme,
-              ),
-              _CountdownSeparator(theme: theme),
-              _CountdownUnit(
-                value: minutes.toString().padLeft(2, '0'),
-                label: context.l10n.minutes,
-                theme: theme,
-              ),
-              _CountdownSeparator(theme: theme),
-              _CountdownUnit(
-                value: seconds.toString().padLeft(2, '0'),
-                label: context.l10n.seconds,
-                theme: theme,
-              ),
-            ],
           ),
         ],
       ),
@@ -118,45 +163,41 @@ class NextPrayerCountdownCard extends StatelessWidget {
 }
 
 class _CountdownUnit extends StatelessWidget {
-  const _CountdownUnit({
-    required this.value,
-    required this.label,
-    required this.theme,
-  });
+  const _CountdownUnit({required this.value, required this.label});
 
   final String value;
   final String label;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          width: 64, // Fixed width for alignment
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          constraints: const BoxConstraints(minWidth: 56),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
-          alignment: Alignment.center,
           child: Text(
             value,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onPrimary,
+              color: Colors.white,
               height: 1.0,
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.white70,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -165,19 +206,16 @@ class _CountdownUnit extends StatelessWidget {
 }
 
 class _CountdownSeparator extends StatelessWidget {
-  const _CountdownSeparator({required this.theme});
-
-  final ThemeData theme;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20, left: 8, right: 8),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 20),
       child: Text(
         ':',
-        style: theme.textTheme.headlineLarge?.copyWith(
+        style: TextStyle(
+          fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onPrimary,
+          color: Colors.white.withValues(alpha: 0.5),
         ),
       ),
     );
