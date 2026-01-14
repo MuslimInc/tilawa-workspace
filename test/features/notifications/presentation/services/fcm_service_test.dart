@@ -61,7 +61,7 @@ void main() {
       // Assert
       verify(mockSyncDeviceTokenUseCase('user123')).called(1);
 
-      userController.close();
+      await userController.close();
     });
 
     test(
@@ -83,7 +83,7 @@ void main() {
         // Assert
         verify(mockSyncDeviceTokenUseCase('user123')).called(1);
 
-        tokenController.close();
+        await tokenController.close();
       },
     );
 
@@ -106,7 +106,7 @@ void main() {
         // Assert
         verifyNever(mockSyncDeviceTokenUseCase(any));
 
-        tokenController.close();
+        await tokenController.close();
       },
     );
   });

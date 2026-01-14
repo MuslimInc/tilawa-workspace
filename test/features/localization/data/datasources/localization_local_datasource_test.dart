@@ -38,7 +38,7 @@ void main() {
 
       final String result = await dataSource.getCurrentLanguage();
 
-      expect(result, LanguageConfig.getDefaultLanguageCode());
+      expect(result, LanguageConfig.defaultLanguageCode);
       verify(mockPrefs.getString(LanguageConfig.languageKey)).called(1);
     });
 

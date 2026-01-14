@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -123,8 +124,8 @@ void main() {
         },
         (error, stack) {
           errorMessage = error.toString();
-          print('Caught expected crash: $error');
-          print('Stack: $stack');
+          debugPrint('Caught expected crash: $error');
+          debugPrint('Stack: $stack');
           // Verify it's the exact error from Firebase
           didCrash =
               errorMessage!.contains(
@@ -316,7 +317,7 @@ void main() {
             await Future.delayed(const Duration(milliseconds: 100));
           },
           (error, stack) {
-            print('✅ Caught the crash: $error');
+            debugPrint('✅ Caught the crash: $error');
             if (error.toString().contains(
                   'Cannot add new events after calling close',
                 ) ||

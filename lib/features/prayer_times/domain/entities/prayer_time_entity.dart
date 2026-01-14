@@ -73,7 +73,9 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
   /// Get time remaining until next prayer
   Duration? getTimeUntilNextPrayer() {
     final PrayerTimeItem? next = getCurrentOrNextPrayer();
-    if (next == null) return null;
+    if (next == null) {
+      return null;
+    }
 
     final now = DateTime.now();
     return next.time.difference(now);

@@ -30,7 +30,9 @@ class QuranDataSourceImpl implements QuranDataSource {
 
   /// Load Quran data from assets
   Future<void> _ensureDataLoaded() async {
-    if (_quranData != null) return;
+    if (_quranData != null) {
+      return;
+    }
 
     try {
       // Try to load from bundled asset
@@ -42,7 +44,9 @@ class QuranDataSourceImpl implements QuranDataSource {
       // The API response wraps surahs inside 'data' -> 'surahs'
       if (parsed.containsKey('data') && parsed['data'] is Map) {
         _quranData = parsed;
-        _surahList = parsed['data']['surahs'] as List<dynamic>?;
+        _surahList =
+            (parsed['data'] as Map<String, dynamic>)['surahs']
+                as List<dynamic>?;
       } else if (parsed.containsKey('surahs')) {
         // Direct format without API wrapper
         _quranData = parsed;
@@ -69,30 +73,33 @@ class QuranDataSourceImpl implements QuranDataSource {
     }
 
     try {
-      final dynamic surahData = _surahList?.firstWhereOrNull(
-        (s) => s['number'] == surahNumber,
-      );
+      final surahData =
+          _surahList?.firstWhereOrNull(
+                (s) => (s as Map<String, dynamic>)['number'] == surahNumber,
+              )
+              as Map<String, dynamic>?;
 
       if (surahData == null) {
         return _getMockSurahContent(surahNumber);
       }
 
-      final List<AyahEntity> ayahs = (surahData['ayahs'] as List<dynamic>)
-          .map(
-            (a) => AyahEntity(
-              number: a['number'] ?? 0,
-              numberInSurah: a['numberInSurah'] ?? 0,
-              surahNumber: surahNumber,
-              text: a['text'] ?? '',
-              juz: a['juz'],
-              manzil: a['manzil'],
-              page: a['page'],
-              ruku: a['ruku'],
-              hizbQuarter: a['hizbQuarter'],
-              sajda: a['sajda'] != null && a['sajda'] != false,
-            ),
-          )
-          .toList();
+      final List<AyahEntity> ayahs = (surahData['ayahs'] as List<dynamic>).map((
+        a,
+      ) {
+        final map = a as Map<String, dynamic>;
+        return AyahEntity(
+          number: map['number'] ?? 0,
+          numberInSurah: map['numberInSurah'] ?? 0,
+          surahNumber: surahNumber,
+          text: map['text'] ?? '',
+          juz: map['juz'],
+          manzil: map['manzil'],
+          page: map['page'],
+          ruku: map['ruku'],
+          hizbQuarter: map['hizbQuarter'],
+          sajda: map['sajda'] != null && map['sajda'] != false,
+        );
+      }).toList();
 
       // Use cleaner surah name from the info list if available
       final _SurahInfo surahInfo = surahNumber <= _surahInfoList.length
@@ -151,21 +158,23 @@ class QuranDataSourceImpl implements QuranDataSource {
       pageNumber,
     );
 
-    for (final surah in _surahList!) {
+    for (final Map<String, dynamic> surah
+        in _surahList!.cast<Map<String, dynamic>>()) {
       final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
       final String surahName = surah['name'] as String? ?? '';
       final int surahNum = surah['number'] as int? ?? 0;
 
-      for (final ayah in surahAyahs) {
-        if (ayah['page'] == pageNumber) {
-          if (pageJuz == null && ayah['juz'] != null) {
-            pageJuz = ayah['juz'] as int;
+      for (final dynamic ayah in surahAyahs) {
+        final ayahMap = ayah as Map<String, dynamic>;
+        if (ayahMap['page'] == pageNumber) {
+          if (pageJuz == null && ayahMap['juz'] != null) {
+            pageJuz = ayahMap['juz'] as int;
           }
-          if (pageHizbQuarter == null && ayah['hizbQuarter'] != null) {
-            pageHizbQuarter = ayah['hizbQuarter'] as int;
+          if (pageHizbQuarter == null && ayahMap['hizbQuarter'] != null) {
+            pageHizbQuarter = ayahMap['hizbQuarter'] as int;
           }
 
-          final int ayahNum = ayah['numberInSurah'] as int? ?? 0;
+          final int ayahNum = ayahMap['numberInSurah'] as int? ?? 0;
           final verseKey = '$surahNum:$ayahNum';
 
           pageAyahs.add(
@@ -174,7 +183,7 @@ class QuranDataSourceImpl implements QuranDataSource {
               surahName: surahName,
               surahNameEnglish: surah['englishName'] as String? ?? '',
               ayahNumber: ayahNum,
-              text: ayah['text'] as String? ?? '',
+              text: ayahMap['text'] as String? ?? '',
               words: wordsMap[verseKey],
             ),
           );
@@ -206,18 +215,20 @@ class QuranDataSourceImpl implements QuranDataSource {
       return ayahs;
     }
 
-    for (final surah in _surahList!) {
+    for (final Map<String, dynamic> surah
+        in _surahList!.cast<Map<String, dynamic>>()) {
       final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
-      for (final ayah in surahAyahs) {
-        if (ayah['juz'] == juzNumber) {
+      for (final dynamic ayah in surahAyahs) {
+        final ayahMap = ayah as Map<String, dynamic>;
+        if (ayahMap['juz'] == juzNumber) {
           ayahs.add(
             AyahEntity(
-              number: ayah['number'] ?? 0,
-              numberInSurah: ayah['numberInSurah'] ?? 0,
+              number: ayahMap['number'] ?? 0,
+              numberInSurah: ayahMap['numberInSurah'] ?? 0,
               surahNumber: surah['number'] ?? 0,
-              text: ayah['text'] ?? '',
-              juz: ayah['juz'],
-              page: ayah['page'],
+              text: ayahMap['text'] ?? '',
+              juz: ayahMap['juz'],
+              page: ayahMap['page'],
             ),
           );
         }
@@ -238,19 +249,21 @@ class QuranDataSourceImpl implements QuranDataSource {
       return results;
     }
 
-    for (final surah in _surahList!) {
+    for (final Map<String, dynamic> surah
+        in _surahList!.cast<Map<String, dynamic>>()) {
       final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
-      for (final ayah in surahAyahs) {
-        final String text = ayah['text']?.toString().toLowerCase() ?? '';
+      for (final dynamic ayah in surahAyahs) {
+        final ayahMap = ayah as Map<String, dynamic>;
+        final String text = ayahMap['text']?.toString().toLowerCase() ?? '';
         if (text.contains(normalizedQuery)) {
           results.add(
             AyahEntity(
-              number: ayah['number'] ?? 0,
-              numberInSurah: ayah['numberInSurah'] ?? 0,
+              number: ayahMap['number'] ?? 0,
+              numberInSurah: ayahMap['numberInSurah'] ?? 0,
               surahNumber: surah['number'] ?? 0,
-              text: ayah['text'] ?? '',
-              juz: ayah['juz'],
-              page: ayah['page'],
+              text: ayahMap['text'] ?? '',
+              juz: ayahMap['juz'],
+              page: ayahMap['page'],
             ),
           );
         }
@@ -296,7 +309,7 @@ class QuranDataSourceImpl implements QuranDataSource {
         queryParameters: {'words': true, 'word_fields': 'text_uthmani'},
       );
 
-      final data = response.data;
+      final data = response.data as Map<String, dynamic>?;
       if (data == null || data['verses'] == null) {
         return {};
       }
@@ -304,7 +317,8 @@ class QuranDataSourceImpl implements QuranDataSource {
       final Map<String, List<QuranWord>> result = {};
       final verses = data['verses'] as List;
 
-      for (final verse in verses) {
+      for (final dynamic verseDynamic in verses) {
+        final verse = verseDynamic as Map<String, dynamic>;
         final verseKey = verse['verse_key'] as String;
         final wordsData = verse['words'] as List?;
 

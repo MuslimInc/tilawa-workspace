@@ -24,39 +24,69 @@ class NextPrayerCountdownCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.primaryContainer,
+          ],
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
           // Next prayer label
-          Text(
-            context.l10n.nextPrayer,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onPrimary.withOpacity(0.8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              context.l10n.nextPrayer.toUpperCase(),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onPrimary,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: 16),
 
           // Prayer name
           Text(
             isArabic
                 ? nextPrayer.type.displayNameAr
                 : nextPrayer.type.displayName,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.displaySmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onPrimary,
+              height: 1.0,
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+
+          // Prayer time
+          Text(
+            '${context.l10n.at} ${nextPrayer.formattedTime12Hour}',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+            ),
+          ),
+
+          const SizedBox(height: 24),
 
           // Countdown timer
           Row(
@@ -81,16 +111,6 @@ class NextPrayerCountdownCard extends StatelessWidget {
               ),
             ],
           ),
-
-          const SizedBox(height: 12),
-
-          // Prayer time
-          Text(
-            '${context.l10n.at} ${nextPrayer.formattedTime12Hour}',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onPrimary.withOpacity(0.9),
-            ),
-          ),
         ],
       ),
     );
@@ -113,24 +133,30 @@ class _CountdownUnit extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          width: 64, // Fixed width for alignment
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.onPrimary.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+            ),
           ),
+          alignment: Alignment.center,
           child: Text(
             value,
-            style: theme.textTheme.headlineLarge?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onPrimary,
+              height: 1.0,
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onPrimary.withOpacity(0.7),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
           ),
         ),
       ],

@@ -183,8 +183,8 @@ void main() {
       seed: () => const FavoritesLoaded(favorites: [], favoriteIds: {}),
       act: (cubit) async {
         // Fire twice rapidly
-        cubit.toggleFavorite(tReciter);
-        cubit.toggleFavorite(tReciter);
+        await cubit.toggleFavorite(tReciter);
+        await cubit.toggleFavorite(tReciter);
         // Wait for potential completion
         await Future.delayed(const Duration(milliseconds: 200));
       },

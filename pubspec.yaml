@@ -5,7 +5,7 @@ publish_to: "none"
 version: 0.0.6+6
 
 environment:
-  sdk: ^3.10.4
+  sdk: ^3.10.7
 
 dependencies:
   audio_service: ^0.18.18
@@ -37,6 +37,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_downloader: ^1.12.0
   flutter_local_notifications: ^19.5.0
+  flutter_local_notifications_platform_interface: ^9.1.0
   flutter_localizations:
     sdk: flutter
   flutter_screenutil_plus: ^1.4.0
@@ -54,9 +55,11 @@ dependencies:
   hugeicons: ^1.1.4
   hydrated_bloc: ^10.1.1
   injectable: ^2.7.1
+  intl: ^0.20.2
   json_annotation: ^4.9.0
   just_audio: ^0.10.5
   logger: ^2.6.2
+  luciq_flutter: ^19.0.0
   path: ^1.9.1
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
@@ -64,13 +67,11 @@ dependencies:
   qibla:
     path: ./packages/qibla
   rxdart: ^0.28.0
+  share_plus: ^12.0.1
   shared_preferences: ^2.5.4
   skeletonizer: ^2.1.2
   stream_transform: ^2.1.1
-  share_plus: ^12.0.1
   timezone: ^0.10.1
-  luciq_flutter: ^19.0.0
-  flutter_local_notifications_platform_interface: ^9.1.0
 
 dev_dependencies:
   bloc_lint: ^0.3.6

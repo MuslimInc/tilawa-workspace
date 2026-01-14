@@ -83,9 +83,7 @@ class SettingsScreen extends StatelessWidget {
                       return _SettingsTile(
                         icon: FluentIcons.local_language_24_regular,
                         title: context.l10n.language,
-                        subtitle:
-                            state.locale.languageCode ==
-                                LanguageConfig.defaultLanguageCode
+                        subtitle: state.locale.languageCode == 'ar'
                             ? context.l10n.arabic
                             : context.l10n.english,
                         onTap: () => _showLanguagePicker(context, state.locale),
@@ -595,7 +593,7 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(height: 16.h),
             ListTile(
               title: Text(context.l10n.english),
-              trailing: currentLocale.languageCode == 'en'
+              trailing: currentLocale.languageCode == englishLanguageCode
                   ? Icon(
                       FluentIcons.checkmark_24_regular,
                       color: Theme.of(context).primaryColor,
@@ -603,16 +601,14 @@ class SettingsScreen extends StatelessWidget {
                   : null,
               onTap: () {
                 context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale('en')),
+                  const ChangeLanguage(Locale(englishLanguageCode)),
                 );
                 Navigator.pop(context);
               },
             ),
             ListTile(
               title: Text(context.l10n.arabic),
-              trailing:
-                  currentLocale.languageCode ==
-                      LanguageConfig.defaultLanguageCode
+              trailing: currentLocale.languageCode == arabicLanguageCode
                   ? Icon(
                       FluentIcons.checkmark_24_regular,
                       color: Theme.of(context).primaryColor,
@@ -620,9 +616,7 @@ class SettingsScreen extends StatelessWidget {
                   : null,
               onTap: () {
                 context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(
-                    Locale(LanguageConfig.defaultLanguageCode),
-                  ),
+                  const ChangeLanguage(Locale(arabicLanguageCode)),
                 );
                 Navigator.pop(context);
               },

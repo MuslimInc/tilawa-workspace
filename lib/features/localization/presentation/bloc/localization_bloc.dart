@@ -18,9 +18,7 @@ class LocalizationBloc
     extends HydratedBloc<LocalizationEvent, LocalizationState> {
   LocalizationBloc(this._getCurrentLanguageUseCase, this._setLanguageUseCase)
     : super(
-        const LocalizationState(
-          locale: Locale(LanguageConfig.defaultLanguageCode),
-        ),
+        LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
       ) {
     on<LoadLanguage>(_onLoadLanguage);
     on<ChangeLanguage>(_onChangeLanguage);
@@ -39,11 +37,11 @@ class LocalizationBloc
         return LocalizationState(locale: Locale(languageCode));
       }
       return LocalizationState(
-        locale: Locale(LanguageConfig.getDefaultLanguageCode()),
+        locale: Locale(LanguageConfig.defaultLanguageCode),
       );
     } catch (e) {
       return LocalizationState(
-        locale: Locale(LanguageConfig.getDefaultLanguageCode()),
+        locale: Locale(LanguageConfig.defaultLanguageCode),
       );
     }
   }

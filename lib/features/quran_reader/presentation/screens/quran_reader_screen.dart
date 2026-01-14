@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/entities/audio.dart';
-import '../../../../core/extensions.dart';
-import '../../../../core/utils/toast_utils.dart';
-import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/entities.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../widgets/quran_page_widget.dart';
@@ -224,73 +218,5 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         },
       ),
     );
-  }
-
-  void _showAyahOptionsSheet(BuildContext context, AyahEntity ayah) {
-    final QuranReaderState state = context.read<QuranReaderBloc>().state;
-    final String surahName =
-        state.currentSurah?.nameEnglish ?? 'Surah ${ayah.surahNumber}';
-
-    showModalBottomSheet(
-      context: context,
-      builder: (modalContext) => AyahOptionsSheet(
-        ayah: ayah,
-        onCopy: () {
-          _copyAyahToClipboard(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-        onShare: () {
-          _shareAyah(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-        onBookmark: () {
-          // TODO: Add bookmark functionality
-          ToastUtils.showToast(msg: context.l10n.comingSoon);
-          Navigator.pop(modalContext);
-        },
-        onPlay: () {
-          _playAyahAudio(ayah, surahName);
-          Navigator.pop(modalContext);
-        },
-      ),
-    );
-  }
-
-  void _copyAyahToClipboard(AyahEntity ayah, String surahName) {
-    final text =
-        '${ayah.text}\n\n- $surahName, ${context.l10n.ayah} ${ayah.numberInSurah}';
-    Clipboard.setData(ClipboardData(text: text));
-    ToastUtils.showSuccessToast(context.l10n.copiedToClipboard);
-  }
-
-  void _shareAyah(AyahEntity ayah, String surahName) {
-    final text =
-        '${ayah.text}\n\n- $surahName, ${context.l10n.ayah} ${ayah.numberInSurah}';
-    Clipboard.setData(ClipboardData(text: text));
-    ToastUtils.showSuccessToast('Copied to clipboard for sharing');
-  }
-
-  void _playAyahAudio(AyahEntity ayah, String surahName) {
-    final audioUrl =
-        'https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayah.number}.mp3';
-
-    final audioEntity = AudioEntity(
-      id: 'ayah_${ayah.surahNumber}_${ayah.numberInSurah}',
-      title: '$surahName - ${context.l10n.ayah} ${ayah.numberInSurah}',
-      url: audioUrl,
-      duration: const Duration(seconds: 30),
-      artist: 'Mishary Rashid Alafasy',
-      album: surahName,
-    );
-
-    try {
-      final AudioPlayerBloc audioBloc = getIt<AudioPlayerBloc>();
-      audioBloc.add(AudioPlayerEvent.playFromQueue([audioEntity], 0));
-      ToastUtils.showToast(
-        msg: 'Playing: ${context.l10n.ayah} ${ayah.numberInSurah}',
-      );
-    } catch (e) {
-      ToastUtils.showErrorToast(context.l10n.errorPlayingAudio);
-    }
   }
 }

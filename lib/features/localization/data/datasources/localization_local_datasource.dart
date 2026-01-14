@@ -18,7 +18,7 @@ class LocalizationLocalDataSourceImpl implements LocalizationLocalDataSource {
   @override
   Future<String> getCurrentLanguage() async {
     return await _prefs.getString(LanguageConfig.languageKey) ??
-        LanguageConfig.getDefaultLanguageCode();
+        LanguageConfig.defaultLanguageCode;
   }
 
   @override

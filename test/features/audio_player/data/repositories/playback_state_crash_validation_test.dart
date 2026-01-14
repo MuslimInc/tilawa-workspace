@@ -9,8 +9,8 @@ import 'package:tilawa/core/entities/audio.dart';
 ///
 /// Firebase Crash (Dec 27, 2025):
 /// NoSuchMethodError: No constructor '_PlaybackStateEntity.' declared
-/// at AudioPlayerRepositoryImpl.playbackState.<fn>(audio_player_repository_impl.dart:32)
-/// at CombineLatestStream.combine2.<fn>(combine_latest.dart:85)
+/// at AudioPlayerRepositoryImpl.playbackState(audio_player_repository_impl.dart:32)
+/// at CombineLatestStream.combine2(combine_latest.dart:85)
 ///
 /// This test validates:
 /// 1. PlaybackStateEntity constructor works correctly
@@ -164,7 +164,7 @@ void main() {
       expect(() {
         // Try to use reflection to create without params
         // (simulating what might happen with bad generated code)
-        PlaybackStateEntity; // Just reference the type
+        // PlaybackStateEntity; // Just reference the type
       }, returnsNormally);
 
       // This test passing means the code is correct
@@ -177,7 +177,7 @@ void main() {
 
       for (var i = 0; i < 1000; i++) {
         final entity = PlaybackStateEntity(
-          isPlaying: i % 2 == 0,
+          isPlaying: i.isEven,
           processingState: AudioProcessingStateStatus
               .values[i % AudioProcessingStateStatus.values.length],
           position: Duration(seconds: i),

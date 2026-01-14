@@ -16,7 +16,7 @@ import 'localization_bloc_test.mocks.dart';
 // Provide dummy values for Either types
 @visibleForTesting
 Either<Failure, String> provideDummyEitherFailureString() =>
-    const Right(LanguageConfig.defaultLanguageCode);
+    Right(LanguageConfig.defaultLanguageCode);
 
 @visibleForTesting
 Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
@@ -39,7 +39,7 @@ void main() {
     setUp(() {
       // Provide dummy values for Either types
       provideDummy<Either<Failure, String>>(
-        const Right(LanguageConfig.defaultLanguageCode),
+        Right(LanguageConfig.defaultLanguageCode),
       );
       provideDummy<Either<Failure, void>>(const Right(null));
 
@@ -47,9 +47,9 @@ void main() {
       mockSetLanguageUseCase = MockSetLanguageUseCase();
 
       // Mock GetCurrentLanguageUseCase to return default language
-      when(mockGetCurrentLanguageUseCase()).thenAnswer(
-        (_) async => const Right(LanguageConfig.defaultLanguageCode),
-      );
+      when(
+        mockGetCurrentLanguageUseCase(),
+      ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
 
       // Mock SetLanguageUseCase to return success
       when(
@@ -70,9 +70,7 @@ void main() {
       test('should have initial state with default locale', () {
         expect(
           bloc.state,
-          const LocalizationState(
-            locale: Locale(LanguageConfig.defaultLanguageCode),
-          ),
+          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
         );
       });
     });
@@ -86,9 +84,9 @@ void main() {
           reset(mockSetLanguageUseCase);
 
           // Mock GetCurrentLanguageUseCase to return default language
-          when(mockGetCurrentLanguageUseCase()).thenAnswer(
-            (_) async => const Right(LanguageConfig.defaultLanguageCode),
-          );
+          when(
+            mockGetCurrentLanguageUseCase(),
+          ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -126,10 +124,10 @@ void main() {
           reset(mockGetCurrentLanguageUseCase);
           reset(mockSetLanguageUseCase);
 
-          // Mock GetCurrentLanguageUseCase to return English
+          // Mock GetCurrentLanguageUseCase to return Arabic (different from default 'en')
           when(
             mockGetCurrentLanguageUseCase(),
-          ).thenAnswer((_) async => const Right('en'));
+          ).thenAnswer((_) async => const Right('ar'));
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -157,7 +155,7 @@ void main() {
           // (at least once from the test action, possibly also from initialization)
           verify(mockSetLanguageUseCase(any));
         },
-        expect: () => [const LocalizationState(locale: Locale('en'))],
+        expect: () => [const LocalizationState(locale: Locale('ar'))],
       );
 
       blocTest<LocalizationBloc, LocalizationState>(
@@ -212,9 +210,7 @@ void main() {
 
         expect(
           result,
-          const LocalizationState(
-            locale: Locale(LanguageConfig.defaultLanguageCode),
-          ),
+          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
         );
       });
 
@@ -226,9 +222,7 @@ void main() {
 
         expect(
           result,
-          const LocalizationState(
-            locale: Locale(LanguageConfig.defaultLanguageCode),
-          ),
+          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
         );
       });
     });
@@ -246,12 +240,12 @@ void main() {
       blocTest<LocalizationBloc, LocalizationState>(
         'emits [LocalizationState] when language is changed successfully',
         build: () => bloc,
-        act: (bloc) => bloc.add(const ChangeLanguage(Locale('en'))),
+        act: (bloc) => bloc.add(const ChangeLanguage(Locale('ar'))),
         verify: (_) {
           // Verify that SetLanguageUseCase was called with the new language
-          verify(mockSetLanguageUseCase('en')).called(1);
+          verify(mockSetLanguageUseCase('ar')).called(1);
         },
-        expect: () => [const LocalizationState(locale: Locale('en'))],
+        expect: () => [const LocalizationState(locale: Locale('ar'))],
       );
 
       blocTest<LocalizationBloc, LocalizationState>(
@@ -337,9 +331,9 @@ void main() {
             MockGetCurrentLanguageUseCase();
         final firstMockSetLanguageUseCase = MockSetLanguageUseCase();
 
-        when(firstMockGetCurrentLanguageUseCase()).thenAnswer(
-          (_) async => const Right(LanguageConfig.defaultLanguageCode),
-        );
+        when(
+          firstMockGetCurrentLanguageUseCase(),
+        ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
         when(
           firstMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));
@@ -379,7 +373,7 @@ void main() {
           newBloc.state,
           anyOf(
             const LocalizationState(locale: Locale('en')),
-            const LocalizationState(
+            LocalizationState(
               locale: Locale(LanguageConfig.defaultLanguageCode),
             ),
           ),

@@ -93,7 +93,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
 
   /// Check if a payload belongs to download notifications
   bool _isDownloadPayload(String? payload) {
-    if (payload == null) return false;
+    if (payload == null) {
+      return false;
+    }
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
       return data.containsKey('reciterName');

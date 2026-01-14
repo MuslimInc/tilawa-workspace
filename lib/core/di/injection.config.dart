@@ -290,6 +290,8 @@ import 'package:tilawa/features/prayer_times/data/datasources/prayer_settings_da
     as _i845;
 import 'package:tilawa/features/prayer_times/data/repositories/prayer_times_repository_impl.dart'
     as _i731;
+import 'package:tilawa/features/prayer_times/data/services/geolocator_client.dart'
+    as _i321;
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart'
     as _i173;
 import 'package:tilawa/features/prayer_times/domain/usecases/get_monthly_prayer_times_use_case.dart'
@@ -512,6 +514,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
+    gh.lazySingleton<_i321.GeolocatorClient>(
+      () => _i321.GeolocatorClientImpl(),
+    );
     gh.lazySingleton<_i958.OnboardingRepository>(
       () => _i186.OnboardingRepositoryImpl(gh<_i460.SharedPreferencesAsync>()),
     );
@@ -553,9 +558,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferencesAsync>(),
       ),
     );
-    gh.lazySingleton<_i684.LocationDataSource>(
-      () => _i684.LocationDataSourceImpl(),
-    );
     gh.singleton<_i600.CrashlyticsService>(
       () =>
           _i600.FirebaseCrashlyticsServiceImpl(gh<_i141.FirebaseCrashlytics>()),
@@ -572,12 +574,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i49.DownloadValidator>(
       () => _i49.DownloadValidator(gh<_i965.DownloadsLocalDataSource>()),
-    );
-    gh.lazySingleton<_i173.PrayerTimesRepository>(
-      () => _i731.PrayerTimesRepositoryImpl(
-        gh<_i139.PrayerSettingsDataSource>(),
-        gh<_i139.LocationDataSource>(),
-      ),
     );
     gh.lazySingleton<_i1039.NotificationPermissionService>(
       () => _i1039.NotificationPermissionService(
@@ -744,21 +740,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i995.CompleteOnboarding>(
       () => _i995.CompleteOnboarding(gh<_i958.OnboardingRepository>()),
     );
-    gh.factory<_i590.GetCurrentLocationUseCase>(
-      () => _i590.GetCurrentLocationUseCase(gh<_i173.PrayerTimesRepository>()),
-    );
-    gh.factory<_i620.GetMonthlyPrayerTimesUseCase>(
-      () =>
-          _i620.GetMonthlyPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
-    );
-    gh.factory<_i398.GetPrayerTimesUseCase>(
-      () => _i398.GetPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
-    );
-    gh.factory<_i585.LoadPrayerSettingsUseCase>(
-      () => _i585.LoadPrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
-    );
-    gh.factory<_i930.SavePrayerSettingsUseCase>(
-      () => _i930.SavePrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
+    gh.lazySingleton<_i684.LocationDataSource>(
+      () => _i684.LocationDataSourceImpl(gh<_i321.GeolocatorClient>()),
     );
     gh.lazySingleton<_i652.AthkarRepository>(
       () => _i150.AthkarRepositoryImpl(
@@ -857,6 +840,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i586.SetLanguageUseCase>(
       () => _i586.SetLanguageUseCase(gh<_i67.LocalizationRepository>()),
+    );
+    gh.lazySingleton<_i173.PrayerTimesRepository>(
+      () => _i731.PrayerTimesRepositoryImpl(
+        gh<_i139.PrayerSettingsDataSource>(),
+        gh<_i139.LocationDataSource>(),
+      ),
     );
     gh.lazySingleton<_i16.CreateBookmarkUseCase>(
       () => _i16.CreateBookmarkUseCase(gh<_i475.BookmarksRepository>()),
@@ -1022,21 +1011,28 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i887.SplashCubit>(
       () => _i887.SplashCubit(gh<_i712.GetSplashNextRouteUseCase>()),
     );
-    gh.factory<_i713.PrayerTimesBloc>(
-      () => _i713.PrayerTimesBloc(
-        gh<_i590.GetPrayerTimesUseCase>(),
-        gh<_i590.GetMonthlyPrayerTimesUseCase>(),
-        gh<_i590.GetCurrentLocationUseCase>(),
-        gh<_i590.SavePrayerSettingsUseCase>(),
-        gh<_i590.LoadPrayerSettingsUseCase>(),
-      ),
-    );
     gh.factory<_i275.QiblaBloc>(
       () => _i275.QiblaBloc(
         gh<_i696.GetQiblaDirectionUseCase>(),
         gh<_i144.CheckLocationServiceUseCase>(),
         gh<_i649.RequestLocationPermissionUseCase>(),
       ),
+    );
+    gh.factory<_i590.GetCurrentLocationUseCase>(
+      () => _i590.GetCurrentLocationUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i620.GetMonthlyPrayerTimesUseCase>(
+      () =>
+          _i620.GetMonthlyPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i398.GetPrayerTimesUseCase>(
+      () => _i398.GetPrayerTimesUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i585.LoadPrayerSettingsUseCase>(
+      () => _i585.LoadPrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
+    );
+    gh.factory<_i930.SavePrayerSettingsUseCase>(
+      () => _i930.SavePrayerSettingsUseCase(gh<_i173.PrayerTimesRepository>()),
     );
     gh.singleton<_i204.RemoveFromDownloadQueueUseCase>(
       () => _i204.RemoveFromDownloadQueueUseCase(
@@ -1075,6 +1071,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i463.DownloadServiceInterface>(),
         gh<_i49.DownloadValidator>(),
         gh<_i420.DownloadQueueManager>(),
+      ),
+    );
+    gh.factory<_i713.PrayerTimesBloc>(
+      () => _i713.PrayerTimesBloc(
+        gh<_i590.GetPrayerTimesUseCase>(),
+        gh<_i590.GetMonthlyPrayerTimesUseCase>(),
+        gh<_i590.GetCurrentLocationUseCase>(),
+        gh<_i590.SavePrayerSettingsUseCase>(),
+        gh<_i590.LoadPrayerSettingsUseCase>(),
       ),
     );
     gh.lazySingleton<_i881.DownloadStatusSynchronizer>(

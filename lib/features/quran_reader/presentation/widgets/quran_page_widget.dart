@@ -169,7 +169,9 @@ class _SurahTextSectionState extends State<SurahTextSection> {
         for (final PageAyahInfo ayah in widget.ayahs) {
           if (ayah.words != null) {
             for (final QuranWord word in ayah.words!) {
-              if (word.charTypeName == 'end') continue;
+              if (word.charTypeName == 'end') {
+                continue;
+              }
 
               final isPlaying = word.id == playingId;
               final recognizer = TapGestureRecognizer()
@@ -204,7 +206,7 @@ class _SurahTextSectionState extends State<SurahTextSection> {
                     height: 2.2,
                     color: isPlaying ? Colors.amber[900] : Colors.black,
                     backgroundColor: isPlaying
-                        ? Colors.amber.withOpacity(0.2)
+                        ? Colors.amber.withValues(alpha: 0.2)
                         : null,
                   ),
                 ),

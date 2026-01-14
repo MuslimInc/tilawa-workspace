@@ -119,25 +119,31 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
       final Either<Failure, LocationResult> locationResult =
           await _getCurrentLocationUseCase.call();
-      locationResult.fold(
-        (failure) {
+
+      var locationFound = false;
+      await locationResult.fold(
+        (failure) async {
           emit(
             state.copyWith(
               status: PrayerTimesStatus.locationRequired,
               isLoadingLocation: false,
-              errorMessage: failure.toString(),
+              errorMessage: failure.message ?? 'Unknown error',
             ),
           );
-          return;
         },
-        (location) {
+        (location) async {
           latitude = location.latitude;
           longitude = location.longitude;
           locationName = location.locationName;
+          locationFound = true;
         },
       );
 
       emit(state.copyWith(isLoadingLocation: false));
+
+      if (!locationFound) {
+        return;
+      }
     }
 
     if (latitude == null || longitude == null) {
@@ -163,7 +169,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       (failure) => emit(
         state.copyWith(
           status: PrayerTimesStatus.error,
-          errorMessage: failure.toString(),
+          errorMessage: failure.message ?? 'Unknown error',
         ),
       ),
       (prayerTimes) {
@@ -204,7 +210,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         );
 
     result.fold(
-      (failure) => emit(state.copyWith(errorMessage: failure.toString())),
+      (failure) => emit(
+        state.copyWith(errorMessage: failure.message ?? 'Unknown error'),
+      ),
       (prayerTimes) => emit(state.copyWith(monthlyPrayerTimes: prayerTimes)),
     );
   }
@@ -222,7 +230,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       (failure) => emit(
         state.copyWith(
           isLoadingLocation: false,
-          errorMessage: failure.toString(),
+          errorMessage: failure.message ?? 'Unknown error',
         ),
       ),
       (location) {
@@ -259,7 +267,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _RefreshCountdown event,
     Emitter<PrayerTimesState> emit,
   ) {
-    if (state.todayPrayerTimes == null) return;
+    if (state.todayPrayerTimes == null) {
+      return;
+    }
 
     final PrayerTimeItem? currentOrNext = state.todayPrayerTimes!
         .getCurrentOrNextPrayer();

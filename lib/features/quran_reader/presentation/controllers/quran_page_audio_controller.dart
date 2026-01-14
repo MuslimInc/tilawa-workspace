@@ -7,7 +7,9 @@ class QuranPageAudioController extends ChangeNotifier {
   QuranPageAudioController() {
     _playerStateSubscription = _globalPlayer.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
-        if (_isDisposed) return;
+        if (_isDisposed) {
+          return;
+        }
         _playingWordId = null;
         notifyListeners();
       }
@@ -37,7 +39,9 @@ class QuranPageAudioController extends ChangeNotifier {
   int? get playingWordId => _playingWordId;
 
   Future<void> playWord(String? url, int wordId) async {
-    if (url == null) return;
+    if (url == null) {
+      return;
+    }
 
     if (_playingWordId == wordId && _globalPlayer.playing) {
       await stop();

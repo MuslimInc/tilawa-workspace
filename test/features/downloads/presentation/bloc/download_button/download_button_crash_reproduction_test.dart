@@ -14,7 +14,7 @@ import '../../../helpers/mock_helper.mocks.dart';
 /// Bad state: Cannot add new events after calling close
 /// at _BroadcastStreamController.add(dart:async)
 /// at Bloc.add(bloc.dart:97)
-/// at DownloadButtonBloc._listenToProgress.<fn>(download_button_bloc.dart:220)
+/// at DownloadButtonBloc._listenToProgress(download_button_bloc.dart:220)
 ///
 /// This test simulates the real-world scenario:
 /// 1. User starts downloading a surah

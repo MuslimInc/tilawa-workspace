@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- For Android 14+ (API 34+) when targeting SDK 34+, USE_EXACT_ALARM provides exact alarms without user permission -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Location permissions for Qibla feature -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

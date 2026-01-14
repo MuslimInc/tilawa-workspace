@@ -334,9 +334,7 @@ void main() {
       );
 
       // Add positions to the stream
-      for (final Duration p in positions.skip(1)) {
-        positionSubject.add(p);
-      }
+      positions.skip(1).forEach(positionSubject.add);
 
       await expectation;
     });

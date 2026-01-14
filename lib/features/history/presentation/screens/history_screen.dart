@@ -288,8 +288,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // });
   }
 
-  void _showClearAllDialog(BuildContext context) {
-    showDialog<bool>(
+  Future<void> _showClearAllDialog(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.clearHistory),
@@ -310,10 +310,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
-    ).then((confirmed) {
-      if (confirmed ?? false) {
-        context.read<HistoryBloc>().add(const HistoryEvent.clearAllHistory());
-      }
-    });
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (confirmed ?? false) {
+      context.read<HistoryBloc>().add(const HistoryEvent.clearAllHistory());
+    }
   }
 }

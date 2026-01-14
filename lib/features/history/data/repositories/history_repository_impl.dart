@@ -108,7 +108,9 @@ class HistoryRepositoryImpl implements HistoryRepository {
     bool? completed,
   }) async {
     final HistoryEntity? existing = await _localDataSource.getHistoryById(id);
-    if (existing == null) return null;
+    if (existing == null) {
+      return null;
+    }
 
     final HistoryEntity updated = existing.copyWith(
       lastPositionMs: lastPositionMs,

@@ -1,5 +1,6 @@
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -89,9 +90,10 @@ void main() {
               ];
             }
             if (methodCall.method == 'Firebase#initializeApp') {
+              final args = methodCall.arguments as Map<dynamic, dynamic>;
               return {
-                'name': methodCall.arguments['appName'],
-                'options': methodCall.arguments['options'],
+                'name': args['appName'],
+                'options': args['options'],
                 'pluginConstants': {},
               };
             }
@@ -323,7 +325,7 @@ void main() {
         await firebaseMessagingBackgroundHandler(const RemoteMessage());
       } catch (e) {
         // Expected if platform is not supported or Firebase already initialized with different options
-        print(
+        debugPrint(
           'Handled expected error in firebaseMessagingBackgroundHandler test: $e',
         );
       }
@@ -370,7 +372,9 @@ void main() {
       await bootstrap(
         runner: (widget) {
           runCount++;
-          if (runCount == 1) throw 'Crash';
+          if (runCount == 1) {
+            throw Exception('Crash');
+          }
         },
         diConfigurator: () async {},
       );
@@ -388,7 +392,7 @@ void main() {
         await bootstrap(
           runner: (widget) {
             runCount++;
-            throw 'Crash $runCount';
+            throw Exception('Crash $runCount');
           },
           diConfigurator: () async {},
         );

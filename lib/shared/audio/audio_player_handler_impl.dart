@@ -767,7 +767,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<String> _getSurahName(int surahNumber) async {
     final String currentLanguage =
         await _prefs.getString(LanguageConfig.languageKey) ??
-        LanguageConfig.getDefaultLanguageCode();
+        LanguageConfig.defaultLanguageCode;
 
     if (currentLanguage == 'en') {
       return SurahNames.getEnglishSurahName(surahNumber);

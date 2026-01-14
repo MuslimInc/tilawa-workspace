@@ -66,32 +66,44 @@ class PrayerTimeCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    return Card(
-      color: isNext
-          ? theme.colorScheme.primaryContainer
-          : hasPassed
-          ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
-          : null,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: isNext
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: isNext
+            ? Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
+              )
+            : null,
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             // Prayer icon
             Container(
-              width: 48,
-              height: 48,
+              width: 44, // Slightly smaller
+              height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isNext
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceContainerHighest,
+                    : theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
               ),
               child: Icon(
                 _getPrayerIcon(prayer.type),
+                size: 22,
                 color: isNext
                     ? theme.colorScheme.onPrimary
                     : hasPassed
-                    ? theme.colorScheme.outline
+                    ? theme.colorScheme.outline.withValues(
+                        alpha: 0.5,
+                      ) // More muted
                     : theme.colorScheme.onSurfaceVariant,
               ),
             ),
@@ -108,8 +120,12 @@ class PrayerTimeCard extends StatelessWidget {
                         ? prayer.type.displayNameAr
                         : prayer.type.displayName,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: isNext ? FontWeight.bold : null,
-                      color: hasPassed ? theme.colorScheme.outline : null,
+                      fontWeight: isNext
+                          ? FontWeight.bold
+                          : FontWeight.w500, // Medium for others
+                      color: hasPassed
+                          ? theme.colorScheme.outline.withValues(alpha: 0.7)
+                          : theme.colorScheme.onSurface,
                     ),
                   ),
                   if (isNext)
@@ -117,6 +133,7 @@ class PrayerTimeCard extends StatelessWidget {
                       context.l10n.nextPrayer,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                 ],
@@ -129,21 +146,38 @@ class PrayerTimeCard extends StatelessWidget {
                   ? prayer.formattedTime
                   : prayer.formattedTime12Hour,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: hasPassed ? theme.colorScheme.outline : null,
+                fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+                color: isNext
+                    ? theme.colorScheme.primary
+                    : hasPassed
+                    ? theme.colorScheme.outline.withValues(alpha: 0.6)
+                    : theme.colorScheme.onSurface,
               ),
             ),
 
-            // Passed indicator
-            if (hasPassed)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Icon(
-                  Icons.check_circle,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
+            // Passed indicator or active dot
+            SizedBox(
+              width: 32,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: isNext
+                    ? Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.colorScheme.primary,
+                        ),
+                      )
+                    : hasPassed
+                    ? Icon(
+                        Icons.check,
+                        size: 18,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                      )
+                    : null,
               ),
+            ),
           ],
         ),
       ),

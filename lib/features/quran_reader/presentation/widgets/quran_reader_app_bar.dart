@@ -24,14 +24,14 @@ class QuranReaderAppBar extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            theme.colorScheme.surface.withOpacity(0.95),
-            theme.colorScheme.surface.withOpacity(0.9),
+            theme.colorScheme.surface.withValues(alpha: 0.95),
+            theme.colorScheme.surface.withValues(alpha: 0.9),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
         ],
       ),
       child: SafeArea(

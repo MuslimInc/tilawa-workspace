@@ -22,7 +22,7 @@ class LanguageSwitcher extends StatelessWidget {
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem<Locale>(
-                value: const Locale(LanguageConfig.defaultLanguageCode),
+                value: Locale(LanguageConfig.defaultLanguageCode),
                 child: Row(
                   children: [
                     Text(
