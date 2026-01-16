@@ -7,7 +7,7 @@ import '../../domain/repositories/prayer_times_repository.dart';
 import '../services/geolocator_client.dart';
 
 abstract class LocationDataSource {
-  Future<LocationResult> getCurrentLocation();
+  Future<LocationResult> getCurrentLocation({bool forceRefresh = false});
   Future<bool> hasPermission();
   Future<bool> requestPermission();
   Future<bool> isLocationServiceEnabled();
@@ -25,7 +25,7 @@ class LocationDataSourceImpl implements LocationDataSource {
   );
 
   @override
-  Future<LocationResult> getCurrentLocation() async {
+  Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
     final bool serviceEnabled = await isLocationServiceEnabled();
     if (!serviceEnabled) {
       return LocationResult.error('Location services are disabled');
@@ -34,6 +34,17 @@ class LocationDataSourceImpl implements LocationDataSource {
     final bool permissionGranted = await _ensurePermission();
     if (!permissionGranted) {
       return LocationResult.error('Location permission denied');
+    }
+
+    if (!forceRefresh) {
+      final Position? lastKnown = await _geolocatorClient
+          .getLastKnownPosition();
+      if (lastKnown != null) {
+        return LocationResult(
+          latitude: lastKnown.latitude,
+          longitude: lastKnown.longitude,
+        );
+      }
     }
 
     return _getLocationResult();

@@ -46,6 +46,7 @@ import 'package:tilawa/core/services/navigation_service.dart' as _i628;
 import 'package:tilawa/core/services/notification_dispatcher.dart' as _i752;
 import 'package:tilawa/core/services/notification_permission_service.dart'
     as _i1039;
+import 'package:tilawa/core/services/update_service.dart' as _i778;
 import 'package:tilawa/core/services/user_email_service.dart' as _i597;
 import 'package:tilawa/core/wrappers/location_service_wrapper.dart' as _i527;
 import 'package:tilawa/core/wrappers/qibla_service_wrapper.dart' as _i119;
@@ -475,6 +476,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<List<_i87.MediaItem>>(
       () => externalDependenciesModule.mediaItemList(),
     );
+    gh.singleton<_i778.UpdateService>(() => _i778.UpdateService());
     gh.lazySingleton<_i895.Connectivity>(
       () => externalDependenciesModule.connectivity,
     );

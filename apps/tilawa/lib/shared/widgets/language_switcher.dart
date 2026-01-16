@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui/theme/color_scheme.dart';
 
 import '../../core/config/language_config.dart';
-import '../../core/theme/color_scheme.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 
 class LanguageSwitcher extends StatelessWidget {

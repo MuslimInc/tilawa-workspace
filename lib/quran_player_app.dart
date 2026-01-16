@@ -9,6 +9,7 @@ import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/providers/providers.dart';
 import 'core/services/interfaces/notification_dispatcher_interface.dart';
+import 'core/services/update_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
@@ -37,6 +38,7 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
     // Process launch notification after first frame when router is ready
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _processLaunchNotificationIfNeeded();
+      _checkForUpdate();
     });
   }
 
@@ -59,7 +61,19 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
       // Use debounce to prevent excessive checks when rapidly switching states
       _resumeDebounceTimer = Timer(const Duration(milliseconds: 100), () {
         _checkForNotificationOnResume();
+        _checkForUpdate();
       });
+    }
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      if (getIt.isRegistered<UpdateService>()) {
+        // Run in background to not block UI
+        getIt<UpdateService>().checkForUpdate();
+      }
+    } catch (e) {
+      logger.d('[QuranPlayerApp] Error checking for update: $e');
     }
   }
 

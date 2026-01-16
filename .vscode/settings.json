@@ -4,5 +4,6 @@
     "Athkar",
     "tilawa",
     "usecases"
-  ]
+  ],
+  "chatgpt.openOnStartup": false
 }

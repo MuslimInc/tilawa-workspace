@@ -134,14 +134,16 @@ class MockGetCurrentLocationUseCase extends _i1.Mock
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, _i10.LocationResult>> call() =>
+  _i3.Future<_i4.Either<_i5.Failure, _i10.LocationResult>> call({
+    bool? forceRefresh = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, []),
+            Invocation.method(#call, [], {#forceRefresh: forceRefresh}),
             returnValue:
                 _i3.Future<_i4.Either<_i5.Failure, _i10.LocationResult>>.value(
                   _i7.dummyValue<_i4.Either<_i5.Failure, _i10.LocationResult>>(
                     this,
-                    Invocation.method(#call, []),
+                    Invocation.method(#call, [], {#forceRefresh: forceRefresh}),
                   ),
                 ),
           )

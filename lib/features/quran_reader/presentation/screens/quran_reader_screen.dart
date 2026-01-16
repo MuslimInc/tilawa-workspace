@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_mushaf/quran_mushaf.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/quran_reader_bloc.dart';
@@ -48,6 +49,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return const Scaffold(body: PageviewQuran());
+    // return const Scaffold(body: PageviewQuranV2());
     return Scaffold(
       body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
         listener: (context, state) {

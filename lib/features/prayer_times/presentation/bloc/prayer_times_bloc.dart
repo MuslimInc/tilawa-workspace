@@ -224,7 +224,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     emit(state.copyWith(isLoadingLocation: true));
 
     final Either<Failure, LocationResult> locationResult =
-        await _getCurrentLocationUseCase.call();
+        await _getCurrentLocationUseCase.call(forceRefresh: true);
 
     locationResult.fold(
       (failure) => emit(

@@ -128,13 +128,19 @@ class MockPrayerTimesRepository extends _i1.Mock
           as _i5.Future<List<_i2.PrayerTimeEntity>>);
 
   @override
-  _i5.Future<_i3.LocationResult> getCurrentLocation() =>
+  _i5.Future<_i3.LocationResult> getCurrentLocation({
+    bool? forceRefresh = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#getCurrentLocation, []),
+            Invocation.method(#getCurrentLocation, [], {
+              #forceRefresh: forceRefresh,
+            }),
             returnValue: _i5.Future<_i3.LocationResult>.value(
               _FakeLocationResult_1(
                 this,
-                Invocation.method(#getCurrentLocation, []),
+                Invocation.method(#getCurrentLocation, [], {
+                  #forceRefresh: forceRefresh,
+                }),
               ),
             ),
           )

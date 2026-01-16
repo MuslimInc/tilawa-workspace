@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'core/constants/app_strings.dart';
 import 'core/di/injection.dart';
 import 'core/observers/app_bloc_observer.dart';
+import 'core/observers/crashlytics_bloc_observer.dart';
 import 'core/services/analytics_initialization_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
@@ -93,9 +94,12 @@ Future<void> bootstrap({
       // App can work without crash reporting
     }
 
-    Bloc.observer = AppBlocObserver();
-
-    // ========================================================================
+    Bloc.observer = MultiBlocObserver(
+      observers: [
+        AppBlocObserver(),
+        CrashlyticsBlocObserver(getIt<CrashlyticsService>()),
+      ],
+    ); // ========================================================================
     // CRITICAL: Initialize notification dispatcher and athkar service BEFORE
     // showing UI so they can handle notification taps from background
     // ========================================================================

@@ -36,7 +36,7 @@ void main() {
 
     group('getCurrentLocation', () {
       test(
-        'should return LocationResult when permission granted and service enabled',
+        'should return cached location when available and forceRefresh is false',
         () async {
           // Arrange
           when(
@@ -45,6 +45,67 @@ void main() {
           when(
             mockGeolocatorClient.checkPermission(),
           ).thenAnswer((_) async => LocationPermission.whileInUse);
+          when(
+            mockGeolocatorClient.getLastKnownPosition(),
+          ).thenAnswer((_) async => tPosition);
+
+          // Act
+          final LocationResult result = await dataSource.getCurrentLocation();
+
+          // Assert
+          expect(result.latitude, tPosition.latitude);
+          expect(result.longitude, tPosition.longitude);
+          // Verify getCurrentPosition was NOT called
+          verifyNever(
+            mockGeolocatorClient.getCurrentPosition(
+              locationSettings: anyNamed('locationSettings'),
+            ),
+          );
+        },
+      );
+
+      test('should fetch fresh location when forceRefresh is true', () async {
+        // Arrange
+        when(
+          mockGeolocatorClient.isLocationServiceEnabled(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockGeolocatorClient.checkPermission(),
+        ).thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          mockGeolocatorClient.getCurrentPosition(
+            locationSettings: anyNamed('locationSettings'),
+          ),
+        ).thenAnswer((_) async => tPosition);
+
+        // Act
+        final LocationResult result = await dataSource.getCurrentLocation(
+          forceRefresh: true,
+        );
+
+        // Assert
+        expect(result.latitude, tPosition.latitude);
+        expect(result.longitude, tPosition.longitude);
+        verify(
+          mockGeolocatorClient.getCurrentPosition(
+            locationSettings: anyNamed('locationSettings'),
+          ),
+        ).called(1);
+      });
+
+      test(
+        'should fetch fresh location when cached location is unavailable',
+        () async {
+          // Arrange
+          when(
+            mockGeolocatorClient.isLocationServiceEnabled(),
+          ).thenAnswer((_) async => true);
+          when(
+            mockGeolocatorClient.checkPermission(),
+          ).thenAnswer((_) async => LocationPermission.whileInUse);
+          when(
+            mockGeolocatorClient.getLastKnownPosition(),
+          ).thenAnswer((_) async => null);
           when(
             mockGeolocatorClient.getCurrentPosition(
               locationSettings: anyNamed('locationSettings'),
@@ -56,7 +117,11 @@ void main() {
 
           // Assert
           expect(result.latitude, tPosition.latitude);
-          expect(result.longitude, tPosition.longitude);
+          verify(
+            mockGeolocatorClient.getCurrentPosition(
+              locationSettings: anyNamed('locationSettings'),
+            ),
+          ).called(1);
         },
       );
 
@@ -95,80 +160,8 @@ void main() {
         },
       );
 
-      test('falls back to last known position on exception', () async {
-        // Arrange
-        when(
-          mockGeolocatorClient.isLocationServiceEnabled(),
-        ).thenAnswer((_) async => true);
-        when(
-          mockGeolocatorClient.checkPermission(),
-        ).thenAnswer((_) async => LocationPermission.whileInUse);
-        when(
-          mockGeolocatorClient.getCurrentPosition(
-            locationSettings: anyNamed('locationSettings'),
-          ),
-        ).thenThrow(Exception('Error'));
-        when(
-          mockGeolocatorClient.getLastKnownPosition(),
-        ).thenAnswer((_) async => tPosition);
-
-        // Act
-        final LocationResult result = await dataSource.getCurrentLocation();
-
-        // Assert
-        expect(result.latitude, tPosition.latitude);
-      });
-
-      test('returns error on timeout if no last known position', () async {
-        // Arrange
-        when(
-          mockGeolocatorClient.isLocationServiceEnabled(),
-        ).thenAnswer((_) async => true);
-        when(
-          mockGeolocatorClient.checkPermission(),
-        ).thenAnswer((_) async => LocationPermission.whileInUse);
-        when(
-          mockGeolocatorClient.getCurrentPosition(
-            locationSettings: anyNamed('locationSettings'),
-          ),
-        ).thenThrow(TimeoutException('Timeout'));
-        when(
-          mockGeolocatorClient.getLastKnownPosition(),
-        ).thenAnswer((_) async => null);
-
-        // Act
-        final LocationResult result = await dataSource.getCurrentLocation();
-
-        // Assert
-        expect(result.error, contains('timed out'));
-      });
-
-      test('falls back to last known position on timeout', () async {
-        // Arrange
-        when(
-          mockGeolocatorClient.isLocationServiceEnabled(),
-        ).thenAnswer((_) async => true);
-        when(
-          mockGeolocatorClient.checkPermission(),
-        ).thenAnswer((_) async => LocationPermission.whileInUse);
-        when(
-          mockGeolocatorClient.getCurrentPosition(
-            locationSettings: anyNamed('locationSettings'),
-          ),
-        ).thenThrow(TimeoutException('Timeout'));
-        when(
-          mockGeolocatorClient.getLastKnownPosition(),
-        ).thenAnswer((_) async => tPosition);
-
-        // Act
-        final LocationResult result = await dataSource.getCurrentLocation();
-
-        // Assert
-        expect(result.latitude, tPosition.latitude);
-        expect(result.longitude, tPosition.longitude);
-      });
       test(
-        'returns specific error when both current and last known positions fail',
+        'falls back to last known position on exception (forceRefresh=true)',
         () async {
           // Arrange
           when(
@@ -181,21 +174,44 @@ void main() {
             mockGeolocatorClient.getCurrentPosition(
               locationSettings: anyNamed('locationSettings'),
             ),
-          ).thenThrow(Exception('Generic Error'));
+          ).thenThrow(Exception('Error'));
           when(
             mockGeolocatorClient.getLastKnownPosition(),
-          ).thenAnswer((_) async => null);
+          ).thenAnswer((_) async => tPosition);
 
           // Act
-          final LocationResult result = await dataSource.getCurrentLocation();
+          final LocationResult result = await dataSource.getCurrentLocation(
+            forceRefresh: true,
+          );
 
           // Assert
-          expect(
-            result.error,
-            contains('Failed to get location: Exception: Generic Error'),
-          );
+          expect(result.latitude, tPosition.latitude);
         },
       );
+
+      test('returns error on timeout if no last known position', () async {
+        // Arrange
+        when(
+          mockGeolocatorClient.isLocationServiceEnabled(),
+        ).thenAnswer((_) async => true);
+        when(
+          mockGeolocatorClient.checkPermission(),
+        ).thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          mockGeolocatorClient.getLastKnownPosition(),
+        ).thenAnswer((_) async => null); // Initially null
+        when(
+          mockGeolocatorClient.getCurrentPosition(
+            locationSettings: anyNamed('locationSettings'),
+          ),
+        ).thenThrow(TimeoutException('Timeout'));
+
+        // Act
+        final LocationResult result = await dataSource.getCurrentLocation();
+
+        // Assert
+        expect(result.error, contains('timed out'));
+      });
     });
 
     group('requestPermission', () {

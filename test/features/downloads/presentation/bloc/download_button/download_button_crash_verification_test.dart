@@ -42,6 +42,11 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - NO isClosed check
       emit(TestDownloading(0.0));
+      // Simulate real implementation: listen and add events
+      _subscription = progressStream.listen((progress) {
+        // This is where it crashes if closed
+        add(TestProgressUpdated(progress));
+      });
     });
 
     on<TestProgressUpdated>((event, emit) async {
@@ -50,6 +55,7 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   }
 
   final Stream<double> progressStream;
+  StreamSubscription<double>? _subscription;
 
   @override
   Future<void> close() {
@@ -66,6 +72,10 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - WITH isClosed check
       emit(TestDownloading(0.0));
+      _subscription = progressStream.listen((progress) {
+        if (isClosed) return;
+        add(TestProgressUpdated(progress));
+      });
     });
 
     on<TestProgressUpdated>((event, emit) async {
@@ -74,6 +84,7 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
   }
 
   final Stream<double> progressStream;
+  StreamSubscription<double>? _subscription;
 
   @override
   Future<void> close() {

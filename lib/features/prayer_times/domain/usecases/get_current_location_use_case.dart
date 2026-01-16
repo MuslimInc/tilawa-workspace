@@ -10,7 +10,9 @@ class GetCurrentLocationUseCase {
 
   final PrayerTimesRepository _repository;
 
-  Future<Either<Failure, LocationResult>> call() async {
+  Future<Either<Failure, LocationResult>> call({
+    bool forceRefresh = false,
+  }) async {
     try {
       final bool hasPermission = await _repository.hasLocationPermission();
 
@@ -21,7 +23,9 @@ class GetCurrentLocationUseCase {
         }
       }
 
-      final LocationResult location = await _repository.getCurrentLocation();
+      final LocationResult location = await _repository.getCurrentLocation(
+        forceRefresh: forceRefresh,
+      );
 
       if (location.hasError) {
         return Left(Failure.unexpectedError(location.error!));

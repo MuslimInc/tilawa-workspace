@@ -1,0 +1,28 @@
+name: tilawa_ui
+description: UI Kit and Design System for Tilawa app.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.10.7
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core
+  tilawa_core:
+    path: ../core
+
+  # Utils
+  google_fonts: ^7.0.0
+  flex_color_scheme: ^8.4.0
+  flutter_screenutil_plus: ^1.4.0
+  skeletonizer: ^2.1.2
+  gap: ^3.0.1
+  flutter_svg: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
