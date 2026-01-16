@@ -19,6 +19,10 @@ class StartQiblaStream extends QiblaEvent {
   const StartQiblaStream();
 }
 
+class StopQiblaStream extends QiblaEvent {
+  const StopQiblaStream();
+}
+
 class UpdateQiblaDirection extends QiblaEvent {
   const UpdateQiblaDirection(this.direction);
   final QiblaDirectionEntity direction;

@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -32,10 +33,13 @@ void main() {
   Widget buildTestWidget() {
     return ScreenUtilPlusInit(
       designSize: const Size(375, 812),
-      builder: (_, _) => const MaterialApp(
+      builder: (_, _) => MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: QiblaScreen(),
+        home: BlocProvider<QiblaBloc>.value(
+          value: mockQiblaBloc,
+          child: const QiblaScreen(),
+        ),
       ),
     );
   }

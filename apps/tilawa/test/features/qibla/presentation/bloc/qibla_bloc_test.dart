@@ -4,13 +4,13 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa/features/qibla/domain/entities/qibla_direction_entity.dart';
 import 'package:tilawa/features/qibla/domain/usecases/check_location_service_use_case.dart';
 import 'package:tilawa/features/qibla/domain/usecases/get_qibla_direction_use_case.dart';
 import 'package:tilawa/features/qibla/domain/usecases/request_location_permission_use_case.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/usecases/usecase.dart';
 
 class MockGetQiblaDirectionUseCase extends Mock
     implements GetQiblaDirectionUseCase {}
@@ -252,6 +252,15 @@ void main() {
           errorMessage: 'Exception: Setup failed',
         ),
       ],
+    );
+  });
+
+  group('StopQiblaStream', () {
+    blocTest<QiblaBloc, QiblaState>(
+      'should not emit any new state when stopped',
+      build: () => qiblaBloc,
+      act: (bloc) => bloc.add(const StopQiblaStream()),
+      expect: () => [],
     );
   });
 }

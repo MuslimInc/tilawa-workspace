@@ -4,9 +4,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/usecases/check_location_service_use_case.dart';
 import '../../domain/usecases/get_qibla_direction_use_case.dart';
@@ -25,6 +25,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     on<CheckLocationService>(_onCheckLocationService);
     on<RequestLocationPermission>(_onRequestLocationPermission);
     on<StartQiblaStream>(_onStartQiblaStream);
+    on<StopQiblaStream>(_onStopQiblaStream);
     on<UpdateQiblaDirection>(_onUpdateQiblaDirection);
     on<QiblaErrorOccurred>(_onQiblaErrorOccurred);
   }
@@ -104,26 +105,25 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
       emit(state.copyWith(status: QiblaStatus.loading));
 
       await _qiblaSubscription?.cancel();
-      _qiblaSubscription = _getQiblaDirection(const NoParams())
-          .timeout(
-            const Duration(seconds: 3),
-            onTimeout: (sink) {
-              sink.addError(
-                'Sensors not responding. If you are on a Simulator, Compass is not supported.',
-              );
-            },
-          )
-          .listen(
-            (direction) => add(UpdateQiblaDirection(direction)),
-            onError: (error) {
-              add(QiblaErrorOccurred(error.toString()));
-            },
-          );
+      _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
+        (direction) => add(UpdateQiblaDirection(direction)),
+        onError: (error) {
+          add(QiblaErrorOccurred(error.toString()));
+        },
+      );
     } catch (e) {
       emit(
         state.copyWith(status: QiblaStatus.error, errorMessage: e.toString()),
       );
     }
+  }
+
+  Future<void> _onStopQiblaStream(
+    StopQiblaStream event,
+    Emitter<QiblaState> emit,
+  ) async {
+    await _qiblaSubscription?.cancel();
+    _qiblaSubscription = null;
   }
 
   void _onUpdateQiblaDirection(
