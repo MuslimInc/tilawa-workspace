@@ -1,10 +1,10 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/entities/audio.dart';
-import '../../core/entities/reciter_entity.dart';
-import '../../core/extensions.dart';
-import '../../core/utils/toast_utils.dart';
+import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import '../../helpers/reciter_helper.dart';
 import '../../router/app_router_config.dart';
 

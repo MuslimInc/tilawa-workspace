@@ -1,5 +1,6 @@
 name: tilawa_ui
-description: UI Kit and Design System for Tilawa app.
+resolution: workspace
+description: UI library for Tilawa.
 version: 0.0.1
 publish_to: none
 

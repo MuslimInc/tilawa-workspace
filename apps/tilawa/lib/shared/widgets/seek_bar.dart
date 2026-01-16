@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../../core/widgets/hidden_thumb_component_shape.dart';
+import 'package:tilawa_core/widgets/hidden_thumb_component_shape.dart';
 
 class SeekBar extends StatefulWidget {
   const SeekBar({

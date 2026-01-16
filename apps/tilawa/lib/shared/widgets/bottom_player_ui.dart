@@ -3,7 +3,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
-import '../../../core/entities/audio.dart';
+import 'package:tilawa_core/entities/audio.dart';
 import '../models/position_data.dart';
 
 /// UI-only widget for the bottom player that can be used in previews

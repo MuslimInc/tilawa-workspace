@@ -1,4 +1,5 @@
 name: tilawa
+resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: "none"
@@ -103,9 +104,6 @@ dev_dependencies:
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
 
-dependency_overrides:
-  test_api: ^0.7.8
-
 flutter:
   uses-material-design: true
   generate: true
@@ -116,7 +114,7 @@ flutter:
     - assets/data/
     - assets/images/qibla_dial.png
     - assets/images/qibla_needle.png
-    - shorebird.yaml
+
   fonts:
     - family: QCF_P001
       fonts:
