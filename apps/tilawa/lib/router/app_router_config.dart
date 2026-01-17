@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa/core/extensions.dart';
 
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
@@ -19,7 +19,6 @@ import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
-import '../features/quran_reader/presentation/screens/quran_reader_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -285,10 +284,11 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
       create: (context) =>
           getIt<QuranReaderBloc>()
             ..add(QuranReaderEvent.loadSurah(surahNumber)),
-      child: QuranReaderScreen(
-        surahNumber: surahNumber,
-        initialAyah: ayahNumber,
-      ),
+      // child: QuranReaderScreen(
+      //   surahNumber: surahNumber,
+      //   initialAyah: ayahNumber,
+      // ),
+      child: Scaffold(body: Center(child: Text('Quran Reader | Coming Soon'))),
     );
   }
 }
