@@ -2,10 +2,10 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa/core/extensions.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
@@ -93,6 +93,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   ? FloatingActionButtonLocation.endFloat
                   : FloatingActionButtonLocation.startFloat,
               floatingActionButton: FloatingActionButton(
+                heroTag: 'reciters_fab',
                 onPressed: () async {
                   await const FavoritesRoute().push(context);
                   if (context.mounted) {

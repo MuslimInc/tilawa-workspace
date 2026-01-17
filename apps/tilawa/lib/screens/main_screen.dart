@@ -60,6 +60,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Scaffold(
               floatingActionButton: kDebugMode
                   ? FloatingActionButton(
+                      heroTag: null,
                       onPressed: () {
                         /// TODO: implement push notification
                         final IAthkarNotificationService notificationService =

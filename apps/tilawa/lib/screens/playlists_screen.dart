@@ -152,6 +152,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'playlists_fab',
         onPressed: () => _showCreatePlaylistDialog(context),
         child: const Icon(Icons.add),
       ),

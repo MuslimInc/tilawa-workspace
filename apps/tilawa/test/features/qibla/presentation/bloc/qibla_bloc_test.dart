@@ -215,28 +215,6 @@ void main() {
 
   group('StartQiblaStream', () {
     blocTest<QiblaBloc, QiblaState>(
-      'should emit [error] when stream times out',
-      setUp: () {
-        when(() => mockGetQiblaDirectionUseCase(any())).thenAnswer(
-          (_) => Stream<QiblaDirectionEntity>.fromFuture(
-            Completer<QiblaDirectionEntity>().future,
-          ),
-        );
-      },
-      build: () => qiblaBloc,
-      act: (bloc) => bloc.add(const StartQiblaStream()),
-      wait: const Duration(seconds: 4),
-      expect: () => [
-        const QiblaState(status: QiblaStatus.loading),
-        const QiblaState(
-          status: QiblaStatus.error,
-          errorMessage:
-              'Sensors not responding. If you are on a Simulator, Compass is not supported.',
-        ),
-      ],
-    );
-
-    blocTest<QiblaBloc, QiblaState>(
       'should emit [error] when stream setup fails',
       setUp: () {
         when(

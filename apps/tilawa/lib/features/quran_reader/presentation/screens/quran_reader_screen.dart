@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_mushaf/quran_mushaf.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/quran_reader_bloc.dart';
@@ -26,8 +27,8 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   late PageController _pageController;
-  bool _firstLoad = true;
-  bool _showControls = true;
+  final bool _firstLoad = true;
+  final bool _showControls = true;
 
   @override
   void initState() {
@@ -48,92 +49,92 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // return const Scaffold(body: PageviewQuran());
+    return const Scaffold(body: PageviewQuran());
     // return const Scaffold(body: PageviewQuranV2());
-    return Scaffold(
-      body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
-        listener: (context, state) {
-          // Handle initial navigation to surah's start page
-          if (state.currentSurah != null && _firstLoad) {
-            final int startPage = state.currentSurah!.startPage ?? 1;
-            // Post frame to ensure controller is attached
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_pageController.hasClients) {
-                _pageController.jumpToPage(startPage - 1);
-                // Trigger load for the start page
-                context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.loadPage(startPage),
-                );
-              }
-            });
-            _firstLoad = false;
-          }
-        },
-        builder: (context, state) {
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _showControls = !_showControls;
-              });
-            },
-            child: Stack(
-              children: [
-                // Main content
-                _buildContent(context, state),
+    // return Scaffold(
+    //   body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
+    //     listener: (context, state) {
+    //       // Handle initial navigation to surah's start page
+    //       if (state.currentSurah != null && _firstLoad) {
+    //         final int startPage = state.currentSurah!.startPage ?? 1;
+    //         // Post frame to ensure controller is attached
+    //         WidgetsBinding.instance.addPostFrameCallback((_) {
+    //           if (_pageController.hasClients) {
+    //             _pageController.jumpToPage(startPage - 1);
+    //             // Trigger load for the start page
+    //             context.read<QuranReaderBloc>().add(
+    //               QuranReaderEvent.loadPage(startPage),
+    //             );
+    //           }
+    //         });
+    //         _firstLoad = false;
+    //       }
+    //     },
+    //     builder: (context, state) {
+    //       return GestureDetector(
+    //         onTap: () {
+    //           setState(() {
+    //             _showControls = !_showControls;
+    //           });
+    //         },
+    //         child: Stack(
+    //           children: [
+    //             // Main content
+    //             _buildContent(context, state),
 
-                // Top bar
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  top: _showControls ? 0 : -100,
-                  left: 0,
-                  right: 0,
-                  child: QuranReaderAppBar(
-                    title:
-                        state.currentPage?.ayahs.firstOrNull?.surahName ??
-                        state.currentSurah?.name ??
-                        '',
-                    subtitle:
-                        state
-                            .currentPage
-                            ?.ayahs
-                            .firstOrNull
-                            ?.surahNameEnglish ??
-                        state.currentSurah?.nameEnglish ??
-                        '',
-                    onBack: () => Navigator.of(context).pop(),
-                    onSearch: () => _showSearchDialog(context),
-                    onSettings: () => _showSettingsSheet(context, state),
-                  ),
-                ),
+    //             // Top bar
+    //             AnimatedPositioned(
+    //               duration: const Duration(milliseconds: 300),
+    //               top: _showControls ? 0 : -100,
+    //               left: 0,
+    //               right: 0,
+    //               child: QuranReaderAppBar(
+    //                 title:
+    //                     state.currentPage?.ayahs.firstOrNull?.surahName ??
+    //                     state.currentSurah?.name ??
+    //                     '',
+    //                 subtitle:
+    //                     state
+    //                         .currentPage
+    //                         ?.ayahs
+    //                         .firstOrNull
+    //                         ?.surahNameEnglish ??
+    //                     state.currentSurah?.nameEnglish ??
+    //                     '',
+    //                 onBack: () => Navigator.of(context).pop(),
+    //                 onSearch: () => _showSearchDialog(context),
+    //                 onSettings: () => _showSettingsSheet(context, state),
+    //               ),
+    //             ),
 
-                // Bottom controls
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  bottom: _showControls ? 0 : -100,
-                  left: 0,
-                  right: 0,
-                  child: QuranReaderBottomBar(
-                    surahNumber: widget.surahNumber,
-                    settings: state.settings,
-                    onFontSizeChanged: (size) {
-                      context.read<QuranReaderBloc>().add(
-                        QuranReaderEvent.updateFontSize(size),
-                      );
-                    },
-                    onPreviousSurah: widget.surahNumber > 1
-                        ? () => _navigateToSurah(widget.surahNumber - 1)
-                        : null,
-                    onNextSurah: widget.surahNumber < 114
-                        ? () => _navigateToSurah(widget.surahNumber + 1)
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+    //             // Bottom controls
+    //             AnimatedPositioned(
+    //               duration: const Duration(milliseconds: 300),
+    //               bottom: _showControls ? 0 : -100,
+    //               left: 0,
+    //               right: 0,
+    //               child: QuranReaderBottomBar(
+    //                 surahNumber: widget.surahNumber,
+    //                 settings: state.settings,
+    //                 onFontSizeChanged: (size) {
+    //                   context.read<QuranReaderBloc>().add(
+    //                     QuranReaderEvent.updateFontSize(size),
+    //                   );
+    //                 },
+    //                 onPreviousSurah: widget.surahNumber > 1
+    //                     ? () => _navigateToSurah(widget.surahNumber - 1)
+    //                     : null,
+    //                 onNextSurah: widget.surahNumber < 114
+    //                     ? () => _navigateToSurah(widget.surahNumber + 1)
+    //                     : null,
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //       );
+    //     },
+    //   ),
+    // );
   }
 
   Widget _buildContent(BuildContext context, QuranReaderState state) {
