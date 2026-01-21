@@ -83,7 +83,12 @@ class Qibla {
   /// For testing purposes, we can override these streams
   Stream<CompassEvent> get compassEvents => FlutterCompass.events!;
 
-  Stream<Position> get locationStream => Geolocator.getPositionStream();
+  Stream<Position> get locationStream => Geolocator.getPositionStream(
+    locationSettings: LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    ),
+  );
 
   Stream<QiblaDirection> _merge<A, B>(Stream<A> streamA, Stream<B> streamB) =>
       streamA.combineLatest<B, QiblaDirection>(streamB, (dir, pos) {

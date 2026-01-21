@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.6+7] - 2026-01-17
+
+### Fixed
+
+- **UI**: Fixed Hero widget tag conflict in `MainScreen`, `RecitersScreen`, and `PlaylistsScreen`.
+- **Qibla**: Removed sensor timeout logic in `QiblaBloc` for improved UX.
+
+### Changed
+
+- **Dev Tools**: Improved VSCode launch configurations for mono-repo support.
 
 ## [0.0.6+6] - 2026-01-07
 

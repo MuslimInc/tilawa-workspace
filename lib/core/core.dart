@@ -1,9 +1,0 @@
-export 'config/config.dart';
-export 'di/di.dart';
-export 'entities/entities.dart';
-export 'errors/errors.dart';
-export 'observers/observers.dart';
-export 'providers/providers.dart';
-export 'services/services.dart';
-export 'utils/utils.dart';
-export 'widgets/widgets.dart';
