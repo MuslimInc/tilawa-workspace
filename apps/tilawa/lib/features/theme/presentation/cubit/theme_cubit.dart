@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-
+import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
 import 'package:tilawa_ui/theme/app_theme.dart';
 
@@ -11,13 +11,15 @@ class ThemeState extends Equatable {
     required this.mode,
     this.primaryColor = AppColors.defaultPrimary,
     this.useSystemTheme = true,
+    this.preset = AppThemePreset.defaultMode,
   });
   final ThemeMode mode;
   final Color primaryColor;
   final bool useSystemTheme;
+  final AppThemePreset preset;
 
   @override
-  List<Object?> get props => [mode, primaryColor, useSystemTheme];
+  List<Object?> get props => [mode, primaryColor, useSystemTheme, preset];
 }
 
 class AppColorOption {
@@ -54,10 +56,17 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
           ? Color(colorValue)
           : AppColors.defaultPrimary;
 
+      final presetName = json['preset'] as String?;
+      final preset = AppThemePreset.values.firstWhere(
+        (e) => e.name == presetName,
+        orElse: () => AppThemePreset.defaultMode,
+      );
+
       return ThemeState(
         mode: mode,
         primaryColor: primaryColor,
         useSystemTheme: useSystemTheme,
+        preset: preset,
       );
     } catch (e) {
       return const ThemeState(mode: ThemeMode.system);
@@ -74,7 +83,19 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       },
       'primaryColor': state.primaryColor.toARGB32(),
       'useSystemTheme': state.useSystemTheme,
+      'preset': state.preset.name,
     };
+  }
+
+  Future<void> setPreset(AppThemePreset preset) async {
+    emit(
+      ThemeState(
+        mode: state.mode,
+        primaryColor: state.primaryColor,
+        useSystemTheme: state.useSystemTheme,
+        preset: preset,
+      ),
+    );
   }
 
   Future<void> setMode(ThemeMode mode) async {
@@ -83,6 +104,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         mode: mode,
         primaryColor: state.primaryColor,
         useSystemTheme: state.useSystemTheme,
+        preset: state.preset,
       ),
     );
   }
@@ -93,6 +115,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         mode: state.mode,
         primaryColor: color,
         useSystemTheme: state.useSystemTheme,
+        preset: state.preset,
       ),
     );
   }
@@ -103,6 +126,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         mode: state.mode,
         primaryColor: state.primaryColor,
         useSystemTheme: useSystemTheme,
+        preset: state.preset,
       ),
     );
   }
@@ -118,6 +142,9 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
   /// Get the current dark theme
   ThemeData getDarkTheme() {
-    return AppTheme.getDarkTheme(primaryColor: state.primaryColor);
+    return AppTheme.getDarkTheme(
+      primaryColor: state.primaryColor,
+      darkIsTrueBlack: state.preset == AppThemePreset.trueBlack,
+    );
   }
 }

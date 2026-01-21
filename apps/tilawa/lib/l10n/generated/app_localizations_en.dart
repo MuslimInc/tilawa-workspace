@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get unknownLocation => 'Unknown Location';
+
+  @override
   String get toQibla => 'To Qibla';
 
   @override
@@ -55,6 +58,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSurahsAvailable => 'No surahs available';
+
+  @override
+  String get noSurahsMatchSearch => 'No surahs match your search';
+
+  @override
+  String get continueListening => 'Continue Listening';
 
   @override
   String get play => 'Play';
@@ -580,6 +589,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get home => 'Home';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get homeLayout => 'Home Layout';
+
+  @override
+  String get recitersList => 'Reciters List';
+
+  @override
+  String get chooseHomeLayout => 'Choose Home Layout';
+
+  @override
   String get restorePlaybackState => 'Restore Last Playback';
 
   @override
@@ -1069,4 +1093,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get seeAll => 'See All';
+
+  @override
+  String get welcomeBack => 'Welcome Back!';
+
+  @override
+  String get continueSpiritualJourney => 'Continue your spiritual journey.';
+
+  @override
+  String get recentlyPlayed => 'Recently Played';
+
+  @override
+  String get quickAccess => 'Quick Access';
+
+  @override
+  String get dashboardLastRead => 'Last Read';
+
+  @override
+  String get dashboardQuran => 'Quran';
+
+  @override
+  String get dashboardDuas => 'Duas';
+
+  @override
+  String get hifz => 'Hifz';
+
+  @override
+  String get apps => 'Apps';
+
+  @override
+  String get donation => 'Donation';
+
+  @override
+  String get todaysActivities => 'Today\'s Activities';
+
+  @override
+  String get dailyActivitiesSubtitle =>
+      'Complete the daily activity checklist.';
+
+  @override
+  String tasksProgress(int completed, int total) {
+    return '$completed of $total Tasks';
+  }
+
+  @override
+  String get goToChecklist => 'Go to Checklist';
+
+  @override
+  String prayerAwayFrom(String prayer, String time) {
+    return '$time remaining until $prayer';
+  }
 }

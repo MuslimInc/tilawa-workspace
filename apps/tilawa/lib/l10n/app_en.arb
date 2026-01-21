@@ -1,5 +1,9 @@
 {
     "@@locale": "en",
+    "unknownLocation": "Unknown Location",
+    "@unknownLocation": {
+        "description": "Fallback text when location name is not available"
+    },
     "toQibla": "To Qibla",
     "@toQibla": {
         "description": "The title of the qibla direction screen"
@@ -63,6 +67,14 @@
     "noSurahsAvailable": "No surahs available",
     "@noSurahsAvailable": {
         "description": "No surahs available message"
+    },
+    "noSurahsMatchSearch": "No surahs match your search",
+    "@noSurahsMatchSearch": {
+        "description": "No surahs match search message"
+    },
+    "continueListening": "Continue Listening",
+    "@continueListening": {
+        "description": "Continue listening section title"
     },
     "play": "Play",
     "@play": {
@@ -792,6 +804,26 @@
             }
         }
     },
+    "home": "Home",
+    "@home": {
+        "description": "Home screen title"
+    },
+    "dashboard": "Dashboard",
+    "@dashboard": {
+        "description": "Dashboard layout option"
+    },
+    "homeLayout": "Home Layout",
+    "@homeLayout": {
+        "description": "Home layout setting title"
+    },
+    "recitersList": "Reciters List",
+    "@recitersList": {
+        "description": "Reciters list layout option"
+    },
+    "chooseHomeLayout": "Choose Home Layout",
+    "@chooseHomeLayout": {
+        "description": "Choose home layout dialog title"
+    },
     "restorePlaybackState": "Restore Last Playback",
     "@restorePlaybackState": {
         "description": "Restore playback state setting title"
@@ -1390,10 +1422,6 @@
     "@clearAll": {
         "description": "Clear all button text"
     },
-    "cancel": "Cancel",
-    "@cancel": {
-        "description": "Cancel button text"
-    },
     "timeAdjustments": "Time Adjustments",
     "@timeAdjustments": {
         "description": "Time adjustments section title"
@@ -1421,5 +1449,85 @@
     "comingSoon": "Coming soon",
     "@comingSoon": {
         "description": "Message for features not yet implemented"
+    },
+    "seeAll": "See All",
+    "@seeAll": {
+        "description": "See all button text"
+    },
+    "welcomeBack": "Welcome Back!",
+    "@welcomeBack": {
+        "description": "Welcome back message"
+    },
+    "continueSpiritualJourney": "Continue your spiritual journey.",
+    "@continueSpiritualJourney": {
+        "description": "Subtitle for welcome message"
+    },
+    "recentlyPlayed": "Recently Played",
+    "@recentlyPlayed": {
+        "description": "Recently played section title"
+    },
+    "quickAccess": "Quick Access",
+    "@quickAccess": {
+        "description": "Quick access section title"
+    },
+    "dashboardLastRead": "Last Read",
+    "@dashboardLastRead": {
+        "description": "Last read dashboard item"
+    },
+    "dashboardQuran": "Quran",
+    "@dashboardQuran": {
+        "description": "Quran dashboard item"
+    },
+    "dashboardDuas": "Duas",
+    "@dashboardDuas": {
+        "description": "Duas dashboard item"
+    },
+    "hifz": "Hifz",
+    "@hifz": {
+        "description": "Hifz dashboard item"
+    },
+    "apps": "Apps",
+    "@apps": {
+        "description": "Apps dashboard item"
+    },
+    "donation": "Donation",
+    "@donation": {
+        "description": "Donation dashboard item"
+    },
+    "todaysActivities": "Today's Activities",
+    "@todaysActivities": {
+        "description": "Today's activities card title"
+    },
+    "dailyActivitiesSubtitle": "Complete the daily activity checklist.",
+    "@dailyActivitiesSubtitle": {
+        "description": "Today's activities card subtitle"
+    },
+    "tasksProgress": "{completed} of {total} Tasks",
+    "@tasksProgress": {
+        "description": "Tasks progress label",
+        "placeholders": {
+            "completed": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "goToChecklist": "Go to Checklist",
+    "@goToChecklist": {
+        "description": "Go to checklist button text"
+    },
+    "prayerAwayFrom": "{time} remaining until {prayer}",
+    "@prayerAwayFrom": {
+        "description": "Next prayer time indication",
+        "placeholders": {
+            "prayer": {
+                "type": "String"
+            },
+            "time": {
+                "type": "String"
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@ part of 'reciter_details_bloc.dart';
 
 enum ReciterDetailsStatus { initial, loading, loaded, error }
 
+enum ReciterViewMode { list, grid }
+
 class ReciterDetailsState extends Equatable {
   const ReciterDetailsState({
     this.status = ReciterDetailsStatus.initial,
@@ -11,6 +13,8 @@ class ReciterDetailsState extends Equatable {
     this.errorMessage,
     this.searchQuery = '',
     this.playCommand,
+    this.listeningHistory = const [],
+    this.viewMode = ReciterViewMode.list,
   });
 
   factory ReciterDetailsState.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,14 @@ class ReciterDetailsState extends Equatable {
       selectedSurahId: json['selectedSurahId'] as String?,
       errorMessage: json['errorMessage'] as String?,
       searchQuery: json['searchQuery'] as String? ?? '',
+      listeningHistory:
+          (json['listeningHistory'] as List<dynamic>?)
+              ?.map((x) => HistoryEntity.fromJson(x as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      viewMode: json['viewMode'] != null
+          ? ReciterViewMode.values.byName(json['viewMode'] as String)
+          : ReciterViewMode.list,
     );
   }
 
@@ -39,6 +51,8 @@ class ReciterDetailsState extends Equatable {
   final String? errorMessage;
   final String searchQuery;
   final PlaySurahCommand? playCommand;
+  final List<HistoryEntity> listeningHistory;
+  final ReciterViewMode viewMode;
 
   @override
   List<Object?> get props => [
@@ -49,6 +63,8 @@ class ReciterDetailsState extends Equatable {
     errorMessage,
     searchQuery,
     playCommand,
+    listeningHistory,
+    viewMode,
   ];
 
   ReciterDetailsState copyWith({
@@ -59,6 +75,8 @@ class ReciterDetailsState extends Equatable {
     String? errorMessage,
     String? searchQuery,
     PlaySurahCommand? playCommand,
+    List<HistoryEntity>? listeningHistory,
+    ReciterViewMode? viewMode,
   }) {
     return ReciterDetailsState(
       status: status ?? this.status,
@@ -68,6 +86,8 @@ class ReciterDetailsState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
       playCommand: playCommand, // No default, it's transient
+      listeningHistory: listeningHistory ?? this.listeningHistory,
+      viewMode: viewMode ?? this.viewMode,
     );
   }
 

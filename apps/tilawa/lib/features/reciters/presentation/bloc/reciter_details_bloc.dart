@@ -4,12 +4,14 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/history/domain/usecases/get_history_by_reciter_use_case.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
-import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
@@ -27,6 +29,7 @@ class ReciterDetailsBloc
     this._convertAudioEntitiesToSurahs,
     this._refreshSurahDownloadStatusUseCase,
     this._getValidCompletedDownloadsUseCase,
+    this._getHistoryByReciterUseCase,
   ) : super(const ReciterDetailsState()) {
     on<LoadSurahList>(_onLoadSurahList);
     on<SelectMoshaf>(_onSelectMoshaf);
@@ -34,16 +37,31 @@ class ReciterDetailsBloc
     on<RefreshSurahDownloadStatus>(_onRefreshSurahDownloadStatus);
     on<FilterSurahs>(_onFilterSurahs);
     on<PlaySurahRequested>(_onPlaySurahRequested);
+    on<ToggleViewMode>(_onToggleViewMode);
+    on<LoadReciterHistory>(_onLoadReciterHistory);
   }
 
-  void _onFilterSurahs(FilterSurahs event, Emitter<ReciterDetailsState> emit) {
-    emit(state.copyWith(searchQuery: event.query));
+  void _onToggleViewMode(
+    ToggleViewMode event,
+    Emitter<ReciterDetailsState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        viewMode: state.viewMode == ReciterViewMode.list
+            ? ReciterViewMode.grid
+            : ReciterViewMode.list,
+      ),
+    );
   }
 
   final AudioPlayerHandler _audioHandler;
   final ConvertAudioEntitiesToSurahsUseCase _convertAudioEntitiesToSurahs;
   final RefreshSurahDownloadStatusUseCase _refreshSurahDownloadStatusUseCase;
   final GetValidCompletedDownloadsUseCase _getValidCompletedDownloadsUseCase;
+  final GetHistoryByReciterUseCase _getHistoryByReciterUseCase;
+  void _onFilterSurahs(FilterSurahs event, Emitter<ReciterDetailsState> emit) {
+    emit(state.copyWith(searchQuery: event.query));
+  }
 
   Future<void> _onLoadSurahList(
     LoadSurahList event,
@@ -52,7 +70,11 @@ class ReciterDetailsBloc
     emit(state.copyWith(status: ReciterDetailsStatus.loading));
     try {
       final List<AudioEntity>? audioEntities = await _audioHandler
-          .getSurahListForMoshaf(event.moshaf, reciterName: event.reciter.name);
+          .getSurahListForMoshaf(
+            event.moshaf,
+            reciterName: event.reciter.name,
+            reciterId: event.reciter.id.toString(),
+          );
 
       if (audioEntities != null) {
         // Convert AudioEntity list to Surah list with download status
@@ -140,13 +162,9 @@ class ReciterDetailsBloc
 
     try {
       // Find index
-      final int surahIndex = state.surahList.indexWhere(
+      int surahIndex = state.surahList.indexWhere(
         (item) => item.id == surah.id,
       );
-
-      if (surahIndex == -1) {
-        return;
-      }
 
       // Fetch valid downloads
       final Either<Failure, List<DownloadItem>> result =
@@ -160,18 +178,28 @@ class ReciterDetailsBloc
         downloadMap[item.url] = item.filePath;
       }
 
-      // Build playlist with local files
-      final List<AudioEntity> surahListWithDownloads = [];
-      for (var i = 0; i < state.surahList.length; i++) {
-        final SurahEntity currentSurah = state.surahList[i];
-        final String? localPath = downloadMap[currentSurah.id];
+      final List<AudioEntity> playlist = [];
 
+      if (surahIndex != -1) {
+        // Build playlist with local files from current list
+        for (var i = 0; i < state.surahList.length; i++) {
+          final SurahEntity currentSurah = state.surahList[i];
+          final String? localPath = downloadMap[currentSurah.id];
+
+          if (localPath != null) {
+            playlist.add(_createLocalAudioEntity(currentSurah, localPath));
+          } else {
+            playlist.add(currentSurah.audio);
+          }
+        }
+      } else {
+        // Play single item if not in list
+        surahIndex = 0;
+        final String? localPath = downloadMap[surah.id];
         if (localPath != null) {
-          surahListWithDownloads.add(
-            _createLocalAudioEntity(currentSurah, localPath),
-          );
+          playlist.add(_createLocalAudioEntity(surah, localPath));
         } else {
-          surahListWithDownloads.add(currentSurah.audio);
+          playlist.add(surah.audio);
         }
       }
 
@@ -179,7 +207,7 @@ class ReciterDetailsBloc
       emit(
         state.copyWith(
           playCommand: PlaySurahCommand(
-            playlist: surahListWithDownloads,
+            playlist: playlist,
             initialIndex: surahIndex,
           ),
         ),
@@ -190,6 +218,17 @@ class ReciterDetailsBloc
     } catch (e) {
       // Log error or ignoring
     }
+  }
+
+  Future<void> _onLoadReciterHistory(
+    LoadReciterHistory event,
+    Emitter<ReciterDetailsState> emit,
+  ) async {
+    final result = await _getHistoryByReciterUseCase(event.reciterId);
+    result.fold(
+      (failure) => null, // Ignore failure for now, just don't show history
+      (history) => emit(state.copyWith(listeningHistory: history)),
+    );
   }
 
   AudioEntity _createLocalAudioEntity(SurahEntity surah, String localPath) {
@@ -220,6 +259,11 @@ class ReciterDetailsBloc
 
       final selectedSurahId = json['selectedSurahId'] as String?;
 
+      final viewModeString = json['viewMode'] as String?;
+      final viewMode = viewModeString != null
+          ? ReciterViewMode.values.byName(viewModeString)
+          : ReciterViewMode.list;
+
       // Only restore valid loaded state if we have data
       if (status == ReciterDetailsStatus.loaded && surahList.isNotEmpty) {
         return ReciterDetailsState(
@@ -227,9 +271,10 @@ class ReciterDetailsBloc
           surahList: surahList,
           selectedMoshaf: selectedMoshaf,
           selectedSurahId: selectedSurahId,
+          viewMode: viewMode,
         );
       }
-      return const ReciterDetailsState();
+      return ReciterDetailsState(viewMode: viewMode);
     } catch (_) {
       return null;
     }
@@ -237,15 +282,17 @@ class ReciterDetailsBloc
 
   @override
   Map<String, dynamic>? toJson(ReciterDetailsState state) {
+    final Map<String, dynamic> json = {'viewMode': state.viewMode.name};
+
     if (state.status == ReciterDetailsStatus.loaded &&
         state.surahList.isNotEmpty) {
-      return {
+      json.addAll({
         'status': state.status.toString(),
         'surahList': state.surahList.map((e) => e.toJson()).toList(),
         'selectedMoshaf': state.selectedMoshaf?.toJson(),
         'selectedSurahId': state.selectedSurahId,
-      };
+      });
     }
-    return null;
+    return json;
   }
 }

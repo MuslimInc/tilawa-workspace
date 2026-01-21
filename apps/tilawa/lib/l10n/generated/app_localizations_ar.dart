@@ -9,6 +9,9 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get unknownLocation => 'موقع غير معروف';
+
+  @override
   String get toQibla => 'إلى القبلة';
 
   @override
@@ -55,6 +58,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noSurahsAvailable => 'لا توجد سور متاحة';
+
+  @override
+  String get noSurahsMatchSearch => 'لا توجد سور تطابق البحث';
+
+  @override
+  String get continueListening => 'متابعة الاستماع';
 
   @override
   String get play => 'تشغيل';
@@ -578,6 +587,21 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get home => 'الرئيسية';
+
+  @override
+  String get dashboard => 'لوحة التحكم';
+
+  @override
+  String get homeLayout => 'تخطيط الصفحة الرئيسية';
+
+  @override
+  String get recitersList => 'قائمة القراء';
+
+  @override
+  String get chooseHomeLayout => 'اختر تخطيط الصفحة الرئيسية';
+
+  @override
   String get restorePlaybackState => 'استعادة آخر تشغيل';
 
   @override
@@ -1061,4 +1085,56 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get comingSoon => 'قريباً';
+
+  @override
+  String get seeAll => 'عرض الكل';
+
+  @override
+  String get welcomeBack => 'مرحباً بعودتك!';
+
+  @override
+  String get continueSpiritualJourney => 'أكمل رحلتك الروحانية.';
+
+  @override
+  String get recentlyPlayed => 'تم تشغيلها مؤخراً';
+
+  @override
+  String get quickAccess => 'وصول سريع';
+
+  @override
+  String get dashboardLastRead => 'آخر قراءة';
+
+  @override
+  String get dashboardQuran => 'القرآن';
+
+  @override
+  String get dashboardDuas => 'الأدعية';
+
+  @override
+  String get hifz => 'الحفظ';
+
+  @override
+  String get apps => 'التطبيقات';
+
+  @override
+  String get donation => 'التبرع';
+
+  @override
+  String get todaysActivities => 'أنشطة اليوم';
+
+  @override
+  String get dailyActivitiesSubtitle => 'أكمل قائمة الأنشطة اليومية.';
+
+  @override
+  String tasksProgress(int completed, int total) {
+    return '$completed من $total مهام';
+  }
+
+  @override
+  String get goToChecklist => 'الذهاب للقائمة';
+
+  @override
+  String prayerAwayFrom(String prayer, String time) {
+    return 'متبقي على $prayer $time';
+  }
 }

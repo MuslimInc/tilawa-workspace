@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
-import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+
 import '../../../../features/surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
 
@@ -20,7 +20,7 @@ class DownloadAllButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
       child: BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
         listenWhen: (previous, current) => current.shouldShowError(previous),
         listener: (context, state) {
@@ -33,68 +33,117 @@ class DownloadAllButton extends StatelessWidget {
           final double progress = state.progress;
           final bool isAllDownloaded = state.isAllDownloaded;
 
-          return SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              key: const Key('download_all_button'),
-              onPressed: isAllDownloaded || state.isPending
-                  ? null
-                  : () {
-                      if (isDownloading) {
-                        context.read<ReciterDownloadBloc>().add(
-                          CancelReciterDownloadAll(reciterName: reciter.name),
-                        );
-                      } else {
-                        context.read<ReciterDownloadBloc>().add(
-                          StartReciterDownloadAll(
-                            reciter: reciter,
-                            surahs: surahs,
-                          ),
-                        );
-                      }
-                    },
-              icon: isAllDownloaded
-                  ? const Icon(Icons.check_circle_outline)
-                  : isDownloading
-                  ? SizedBox(
-                      width: 20.w,
-                      height: 20.w,
-                      child: const Icon(
-                        Icons.pause_rounded,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.download_rounded, color: Colors.white),
-              label: Text(
-                isAllDownloaded
-                    ? context.l10n.allDownloaded
-                    : isDownloading
-                    ? context.l10n.pauseProgressWithCount(
-                        (progress * 100).toInt(),
-                        state.downloadedCount,
-                        state.totalCount,
-                      )
-                    : (progress > 0 && progress < 1.0)
-                    ? context.l10n.completeDownloadingWithCount(
-                        state.downloadedCount,
-                        state.totalCount,
-                      )
-                    : context.l10n.downloadAllWithCount(
-                        state.downloadedCount,
-                        state.totalCount,
-                      ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.r),
+          if (isAllDownloaded) {
+            return UnconstrainedBox(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.2),
+                  ),
                 ),
-                disabledBackgroundColor: Theme.of(
-                  context,
-                ).disabledColor.withValues(alpha: 0.1),
-                disabledForegroundColor: Theme.of(context).disabledColor,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: Theme.of(context).primaryColor,
+                      size: 16.sp,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      context.l10n.allDownloaded,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return UnconstrainedBox(
+            child: InkWell(
+              key: const Key('reciter_details_download_all_button'),
+              onTap: () {
+                if (state.isPending) return;
+                if (isDownloading) {
+                  context.read<ReciterDownloadBloc>().add(
+                    CancelReciterDownloadAll(reciterName: reciter.name),
+                  );
+                } else {
+                  context.read<ReciterDownloadBloc>().add(
+                    StartReciterDownloadAll(reciter: reciter, surahs: surahs),
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(24.r),
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 24.w),
+                decoration: BoxDecoration(
+                  color: isDownloading
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(24.r),
+                  border: Border.all(
+                    color: isDownloading
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).dividerColor,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isDownloading)
+                      SizedBox(
+                        width: 14.w,
+                        height: 14.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          value: progress,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    else
+                      Icon(
+                        Icons.cloud_download_outlined,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                        size: 18.sp,
+                      ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      isDownloading
+                          ? context.l10n.pauseProgressWithCount(
+                              (progress * 100).toInt(),
+                              state.downloadedCount,
+                              state.totalCount,
+                            )
+                          : (progress > 0 && progress < 1.0)
+                          ? context.l10n.completeDownloadingWithCount(
+                              state.downloadedCount,
+                              state.totalCount,
+                            )
+                          : context.l10n.downloadAllWithCount(
+                              state.downloadedCount,
+                              state.totalCount,
+                            ),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

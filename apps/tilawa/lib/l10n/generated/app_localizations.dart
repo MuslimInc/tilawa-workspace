@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// Fallback text when location name is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Location'**
+  String get unknownLocation;
+
   /// The title of the qibla direction screen
   ///
   /// In en, this message translates to:
@@ -193,6 +199,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No surahs available'**
   String get noSurahsAvailable;
+
+  /// No surahs match search message
+  ///
+  /// In en, this message translates to:
+  /// **'No surahs match your search'**
+  String get noSurahsMatchSearch;
+
+  /// Continue listening section title
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Listening'**
+  String get continueListening;
 
   /// Play button text
   ///
@@ -1172,6 +1190,36 @@ abstract class AppLocalizations {
   /// **'Downloading {surahTitle}'**
   String downloadingSurah(String surahTitle);
 
+  /// Home screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// Dashboard layout option
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// Home layout setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Home Layout'**
+  String get homeLayout;
+
+  /// Reciters list layout option
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters List'**
+  String get recitersList;
+
+  /// Choose home layout dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Home Layout'**
+  String get chooseHomeLayout;
+
   /// Restore playback state setting title
   ///
   /// In en, this message translates to:
@@ -2035,6 +2083,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get comingSoon;
+
+  /// See all button text
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get seeAll;
+
+  /// Welcome back message
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back!'**
+  String get welcomeBack;
+
+  /// Subtitle for welcome message
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your spiritual journey.'**
+  String get continueSpiritualJourney;
+
+  /// Recently played section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Played'**
+  String get recentlyPlayed;
+
+  /// Quick access section title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Access'**
+  String get quickAccess;
+
+  /// Last read dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Last Read'**
+  String get dashboardLastRead;
+
+  /// Quran dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get dashboardQuran;
+
+  /// Duas dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Duas'**
+  String get dashboardDuas;
+
+  /// Hifz dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Hifz'**
+  String get hifz;
+
+  /// Apps dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Apps'**
+  String get apps;
+
+  /// Donation dashboard item
+  ///
+  /// In en, this message translates to:
+  /// **'Donation'**
+  String get donation;
+
+  /// Today's activities card title
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Activities'**
+  String get todaysActivities;
+
+  /// Today's activities card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the daily activity checklist.'**
+  String get dailyActivitiesSubtitle;
+
+  /// Tasks progress label
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} Tasks'**
+  String tasksProgress(int completed, int total);
+
+  /// Go to checklist button text
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Checklist'**
+  String get goToChecklist;
+
+  /// Next prayer time indication
+  ///
+  /// In en, this message translates to:
+  /// **'{time} remaining until {prayer}'**
+  String prayerAwayFrom(String prayer, String time);
 }
 
 class _AppLocalizationsDelegate
