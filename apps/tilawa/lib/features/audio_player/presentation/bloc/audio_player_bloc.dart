@@ -4,12 +4,13 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
+
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
+import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
@@ -44,6 +45,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._loadAudioPlayerData,
     this._checkAudioPlayability,
     this._settingsCubit,
+    this._addOrUpdateHistory,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<ResetAudioPlayer>(_onResetAudioPlayer);
@@ -101,6 +103,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
   final CheckAudioPlayabilityUseCase _checkAudioPlayability;
   final SettingsCubit _settingsCubit;
+  final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -191,6 +194,10 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         // Logic: specific ID is dismissed until explicitly played or cleared.
       ),
     );
+
+    if (event.audio != null) {
+      _saveHistory(event.audio!);
+    }
   }
 
   void _onUpdatePlaybackStateEntity(
@@ -199,6 +206,13 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   ) {
     // If we start playing, always un-dismiss
     final bool isPlaying = event.playbackState.isPlaying;
+
+    if (event.playbackState.processingState ==
+        AudioProcessingStateStatus.completed) {
+      if (state.currentAudio != null) {
+        _saveHistory(state.currentAudio!, isCompleted: true);
+      }
+    }
 
     emit(
       state.copyWith(
@@ -253,6 +267,10 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     await _pauseAudio();
     // Cancel sleep timer on manual pause but keep the preference
     add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
+
+    if (state.currentAudio != null) {
+      _saveHistory(state.currentAudio!);
+    }
   }
 
   Future<void> _onStopAudio(
@@ -265,6 +283,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         emit(state.copyWith());
       },
       (success) async {
+        if (state.currentAudio != null) {
+          _saveHistory(state.currentAudio!);
+        }
         // Stop the internal timer
         _sleepTimer?.cancel();
         _sleepTimer = null;
@@ -463,6 +484,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     _sleepTimer?.cancel();
     _sleepTimer = null;
     await _pauseAudio();
+    if (state.currentAudio != null) {
+      _saveHistory(state.currentAudio!);
+    }
     emit(
       state.copyWith(
         sleepTimerTargetTime: null,
@@ -470,6 +494,46 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         status: AudioPlayerStatus.success,
       ),
     );
+  }
+
+  Future<void> _saveHistory(
+    AudioEntity audio, {
+    bool isCompleted = false,
+  }) async {
+    final Map<String, dynamic>? extras = audio.extras;
+    if (extras == null) return;
+
+    final String? reciterId = extras['reciterId'] as String?;
+    final int? moshafId = extras['moshafId'] as int?;
+    final int? surahId = extras['surahId'] as int?;
+
+    if (reciterId != null && moshafId != null && surahId != null) {
+      // Determine Duration: Prefer audio entity, fallback to playback state
+      final Duration duration = audio.duration != Duration.zero
+          ? audio.duration
+          : state.playbackState?.duration ?? Duration.zero;
+
+      // Determine Position:
+      // If completed, use full duration.
+      // Otherwise use current position.
+      final Duration position = isCompleted
+          ? duration
+          : state.positionData?.position ?? Duration.zero;
+
+      await _addOrUpdateHistory(
+        surahId: surahId,
+        surahName: audio.title,
+        surahNameEn: audio.title,
+        reciterId: reciterId,
+        reciterName: audio.artist ?? '',
+        moshafId: moshafId,
+        moshafName: audio.album ?? '',
+        lastPositionMs: position.inMilliseconds,
+        durationMs: duration.inMilliseconds,
+        audioUrl: audio.url,
+        artworkUrl: audio.artUri,
+      );
+    }
   }
 
   @override
