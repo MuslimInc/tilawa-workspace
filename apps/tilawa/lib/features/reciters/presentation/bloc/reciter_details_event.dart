@@ -59,3 +59,15 @@ class PlaySurahRequested extends ReciterDetailsEvent {
   @override
   List<Object?> get props => [surah];
 }
+
+class LoadReciterHistory extends ReciterDetailsEvent {
+  const LoadReciterHistory(this.reciterId);
+  final String reciterId;
+
+  @override
+  List<Object?> get props => [reciterId];
+}
+
+class ToggleViewMode extends ReciterDetailsEvent {
+  const ToggleViewMode();
+}

@@ -56,7 +56,10 @@ class AppTheme {
   }
 
   /// Get the dark theme for the given primary color
-  static ThemeData getDarkTheme({required Color primaryColor}) {
+  static ThemeData getDarkTheme({
+    required Color primaryColor,
+    bool darkIsTrueBlack = false,
+  }) {
     final scheme = FlexSchemeColor.from(
       primary: primaryColor,
       secondary: primaryColor,

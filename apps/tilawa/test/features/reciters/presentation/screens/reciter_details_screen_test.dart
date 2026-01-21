@@ -575,7 +575,7 @@ void main() {
 
     // Use localized string from ARB files
     final BuildContext context = tester.element(find.byType(Scaffold));
-    expect(find.text(context.l10n.noSurahsAvailable), findsOneWidget);
+    expect(find.text(context.l10n.noSurahsMatchSearch), findsOneWidget);
   });
 
   testWidgets('ReciterDetailsScreen search field updates query', (
@@ -651,23 +651,14 @@ void main() {
     // debugDumpApp(); // Uncomment if needed
     // print('Found ElevatedButton widgets: ${find.byType(ElevatedButton).evaluate().length}');
 
-    // Robust finding strategy:
-    Finder buttonFinder = find.byType(ElevatedButton);
-    if (buttonFinder.evaluate().isEmpty) {
-      // Try offstage
-      buttonFinder = find.byType(ElevatedButton, skipOffstage: false);
-    }
+    // Verify button existence via Key
+    final buttonFinder = find.byKey(
+      const Key('reciter_details_download_all_button'),
+    );
 
-    // Verify button existence via Icon since find.byType(ElevatedButton) is flaky with _ElevatedButtonWithIcon
-    buttonFinder = find.byIcon(Icons.download_rounded);
+    expect(buttonFinder, findsOneWidget);
 
-    if (buttonFinder.evaluate().isEmpty) {
-      // Only fail if icon is also missing (meaning button truly not rendered or icon changed)
-      debugDumpApp();
-      fail('Download All button (Icon) not found!');
-    }
-
-    await tester.tap(buttonFinder.first); // Download All
+    await tester.tap(buttonFinder); // Download All
     verify(
       () => mockReciterDownloadBloc.add(
         StartReciterDownloadAll(reciter: testReciter, surahs: testSurahList),

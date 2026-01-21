@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-
 import 'package:tilawa/core/utils/toast_utils.dart';
-import '../../../../l10n/generated/app_localizations.dart';
+
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -25,9 +24,8 @@ class LoginScreen extends StatelessWidget {
             },
             unauthenticated: () {},
             error: (message) {
-              final AppLocalizations l10n = context.l10n;
               ToastUtils.showToast(
-                msg: l10n.unableToSignInWithThirdPartyAccount,
+                msg: context.l10n.unableToSignInWithThirdPartyAccount,
               );
             },
           );

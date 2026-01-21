@@ -2,15 +2,18 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/entities/audio.dart';
-import 'package:tilawa_core/entities/moshaf_entity.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/downloads/domain/usecases/get_valid_completed_downloads_use_case.dart';
+import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/history/domain/usecases/get_history_by_reciter_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/features/surah/domain/usecases/convert_audio_entities_to_surahs_use_case.dart';
 import 'package:tilawa/features/surah/domain/usecases/refresh_surah_download_status_use_case.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/moshaf_entity.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
 
@@ -22,6 +25,9 @@ class MockRefreshSurahDownloadStatusUseCase extends Mock
 
 class MockGetValidCompletedDownloadsUseCase extends Mock
     implements GetValidCompletedDownloadsUseCase {}
+
+class MockGetHistoryByReciterUseCase extends Mock
+    implements GetHistoryByReciterUseCase {}
 
 class MockStorage extends Mock implements Storage {}
 
@@ -58,6 +64,7 @@ void main() {
     late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
 
     setUp(() {
       storage = MockStorage();
@@ -68,6 +75,7 @@ void main() {
       convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
 
       when(
         () => getValidCompletedDownloads(any()),
@@ -102,9 +110,13 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
-      expect(bloc.toJson(const ReciterDetailsState()), isNull);
+      final json = bloc.toJson(const ReciterDetailsState());
+      expect(json, isNotNull);
+      expect(json!['viewMode'], equals('list'));
+      expect(json['status'], isNull);
     });
 
     test('ReciterDetailsBloc toJson returns valid map when loaded', () {
@@ -113,6 +125,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       const state = ReciterDetailsState(
@@ -136,6 +149,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       // Manually construct JSON to simulate reading from disk
@@ -168,6 +182,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       final ReciterDetailsState? restoredState = bloc.fromJson({
@@ -185,6 +200,7 @@ void main() {
     late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
 
     setUp(() {
       storage = MockStorage();
@@ -195,6 +211,7 @@ void main() {
       convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
 
       when(
         () => getValidCompletedDownloads(any()),
@@ -207,6 +224,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       bloc.add(const FilterSurahs('Al-Fatiha'));
@@ -228,6 +246,7 @@ void main() {
     late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
 
     setUp(() {
       storage = MockStorage();
@@ -238,6 +257,7 @@ void main() {
       convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
 
       when(
         () => getValidCompletedDownloads(any()),
@@ -259,6 +279,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       bloc.add(const SelectMoshaf(moshaf));
@@ -272,6 +293,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       // Set to loaded state
@@ -295,6 +317,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       bloc.add(const SelectSurah('1'));
@@ -308,6 +331,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       // Set to loaded state
@@ -332,6 +356,7 @@ void main() {
     late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
 
     setUp(() {
       storage = MockStorage();
@@ -342,6 +367,7 @@ void main() {
       convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
 
       when(
         () => getValidCompletedDownloads(any()),
@@ -372,12 +398,14 @@ void main() {
           convertAudioEntitiesToSurahs,
           refreshSurahDownloadStatus,
           getValidCompletedDownloads,
+          getHistoryByReciter,
         );
 
         when(
           () => audioHandler.getSurahListForMoshaf(
             any(),
             reciterName: any(named: 'reciterName'),
+            reciterId: any(named: 'reciterId'),
           ),
         ).thenAnswer((_) async => null);
 
@@ -405,12 +433,14 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       when(
         () => audioHandler.getSurahListForMoshaf(
           any(),
           reciterName: any(named: 'reciterName'),
+          reciterId: any(named: 'reciterId'),
         ),
       ).thenThrow(Exception('Network error'));
 
@@ -437,6 +467,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       const surah1 = SurahEntity(
@@ -461,6 +492,7 @@ void main() {
         () => audioHandler.getSurahListForMoshaf(
           any(),
           reciterName: any(named: 'reciterName'),
+          reciterId: any(named: 'reciterId'),
         ),
       ).thenAnswer((_) async => [surah1.audio, surah2.audio]);
 
@@ -491,6 +523,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       bloc.add(
@@ -506,6 +539,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       const surah = SurahEntity(
@@ -563,6 +597,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       const surah = SurahEntity(
@@ -599,12 +634,13 @@ void main() {
     });
   });
 
-  group('ReciterDetailsBloc Close', () {
+  group('ReciterDetailsBloc History', () {
     late Storage storage;
     late MockAudioPlayerHandler audioHandler;
     late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
     late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
     late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
 
     setUp(() {
       storage = MockStorage();
@@ -615,6 +651,182 @@ void main() {
       convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
       refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
       getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
+
+      when(
+        () => getValidCompletedDownloads(any()),
+      ).thenAnswer((_) async => const Right([]));
+    });
+
+    test('LoadReciterHistory updates state with history', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertAudioEntitiesToSurahs,
+        refreshSurahDownloadStatus,
+        getValidCompletedDownloads,
+        getHistoryByReciter,
+      );
+
+      final history = [
+        HistoryEntity(
+          id: '',
+          surahName: '',
+          surahNameEn: '',
+          reciterName: '',
+          moshafName: '',
+          lastPositionMs: 1,
+          durationMs: 1,
+          audioUrl: '',
+          playedAt: DateTime.now(),
+          surahId: 1,
+          reciterId: '',
+          moshafId: 1,
+        ),
+      ];
+
+      when(
+        () => getHistoryByReciter('1'),
+      ).thenAnswer((_) async => Right(history));
+
+      bloc.add(const LoadReciterHistory('1'));
+
+      await expectLater(
+        bloc.stream,
+        emits(
+          predicate<ReciterDetailsState>(
+            (state) => state.listeningHistory == history,
+          ),
+        ),
+      );
+    });
+
+    test('LoadReciterHistory does not update state on failure', () async {
+      final bloc = ReciterDetailsBloc(
+        audioHandler,
+        convertAudioEntitiesToSurahs,
+        refreshSurahDownloadStatus,
+        getValidCompletedDownloads,
+        getHistoryByReciter,
+      );
+
+      when(
+        () => getHistoryByReciter('1'),
+      ).thenAnswer((_) async => const Left(CacheFailure('message')));
+
+      bloc.add(const LoadReciterHistory('1'));
+
+      await Future.delayed(const Duration(milliseconds: 50));
+      expect(bloc.state.listeningHistory, isEmpty);
+    });
+
+    test(
+      'PlaySurahRequested plays single item when surah is not in list',
+      () async {
+        final bloc = ReciterDetailsBloc(
+          audioHandler,
+          convertAudioEntitiesToSurahs,
+          refreshSurahDownloadStatus,
+          getValidCompletedDownloads,
+          getHistoryByReciter,
+        );
+
+        // Pre-load state to loaded
+        when(
+          () => audioHandler.getSurahListForMoshaf(
+            any(),
+            reciterName: any(named: 'reciterName'),
+            reciterId: any(named: 'reciterId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        when(
+          () => convertAudioEntitiesToSurahs(any()),
+        ).thenAnswer((_) async => []);
+
+        bloc.add(
+          LoadSurahList(
+            reciter: const ReciterEntity(
+              id: 1,
+              name: 'Reciter',
+              letter: 'R',
+              date: '2022',
+              moshaf: [
+                MoshafEntity(
+                  id: 1,
+                  name: 'Moshaf',
+                  server: 'server',
+                  surahTotal: 114,
+                  moshafType: 1,
+                  surahList: '1,2,3',
+                ),
+              ],
+            ),
+            moshaf: const MoshafEntity(
+              id: 1,
+              name: 'Moshaf',
+              server: 'server',
+              surahTotal: 114,
+              moshafType: 1,
+              surahList: '1,2,3',
+            ),
+          ),
+        );
+
+        // Wait for the state to be loaded
+        await bloc.stream.firstWhere(
+          (state) => state.status == ReciterDetailsStatus.loaded,
+        );
+
+        const surah = SurahEntity(
+          audio: AudioEntity(
+            id: '1',
+            url: 'url',
+            title: 'Surah',
+            artist: 'Reciter',
+            duration: Duration(minutes: 5),
+          ),
+          isDownloaded: false,
+          downloadProgress: 0,
+        );
+
+        when(
+          () => getValidCompletedDownloads(any()),
+        ).thenAnswer((_) async => const Right([]));
+
+        bloc.add(const PlaySurahRequested(surah));
+
+        await expectLater(
+          bloc.stream,
+          emitsThrough(
+            predicate<ReciterDetailsState>((state) {
+              return state.playCommand != null &&
+                  state.playCommand!.playlist.length == 1 &&
+                  state.playCommand!.playlist.first.id == '1';
+            }),
+          ),
+        );
+      },
+    );
+  });
+
+  group('ReciterDetailsBloc Close', () {
+    late Storage storage;
+    late MockAudioPlayerHandler audioHandler;
+    late MockConvertAudioEntitiesToSurahsUseCase convertAudioEntitiesToSurahs;
+    late MockRefreshSurahDownloadStatusUseCase refreshSurahDownloadStatus;
+    late MockGetValidCompletedDownloadsUseCase getValidCompletedDownloads;
+    late MockGetHistoryByReciterUseCase getHistoryByReciter;
+
+    setUp(() {
+      storage = MockStorage();
+      when(() => storage.write(any(), any<dynamic>())).thenAnswer((_) async {});
+      HydratedBloc.storage = storage;
+
+      audioHandler = MockAudioPlayerHandler();
+      convertAudioEntitiesToSurahs = MockConvertAudioEntitiesToSurahsUseCase();
+      refreshSurahDownloadStatus = MockRefreshSurahDownloadStatusUseCase();
+      getValidCompletedDownloads = MockGetValidCompletedDownloadsUseCase();
+      getHistoryByReciter = MockGetHistoryByReciterUseCase();
 
       when(
         () => getValidCompletedDownloads(any()),
@@ -627,6 +839,7 @@ void main() {
         convertAudioEntitiesToSurahs,
         refreshSurahDownloadStatus,
         getValidCompletedDownloads,
+        getHistoryByReciter,
       );
 
       await bloc.close();
