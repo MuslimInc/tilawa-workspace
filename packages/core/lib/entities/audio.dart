@@ -14,7 +14,10 @@ abstract class AudioEntity with _$AudioEntity {
     String? artist,
     String? album,
     String? artUri,
+    Map<String, dynamic>? extras,
   }) = _AudioEntity;
+
+  const AudioEntity._();
 
   factory AudioEntity.fromJson(Map<String, dynamic> json) =>
       _$AudioEntityFromJson(json);

@@ -14,6 +14,7 @@ _AudioEntity _$AudioEntityFromJson(Map<String, dynamic> json) => _AudioEntity(
   artist: json['artist'] as String?,
   album: json['album'] as String?,
   artUri: json['art_uri'] as String?,
+  extras: json['extras'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$AudioEntityToJson(_AudioEntity instance) =>
@@ -25,6 +26,7 @@ Map<String, dynamic> _$AudioEntityToJson(_AudioEntity instance) =>
       'artist': instance.artist,
       'album': instance.album,
       'art_uri': instance.artUri,
+      'extras': instance.extras,
     };
 
 _PlaybackStateEntity _$PlaybackStateEntityFromJson(Map<String, dynamic> json) =>

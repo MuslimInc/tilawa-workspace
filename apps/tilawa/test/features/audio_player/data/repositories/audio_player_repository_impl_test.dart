@@ -6,12 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tilawa_core/entities/audio.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/audio_player/data/repositories/audio_player_repository_impl.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa/shared/services/audio_position_service.dart';
+import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import 'audio_player_repository_impl_test.mocks.dart';
 
@@ -140,6 +140,37 @@ void main() {
         ),
       );
     });
+    test(
+      'preserves extras in AudioEntity when mediaItem has metadata',
+      () async {
+        final mediaItemWithExtras = audio_service.MediaItem(
+          id: '1',
+          title: 'Title',
+          extras: const {
+            'url': 'url',
+            'reciterId': 'reciter1',
+            'surahId': 1,
+            'moshafId': 1,
+          },
+        );
+        mediaItemSubject.add(mediaItemWithExtras);
+
+        await expectLater(
+          repository.currentAudio,
+          emits(
+            isA<AudioEntity>().having(
+              (a) => a.extras,
+              'extras',
+              allOf(
+                containsPair('reciterId', 'reciter1'),
+                containsPair('surahId', 1),
+                containsPair('moshafId', 1),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('AudioPlayerRepositoryImpl - queue Stream', () {
@@ -622,6 +653,31 @@ void main() {
       expect(
         capturedMediaItem.artUri,
         Uri.parse('https://example.com/art.jpg'),
+      );
+    });
+    test('passes extras to audioHandler when adding queue item', () async {
+      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
+      const entityWithExtras = AudioEntity(
+        id: '1',
+        title: 'Title',
+        url: 'url',
+        duration: Duration.zero,
+        extras: {'reciterId': 'reciter1', 'surahId': 1, 'moshafId': 1},
+      );
+
+      await repository.addQueueItem(entityWithExtras);
+
+      final captured =
+          verify(mockAudioHandler.addQueueItem(captureAny)).captured.single
+              as audio_service.MediaItem;
+      expect(
+        captured.extras,
+        allOf(
+          containsPair('reciterId', 'reciter1'),
+          containsPair('surahId', 1),
+          containsPair('moshafId', 1),
+          containsPair('url', 'url'),
+        ),
       );
     });
   });

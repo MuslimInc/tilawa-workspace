@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import '../models/queue_state.dart';
 
@@ -69,6 +69,7 @@ abstract class AudioPlayerHandler implements AudioHandler {
   Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,
+    String? reciterId,
   });
   Future<void> playArtistPlaylist(String artistId);
   Future<void> playFromQueue(List<MediaItem> queue, int index);

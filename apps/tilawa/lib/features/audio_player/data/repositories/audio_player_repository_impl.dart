@@ -2,9 +2,9 @@ import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
+
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../../shared/services/audio_position_service.dart';
 import '../../domain/entities/audio_modes.dart';
@@ -211,10 +211,14 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
       artist: item.artist,
       album: item.album,
       artUri: item.artUri?.toString(),
+      extras: item.extras,
     );
   }
 
   audio_service.MediaItem _mapEntityToMediaItem(AudioEntity entity) {
+    final Map<String, dynamic> extras = Map.of(entity.extras ?? {});
+    extras['url'] = entity.url;
+
     return audio_service.MediaItem(
       id: entity.id,
       title: entity.title,
@@ -222,7 +226,7 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
       artist: entity.artist,
       album: entity.album,
       artUri: entity.artUri != null ? Uri.parse(entity.artUri!) : null,
-      extras: {'url': entity.url},
+      extras: extras,
     );
   }
 

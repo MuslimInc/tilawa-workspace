@@ -7,7 +7,6 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
@@ -16,6 +15,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
+
 import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
@@ -146,6 +146,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       artist: item.artist,
       album: item.album,
       artUri: item.artUri?.toString(),
+      extras: item.extras,
     );
   }
 
@@ -370,6 +371,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         'Successfully set ${sources.length} audio sources at index $initialIndex',
       );
     } catch (e, stackTrace) {
+      if (e.toString().contains('Loading interrupted') ||
+          e.toString().contains('aborted')) {
+        log('Loading interrupted as expected: $e');
+        return;
+      }
       log('Error setting audio sources: $e\n$stackTrace');
       // Broadcast error state
       playbackState.add(
@@ -694,6 +700,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
                     duration: Duration.zero,
                     album: moshaf.name,
                     artist: reciter.name,
+                    extras: {
+                      'reciterId': reciter.id,
+                      'moshafId': moshaf.id,
+                      'surahId': int.parse(surahId),
+                    },
                   ),
                 );
               }
@@ -726,6 +737,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,
+    String? reciterId,
   }) async {
     try {
       final List<String> surahList = moshaf.surahList.split(',');
@@ -752,6 +764,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
             duration: Duration.zero,
             artist: reciterName,
             album: moshaf.name,
+            extras: {
+              if (reciterId != null) 'reciterId': reciterId,
+              'moshafId': moshaf.id,
+              'surahId': surahNumber,
+            },
           ),
         );
       }
