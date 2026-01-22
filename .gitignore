@@ -29,7 +29,7 @@
 .packages
 .pub-cache/
 .pub/
-/build/
+build/
 
 # Web related
 lib/generated_plugin_registrant.dart
@@ -53,4 +53,4 @@ pubspec.lock
 /backgroundDownloaderDatabase/
 /backgroundDownloaderResumeData/
 /coverage/
-packages/core/build/test_cache/build/199e63d12aae48772fe1ad268adc4fc7.cache.dill.track.dill
+

@@ -7,11 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/download_all_button.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
 
 class MockReciterDownloadBloc
     extends MockBloc<ReciterDownloadEvent, ReciterDownloadState>
@@ -80,7 +80,7 @@ void main() {
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.download_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.cloud_download_outlined), findsOneWidget);
       expect(find.text('Download All (0/10)'), findsOneWidget);
     },
   );
@@ -100,7 +100,7 @@ void main() {
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Pause 50% (5/10)'), findsOneWidget);
     },
   );
@@ -115,10 +115,10 @@ void main() {
     await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
     await tester.pumpAndSettle();
 
-    final ElevatedButton button = tester.widget<ElevatedButton>(
-      find.byKey(const Key('download_all_button')),
+    await tester.tap(
+      find.byKey(const Key('reciter_details_download_all_button')),
     );
-    expect(button.onPressed, isNull);
+    verifyNever(() => mockBloc.add(any()));
   });
 
   testWidgets('DownloadAllButton fires StartReciterDownloadAll on tap', (
@@ -131,7 +131,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('download_all_button')));
+    await tester.tap(
+      find.byKey(const Key('reciter_details_download_all_button')),
+    );
     verify(
       () => mockBloc.add(any(that: isA<StartReciterDownloadAll>())),
     ).called(1);
@@ -148,13 +150,13 @@ void main() {
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
       expect(find.text('All Downloaded'), findsOneWidget);
 
-      final ElevatedButton button = tester.widget<ElevatedButton>(
-        find.byKey(const Key('download_all_button')),
+      expect(
+        find.byKey(const Key('reciter_details_download_all_button')),
+        findsNothing,
       );
-      expect(button.onPressed, isNull);
     },
   );
 
@@ -200,10 +202,12 @@ void main() {
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       // Tap button to cancel/pause
-      await tester.tap(find.byKey(const Key('download_all_button')));
+      await tester.tap(
+        find.byKey(const Key('reciter_details_download_all_button')),
+      );
       await tester.pump();
 
       verify(
