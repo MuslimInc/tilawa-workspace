@@ -91,8 +91,8 @@ void main() {
     expect(find.text('test@example.com'), findsOneWidget);
 
     // Verify Sections
-    expect(find.text('Appearance'), findsOneWidget);
-    expect(find.text('Downloads'), findsOneWidget);
+    expect(find.text('APPEARANCE'), findsOneWidget);
+    expect(find.text('DOWNLOADS'), findsOneWidget);
 
     // Verify Tiles
     expect(find.text('Theme'), findsOneWidget);
@@ -106,7 +106,7 @@ void main() {
     expect(find.byIcon(FluentIcons.arrow_download_24_regular), findsOneWidget);
 
     // Verify Audio Section
-    expect(find.text('Audio'), findsOneWidget);
+    expect(find.text('AUDIO'), findsOneWidget);
     expect(find.text('Restore Last Playback'), findsOneWidget);
   });
 
