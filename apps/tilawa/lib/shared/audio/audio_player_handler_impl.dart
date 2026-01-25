@@ -254,6 +254,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         .distinct((prev, next) => prev.toString() == next.toString())
         .listen((item) {
           mediaItem.add(item);
+          // Only update the queue if the duration has actually changed
+          // to avoid infinite recursive loops.
+          if (_mediaItemMap[item.id]?.duration != item.duration) {
+            updateMediaItem(item);
+          }
         });
 
     _player.playbackEventStream.listen(_broadcastState);
