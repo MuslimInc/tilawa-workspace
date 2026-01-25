@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7+10] - 2026-01-25
+
+### Added
+
+- **History**: Implemented listening history feature with composite keys for idempotency.
+- **Prayer Times**: Added prayer times feature including location services and persistence.
+- **Settings**: Added app version and build number display.
+- **Localization**: Added Arabic translations for Settings.
+
+### Changed
+
+- **UI**: Modernized and enhanced Settings screen tiles and sections.
+- **Theme**: Centralized color definitions in `AppColors`.
+- **UI**: Redesigned Reciter Details screen for a more premium look.
+- **Build**: Updated Kotlin version to 2.1.0 and migrated from JCenter to MavenCentral.
+
+### Fixed
+
+- **UI**: Resolved Hero widget tag conflicts in various screens.
+- **Cleanup**: Removed AppsFlyer SDK and updated build artifact paths.
+
 ## [0.0.6+7] - 2026-01-17
 
 ### Fixed
