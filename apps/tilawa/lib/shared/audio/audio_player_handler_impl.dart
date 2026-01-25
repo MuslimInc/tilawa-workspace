@@ -254,7 +254,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         .distinct((prev, next) => prev.toString() == next.toString())
         .listen((item) {
           mediaItem.add(item);
-          updateMediaItem(item);
         });
 
     _player.playbackEventStream.listen(_broadcastState);
