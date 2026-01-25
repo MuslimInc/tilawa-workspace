@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7+11] - 2026-01-25
+
+### Fixed
+
+- **Audio**: Resolved a critical infinite recursive loop in MediaItem synchronization that caused hanging and excessive resource usage.
+- **Audio**: Fixed a regression where surah duration was not correctly updating in the playback queue.
+- **Tests**: Fixed settings screen tests to align with recent UI header changes.
+
+### Changed
+
+- **Dependencies**: Updated `google_fonts` to v8.0.0.
+
 ## [0.0.7+10] - 2026-01-25
 
 ### Added
