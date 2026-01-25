@@ -195,7 +195,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
           title: notificationTitle,
           message: failedMessage ?? 'Download failed',
         );
-      } else if (status == DownloadStatus.cancelled) {
+      } else if (status == DownloadStatus.cancelled ||
+          status == DownloadStatus.paused) {
         // Cancel/remove the notification
         await cancelNotification(downloadId);
       }
@@ -275,7 +276,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
           title: title,
           message: 'Batch download failed',
         );
-      } else if (status == DownloadStatus.cancelled) {
+      } else if (status == DownloadStatus.cancelled ||
+          status == DownloadStatus.paused) {
         await cancelNotification(batchId);
       }
     } catch (e) {

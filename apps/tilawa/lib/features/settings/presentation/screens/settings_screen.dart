@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
-import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/config/language_config.dart';
+import 'package:tilawa_ui/theme/app_colors.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -49,7 +50,7 @@ class SettingsScreen extends StatelessWidget {
 
               // General Group (Theme & Language)
               _SettingsGroup(
-                title: context.l10n.appearance,
+                title: context.l10n.appearance.toUpperCase(),
                 children: [
                   BlocBuilder<ThemeCubit, ThemeState>(
                     builder: (context, state) {
@@ -57,6 +58,7 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           _SettingsTile(
                             icon: FluentIcons.dark_theme_24_regular,
+                            iconColor: AppColors.settingsTheme,
                             title: context.l10n.theme,
                             subtitle: _getThemeName(context, state.mode),
                             onTap: () => _showThemePicker(context, state.mode),
@@ -66,6 +68,7 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           _SettingsTile(
                             icon: FluentIcons.color_24_regular,
+                            iconColor: AppColors.settingsColor,
                             title: context.l10n.primaryColor,
                             subtitle: _getColorName(
                               context,
@@ -82,6 +85,7 @@ class SettingsScreen extends StatelessWidget {
                     builder: (context, state) {
                       return _SettingsTile(
                         icon: FluentIcons.local_language_24_regular,
+                        iconColor: AppColors.settingsLanguage,
                         title: context.l10n.language,
                         subtitle: state.locale.languageCode == 'ar'
                             ? context.l10n.arabic
@@ -101,7 +105,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Audio Group
               _SettingsGroup(
-                title: context.l10n.audioSettings,
+                title: context.l10n.audioSettings.toUpperCase(),
                 children: [
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
@@ -109,6 +113,7 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           _SwitchSettingsTile(
                             icon: FluentIcons.history_24_regular,
+                            iconColor: AppColors.settingsPlayback,
                             title: context.l10n.restorePlaybackState,
                             subtitle: context.l10n.restorePlaybackStateSubtitle,
                             value: state.restorePlaybackState,
@@ -117,9 +122,13 @@ class SettingsScreen extends StatelessWidget {
                                   .read<SettingsCubit>()
                                   .toggleRestorePlaybackState(value);
                             },
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(16.r),
+                            ),
                           ),
                           _SwitchSettingsTile(
                             icon: FluentIcons.timer_24_regular,
+                            iconColor: AppColors.settingsDuration,
                             title: context.l10n.enableRecitationDuration,
                             subtitle:
                                 context.l10n.enableRecitationDurationSubtitle,
@@ -130,6 +139,9 @@ class SettingsScreen extends StatelessWidget {
                                   .toggleSleepTimerEnabled(value);
                             },
                             showDivider: false,
+                            borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(16.r),
+                            ),
                           ),
                         ],
                       );
@@ -142,10 +154,11 @@ class SettingsScreen extends StatelessWidget {
 
               // Features Group
               _SettingsGroup(
-                title: context.l10n.features,
+                title: context.l10n.features.toUpperCase(),
                 children: [
                   _SettingsTile(
                     icon: FluentIcons.bookmark_24_regular,
+                    iconColor: AppColors.settingsBookmarks,
                     title: context.l10n.bookmarks,
                     subtitle: context.l10n.noBookmarksHint,
                     onTap: () => const BookmarksRoute().push(context),
@@ -155,18 +168,21 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   _SettingsTile(
                     icon: FluentIcons.history_24_regular,
+                    iconColor: AppColors.settingsHistory,
                     title: context.l10n.listeningHistory,
                     subtitle: context.l10n.noHistoryDescription,
                     onTap: () => const HistoryRoute().push(context),
                   ),
                   _SettingsTile(
                     icon: FluentIcons.clock_24_regular,
+                    iconColor: AppColors.settingsPrayer,
                     title: context.l10n.prayerTimes,
                     subtitle: context.l10n.locationRequiredDescription,
                     onTap: () => const PrayerTimesRoute().push(context),
                   ),
                   _SettingsTile(
                     icon: FluentIcons.book_24_regular,
+                    iconColor: AppColors.settingsQuran,
                     title: context.l10n.quranReader,
                     subtitle: context.l10n.continueReading,
                     onTap: () =>
@@ -183,10 +199,11 @@ class SettingsScreen extends StatelessWidget {
 
               // Downloads Group
               _SettingsGroup(
-                title: context.l10n.downloads,
+                title: context.l10n.downloads.toUpperCase(),
                 children: [
                   _SettingsTile(
                     icon: FluentIcons.folder_24_regular,
+                    iconColor: AppColors.settingsStorage,
                     title: context.l10n.manageStorage,
                     subtitle: context.l10n.manageStorageSubtitle,
                     onTap: () => const DownloadsRoute().push(context),
@@ -198,6 +215,7 @@ class SettingsScreen extends StatelessWidget {
                     builder: (context, state) {
                       return _SettingsTile(
                         icon: FluentIcons.arrow_download_24_regular,
+                        iconColor: AppColors.settingsDownloads,
                         title: context.l10n.concurrentDownloads,
                         subtitle: context.l10n.concurrentDownloadsSubtitle(
                           state.maxConcurrentDownloads,
@@ -222,54 +240,35 @@ class SettingsScreen extends StatelessWidget {
               BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
                   if (state is AuthAuthenticated) {
-                    return InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(context.l10n.logout),
-                            content: Text(context.l10n.logoutConfirmation),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(context.l10n.cancel),
+                    return Material(
+                      color: context.isDarkMode
+                          ? context.theme.cardColor
+                          : AppColors.logoutBackground,
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: InkWell(
+                        onTap: () => _showLogoutDialog(context),
+                        borderRadius: BorderRadius.circular(16.r),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                FluentIcons.sign_out_24_filled,
+                                color: AppColors.error,
+                                size: 20,
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  context.read<AuthBloc>().add(
-                                    const SignOutEvent(),
-                                  );
-                                },
-                                child: Text(
-                                  context.l10n.logout,
-                                  style: const TextStyle(color: Colors.red),
+                              SizedBox(width: 12.w),
+                              Text(
+                                context.l10n.logout,
+                                style: TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ],
-                          ),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(16.r),
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).dividerColor.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Text(
-                          context.l10n.logout,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -292,6 +291,38 @@ class SettingsScreen extends StatelessWidget {
               ],
 
               SizedBox(height: 32.h),
+
+              // App Version Section
+              BlocBuilder<SettingsCubit, SettingsState>(
+                builder: (context, state) {
+                  final version = state.appInfo?.version ?? '...';
+                  final buildNumber = state.appInfo?.buildNumber ?? '...';
+                  return Column(
+                    children: [
+                      Text(
+                        context.l10n.version(version),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: context.theme.textTheme.bodySmall?.color
+                              ?.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        context.l10n.build(buildNumber),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: context.theme.textTheme.bodySmall?.color
+                              ?.withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+              SizedBox(height: 32.h),
             ],
           ),
         ),
@@ -307,22 +338,44 @@ class SettingsScreen extends StatelessWidget {
           orElse: () => null,
         );
         return Container(
-          padding: EdgeInsets.all(20.r),
+          padding: EdgeInsets.all(24.r),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16.r),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.profileGradientStart,
+                AppColors.profileGradientEnd,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.profileGradientStart.withValues(alpha: 0.2),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 30.r,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColor.withValues(alpha: 0.1),
-                child: Icon(
-                  FluentIcons.person_32_filled,
-                  size: 32.sp,
-                  color: Theme.of(context).primaryColor,
+              Container(
+                width: 60.r,
+                height: 60.r,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    FluentIcons.person_32_filled,
+                    size: 32.sp,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -333,8 +386,9 @@ class SettingsScreen extends StatelessWidget {
                     Text(
                       user?.displayName ?? context.l10n.guestUser,
                       style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -342,12 +396,21 @@ class SettingsScreen extends StatelessWidget {
                       user?.email ?? context.l10n.signInToSync,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
+              if (user == null)
+                IconButton(
+                  onPressed: () => const LoginRoute().push(context),
+                  icon: const Icon(
+                    FluentIcons.arrow_right_24_filled,
+                    color: Colors.white,
+                  ),
+                ),
             ],
           ),
         );
@@ -592,6 +655,21 @@ class SettingsScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             ListTile(
+              title: Text("العربية"),
+              trailing: currentLocale.languageCode == arabicLanguageCode
+                  ? Icon(
+                      FluentIcons.checkmark_24_regular,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(arabicLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               title: Text(context.l10n.english),
               trailing: currentLocale.languageCode == englishLanguageCode
                   ? Icon(
@@ -602,21 +680,6 @@ class SettingsScreen extends StatelessWidget {
               onTap: () {
                 context.read<LocalizationBloc>().add(
                   const ChangeLanguage(Locale(englishLanguageCode)),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(context.l10n.arabic),
-              trailing: currentLocale.languageCode == arabicLanguageCode
-                  ? Icon(
-                      FluentIcons.checkmark_24_regular,
-                      color: Theme.of(context).primaryColor,
-                    )
-                  : null,
-              onTap: () {
-                context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale(arabicLanguageCode)),
                 );
                 Navigator.pop(context);
               },
@@ -664,6 +727,32 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.logout),
+        content: Text(context.l10n.logoutConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AuthBloc>().add(const SignOutEvent());
+            },
+            child: Text(
+              context.l10n.logout,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SettingsGroup extends StatelessWidget {
@@ -677,20 +766,28 @@ class _SettingsGroup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.fromLTRB(12.w, 16.h, 16.w, 8.h),
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
+              fontSize: 12.5.sp,
+              fontWeight: FontWeight.w800,
               color: Theme.of(context).primaryColor,
+              letterSpacing: 1.1,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.settingsCardShadow,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(children: children),
         ),
@@ -704,11 +801,13 @@ class _SettingsTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.onTap,
+    this.iconColor,
     this.subtitle,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
   });
   final IconData icon;
+  final Color? iconColor;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -718,42 +817,58 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final effectiveIconColor = iconColor ?? theme.primaryColor;
     return Column(
       children: [
         Material(
+          color: Colors.transparent,
           borderRadius: borderRadius,
           child: ListTile(
             onTap: onTap,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 2.h,
+            ),
             shape: RoundedRectangleBorder(borderRadius: borderRadius),
             leading: Container(
-              padding: EdgeInsets.all(8.r),
+              padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8.r),
+                color: effectiveIconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: theme.primaryColor, size: 20.sp),
+              child: Icon(icon, color: effectiveIconColor, size: 22.sp),
             ),
-            title: Text(title, style: TextStyle(fontSize: 16.sp)),
+            title: Text(
+              title,
+              style: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w600),
+            ),
             subtitle: subtitle != null
                 ? Text(
                     subtitle!,
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 12.5.sp,
                       color: theme.textTheme.bodySmall?.color?.withValues(
-                        alpha: 0.6,
+                        alpha: 0.5,
                       ),
                     ),
                   )
                 : null,
             trailing: Icon(
-              FluentIcons.chevron_right_24_regular,
-              size: 18.sp,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+              FluentIcons.chevron_right_24_filled,
+              size: 14.sp,
+              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
             ),
           ),
         ),
         if (showDivider)
-          Divider(height: 1, indent: 60.w, endIndent: 20.w, thickness: 0.5),
+          Padding(
+            padding: EdgeInsets.only(left: 64.w, right: 16.w),
+            child: Divider(
+              height: 1,
+              thickness: 0.5,
+              color: theme.dividerColor.withValues(alpha: 0.05),
+            ),
+          ),
       ],
     );
   }
@@ -799,68 +914,93 @@ class _SwitchSettingsTile extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.iconColor,
     this.subtitle,
     this.showDivider = true,
+    this.borderRadius = BorderRadius.zero,
   });
 
   final IconData icon;
+  final Color? iconColor;
   final String title;
   final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool showDivider;
+  final BorderRadiusGeometry borderRadius;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final effectiveIconColor = iconColor ?? theme.primaryColor;
     return Column(
       children: [
         Material(
           color: Colors.transparent,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8.r),
+          borderRadius: borderRadius,
+          child: InkWell(
+            onTap: () => onChanged(!value),
+            borderRadius: borderRadius is BorderRadius
+                ? borderRadius as BorderRadius
+                : null,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10.r),
+                    decoration: BoxDecoration(
+                      color: effectiveIconColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Icon(icon, color: effectiveIconColor, size: 22.sp),
                   ),
-                  child: Icon(icon, color: theme.primaryColor, size: 20.sp),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: TextStyle(fontSize: 16.sp)),
-                      if (subtitle != null) ...[
-                        SizedBox(height: 4.h),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle!,
+                          title,
                           style: TextStyle(
-                            fontSize: 13.sp,
-                            color: theme.textTheme.bodySmall?.color?.withValues(
-                              alpha: 0.6,
-                            ),
+                            fontSize: 15.5.sp,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                        if (subtitle != null) ...[
+                          SizedBox(height: 4.h),
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              fontSize: 12.5.sp,
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                Switch.adaptive(
-                  value: value,
-                  onChanged: onChanged,
-                  activeTrackColor: theme.primaryColor,
-                ),
-              ],
+                  Switch.adaptive(
+                    value: value,
+                    onChanged: onChanged,
+                    activeTrackColor: theme.primaryColor.withValues(alpha: 0.5),
+                    activeColor: theme.primaryColor,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
         if (showDivider)
-          Divider(height: 1, indent: 60.w, endIndent: 20.w, thickness: 0.5),
+          Padding(
+            padding: EdgeInsets.only(left: 64.w, right: 16.w),
+            child: Divider(
+              height: 1,
+              thickness: 0.5,
+              color: theme.dividerColor.withValues(alpha: 0.05),
+            ),
+          ),
       ],
     );
   }

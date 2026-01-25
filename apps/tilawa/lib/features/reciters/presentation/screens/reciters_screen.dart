@@ -202,97 +202,136 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             ),
                           ),
                         // Search field
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Focus(
-                            onFocusChange: (hasFocus) {
-                              setState(() {});
-                            },
-                            child: TextField(
-                              focusNode: _focusNode,
-                              controller: _searchController,
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: theme.colorScheme.surface,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  borderSide: BorderSide.none,
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  borderSide: BorderSide(
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 54.h,
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.primaryColor.withValues(
+                                        alpha: 0.05,
+                                      ),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                  border: Border.all(
                                     color: theme.colorScheme.outlineVariant
-                                        .withValues(alpha: 0.3),
+                                        .withValues(alpha: 0.2),
                                   ),
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  borderSide: BorderSide(
-                                    color: theme.primaryColor,
-                                    width: 1.5,
+                                child: Focus(
+                                  onFocusChange: (hasFocus) {
+                                    setState(() {});
+                                  },
+                                  child: TextField(
+                                    focusNode: _focusNode,
+                                    controller: _searchController,
+                                    textAlignVertical: TextAlignVertical.center,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                      border: InputBorder.none,
+                                      hintText: l10n.searchReciters,
+                                      hintStyle: TextStyle(
+                                        color: theme
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                            .withValues(alpha: 0.4),
+                                        fontSize: 14.sp,
+                                      ),
+                                      prefixIcon: Icon(
+                                        FluentIcons.search_24_regular,
+                                        size: 20.sp,
+                                        color: _focusNode.hasFocus
+                                            ? theme.primaryColor
+                                            : theme.colorScheme.onSurfaceVariant
+                                                  .withValues(alpha: 0.6),
+                                      ),
+                                      suffixIcon:
+                                          (state is RecitersLoaded &&
+                                              state.searchQuery.isNotEmpty)
+                                          ? IconButton(
+                                              icon: Icon(
+                                                FluentIcons.dismiss_24_regular,
+                                                size: 18.sp,
+                                              ),
+                                              onPressed: () {
+                                                _searchController.clear();
+                                                context
+                                                    .read<RecitersBloc>()
+                                                    .add(const ClearSearch());
+                                                context
+                                                    .read<
+                                                      AlphabetScrollbarBloc
+                                                    >()
+                                                    .add(
+                                                      const ClearSelection(),
+                                                    );
+                                              },
+                                            )
+                                          : null,
+                                    ),
+                                    onChanged: (value) {
+                                      context.read<RecitersBloc>().add(
+                                        SearchRecitersEvent(value),
+                                      );
+                                    },
+                                    onTapOutside: (event) {
+                                      _focusNode.unfocus();
+                                    },
                                   ),
                                 ),
-                                hintText: l10n.searchReciters,
-                                hintStyle: TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.5),
-                                  fontSize: 14.sp,
-                                ),
-                                prefixIcon: Icon(
-                                  FluentIcons.search_24_regular,
-                                  size: 20.sp,
-                                  color: _focusNode.hasFocus
-                                      ? theme.primaryColor
-                                      : theme.colorScheme.onSurfaceVariant
-                                            .withValues(alpha: 0.7),
-                                ),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 20.w,
-                                  vertical: 16.h,
-                                ),
-                                suffixIcon:
-                                    (state is RecitersLoaded &&
-                                        state.searchQuery.isNotEmpty)
-                                    ? IconButton(
-                                        icon: Icon(
-                                          FluentIcons.dismiss_24_regular,
-                                          size: 20.sp,
-                                        ),
-                                        onPressed: () {
-                                          _searchController.clear();
-                                          context.read<RecitersBloc>().add(
-                                            const ClearSearch(),
-                                          );
-                                          context
-                                              .read<AlphabetScrollbarBloc>()
-                                              .add(const ClearSelection());
-                                        },
-                                      )
-                                    : null,
                               ),
-                              onChanged: (value) {
-                                context.read<RecitersBloc>().add(
-                                  SearchRecitersEvent(value),
-                                );
-                              },
-                              onTapOutside: (event) {
-                                _focusNode.unfocus();
-                              },
                             ),
-                          ),
+                            SizedBox(width: 10.w),
+                            Container(
+                              height: 54.h,
+                              width: 54.h,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.primaryColor.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: theme.primaryColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                ),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  onTap: () =>
+                                      const DownloadsRoute().push(context),
+                                  child: Center(
+                                    child: Icon(
+                                      FluentIcons.arrow_download_24_regular,
+                                      color: theme.primaryColor,
+                                      size: 24.sp,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

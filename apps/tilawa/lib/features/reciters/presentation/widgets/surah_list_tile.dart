@@ -47,7 +47,10 @@ class SurahListTile extends StatelessWidget {
 
     return RepaintBoundary(
       child: Material(
-        color: Colors.transparent,
+        color: isCurrentItem
+            ? theme.primaryColor.withValues(alpha: 0.08)
+            : theme.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
         child: InkWell(
           borderRadius: BorderRadius.circular(16.r),
           onLongPress: () => _showSurahOptionsSheet(context, surah),
@@ -66,18 +69,7 @@ class SurahListTile extends StatelessWidget {
               onTap();
             }
           },
-          child: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: 8.w,
-              vertical: 4.h,
-            ), // Add spacing between items
-            decoration: BoxDecoration(
-              // subtle background for all items, stronger for current
-              color: isCurrentItem
-                  ? theme.primaryColor.withValues(alpha: 0.08)
-                  : theme.primaryColor.withValues(alpha: 0.01),
-              borderRadius: BorderRadius.circular(16.r),
-            ),
+          child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 16.w,
               vertical: 16.h,
@@ -115,8 +107,6 @@ class SurahListTile extends StatelessWidget {
                           style: TextStyle(
                             color: theme.disabledColor,
                             fontWeight: FontWeight.w600,
-                            fontFamily:
-                                "GoogleFonts.outfit().fontFamily", // Monospaced-like or distinct font usually looks good for numbers
                             fontSize: 14.sp,
                           ),
                         ),

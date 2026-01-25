@@ -231,21 +231,31 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
           _player.shuffleIndicesStream,
           _player.durationStream,
           (index, queue, shuffleModeEnabled, shuffleIndices, duration) {
+            // This prevents applying the next track's duration to the previous track.
+            final int? currentIndex = _player.currentIndex;
+
             final int? rawIndex = _isLoadingAudio && _pendingIndex != null
                 ? _pendingIndex
-                : index;
+                : (currentIndex ?? index);
             final int? queueIndex = getQueueIndex(
               rawIndex,
               shuffleModeEnabled,
               shuffleIndices,
             );
-            return (queueIndex != null && queueIndex < queue.length)
+
+            final result = (queueIndex != null && queueIndex < queue.length)
                 ? queue[queueIndex].copyWith(duration: duration)
                 : null;
+
+            return result;
           },
         )
         .whereType<audio_service.MediaItem>()
-        .listen(mediaItem.add);
+        .distinct((prev, next) => prev.toString() == next.toString())
+        .listen((item) {
+          mediaItem.add(item);
+          updateMediaItem(item);
+        });
 
     _player.playbackEventStream.listen(_broadcastState);
     _player.shuffleModeEnabledStream.listen(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -230,26 +232,137 @@ void main() {
     );
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
-      'should save history when playback starts/updates with valid extras',
+      'should save history with 0 duration if AudioEntity has 0 duration, ignoring PlaybackState duration',
+      setUp: () {
+        // Seed playback state with "stale" duration
+        playbackStateSubject.add(
+          PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration(seconds: 10),
+            bufferedPosition: Duration(seconds: 20),
+            duration: Duration(minutes: 10), // Stale duration
+            currentIndex: 0,
+            queue: [],
+          ),
+        );
+      },
+      build: () => buildBloc(),
+      act: (bloc) => bloc.add(
+        const AudioPlayerEvent.updateAudio(
+          AudioEntity(
+            id: 'zero-duration-audio',
+            title: 'Zero Duration Test',
+            url: 'url',
+            duration: Duration.zero, // Zero duration
+            artist: 'Reciter',
+            album: 'Moshaf',
+            extras: {'reciterId': '1', 'moshafId': 2, 'surahId': 3},
+          ),
+        ),
+      ),
+      verify: (_) {
+        // Should NOT save history when audio is first set
+        verifyNever(
+          mockAddOrUpdateHistory.call(
+            surahId: anyNamed('surahId'),
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        );
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should save history for PREVIOUS audio when audio updates (track transition)',
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: historyAudio, // The track causing the transition
+      ),
+      build: () => buildBloc(),
+      act: (bloc) => bloc.add(
+        const AudioPlayerEvent.updateAudio(
+          AudioEntity(
+            id: 'next-audio',
+            title: 'Next Audio',
+            url: 'url',
+            duration: Duration(minutes: 10),
+            artist: 'Reciter',
+            album: 'Moshaf',
+            extras: {'reciterId': '1', 'moshafId': 2, 'surahId': 3},
+          ),
+        ),
+      ),
+      verify: (_) {
+        // Should save existing (previous) audio only
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: 789, // historyAudio surahId
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        ).called(1);
+
+        // Should NOT save new audio (it hasn't been played yet)
+        verifyNever(
+          mockAddOrUpdateHistory.call(
+            surahId: 3, // next audio surahId
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        );
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should NOT save history when audio is first set (not played yet)',
       build: () => buildBloc(),
       act: (bloc) => bloc.add(const AudioPlayerEvent.updateAudio(historyAudio)),
       verify: (_) {
-        verify(
+        // Should NOT save history until the audio is actually played
+        verifyNever(
           mockAddOrUpdateHistory.call(
-            surahId: 789,
-            surahName: 'History Test',
-            surahNameEn: 'History Test',
-            reciterId: '123',
-            reciterName: 'Reciter Name',
-            moshafId: 456,
-            moshafName: 'Moshaf Name',
-            lastPositionMs: 0,
-            durationMs: 300000,
-            audioUrl: 'url',
-            artworkUrl: null,
-            completed: false,
+            surahId: anyNamed('surahId'),
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
           ),
-        ).called(1);
+        );
       },
     );
 
@@ -386,5 +499,330 @@ void main() {
         ).called(1);
       },
     );
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'saves history with last valid position when switching tracks (reproduction)',
+      setUp: () {
+        // Define test entities
+        final testHistoryEntity = HistoryEntity(
+          id: '1',
+          surahId: 789,
+          surahName: 'History Test',
+          surahNameEn: 'History Test',
+          reciterId: '123',
+          reciterName: 'Reciter Name',
+          moshafId: 456,
+          moshafName: 'Moshaf Name',
+          lastPositionMs: 50000,
+          durationMs: 300000,
+          audioUrl: 'url',
+          playedAt: DateTime.now(),
+        );
+
+        // Ensure playback state subject has initial value
+        if (!playbackStateSubject.hasValue) {
+          playbackStateSubject.add(
+            const PlaybackStateEntity(
+              isPlaying: true,
+              processingState: AudioProcessingStateStatus.ready,
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration(minutes: 5),
+              currentIndex: 0,
+              queue: [],
+            ),
+          );
+        }
+
+        when(
+          mockAddOrUpdateHistory(
+            surahId: anyNamed('surahId'),
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        ).thenAnswer((_) async => Right(testHistoryEntity));
+      },
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const historyAudio = AudioEntity(
+          id: '1',
+          title: 'History Test',
+          url: 'url',
+          duration: Duration(minutes: 5),
+          extras: <String, dynamic>{
+            'surahId': 789,
+            'reciterId': '123',
+            'moshafId': 456,
+          },
+        );
+        const audio2 = AudioEntity(
+          id: '2',
+          title: '2',
+          url: 'url',
+          duration: Duration(minutes: 5),
+          extras: <String, dynamic>{
+            'surahId': 790,
+            'reciterId': '123',
+            'moshafId': 456,
+          },
+        );
+
+        // 1. Set current audio
+        currentAudioSubject.add(historyAudio);
+        await Future.delayed(Duration.zero);
+
+        // 2. Update positions properly (simulating playback)
+        positionSubject.add(const Duration(seconds: 10));
+        await Future.delayed(Duration.zero);
+        positionSubject.add(const Duration(seconds: 50));
+        await Future.delayed(Duration.zero);
+
+        // 3. Reset position (simulating player switch / next track start)
+        positionSubject.add(Duration.zero);
+        await Future.delayed(Duration.zero);
+
+        // 4. Switch audio
+        currentAudioSubject.add(audio2);
+        await Future.delayed(Duration.zero);
+      },
+      verify: (_) {
+        // The cache works correctly! Looking at the debug output:
+        // 1. Initial save: lastPositionMs: 0 (when audio is first set)
+        // 2. Track switch save: lastPositionMs: 50000 (cached position retrieved!)
+        // 3. New audio save: lastPositionMs: 0 (for audio2)
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: 789,
+            surahName: 'History Test',
+            surahNameEn: 'History Test',
+            reciterId: '123',
+            reciterName: '', // Empty because AudioEntity has no artist field
+            moshafId: 456,
+            moshafName: '', // Empty because AudioEntity has no album field
+            // CRITICAL: We expect ~50s (50000ms), NOT 0
+            lastPositionMs: 50000,
+            durationMs: 300000,
+            audioUrl: 'url',
+            artworkUrl: null,
+            completed: false,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should save history when skipping to next track',
+      setUp: () {
+        when(mockSkipToNext.call()).thenAnswer((_) async => const Right(null));
+      },
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: historyAudio,
+      ),
+      build: () => buildBloc(),
+      act: (bloc) async {
+        // Simulate position updates
+        positionSubject.add(const Duration(minutes: 2, seconds: 30));
+        await Future.delayed(Duration.zero);
+        // User presses "Next" button
+        bloc.add(const AudioPlayerEvent.skipToNext());
+        await Future.delayed(Duration.zero);
+      },
+      verify: (_) {
+        // Should save current track's history before skipping
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: 789,
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: 150000, // 2:30 = 150 seconds = 150000ms
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should save history when skipping to previous track',
+      setUp: () {
+        when(
+          mockSkipToPrevious.call(),
+        ).thenAnswer((_) async => const Right(null));
+      },
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: historyAudio,
+      ),
+      build: () => buildBloc(),
+      act: (bloc) async {
+        // Simulate position updates
+        positionSubject.add(const Duration(minutes: 1, seconds: 45));
+        await Future.delayed(Duration.zero);
+        // User presses "Previous" button
+        bloc.add(const AudioPlayerEvent.skipToPrevious());
+        await Future.delayed(Duration.zero);
+      },
+      verify: (_) {
+        // Should save current track's history before skipping
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: 789,
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: 105000, // 1:45 = 105 seconds = 105000ms
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'uses playback state duration when audio metadata duration is missing',
+      setUp: () {
+        when(mockPauseAudio.call()).thenAnswer((_) async => const Right(null));
+      },
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const zeroDurationAudio = AudioEntity(
+          id: 'zero-duration',
+          title: 'Zero Duration',
+          url: 'url',
+          duration: Duration.zero,
+          artist: 'Reciter',
+          album: 'Moshaf',
+          extras: {'reciterId': '1', 'moshafId': 2, 'surahId': 3},
+        );
+
+        final playbackState = PlaybackStateEntity(
+          isPlaying: true,
+          processingState: AudioProcessingStateStatus.ready,
+          position: const Duration(seconds: 5),
+          bufferedPosition: const Duration(seconds: 5),
+          duration: const Duration(seconds: 34),
+          currentIndex: 0,
+          queue: const [zeroDurationAudio],
+        );
+
+        currentAudioSubject.add(zeroDurationAudio);
+        await Future.delayed(Duration.zero);
+        playbackStateSubject.add(playbackState);
+        await Future.delayed(Duration.zero);
+        positionSubject.add(const Duration(seconds: 34));
+        await Future.delayed(Duration.zero);
+
+        bloc.add(const AudioPlayerEvent.pauseAudio());
+        await Future.delayed(Duration.zero);
+      },
+      verify: (_) {
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: 3,
+            surahName: 'Zero Duration',
+            surahNameEn: 'Zero Duration',
+            reciterId: '1',
+            reciterName: 'Reciter',
+            moshafId: 2,
+            moshafName: 'Moshaf',
+            lastPositionMs: 34000,
+            durationMs: 34000,
+            audioUrl: 'url',
+            artworkUrl: null,
+            completed: true,
+          ),
+        ).called(1);
+      },
+    );
   });
+
+  test(
+    'skipToNext waits for history to be saved before invoking SkipToNext use case',
+    () async {
+      when(mockSkipToNext.call()).thenAnswer((_) async => const Right(null));
+      final completer = Completer<void>();
+      final historyResponse = HistoryEntity(
+        id: 'completion',
+        surahId: 789,
+        surahName: 'History Test',
+        surahNameEn: 'History Test',
+        reciterId: '123',
+        reciterName: 'Reciter Name',
+        moshafId: 456,
+        moshafName: 'Moshaf Name',
+        lastPositionMs: 0,
+        durationMs: 300000,
+        audioUrl: 'url',
+        playedAt: DateTime.now(),
+      );
+
+      when(
+        mockAddOrUpdateHistory.call(
+          surahId: anyNamed('surahId'),
+          surahName: anyNamed('surahName'),
+          surahNameEn: anyNamed('surahNameEn'),
+          reciterId: anyNamed('reciterId'),
+          reciterName: anyNamed('reciterName'),
+          moshafId: anyNamed('moshafId'),
+          moshafName: anyNamed('moshafName'),
+          lastPositionMs: anyNamed('lastPositionMs'),
+          durationMs: anyNamed('durationMs'),
+          audioUrl: anyNamed('audioUrl'),
+          artworkUrl: anyNamed('artworkUrl'),
+          completed: anyNamed('completed'),
+        ),
+      ).thenAnswer((_) async {
+        await completer.future;
+        return Right(historyResponse);
+      });
+
+      final bloc = buildBloc();
+      const skipAudio = AudioEntity(
+        id: 'history-audio-1',
+        title: 'History Test',
+        url: 'url',
+        duration: Duration(minutes: 5),
+        artist: 'Reciter Name',
+        album: 'Moshaf Name',
+        extras: {'reciterId': '123', 'moshafId': 456, 'surahId': 789},
+      );
+
+      bloc.add(const AudioPlayerEvent.updateAudio(skipAudio));
+      await Future.delayed(Duration.zero);
+      positionSubject.add(const Duration(seconds: 5));
+      await Future.delayed(Duration.zero);
+
+      bloc.add(const AudioPlayerEvent.skipToNext());
+
+      // Allow event loop to process the awaiting _saveHistory call
+      await Future.delayed(const Duration(milliseconds: 50));
+      verifyNever(mockSkipToNext.call());
+
+      completer.complete();
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      verify(mockSkipToNext.call()).called(1);
+      await bloc.close();
+    },
+  );
 }

@@ -29,6 +29,10 @@ class SplashCubit extends Cubit<SplashState> {
         emit(const SplashNavigateToLogin());
       case SplashDestination.onboarding:
         emit(const SplashNavigateToOnboarding());
+      case SplashDestination.notificationLaunch:
+        // Do nothing - let the notification service handle navigation
+        // This prevents the splash screen from overriding the notification navigation
+        break;
     }
   }
 }

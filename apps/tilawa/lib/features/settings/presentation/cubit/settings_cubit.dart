@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
+import 'package:tilawa_core/entities/app_info.dart';
 
 import '../../../downloads/data/services/download_queue_manager.dart';
 
@@ -9,22 +11,26 @@ class SettingsState extends Equatable {
     this.maxConcurrentDownloads = 2,
     this.restorePlaybackState = true,
     this.isSleepTimerEnabled = true,
+    this.appInfo,
   });
 
   final int maxConcurrentDownloads;
   final bool restorePlaybackState;
   final bool isSleepTimerEnabled;
+  final AppInfo? appInfo;
 
   SettingsState copyWith({
     int? maxConcurrentDownloads,
     bool? restorePlaybackState,
     bool? isSleepTimerEnabled,
+    AppInfo? appInfo,
   }) {
     return SettingsState(
       maxConcurrentDownloads:
           maxConcurrentDownloads ?? this.maxConcurrentDownloads,
       restorePlaybackState: restorePlaybackState ?? this.restorePlaybackState,
       isSleepTimerEnabled: isSleepTimerEnabled ?? this.isSleepTimerEnabled,
+      appInfo: appInfo ?? this.appInfo,
     );
   }
 
@@ -33,17 +39,30 @@ class SettingsState extends Equatable {
     maxConcurrentDownloads,
     restorePlaybackState,
     isSleepTimerEnabled,
+    appInfo,
   ];
 }
 
 @injectable
 class SettingsCubit extends HydratedCubit<SettingsState> {
-  SettingsCubit(this._downloadQueueManager) : super(const SettingsState()) {
+  SettingsCubit(this._downloadQueueManager, this._getAppInfo)
+    : super(const SettingsState()) {
     // Initialize DownloadQueueManager with persisted value
     _updateQueueManager();
+    _fetchAppInfo();
   }
 
   final DownloadQueueManager _downloadQueueManager;
+  final GetAppInfo _getAppInfo;
+
+  Future<void> _fetchAppInfo() async {
+    try {
+      final appInfo = await _getAppInfo();
+      emit(state.copyWith(appInfo: appInfo));
+    } catch (_) {
+      // Ignore errors for app info
+    }
+  }
 
   @override
   SettingsState? fromJson(Map<String, dynamic> json) {

@@ -351,13 +351,16 @@ class _ReciterDetailsContent extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final SurahEntity surah = filteredSurahs[index];
-              return SurahListTile(
-                key: ValueKey('surah_${surah.id}'),
-                surah: surah,
-                index: index,
-                reciterName: reciter.name,
-                reciterId: reciter.id,
-                onTap: () => onPlaySurah(surah),
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                child: SurahListTile(
+                  key: ValueKey('surah_${surah.id}'),
+                  surah: surah,
+                  index: index,
+                  reciterName: reciter.name,
+                  reciterId: reciter.id,
+                  onTap: () => onPlaySurah(surah),
+                ),
               );
             }, childCount: filteredSurahs.length),
           ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:tilawa/core/extensions.dart';
 
 class HistoryStatsCard extends StatelessWidget {
@@ -60,10 +59,14 @@ class HistoryStatsCard extends StatelessWidget {
     final int hours = duration.inHours;
     final int minutes = duration.inMinutes.remainder(60);
 
+    final int seconds = duration.inSeconds.remainder(60);
+
     if (hours > 0) {
       return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${seconds}s';
     } else {
-      return '${minutes}m';
+      return '${seconds}s';
     }
   }
 }

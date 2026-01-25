@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
@@ -92,6 +93,13 @@ Future<void> bootstrap({
     } catch (e) {
       logger.d('Warning: Crashlytics initialization failed: $e');
       // App can work without crash reporting
+    }
+
+    // Initialize Hive (for local data persistence)
+    try {
+      await initializeHive();
+    } catch (e) {
+      logger.d('Warning: Hive initialization failed: $e');
     }
 
     Bloc.observer = MultiBlocObserver(
@@ -224,6 +232,20 @@ Future<void> initializeHydratedStorage() async {
     logger.d('HydratedStorage initialized successfully');
   } catch (e) {
     logger.d('Warning: Could not initialize HydratedStorage: $e');
+  }
+}
+
+/// Initialize Hive
+@visibleForTesting
+Future<void> initializeHive() async {
+  try {
+    final directory = kIsWeb ? null : await getApplicationDocumentsDirectory();
+    if (!kIsWeb && directory != null) {
+      Hive.init(directory.path);
+    }
+    logger.d('Hive initialized successfully');
+  } catch (e) {
+    logger.d('Warning: Could not initialize Hive: $e');
   }
 }
 

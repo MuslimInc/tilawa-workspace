@@ -455,6 +455,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get downloadSurahsOffline => 'حمل السور للاستماع دون اتصال';
 
   @override
+  String version(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String build(String build) {
+    return 'النسخة $build';
+  }
+
+  @override
   String get notificationWaitingToStart => 'في انتظار البدء...';
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/history_entity.dart';
 
@@ -13,30 +13,50 @@ abstract class HistoryLocalDataSource {
     required String reciterId,
     required int moshafId,
   });
+
+  /// Gets history by composite key directly (O(1) lookup).
+  Future<HistoryEntity?> getHistoryByCompositeKey(String compositeKey);
+
   Future<void> saveHistory(HistoryEntity history);
   Future<void> deleteHistory(String id);
   Future<void> saveAllHistory(List<HistoryEntity> historyList);
   Future<void> clearAllHistory();
+
+  /// Generates a composite key from surah/reciter/moshaf IDs.
+  /// This key is deterministic and used for idempotent saves.
+  String generateCompositeKey({
+    required int surahId,
+    required String reciterId,
+    required int moshafId,
+  });
+
+  @Deprecated('Use generateCompositeKey instead for new entries')
   Future<String> generateHistoryId();
+
   Future<int> getHistoryCount();
 }
 
 @LazySingleton(as: HistoryLocalDataSource)
 class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
-  HistoryLocalDataSourceImpl(this._prefs);
+  HistoryLocalDataSourceImpl(this._hive);
 
-  static const String _historyKey = 'listening_history';
-  static const String _historyCounterKey = 'history_counter';
+  static const String _historyBoxName = 'listening_history';
+  static const String _historyCounterKey = '__history_counter__';
   static const int _maxHistorySize = 500; // Limit history entries
 
-  final SharedPreferencesAsync _prefs;
+  final HiveInterface _hive;
+
+  Future<Box> _getBox() async {
+    if (_hive.isBoxOpen(_historyBoxName)) {
+      return _hive.box(_historyBoxName);
+    }
+    return _hive.openBox(_historyBoxName);
+  }
 
   @override
   Future<List<HistoryEntity>> getAllHistory() async {
-    final List<String> historyJson =
-        await _prefs.getStringList(_historyKey) ?? [];
-
-    final List<HistoryEntity> history = historyJson.map((json) {
+    final box = await _getBox();
+    final history = box.values.whereType<String>().map((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;
       return HistoryEntity.fromJson(map);
     }).toList();
@@ -49,12 +69,12 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
 
   @override
   Future<HistoryEntity?> getHistoryById(String id) async {
-    final List<HistoryEntity> history = await getAllHistory();
-    try {
-      return history.firstWhere((h) => h.id == id);
-    } catch (e) {
-      return null;
+    final box = await _getBox();
+    final jsonString = box.get(id);
+    if (jsonString != null && jsonString is String) {
+      return HistoryEntity.fromJson(jsonDecode(jsonString));
     }
+    return null;
   }
 
   @override
@@ -63,6 +83,8 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
     required String reciterId,
     required int moshafId,
   }) async {
+    // Since we store by ID, we must iterate to find by key
+    // This efficiency is similar to the previous implementation (O(N))
     final List<HistoryEntity> history = await getAllHistory();
     try {
       return history.firstWhere(
@@ -78,57 +100,102 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
 
   @override
   Future<void> saveHistory(HistoryEntity history) async {
-    final List<HistoryEntity> historyList = await getAllHistory();
-
-    final int existingIndex = historyList.indexWhere((h) => h.id == history.id);
-
-    if (existingIndex != -1) {
-      historyList[existingIndex] = history;
-    } else {
-      historyList.insert(0, history); // Add to beginning
-    }
+    final box = await _getBox();
+    await box.put(history.id, jsonEncode(history.toJson()));
 
     // Trim history if it exceeds max size
-    final List<HistoryEntity> trimmedHistory =
-        historyList.length > _maxHistorySize
-        ? historyList.sublist(0, _maxHistorySize)
-        : historyList;
+    // Note: This is an expensive operation as we load everything.
+    // Hive keys are in order of insertion? No.
+    // We already sorting in getAllHistory.
+    // Optimization: only check if we added a new item.
+    // For exactness, we reuse logic comparable to before but using Box methods.
 
-    await saveAllHistory(trimmedHistory);
+    // Check total count (excluding counter key)
+    final count = box.values.whereType<String>().length;
+    if (count > _maxHistorySize) {
+      final allHistory = await getAllHistory(); // Sorted newest first
+      if (allHistory.length > _maxHistorySize) {
+        final toRemove = allHistory.sublist(_maxHistorySize);
+        final keysToRemove = toRemove.map((e) => e.id).toList();
+        await box.deleteAll(keysToRemove);
+      }
+    }
   }
 
   @override
   Future<void> deleteHistory(String id) async {
-    final List<HistoryEntity> history = await getAllHistory();
-    history.removeWhere((h) => h.id == id);
-    await saveAllHistory(history);
+    final box = await _getBox();
+    await box.delete(id);
   }
 
   @override
   Future<void> saveAllHistory(List<HistoryEntity> historyList) async {
-    final List<String> historyJson = historyList
-        .map((h) => jsonEncode(h.toJson()))
+    final box = await _getBox();
+    // Clear existing history items (strings) but keep counter?
+    // Current implementation implies replacing everything.
+    // But safely:
+    // This method was used in SharedPreferences to save the whole list.
+    // In Hive, we should probably clear and put all.
+    // But let's check `clearAllHistory` logic in Data Source contract.
+    // `saveAllHistory` is typically used for batch updates or reordering (if order mattered for storage).
+    // Here we use it to save filtered lists (e.g. deleteOlderThan).
+
+    // Strategy:
+    // 1. Identify current keys (history items).
+    // 2. Delete them.
+    // 3. Put new items.
+
+    final keysToDelete = box.keys
+        .where((k) => k != _historyCounterKey)
         .toList();
-    await _prefs.setStringList(_historyKey, historyJson);
+    await box.deleteAll(keysToDelete);
+
+    final Map<dynamic, String> entries = {
+      for (var h in historyList) h.id: jsonEncode(h.toJson()),
+    };
+    await box.putAll(entries);
   }
 
   @override
   Future<void> clearAllHistory() async {
-    await _prefs.remove(_historyKey);
-    await _prefs.remove(_historyCounterKey);
+    final box = await _getBox();
+    // We want to clear history items, maybe keep counter?
+    // Previous impl removed `_historyKey` and `_historyCounterKey`.
+    // So distinct box clear is fine.
+    await box.clear();
   }
 
   @override
   Future<String> generateHistoryId() async {
-    final int counter = await _prefs.getInt(_historyCounterKey) ?? 0;
-    final int newCounter = counter + 1;
-    await _prefs.setInt(_historyCounterKey, newCounter);
-    return 'history_$newCounter';
+    final box = await _getBox();
+    final count = box.get(_historyCounterKey, defaultValue: 0) as int;
+    final newCount = count + 1;
+    await box.put(_historyCounterKey, newCount);
+    return 'history_$newCount';
   }
 
   @override
   Future<int> getHistoryCount() async {
-    final List<HistoryEntity> history = await getAllHistory();
-    return history.length;
+    final box = await _getBox();
+    return box.values.whereType<String>().length;
+  }
+
+  @override
+  String generateCompositeKey({
+    required int surahId,
+    required String reciterId,
+    required int moshafId,
+  }) {
+    return '${surahId}_${reciterId}_$moshafId';
+  }
+
+  @override
+  Future<HistoryEntity?> getHistoryByCompositeKey(String compositeKey) async {
+    final box = await _getBox();
+    final jsonString = box.get(compositeKey);
+    if (jsonString != null && jsonString is String) {
+      return HistoryEntity.fromJson(jsonDecode(jsonString));
+    }
+    return null;
   }
 }

@@ -956,6 +956,18 @@ abstract class AppLocalizations {
   /// **'Download surahs to listen offline'**
   String get downloadSurahsOffline;
 
+  /// App version label
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String version(String version);
+
+  /// App build number label
+  ///
+  /// In en, this message translates to:
+  /// **'Build {build}'**
+  String build(String build);
+
   /// Notification message when download is pending
   ///
   /// In en, this message translates to:

@@ -6,10 +6,34 @@ import 'package:tilawa/features/downloads/data/services/download_notification_se
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa_core/entities/app_info.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../../../downloads/helpers/mock_helper.mocks.dart';
+
+class MockGetAppInfo extends Mock implements GetAppInfo {
+  @override
+  Future<AppInfo> call() => super.noSuchMethod(
+    Invocation.method(#call, []),
+    returnValue: Future.value(
+      const AppInfo(
+        version: '1.0.0',
+        buildNumber: '1',
+        appName: 'Tilawa',
+        packageName: 'com.tilawa.app',
+      ),
+    ),
+  );
+}
+
+const AppInfo testAppInfo = AppInfo(
+  version: '1.0.0',
+  buildNumber: '1',
+  appName: 'Tilawa',
+  packageName: 'com.tilawa.app',
+);
 
 final GetIt getIt = GetIt.instance;
 
@@ -23,6 +47,7 @@ void main() {
     late MockDownloadServiceInterface mockDownloadService;
     late MockDownloadsRepository mockDownloadsRepository;
     late MockDownloadNotificationService mockDownloadNotificationService;
+    late MockGetAppInfo mockGetAppInfo;
 
     setUp(() async {
       // Clean up GetIt manually
@@ -42,6 +67,16 @@ void main() {
       mockDownloadService = MockDownloadServiceInterface();
       mockDownloadsRepository = MockDownloadsRepository();
       mockDownloadNotificationService = MockDownloadNotificationService();
+      mockGetAppInfo = MockGetAppInfo();
+
+      when(mockGetAppInfo()).thenAnswer(
+        (_) async => const AppInfo(
+          version: '1.0.0',
+          buildNumber: '1',
+          appName: 'Tilawa',
+          packageName: 'com.tilawa.app',
+        ),
+      );
 
       when(
         mockDownloadService.getActiveDownloadIds(),
@@ -95,15 +130,17 @@ void main() {
       await dqm.initialize();
       // SettingsCubit calls instance.maxConcurrentDownloads getter/setter.
 
-      cubit = SettingsCubit(getIt<DownloadQueueManager>());
+      cubit = SettingsCubit(getIt<DownloadQueueManager>(), mockGetAppInfo);
     });
 
     tearDown(() {
       cubit.close();
     });
 
-    test('initial state has default maxConcurrentDownloads of 2', () {
-      expect(cubit.state, const SettingsState());
+    test('initial state has default maxConcurrentDownloads of 2', () async {
+      // Wait for app info to be fetched
+      await Future.delayed(Duration.zero);
+      expect(cubit.state, const SettingsState(appInfo: testAppInfo));
       expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 2);
     });
 
@@ -111,7 +148,9 @@ void main() {
       'emits new state when setMaxConcurrentDownloads is called',
       build: () => cubit,
       act: (cubit) => cubit.setMaxConcurrentDownloads(4),
-      expect: () => [const SettingsState(maxConcurrentDownloads: 4)],
+      expect: () => [
+        const SettingsState(maxConcurrentDownloads: 4, appInfo: testAppInfo),
+      ],
       verify: (_) {
         expect(getIt<DownloadQueueManager>().maxConcurrentDownloads, 4);
       },
@@ -130,7 +169,9 @@ void main() {
       'toggleRestorePlaybackState updates state',
       build: () => cubit,
       act: (cubit) => cubit.toggleRestorePlaybackState(false),
-      expect: () => [const SettingsState(restorePlaybackState: false)],
+      expect: () => [
+        const SettingsState(restorePlaybackState: false, appInfo: testAppInfo),
+      ],
     );
 
     blocTest<SettingsCubit, SettingsState>(
@@ -141,8 +182,8 @@ void main() {
         await cubit.toggleRestorePlaybackState(true);
       },
       expect: () => [
-        const SettingsState(restorePlaybackState: false),
-        const SettingsState(),
+        const SettingsState(restorePlaybackState: false, appInfo: testAppInfo),
+        const SettingsState(appInfo: testAppInfo),
       ],
     );
 
@@ -150,7 +191,9 @@ void main() {
       'toggleSleepTimerEnabled updates state',
       build: () => cubit,
       act: (cubit) => cubit.toggleSleepTimerEnabled(false),
-      expect: () => [const SettingsState(isSleepTimerEnabled: false)],
+      expect: () => [
+        const SettingsState(isSleepTimerEnabled: false, appInfo: testAppInfo),
+      ],
     );
 
     group('Serialization', () {

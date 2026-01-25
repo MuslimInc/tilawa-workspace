@@ -9,6 +9,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
@@ -50,6 +51,9 @@ abstract class ExternalDependenciesModule {
 
   @singleton
   SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();
+
+  @singleton
+  HiveInterface get hive => Hive;
 
   @singleton
   Dio dioClient() => Dio(

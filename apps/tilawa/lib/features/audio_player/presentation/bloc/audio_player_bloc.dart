@@ -107,6 +107,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
+  final Map<String, Duration> _lastKnownPositions = {};
+  final Map<String, Duration> _lastKnownDurations = {};
   Timer? _sleepTimer;
 
   void _setupAudioStreams() {
@@ -185,7 +187,17 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     emit(const AudioPlayerState(status: AudioPlayerStatus.initial));
   }
 
-  void _onUpdateAudio(UpdateAudio event, Emitter<AudioPlayerState> emit) {
+  Future<void> _onUpdateAudio(
+    UpdateAudio event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
+    // If we are updating to a NEW track, save the history for the OLD track first
+    if (state.currentAudio != null &&
+        event.audio != null &&
+        state.currentAudio!.id != event.audio!.id) {
+      await _saveHistory(state.currentAudio!);
+    }
+
     emit(
       state.copyWith(
         status: AudioPlayerStatus.success,
@@ -194,23 +206,33 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         // Logic: specific ID is dismissed until explicitly played or cleared.
       ),
     );
-
-    if (event.audio != null) {
-      _saveHistory(event.audio!);
-    }
+    // Note: We intentionally do NOT save history for the new audio here.
+    // History will be saved when:
+    // 1. The user pauses/stops playback
+    // 2. The track completes
+    // 3. The user switches to another track
   }
 
-  void _onUpdatePlaybackStateEntity(
+  Future<void> _onUpdatePlaybackStateEntity(
     UpdatePlaybackStateEntity event,
     Emitter<AudioPlayerState> emit,
-  ) {
+  ) async {
     // If we start playing, always un-dismiss
     final bool isPlaying = event.playbackState.isPlaying;
+    _cachePlaybackMetrics(event.playbackState);
 
     if (event.playbackState.processingState ==
         AudioProcessingStateStatus.completed) {
-      if (state.currentAudio != null) {
-        _saveHistory(state.currentAudio!, isCompleted: true);
+      final PlaybackStateEntity playbackState = event.playbackState;
+      final int currentIndex = playbackState.currentIndex;
+      AudioEntity? completedAudio;
+      if (currentIndex >= 0 && currentIndex < playbackState.queue.length) {
+        completedAudio = playbackState.queue[currentIndex];
+      } else {
+        completedAudio = state.currentAudio;
+      }
+      if (completedAudio != null) {
+        await _saveHistory(completedAudio, isCompleted: true);
       }
     }
 
@@ -227,6 +249,18 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     UpdatePositionData event,
     Emitter<AudioPlayerState> emit,
   ) {
+    // Cache the last known position for the current audio.
+    // We ignore Duration.zero to prevent overwriting the last valid position
+    // when the player resets the position before switching to the next track.
+    if (state.currentAudio != null &&
+        event.positionData.position > Duration.zero) {
+      _lastKnownPositions[state.currentAudio!.id] = event.positionData.position;
+    }
+    if (state.currentAudio != null &&
+        event.positionData.duration > Duration.zero) {
+      _lastKnownDurations[state.currentAudio!.id] = event.positionData.duration;
+    }
+
     emit(
       state.copyWith(
         status: AudioPlayerStatus.success,
@@ -269,7 +303,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     add(const AudioPlayerEvent.cancelSleepTimer(clearPreference: false));
 
     if (state.currentAudio != null) {
-      _saveHistory(state.currentAudio!);
+      await _saveHistory(state.currentAudio!);
     }
   }
 
@@ -284,7 +318,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       },
       (success) async {
         if (state.currentAudio != null) {
-          _saveHistory(state.currentAudio!);
+          await _saveHistory(state.currentAudio!);
         }
         // Stop the internal timer
         _sleepTimer?.cancel();
@@ -308,6 +342,10 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     SkipToNext event,
     Emitter<AudioPlayerState> emit,
   ) async {
+    // Save current track's history before skipping
+    if (state.currentAudio != null) {
+      await _saveHistory(state.currentAudio!);
+    }
     await _skipToNext();
   }
 
@@ -315,6 +353,10 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     SkipToPrevious event,
     Emitter<AudioPlayerState> emit,
   ) async {
+    // Save current track's history before skipping
+    if (state.currentAudio != null) {
+      await _saveHistory(state.currentAudio!);
+    }
     await _skipToPrevious();
   }
 
@@ -485,7 +527,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     _sleepTimer = null;
     await _pauseAudio();
     if (state.currentAudio != null) {
-      _saveHistory(state.currentAudio!);
+      await _saveHistory(state.currentAudio!);
     }
     emit(
       state.copyWith(
@@ -509,16 +551,37 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     if (reciterId != null && moshafId != null && surahId != null) {
       // Determine Duration: Prefer audio entity, fallback to playback state
-      final Duration duration = audio.duration != Duration.zero
-          ? audio.duration
-          : state.playbackState?.duration ?? Duration.zero;
+      final PlaybackStateEntity? playbackState = state.playbackState;
+      final int? currentIndex = playbackState?.currentIndex;
+      final bool isCurrentPlayback =
+          playbackState != null &&
+          currentIndex != null &&
+          currentIndex >= 0 &&
+          currentIndex < playbackState.queue.length &&
+          playbackState.queue[currentIndex].id == audio.id;
+
+      final Duration duration = _resolveDuration(
+        audio,
+        playbackState,
+        isCurrentPlayback,
+      );
 
       // Determine Position:
       // If completed, use full duration.
-      // Otherwise use current position.
-      final Duration position = isCompleted
+      // Otherwise use cached position if available, or current position if it matches.
+      final Duration cachedPosition =
+          _lastKnownPositions[audio.id] ?? Duration.zero;
+
+      final Duration rawPosition = isCompleted
           ? duration
-          : state.positionData?.position ?? Duration.zero;
+          : (isCurrentPlayback
+                ? state.positionData?.position ?? cachedPosition
+                : cachedPosition);
+
+      final Duration position = _clampToDuration(rawPosition, duration);
+
+      final bool completed =
+          isCompleted || (duration > Duration.zero && position >= duration);
 
       await _addOrUpdateHistory(
         surahId: surahId,
@@ -532,8 +595,80 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         durationMs: duration.inMilliseconds,
         audioUrl: audio.url,
         artworkUrl: audio.artUri,
+        completed: completed,
       );
     }
+  }
+
+  void _cachePlaybackMetrics(PlaybackStateEntity playbackState) {
+    final int currentIndex = playbackState.currentIndex;
+    if (currentIndex >= 0 && currentIndex < playbackState.queue.length) {
+      final AudioEntity currentAudio = playbackState.queue[currentIndex];
+      if (playbackState.position > Duration.zero) {
+        _lastKnownPositions[currentAudio.id] = playbackState.position;
+      }
+      if (playbackState.duration > Duration.zero) {
+        _lastKnownDurations[currentAudio.id] = playbackState.duration;
+      } else if (currentAudio.duration > Duration.zero) {
+        _lastKnownDurations[currentAudio.id] = currentAudio.duration;
+      }
+    }
+
+    for (final AudioEntity queuedAudio in playbackState.queue) {
+      if (queuedAudio.duration > Duration.zero) {
+        _lastKnownDurations.putIfAbsent(
+          queuedAudio.id,
+          () => queuedAudio.duration,
+        );
+      }
+    }
+  }
+
+  Duration _resolveDuration(
+    AudioEntity audio,
+    PlaybackStateEntity? playbackState,
+    bool isCurrentPlayback,
+  ) {
+    if (audio.duration > Duration.zero) {
+      return audio.duration;
+    }
+
+    final Duration cachedDuration =
+        _lastKnownDurations[audio.id] ?? Duration.zero;
+    if (cachedDuration > Duration.zero) {
+      return cachedDuration;
+    }
+
+    if (isCurrentPlayback && playbackState != null) {
+      final Duration playbackDuration = playbackState.duration;
+      if (playbackDuration > Duration.zero) {
+        return playbackDuration;
+      }
+    }
+
+    if (playbackState != null) {
+      for (final AudioEntity queuedAudio in playbackState.queue) {
+        if (queuedAudio.id == audio.id &&
+            queuedAudio.duration > Duration.zero) {
+          return queuedAudio.duration;
+        }
+      }
+    }
+
+    return Duration.zero;
+  }
+
+  Duration _clampToDuration(Duration value, Duration max) {
+    if (max <= Duration.zero) {
+      return value >= Duration.zero ? value : Duration.zero;
+    }
+    if (value < Duration.zero) {
+      return Duration.zero;
+    }
+    if (value > max) {
+      return max;
+    }
+    return value;
   }
 
   @override

@@ -58,30 +58,38 @@ class HistoryRepositoryImpl implements HistoryRepository {
     String? artworkUrl,
     bool completed = false,
   }) async {
-    // Check if entry already exists
-    final HistoryEntity? existing = await _localDataSource.getHistoryByKey(
+    // Generate composite key for idempotent saves (prevents race condition duplicates)
+    final String compositeKey = _localDataSource.generateCompositeKey(
       surahId: surahId,
       reciterId: reciterId,
       moshafId: moshafId,
     );
 
+    // O(1) lookup using composite key
+    final HistoryEntity? existing = await _localDataSource
+        .getHistoryByCompositeKey(compositeKey);
+
     final now = DateTime.now();
 
     if (existing != null) {
+      final int updatedLastPositionMs = (lastPositionMs > 0 || completed)
+          ? lastPositionMs
+          : existing.lastPositionMs;
+
       // Update existing entry
       final HistoryEntity updated = existing.copyWith(
-        lastPositionMs: lastPositionMs,
+        lastPositionMs: updatedLastPositionMs,
+        durationMs: durationMs > 0 ? durationMs : existing.durationMs,
         playedAt: now,
-        completed: completed,
+        completed: completed || existing.completed,
         playCount: existing.playCount + 1,
       );
       await _localDataSource.saveHistory(updated);
       return updated;
     } else {
-      // Create new entry
-      final String id = await _localDataSource.generateHistoryId();
+      // Create new entry using composite key as ID (deterministic, idempotent)
       final newHistory = HistoryEntity(
-        id: id,
+        id: compositeKey,
         surahId: surahId,
         surahName: surahName,
         surahNameEn: surahNameEn,

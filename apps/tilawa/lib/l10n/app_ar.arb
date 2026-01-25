@@ -606,6 +606,24 @@
     "@downloadSurahsOffline": {
         "description": "Text prompting users to download surahs for offline listening"
     },
+    "version": "الإصدار {version}",
+    "@version": {
+        "description": "App version label",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "build": "النسخة {build}",
+    "@build": {
+        "description": "App build number label",
+        "placeholders": {
+            "build": {
+                "type": "String"
+            }
+        }
+    },
     "notificationWaitingToStart": "في انتظار البدء...",
     "@notificationWaitingToStart": {
         "description": "Notification message when download is pending"
