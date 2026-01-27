@@ -7,6 +7,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
+import 'package:tilawa_ui/theme/color_scheme.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
@@ -304,8 +305,9 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: context.theme.textTheme.bodySmall?.color
-                              ?.withValues(alpha: 0.5),
+                          color: context.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -313,8 +315,9 @@ class SettingsScreen extends StatelessWidget {
                         context.l10n.build(buildNumber),
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: context.theme.textTheme.bodySmall?.color
-                              ?.withValues(alpha: 0.3),
+                          color: context.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                     ],
@@ -342,8 +345,8 @@ class SettingsScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.profileGradientStart,
-                AppColors.profileGradientEnd,
+                context.colorScheme.primary,
+                context.colorScheme.secondary,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

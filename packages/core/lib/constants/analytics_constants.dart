@@ -68,7 +68,10 @@ class AnalyticsParams {
   static const String fileSize = 'file_size';
   static const String surahId = 'surah_id';
   static const String surahTitle = 'surah_title';
+  static const String surahName = 'surah_name';
   static const String reciterName = 'reciter_name';
+  static const String reciterId = 'reciter_id';
+  static const String moshafName = 'moshaf_name';
 
   // Athkar
   static const String categoryId = 'category_id';

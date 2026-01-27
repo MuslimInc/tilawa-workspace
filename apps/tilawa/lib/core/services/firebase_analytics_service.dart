@@ -65,6 +65,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
     String audioId, {
     String? audioName,
     String? artist,
+    String? surahName,
+    String? reciterName,
+    String? moshafName,
+    String? surahId,
+    String? reciterId,
   }) async {
     await logEvent(
       AnalyticsEvents.audioPlay,
@@ -72,6 +77,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
         AnalyticsParams.audioId: audioId,
         AnalyticsParams.audioName: audioName,
         AnalyticsParams.artist: artist,
+        AnalyticsParams.surahName: surahName,
+        AnalyticsParams.reciterName: reciterName,
+        AnalyticsParams.moshafName: moshafName,
+        AnalyticsParams.surahId: surahId,
+        AnalyticsParams.reciterId: reciterId,
       }),
     );
   }

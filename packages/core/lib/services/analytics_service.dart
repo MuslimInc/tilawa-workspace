@@ -17,6 +17,11 @@ abstract class AnalyticsService {
     String audioId, {
     String? audioName,
     String? artist,
+    String? surahName,
+    String? reciterName,
+    String? moshafName,
+    String? surahId,
+    String? reciterId,
   });
   Future<void> logAudioPause(String audioId);
   Future<void> logAudioStop(String audioId);
