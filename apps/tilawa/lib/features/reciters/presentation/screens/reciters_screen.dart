@@ -228,67 +228,73 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   onFocusChange: (hasFocus) {
                                     setState(() {});
                                   },
-                                  child: TextField(
-                                    focusNode: _focusNode,
-                                    controller: _searchController,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      filled: true,
-                                      fillColor: Colors.transparent,
-                                      border: InputBorder.none,
-                                      hintText: l10n.searchReciters,
-                                      hintStyle: TextStyle(
-                                        color: theme
-                                            .colorScheme
-                                            .onSurfaceVariant
-                                            .withValues(alpha: 0.4),
+                                  child: Center(
+                                    child: TextField(
+                                      focusNode: _focusNode,
+                                      controller: _searchController,
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
+                                      style: TextStyle(
                                         fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      prefixIcon: Icon(
-                                        FluentIcons.search_24_regular,
-                                        size: 20.sp,
-                                        color: _focusNode.hasFocus
-                                            ? theme.primaryColor
-                                            : theme.colorScheme.onSurfaceVariant
-                                                  .withValues(alpha: 0.6),
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        filled: true,
+                                        fillColor: Colors.transparent,
+                                        border: InputBorder.none,
+                                        hintText: l10n.searchReciters,
+                                        hintStyle: TextStyle(
+                                          color: theme
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                              .withValues(alpha: 0.4),
+                                          fontSize: 14.sp,
+                                        ),
+                                        prefixIcon: Icon(
+                                          FluentIcons.search_24_regular,
+                                          size: 20.sp,
+                                          color: _focusNode.hasFocus
+                                              ? theme.primaryColor
+                                              : theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(alpha: 0.6),
+                                        ),
+                                        suffixIcon:
+                                            (state is RecitersLoaded &&
+                                                state.searchQuery.isNotEmpty)
+                                            ? IconButton(
+                                                icon: Icon(
+                                                  FluentIcons
+                                                      .dismiss_24_regular,
+                                                  size: 18.sp,
+                                                ),
+                                                onPressed: () {
+                                                  _searchController.clear();
+                                                  context
+                                                      .read<RecitersBloc>()
+                                                      .add(const ClearSearch());
+                                                  context
+                                                      .read<
+                                                        AlphabetScrollbarBloc
+                                                      >()
+                                                      .add(
+                                                        const ClearSelection(),
+                                                      );
+                                                },
+                                              )
+                                            : null,
                                       ),
-                                      suffixIcon:
-                                          (state is RecitersLoaded &&
-                                              state.searchQuery.isNotEmpty)
-                                          ? IconButton(
-                                              icon: Icon(
-                                                FluentIcons.dismiss_24_regular,
-                                                size: 18.sp,
-                                              ),
-                                              onPressed: () {
-                                                _searchController.clear();
-                                                context
-                                                    .read<RecitersBloc>()
-                                                    .add(const ClearSearch());
-                                                context
-                                                    .read<
-                                                      AlphabetScrollbarBloc
-                                                    >()
-                                                    .add(
-                                                      const ClearSelection(),
-                                                    );
-                                              },
-                                            )
-                                          : null,
+                                      onChanged: (value) {
+                                        context.read<RecitersBloc>().add(
+                                          SearchRecitersEvent(value),
+                                        );
+                                      },
+                                      onTapOutside: (event) {
+                                        _focusNode.unfocus();
+                                      },
                                     ),
-                                    onChanged: (value) {
-                                      context.read<RecitersBloc>().add(
-                                        SearchRecitersEvent(value),
-                                      );
-                                    },
-                                    onTapOutside: (event) {
-                                      _focusNode.unfocus();
-                                    },
                                   ),
                                 ),
                               ),

@@ -172,12 +172,12 @@ class DownloadNotificationService implements IDownloadNotificationService {
         );
 
         await _notifications.show(
-          notificationId,
-          notificationTitle,
-          status == DownloadStatus.pending
+          id: notificationId,
+          title: notificationTitle,
+          body: status == DownloadStatus.pending
               ? (pendingMessage ?? 'Waiting to start...')
               : (progressMessage ?? 'Downloading: $progress%'),
-          notificationDetails,
+          notificationDetails: notificationDetails,
           payload: jsonEncode({'reciterName': reciterName}),
         );
       } else if (isEffectivelyCompleted) {
@@ -258,10 +258,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
         );
 
         await _notifications.show(
-          notificationId,
-          title,
-          'Progress: $completedCount/$totalCount ($progress%)',
-          notificationDetails,
+          id: notificationId,
+          title: title,
+          body: 'Progress: $completedCount/$totalCount ($progress%)',
+          notificationDetails: notificationDetails,
         );
       } else if (status == DownloadStatus.completed) {
         await _showCompletedNotification(
@@ -296,7 +296,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
 
     final int? notificationId = _notificationIds[downloadId];
     if (notificationId != null) {
-      await _notifications.cancel(notificationId);
+      await _notifications.cancel(id: notificationId);
       _notificationIds.remove(downloadId);
     }
   }
@@ -429,10 +429,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
       );
 
       await _notifications.show(
-        notificationId,
-        title,
-        message,
-        notificationDetails,
+        id: notificationId,
+        title: title,
+        body: message,
+        notificationDetails: notificationDetails,
         payload: jsonEncode({'reciterName': reciterName}),
       );
     } catch (e) {
@@ -471,10 +471,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
       );
 
       await _notifications.show(
-        notificationId,
-        title,
-        message,
-        notificationDetails,
+        id: notificationId,
+        title: title,
+        body: message,
+        notificationDetails: notificationDetails,
       );
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing failure: $e');

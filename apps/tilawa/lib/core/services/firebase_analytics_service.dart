@@ -65,6 +65,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
     String audioId, {
     String? audioName,
     String? artist,
+    String? surahName,
+    String? reciterName,
+    String? moshafName,
+    String? surahId,
+    String? reciterId,
   }) async {
     await logEvent(
       AnalyticsEvents.audioPlay,
@@ -72,6 +77,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
         AnalyticsParams.audioId: audioId,
         AnalyticsParams.audioName: audioName,
         AnalyticsParams.artist: artist,
+        AnalyticsParams.surahName: surahName,
+        AnalyticsParams.reciterName: reciterName,
+        AnalyticsParams.moshafName: moshafName,
+        AnalyticsParams.surahId: surahId,
+        AnalyticsParams.reciterId: reciterId,
       }),
     );
   }
@@ -100,64 +110,6 @@ class FirebaseAnalyticsService implements AnalyticsService {
         AnalyticsParams.audioId: audioId,
         AnalyticsParams.position: position,
       },
-    );
-  }
-
-  @override
-  Future<void> logDownloadStart(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadStart,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.fileSize: fileSize,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
-    );
-  }
-
-  @override
-  Future<void> logDownloadComplete(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadComplete,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.fileSize: fileSize,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
-    );
-  }
-
-  @override
-  Future<void> logDownloadCancel(
-    String downloadId, {
-    String? fileName,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadCancel,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
     );
   }
 

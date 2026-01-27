@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8+12] - 2026-01-27
+
+### Changed
+
+- **Dependencies**: Updated `flutter_local_notifications` to v20.0.0.
+- **Analytics**: Refactored download analytics and removed legacy `AnalyticsService`.
+- **UI**: Improved `OnboardingPage` layout.
+- **Tests**: Fixed notification service tests and enforced strict named parameters usage.
+
 ## [0.0.7+11] - 2026-01-25
 
 ### Fixed

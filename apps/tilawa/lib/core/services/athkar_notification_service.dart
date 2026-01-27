@@ -324,11 +324,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
 
       await _notifications.zonedSchedule(
-        _morningAthkarNotificationId,
-        'أذكار الصباح',
-        'حان وقت أذكار الصباح 🌅',
-        scheduledDate,
-        notificationDetails,
+        id: _morningAthkarNotificationId,
+        title: 'أذكار الصباح',
+        body: 'حان وقت أذكار الصباح 🌅',
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: 'morning_athkar_${scheduledDate.millisecondsSinceEpoch}',
@@ -372,11 +372,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
 
       await _notifications.zonedSchedule(
-        _eveningAthkarNotificationId,
-        'أذكار المساء',
-        'حان وقت أذكار المساء 🌙',
-        scheduledDate,
-        notificationDetails,
+        id: _eveningAthkarNotificationId,
+        title: 'أذكار المساء',
+        body: 'حان وقت أذكار المساء 🌙',
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}',
@@ -451,11 +451,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
 
       await _notifications.zonedSchedule(
-        9999, // Test notification ID
-        'Test Athkar Notification',
-        'This is a test notification scheduled for $scheduledDate',
-        scheduledDate,
-        notificationDetails,
+        id: 9999, // Test notification ID
+        title: 'Test Athkar Notification',
+        body: 'This is a test notification scheduled for $scheduledDate',
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
 
@@ -524,11 +524,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
           : 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}';
 
       await _notifications.zonedSchedule(
-        id,
-        title,
-        body,
-        scheduledDate,
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: athkarPayload,
       );
@@ -549,8 +549,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
 
     try {
-      await _notifications.cancel(_morningAthkarNotificationId);
-      await _notifications.cancel(_eveningAthkarNotificationId);
+      await _notifications.cancel(id: _morningAthkarNotificationId);
+      await _notifications.cancel(id: _eveningAthkarNotificationId);
       logger.d(
         '[AthkarNotificationService] Cancelled all athkar notifications',
       );

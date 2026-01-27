@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: "none"
-version: 0.0.7+11
+version: 0.0.8+12
 
 environment:
   sdk: ^3.10.7
@@ -37,8 +37,8 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_downloader: ^1.12.0
-  flutter_local_notifications: ^19.5.0
-  flutter_local_notifications_platform_interface: ^9.1.0
+  flutter_local_notifications: ^20.0.0
+  flutter_local_notifications_platform_interface: ^10.0.0
   flutter_localizations:
     sdk: flutter
   flutter_screenutil_plus: ^1.4.0
@@ -110,5 +110,4 @@ flutter:
     - assets/images/
     - assets/json/
     - assets/data/
-    - assets/images/qibla_dial.png
-    - assets/images/qibla_needle.png
+    - assets/icons/
