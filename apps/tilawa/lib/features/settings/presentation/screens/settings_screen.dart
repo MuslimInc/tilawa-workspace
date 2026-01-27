@@ -988,7 +988,7 @@ class _SwitchSettingsTile extends StatelessWidget {
                     value: value,
                     onChanged: onChanged,
                     activeTrackColor: theme.primaryColor.withValues(alpha: 0.5),
-                    activeColor: theme.primaryColor,
+                    activeThumbColor: theme.primaryColor,
                   ),
                 ],
               ),
