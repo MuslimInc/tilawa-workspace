@@ -4,10 +4,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
-import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
-import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
@@ -36,7 +34,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     this.statusSynchronizer,
     this.validator,
     this.queueManager,
-    this._analyticsService,
     this._networkInfo,
   );
 
@@ -47,7 +44,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   final DownloadStatusSynchronizer statusSynchronizer;
   final DownloadValidator validator;
   final DownloadQueueManager queueManager;
-  final AnalyticsService _analyticsService;
+
   final NetworkInfo _networkInfo;
   StreamSubscription? _progressSubscription;
   final StreamController<DownloadItem> _downloadUpdatesController =
@@ -188,14 +185,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
     }
     await localDataSource.clearAllDownloads();
-
-    // [MODIFIED] Log clear all downloads event
-    await _analyticsService.logEvent(
-      AnalyticsEvents.clearAllDownloads,
-      parameters: {
-        AnalyticsParams.action: AnalyticsActionValues.clearAllDownloads,
-      },
-    );
   }
 
   @override
@@ -281,14 +270,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     );
 
     await addDownload(downloadItem);
-
-    // [MODIFIED] Log download start event
-    await _analyticsService.logDownloadStart(
-      downloadId,
-      fileName: safeFileName,
-      surahId: downloadId,
-      reciterName: reciterName,
-    );
 
     logger.d(
       '[DownloadsRepositoryImpl] startDownload: id=$downloadId fileName=$safeFileName path=$filePath status=$initialStatus',
@@ -448,15 +429,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       }
       await deleteDownload(download.id);
     }
-
-    // [MODIFIED] Log delete reciter downloads event
-    await _analyticsService.logEvent(
-      AnalyticsEvents.deleteReciterDownloads,
-      parameters: {
-        AnalyticsParams.reciterName: reciterName,
-        AnalyticsParams.action: AnalyticsActionValues.deleteReciterDownloads,
-      },
-    );
   }
 
   @override
@@ -503,14 +475,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      // [MODIFIED] Log download cancel event
-      await _analyticsService.logDownloadCancel(
-        id,
-        fileName: download.title,
-        surahId: download.url,
-        reciterName: download.reciterName,
-      );
-
       final DownloadItem updatedDownload = download.copyWith(
         status: DownloadStatus.cancelled,
       );
@@ -706,15 +670,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
               ),
             );
 
-            // [MODIFIED] Log download complete event
-            await _analyticsService.logDownloadComplete(
-              id,
-              fileName: download.title,
-              fileSize: actualSize,
-              surahId: download.url,
-              reciterName: download.reciterName,
-            );
-
             return;
           }
         }
@@ -727,15 +682,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
             fileSize: fileSize,
             completedAt: DateTime.now(),
           ),
-        );
-
-        // [MODIFIED] Log download complete event
-        await _analyticsService.logDownloadComplete(
-          id,
-          fileName: download.title,
-          fileSize: fileSize,
-          surahId: download.url,
-          reciterName: download.reciterName,
         );
       } else {
         final int effectiveFileSize = fileSize > 0

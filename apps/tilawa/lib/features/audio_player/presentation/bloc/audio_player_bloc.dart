@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
@@ -46,6 +47,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._checkAudioPlayability,
     this._settingsCubit,
     this._addOrUpdateHistory,
+    this._analyticsService,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<ResetAudioPlayer>(_onResetAudioPlayer);
@@ -104,6 +106,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final CheckAudioPlayabilityUseCase _checkAudioPlayability;
   final SettingsCubit _settingsCubit;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
+  final AnalyticsService _analyticsService;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -196,6 +199,20 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         event.audio != null &&
         state.currentAudio!.id != event.audio!.id) {
       await _saveHistory(state.currentAudio!);
+    }
+
+    if (event.audio != null) {
+      final extras = event.audio?.extras;
+      await _analyticsService.logAudioPlay(
+        event.audio!.id,
+        audioName: event.audio!.title,
+        artist: event.audio!.artist,
+        surahName: event.audio!.title,
+        reciterName: event.audio!.artist,
+        moshafName: extras?['moshafName'] as String?,
+        surahId: extras?['surahId']?.toString(),
+        reciterId: extras?['reciterId'] as String?,
+      );
     }
 
     emit(

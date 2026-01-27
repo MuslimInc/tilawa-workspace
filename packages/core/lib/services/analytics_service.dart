@@ -27,28 +27,6 @@ abstract class AnalyticsService {
   Future<void> logAudioStop(String audioId);
   Future<void> logAudioSeek(String audioId, int position);
 
-  /// Log download events
-  Future<void> logDownloadStart(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  });
-  Future<void> logDownloadComplete(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  });
-  Future<void> logDownloadCancel(
-    String downloadId, {
-    String? fileName,
-    String? surahId,
-    String? reciterName,
-  });
-
   /// Log premium/subscription events
   Future<void> logPurchase(
     String transactionId, {

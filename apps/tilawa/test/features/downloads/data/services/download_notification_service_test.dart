@@ -5,11 +5,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
+import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
-import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
-import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
 
@@ -54,18 +54,18 @@ class MockFlutterLocalNotificationsPlatform extends Mock
     with MockPlatformInterfaceMixin
     implements FlutterLocalNotificationsPlatform {
   @override
-  Future<void> show(
-    int id,
+  Future<void> show({
+    required int id,
     String? title,
-    String? body, {
-    NotificationDetails? notificationDetails,
+    String? body,
     String? payload,
+    // Note: notificationDetails is not part of the platform interface show method directly in this version
   }) async {
     // No-op for tests
   }
 
   @override
-  Future<void> cancel(int id, {String? tag}) async {
+  Future<void> cancel({required int id, String? tag}) async {
     // No-op for tests
   }
 

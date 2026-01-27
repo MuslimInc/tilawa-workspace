@@ -58,7 +58,7 @@ void main() {
       // Default mock behavior
       when(
         mockNotificationsPlugin.initialize(
-          any,
+          settings: anyNamed('settings'),
           onDidReceiveNotificationResponse: anyNamed(
             'onDidReceiveNotificationResponse',
           ),
@@ -83,19 +83,22 @@ void main() {
 
       when(
         mockNotificationsPlugin.zonedSchedule(
-          any,
-          any,
-          any,
-          any,
-          any,
+          id: anyNamed('id'),
+          title: anyNamed('title'),
+          body: anyNamed('body'),
+          scheduledDate: anyNamed('scheduledDate'),
+          notificationDetails: anyNamed('notificationDetails'),
           androidScheduleMode: anyNamed('androidScheduleMode'),
           matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+          payload: anyNamed('payload'),
         ),
       ).thenAnswer((_) async {
         return;
       });
 
-      when(mockNotificationsPlugin.cancel(any)).thenAnswer((_) async {
+      when(mockNotificationsPlugin.cancel(id: anyNamed('id'))).thenAnswer((
+        _,
+      ) async {
         return;
       });
 
@@ -222,11 +225,11 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            1001, // Morning ID
-            'أذكار الصباح',
-            'حان وقت أذكار الصباح 🌅',
-            any,
-            any,
+            id: 1001, // Morning ID
+            title: 'أذكار الصباح',
+            body: 'حان وقت أذكار الصباح 🌅',
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
             payload: anyNamed('payload'),
@@ -235,11 +238,11 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            1002, // Evening ID
-            'أذكار المساء',
-            'حان وقت أذكار المساء 🌙',
-            any,
-            any,
+            id: 1002, // Evening ID
+            title: 'أذكار المساء',
+            body: 'حان وقت أذكار المساء 🌙',
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
             payload: anyNamed('payload'),
@@ -253,12 +256,14 @@ void main() {
 
         verifyNever(
           mockNotificationsPlugin.zonedSchedule(
-            any,
-            any,
-            any,
-            any,
-            any,
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         );
       });
@@ -266,13 +271,14 @@ void main() {
       test('should handle scheduling error gracefully', () async {
         when(
           mockNotificationsPlugin.zonedSchedule(
-            any,
-            any,
-            any,
-            any,
-            any,
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).thenThrow(Exception('Scheduling failed'));
 
@@ -356,20 +362,20 @@ void main() {
       test('should cancel all athkar notifications', () async {
         await service.cancelAllAthkarNotifications();
 
-        verify(mockNotificationsPlugin.cancel(1001)).called(1);
-        verify(mockNotificationsPlugin.cancel(1002)).called(1);
+        verify(mockNotificationsPlugin.cancel(id: 1001)).called(1);
+        verify(mockNotificationsPlugin.cancel(id: 1002)).called(1);
       });
 
       test('should not cancel if disabled', () async {
         NotificationConfig.enableLocalNotifications = false;
         await service.cancelAllAthkarNotifications();
 
-        verifyNever(mockNotificationsPlugin.cancel(any));
+        verifyNever(mockNotificationsPlugin.cancel(id: anyNamed('id')));
       });
 
       test('should handle cancel error', () async {
         when(
-          mockNotificationsPlugin.cancel(any),
+          mockNotificationsPlugin.cancel(id: anyNamed('id')),
         ).thenThrow(Exception('Cancel failed'));
 
         await service.cancelAllAthkarNotifications(); // Should not throw
@@ -614,12 +620,14 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            9999,
-            'Test Athkar Notification',
-            any, // Dynamic message with time
-            any,
-            any,
+            id: 9999,
+            title: 'Test Athkar Notification',
+            body: anyNamed('body'), // Dynamic message with time
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).called(1);
       });
@@ -629,12 +637,14 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            9999,
-            'Test Athkar Notification',
-            any,
-            any,
-            any,
+            id: 9999,
+            title: 'Test Athkar Notification',
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).called(1);
       });
@@ -645,12 +655,14 @@ void main() {
 
         verifyNever(
           mockNotificationsPlugin.zonedSchedule(
-            any,
-            any,
-            any,
-            any,
-            any,
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         );
       });
@@ -658,12 +670,14 @@ void main() {
       test('should handle test notification scheduling error', () async {
         when(
           mockNotificationsPlugin.zonedSchedule(
-            any,
-            any,
-            any,
-            any,
-            any,
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
           ),
         ).thenThrow(Exception('Test scheduling failed'));
 
@@ -677,11 +691,11 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            1001, // Morning ID
-            'أذكار الصباح',
-            'حان وقت أذكار الصباح 🌅',
-            any,
-            any,
+            id: 1001, // Morning ID
+            title: 'أذكار الصباح',
+            body: 'حان وقت أذكار الصباح 🌅',
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
             // No matchDateTimeComponents expected for debug
             payload: anyNamed('payload'), // Added payload check
@@ -694,13 +708,13 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            1002, // Evening ID
-            'أذكار المساء',
-            'حان وقت أذكار المساء 🌙',
-            any,
-            any,
+            id: 1002, // Evening ID
+            title: 'أذكار المساء',
+            body: 'حان وقت أذكار المساء 🌙',
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
-            payload: anyNamed('payload'),
+            payload: anyNamed('payload'), // Added payload check
           ),
         ).called(1);
       });
@@ -711,11 +725,11 @@ void main() {
 
         verifyNever(
           mockNotificationsPlugin.zonedSchedule(
-            any,
-            any,
-            any,
-            any,
-            any,
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
             payload: anyNamed('payload'),
           ),

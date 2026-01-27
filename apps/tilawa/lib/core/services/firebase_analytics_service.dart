@@ -114,64 +114,6 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logDownloadStart(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadStart,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.fileSize: fileSize,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
-    );
-  }
-
-  @override
-  Future<void> logDownloadComplete(
-    String downloadId, {
-    String? fileName,
-    int? fileSize,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadComplete,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.fileSize: fileSize,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
-    );
-  }
-
-  @override
-  Future<void> logDownloadCancel(
-    String downloadId, {
-    String? fileName,
-    String? surahId,
-    String? reciterName,
-  }) async {
-    await logEvent(
-      AnalyticsEvents.downloadCancel,
-      parameters: _cleanParameters({
-        AnalyticsParams.downloadId: downloadId,
-        AnalyticsParams.fileName: fileName,
-        AnalyticsParams.surahId: surahId,
-        AnalyticsParams.reciterName: reciterName,
-      }),
-    );
-  }
-
-  @override
   Future<void> logPurchase(
     String transactionId, {
     double? value,

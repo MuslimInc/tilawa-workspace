@@ -17,13 +17,6 @@ class AnalyticsEvents {
   static const String audioStop = 'audio_stop';
   static const String audioSeek = 'audio_seek';
 
-  // Downloads
-  static const String downloadStart = 'download_start';
-  static const String downloadComplete = 'download_complete';
-  static const String downloadCancel = 'download_cancel';
-  static const String deleteReciterDownloads = 'delete_reciter_downloads';
-  static const String clearAllDownloads = 'clear_all_downloads';
-
   // Athkar
   static const String athkarCategoriesLoaded = 'athkar_categories_loaded';
   static const String athkarItemsLoaded = 'athkar_items_loaded';
@@ -106,9 +99,4 @@ class UserPropertyValues {
   static const String authenticated = 'authenticated';
   static const String anonymous = 'anonymous';
   static const String unknown = 'unknown';
-}
-
-class AnalyticsActionValues {
-  static const String deleteReciterDownloads = 'delete_reciter_downloads';
-  static const String clearAllDownloads = 'clear_all_downloads';
 }

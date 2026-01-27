@@ -15,6 +15,7 @@ import 'package:tilawa/features/history/domain/usecases/add_or_update_history_us
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'audio_player_bloc_test.mocks.dart';
@@ -41,6 +42,7 @@ import 'audio_player_bloc_test.mocks.dart';
   SettingsCubit,
   CheckAudioPlayabilityUseCase,
   AddOrUpdateHistoryUseCase,
+  AnalyticsService,
 ])
 void main() {
   setUpAll(() async {
@@ -91,6 +93,7 @@ void main() {
   late MockSettingsCubit mockSettingsCubit;
   late MockCheckAudioPlayabilityUseCase mockCheckAudioPlayability;
   late MockAddOrUpdateHistoryUseCase mockAddOrUpdateHistory;
+  late MockAnalyticsService mockAnalyticsService;
 
   late BehaviorSubject<AudioEntity?> currentAudioSubject;
   late BehaviorSubject<PlaybackStateEntity> playbackStateSubject;
@@ -121,6 +124,7 @@ void main() {
     mockSettingsCubit = MockSettingsCubit();
     mockCheckAudioPlayability = MockCheckAudioPlayabilityUseCase();
     mockAddOrUpdateHistory = MockAddOrUpdateHistoryUseCase();
+    mockAnalyticsService = MockAnalyticsService();
 
     currentAudioSubject = BehaviorSubject<AudioEntity?>();
     playbackStateSubject = BehaviorSubject<PlaybackStateEntity>();
@@ -140,6 +144,22 @@ void main() {
     when(mockGetAudioStreams.volume).thenAnswer((_) => volumeSubject);
     when(mockGetAudioStreams.speed).thenAnswer((_) => speedSubject);
     when(mockGetAudioStreams.position).thenAnswer((_) => positionSubject);
+
+    // Setup Mock Analytics
+    when(
+      mockAnalyticsService.logAudioPlay(
+        any,
+        audioName: anyNamed('audioName'),
+        artist: anyNamed('artist'),
+        surahName: anyNamed('surahName'),
+        reciterName: anyNamed('reciterName'),
+        moshafName: anyNamed('moshafName'),
+        surahId: anyNamed('surahId'),
+        reciterId: anyNamed('reciterId'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
 
     // Setup default SettingsCubit state
     when(mockSettingsCubit.state).thenReturn(const SettingsState());
@@ -213,6 +233,7 @@ void main() {
       mockCheckAudioPlayability,
       mockSettingsCubit,
       mockAddOrUpdateHistory,
+      mockAnalyticsService,
     );
   }
 

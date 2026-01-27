@@ -7,14 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa_core/constants/analytics_constants.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/data/models/download_progress.dart';
 import 'package:tilawa/features/downloads/data/repositories/downloads_repository_impl.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
 
@@ -61,7 +60,7 @@ void main() {
   late MockDownloadValidator mockValidator;
   late MockDownloadStatusSynchronizer mockStatusSynchronizer;
   late MockDownloadNotificationService mockNotificationService;
-  late MockAnalyticsService mockAnalyticsService;
+
   late MockNetworkInfo mockNetworkInfo;
   late StreamController<DownloadProgress> progressController;
 
@@ -76,7 +75,7 @@ void main() {
     mockValidator = MockDownloadValidator();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
     mockStatusSynchronizer = MockDownloadStatusSynchronizer();
-    mockAnalyticsService = MockAnalyticsService();
+
     mockNetworkInfo = MockNetworkInfo();
     // DownloadService.flutterDownloaderTestOverride = mockDownloader; // Removed: we use mockDownloadService directly
 
@@ -111,27 +110,6 @@ void main() {
     ).thenAnswer((_) async => false);
     when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
-
-    // Stub AnalyticsService methods
-    when(
-      mockAnalyticsService.logDownloadStart(
-        any,
-        fileName: anyNamed('fileName'),
-      ),
-    ).thenAnswer((_) async => {});
-    when(
-      mockAnalyticsService.logDownloadComplete(
-        any,
-        fileName: anyNamed('fileName'),
-        fileSize: anyNamed('fileSize'),
-      ),
-    ).thenAnswer((_) async => {});
-    when(
-      mockAnalyticsService.logDownloadCancel(
-        any,
-        fileName: anyNamed('fileName'),
-      ),
-    ).thenAnswer((_) async => {});
 
     // Stub common methods to avoid MissingStubError during initialization
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -201,7 +179,6 @@ void main() {
       mockStatusSynchronizer,
       mockValidator,
       downloadQueueManager,
-      mockAnalyticsService,
       mockNetworkInfo,
     );
     when(
@@ -266,47 +243,6 @@ void main() {
       },
     );
 
-    test(
-      'deleteReciterDownloads should call logger with correct params',
-      () async {
-        // Arrange
-        const testReciter = 'Reciter1';
-        when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-        // Act
-        await repository.deleteReciterDownloads(testReciter);
-
-        // Assert
-        verify(
-          mockAnalyticsService.logEvent(
-            AnalyticsEvents.deleteReciterDownloads,
-            parameters: {
-              AnalyticsParams.reciterName: testReciter,
-              AnalyticsParams.action:
-                  AnalyticsActionValues.deleteReciterDownloads,
-            },
-          ),
-        ).called(1);
-      },
-    );
-
-    test('clearAllDownloads should call logger with correct params', () async {
-      // Arrange
-      when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-
-      // Act
-      await repository.clearAllDownloads();
-
-      // Assert
-      verify(
-        mockAnalyticsService.logEvent(
-          AnalyticsEvents.clearAllDownloads,
-          parameters: {
-            AnalyticsParams.action: AnalyticsActionValues.clearAllDownloads,
-          },
-        ),
-      ).called(1);
-    });
     group('initialize', () {
       test('should subscribe to global progress stream', () async {
         // Act
@@ -606,7 +542,6 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
-          mockAnalyticsService,
           mockNetworkInfo,
         );
 
@@ -657,7 +592,7 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
-          mockAnalyticsService,
+
           mockNetworkInfo,
         );
 
@@ -754,16 +689,6 @@ void main() {
         expect(downloadItem.progress, 0.0);
         expect(downloadItem.title, testSurahTitle);
         expect(downloadItem.reciterName, testReciterName);
-
-        // Verify analytics
-        verify(
-          mockAnalyticsService.logDownloadStart(
-            captureAny,
-            fileName: anyNamed('fileName'),
-            surahId: testSurahId,
-            reciterName: testReciterName,
-          ),
-        ).called(1);
       });
 
       test('should handle directory creation failure', () async {
@@ -847,7 +772,7 @@ void main() {
             mockStatusSynchronizer,
             mockValidator,
             mockQueueManager,
-            mockAnalyticsService,
+
             mockNetworkInfo,
           );
 
@@ -2586,7 +2511,7 @@ void main() {
           mockStatusSynchronizer,
           mockValidator,
           mockQueueManager,
-          mockAnalyticsService,
+
           mockNetworkInfo,
         );
 
@@ -2926,7 +2851,7 @@ void main() {
         mockStatusSynchronizer,
         mockValidator,
         mockQueueManager,
-        mockAnalyticsService,
+
         mockNetworkInfo,
       );
 

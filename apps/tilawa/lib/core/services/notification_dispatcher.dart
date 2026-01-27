@@ -74,7 +74,7 @@ class NotificationDispatcher implements INotificationDispatcher {
       );
 
       await _notifications.initialize(
-        initSettings,
+        settings: initSettings,
         onDidReceiveNotificationResponse: _handleNotificationResponse,
       );
 
