@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9+13] - 2026-01-28
+
+### Added
+
+- **Tests**: Enhanced `download_service_impl_test.dart` with additional tests for uncovered lines and improved handling of active downloads.
+- **Tests**: Added `batch_download_manager_test.dart` for batch download functionality.
+- **Tests**: Expanded `download_queue_manager_test.dart` with comprehensive test coverage.
+- **Downloads**: Added `BatchDownloadManager` service for improved batch download handling.
+- **Router**: Added `routerRestorationScopeId` constant for improved routing management.
+
+### Changed
+
+- **Downloads**: Improved error handling and state management in `DownloadServiceImpl`.
+- **Downloads**: Enhanced `DownloadQueueManager` with better queue management.
+- **Downloads**: Refactored `CancelDownloadsForReciterUseCase` to ensure batch notifications are canceled even when no downloads exist.
+- **Bloc**: Improved `AlphabetScrollbarBloc` implementation.
+
+### Fixed
+
+- **ProGuard**: Added `-dontnote j$.**` rule to suppress R8 informational messages about unused desugaring keep rules.
+- **Build**: Added `android.r8.ignoreUnusedKeepRules=true` to suppress ProGuard unmatched rule warnings in release builds.
+
+### Removed
+
+- **Services**: Removed unused `LuciqService` and related tests.
+- **Tests**: Removed redundant tests from `alphabet_scrollbar_bloc_test.dart` related to HydratedBloc persistence.
+- **Dependencies**: Removed `luciq_flutter` package dependency.
+
 ## [0.0.8+12] - 2026-01-27
 
 ### Changed
