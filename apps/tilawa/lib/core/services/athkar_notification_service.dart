@@ -631,6 +631,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         // Then push the details on top of Home
         AppRouter.router.push(location);
       } else {
+        AppRouter.router.go(const HomeRoute().location);
         AppRouter.router.push(location);
       }
     } catch (e) {

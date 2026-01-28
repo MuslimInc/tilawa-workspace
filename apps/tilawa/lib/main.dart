@@ -21,7 +21,6 @@ import 'core/observers/crashlytics_bloc_observer.dart';
 import 'core/services/analytics_initialization_service.dart';
 import 'core/services/crashlytics_service.dart';
 import 'core/services/firebase_initialization_service.dart';
-import 'core/services/luciq_service.dart';
 import 'core/services/notification_permission_service.dart';
 import 'features/downloads/data/services/downloads_initialization_service.dart';
 import 'features/downloads/domain/services/download_notification_service_interface.dart';
@@ -153,11 +152,7 @@ void initializeNonCriticalServices() {
   Future.microtask(() async {
     // Phase 1: Parallel initialization of independent services
     try {
-      await (
-        initializeCredentialManager(),
-        initializeAnalytics(),
-        initializeLuciq(),
-      ).wait;
+      await (initializeCredentialManager(), initializeAnalytics()).wait;
       logger.d('Phase 1 services initialized (parallel)');
     } catch (e) {
       logger.d('Error during Phase 1 initialization: $e');
@@ -323,18 +318,6 @@ Future<void> initializeDownloads() async {
     await downloadsInitService.initialize();
   } catch (e) {
     logger.d('Warning: Could not initialize downloads: $e');
-  }
-}
-
-/// Initialize Luciq bug reporting
-@visibleForTesting
-Future<void> initializeLuciq() async {
-  try {
-    final LuciqService luciqService = getIt<LuciqService>();
-    await luciqService.initialize();
-    logger.d('Luciq initialized successfully');
-  } catch (e) {
-    logger.d('Warning: Could not initialize Luciq: $e');
   }
 }
 

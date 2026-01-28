@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/utils/toast_utils.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
@@ -679,6 +679,7 @@ class DownloadQueueManager {
   }
 
   /// Sync active downloads with DownloadService to remove stale entries
+  /// Sync active downloads with DownloadService to remove stale entries
   Future<void> _syncActiveDownloads() async {
     if (_isSyncing || _isDisposed) {
       return;
@@ -708,11 +709,50 @@ class DownloadQueueManager {
         logger.d(
           '[Downloading Queue] Found ${staleIds.length} stale active downloads received update before event: $staleIds',
         );
+        // Fix: Ensure we also cleanup any stuck notifications for these stale downloads
+        for (final id in staleIds) {
+          // Check if we have metadata for this download (meaning we might have shown a notification)
+          // Use ID or URL for lookup
+          final normalizedId = _normalizeUrlString(id);
+
+          String? metadataKey;
+          if (_downloadMetadata.containsKey(id)) {
+            metadataKey = id;
+          } else {
+            // Try to find by URL
+            try {
+              metadataKey = _downloadMetadata.keys.firstWhere(
+                (k) => _normalizeUrlString(k) == normalizedId,
+                orElse: () => '',
+              );
+            } catch (_) {}
+          }
+
+          if (metadataKey != null && metadataKey.isNotEmpty) {
+            final meta = _downloadMetadata[metadataKey];
+            if (meta != null && meta.showNotification) {
+              logger.d(
+                '[Downloading Queue] Cancelling stuck notification for stale download: $id',
+              );
+              // Cancel using the original ID (which is usually the URL)
+              _notificationService.cancelNotification(metadataKey);
+            }
+            _downloadMetadata.remove(metadataKey);
+          }
+
+          // Fallback: also try to remove by the stale ID itself directly just in case
+          if (metadataKey != id) {
+            _downloadMetadata.remove(id);
+            // Verify if we should cancel notification for this ID too
+            _notificationService.cancelNotification(id);
+          }
+        }
+
         staleIds.forEach(_activeDownloads.remove);
         staleIds.forEach(_activeDownloadUrls.remove);
         staleIds.forEach(_lastActivityTime.remove);
         logger.d(
-          '[Downloading Queue] Removed stale downloads. activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
+          '[Downloading Queue] Removed stale downloads and cleaned up notifications. activeCount=${_activeDownloads.length} queueLength=${_queue.length}',
         );
 
         // Process queue to start next downloads

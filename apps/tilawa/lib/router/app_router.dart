@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/constants/app_strings.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import 'app_router_config.dart';
 import 'json_type_registry.dart';
@@ -48,7 +49,9 @@ class AppRouter {
     debugLogDiagnostics: true,
     // Disable restoration when launched from notification to prevent
     // the restored state from overriding notification navigation
-    restorationScopeId: disableStateRestoration ? null : 'router',
+    restorationScopeId: disableStateRestoration
+        ? null
+        : AppStrings.routerRestorationScopeId,
     redirect: redirect,
     routes: $appRoutes,
     errorBuilder: errorBuilder,

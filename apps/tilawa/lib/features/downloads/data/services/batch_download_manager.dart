@@ -27,6 +27,7 @@ class BatchDownloadManager {
     required String batchId,
     required String title,
     required List<String> downloadIds,
+    String? reciterName,
   }) {
     if (downloadIds.isEmpty) {
       return;
@@ -38,6 +39,7 @@ class BatchDownloadManager {
       title: title,
       itemIds: Set.from(downloadIds),
       totalItems: downloadIds.length,
+      reciterName: reciterName,
     );
 
     _activeBatches[batchId] = batchInfo;
@@ -67,6 +69,64 @@ class BatchDownloadManager {
 
     _activeBatches.remove(batchId);
     await _notificationService.cancelNotification(batchId);
+
+    _checkCleanup();
+  }
+
+  /// Cancel all active batches for a specific reciter
+  /// Used when user pauses/cancels downloads for a specific reciter
+  Future<void> cancelBatchesForReciter(String reciterName) async {
+    if (_activeBatches.isEmpty) {
+      return;
+    }
+
+    // Find batches belonging to this reciter
+    final List<String> batchIdsToCancel = _activeBatches.entries
+        .where((entry) => entry.value.reciterName == reciterName)
+        .map((entry) => entry.key)
+        .toList();
+
+    if (batchIdsToCancel.isEmpty) {
+      logger.d(
+        '[BatchDownloadManager] No batches found for reciter: $reciterName',
+      );
+      return;
+    }
+
+    logger.d(
+      '[BatchDownloadManager] Cancelling ${batchIdsToCancel.length} batches for reciter: $reciterName',
+    );
+
+    // Cancel each batch notification and remove from tracking
+    for (final String batchId in batchIdsToCancel) {
+      await _notificationService.cancelNotification(batchId);
+      _activeBatches.remove(batchId);
+    }
+
+    _checkCleanup();
+  }
+
+  /// Cancel all active batches and their notifications
+  /// Used when user pauses/cancels all downloads
+  Future<void> cancelAllBatches() async {
+    if (_activeBatches.isEmpty) {
+      return;
+    }
+
+    logger.d(
+      '[BatchDownloadManager] Cancelling all ${_activeBatches.length} active batches',
+    );
+
+    // Get all batch IDs first to avoid modifying map while iterating
+    final List<String> batchIds = _activeBatches.keys.toList();
+
+    // Cancel each batch notification
+    for (final String batchId in batchIds) {
+      await _notificationService.cancelNotification(batchId);
+    }
+
+    // Clear all active batches
+    _activeBatches.clear();
 
     _checkCleanup();
   }
@@ -151,12 +211,14 @@ class _BatchInfo {
     required this.title,
     required this.itemIds,
     required this.totalItems,
+    this.reciterName,
   });
 
   final String id;
   final String title;
   final Set<String> itemIds;
   final int totalItems;
+  final String? reciterName;
 
   // Progress tracking
   int completedCount = 0;

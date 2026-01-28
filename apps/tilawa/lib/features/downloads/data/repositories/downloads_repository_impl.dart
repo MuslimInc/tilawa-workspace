@@ -395,12 +395,18 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       // Also emit updates to the stream for each item so listeners (UI) know they are pending
       dbItems.forEach(_downloadUpdatesController.add);
 
+      // Get reciter name from first item (all items in batch are for same reciter)
+      final String? reciterName = queueItems.isNotEmpty
+          ? queueItems.first.reciterName
+          : null;
+
       // Notify batch manager
       final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';
       batchDownloadManager.startBatch(
         batchId: batchId,
         title: 'Downloading ${queueItems.length} files',
         downloadIds: queueItems.map((e) => e.id).toList(),
+        reciterName: reciterName,
       );
 
       // Enqueue as a batch

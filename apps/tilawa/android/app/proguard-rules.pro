@@ -27,9 +27,11 @@
 
 # ============================================
 # Java Desugaring (j$.util)
+# Suppress all notes/warnings from desugaring library
 # ============================================
--dontwarn j$.util.**
--keep class j$.util.** { *; }
+-dontwarn j$.**
+-dontnote j$.**
+-keep class j$.** { *; }
 
 # ============================================
 # Audio service classes (required for audio playback)

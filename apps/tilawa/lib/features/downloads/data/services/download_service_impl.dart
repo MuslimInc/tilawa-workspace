@@ -403,10 +403,34 @@ class DownloadServiceImpl implements DownloadServiceInterface {
   }
 
   /// Get all currently active download URLs.
+  ///
+  /// Queries fresh data from the downloader to ensure accuracy.
   @override
   Future<List<String>> getActiveDownloadIds() async {
     await initialize();
-    return _activeDownloadUrls.toList();
+
+    try {
+      final List<DownloadTask>? tasks = await _flutterDownloader.loadTasks();
+      if (tasks == null) {
+        return _activeDownloadUrls.toList();
+      }
+
+      // Update cache and return fresh list
+      final Set<String> activeUrls = {};
+      for (final DownloadTask task in tasks) {
+        if (task.status == DownloadTaskStatus.running ||
+            task.status == DownloadTaskStatus.enqueued) {
+          activeUrls.add(task.url);
+        }
+      }
+      _activeDownloadUrls
+        ..clear()
+        ..addAll(activeUrls);
+      return activeUrls.toList();
+    } catch (e) {
+      logger.w('[DownloadService] Error getting active downloads: $e');
+      return _activeDownloadUrls.toList();
+    }
   }
 
   /// Check if a download is currently active.

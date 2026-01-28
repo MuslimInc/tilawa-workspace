@@ -170,6 +170,141 @@ void main() {
     });
   });
 
+  group('BatchDownloadManager - cancelBatchesForReciter', () {
+    test('should cancel only batches for the specified reciter', () async {
+      // Arrange - start batches for different reciters
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test 1',
+        downloadIds: ['id1', 'id2'],
+        reciterName: 'Reciter A',
+      );
+      manager.startBatch(
+        batchId: 'batch-2',
+        title: 'Test 2',
+        downloadIds: ['id3', 'id4'],
+        reciterName: 'Reciter B',
+      );
+
+      // Act - cancel only Reciter A's batches
+      await manager.cancelBatchesForReciter('Reciter A');
+
+      // Assert - only Reciter A's batch should be cancelled
+      verify(mockNotificationService.cancelNotification('batch-1')).called(1);
+      verifyNever(mockNotificationService.cancelNotification('batch-2'));
+    });
+
+    test('should do nothing when no batches for reciter', () async {
+      // Arrange - start batch for different reciter
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test 1',
+        downloadIds: ['id1'],
+        reciterName: 'Reciter A',
+      );
+
+      // Act - try to cancel for non-existent reciter
+      await manager.cancelBatchesForReciter('Reciter B');
+
+      // Assert - no notifications cancelled
+      verifyNever(mockNotificationService.cancelNotification(any));
+    });
+
+    test('should cancel multiple batches for same reciter', () async {
+      // Arrange - start multiple batches for same reciter
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test 1',
+        downloadIds: ['id1'],
+        reciterName: 'Reciter A',
+      );
+      manager.startBatch(
+        batchId: 'batch-2',
+        title: 'Test 2',
+        downloadIds: ['id2'],
+        reciterName: 'Reciter A',
+      );
+
+      // Act
+      await manager.cancelBatchesForReciter('Reciter A');
+
+      // Assert - both batches should be cancelled
+      verify(mockNotificationService.cancelNotification('batch-1')).called(1);
+      verify(mockNotificationService.cancelNotification('batch-2')).called(1);
+    });
+  });
+
+  group('BatchDownloadManager - cancelAllBatches', () {
+    test('should cancel all active batches and their notifications', () async {
+      // Arrange - start multiple batches
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test 1',
+        downloadIds: ['id1', 'id2'],
+      );
+      manager.startBatch(
+        batchId: 'batch-2',
+        title: 'Test 2',
+        downloadIds: ['id3', 'id4'],
+      );
+
+      // Act
+      await manager.cancelAllBatches();
+
+      // Assert - both batch notifications should be cancelled
+      verify(mockNotificationService.cancelNotification('batch-1')).called(1);
+      verify(mockNotificationService.cancelNotification('batch-2')).called(1);
+    });
+
+    test('should do nothing when no active batches', () async {
+      // Act
+      await manager.cancelAllBatches();
+
+      // Assert
+      verifyNever(mockNotificationService.cancelNotification(any));
+    });
+
+    test('should cleanup subscription after cancelling all batches', () async {
+      // Arrange
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'Test',
+        downloadIds: ['id1'],
+      );
+
+      // Act
+      await manager.cancelAllBatches();
+
+      // Give time for cleanup
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      // Emit progress - no handler should process since all batches cancelled
+      progressController.add(
+        const DownloadProgress(
+          id: 'id1',
+          progress: 0.5,
+          downloadedSize: 500,
+          fileSize: 1000,
+          status: DownloadStatus.downloading,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      // Only initial notification should have been called during startBatch
+      verify(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: anyNamed('batchId'),
+          title: anyNamed('title'),
+          progress: anyNamed('progress'),
+          completedCount: anyNamed('completedCount'),
+          totalCount: anyNamed('totalCount'),
+          status: anyNamed('status'),
+        ),
+      ).called(1); // Only initial, no updates
+    });
+  });
+
   group('BatchDownloadManager - progress updates', () {
     test('should update notification when download progresses', () async {
       // Arrange

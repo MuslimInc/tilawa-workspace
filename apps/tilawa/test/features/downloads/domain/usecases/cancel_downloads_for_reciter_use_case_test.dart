@@ -1,10 +1,10 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
 
@@ -12,6 +12,7 @@ void main() {
   late CancelDownloadsForReciterUseCase useCase;
   late MockDownloadsRepository mockRepository;
   late MockRecitersRepository mockRecitersRepository;
+  late MockBatchDownloadManager mockBatchDownloadManager;
 
   void provideDummies() {
     provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
@@ -21,9 +22,14 @@ void main() {
     provideDummies();
     mockRepository = MockDownloadsRepository();
     mockRecitersRepository = MockRecitersRepository();
+    mockBatchDownloadManager = MockBatchDownloadManager();
+    when(
+      mockBatchDownloadManager.cancelBatchesForReciter(any),
+    ).thenAnswer((_) async => Future.value());
     useCase = CancelDownloadsForReciterUseCase(
       mockRepository,
       mockRecitersRepository,
+      mockBatchDownloadManager,
     );
   });
 
@@ -103,6 +109,11 @@ void main() {
       // Assert
       expect(result, isA<Right>());
 
+      // Should cancel batch notifications for this reciter immediately
+      verify(
+        mockBatchDownloadManager.cancelBatchesForReciter(testReciterName),
+      ).called(1);
+
       // Should verify reciter resolution
       verify(mockRecitersRepository.getReciters()).called(1);
 
@@ -112,6 +123,25 @@ void main() {
       // Should NOT cancel completed download or other reciter's download
       verifyNever(mockRepository.cancelDownload(downloadCompleted.id));
       verifyNever(mockRepository.cancelDownload(otherReciterDownload.id));
+    });
+
+    test('should cancel batch notifications even with no downloads', () async {
+      // Arrange
+      when(mockRepository.getAllDownloads()).thenAnswer((_) async => []);
+      when(
+        mockRecitersRepository.getReciters(),
+      ).thenAnswer((_) async => const Right([testReciter]));
+
+      // Act
+      final Either<Failure, void> result = await useCase(testReciterName);
+
+      // Assert
+      expect(result, isA<Right>());
+
+      // Should still cancel batch notifications for this reciter
+      verify(
+        mockBatchDownloadManager.cancelBatchesForReciter(testReciterName),
+      ).called(1);
     });
 
     test('should return ServerFailure when getAllDownloads fails', () async {

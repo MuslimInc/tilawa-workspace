@@ -5,4 +5,5 @@ class AppStrings {
   static const String googleClientId =
       '181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com';
   static const String restorationScopeId = 'tilawa_app';
+  static const String routerRestorationScopeId = 'tilawa_router';
 }
