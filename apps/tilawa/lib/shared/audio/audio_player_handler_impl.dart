@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:audio_session/audio_session.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -385,8 +386,16 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         'Successfully set ${sources.length} audio sources at index $initialIndex',
       );
     } catch (e, stackTrace) {
-      if (e.toString().contains('Loading interrupted') ||
-          e.toString().contains('aborted')) {
+      // Check for just_audio interruption or abortion
+      bool isInterrupted =
+          e.toString().contains('Loading interrupted') ||
+          e.toString().contains('aborted');
+
+      if (e is PlatformException && e.code == 'abort') {
+        isInterrupted = true;
+      }
+
+      if (isInterrupted) {
         log('Loading interrupted as expected: $e');
         return;
       }
@@ -564,6 +573,20 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
         );
       }
     } catch (e) {
+      // Check for just_audio interruption or abortion
+      bool isInterrupted =
+          e.toString().contains('Loading interrupted') ||
+          e.toString().contains('aborted');
+
+      if (e is PlatformException && e.code == 'abort') {
+        isInterrupted = true;
+      }
+
+      if (isInterrupted) {
+        log('Play interrupted as expected: $e');
+        return;
+      }
+
       log('Error playing audio: $e');
       // Broadcast error state
       playbackState.add(
@@ -779,7 +802,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
             artist: reciterName,
             album: moshaf.name,
             extras: {
-              if (reciterId != null) 'reciterId': reciterId,
+              'reciterId': ?reciterId,
               'moshafId': moshaf.id,
               'surahId': surahNumber,
             },
