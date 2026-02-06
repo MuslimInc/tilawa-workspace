@@ -798,6 +798,10 @@
     "@anErrorOccurred": {
         "description": "Generic error message"
     },
+    "qiblaAligned": "أنت تواجه القبلة",
+    "@qiblaAligned": {
+        "description": "Message shown when the user is aligned with Qibla"
+    },
     "reciterInfoNotAvailable": "معلومات القارئ غير متوفرة",
     "@reciterInfoNotAvailable": {
         "description": "Message when reciter info is missing"

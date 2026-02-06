@@ -37,8 +37,7 @@ void main() {
     );
 
     expect(find.text('3'), findsOneWidget);
-    // There are 2 CircularProgressIndicators: background and value
-    expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
   testWidgets('ItemCountWidget displays checkmark when done', (

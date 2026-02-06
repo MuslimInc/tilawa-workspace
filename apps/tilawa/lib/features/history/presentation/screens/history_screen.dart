@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui/theme/app_colors.dart';
+
 import '../../../../helpers/datetime_helper.dart';
 import '../../domain/entities/history_entity.dart';
 import '../bloc/history_bloc.dart';
@@ -52,7 +53,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       value: 'clear_all',
                       child: Row(
                         children: [
-                          const Icon(Icons.delete_sweep, size: 20),
+                          const Icon(
+                            Icons.delete_sweep,
+                            color: AppColors.error,
+                          ),
                           const SizedBox(width: 12),
                           Text(context.l10n.clearAll),
                         ],

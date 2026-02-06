@@ -11,7 +11,6 @@ abstract class AthkarItemModel extends AthkarItem with _$AthkarItemModel {
     required int id,
     @JsonKey(name: 'category_id') required int categoryId,
     @JsonKey(name: 'text_ar') required String textAr,
-    @JsonKey(name: 'text_en') required String textEn,
     required int count,
     required String reference,
   }) = _AthkarItemModel;

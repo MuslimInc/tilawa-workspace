@@ -1184,6 +1184,12 @@ abstract class AppLocalizations {
   /// **'An error occurred'**
   String get anErrorOccurred;
 
+  /// Message shown when the user is aligned with Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'You are facing Qibla'**
+  String get qiblaAligned;
+
   /// Message when reciter info is missing
   ///
   /// In en, this message translates to:

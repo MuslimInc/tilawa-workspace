@@ -41,36 +41,9 @@ class ItemCountWidget extends StatelessWidget {
               Container(
                 width: 110.w,
                 height: 110.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.2),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                    BoxShadow(
-                      color: theme.shadowColor.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle),
               ),
-              // Background Track
-              SizedBox(
-                width: 100.w,
-                height: 100.w,
-                child: CircularProgressIndicator(
-                  value: 1.0,
-                  strokeWidth: 10,
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  ),
-                  strokeCap: StrokeCap.round,
-                ),
-              ),
+
               // Animated Progress Ring
               SizedBox(
                 width: 100.w,
@@ -96,23 +69,29 @@ class ItemCountWidget extends StatelessWidget {
                 height: 78.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [activeColor, activeColor.withValues(alpha: 0.8)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.4),
-                      blurRadius: 15,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: isDone
+                      ? Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 2,
+                        )
+                      : null,
+                  gradient: isDone
+                      ? const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF66BB6A), // Balanced Green 400
+                            Color(0xFF43A047), // Balanced Green 600
+                          ],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            activeColor,
+                            activeColor.withValues(alpha: 0.8),
+                          ],
+                        ),
                 ),
                 child: Center(
                   child: AnimatedSwitcher(
@@ -130,7 +109,7 @@ class ItemCountWidget extends StatelessWidget {
                             key: const ValueKey('done'),
                             FluentIcons.checkmark_24_filled,
                             color: Colors.white,
-                            size: 44.sp,
+                            size: 50.sp,
                           )
                         : Text(
                             key: ValueKey(currentCount),
@@ -140,13 +119,6 @@ class ItemCountWidget extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 36.sp,
                               height: 1.0,
-                              shadows: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                           ),
                   ),

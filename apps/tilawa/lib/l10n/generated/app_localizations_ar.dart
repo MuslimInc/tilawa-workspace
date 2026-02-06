@@ -584,6 +584,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get anErrorOccurred => 'حدث خطأ ما';
 
   @override
+  String get qiblaAligned => 'أنت تواجه القبلة';
+
+  @override
   String get reciterInfoNotAvailable => 'معلومات القارئ غير متوفرة';
 
   @override

@@ -32,7 +32,6 @@ void main() {
   const tCategoryModel = AthkarCategoryModel(
     id: 1,
     nameAr: 'أذكار الصباح',
-    nameEn: 'Morning Athkar',
     icon: 'wb_sunny_rounded',
   );
 
@@ -40,7 +39,6 @@ void main() {
     id: 1,
     categoryId: 1,
     textAr: 'Test Ar',
-    textEn: 'Test En',
     count: 1,
     reference: 'Test Ref',
   );

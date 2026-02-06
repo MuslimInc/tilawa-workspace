@@ -586,6 +586,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anErrorOccurred => 'An error occurred';
 
   @override
+  String get qiblaAligned => 'You are facing Qibla';
+
+  @override
   String get reciterInfoNotAvailable => 'Reciter information not available';
 
   @override
