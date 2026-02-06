@@ -52,6 +52,14 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   FirebaseCrashlyticsServiceImpl(this._crashlytics);
 
   final FirebaseCrashlytics _crashlytics;
+  static const String _loadingInterruptedMessage = 'Loading interrupted';
+  static const String _abortMessage = 'abort';
+
+  bool _isJustAudioInterruption(Object exception) {
+    final String message = exception.toString();
+    return message.contains(_loadingInterruptedMessage) ||
+        message.contains(_abortMessage);
+  }
 
   @override
   Future<void> initialize() async {
@@ -62,6 +70,16 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
       // Set up Flutter error handling
       FlutterError.onError = (FlutterErrorDetails details) {
         FlutterError.presentError(details);
+        final Object exception = details.exception;
+        if (_isJustAudioInterruption(exception)) {
+          recordError(
+            exception,
+            details.stack,
+            reason: 'just_audio interruption',
+            fatal: false,
+          );
+          return;
+        }
         recordFlutterError(details, fatal: true);
       };
 
@@ -102,7 +120,11 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     bool fatal = false,
   }) async {
     try {
-      await _crashlytics.recordFlutterFatalError(details);
+      if (fatal) {
+        await _crashlytics.recordFlutterFatalError(details);
+      } else {
+        await _crashlytics.recordFlutterError(details);
+      }
     } catch (e) {
       logger.d('Crashlytics recordFlutterError failed: $e');
     }
