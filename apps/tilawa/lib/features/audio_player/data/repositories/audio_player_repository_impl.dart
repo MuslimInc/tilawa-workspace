@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../../../../shared/audio/audio_player_handler.dart';
@@ -16,6 +17,26 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
 
   final AudioPlayerHandler _audioHandler;
   final AudioPositionService _positionService;
+  static const String _loadingInterruptedMessage = 'Loading interrupted';
+  static const String _abortMessage = 'abort';
+
+  bool _isLoadingInterrupted(Object error) {
+    final String message = error.toString();
+    return message.contains(_loadingInterruptedMessage) ||
+        message.contains(_abortMessage);
+  }
+
+  ResultVoid _guardVoid(Future<void> Function() action) async {
+    try {
+      await action();
+      return const Right(null);
+    } catch (e) {
+      if (_isLoadingInterrupted(e)) {
+        return const Right(null);
+      }
+      return Left(AudioFailure(e.toString()));
+    }
+  }
 
   @override
   Stream<AudioEntity?> get currentAudio => _audioHandler.mediaItem
@@ -77,107 +98,110 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
 
   @override
   ResultVoid play() async {
-    await _audioHandler.play();
-    return const Right(null);
+    return _guardVoid(_audioHandler.play);
   }
 
   @override
   ResultVoid pause() async {
-    await _audioHandler.pause();
-    return const Right(null);
+    return _guardVoid(_audioHandler.pause);
   }
 
   @override
   ResultVoid stop() async {
-    await _audioHandler.stop();
-    return const Right(null);
+    return _guardVoid(_audioHandler.stop);
   }
 
   @override
   ResultVoid seek(Duration position) async {
-    await _audioHandler.seek(position);
-    return const Right(null);
+    return _guardVoid(() => _audioHandler.seek(position));
   }
 
   @override
   ResultVoid next() async {
-    await _audioHandler.skipToNext();
-    return const Right(null);
+    return _guardVoid(_audioHandler.skipToNext);
   }
 
   @override
   ResultVoid previous() async {
-    await _audioHandler.skipToPrevious();
-    return const Right(null);
+    return _guardVoid(_audioHandler.skipToPrevious);
   }
 
   @override
   ResultVoid skipToQueueItem(int index) async {
-    await _audioHandler.skipToQueueItem(index);
-    return const Right(null);
+    return _guardVoid(() => _audioHandler.skipToQueueItem(index));
   }
 
   @override
   ResultVoid setVolume(double volume) async {
-    await _audioHandler.setVolume(volume);
-    return const Right(null);
+    return _guardVoid(() => _audioHandler.setVolume(volume));
   }
 
   @override
   ResultVoid setSpeed(double speed) async {
-    await _audioHandler.setSpeed(speed);
-    return const Right(null);
+    return _guardVoid(() => _audioHandler.setSpeed(speed));
   }
 
   @override
   ResultVoid setRepeatMode(AudioRepeatMode repeatMode) async {
-    await _audioHandler.setRepeatMode(_mapRepeatModeToService(repeatMode));
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.setRepeatMode(_mapRepeatModeToService(repeatMode)),
+    );
   }
 
   @override
   ResultVoid setShuffleMode(AudioShuffleMode shuffleMode) async {
-    await _audioHandler.setShuffleMode(_mapShuffleModeToService(shuffleMode));
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.setShuffleMode(_mapShuffleModeToService(shuffleMode)),
+    );
   }
 
   @override
   ResultVoid addQueueItem(AudioEntity audio) async {
-    await _audioHandler.addQueueItem(_mapEntityToMediaItem(audio));
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.addQueueItem(_mapEntityToMediaItem(audio)),
+    );
   }
 
   @override
   ResultVoid removeQueueItem(AudioEntity audio) async {
-    await _audioHandler.removeQueueItem(_mapEntityToMediaItem(audio));
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.removeQueueItem(_mapEntityToMediaItem(audio)),
+    );
   }
 
   @override
   ResultVoid moveQueueItem(int currentIndex, int newIndex) async {
-    await _audioHandler.moveQueueItem(currentIndex, newIndex);
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.moveQueueItem(currentIndex, newIndex),
+    );
   }
 
   @override
   ResultVoid updateQueue(List<AudioEntity> queue) async {
-    await _audioHandler.updateQueue(queue.map(_mapEntityToMediaItem).toList());
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.updateQueue(
+        queue.map(_mapEntityToMediaItem).toList(),
+      ),
+    );
   }
 
   @override
   ResultVoid playFromQueue(List<AudioEntity> queue, int index) async {
-    await _audioHandler.playFromQueue(
-      queue.map(_mapEntityToMediaItem).toList(),
-      index,
+    return _guardVoid(
+      () => _audioHandler.playFromQueue(
+        queue.map(_mapEntityToMediaItem).toList(),
+        index,
+      ),
     );
-    return const Right(null);
   }
 
   @override
   ResultVoid loadAudioPlayerData({bool restorePlayback = true}) async {
-    await _audioHandler.loadAudioPlayerData(restorePlayback: restorePlayback);
-    return const Right(null);
+    return _guardVoid(
+      () => _audioHandler.loadAudioPlayerData(
+        restorePlayback: restorePlayback,
+      ),
+    );
   }
 
   // Mappers

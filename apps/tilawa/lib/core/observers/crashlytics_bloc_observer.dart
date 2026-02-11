@@ -10,6 +10,7 @@ class CrashlyticsBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
+    if (_shouldIgnoreEvent(event)) return;
     _crashlyticsService.setBreadcrumb(
       'Bloc Event: (${bloc.runtimeType}) > $event',
     );
@@ -18,9 +19,18 @@ class CrashlyticsBlocObserver extends BlocObserver {
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
+    if (_shouldIgnoreEvent(transition.event)) return;
     _crashlyticsService.setBreadcrumb(
       'Bloc Transition: (${bloc.runtimeType}) > $transition',
     );
+  }
+
+  bool _shouldIgnoreEvent(Object? event) {
+    final String eventString = event.toString();
+    return eventString.contains('refreshCountdown') ||
+        eventString.contains('updatePosition') ||
+        eventString.contains('UpdatePosition') ||
+        eventString.contains('AudioTimerExpired');
   }
 
   @override

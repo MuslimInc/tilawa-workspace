@@ -41,6 +41,10 @@ android {
         
         // Add multiDex support to handle large app initialization
         multiDexEnabled = true
+        
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
     }
 
     signingConfigs {
