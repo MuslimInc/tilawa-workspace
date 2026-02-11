@@ -84,6 +84,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                       dragStartBehavior: DragStartBehavior.down,
                       child: Text(
                         item.textAr,
+                        textDirection: TextDirection.rtl,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20.sp,
