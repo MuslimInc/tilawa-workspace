@@ -19,28 +19,35 @@ void main() {
     repository = QiblaRepositoryImpl(mockDataSource);
   });
 
+  Stream<QiblaDirection> timedQiblaStream(
+    List<QiblaDirection> values, {
+    Duration interval = const Duration(milliseconds: 130),
+  }) async* {
+    for (final QiblaDirection value in values) {
+      yield value;
+      await Future<void>.delayed(interval);
+    }
+  }
+
   group('getQiblaDirection', () {
     test(
       'should return stream of QiblaDirectionEntity mapped from QiblaDirection',
-      () {
+      () async {
         // Arrange
-        // QiblaDirection doesn't have a const constructor usually, inspecting it would be better but assuming standard.
-        // Based on typical package structure.
-        const qiblaDirection = QiblaDirection(10, 20, 30);
+        const qiblaDirection = QiblaDirection(-10, 370, 725);
         when(
           mockDataSource.qiblaStream,
-        ).thenAnswer((_) => Stream.value(qiblaDirection));
+        ).thenAnswer((_) => timedQiblaStream([qiblaDirection]));
 
         // Act
-        final Stream<QiblaDirectionEntity> result = repository
-            .getQiblaDirection();
+        final QiblaDirectionEntity result = await repository
+            .getQiblaDirection()
+            .first;
 
         // Assert
         expect(
           result,
-          emits(
-            const QiblaDirectionEntity(qibla: 10, direction: 20, offset: 30),
-          ),
+          const QiblaDirectionEntity(qibla: 350, direction: 10, offset: 5),
         );
       },
     );
@@ -132,87 +139,69 @@ void main() {
     });
   });
 
-  group('getQiblaDirection - distinct() behavior', () {
+  group('getQiblaDirection - tolerance distinct behavior', () {
     test(
-      'filters duplicate QiblaDirectionEntity emissions with same values',
+      'filters jitter within tolerance and emits meaningful changes',
       () async {
         // Arrange
-        const direction1 = QiblaDirection(10, 20, 30);
+        const direction1 = QiblaDirection(100, 200, 300);
         const direction2 = QiblaDirection(
-          10,
-          20,
-          30,
-        ); // Same values, different instance
-        const direction3 = QiblaDirection(40, 50, 60); // Different values
+          100.3,
+          200.2,
+          300.4,
+        ); // Within 0.5 tolerance
+        const direction3 = QiblaDirection(
+          101.1,
+          201.0,
+          301.0,
+        ); // Exceeds tolerance
 
-        final Stream<QiblaDirection> streamController = Stream.fromIterable([
-          direction1,
-          direction2,
-          direction3,
-        ]);
-
-        when(mockDataSource.qiblaStream).thenAnswer((_) => streamController);
+        when(mockDataSource.qiblaStream).thenAnswer(
+          (_) => timedQiblaStream([direction1, direction2, direction3]),
+        );
 
         // Act
         final List<QiblaDirectionEntity> emissions = await repository
             .getQiblaDirection()
             .toList();
 
-        // Assert - should have 2 emissions since direction1 and direction2 are equal
+        // Assert
         expect(emissions.length, 2);
-        expect(emissions[0].qibla, 10);
-        expect(emissions[1].qibla, 40);
+        expect(emissions[0].qibla, 100);
+        expect(emissions[1].qibla, closeTo(101.1, 0.0001));
       },
     );
 
-    test('emits all values when they are different', () async {
-      // Arrange
-      const direction1 = QiblaDirection(10, 20, 30);
-      const direction2 = QiblaDirection(15, 25, 35);
-      const direction3 = QiblaDirection(20, 30, 40);
+    test(
+      'handles wrap-around angles correctly in tolerance comparison',
+      () async {
+        // Arrange
+        const direction1 = QiblaDirection(359.9, 359.9, 359.9);
+        const direction2 = QiblaDirection(
+          0.1,
+          0.1,
+          0.1,
+        ); // 0.2 apart via wrap-around
+        const direction3 = QiblaDirection(
+          1.2,
+          1.2,
+          1.2,
+        ); // >0.5 apart from direction2
 
-      final Stream<QiblaDirection> streamController = Stream.fromIterable([
-        direction1,
-        direction2,
-        direction3,
-      ]);
+        when(mockDataSource.qiblaStream).thenAnswer(
+          (_) => timedQiblaStream([direction1, direction2, direction3]),
+        );
 
-      when(mockDataSource.qiblaStream).thenAnswer((_) => streamController);
+        // Act
+        final List<QiblaDirectionEntity> emissions = await repository
+            .getQiblaDirection()
+            .toList();
 
-      // Act
-      final List<QiblaDirectionEntity> emissions = await repository
-          .getQiblaDirection()
-          .toList();
-
-      // Assert - all values should be emitted since they are all different
-      expect(emissions.length, 3);
-      expect(emissions[0].qibla, 10);
-      expect(emissions[1].qibla, 15);
-      expect(emissions[2].qibla, 20);
-    });
-
-    test('QiblaDirectionEntity equality works correctly for distinct()', () {
-      // Verify that QiblaDirectionEntity implements equality correctly
-      // which is required for distinct() to work
-      const entity1 = QiblaDirectionEntity(
-        qibla: 10,
-        direction: 20,
-        offset: 30,
-      );
-      const entity2 = QiblaDirectionEntity(
-        qibla: 10,
-        direction: 20,
-        offset: 30,
-      );
-      const entity3 = QiblaDirectionEntity(
-        qibla: 40,
-        direction: 50,
-        offset: 60,
-      );
-
-      expect(entity1, equals(entity2));
-      expect(entity1, isNot(equals(entity3)));
-      expect(entity1.hashCode, equals(entity2.hashCode));
-    });
+        // Assert
+        expect(emissions.length, 2);
+        expect(emissions[0].qibla, closeTo(359.9, 0.0001));
+        expect(emissions[1].qibla, closeTo(1.2, 0.0001));
+      },
+    );
   });
 }

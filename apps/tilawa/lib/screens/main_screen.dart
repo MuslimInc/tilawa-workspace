@@ -19,6 +19,13 @@ import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../shared/widgets/bottom_player_widget.dart';
 
+bool shouldHandleBottomNavTap({
+  required int currentIndex,
+  required int tappedIndex,
+}) {
+  return tappedIndex != currentIndex;
+}
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -37,6 +44,17 @@ class _MainScreenState extends State<MainScreen> {
     const SettingsScreen(),
   ];
 
+  void _handleTabSideEffects(BuildContext context, int index) {
+    final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
+    prayerTimesBloc.setCountdownActive(index == 1);
+
+    if (index == 3) {
+      context.read<QiblaBloc>().add(const CheckLocationService());
+    } else {
+      context.read<QiblaBloc>().add(const StopQiblaStream());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -44,9 +62,9 @@ class _MainScreenState extends State<MainScreen> {
         BlocProvider(create: (_) => getIt<InternetStatusBloc>()),
         BlocProvider(create: (_) => getIt<QiblaBloc>()),
         BlocProvider(
-          create: (_) =>
-              getIt<PrayerTimesBloc>()
-                ..add(const PrayerTimesEvent.loadPrayerTimes()),
+          create: (_) => getIt<PrayerTimesBloc>()
+            ..add(const PrayerTimesEvent.loadPrayerTimes())
+            ..setCountdownActive(_currentIndex == 1),
         ),
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
@@ -60,6 +78,7 @@ class _MainScreenState extends State<MainScreen> {
               setState(() {
                 _currentIndex = 0;
               });
+              _handleTabSideEffects(context, _currentIndex);
             },
             child: Scaffold(
               floatingActionButton: kDebugMode
@@ -112,23 +131,17 @@ class _MainScreenState extends State<MainScreen> {
                       child: BottomNavigationBar(
                         currentIndex: _currentIndex,
                         onTap: (index) {
+                          if (!shouldHandleBottomNavTap(
+                            currentIndex: _currentIndex,
+                            tappedIndex: index,
+                          )) {
+                            return;
+                          }
+
                           setState(() {
                             _currentIndex = index;
                           });
-                          if (index == 1) {
-                            // Optional: refresh prayer times or handle specific logic
-                          }
-
-                          // Handle Qibla Stream Lifecycle
-                          if (index == 3) {
-                            context.read<QiblaBloc>().add(
-                              const CheckLocationService(),
-                            );
-                          } else {
-                            context.read<QiblaBloc>().add(
-                              const StopQiblaStream(),
-                            );
-                          }
+                          _handleTabSideEffects(context, index);
                         },
                         type: BottomNavigationBarType.fixed,
                         backgroundColor: Colors.transparent,

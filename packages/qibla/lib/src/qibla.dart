@@ -21,6 +21,16 @@ class Qibla {
   static Qibla instance = Qibla.internal();
 
   static const _channel = MethodChannel('ml.medyas.qibla');
+  static const Duration _quickFixTimeout = Duration(seconds: 3);
+  static const Duration _streamFixTimeout = Duration(seconds: 7);
+  static const LocationSettings _quickLocationSettings = LocationSettings(
+    accuracy: LocationAccuracy.medium,
+    distanceFilter: 10,
+  );
+  static const LocationSettings _streamLocationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10,
+  );
 
   Stream<QiblaDirection>? _qiblaStream;
 
@@ -67,14 +77,7 @@ class Qibla {
   Stream<QiblaDirection> getQiblaStream() {
     _qiblaStream ??= _merge<CompassEvent, Position>(
       compassEvents,
-      locationStream.transform(
-        StreamTransformer<Position, Position>.fromHandlers(
-          handleData: (Position position, EventSink<Position> sink) {
-            sink.add(position);
-            sink.close();
-          },
-        ),
-      ),
+      locationStream.take(1),
     );
 
     return _qiblaStream!;
@@ -83,12 +86,34 @@ class Qibla {
   /// For testing purposes, we can override these streams
   Stream<CompassEvent> get compassEvents => FlutterCompass.events!;
 
-  Stream<Position> get locationStream => Geolocator.getPositionStream(
-    locationSettings: LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-    ),
-  );
+  Stream<Position> get locationStream => _initialLocationStream();
+
+  Stream<Position> _initialLocationStream() async* {
+    final Position? lastKnown = await Geolocator.getLastKnownPosition();
+    if (lastKnown != null) {
+      yield lastKnown;
+      return;
+    }
+
+    try {
+      final Position quickFix = await Geolocator.getCurrentPosition(
+        locationSettings: _quickLocationSettings,
+      ).timeout(_quickFixTimeout);
+      yield quickFix;
+      return;
+    } catch (_) {
+      // Fall through to the stream-based GPS fix.
+    }
+
+    yield* Geolocator.getPositionStream(
+          locationSettings: _streamLocationSettings,
+        )
+        .take(1)
+        .timeout(
+          _streamFixTimeout,
+          onTimeout: (EventSink<Position> sink) => sink.close(),
+        );
+  }
 
   Stream<QiblaDirection> _merge<A, B>(Stream<A> streamA, Stream<B> streamB) =>
       streamA.combineLatest<B, QiblaDirection>(streamB, (dir, pos) {

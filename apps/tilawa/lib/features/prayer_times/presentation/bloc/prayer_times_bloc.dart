@@ -66,9 +66,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     on<_UpdateSettings>(_onUpdateSettings);
     on<_RefreshCountdown>(_onRefreshCountdown);
     on<_SetManualLocation>(_onSetManualLocation);
-
-    // Start countdown timer
-    _startCountdownTimer();
   }
 
   final GetPrayerTimesUseCase _getPrayerTimesUseCase;
@@ -78,17 +75,41 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final LoadPrayerSettingsUseCase _loadPrayerSettingsUseCase;
 
   Timer? _countdownTimer;
+  bool _isCountdownActive = false;
 
   void _startCountdownTimer() {
+    if (_countdownTimer != null) {
+      return;
+    }
     _countdownTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => add(const PrayerTimesEvent.refreshCountdown()),
     );
   }
 
+  void _stopCountdownTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+  }
+
+  /// Controls countdown refresh activity based on Prayer Times tab visibility.
+  void setCountdownActive(bool isActive) {
+    if (_isCountdownActive == isActive || isClosed) {
+      return;
+    }
+
+    _isCountdownActive = isActive;
+    if (isActive) {
+      _startCountdownTimer();
+      add(const PrayerTimesEvent.refreshCountdown());
+    } else {
+      _stopCountdownTimer();
+    }
+  }
+
   @override
   Future<void> close() {
-    _countdownTimer?.cancel();
+    _stopCountdownTimer();
     return super.close();
   }
 
@@ -267,6 +288,10 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _RefreshCountdown event,
     Emitter<PrayerTimesState> emit,
   ) {
+    if (!_isCountdownActive) {
+      return;
+    }
+
     if (state.todayPrayerTimes == null) {
       return;
     }

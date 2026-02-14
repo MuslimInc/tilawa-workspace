@@ -36,14 +36,20 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   StreamSubscription<QiblaDirectionEntity>? _qiblaSubscription;
 
-  /// First check: Is Location Service Enabled (GPS On)?
+  /// Checks location service, permission, and starts the Qibla
+  /// stream in a single pass — avoiding multiple event dispatches.
   Future<void> _onCheckLocationService(
     CheckLocationService event,
     Emitter<QiblaState> emit,
   ) async {
+    // Skip re-initialization if the stream is already active.
+    if (state.status == QiblaStatus.success && _qiblaSubscription != null) {
+      return;
+    }
+
     emit(state.copyWith(status: QiblaStatus.loading));
 
-    // 1. Check if Location Services are enabled
+    // 1. Check if Location Services are enabled.
     final Either<Failure, bool> serviceResult = await _checkLocationService(
       const NoParams(),
     );
@@ -56,26 +62,45 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
         ),
       ),
       (isServiceEnabled) async {
-        if (isClosed) {
+        if (isClosed) return;
+        if (!isServiceEnabled) {
+          emit(state.copyWith(status: QiblaStatus.serviceDisabled));
           return;
         }
-        if (isServiceEnabled) {
-          // 2. If Service is Enabled, we MUST Check/Request Permissions
-          // We trigger the RequestLocationPermission event which handles the permission check logic
-          add(const RequestLocationPermission());
-        } else {
-          emit(state.copyWith(status: QiblaStatus.serviceDisabled));
-        }
+
+        // 2. Check / request location permission inline.
+        final Either<Failure, bool> permissionResult =
+            await _requestLocationPermission(const NoParams());
+
+        await permissionResult.fold(
+          (failure) async => emit(
+            state.copyWith(
+              status: QiblaStatus.error,
+              errorMessage: failure.message,
+            ),
+          ),
+          (isGranted) async {
+            if (isClosed) return;
+            if (!isGranted) {
+              emit(state.copyWith(status: QiblaStatus.permissionDenied));
+              return;
+            }
+
+            // 3. Permission granted — start the stream immediately.
+            _startListening();
+          },
+        );
       },
     );
   }
 
-  /// Second check: Are Location Permissions Granted?
+  /// Handles the retry button for requesting location permission.
   Future<void> _onRequestLocationPermission(
     RequestLocationPermission event,
     Emitter<QiblaState> emit,
   ) async {
-    // 3. This UseCase checks permission status and requests it if denied.
+    emit(state.copyWith(status: QiblaStatus.loading));
+
     final Either<Failure, bool> permissionResult =
         await _requestLocationPermission(const NoParams());
 
@@ -87,9 +112,9 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
         ),
       ),
       (isGranted) async {
+        if (isClosed) return;
         if (isGranted) {
-          // 4. Permission Granted -> Start Stream
-          add(const StartQiblaStream());
+          _startListening();
         } else {
           emit(state.copyWith(status: QiblaStatus.permissionDenied));
         }
@@ -97,25 +122,24 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     );
   }
 
+  /// Handles the explicit start-stream event (e.g. from a retry).
   Future<void> _onStartQiblaStream(
     StartQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: QiblaStatus.loading));
+    emit(state.copyWith(status: QiblaStatus.loading));
+    _startListening();
+  }
 
-      await _qiblaSubscription?.cancel();
-      _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
-        (direction) => add(UpdateQiblaDirection(direction)),
-        onError: (error) {
-          add(QiblaErrorOccurred(error.toString()));
-        },
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(status: QiblaStatus.error, errorMessage: e.toString()),
-      );
-    }
+  /// Subscribes to the Qibla direction stream.
+  void _startListening() {
+    _qiblaSubscription?.cancel();
+    _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
+      (direction) => add(UpdateQiblaDirection(direction)),
+      onError: (error) {
+        add(QiblaErrorOccurred(error.toString()));
+      },
+    );
   }
 
   Future<void> _onStopQiblaStream(
