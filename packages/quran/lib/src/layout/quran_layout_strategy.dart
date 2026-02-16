@@ -33,11 +33,11 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Constant for the number of lines per page in a standard Madani Mushaf.
   // static const int _linesPerPage = 15;
   // Tuning factor for height calculation to ensure perfect fit.
-  static const double _heightTuningFactor = 18.0;
+  static const double _heightTuningFactor = 17.5;
   // Proportional factor for natural Arabic text spacing.
   static const double _naturalLineHeightRatio = 0.50;
   // Width divisor to determine base font size relative to screen width.
-  static const double _widthDivisor = 18.0;
+  static const double _widthDivisor = 17.5;
 
   @override
   QuranLayoutMetrics calculateMetrics(BuildContext context) {

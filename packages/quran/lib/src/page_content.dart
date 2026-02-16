@@ -59,6 +59,9 @@ class _PageContentState extends State<PageContent> {
     // Alias for readability
     final double adaptiveFontSize = metrics.fontSize;
     final double adaptiveFontHeight = metrics.fontHeight;
+    // The font files are Regular (w400). Custom weights like 550 often default to 400.
+    // Using w700 (Standard Bold) to ensure a visibly thicker weight.
+    const FontWeight fontWeight = FontWeight.w500;
 
     print('[PageContent] Page: ${widget.pageNumber}, Font: $pageFont');
     print(
@@ -98,6 +101,7 @@ class _PageContentState extends State<PageContent> {
                     fontFamily: 'QCF_P001',
                     package: 'quran',
                     fontSize: adaptiveFontSize,
+                    fontWeight: fontWeight,
                     color: Colors.black,
                   ),
                 ),
@@ -110,6 +114,7 @@ class _PageContentState extends State<PageContent> {
                     fontFamily: 'QCF_BSML',
                     package: 'quran',
                     fontSize: adaptiveFontSize * 0.75,
+                    fontWeight: fontWeight,
                     color: Colors.black,
                   ),
                 ),
@@ -147,6 +152,7 @@ class _PageContentState extends State<PageContent> {
               fontFamily: pageFont,
               package: 'quran',
               fontSize: adaptiveFontSize,
+              fontWeight: fontWeight,
               color: widget.textColor,
               height: adaptiveFontHeight,
               letterSpacing: metrics.letterSpacing,
@@ -160,6 +166,7 @@ class _PageContentState extends State<PageContent> {
                   fontFamily: pageFont,
                   package: 'quran',
                   fontSize: adaptiveFontSize,
+                  fontWeight: FontWeight.normal,
                   color: Colors.brown,
                   height: 1.35,
                   backgroundColor: verseBgColor,
@@ -181,6 +188,7 @@ class _PageContentState extends State<PageContent> {
           fontFamily: pageFont,
           package: 'quran',
           fontSize: adaptiveFontSize,
+          fontWeight: fontWeight,
           color: widget.textColor,
           height: adaptiveFontHeight,
           letterSpacing: metrics.letterSpacing,
