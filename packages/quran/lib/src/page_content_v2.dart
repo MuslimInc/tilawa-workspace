@@ -77,10 +77,7 @@ class _PageContentV2State extends State<PageContentV2> {
             alignment: PlaceholderAlignment.middle,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: HeaderWidget(
-                suraNumber: surah,
-                fontSize: metrics.fontSize * 1.5,
-              ),
+              child: HeaderWidget(suraNumber: surah),
             ),
           ),
         );

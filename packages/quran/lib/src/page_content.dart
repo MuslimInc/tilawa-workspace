@@ -63,20 +63,7 @@ class _PageContentState extends State<PageContent> {
     // Using w700 (Standard Bold) to ensure a visibly thicker weight.
     const FontWeight fontWeight = FontWeight.w500;
 
-    print('[PageContent] Page: ${widget.pageNumber}, Font: $pageFont');
-    print(
-      '[PageContent] Metrics: Font=$adaptiveFontSize, Height=$adaptiveFontHeight',
-    );
-    print('[PageContent] Ranges count: ${ranges.length}');
-
     final verseSpans = <InlineSpan>[];
-    if (widget.pageNumber == 2 || widget.pageNumber == 1) {
-      verseSpans.add(
-        WidgetSpan(
-          child: SizedBox(height: MediaQuery.sizeOf(context).height * .175),
-        ),
-      );
-    }
     for (final r in ranges) {
       final int surah = r['surah']!;
       final int start = r['start']!;
@@ -86,10 +73,8 @@ class _PageContentState extends State<PageContent> {
         if (v == start && v == 1) {
           verseSpans.add(
             WidgetSpan(
-              child: HeaderWidget(
-                suraNumber: surah,
-                fontSize: adaptiveFontSize,
-              ),
+              // alignment: PlaceholderAlignment.top,
+              child: HeaderWidget(suraNumber: surah),
             ),
           );
           if (widget.pageNumber != 1 && widget.pageNumber != 187) {
