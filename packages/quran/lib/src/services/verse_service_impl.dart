@@ -71,8 +71,11 @@ class VerseServiceImpl implements VerseService {
       );
     }
 
-    final qcfData = verseData['qcfData'] as String;
-    return verseEndSymbol ? qcfData : qcfData.substring(0, qcfData.length - 1);
+    var qcfData = verseData['qcfData'] as String;
+    if (!verseEndSymbol) {
+      qcfData = qcfData.substring(0, qcfData.length - 1);
+    }
+    return qcfData.split('').join(' ');
   }
 
   @override
@@ -88,7 +91,10 @@ class VerseServiceImpl implements VerseService {
       );
     }
 
-    final qcfData = verseData['qcfData'] as String;
+    final String qcfData = (verseData['qcfData'] as String).replaceAll(
+      '\n',
+      '',
+    );
     return qcfData.substring(qcfData.length - 1);
   }
 
