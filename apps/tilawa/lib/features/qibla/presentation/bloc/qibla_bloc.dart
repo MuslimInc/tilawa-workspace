@@ -134,12 +134,16 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   /// Subscribes to the Qibla direction stream.
   void _startListening() {
     _qiblaSubscription?.cancel();
-    _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
-      (direction) => add(UpdateQiblaDirection(direction)),
-      onError: (error) {
-        add(QiblaErrorOccurred(error.toString()));
-      },
-    );
+    try {
+      _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
+        (direction) => add(UpdateQiblaDirection(direction)),
+        onError: (error) {
+          add(QiblaErrorOccurred(error.toString()));
+        },
+      );
+    } catch (error) {
+      add(QiblaErrorOccurred(error.toString()));
+    }
   }
 
   Future<void> _onStopQiblaStream(
