@@ -80,6 +80,14 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
   }
 
   @override
+  Future<String?> getCountryCode({
+    required double latitude,
+    required double longitude,
+  }) async {
+    return _locationDataSource.getCountryCode(latitude, longitude);
+  }
+
+  @override
   Future<void> saveSettings(PrayerSettingsEntity settings) async {
     await _settingsDataSource.saveSettings(settings);
   }

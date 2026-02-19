@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 
@@ -127,6 +127,8 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                   final PrayerTimeEntity prayerTimes =
                       state.monthlyPrayerTimes[index];
                   final bool isToday = _isToday(prayerTimes.date);
+                  final isArabic =
+                      Localizations.localeOf(context).languageCode == 'ar';
 
                   return Container(
                     color: isToday
@@ -150,31 +152,34 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                         _buildDataCell(
                           widget.settings.use24HourFormat
                               ? _formatTime(prayerTimes.fajr)
-                              : _formatTime12Hour(prayerTimes.fajr),
+                              : _formatTime12Hour(prayerTimes.fajr, isArabic),
                           flex: 2,
                         ),
                         _buildDataCell(
                           widget.settings.use24HourFormat
                               ? _formatTime(prayerTimes.dhuhr)
-                              : _formatTime12Hour(prayerTimes.dhuhr),
+                              : _formatTime12Hour(prayerTimes.dhuhr, isArabic),
                           flex: 2,
                         ),
                         _buildDataCell(
                           widget.settings.use24HourFormat
                               ? _formatTime(prayerTimes.asr)
-                              : _formatTime12Hour(prayerTimes.asr),
+                              : _formatTime12Hour(prayerTimes.asr, isArabic),
                           flex: 2,
                         ),
                         _buildDataCell(
                           widget.settings.use24HourFormat
                               ? _formatTime(prayerTimes.maghrib)
-                              : _formatTime12Hour(prayerTimes.maghrib),
+                              : _formatTime12Hour(
+                                  prayerTimes.maghrib,
+                                  isArabic,
+                                ),
                           flex: 2,
                         ),
                         _buildDataCell(
                           widget.settings.use24HourFormat
                               ? _formatTime(prayerTimes.isha)
-                              : _formatTime12Hour(prayerTimes.isha),
+                              : _formatTime12Hour(prayerTimes.isha, isArabic),
                           flex: 2,
                         ),
                       ],
@@ -226,9 +231,11 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
-  String _formatTime12Hour(DateTime time) {
+  String _formatTime12Hour(DateTime time, bool isArabic) {
     final int hour = time.hour > 12 ? time.hour - 12 : time.hour;
-    final period = time.hour >= 12 ? 'PM' : 'AM';
+    final period = time.hour >= 12
+        ? (isArabic ? 'م' : 'PM')
+        : (isArabic ? 'ص' : 'AM');
     return '${hour == 0 ? 12 : hour}:${time.minute.toString().padLeft(2, '0')} $period';
   }
 

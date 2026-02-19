@@ -15,6 +15,7 @@ import 'prayer_times_bloc_test.mocks.dart';
   GetPrayerTimesUseCase,
   GetMonthlyPrayerTimesUseCase,
   GetCurrentLocationUseCase,
+  GetCountryCodeUseCase,
   SavePrayerSettingsUseCase,
   LoadPrayerSettingsUseCase,
 ])
@@ -23,6 +24,7 @@ void main() {
   late MockGetPrayerTimesUseCase mockGetPrayerTimesUseCase;
   late MockGetMonthlyPrayerTimesUseCase mockGetMonthlyPrayerTimesUseCase;
   late MockGetCurrentLocationUseCase mockGetCurrentLocationUseCase;
+  late MockGetCountryCodeUseCase mockGetCountryCodeUseCase;
   late MockSavePrayerSettingsUseCase mockSavePrayerSettingsUseCase;
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettingsUseCase;
 
@@ -30,6 +32,7 @@ void main() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
     mockGetMonthlyPrayerTimesUseCase = MockGetMonthlyPrayerTimesUseCase();
     mockGetCurrentLocationUseCase = MockGetCurrentLocationUseCase();
+    mockGetCountryCodeUseCase = MockGetCountryCodeUseCase();
     mockSavePrayerSettingsUseCase = MockSavePrayerSettingsUseCase();
     mockLoadPrayerSettingsUseCase = MockLoadPrayerSettingsUseCase();
 
@@ -37,9 +40,18 @@ void main() {
       mockGetPrayerTimesUseCase,
       mockGetMonthlyPrayerTimesUseCase,
       mockGetCurrentLocationUseCase,
+      mockGetCountryCodeUseCase,
       mockSavePrayerSettingsUseCase,
       mockLoadPrayerSettingsUseCase,
     );
+
+    // Default stub
+    when(
+      mockGetCountryCodeUseCase.call(
+        latitude: anyNamed('latitude'),
+        longitude: anyNamed('longitude'),
+      ),
+    ).thenAnswer((_) async => null);
   });
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
     const Right(PrayerSettingsEntity()),
@@ -227,6 +239,130 @@ void main() {
       },
       act: (bloc) => bloc.add(const PrayerTimesEvent.updateSettings(tSettings)),
       expect: () => [const PrayerTimesState()],
+    );
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'should auto-detect calculation method for Egypt when using default settings',
+      build: () {
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer((_) async => const Right(PrayerSettingsEntity()));
+
+        when(mockGetCurrentLocationUseCase.call()).thenAnswer(
+          (_) async => Right(
+            LocationResult(
+              latitude: 30.0444,
+              longitude: 31.2357,
+              locationName: 'Cairo',
+              countryCode: 'EG',
+            ),
+          ),
+        );
+
+        // First settings save call (auto-detection)
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+
+        // Use captureAny to allow flexible matching since settings object changes
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (bloc) {
+        verify(mockGetCurrentLocationUseCase.call()).called(1);
+
+        // specific verification for auto-detection
+        final capturedSettings =
+            verify(
+                  mockSavePrayerSettingsUseCase.call(
+                    settings: captureAnyNamed('settings'),
+                  ),
+                ).captured.first
+                as PrayerSettingsEntity;
+
+        expect(capturedSettings.calculationMethod, CalculationMethod.egyptian);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'should auto-detect calculation method for Egypt when using default settings and SAVED location',
+      build: () {
+        // Saved location exists (Cairo)
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              savedLatitude: 30.0444,
+              savedLongitude: 31.2357,
+              savedLocationName: 'Cairo',
+              calculationMethod: CalculationMethod.ummAlQura, // Default
+            ),
+          ),
+        );
+
+        // Mock GetCountryCode to return EG
+        when(
+          mockGetCountryCodeUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+          ),
+        ).thenAnswer((_) async => 'EG');
+
+        // Expect settings save
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (bloc) {
+        // Should call getCountryCode
+        verify(
+          mockGetCountryCodeUseCase.call(latitude: 30.0444, longitude: 31.2357),
+        ).called(1);
+
+        // Should NOT call getCurrentLocation
+        verifyNever(mockGetCurrentLocationUseCase.call());
+
+        // Should save new settings
+        final capturedSettings =
+            verify(
+                  mockSavePrayerSettingsUseCase.call(
+                    settings: captureAnyNamed('settings'),
+                  ),
+                ).captured.first
+                as PrayerSettingsEntity;
+
+        expect(capturedSettings.calculationMethod, CalculationMethod.egyptian);
+
+        // Verify that getPrayerTimesUseCase was called with the UPDATED settings
+        verify(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings:
+                capturedSettings, // Must match the saved (updated) settings
+          ),
+        ).called(1);
+      },
     );
   });
 }

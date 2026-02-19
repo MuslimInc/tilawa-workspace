@@ -100,7 +100,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     PrayerNotificationSettings maghribNotification,
     @Default(PrayerNotificationSettings())
     PrayerNotificationSettings ishaNotification,
-    @Default(true) bool use24HourFormat,
+    @Default(false) bool use24HourFormat,
     @Default(false) bool showSunrise,
     double? savedLatitude,
     double? savedLongitude,
@@ -128,6 +128,40 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
         return ishaAdjustment;
       default:
         return 0;
+    }
+  }
+
+  /// Get default calculation method for a specific country code (ISO 3166-1 alpha-2)
+  static CalculationMethod? defaultForCountry(String? countryCode) {
+    if (countryCode == null) return null;
+
+    switch (countryCode.toUpperCase()) {
+      case 'EG': // Egypt
+        return CalculationMethod.egyptian;
+      case 'PK': // Pakistan
+        return CalculationMethod.karachi;
+      case 'TR': // Turkey
+        return CalculationMethod.turkey;
+      case 'SG': // Singapore
+        return CalculationMethod.singapore;
+      case 'KW': // Kuwait
+        return CalculationMethod.kuwait;
+      case 'QA': // Qatar
+        return CalculationMethod.qatar;
+      case 'AE': // United Arab Emirates
+      case 'BH': // Bahrain
+      case 'OM': // Oman
+        return CalculationMethod.gulf;
+      case 'IR': // Iran
+        return CalculationMethod.tehran;
+      case 'US': // United States
+      case 'CA': // Canada
+      case 'GB': // United Kingdom
+        return CalculationMethod.isna;
+      case 'SA': // Saudi Arabia
+        return CalculationMethod.ummAlQura;
+      default:
+        return null;
     }
   }
 }

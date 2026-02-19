@@ -4,8 +4,8 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
+
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/prayer_times_repository.dart';
 import '../../domain/usecases/usecases.dart';
@@ -57,6 +57,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._getPrayerTimesUseCase,
     this._getMonthlyPrayerTimesUseCase,
     this._getCurrentLocationUseCase,
+    this._getCountryCodeUseCase,
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
   ) : super(const PrayerTimesState()) {
@@ -71,6 +72,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final GetPrayerTimesUseCase _getPrayerTimesUseCase;
   final GetMonthlyPrayerTimesUseCase _getMonthlyPrayerTimesUseCase;
   final GetCurrentLocationUseCase _getCurrentLocationUseCase;
+  final GetCountryCodeUseCase _getCountryCodeUseCase;
   final SavePrayerSettingsUseCase _savePrayerSettingsUseCase;
   final LoadPrayerSettingsUseCase _loadPrayerSettingsUseCase;
 
@@ -129,6 +131,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
     emit(state.copyWith(settings: settings));
 
+    // We need to use the potentially updated settings
+    var effectiveSettings = settings;
+
     // Check for saved location or get current location
     double? latitude = settings.savedLatitude;
     double? longitude = settings.savedLongitude;
@@ -142,6 +147,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           await _getCurrentLocationUseCase.call();
 
       var locationFound = false;
+      String? detectedCountryCode;
+
       await locationResult.fold(
         (failure) async {
           emit(
@@ -156,6 +163,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           latitude = location.latitude;
           longitude = location.longitude;
           locationName = location.locationName;
+          detectedCountryCode = location.countryCode;
           locationFound = true;
         },
       );
@@ -164,6 +172,45 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
       if (!locationFound) {
         return;
+      }
+
+      // Auto-detect calculation method if using default
+      if (detectedCountryCode != null &&
+          effectiveSettings.calculationMethod == CalculationMethod.ummAlQura) {
+        final CalculationMethod? recommendedMethod =
+            PrayerSettingsEntity.defaultForCountry(detectedCountryCode);
+
+        if (recommendedMethod != null &&
+            recommendedMethod != effectiveSettings.calculationMethod) {
+          final newSettings = effectiveSettings.copyWith(
+            calculationMethod: recommendedMethod,
+          );
+          await _savePrayerSettingsUseCase.call(settings: newSettings);
+          emit(state.copyWith(settings: newSettings));
+          effectiveSettings = newSettings;
+        }
+      }
+    } else if (effectiveSettings.calculationMethod ==
+        CalculationMethod.ummAlQura) {
+      // Location is saved, but we might need to auto-detect method
+      final String? countryCode = await _getCountryCodeUseCase.call(
+        latitude: latitude,
+        longitude: longitude,
+      );
+
+      if (countryCode != null) {
+        final CalculationMethod? recommendedMethod =
+            PrayerSettingsEntity.defaultForCountry(countryCode);
+
+        if (recommendedMethod != null &&
+            recommendedMethod != effectiveSettings.calculationMethod) {
+          final newSettings = effectiveSettings.copyWith(
+            calculationMethod: recommendedMethod,
+          );
+          await _savePrayerSettingsUseCase.call(settings: newSettings);
+          emit(state.copyWith(settings: newSettings));
+          effectiveSettings = newSettings;
+        }
       }
     }
 
@@ -183,7 +230,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           latitude: latitude!,
           longitude: longitude!,
           date: DateTime.now(),
-          settings: settings,
+          settings: effectiveSettings,
         );
 
     result.fold(

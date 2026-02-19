@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 
 class NextPrayerCountdownCard extends StatelessWidget {
@@ -8,10 +8,12 @@ class NextPrayerCountdownCard extends StatelessWidget {
     super.key,
     required this.nextPrayer,
     required this.timeUntil,
+    this.use24HourFormat = true,
   });
 
   final PrayerTimeItem nextPrayer;
   final Duration timeUntil;
+  final bool use24HourFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +94,11 @@ class NextPrayerCountdownCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      nextPrayer.formattedTime12Hour,
+                      use24HourFormat
+                          ? nextPrayer.formattedTime
+                          : nextPrayer.getFormattedTime12Hour(
+                              isArabic: isArabic,
+                            ),
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

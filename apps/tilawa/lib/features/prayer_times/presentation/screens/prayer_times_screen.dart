@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../bloc/prayer_times_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -199,6 +199,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               NextPrayerCountdownCard(
                 nextPrayer: state.currentOrNextPrayer!,
                 timeUntil: state.timeUntilNextPrayer!,
+                use24HourFormat: state.settings.use24HourFormat,
               ),
 
             // Prayer times list

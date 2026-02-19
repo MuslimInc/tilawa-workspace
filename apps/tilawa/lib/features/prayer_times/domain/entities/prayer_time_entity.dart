@@ -119,9 +119,11 @@ class PrayerTimeItem {
     return '$hour:$minute';
   }
 
-  String get formattedTime12Hour {
+  String getFormattedTime12Hour({bool isArabic = false}) {
     final int hour12 = time.hour > 12 ? time.hour - 12 : time.hour;
-    final period = time.hour >= 12 ? 'PM' : 'AM';
+    final period = time.hour >= 12
+        ? (isArabic ? 'م' : 'PM')
+        : (isArabic ? 'ص' : 'AM');
     final String minute = time.minute.toString().padLeft(2, '0');
     return '${hour12 == 0 ? 12 : hour12}:$minute $period';
   }

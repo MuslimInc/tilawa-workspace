@@ -38,6 +38,12 @@ abstract class PrayerTimesRepository {
     required double longitude,
   });
 
+  /// Get country code from coordinates
+  Future<String?> getCountryCode({
+    required double latitude,
+    required double longitude,
+  });
+
   /// Save prayer settings
   Future<void> saveSettings(PrayerSettingsEntity settings);
 
@@ -57,6 +63,7 @@ class LocationResult {
     required this.latitude,
     required this.longitude,
     this.locationName,
+    this.countryCode,
     this.error,
   });
 
@@ -66,6 +73,7 @@ class LocationResult {
   final double latitude;
   final double longitude;
   final String? locationName;
+  final String? countryCode;
   final String? error;
 
   bool get hasError => error != null;

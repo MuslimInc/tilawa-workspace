@@ -59,30 +59,38 @@ class PrayerTimeCalculator {
           _timeDifference(latitude, declination, params.ishaAngle) / 15;
     }
 
-    // Apply adjustments
+    // Apply adjustments with Fiqh safe rounding:
+    // - Floor for Fajr/Sunrise (prevent eating late during fast)
+    // - Ceil for Dhuhr, Asr, Maghrib, Isha (prevent praying before time enters)
     final DateTime fajr = _timeToDateTime(
       date,
       fajrTime + settings.fajrAdjustment / 60,
+      roundMode: RoundMode.floor,
     );
     final DateTime sunrise = _timeToDateTime(
       date,
       sunriseTime + settings.sunriseAdjustment / 60,
+      roundMode: RoundMode.floor,
     );
     final DateTime dhuhr = _timeToDateTime(
       date,
       dhuhrTime + settings.dhuhrAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime asr = _timeToDateTime(
       date,
       asrTime + settings.asrAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime maghrib = _timeToDateTime(
       date,
       maghribTime + settings.maghribAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime isha = _timeToDateTime(
       date,
       ishaTime + settings.ishaAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
 
     return PrayerTimeEntity(
@@ -216,21 +224,34 @@ class PrayerTimeCalculator {
     return _timeDifference(lat, decl, -angle);
   }
 
-  /// Convert decimal time to DateTime
-  DateTime _timeToDateTime(DateTime date, double time) {
-    final double fixedTime = _fixHour(time);
-    final int hours = fixedTime.floor();
-    final int minutes = ((fixedTime - hours) * 60).floor();
-    final int seconds = ((((fixedTime - hours) * 60) - minutes) * 60).floor();
+  /// Convert decimal time to DateTime, applying specific rounding
+  DateTime _timeToDateTime(
+    DateTime date,
+    double time, {
+    required RoundMode roundMode,
+  }) {
+    if (time.isNaN) return date;
 
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      hours.clamp(0, 23),
-      minutes.clamp(0, 59),
-      seconds.clamp(0, 59),
-    );
+    final double fixedTime = _fixHour(time);
+
+    // Convert to total minutes
+    final double exactMinutes = fixedTime * 60;
+
+    int totalMinutes;
+    if (roundMode == RoundMode.floor) {
+      totalMinutes = exactMinutes.floor();
+    } else {
+      totalMinutes = exactMinutes.ceil();
+    }
+
+    final int hours = (totalMinutes ~/ 60) % 24;
+    final int minutes = totalMinutes % 60;
+
+    // We do not add rollover days here because prayer times are strictly
+    // computed for the given 'date'. If an extreme latitude pushes a time
+    // to >= 24h, it maps to 00:00+ on the same day's DateTime, which we
+    // accept as wrapping around.
+    return DateTime(date.year, date.month, date.day, hours, minutes, 0);
   }
 
   /// Get timezone offset for a date
@@ -270,3 +291,6 @@ class CalculationParams {
   final double ishaAngle;
   final int? ishaMinutes;
 }
+
+/// Rounding modes for prayer time minutes
+enum RoundMode { floor, ceil }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 
@@ -8,6 +9,7 @@ import '../services/geolocator_client.dart';
 
 abstract class LocationDataSource {
   Future<LocationResult> getCurrentLocation({bool forceRefresh = false});
+  Future<String?> getCountryCode(double latitude, double longitude);
   Future<bool> hasPermission();
   Future<bool> requestPermission();
   Future<bool> isLocationServiceEnabled();
@@ -48,6 +50,28 @@ class LocationDataSourceImpl implements LocationDataSource {
     }
 
     return _getLocationResult();
+  }
+
+  @override
+  Future<String?> getCountryCode(double latitude, double longitude) async {
+    try {
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final code = placemarks.first.isoCountryCode;
+        if (code != null && code.isNotEmpty) {
+          return code;
+        }
+      }
+    } catch (e) {
+      // Ignore geocoding errors
+    }
+
+    // Fallback detection
+    return _approximateCountryCode(latitude, longitude);
   }
 
   @override
@@ -95,12 +119,46 @@ class LocationDataSourceImpl implements LocationDataSource {
         locationSettings: _locationSettings,
       );
 
+      String? locationName;
+      String? countryCode;
+
+      try {
+        final List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          final Placemark place = placemarks.first;
+          locationName = place.locality ?? place.subAdministrativeArea;
+          countryCode = place.isoCountryCode;
+        }
+      } catch (e) {
+        // Ignore geocoding errors, just return coordinates
+      }
+
+      // Fallback if geocoding fails or returns empty
+      if (countryCode == null || countryCode.isEmpty) {
+        countryCode = _approximateCountryCode(
+          position.latitude,
+          position.longitude,
+        );
+      }
+
       return LocationResult(
         latitude: position.latitude,
         longitude: position.longitude,
+        locationName: locationName,
+        countryCode: countryCode,
       );
     } catch (e) {
-      // Fallback to last known position on any error (including timeout)
+      if (e is TimeoutException) {
+        return LocationResult.error(
+          'Location request timed out. Please check your GPS signal.',
+        );
+      }
+
+      // Fallback to last known position on any error
       final Position? lastKnown = await _geolocatorClient
           .getLastKnownPosition();
       if (lastKnown != null) {
@@ -110,13 +168,46 @@ class LocationDataSourceImpl implements LocationDataSource {
         );
       }
 
-      if (e is TimeoutException) {
-        return LocationResult.error(
-          'Location request timed out. Please check your GPS signal.',
-        );
-      }
-
       return LocationResult.error('Failed to get location: $e');
     }
+  }
+
+  String? _approximateCountryCode(double latitude, double longitude) {
+    // Egypt Bounding Box (Rough approximation)
+    if (latitude >= 22.0 &&
+        latitude <= 32.0 &&
+        longitude >= 24.5 &&
+        longitude <= 37.0) {
+      return 'EG';
+    }
+    // Saudi Arabia
+    if (latitude >= 16.0 &&
+        latitude <= 32.5 &&
+        longitude >= 34.0 &&
+        longitude <= 56.0) {
+      // Exclude Egypt overlap (if any - unlikely/minimal)
+      if (!(latitude >= 22.0 &&
+          latitude <= 32.0 &&
+          longitude >= 24.5 &&
+          longitude <= 37.0)) {
+        return 'SA';
+      }
+    }
+    // Turkey
+    if (latitude >= 35.0 &&
+        latitude <= 42.0 &&
+        longitude >= 25.0 &&
+        longitude <= 45.0) {
+      return 'TR';
+    }
+    // Pakistan
+    if (latitude >= 23.0 &&
+        latitude <= 37.0 &&
+        longitude >= 60.0 &&
+        longitude <= 78.0) {
+      return 'PK';
+    }
+
+    return null;
   }
 }

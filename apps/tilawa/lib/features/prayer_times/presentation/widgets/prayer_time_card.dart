@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 
 class PrayerTimeCard extends StatelessWidget {
@@ -108,7 +108,7 @@ class PrayerTimeCard extends StatelessWidget {
                 Text(
                   use24HourFormat
                       ? prayer.formattedTime
-                      : prayer.formattedTime12Hour,
+                      : prayer.getFormattedTime12Hour(isArabic: isArabic),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontSize: 18.sp,
                     fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
@@ -117,7 +117,6 @@ class PrayerTimeCard extends StatelessWidget {
                         : hasPassed
                         ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
                         : theme.colorScheme.onSurface,
-                    fontFamily: 'RobotoMono',
                   ),
                 ),
 
