@@ -202,12 +202,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 use24HourFormat: state.settings.use24HourFormat,
               ),
 
-            // Prayer times list
-            PrayerTimesList(
+            // Prayer times grid
+            PrayerTimesGrid(
               prayerTimes: state.todayPrayerTimes!,
               currentPrayer: state.currentOrNextPrayer,
               use24HourFormat: state.settings.use24HourFormat,
-              showSunrise: state.settings.showSunrise,
+            ),
+
+            // Fasting hours summary
+            FastingHoursStrip(
+              prayerTimes: state.todayPrayerTimes!,
             ),
           ],
         ),

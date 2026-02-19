@@ -93,6 +93,39 @@ class PrayerTimeCalculator {
       roundMode: RoundMode.ceil,
     );
 
+    // Calculate next day's Fajr to determine Midnight and Last Third of the night
+    final DateTime nextDate = date.add(const Duration(days: 1));
+    final double nextJd = _julianDate(
+      nextDate.year,
+      nextDate.month,
+      nextDate.day,
+    );
+    final double nextDeclination = _sunDeclination(nextJd);
+    final double nextEquationOfTime = _equationOfTime(nextJd);
+    final double nextDhuhrTime =
+        12 +
+        _getTimeZoneOffset(nextDate) -
+        longitude / 15 -
+        nextEquationOfTime / 60;
+    final double nextFajrTime =
+        nextDhuhrTime -
+        _timeDifference(latitude, nextDeclination, params.fajrAngle) / 15;
+
+    final DateTime nextFajr = _timeToDateTime(
+      nextDate,
+      nextFajrTime + settings.fajrAdjustment / 60,
+      roundMode: RoundMode.floor,
+    );
+
+    // Calculate night segments mathematically
+    final int nightDurationMinutes = nextFajr.difference(maghrib).inMinutes;
+    final DateTime midnight = maghrib.add(
+      Duration(minutes: nightDurationMinutes ~/ 2),
+    );
+    final DateTime lastThird = maghrib.add(
+      Duration(minutes: (nightDurationMinutes * 2) ~/ 3),
+    );
+
     return PrayerTimeEntity(
       date: date,
       fajr: fajr,
@@ -101,6 +134,8 @@ class PrayerTimeCalculator {
       asr: asr,
       maghrib: maghrib,
       isha: isha,
+      midnight: midnight,
+      lastThird: lastThird,
       latitude: latitude,
       longitude: longitude,
     );

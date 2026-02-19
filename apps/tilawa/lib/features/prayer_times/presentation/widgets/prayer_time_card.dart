@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -23,18 +22,19 @@ class PrayerTimeCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
+    // Active color from theme to ensure good contrast
+    final Color activeColor = theme.colorScheme.primary;
+
     return Container(
       decoration: BoxDecoration(
-        color: isNext
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
-            : theme.colorScheme.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: isNext
-            ? Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                width: 1.5,
-              )
-            : null,
+        border: Border.all(
+          color: isNext
+              ? activeColor.withValues(alpha: 0.3)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+          width: isNext ? 1.5 : 1.0,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -42,115 +42,49 @@ class PrayerTimeCard extends StatelessWidget {
           onTap: () {},
           borderRadius: BorderRadius.circular(16.r),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Row(
+            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Prayer icon
-                Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: isNext
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(
-                    _getPrayerIcon(prayer.type),
-                    size: 18.sp,
-                    color: isNext
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-
-                SizedBox(width: 12.w),
-
                 // Prayer name
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        isArabic
-                            ? prayer.type.displayNameAr
-                            : prayer.type.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: isNext
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          color: hasPassed
-                              ? theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.6,
-                                )
-                              : theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      if (isNext)
-                        Padding(
-                          padding: EdgeInsets.only(top: 2.h),
-                          child: Text(
-                            context.l10n.nextPrayer,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 11.sp,
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                Text(
+                  isArabic
+                      ? prayer.type.displayNameAr
+                      : prayer.type.displayName,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontSize: 18.sp,
+                    fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
+                    color: isNext
+                        ? activeColor
+                        : theme.colorScheme.onSurface.withValues(
+                            alpha: hasPassed ? 0.6 : 1.0,
                           ),
-                        ),
-                    ],
                   ),
                 ),
+                SizedBox(height: 8.h),
 
                 // Prayer time
                 Text(
                   use24HourFormat
                       ? prayer.formattedTime
                       : prayer.getFormattedTime12Hour(isArabic: isArabic),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 18.sp,
-                    fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
                     color: isNext
-                        ? theme.colorScheme.primary
-                        : hasPassed
-                        ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
-                        : theme.colorScheme.onSurface,
+                        ? activeColor
+                        : theme.colorScheme.onSurface.withValues(
+                            alpha: hasPassed ? 0.6 : 1.0,
+                          ),
                   ),
                 ),
+                SizedBox(height: 8.h),
 
-                SizedBox(width: 8.w),
-
-                // Status indicator dot
-                if (isNext)
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    width: 8.w,
-                    height: 8.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.colorScheme.primary,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.4,
-                          ),
-                          blurRadius: 4,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                  )
-                else if (hasPassed)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.w),
-                    child: Icon(
-                      Icons.check_circle,
-                      size: 16.sp,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                    ),
-                  ),
+                // Iqamah Time
+                _buildIqamahText(theme, isArabic, activeColor),
               ],
             ),
           ),
@@ -159,20 +93,59 @@ class PrayerTimeCard extends StatelessWidget {
     );
   }
 
-  IconData _getPrayerIcon(PrayerType type) {
-    switch (type) {
+  Widget _buildIqamahText(ThemeData theme, bool isArabic, Color activeColor) {
+    int minutesToAdd = 0;
+    String prefix = isArabic ? 'الإقامة: ' : 'Iqamah: ';
+
+    switch (prayer.type) {
       case PrayerType.fajr:
-        return Icons.wb_twilight;
+        minutesToAdd = 25;
+        break;
       case PrayerType.sunrise:
-        return Icons.wb_sunny_outlined;
+        minutesToAdd = 20;
+        prefix = isArabic ? 'بداية الإشراق: ' : 'Ishraq: ';
+        break;
       case PrayerType.dhuhr:
-        return Icons.wb_sunny;
       case PrayerType.asr:
-        return Icons.wb_incandescent_outlined;
-      case PrayerType.maghrib:
-        return Icons.nights_stay_outlined;
       case PrayerType.isha:
-        return Icons.nights_stay;
+        minutesToAdd = 20;
+        break;
+      case PrayerType.maghrib:
+        minutesToAdd = 5;
+        break;
+      case PrayerType.midnight:
+      case PrayerType.lastThird:
+        // No Iqamah or Ishraq for these night segments
+        return const SizedBox.shrink();
     }
+
+    final DateTime iqamahTime = prayer.time.add(
+      Duration(minutes: minutesToAdd),
+    );
+
+    // Format Iqamah Time (usually same formatting as prayer.type, but omit AM/PM if redundant)
+    // The screenshot drops AM/PM for Iqamah, e.g. "الإقامة: 5:29"
+    final int hour12 = iqamahTime.hour > 12
+        ? iqamahTime.hour - 12
+        : iqamahTime.hour;
+    final String formattedHour = hour12 == 0 ? '12' : hour12.toString();
+    final String formattedMinute = iqamahTime.minute.toString().padLeft(2, '0');
+    final String timeStr = use24HourFormat
+        ? '${iqamahTime.hour.toString().padLeft(2, '0')}:$formattedMinute'
+        : '$formattedHour:$formattedMinute';
+
+    return Text(
+      '$prefix$timeStr',
+      textAlign: TextAlign.center,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w500,
+        color: isNext
+            ? activeColor.withValues(alpha: 0.8)
+            : theme.colorScheme.onSurfaceVariant.withValues(
+                alpha: hasPassed ? 0.5 : 0.8,
+              ),
+      ),
+    );
   }
 }

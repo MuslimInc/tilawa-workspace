@@ -27,8 +27,10 @@ void main() {
     sunrise: tDate,
     dhuhr: tDate,
     asr: tDate,
-    maghrib: tDate,
-    isha: tDate,
+    maghrib: DateTime(2023, 1, 1, 17, 30),
+    isha: DateTime(2023, 1, 1, 19, 0),
+    midnight: DateTime(2023, 1, 1, 23, 30),
+    lastThird: DateTime(2023, 1, 2, 2, 0),
     latitude: 10.0,
     longitude: 10.0,
   );

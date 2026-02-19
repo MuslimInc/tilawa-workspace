@@ -42,14 +42,31 @@ class LocationDataSourceImpl implements LocationDataSource {
       final Position? lastKnown = await _geolocatorClient
           .getLastKnownPosition();
       if (lastKnown != null) {
-        return LocationResult(
-          latitude: lastKnown.latitude,
-          longitude: lastKnown.longitude,
-        );
+        return _getLocationResultFromPosition(lastKnown);
       }
     }
 
-    return _getLocationResult();
+    try {
+      final Position position = await _geolocatorClient.getCurrentPosition(
+        locationSettings: _locationSettings,
+      );
+      return _getLocationResultFromPosition(position);
+    } catch (e) {
+      if (e is TimeoutException) {
+        return LocationResult.error(
+          'Location request timed out. Please check your GPS signal.',
+        );
+      }
+
+      // Fallback to last known position on any error
+      final Position? lastKnown = await _geolocatorClient
+          .getLastKnownPosition();
+      if (lastKnown != null) {
+        return _getLocationResultFromPosition(lastKnown);
+      }
+
+      return LocationResult.error('Failed to get current location: $e');
+    }
   }
 
   @override
@@ -113,63 +130,108 @@ class LocationDataSourceImpl implements LocationDataSource {
     return requestPermission();
   }
 
-  Future<LocationResult> _getLocationResult() async {
+  Future<LocationResult> _getLocationResultFromPosition(
+    Position position,
+  ) async {
+    String? locationName;
+    String? countryCode;
+
     try {
-      final Position position = await _geolocatorClient.getCurrentPosition(
-        locationSettings: _locationSettings,
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
       );
 
-      String? locationName;
-      String? countryCode;
+      if (placemarks.isNotEmpty) {
+        final List<String> addressParts = [];
 
-      try {
-        final List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-
-        if (placemarks.isNotEmpty) {
-          final Placemark place = placemarks.first;
-          locationName = place.locality ?? place.subAdministrativeArea;
-          countryCode = place.isoCountryCode;
+        bool isValidPart(String? part) {
+          if (part == null || part.trim().isEmpty) return false;
+          final trimmed = part.trim();
+          if (trimmed.contains('Unnamed')) return false;
+          // Filter out Google Plus Codes
+          if (trimmed.contains('+') && !trimmed.contains(' ')) return false;
+          // Filter out single character/number strings (like '25', '7a') that aren't fully descriptive
+          if (RegExp(r'^[a-zA-Z0-9]{1,3}$').hasMatch(trimmed)) return false;
+          return true;
         }
-      } catch (e) {
-        // Ignore geocoding errors, just return coordinates
-      }
 
-      // Fallback if geocoding fails or returns empty
-      if (countryCode == null || countryCode.isEmpty) {
-        countryCode = _approximateCountryCode(
-          position.latitude,
-          position.longitude,
-        );
-      }
+        String? thoroughfare,
+            subLocality,
+            street,
+            name,
+            locality,
+            subAdmin,
+            admin,
+            country,
+            isoCountryCode;
 
-      return LocationResult(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        locationName: locationName,
-        countryCode: countryCode,
-      );
+        for (final place in placemarks) {
+          if (thoroughfare == null && isValidPart(place.thoroughfare))
+            thoroughfare = place.thoroughfare!.trim();
+          if (subLocality == null && isValidPart(place.subLocality))
+            subLocality = place.subLocality!.trim();
+          if (street == null && isValidPart(place.street))
+            street = place.street!.trim();
+          if (name == null && isValidPart(place.name))
+            name = place.name!.trim();
+
+          if (locality == null && isValidPart(place.locality))
+            locality = place.locality!.trim();
+          if (subAdmin == null && isValidPart(place.subAdministrativeArea))
+            subAdmin = place.subAdministrativeArea!.trim();
+          if (admin == null && isValidPart(place.administrativeArea))
+            admin = place.administrativeArea!.trim();
+          if (country == null && isValidPart(place.country))
+            country = place.country!.trim();
+          if (isoCountryCode == null && place.isoCountryCode != null)
+            isoCountryCode = place.isoCountryCode;
+        }
+
+        // 1. Street-level accuracy
+        if (thoroughfare != null) {
+          addressParts.add(thoroughfare);
+        } else if (subLocality != null) {
+          addressParts.add(subLocality);
+        } else if (street != null) {
+          addressParts.add(street);
+        } else if (name != null) {
+          addressParts.add(name);
+        }
+
+        // 2. City-level accuracy
+        if (locality != null && !addressParts.contains(locality)) {
+          addressParts.add(locality);
+        } else if (subAdmin != null && !addressParts.contains(subAdmin)) {
+          addressParts.add(subAdmin);
+        }
+
+        if (addressParts.isNotEmpty) {
+          locationName = addressParts.toSet().join('، ');
+        } else {
+          locationName = admin ?? country;
+        }
+
+        countryCode = isoCountryCode;
+      }
     } catch (e) {
-      if (e is TimeoutException) {
-        return LocationResult.error(
-          'Location request timed out. Please check your GPS signal.',
-        );
-      }
-
-      // Fallback to last known position on any error
-      final Position? lastKnown = await _geolocatorClient
-          .getLastKnownPosition();
-      if (lastKnown != null) {
-        return LocationResult(
-          latitude: lastKnown.latitude,
-          longitude: lastKnown.longitude,
-        );
-      }
-
-      return LocationResult.error('Failed to get location: $e');
+      // Ignore geocoding errors, just return coordinates
     }
+
+    // Fallback if geocoding fails or returns empty
+    if (countryCode == null || countryCode.isEmpty) {
+      countryCode = _approximateCountryCode(
+        position.latitude,
+        position.longitude,
+      );
+    }
+
+    return LocationResult(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      locationName: locationName,
+      countryCode: countryCode,
+    );
   }
 
   String? _approximateCountryCode(double latitude, double longitude) {

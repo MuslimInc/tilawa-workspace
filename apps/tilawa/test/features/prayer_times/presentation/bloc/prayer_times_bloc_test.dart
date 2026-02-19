@@ -68,8 +68,10 @@ void main() {
         sunrise: DateTime.now(),
         dhuhr: DateTime.now(),
         asr: DateTime.now(),
-        maghrib: DateTime.now(),
-        isha: DateTime.now(),
+        maghrib: DateTime(2023, 1, 1, 17, 30),
+        isha: DateTime(2023, 1, 1, 19, 0),
+        midnight: DateTime(2023, 1, 1, 23, 30),
+        lastThird: DateTime(2023, 1, 2, 2, 0),
         latitude: 0,
         longitude: 0,
       ),
@@ -98,6 +100,8 @@ void main() {
     latitude: 10.0,
     longitude: 10.0,
     timezone: 'UTC',
+    midnight: DateTime.now(),
+    lastThird: DateTime.now(),
   );
 
   group('PrayerTimesBloc', () {

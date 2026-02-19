@@ -128,6 +128,9 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
         return maghribAdjustment;
       case PrayerType.isha:
         return ishaAdjustment;
+      case PrayerType.midnight:
+      case PrayerType.lastThird:
+        return 0;
     }
   }
 

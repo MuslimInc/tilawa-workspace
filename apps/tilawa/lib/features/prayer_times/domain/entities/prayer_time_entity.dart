@@ -3,8 +3,17 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'prayer_time_entity.freezed.dart';
 part 'prayer_time_entity.g.dart';
 
-/// Enum representing the five daily prayers plus sunrise
-enum PrayerType { fajr, sunrise, dhuhr, asr, maghrib, isha }
+/// Enum representing the five daily prayers plus sunrise, midnight, and last third
+enum PrayerType {
+  fajr,
+  sunrise,
+  dhuhr,
+  asr,
+  maghrib,
+  isha,
+  midnight,
+  lastThird,
+}
 
 /// Entity representing prayer times for a specific day
 @freezed
@@ -17,6 +26,8 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
     required DateTime asr,
     required DateTime maghrib,
     required DateTime isha,
+    required DateTime midnight,
+    required DateTime lastThird,
     String? timezone,
     String? locationName,
     double? latitude,
@@ -35,19 +46,31 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
     PrayerTimeItem(type: PrayerType.asr, time: asr),
     PrayerTimeItem(type: PrayerType.maghrib, time: maghrib),
     PrayerTimeItem(type: PrayerType.isha, time: isha),
+    PrayerTimeItem(type: PrayerType.midnight, time: midnight),
+    PrayerTimeItem(type: PrayerType.lastThird, time: lastThird),
   ];
 
-  /// Get the current or next prayer based on the current time
+  /// Get the main prayer times (excluding midnight and last third)
+  List<PrayerTimeItem> get mainPrayers => [
+    PrayerTimeItem(type: PrayerType.fajr, time: fajr),
+    PrayerTimeItem(type: PrayerType.sunrise, time: sunrise),
+    PrayerTimeItem(type: PrayerType.dhuhr, time: dhuhr),
+    PrayerTimeItem(type: PrayerType.asr, time: asr),
+    PrayerTimeItem(type: PrayerType.maghrib, time: maghrib),
+    PrayerTimeItem(type: PrayerType.isha, time: isha),
+  ];
+
+  /// Get the current or next MAIN prayer based on the current time
   PrayerTimeItem? getCurrentOrNextPrayer() {
     final now = DateTime.now();
 
-    for (final PrayerTimeItem prayer in allPrayers) {
+    for (final PrayerTimeItem prayer in mainPrayers) {
       if (prayer.time.isAfter(now)) {
         return prayer;
       }
     }
 
-    // All prayers have passed, return Fajr of next day
+    // All main prayers have passed, return Fajr of next day
     return PrayerTimeItem(
       type: PrayerType.fajr,
       time: fajr.add(const Duration(days: 1)),
@@ -59,7 +82,7 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
     final now = DateTime.now();
     PrayerTimeItem? previous;
 
-    for (final PrayerTimeItem prayer in allPrayers) {
+    for (final PrayerTimeItem prayer in mainPrayers) {
       if (prayer.time.isBefore(now)) {
         previous = prayer;
       } else {
@@ -102,6 +125,10 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
         return maghrib;
       case PrayerType.isha:
         return isha;
+      case PrayerType.midnight:
+        return midnight;
+      case PrayerType.lastThird:
+        return lastThird;
     }
   }
 }
@@ -145,6 +172,10 @@ extension PrayerTypeExtension on PrayerType {
         return 'Maghrib';
       case PrayerType.isha:
         return 'Isha';
+      case PrayerType.midnight:
+        return 'Midnight';
+      case PrayerType.lastThird:
+        return 'Last Third';
     }
   }
 
@@ -162,6 +193,10 @@ extension PrayerTypeExtension on PrayerType {
         return 'المغرب';
       case PrayerType.isha:
         return 'العشاء';
+      case PrayerType.midnight:
+        return 'منتصف الليل';
+      case PrayerType.lastThird:
+        return 'الثلث الأخير';
     }
   }
 
@@ -179,6 +214,10 @@ extension PrayerTypeExtension on PrayerType {
         return 'maghrib';
       case PrayerType.isha:
         return 'isha';
+      case PrayerType.midnight:
+        return 'midnight';
+      case PrayerType.lastThird:
+        return 'lastThird';
     }
   }
 }
