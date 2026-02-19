@@ -87,11 +87,18 @@ class QuranDataSourceImpl implements QuranDataSource {
         a,
       ) {
         final map = a as Map<String, dynamic>;
+        final text = map['text'] ?? '';
+        if (surahNumber == 2 &&
+            (map['numberInSurah'] == 38 || map['numberInSurah'] == 43)) {
+          print(
+            'DataSource: Scanned Ayah $surahNumber:${map['numberInSurah']} raw text: "$text"',
+          );
+        }
         return AyahEntity(
           number: map['number'] ?? 0,
           numberInSurah: map['numberInSurah'] ?? 0,
           surahNumber: surahNumber,
-          text: map['text'] ?? '',
+          text: text,
           juz: map['juz'],
           manzil: map['manzil'],
           page: map['page'],

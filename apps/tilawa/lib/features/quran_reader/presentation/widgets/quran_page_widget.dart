@@ -1,11 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:tilawa_core/constants/quran_constants.dart';
+
 import '../../domain/entities/entities.dart';
 import '../controllers/quran_page_audio_controller.dart';
-import 'quran_page_widget.dart'; // Self import if needed, or remove.
 // Actually I am rewriting the file.
 
 class QuranPageWidget extends StatefulWidget {
@@ -169,10 +168,6 @@ class _SurahTextSectionState extends State<SurahTextSection> {
         for (final PageAyahInfo ayah in widget.ayahs) {
           if (ayah.words != null) {
             for (final QuranWord word in ayah.words!) {
-              if (word.charTypeName == 'end') {
-                continue;
-              }
-
               final isPlaying = word.id == playingId;
               final recognizer = TapGestureRecognizer()
                 ..onTap = () {
@@ -234,18 +229,6 @@ class _SurahTextSectionState extends State<SurahTextSection> {
               ),
             );
           }
-
-          // Ayah End Symbol
-          spans.add(
-            TextSpan(
-              text:
-                  '\u06DD${ayah.ayahNumber.toArabicDigits()} ', // End of Ayah symbol + Number
-              style: GoogleFonts.amiri(
-                fontSize: 24,
-                color: const Color(0xFFD4AF37), // Gold color
-              ),
-            ),
-          );
         }
 
         return RichText(
