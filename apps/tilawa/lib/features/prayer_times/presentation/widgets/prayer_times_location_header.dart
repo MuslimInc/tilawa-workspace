@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/prayer_times/presentation/widgets/location_row.dart';
 
 class PrayerTimesLocationHeader extends StatelessWidget {
   const PrayerTimesLocationHeader({
@@ -48,73 +48,11 @@ class PrayerTimesLocationHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Location Row
-          Row(
-            children: [
-              Icon(
-                Icons.location_on_rounded,
-                size: 20.sp,
-                color: theme.colorScheme.primary,
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.currentLocation,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (locationName != null && locationName!.isNotEmpty) ...[
-                      SizedBox(height: 2.h),
-                      Text(
-                        locationName!,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ] else ...[
-                      SizedBox(height: 2.h),
-                      Text(
-                        context.l10n.unknownLocation,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (isLoading)
-                SizedBox(
-                  width: 16.w,
-                  height: 16.w,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: theme.colorScheme.primary,
-                  ),
-                )
-              else
-                IconButton(
-                  icon: Icon(
-                    Icons.my_location_rounded,
-                    size: 20.sp,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: onUpdateLocation,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  splashRadius: 24.r,
-                ),
-            ],
+          // Location Row Container (Molecular Component)
+          LocationRow(
+            locationName: locationName,
+            isLoading: isLoading,
+            onUpdateLocation: onUpdateLocation,
           ),
 
           SizedBox(height: 12.h),

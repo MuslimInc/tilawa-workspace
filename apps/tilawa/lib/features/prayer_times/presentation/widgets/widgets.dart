@@ -1,4 +1,5 @@
 export 'fasting_hours_strip.dart';
+export 'location_row.dart';
 export 'monthly_prayer_times_view.dart';
 export 'next_prayer_countdown_card.dart';
 export 'prayer_settings_sheet.dart';
