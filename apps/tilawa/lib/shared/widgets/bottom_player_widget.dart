@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
+
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
@@ -27,15 +27,30 @@ class BottomPlayerWidget extends StatefulWidget {
 class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
   int? _currentReciterId;
   String? _currentReciterName;
+  bool _isDismissed = false;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+    return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
+      listenWhen: (previous, current) {
+        // Reset _isDismissed when audio changes or bottom player needs to show again
+        return previous.currentAudio?.id != current.currentAudio?.id ||
+            (!previous.shouldShowBottomPlayer &&
+                current.shouldShowBottomPlayer) ||
+            (previous.isPlaying != current.isPlaying && current.isPlaying);
+      },
+      listener: (context, state) {
+        if (_isDismissed) {
+          setState(() {
+            _isDismissed = false;
+          });
+        }
+      },
       builder: (context, state) {
         final AudioEntity? audio = state.currentAudio;
 
         // Hide if no media, error, or manually dismissed
-        if (!state.shouldShowBottomPlayer || audio == null) {
+        if (!state.shouldShowBottomPlayer || audio == null || _isDismissed) {
           return const SizedBox.shrink();
         }
 
@@ -52,22 +67,27 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               duration: Duration.zero,
             );
 
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            border: Border(
-              top: BorderSide(color: Theme.of(context).colorScheme.surface),
+        return Dismissible(
+          key: Key(audio.id),
+          direction: DismissDirection.down,
+          onDismissed: (direction) {
+            setState(() {
+              _isDismissed = true;
+            });
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.stopAudio(),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
+              border: Border(
+                top: BorderSide(color: Theme.of(context).colorScheme.surface),
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-          ),
-          child: Dismissible(
-            key: Key(audio.id),
-            direction: DismissDirection.down,
-            onDismissed: (direction) {
-              context.read<AudioPlayerBloc>().add(
-                const AudioPlayerEvent.stopAudio(),
-              );
-            },
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 16.w,
