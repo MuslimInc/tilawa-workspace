@@ -83,10 +83,23 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     if (_countdownTimer != null) {
       return;
     }
-    _countdownTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) => add(const PrayerTimesEvent.refreshCountdown()),
-    );
+
+    // Ensure the timer fires right on the second boundary to avoid drift
+    final now = DateTime.now();
+    final delayToNextSecond = 1000 - now.millisecond;
+
+    Future.delayed(Duration(milliseconds: delayToNextSecond), () {
+      if (!_isCountdownActive || isClosed) return;
+
+      // Fire immediately on the second mark
+      add(const PrayerTimesEvent.refreshCountdown());
+
+      // Then start periodic
+      _countdownTimer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => add(const PrayerTimesEvent.refreshCountdown()),
+      );
+    });
   }
 
   void _stopCountdownTimer() {

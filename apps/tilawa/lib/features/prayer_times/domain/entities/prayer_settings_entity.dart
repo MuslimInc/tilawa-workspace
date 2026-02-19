@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'prayer_time_entity.dart';
+
 part 'prayer_settings_entity.freezed.dart';
 part 'prayer_settings_entity.g.dart';
 
@@ -112,22 +114,20 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
       _$PrayerSettingsEntityFromJson(json);
 
   /// Get adjustment in minutes for a specific prayer type
-  int getAdjustmentFor(String prayerName) {
-    switch (prayerName.toLowerCase()) {
-      case 'fajr':
+  int getAdjustmentFor(PrayerType prayerType) {
+    switch (prayerType) {
+      case PrayerType.fajr:
         return fajrAdjustment;
-      case 'sunrise':
+      case PrayerType.sunrise:
         return sunriseAdjustment;
-      case 'dhuhr':
+      case PrayerType.dhuhr:
         return dhuhrAdjustment;
-      case 'asr':
+      case PrayerType.asr:
         return asrAdjustment;
-      case 'maghrib':
+      case PrayerType.maghrib:
         return maghribAdjustment;
-      case 'isha':
+      case PrayerType.isha:
         return ishaAdjustment;
-      default:
-        return 0;
     }
   }
 

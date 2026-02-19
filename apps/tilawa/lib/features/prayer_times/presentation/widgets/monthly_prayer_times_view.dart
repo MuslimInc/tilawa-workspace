@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
@@ -104,11 +105,11 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
           child: Row(
             children: [
               _buildHeaderCell(context.l10n.day),
-              _buildHeaderCell('Fajr', flex: 2),
-              _buildHeaderCell('Dhuhr', flex: 2),
-              _buildHeaderCell('Asr', flex: 2),
-              _buildHeaderCell('Maghrib', flex: 2),
-              _buildHeaderCell('Isha', flex: 2),
+              _buildHeaderCell(context.l10n.fajr, flex: 2),
+              _buildHeaderCell(context.l10n.dhuhr, flex: 2),
+              _buildHeaderCell(context.l10n.asr, flex: 2),
+              _buildHeaderCell(context.l10n.maghrib, flex: 2),
+              _buildHeaderCell(context.l10n.isha, flex: 2),
             ],
           ),
         ),
@@ -240,20 +241,8 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
   }
 
   String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
+    final DateTime date = DateTime(DateTime.now().year, month, 1);
+    final String languageCode = Localizations.localeOf(context).languageCode;
+    return DateFormat.MMMM(languageCode).format(date);
   }
 }

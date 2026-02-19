@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 
@@ -44,159 +44,177 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
       maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+        return BlocListener<PrayerTimesBloc, PrayerTimesState>(
+          listenWhen: (previous, current) =>
+              previous.settings != current.settings,
+          listener: (context, state) {
+            setState(() {
+              _settings = state.settings;
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Text(
-                      context.l10n.prayerSettings,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: _saveSettings,
-                      child: Text(context.l10n.save),
-                    ),
-                  ],
+            ),
+            child: Column(
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
 
-              const Divider(height: 1),
-
-              // Settings list
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
+                // Header
+                Padding(
                   padding: const EdgeInsets.all(16),
-                  children: [
-                    // Calculation method
-                    _buildSectionTitle(context, context.l10n.calculationMethod),
-                    _buildDropdown<CalculationMethod>(
-                      value: _settings.calculationMethod,
-                      items: CalculationMethod.values,
-                      labelBuilder: (method) => method.displayName,
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            _settings.copyWith(calculationMethod: method),
-                          );
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Asr calculation
-                    _buildSectionTitle(context, context.l10n.asrCalculation),
-                    _buildDropdown<AsrJuristicMethod>(
-                      value: _settings.asrJuristicMethod,
-                      items: AsrJuristicMethod.values,
-                      labelBuilder: (method) =>
-                          method == AsrJuristicMethod.shafii
-                          ? "Shafi'i, Maliki, Hanbali"
-                          : 'Hanafi',
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            _settings.copyWith(asrJuristicMethod: method),
-                          );
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Display options
-                    _buildSectionTitle(context, context.l10n.displayOptions),
-                    SwitchListTile(
-                      title: Text(context.l10n.use24HourFormat),
-                      value: _settings.use24HourFormat,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(use24HourFormat: value),
-                        );
-                      },
-                    ),
-                    SwitchListTile(
-                      title: Text(context.l10n.showSunrise),
-                      value: _settings.showSunrise,
-                      onChanged: (value) {
-                        _updateSettings(_settings.copyWith(showSunrise: value));
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Time adjustments
-                    _buildSectionTitle(context, context.l10n.timeAdjustments),
-                    _buildAdjustmentSlider(
-                      label: 'Fajr',
-                      value: _settings.fajrAdjustment,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(fajrAdjustment: value.round()),
-                        );
-                      },
-                    ),
-                    _buildAdjustmentSlider(
-                      label: 'Dhuhr',
-                      value: _settings.dhuhrAdjustment,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(dhuhrAdjustment: value.round()),
-                        );
-                      },
-                    ),
-                    _buildAdjustmentSlider(
-                      label: 'Asr',
-                      value: _settings.asrAdjustment,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(asrAdjustment: value.round()),
-                        );
-                      },
-                    ),
-                    _buildAdjustmentSlider(
-                      label: 'Maghrib',
-                      value: _settings.maghribAdjustment,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(maghribAdjustment: value.round()),
-                        );
-                      },
-                    ),
-                    _buildAdjustmentSlider(
-                      label: 'Isha',
-                      value: _settings.ishaAdjustment,
-                      onChanged: (value) {
-                        _updateSettings(
-                          _settings.copyWith(ishaAdjustment: value.round()),
-                        );
-                      },
-                    ),
-                  ],
+                  child: Row(
+                    children: [
+                      Text(
+                        context.l10n.prayerSettings,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _saveSettings,
+                        child: Text(context.l10n.save),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+
+                const Divider(height: 1),
+
+                // Settings list
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // Calculation method
+                      _buildSectionTitle(
+                        context,
+                        context.l10n.calculationMethod,
+                      ),
+                      _buildDropdown<CalculationMethod>(
+                        value: _settings.calculationMethod,
+                        items: CalculationMethod.values,
+                        labelBuilder: (method) => method.displayName,
+                        onChanged: (method) {
+                          if (method != null) {
+                            _updateSettings(
+                              _settings.copyWith(calculationMethod: method),
+                            );
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Asr calculation
+                      _buildSectionTitle(context, context.l10n.asrCalculation),
+                      _buildDropdown<AsrJuristicMethod>(
+                        value: _settings.asrJuristicMethod,
+                        items: AsrJuristicMethod.values,
+                        labelBuilder: (method) =>
+                            method == AsrJuristicMethod.shafii
+                            ? "Shafi'i, Maliki, Hanbali"
+                            : 'Hanafi',
+                        onChanged: (method) {
+                          if (method != null) {
+                            _updateSettings(
+                              _settings.copyWith(asrJuristicMethod: method),
+                            );
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Display options
+                      _buildSectionTitle(context, context.l10n.displayOptions),
+                      SwitchListTile(
+                        title: Text(context.l10n.use24HourFormat),
+                        value: _settings.use24HourFormat,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(use24HourFormat: value),
+                          );
+                        },
+                      ),
+                      SwitchListTile(
+                        title: Text(context.l10n.showSunrise),
+                        value: _settings.showSunrise,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(showSunrise: value),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Time adjustments
+                      _buildSectionTitle(context, context.l10n.timeAdjustments),
+                      _buildAdjustmentSlider(
+                        label: context.l10n.fajr,
+                        value: _settings.fajrAdjustment,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(fajrAdjustment: value.round()),
+                          );
+                        },
+                      ),
+                      _buildAdjustmentSlider(
+                        label: context.l10n.dhuhr,
+                        value: _settings.dhuhrAdjustment,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(dhuhrAdjustment: value.round()),
+                          );
+                        },
+                      ),
+                      _buildAdjustmentSlider(
+                        label: context.l10n.asr,
+                        value: _settings.asrAdjustment,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(asrAdjustment: value.round()),
+                          );
+                        },
+                      ),
+                      _buildAdjustmentSlider(
+                        label: context.l10n.maghrib,
+                        value: _settings.maghribAdjustment,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(
+                              maghribAdjustment: value.round(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildAdjustmentSlider(
+                        label: context.l10n.isha,
+                        value: _settings.ishaAdjustment,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(ishaAdjustment: value.round()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

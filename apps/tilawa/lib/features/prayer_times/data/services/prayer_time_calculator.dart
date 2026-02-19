@@ -244,14 +244,20 @@ class PrayerTimeCalculator {
       totalMinutes = exactMinutes.ceil();
     }
 
+    final int totalDays = totalMinutes ~/ (24 * 60);
     final int hours = (totalMinutes ~/ 60) % 24;
     final int minutes = totalMinutes % 60;
 
-    // We do not add rollover days here because prayer times are strictly
-    // computed for the given 'date'. If an extreme latitude pushes a time
-    // to >= 24h, it maps to 00:00+ on the same day's DateTime, which we
-    // accept as wrapping around.
-    return DateTime(date.year, date.month, date.day, hours, minutes, 0);
+    // Properly wrap around to the next date if the computed time exceeds 24h
+    // This maintains chronological integrity for allPrayers sorting.
+    return DateTime(
+      date.year,
+      date.month,
+      date.day + totalDays,
+      hours,
+      minutes,
+      0,
+    );
   }
 
   /// Get timezone offset for a date
