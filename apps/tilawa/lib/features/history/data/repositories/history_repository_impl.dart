@@ -72,16 +72,30 @@ class HistoryRepositoryImpl implements HistoryRepository {
     final now = DateTime.now();
 
     if (existing != null) {
-      final int updatedLastPositionMs = (lastPositionMs > 0 || completed)
-          ? lastPositionMs
-          : existing.lastPositionMs;
+      final bool wasAlreadyCompleted = existing.completed;
+      final bool isNowCompleted = completed || wasAlreadyCompleted;
+
+      // Determine lastPositionMs:
+      // - If already completed, prefer the higher value (full duration).
+      // - Otherwise, use the new value if > 0, else keep existing.
+      int updatedLastPositionMs;
+      if (wasAlreadyCompleted && !completed) {
+        // Don't downgrade a completed entry's position
+        updatedLastPositionMs = lastPositionMs > existing.lastPositionMs
+            ? lastPositionMs
+            : existing.lastPositionMs;
+      } else if (lastPositionMs > 0 || completed) {
+        updatedLastPositionMs = lastPositionMs;
+      } else {
+        updatedLastPositionMs = existing.lastPositionMs;
+      }
 
       // Update existing entry
       final HistoryEntity updated = existing.copyWith(
         lastPositionMs: updatedLastPositionMs,
         durationMs: durationMs > 0 ? durationMs : existing.durationMs,
         playedAt: now,
-        completed: completed || existing.completed,
+        completed: isNowCompleted,
         playCount: existing.playCount + 1,
       );
       await _localDataSource.saveHistory(updated);

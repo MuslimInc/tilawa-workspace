@@ -120,7 +120,9 @@ class _HistoryItem extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  Icons.play_circle_fill_rounded,
+                  history.completed
+                      ? Icons.replay_circle_filled_rounded
+                      : Icons.play_circle_fill_rounded,
                   color: theme.primaryColor,
                   size: 24.sp,
                 ),
@@ -143,7 +145,7 @@ class _HistoryItem extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(4.r),
               child: LinearProgressIndicator(
-                value: history.progressPercentage / 100,
+                value: history.progress,
                 minHeight: 4.h,
                 backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
                 valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),

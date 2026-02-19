@@ -112,6 +112,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final List<StreamSubscription<dynamic>> _subscriptions = [];
   final Map<String, Duration> _lastKnownPositions = {};
   final Map<String, Duration> _lastKnownDurations = {};
+  final Set<String> _completedAudioIds = {};
   Timer? _sleepTimer;
 
   void _setupAudioStreams() {
@@ -194,11 +195,30 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     UpdateAudio event,
     Emitter<AudioPlayerState> emit,
   ) async {
-    // If we are updating to a NEW track, save the history for the OLD track first
+    // If we are updating to a NEW track, save the history for the OLD track
+    // first — but skip if it was already saved as completed to avoid
+    // overwriting good data with a stale/reset position.
     if (state.currentAudio != null &&
         event.audio != null &&
         state.currentAudio!.id != event.audio!.id) {
-      await _saveHistory(state.currentAudio!);
+      final String oldId = state.currentAudio!.id;
+      if (!_completedAudioIds.contains(oldId)) {
+        // Check if the cached position looks like a reset (very low
+        // relative to duration). This happens when the position stream
+        // fires with the new track's initial position before
+        // _onUpdateAudio processes the track change.
+        final Duration cachedPos = _lastKnownPositions[oldId] ?? Duration.zero;
+        final Duration cachedDur = _lastKnownDurations[oldId] ?? Duration.zero;
+        final bool positionLooksReset =
+            cachedDur > const Duration(seconds: 10) &&
+            cachedPos < const Duration(seconds: 5);
+        if (!positionLooksReset) {
+          await _saveHistory(state.currentAudio!);
+        }
+      }
+      // Clear the completed marker for this audio so future replays
+      // are tracked normally.
+      _completedAudioIds.remove(oldId);
     }
 
     if (event.audio != null) {
@@ -250,6 +270,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       }
       if (completedAudio != null) {
         await _saveHistory(completedAudio, isCompleted: true);
+        _completedAudioIds.add(completedAudio.id);
       }
     }
 
@@ -269,9 +290,27 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     // Cache the last known position for the current audio.
     // We ignore Duration.zero to prevent overwriting the last valid position
     // when the player resets the position before switching to the next track.
+    //
+    // We also reject dramatic backward jumps (> 10s drop) which indicate that
+    // the position stream is reporting the NEW track's initial position while
+    // state.currentAudio still references the OLD track.
     if (state.currentAudio != null &&
         event.positionData.position > Duration.zero) {
-      _lastKnownPositions[state.currentAudio!.id] = event.positionData.position;
+      final String audioId = state.currentAudio!.id;
+      final Duration existingPos =
+          _lastKnownPositions[audioId] ?? Duration.zero;
+      final Duration newPos = event.positionData.position;
+
+      // Accept if: no existing position, position is advancing, or
+      // the backward jump is within 10 seconds (normal seek).
+      final bool isForwardOrSmallJump =
+          existingPos == Duration.zero ||
+          newPos >= existingPos ||
+          (existingPos - newPos).inSeconds <= 10;
+
+      if (isForwardOrSmallJump) {
+        _lastKnownPositions[audioId] = newPos;
+      }
     }
     if (state.currentAudio != null &&
         event.positionData.duration > Duration.zero) {
@@ -597,8 +636,17 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
       final Duration position = _clampToDuration(rawPosition, duration);
 
-      final bool completed =
-          isCompleted || (duration > Duration.zero && position >= duration);
+      // Lenient completion check: within 1.5 seconds of the end
+      final bool isLenientlyCompleted =
+          duration > Duration.zero &&
+          (duration.inMilliseconds - position.inMilliseconds) < 1500;
+
+      final bool completed = isCompleted || isLenientlyCompleted;
+
+      // If completed, ensure lastPositionMs reflects full completion
+      final int finalPositionMs = completed
+          ? duration.inMilliseconds
+          : position.inMilliseconds;
 
       await _addOrUpdateHistory(
         surahId: surahId,
@@ -608,7 +656,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         reciterName: audio.artist ?? '',
         moshafId: moshafId,
         moshafName: audio.album ?? '',
-        lastPositionMs: position.inMilliseconds,
+        lastPositionMs: finalPositionMs,
         durationMs: duration.inMilliseconds,
         audioUrl: audio.url,
         artworkUrl: audio.artUri,
