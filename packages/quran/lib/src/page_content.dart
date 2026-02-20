@@ -8,15 +8,15 @@ import 'layout/quran_layout_strategy.dart';
 class QuranFontSizes {
   const QuranFontSizes._();
 
-  static const double verseFontSize = 26;
-  static const double ayahNumberFontSize = 24;
-  static const double bismillahFontSize = 24;
-  static const double headerFontSize = 24;
-  static const double juzFontSize = 24;
-  static const double surahFontSize = 24;
-  static const double quarterFontSize = 24;
-  static const double pageNumberFontSize = 24;
-  static const double hizbFontSize = 24;
+  static const double verseFontSize = 27;
+  static const double ayahNumberFontSize = 22;
+  static const double bismillahFontSize = 22;
+  static const double headerFontSize = 22;
+  static const double juzFontSize = 22;
+  static const double surahFontSize = 22;
+  static const double quarterFontSize = 22;
+  static const double pageNumberFontSize = 22;
+  static const double hizbFontSize = 22;
 }
 
 class PageContent extends StatefulWidget {
@@ -93,6 +93,7 @@ class _PageContentState extends State<PageContent> {
     const FontWeight fontWeight = FontWeight.w500;
 
     final verseSpans = <InlineSpan>[];
+    var isFirstVerseOnPage = true;
     for (final r in ranges) {
       final int surah = r['surah']!;
       final int start = r['start']!;
@@ -142,7 +143,12 @@ class _PageContentState extends State<PageContent> {
 
         final Color? verseBgColor = widget.verseBackgroundColor?.call(surah, v);
 
-        final String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
+        String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
+        if (isFirstVerseOnPage && verseText.isNotEmpty) {
+          verseText = '${verseText[0]} ${verseText.substring(1)}';
+          isFirstVerseOnPage = false;
+        }
+
         verseSpans.add(
           TextSpan(
             text: verseText,
@@ -248,7 +254,7 @@ class _PageHeader extends StatelessWidget {
     const primaryColor = Color(0xFFA68B67);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -317,7 +323,7 @@ class _PageFooter extends StatelessWidget {
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0, top: 4.0, right: 24.0),
+      padding: const EdgeInsets.only(bottom: 22.0, top: 4.0, right: 22.0),
       child: Align(
         alignment: Alignment.bottomRight,
         child: Container(
