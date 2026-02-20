@@ -220,29 +220,26 @@ class _PageContentState extends State<PageContent> {
 
     final double horizontalPadding = screenWidth * 0.040;
 
-    if (isLandscape) {
-      return Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [header, readerText, footer],
-          ),
-        ),
-      );
-    }
-
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: MediaQuery.sizeOf(context).height * 0.030,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          Padding(padding: EdgeInsets.zero, child: header),
-          Expanded(child: readerText),
-          footer,
+          Positioned.fill(
+            child: isLandscape
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
+                    child: readerText,
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
+                    child: readerText,
+                  ),
+          ),
+          Positioned(top: 0, left: 0, right: 0, child: header),
+          Positioned(bottom: 0, left: 0, right: 0, child: footer),
         ],
       ),
     );
@@ -262,12 +259,11 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Muted gold/brown color from screenshot
     const primaryColor = Color(0xFFA68B67);
     final double verseFontSize = MediaQuery.sizeOf(context).width * 0.025;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.only(top: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
