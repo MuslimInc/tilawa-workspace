@@ -145,7 +145,15 @@ class _PageContentState extends State<PageContent> {
 
         String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
         if (isFirstVerseOnPage && verseText.isNotEmpty) {
-          verseText = '${verseText[0]} ${verseText.substring(1)}';
+          if (verseText.length > 1 &&
+              verseText[1] != ' ' &&
+              verseText[1] != '\u2009') {
+            verseText = '${verseText[0]}\u2009${verseText.substring(1)}';
+          } else if (verseText.length == 1 &&
+              verseText != ' ' &&
+              verseText != '\u2009') {
+            verseText = '$verseText\u2009';
+          }
           isFirstVerseOnPage = false;
         }
 
@@ -184,19 +192,21 @@ class _PageContentState extends State<PageContent> {
       }
     }
 
-    final Widget readerText = Text.rich(
-      TextSpan(children: [...verseSpans]),
-      locale: const Locale('ar'),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.rtl,
-      style: TextStyle(
-        fontFamily: pageFont,
-        package: 'quran',
-        fontSize: QuranFontSizes.verseFontSize,
-        fontWeight: fontWeight,
-        color: widget.textColor,
-        height: 2,
-        letterSpacing: 2,
+    final Widget readerText = Center(
+      child: Text.rich(
+        TextSpan(children: [...verseSpans]),
+        locale: const Locale('ar'),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          fontFamily: pageFont,
+          package: 'quran',
+          fontSize: QuranFontSizes.verseFontSize,
+          fontWeight: fontWeight,
+          color: widget.textColor,
+          height: 2,
+          letterSpacing: 2,
+        ),
       ),
     );
 
