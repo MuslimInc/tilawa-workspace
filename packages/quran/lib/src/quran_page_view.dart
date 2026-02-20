@@ -9,8 +9,8 @@ import 'page_content.dart';
 /// - Uses `pageData` to determine surah/verse ranges for each page.
 /// - Renders each verse with `QcfVerse`, which applies the correct per-page font.
 /// - Supports RTL page order via `reverse: true` and `Directionality.rtl`.
-class PageviewQuran extends StatefulWidget {
-  const PageviewQuran({
+class QuranPageView extends StatefulWidget {
+  const QuranPageView({
     super.key,
     this.initialPageNumber = 1,
     this.controller,
@@ -59,10 +59,10 @@ class PageviewQuran extends StatefulWidget {
   onLongPressDown;
 
   @override
-  State<PageviewQuran> createState() => _PageviewQuranState();
+  State<QuranPageView> createState() => _QuranPageViewState();
 }
 
-class _PageviewQuranState extends State<PageviewQuran> {
+class _QuranPageViewState extends State<QuranPageView> {
   PageController? _internalController;
 
   PageController get _controller => widget.controller ?? _internalController!;

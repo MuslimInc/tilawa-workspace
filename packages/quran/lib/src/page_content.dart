@@ -50,17 +50,10 @@ class _PageContentState extends State<PageContent> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
 
-    final double verseFontSize = screenWidth * 0.060;
+    final double verseFontSize = screenWidth * 0.055;
     final double ayahNumberFontSize = screenWidth * 0.060;
     final double bismillahFontSize = screenWidth * 0.060;
-    final double headerFontSize = screenWidth * 0.060;
-    final double juzFontSize = screenWidth * 0.060;
-    final double surahFontSize = screenWidth * 0.060;
-    final double quarterFontSize = screenWidth * 0.060;
-    final double pageNumberFontSize = screenWidth * 0.060;
-    final double hizbFontSize = screenWidth * 0.060;
 
     final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
     final Map<String, int> firstVerse = ranges.first;
@@ -222,10 +215,15 @@ class _PageContentState extends State<PageContent> {
       textColor: widget.textColor,
     );
 
-    if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-      return Padding(
-        padding: EdgeInsetsGeometry.zero,
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+
+    final double horizontalPadding = screenWidth * 0.040;
+
+    if (widget.pageNumber == 1 || widget.pageNumber == 2 || isLandscape) {
+      return Center(
         child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [header, readerText, footer],
@@ -235,7 +233,7 @@ class _PageContentState extends State<PageContent> {
     }
 
     return Padding(
-      padding: EdgeInsetsGeometry.zero,
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -263,26 +261,33 @@ class _PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Muted gold/brown color from screenshot
     const primaryColor = Color(0xFFA68B67);
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.040;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            surahName,
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: verseFontSize,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              surahName,
+              style: TextStyle(
+                color: primaryColor,
+                fontSize: verseFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          Text(
-            'Part $juzNumber',
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: verseFontSize,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              'Part $juzNumber',
+              style: TextStyle(
+                color: primaryColor,
+                fontSize: verseFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -328,13 +333,16 @@ class _PageFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     if (pageNumber == 1 || pageNumber == 2) return const SizedBox.shrink();
 
+    final double hizbFontSize = MediaQuery.sizeOf(context).width * 0.040;
+    final double pageNumberFontSize = MediaQuery.sizeOf(context).width * 0.040;
+
     const primaryColor = Color(0xFFA68B67);
     const bgColor = Color(0xFFF4EFE6);
     const borderColor = Color(0xFFDED3C4);
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 22.0, top: 4.0, right: 22.0),
+      padding: const EdgeInsets.only(bottom: 22.0, top: 4.0),
       child: Align(
         alignment: Alignment.bottomRight,
         child: Container(
@@ -353,7 +361,7 @@ class _PageFooter extends StatelessWidget {
                   child: Text(
                     hizbLabel,
                     style: TextStyle(
-                      color: primaryColor.withOpacity(0.9),
+                      color: primaryColor.withValues(alpha: 0.9),
                       fontSize: hizbFontSize,
                       fontWeight: FontWeight.bold,
                     ),

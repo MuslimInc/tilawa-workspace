@@ -49,7 +49,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: PageviewQuran());
+    return const Scaffold(body: QuranPageView());
   }
 
   Widget _buildContent(BuildContext context, QuranReaderState state) {

@@ -36,26 +36,16 @@ void main() {
       var firstVerseText = '';
 
       for (final richText in richTexts) {
-        final textSpan = richText.text as TextSpan;
-        if (textSpan.children != null) {
-          for (final InlineSpan child in textSpan.children!) {
-            if (child is TextSpan && child.text != null) {
-              final String text = child.text!;
-              print('Found span text: "$text"');
-              // The first verse on page 18 should be surah 2, verse 113.
-              // In qcf format, this is what we are looking for.
-              if (text.trim().isNotEmpty && firstVerseText.isEmpty) {
-                firstVerseText = text;
-                // Check if the thin space \u2009 is present right after the first character
-                if (text.length > 1 && text[1] == '\u2009') {
-                  foundThinSpace = true;
-                }
-                break; // We only care about the very first TextSpan with text
-              }
-            }
+        final String plainText = richText.text.toPlainText();
+        // Since we are looking for the Quran verses on page 18, which start with ﱁ
+        if (plainText.contains('ﱁ')) {
+          firstVerseText = plainText;
+          // The first word ﱁ should be followed by a thin space \u2009
+          if (plainText.contains('ﱁ\u2009')) {
+            foundThinSpace = true;
           }
+          break;
         }
-        if (firstVerseText.isNotEmpty) break;
       }
 
       expect(
@@ -99,29 +89,22 @@ void main() {
         );
 
         for (final richText in richTexts) {
-          final textSpan = richText.text as TextSpan;
-          if (textSpan.children != null) {
-            for (final InlineSpan child in textSpan.children!) {
-              if (child is TextSpan && child.text != null) {
-                final String text = child.text!;
-                expect(
-                  text.contains(' \u2009'),
-                  isFalse,
-                  reason: 'Should not have both standard space and thin space',
-                );
-                expect(
-                  text.contains('\u2009 '),
-                  isFalse,
-                  reason: 'Should not have both standard space and thin space',
-                );
-                expect(
-                  text.contains('\u2009\u2009'),
-                  isFalse,
-                  reason: 'Should not have double thin space',
-                );
-              }
-            }
-          }
+          final String plainText = richText.text.toPlainText();
+          expect(
+            plainText.contains(' \u2009'),
+            isFalse,
+            reason: 'Should not have both standard space and thin space',
+          );
+          expect(
+            plainText.contains('\u2009 '),
+            isFalse,
+            reason: 'Should not have both standard space and thin space',
+          );
+          expect(
+            plainText.contains('\u2009\u2009'),
+            isFalse,
+            reason: 'Should not have double thin space',
+          );
         }
       },
     );

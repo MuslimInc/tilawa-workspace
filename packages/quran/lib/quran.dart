@@ -61,7 +61,7 @@ export 'src/qcf_verse.dart';
 // EXCEPTIONS
 // =============================================================================
 export 'src/quran_exception.dart';
-export 'src/quran_pageview.dart';
+export 'src/quran_page_view.dart';
 export 'src/quran_pageview_v2.dart';
 // =============================================================================
 // CONVENIENCE FUNCTIONS (backward compatible global functions)
