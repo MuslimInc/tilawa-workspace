@@ -518,7 +518,7 @@
             }
         }
     },
-    "surahs": "surahs",
+    "surahs": "Surahs",
     "@surahs": {
         "description": "Surahs count text"
     },

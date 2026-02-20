@@ -532,28 +532,4 @@ void main() {
       });
     });
   });
-
-  test('calculatePrayerTimes should work correctly', () {
-    // TODO: Implement test for calculatePrayerTimes
-  });
-
-  test('if should work correctly', () {
-    // TODO: Implement test for if
-  });
-
-  test('calculatePrayerTimesForRange should work correctly', () {
-    // TODO: Implement test for calculatePrayerTimesForRange
-  });
-
-  test('while should work correctly', () {
-    // TODO: Implement test for while
-  });
-
-  test('switch should work correctly', () {
-    // TODO: Implement test for switch
-  });
-
-  test('CalculationParams should work correctly', () {
-    // TODO: Implement test for CalculationParams
-  });
 }

@@ -144,7 +144,7 @@ class HistoryCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
-                        value: progressPercent / 100,
+                        value: history.completed ? 1.0 : progressPercent / 100,
                         minHeight: 3,
                         backgroundColor:
                             theme.colorScheme.surfaceContainerHighest,

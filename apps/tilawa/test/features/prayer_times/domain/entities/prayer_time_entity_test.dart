@@ -14,6 +14,8 @@ void main() {
       required DateTime asr,
       required DateTime maghrib,
       required DateTime isha,
+      DateTime? midnight,
+      DateTime? lastThird,
     }) {
       return PrayerTimeEntity(
         date: testDate,
@@ -23,6 +25,8 @@ void main() {
         asr: asr,
         maghrib: maghrib,
         isha: isha,
+        midnight: midnight ?? maghrib.add(const Duration(hours: 4)),
+        lastThird: lastThird ?? maghrib.add(const Duration(hours: 8)),
         latitude: 0,
         longitude: 0,
       );
@@ -36,17 +40,21 @@ void main() {
         asr: testDate.add(const Duration(hours: 15)),
         maghrib: testDate.add(const Duration(hours: 18)),
         isha: testDate.add(const Duration(hours: 20)),
+        midnight: testDate.add(const Duration(hours: 23, minutes: 30)),
+        lastThird: testDate.add(const Duration(days: 1, hours: 2)),
       );
 
       final List<PrayerTimeItem> prayers = entity.allPrayers;
 
-      expect(prayers.length, 6);
+      expect(prayers.length, 8);
       expect(prayers[0].type, PrayerType.fajr);
       expect(prayers[1].type, PrayerType.sunrise);
       expect(prayers[2].type, PrayerType.dhuhr);
       expect(prayers[3].type, PrayerType.asr);
       expect(prayers[4].type, PrayerType.maghrib);
       expect(prayers[5].type, PrayerType.isha);
+      expect(prayers[6].type, PrayerType.midnight);
+      expect(prayers[7].type, PrayerType.lastThird);
     });
 
     // We can't easily mock DateTime.now() inside the entity without refactoring,

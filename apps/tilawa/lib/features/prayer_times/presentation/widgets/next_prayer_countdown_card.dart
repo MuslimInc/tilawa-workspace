@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 
 class NextPrayerCountdownCard extends StatelessWidget {
@@ -8,10 +9,12 @@ class NextPrayerCountdownCard extends StatelessWidget {
     super.key,
     required this.nextPrayer,
     required this.timeUntil,
+    this.use24HourFormat = true,
   });
 
   final PrayerTimeItem nextPrayer;
   final Duration timeUntil;
+  final bool use24HourFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -22,201 +25,76 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final int minutes = timeUntil.inMinutes.remainder(60);
     final int seconds = timeUntil.inSeconds.remainder(60);
 
+    final String prayerName = isArabic
+        ? nextPrayer.type.displayNameAr
+        : nextPrayer.type.displayName;
+    final String timeRemainingText = isArabic
+        ? 'يتبقى على صلاة $prayerName'
+        : 'Remaining until $prayerName';
+
+    final String timerText =
+        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, theme.colorScheme.tertiary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+          width: 1.0,
         ),
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
-      child: Stack(
+      child: Column(
         children: [
-          // Background decoration
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Icon(
-              Icons.mosque,
-              size: 150,
-              color: Colors.white.withValues(alpha: 0.1),
+          // Top Row: Prayer Name & Time
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                prayerName,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.sp,
+                ),
+              ),
+              Text(
+                use24HourFormat
+                    ? nextPrayer.formattedTime
+                    : nextPrayer.getFormattedTime12Hour(isArabic: isArabic),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.sp,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 24.h),
+
+          // Remaining Text
+          Text(
+            timeRemainingText,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 16.sp,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Top row: Label and Time
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.access_time_filled,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            context.l10n.nextPrayer.toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              letterSpacing: 1.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      nextPrayer.formattedTime12Hour,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
 
-                // Center: Prayer Name
-                Text(
-                  (isArabic
-                          ? nextPrayer.type.displayNameAr
-                          : nextPrayer.type.displayName)
-                      .toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                    height: 1.0,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        offset: const Offset(0, 2),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.timeRemaining,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
-                ),
-                const SizedBox(height: 24),
+          SizedBox(height: 8.h),
 
-                // Bottom: Countdown
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _CountdownUnit(
-                      value: hours.toString().padLeft(2, '0'),
-                      label: context.l10n.hours,
-                    ),
-                    _CountdownSeparator(),
-                    _CountdownUnit(
-                      value: minutes.toString().padLeft(2, '0'),
-                      label: context.l10n.minutes,
-                    ),
-                    _CountdownSeparator(),
-                    _CountdownUnit(
-                      value: seconds.toString().padLeft(2, '0'),
-                      label: context.l10n.seconds,
-                    ),
-                  ],
-                ),
-              ],
+          // Digital Timer
+          Text(
+            timerText,
+            style: theme.textTheme.displayLarge?.copyWith(
+              fontWeight: FontWeight.w300,
+              fontSize: 48.sp,
+              letterSpacing: 2.0,
+              color: theme.colorScheme.primary,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CountdownUnit extends StatelessWidget {
-  const _CountdownUnit({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          constraints: const BoxConstraints(minWidth: 56),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: Text(
-            value,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              height: 1.0,
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.white70,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CountdownSeparator extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 20),
-      child: Text(
-        ':',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.white.withValues(alpha: 0.5),
-        ),
       ),
     );
   }

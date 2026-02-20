@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 
+/// Compact horizontal carousel of recently listened surahs for
+/// quick resume playback. Uses chip-style cards to minimize
+/// vertical space.
 class ReciterHistorySection extends StatelessWidget {
   const ReciterHistorySection({
     super.key,
@@ -17,65 +21,62 @@ class ReciterHistorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (historyList.isEmpty) return const SizedBox.shrink();
 
-    // Filter to show only recent history (last 30 days or so, or just take latest few)
-    // Removed strict 7 days limit to ensure user sees history if they have it.
     final displayList = historyList.take(5).toList();
     final theme = Theme.of(context);
-
-    if (displayList.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(
-            left: 16.w,
-            right: 16.w,
-            top: 8.h,
-            bottom: 12.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Row(
             children: [
               Icon(
                 Icons.history_rounded,
-                size: 20.sp,
+                size: 16.sp,
                 color: theme.primaryColor,
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 6.w),
               Text(
                 context.l10n.continueListening,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13.sp,
                   color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
           ),
         ),
+        SizedBox(height: 8.h),
         SizedBox(
-          height: 110.h, // Fixed height for carousel
+          height: 40.h,
           child: ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             scrollDirection: Axis.horizontal,
             itemCount: displayList.length,
-            separatorBuilder: (context, index) => SizedBox(width: 12.w),
+            separatorBuilder: (_, _) => SizedBox(width: 8.w),
             itemBuilder: (context, index) {
               final history = displayList[index];
-              return _HistoryItem(
+              return _HistoryChip(
                 history: history,
-                onTap: () => onPlay(history),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onPlay(history);
+                },
               );
             },
           ),
         ),
-        SizedBox(height: 16.h),
       ],
     );
   }
 }
 
-class _HistoryItem extends StatelessWidget {
-  const _HistoryItem({required this.history, required this.onTap});
+/// Compact chip-style card showing surah name with a play/check
+/// icon and progress percentage.
+class _HistoryChip extends StatelessWidget {
+  const _HistoryChip({required this.history, required this.onTap});
 
   final HistoryEntity history;
   final VoidCallback onTap;
@@ -83,94 +84,63 @@ class _HistoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      width: 160.w,
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    final bool isComplete = history.progress >= 1.0;
+    final int percent = (history.progress * 100).clamp(0, 100).toInt();
+    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final String displayName = isArabic
+        ? history.surahName
+        : history.surahNameEn;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: isComplete
+              ? theme.primaryColor.withValues(alpha: 0.08)
+              : theme.cardColor,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isComplete
+                ? theme.primaryColor.withValues(alpha: 0.3)
+                : theme.dividerColor.withValues(alpha: 0.3),
           ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    history.surahName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Icon(
-                  Icons.play_circle_fill_rounded,
-                  color: theme.primaryColor,
-                  size: 24.sp,
-                ),
-              ],
+            Icon(
+              isComplete
+                  ? Icons.check_circle_rounded
+                  : Icons.play_circle_fill_rounded,
+              color: theme.primaryColor,
+              size: 18.sp,
             ),
-            SizedBox(height: 4.h),
+            SizedBox(width: 6.w),
             Text(
-              history.reciterName,
+              displayName,
               style: TextStyle(
-                fontSize: 11.sp,
-                color: theme.textTheme.bodyMedium?.color?.withValues(
-                  alpha: 0.6,
-                ),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Spacer(),
-            // Progress Bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4.r),
-              child: LinearProgressIndicator(
-                value: history.progressPercentage / 100,
-                minHeight: 4.h,
-                backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              context
-                  .l10n
-                  .continueReading, // Or "Resume" if available, checking l10n
-              // Actually l10n.continueListening or similar might be better but 'continueReading' was used in sheet.
-              // Let's stick to formatted remaining time or just "Resume" styling
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: theme.primaryColor,
                 fontWeight: FontWeight.w600,
+                fontSize: 12.sp,
+                color: isComplete
+                    ? theme.primaryColor
+                    : theme.textTheme.bodyLarge?.color,
               ),
-            ).hide(), // Helper to hide if needed or replace content
+            ),
+            if (!isComplete && percent >= 5) ...[
+              SizedBox(width: 6.w),
+              Text(
+                '$percent%',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                  color: theme.primaryColor.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
-}
-
-extension on Widget {
-  // Quick helper to hide widget if needed during dev,
-  // actually I will just put the time there instead.
-  Widget hide() => const SizedBox.shrink();
 }

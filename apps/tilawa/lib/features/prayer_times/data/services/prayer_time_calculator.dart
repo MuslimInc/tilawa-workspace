@@ -59,30 +59,71 @@ class PrayerTimeCalculator {
           _timeDifference(latitude, declination, params.ishaAngle) / 15;
     }
 
-    // Apply adjustments
+    // Apply adjustments with Fiqh safe rounding:
+    // - Floor for Fajr/Sunrise (prevent eating late during fast)
+    // - Ceil for Dhuhr, Asr, Maghrib, Isha (prevent praying before time enters)
     final DateTime fajr = _timeToDateTime(
       date,
       fajrTime + settings.fajrAdjustment / 60,
+      roundMode: RoundMode.floor,
     );
     final DateTime sunrise = _timeToDateTime(
       date,
       sunriseTime + settings.sunriseAdjustment / 60,
+      roundMode: RoundMode.floor,
     );
     final DateTime dhuhr = _timeToDateTime(
       date,
       dhuhrTime + settings.dhuhrAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime asr = _timeToDateTime(
       date,
       asrTime + settings.asrAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime maghrib = _timeToDateTime(
       date,
       maghribTime + settings.maghribAdjustment / 60,
+      roundMode: RoundMode.ceil,
     );
     final DateTime isha = _timeToDateTime(
       date,
       ishaTime + settings.ishaAdjustment / 60,
+      roundMode: RoundMode.ceil,
+    );
+
+    // Calculate next day's Fajr to determine Midnight and Last Third of the night
+    final DateTime nextDate = date.add(const Duration(days: 1));
+    final double nextJd = _julianDate(
+      nextDate.year,
+      nextDate.month,
+      nextDate.day,
+    );
+    final double nextDeclination = _sunDeclination(nextJd);
+    final double nextEquationOfTime = _equationOfTime(nextJd);
+    final double nextDhuhrTime =
+        12 +
+        _getTimeZoneOffset(nextDate) -
+        longitude / 15 -
+        nextEquationOfTime / 60;
+    final double nextFajrTime =
+        nextDhuhrTime -
+        _timeDifference(latitude, nextDeclination, params.fajrAngle) / 15;
+
+    final DateTime nextFajr = _timeToDateTime(
+      nextDate,
+      nextFajrTime + settings.fajrAdjustment / 60,
+      roundMode: RoundMode.floor,
+    );
+
+    // Calculate night segments mathematically
+    final int nightDurationMinutes = nextFajr.difference(maghrib).inMinutes;
+    final DateTime midnight = maghrib.add(
+      Duration(minutes: nightDurationMinutes ~/ 2),
+    );
+    final DateTime lastThird = maghrib.add(
+      Duration(minutes: (nightDurationMinutes * 2) ~/ 3),
     );
 
     return PrayerTimeEntity(
@@ -93,6 +134,8 @@ class PrayerTimeCalculator {
       asr: asr,
       maghrib: maghrib,
       isha: isha,
+      midnight: midnight,
+      lastThird: lastThird,
       latitude: latitude,
       longitude: longitude,
     );
@@ -216,20 +259,39 @@ class PrayerTimeCalculator {
     return _timeDifference(lat, decl, -angle);
   }
 
-  /// Convert decimal time to DateTime
-  DateTime _timeToDateTime(DateTime date, double time) {
-    final double fixedTime = _fixHour(time);
-    final int hours = fixedTime.floor();
-    final int minutes = ((fixedTime - hours) * 60).floor();
-    final int seconds = ((((fixedTime - hours) * 60) - minutes) * 60).floor();
+  /// Convert decimal time to DateTime, applying specific rounding
+  DateTime _timeToDateTime(
+    DateTime date,
+    double time, {
+    required RoundMode roundMode,
+  }) {
+    if (time.isNaN) return date;
 
+    final double fixedTime = _fixHour(time);
+
+    // Convert to total minutes
+    final double exactMinutes = fixedTime * 60;
+
+    int totalMinutes;
+    if (roundMode == RoundMode.floor) {
+      totalMinutes = exactMinutes.floor();
+    } else {
+      totalMinutes = exactMinutes.ceil();
+    }
+
+    final int totalDays = totalMinutes ~/ (24 * 60);
+    final int hours = (totalMinutes ~/ 60) % 24;
+    final int minutes = totalMinutes % 60;
+
+    // Properly wrap around to the next date if the computed time exceeds 24h
+    // This maintains chronological integrity for allPrayers sorting.
     return DateTime(
       date.year,
       date.month,
-      date.day,
-      hours.clamp(0, 23),
-      minutes.clamp(0, 59),
-      seconds.clamp(0, 59),
+      date.day + totalDays,
+      hours,
+      minutes,
+      0,
     );
   }
 
@@ -270,3 +332,6 @@ class CalculationParams {
   final double ishaAngle;
   final int? ishaMinutes;
 }
+
+/// Rounding modes for prayer time minutes
+enum RoundMode { floor, ceil }

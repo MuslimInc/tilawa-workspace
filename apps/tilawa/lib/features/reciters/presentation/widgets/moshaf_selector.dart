@@ -43,14 +43,18 @@ class MoshafSelector extends StatelessWidget {
               value: uniqueMoshaf.contains(selectedMoshaf)
                   ? selectedMoshaf
                   : uniqueMoshaf.first,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               items: uniqueMoshaf.map((moshaf) {
                 return DropdownMenuItem<MoshafEntity>(
                   value: moshaf,
-                  child: Text(moshaf.name, overflow: TextOverflow.ellipsis),
+                  child: Text(
+                    moshaf.name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
                 );
               }).toList(),
               onChanged: (MoshafEntity? moshaf) {

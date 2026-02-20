@@ -65,7 +65,19 @@ abstract class HistoryEntity with _$HistoryEntity {
   Duration get duration => Duration(milliseconds: durationMs);
 
   /// Get progress percentage (0.0 - 1.0)
-  double get progress => durationMs > 0 ? lastPositionMs / durationMs : 0.0;
+  ///
+  /// Returns 1.0 if:
+  /// - The [completed] flag is true.
+  /// - The position is within 3% of the total duration (heuristic for
+  ///   entries that were nearly finished but not flagged as completed).
+  double get progress {
+    if (completed) return 1.0;
+    if (durationMs <= 0) return 0.0;
+    final double ratio = lastPositionMs / durationMs;
+    // Treat as completed if within 3% of the end
+    if (ratio >= 0.97) return 1.0;
+    return ratio;
+  }
 
   /// Get progress percentage (0 - 100)
   double get progressPercentage => progress * 100;

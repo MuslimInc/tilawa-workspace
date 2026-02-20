@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'prayer_time_entity.dart';
+
 part 'prayer_settings_entity.freezed.dart';
 part 'prayer_settings_entity.g.dart';
 
@@ -100,7 +102,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     PrayerNotificationSettings maghribNotification,
     @Default(PrayerNotificationSettings())
     PrayerNotificationSettings ishaNotification,
-    @Default(true) bool use24HourFormat,
+    @Default(false) bool use24HourFormat,
     @Default(false) bool showSunrise,
     double? savedLatitude,
     double? savedLongitude,
@@ -112,22 +114,57 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
       _$PrayerSettingsEntityFromJson(json);
 
   /// Get adjustment in minutes for a specific prayer type
-  int getAdjustmentFor(String prayerName) {
-    switch (prayerName.toLowerCase()) {
-      case 'fajr':
+  int getAdjustmentFor(PrayerType prayerType) {
+    switch (prayerType) {
+      case PrayerType.fajr:
         return fajrAdjustment;
-      case 'sunrise':
+      case PrayerType.sunrise:
         return sunriseAdjustment;
-      case 'dhuhr':
+      case PrayerType.dhuhr:
         return dhuhrAdjustment;
-      case 'asr':
+      case PrayerType.asr:
         return asrAdjustment;
-      case 'maghrib':
+      case PrayerType.maghrib:
         return maghribAdjustment;
-      case 'isha':
+      case PrayerType.isha:
         return ishaAdjustment;
-      default:
+      case PrayerType.midnight:
+      case PrayerType.lastThird:
         return 0;
+    }
+  }
+
+  /// Get default calculation method for a specific country code (ISO 3166-1 alpha-2)
+  static CalculationMethod? defaultForCountry(String? countryCode) {
+    if (countryCode == null) return null;
+
+    switch (countryCode.toUpperCase()) {
+      case 'EG': // Egypt
+        return CalculationMethod.egyptian;
+      case 'PK': // Pakistan
+        return CalculationMethod.karachi;
+      case 'TR': // Turkey
+        return CalculationMethod.turkey;
+      case 'SG': // Singapore
+        return CalculationMethod.singapore;
+      case 'KW': // Kuwait
+        return CalculationMethod.kuwait;
+      case 'QA': // Qatar
+        return CalculationMethod.qatar;
+      case 'AE': // United Arab Emirates
+      case 'BH': // Bahrain
+      case 'OM': // Oman
+        return CalculationMethod.gulf;
+      case 'IR': // Iran
+        return CalculationMethod.tehran;
+      case 'US': // United States
+      case 'CA': // Canada
+      case 'GB': // United Kingdom
+        return CalculationMethod.isna;
+      case 'SA': // Saudi Arabia
+        return CalculationMethod.ummAlQura;
+      default:
+        return null;
     }
   }
 }

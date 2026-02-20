@@ -17,8 +17,8 @@ class ReciterSearchHeader extends StatelessWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _StickyHeaderDelegate(
-        minHeight: 80.h,
-        maxHeight: 80.h,
+        minHeight: 64.h,
+        maxHeight: 64.h,
         child: ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),

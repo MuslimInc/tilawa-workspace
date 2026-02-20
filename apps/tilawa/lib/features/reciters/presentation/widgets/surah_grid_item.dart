@@ -66,23 +66,29 @@ class SurahGridItem extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: isCurrentItem
-                  ? theme.primaryColor.withValues(alpha: 0.1)
+                  ? theme.primaryColor.withValues(alpha: 0.08)
                   : theme.cardColor,
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
                 color: isCurrentItem
                     ? theme.primaryColor.withValues(alpha: 0.5)
-                    : theme.dividerColor.withValues(alpha: 0.1),
+                    : theme.dividerColor.withValues(alpha: 0.15),
+                width: isCurrentItem ? 1.5 : 1,
               ),
-              boxShadow: isCurrentItem
-                  ? [
-                      BoxShadow(
-                        color: theme.primaryColor.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: isCurrentItem
+                      ? theme.primaryColor.withValues(alpha: 0.12)
+                      : Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             padding: EdgeInsets.all(12.w),
             child: Column(

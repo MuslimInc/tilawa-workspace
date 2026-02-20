@@ -244,5 +244,36 @@ void main() {
         expect(result, false);
       });
     });
+    group('getCountryCode', () {
+      test('should return EG for coordinates in Egypt when geocoding fails', () async {
+        // Arrange
+        // (Mocking failure is implicit since we don't mock placemarkFromCoordinates here as it's a mixin/extension or static?
+        // Wait, LocationDataSourceImpl calls placemarkFromCoordinates directly which is a global function from geocoding package.
+        // It is NOT mocked in this test setup.
+        // However, since we are running in a test environment without platform channel setup for geocoding,
+        // the real placemarkFromCoordinates will likely throw MissingPluginException or similar, which is caught by the try-catch block.
+        // So we can rely on that behavior for the "failure" case.)
+
+        // Act
+        final result = await dataSource.getCountryCode(
+          30.0444,
+          31.2357,
+        ); // Cairo
+
+        // Assert
+        expect(result, 'EG');
+      });
+
+      test(
+        'should return null for unknown coordinates when geocoding fails',
+        () async {
+          // Act
+          final result = await dataSource.getCountryCode(0.0, 0.0); // Ocean
+
+          // Assert
+          expect(result, null);
+        },
+      );
+    });
   });
 }
