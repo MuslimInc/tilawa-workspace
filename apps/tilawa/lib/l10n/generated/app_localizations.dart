@@ -845,7 +845,7 @@ abstract class AppLocalizations {
   /// Surahs count text
   ///
   /// In en, this message translates to:
-  /// **'surahs'**
+  /// **'Surahs'**
   String get surahs;
 
   /// Sign in button text

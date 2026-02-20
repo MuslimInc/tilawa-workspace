@@ -390,7 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get surahs => 'surahs';
+  String get surahs => 'Surahs';
 
   @override
   String get signIn => 'Sign in';
