@@ -161,7 +161,7 @@ class _PageContentState extends State<PageContent> {
               fontSize: verseFontSize,
               fontWeight: fontWeight,
               color: widget.textColor,
-              height: 2,
+              height: 2.25,
               letterSpacing: 2,
               backgroundColor: verseBgColor,
             ),
@@ -175,7 +175,7 @@ class _PageContentState extends State<PageContent> {
                   /// Ayah number font size
                   fontSize: ayahNumberFontSize,
                   fontWeight: FontWeight.normal,
-                  color: Colors.brown,
+                  color: Colors.green,
                   height: 1.35,
                   backgroundColor: verseBgColor,
                 ),
@@ -220,7 +220,7 @@ class _PageContentState extends State<PageContent> {
 
     final double horizontalPadding = screenWidth * 0.040;
 
-    if (widget.pageNumber == 1 || widget.pageNumber == 2 || isLandscape) {
+    if (isLandscape) {
       return Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -233,11 +233,14 @@ class _PageContentState extends State<PageContent> {
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: MediaQuery.sizeOf(context).height * 0.030,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          header,
+          Padding(padding: EdgeInsets.zero, child: header),
           Expanded(child: readerText),
           footer,
         ],
@@ -261,7 +264,7 @@ class _PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Muted gold/brown color from screenshot
     const primaryColor = Color(0xFFA68B67);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.030;
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.025;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -333,8 +336,14 @@ class _PageFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     if (pageNumber == 1 || pageNumber == 2) return const SizedBox.shrink();
 
-    final double hizbFontSize = MediaQuery.sizeOf(context).width * 0.030;
-    final double pageNumberFontSize = MediaQuery.sizeOf(context).width * 0.030;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+
+    // Use responsive font sizes rather than fixed .sp which can act weirdly in landscape
+    final double fontSize = screenWidth * (isLandscape ? 0.015 : 0.025);
+    final verticalPadding = isLandscape ? 4.0 : 6.0;
+    final bottomPadding = isLandscape ? 12.0 : 22.0;
 
     const primaryColor = Color(0xFFA68B67);
     const bgColor = Color(0xFFF4EFE6);
@@ -342,11 +351,13 @@ class _PageFooter extends StatelessWidget {
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 22.0, top: 4.0),
+      padding: EdgeInsets.only(bottom: bottomPadding, top: 4.0),
       child: Align(
-        alignment: Alignment.bottomRight,
+        alignment: pageNumber.isOdd
+            ? Alignment.bottomRight
+            : Alignment.bottomLeft,
         child: Container(
-          height: 28,
+          padding: EdgeInsets.symmetric(vertical: verticalPadding),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(14),
@@ -354,6 +365,7 @@ class _PageFooter extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (hizbLabel.isNotEmpty) ...[
                 Padding(
@@ -362,14 +374,14 @@ class _PageFooter extends StatelessWidget {
                     hizbLabel,
                     style: TextStyle(
                       color: primaryColor.withValues(alpha: 0.9),
-                      fontSize: hizbFontSize,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Container(
                   width: 0.8,
-                  height: double.infinity,
+                  height: fontSize * 1.5,
                   color: borderColor,
                 ),
               ],
@@ -379,7 +391,7 @@ class _PageFooter extends StatelessWidget {
                   '$pageNumber',
                   style: TextStyle(
                     color: primaryColor.withValues(alpha: 0.9),
-                    fontSize: pageNumberFontSize,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
