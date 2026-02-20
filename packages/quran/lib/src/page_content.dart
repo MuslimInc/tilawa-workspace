@@ -5,20 +5,6 @@ import 'package:flutter/services.dart';
 import '../quran.dart';
 import 'layout/quran_layout_strategy.dart';
 
-class QuranFontSizes {
-  const QuranFontSizes._();
-
-  static const double verseFontSize = 27;
-  static const double ayahNumberFontSize = 22;
-  static const double bismillahFontSize = 22;
-  static const double headerFontSize = 22;
-  static const double juzFontSize = 22;
-  static const double surahFontSize = 22;
-  static const double quarterFontSize = 22;
-  static const double pageNumberFontSize = 22;
-  static const double hizbFontSize = 22;
-}
-
 class PageContent extends StatefulWidget {
   const PageContent({
     super.key,
@@ -63,6 +49,19 @@ class _PageContentState extends State<PageContent> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+
+    final double verseFontSize = screenWidth * 0.060;
+    final double ayahNumberFontSize = screenWidth * 0.060;
+    final double bismillahFontSize = screenWidth * 0.060;
+    final double headerFontSize = screenWidth * 0.060;
+    final double juzFontSize = screenWidth * 0.060;
+    final double surahFontSize = screenWidth * 0.060;
+    final double quarterFontSize = screenWidth * 0.060;
+    final double pageNumberFontSize = screenWidth * 0.060;
+    final double hizbFontSize = screenWidth * 0.060;
+
     final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
     final Map<String, int> firstVerse = ranges.first;
     final int surahNumber = firstVerse['surah']!;
@@ -105,12 +104,12 @@ class _PageContentState extends State<PageContent> {
           if (widget.pageNumber != 1 && widget.pageNumber != 187) {
             if (surah != 97) {
               verseSpans.add(
-                const TextSpan(
+                TextSpan(
                   text: ' ﱁ  ﱂﱃﱄ\n',
                   style: TextStyle(
                     fontFamily: 'QCF_P001',
                     package: 'quran',
-                    fontSize: QuranFontSizes.bismillahFontSize,
+                    fontSize: bismillahFontSize,
                     fontWeight: fontWeight,
                     color: Colors.black,
                   ),
@@ -118,12 +117,12 @@ class _PageContentState extends State<PageContent> {
               );
             } else {
               verseSpans.add(
-                const TextSpan(
+                TextSpan(
                   text: '齃𧻓𥳐龎\n',
                   style: TextStyle(
                     fontFamily: 'QCF_BSML',
                     package: 'quran',
-                    fontSize: QuranFontSizes.bismillahFontSize,
+                    fontSize: bismillahFontSize,
                     fontWeight: fontWeight,
                     color: Colors.black,
                   ),
@@ -164,7 +163,9 @@ class _PageContentState extends State<PageContent> {
             style: TextStyle(
               fontFamily: pageFont,
               package: 'quran',
-              fontSize: QuranFontSizes.verseFontSize,
+
+              /// Dynamic font size based on screen size
+              fontSize: verseFontSize,
               fontWeight: fontWeight,
               color: widget.textColor,
               height: 2,
@@ -179,7 +180,7 @@ class _PageContentState extends State<PageContent> {
                   package: 'quran',
 
                   /// Ayah number font size
-                  fontSize: QuranFontSizes.ayahNumberFontSize,
+                  fontSize: ayahNumberFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.brown,
                   height: 1.35,
@@ -201,7 +202,7 @@ class _PageContentState extends State<PageContent> {
         style: TextStyle(
           fontFamily: pageFont,
           package: 'quran',
-          fontSize: QuranFontSizes.verseFontSize,
+          fontSize: verseFontSize,
           fontWeight: fontWeight,
           color: widget.textColor,
           height: 2,
@@ -270,17 +271,17 @@ class _PageHeader extends StatelessWidget {
         children: [
           Text(
             surahName,
-            style: const TextStyle(
+            style: TextStyle(
               color: primaryColor,
-              fontSize: QuranFontSizes.verseFontSize,
+              fontSize: verseFontSize,
               fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             'Part $juzNumber',
-            style: const TextStyle(
+            style: TextStyle(
               color: primaryColor,
-              fontSize: QuranFontSizes.verseFontSize,
+              fontSize: verseFontSize,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -353,7 +354,7 @@ class _PageFooter extends StatelessWidget {
                     hizbLabel,
                     style: TextStyle(
                       color: primaryColor.withOpacity(0.9),
-                      fontSize: QuranFontSizes.hizbFontSize,
+                      fontSize: hizbFontSize,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -370,7 +371,7 @@ class _PageFooter extends StatelessWidget {
                   '$pageNumber',
                   style: TextStyle(
                     color: primaryColor.withValues(alpha: 0.9),
-                    fontSize: QuranFontSizes.pageNumberFontSize,
+                    fontSize: pageNumberFontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
