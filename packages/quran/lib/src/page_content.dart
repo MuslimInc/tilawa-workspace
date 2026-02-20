@@ -5,6 +5,20 @@ import 'package:flutter/services.dart';
 import '../quran.dart';
 import 'layout/quran_layout_strategy.dart';
 
+class QuranFontSizes {
+  const QuranFontSizes._();
+
+  static const double verseFontSize = 26;
+  static const double ayahNumberFontSize = 24;
+  static const double bismillahFontSize = 24;
+  static const double headerFontSize = 24;
+  static const double juzFontSize = 24;
+  static const double surahFontSize = 24;
+  static const double quarterFontSize = 24;
+  static const double pageNumberFontSize = 24;
+  static const double hizbFontSize = 24;
+}
+
 class PageContent extends StatefulWidget {
   const PageContent({
     super.key,
@@ -50,17 +64,32 @@ class _PageContentState extends State<PageContent> {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
+    final Map<String, int> firstVerse = ranges.first;
+    final int surahNumber = firstVerse['surah']!;
+    final int juzNumber = QuranServiceLocator.quranDataService.getJuzNumber(
+      surahNumber,
+      firstVerse['start']!,
+    );
+    final int? quarterNumber = widget.pageNumber == 1 || widget.pageNumber == 2
+        ? null
+        : QuranServiceLocator.quranDataService.getQuarterNumber(
+            surahNumber,
+            firstVerse['start']!,
+          );
+
+    final String englishSurahName = QuranServiceLocator.surahService
+        .getName(surahNumber)
+        .replaceAll('Al ', 'Al-');
+
     final pageFont = "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
 
     // Use the strategy to calculate layout metrics
     final layoutStrategy = StandardQuranLayoutStrategy();
-    final QuranLayoutMetrics metrics = layoutStrategy.calculateMetrics(context);
+    // final QuranLayoutMetrics metrics = layoutStrategy.calculateMetrics(context);
 
     // Alias for readability
-    final double adaptiveFontSize = metrics.fontSize;
-    final double adaptiveFontHeight = metrics.fontHeight;
-    // The font files are Regular (w400). Custom weights like 550 often default to 400.
-    // Using w700 (Standard Bold) to ensure a visibly thicker weight.
+    // final double adaptiveFontSize = metrics.fontSize;
+    // final double adaptiveFontHeight = metrics.fontHeight;
     const FontWeight fontWeight = FontWeight.w500;
 
     final verseSpans = <InlineSpan>[];
@@ -71,21 +100,16 @@ class _PageContentState extends State<PageContent> {
 
       for (var v = start; v <= end; v++) {
         if (v == start && v == 1) {
-          verseSpans.add(
-            WidgetSpan(
-              // alignment: PlaceholderAlignment.top,
-              child: HeaderWidget(suraNumber: surah),
-            ),
-          );
+          verseSpans.add(WidgetSpan(child: HeaderWidget(suraNumber: surah)));
           if (widget.pageNumber != 1 && widget.pageNumber != 187) {
             if (surah != 97) {
               verseSpans.add(
-                TextSpan(
+                const TextSpan(
                   text: ' ﱁ  ﱂﱃﱄ\n',
                   style: TextStyle(
                     fontFamily: 'QCF_P001',
                     package: 'quran',
-                    fontSize: adaptiveFontSize,
+                    fontSize: QuranFontSizes.bismillahFontSize,
                     fontWeight: fontWeight,
                     color: Colors.black,
                   ),
@@ -93,12 +117,12 @@ class _PageContentState extends State<PageContent> {
               );
             } else {
               verseSpans.add(
-                TextSpan(
+                const TextSpan(
                   text: '齃𧻓𥳐龎\n',
                   style: TextStyle(
                     fontFamily: 'QCF_BSML',
                     package: 'quran',
-                    fontSize: adaptiveFontSize * 0.75,
+                    fontSize: QuranFontSizes.bismillahFontSize,
                     fontWeight: fontWeight,
                     color: Colors.black,
                   ),
@@ -118,16 +142,6 @@ class _PageContentState extends State<PageContent> {
 
         final Color? verseBgColor = widget.verseBackgroundColor?.call(surah, v);
 
-        // Debug first verse text
-        if (v == start) {
-          try {
-            final String t = getVerseQCF(surah, v, verseEndSymbol: false);
-            print('[PageContent] Verse $surah:$v text length: ${t.length}');
-          } catch (e) {
-            print('[PageContent] Error getting verse: $e');
-          }
-        }
-
         final String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
         verseSpans.add(
           TextSpan(
@@ -136,21 +150,22 @@ class _PageContentState extends State<PageContent> {
             style: TextStyle(
               fontFamily: pageFont,
               package: 'quran',
-              fontSize: adaptiveFontSize,
+              fontSize: QuranFontSizes.verseFontSize,
               fontWeight: fontWeight,
               color: widget.textColor,
-              height: adaptiveFontHeight,
-              letterSpacing: metrics.letterSpacing,
+              height: 2,
+              letterSpacing: 2,
               backgroundColor: verseBgColor,
             ),
             children: [
-              /// Surah verse number span
               TextSpan(
                 text: getVerseNumberQCF(surah, v),
                 style: TextStyle(
                   fontFamily: pageFont,
                   package: 'quran',
-                  fontSize: adaptiveFontSize,
+
+                  /// Ayah number font size
+                  fontSize: QuranFontSizes.ayahNumberFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.brown,
                   height: 1.35,
@@ -163,32 +178,191 @@ class _PageContentState extends State<PageContent> {
       }
     }
 
-    final content = Center(
-      child: Text.rich(
-        TextSpan(children: verseSpans),
-        locale: const Locale('ar'),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.rtl,
-        style: TextStyle(
-          fontFamily: pageFont,
-          package: 'quran',
-          fontSize: adaptiveFontSize,
-          fontWeight: fontWeight,
-          color: widget.textColor,
-          height: adaptiveFontHeight,
-          letterSpacing: metrics.letterSpacing,
-        ),
+    final Widget readerText = Text.rich(
+      TextSpan(children: [...verseSpans]),
+      locale: const Locale('ar'),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      style: TextStyle(
+        fontFamily: pageFont,
+        package: 'quran',
+        fontSize: QuranFontSizes.verseFontSize,
+        fontWeight: fontWeight,
+        color: widget.textColor,
+        height: 2,
+        letterSpacing: 2,
       ),
     );
 
-    if (metrics.isScrollable ||
-        widget.pageNumber == 1 ||
-        widget.pageNumber == 2) {
-      return Center(
-        child: SingleChildScrollView(padding: metrics.padding, child: content),
+    final header = _PageHeader(
+      surahName: englishSurahName,
+      juzNumber: juzNumber,
+      textColor: widget.textColor,
+    );
+    final footer = _PageFooter(
+      quarterNumber: quarterNumber,
+      pageNumber: widget.pageNumber,
+      textColor: widget.textColor,
+    );
+
+    if (widget.pageNumber == 1 || widget.pageNumber == 2) {
+      return Padding(
+        padding: EdgeInsetsGeometry.zero,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [header, readerText, footer],
+          ),
+        ),
       );
     }
 
-    return Center(child: content);
+    return Padding(
+      padding: EdgeInsetsGeometry.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          Expanded(child: readerText),
+          footer,
+        ],
+      ),
+    );
+  }
+}
+
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({
+    required this.surahName,
+    required this.juzNumber,
+    required this.textColor,
+  });
+
+  final String surahName;
+  final int juzNumber;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    // Muted gold/brown color from screenshot
+    const primaryColor = Color(0xFFA68B67);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            surahName,
+            style: const TextStyle(
+              color: primaryColor,
+              fontSize: QuranFontSizes.verseFontSize,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            'Part $juzNumber',
+            style: const TextStyle(
+              color: primaryColor,
+              fontSize: QuranFontSizes.verseFontSize,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PageFooter extends StatelessWidget {
+  const _PageFooter({
+    required this.quarterNumber,
+    required this.pageNumber,
+    required this.textColor,
+  });
+
+  final int? quarterNumber;
+  final int pageNumber;
+  final Color textColor;
+
+  String _getHizbLabel() {
+    if (quarterNumber == null) return '';
+    final int hizbIndex = (quarterNumber! - 1) ~/ 4 + 1;
+    final int quarterInHizb = (quarterNumber! - 1) % 4;
+
+    final String prefix;
+    switch (quarterInHizb) {
+      case 0:
+        prefix = '';
+      case 1:
+        prefix = '1/4 ';
+      case 2:
+        prefix = '1/2 ';
+      case 3:
+        prefix = '3/4 ';
+      default:
+        prefix = '';
+    }
+
+    return '${prefix}Hizb $hizbIndex';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (pageNumber == 1 || pageNumber == 2) return const SizedBox.shrink();
+
+    const primaryColor = Color(0xFFA68B67);
+    const bgColor = Color(0xFFF4EFE6);
+    const borderColor = Color(0xFFDED3C4);
+    final String hizbLabel = _getHizbLabel();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0, top: 4.0, right: 24.0),
+      child: Align(
+        alignment: Alignment.bottomRight,
+        child: Container(
+          height: 28,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor, width: 0.8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hizbLabel.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text(
+                    hizbLabel,
+                    style: TextStyle(
+                      color: primaryColor.withOpacity(0.9),
+                      fontSize: QuranFontSizes.hizbFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 0.8,
+                  height: double.infinity,
+                  color: borderColor,
+                ),
+              ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Text(
+                  '$pageNumber',
+                  style: TextStyle(
+                    color: primaryColor.withValues(alpha: 0.9),
+                    fontSize: QuranFontSizes.pageNumberFontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

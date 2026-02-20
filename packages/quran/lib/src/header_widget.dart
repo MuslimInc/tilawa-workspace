@@ -10,7 +10,7 @@ class HeaderWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         width: double.infinity,
-        margin: const .only(bottom: 52),
+        margin: const EdgeInsets.only(bottom: 24),
         padding: const .symmetric(horizontal: 9),
         child: Stack(
           alignment: Alignment.center,

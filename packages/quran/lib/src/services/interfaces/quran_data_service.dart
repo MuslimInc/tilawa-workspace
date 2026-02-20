@@ -14,6 +14,9 @@ abstract class QuranDataService {
   /// Gets the Juz number for a surah and verse.
   int getJuzNumber(int surahNumber, int verseNumber);
 
+  /// Gets the quarter number for a surah and verse (1-240).
+  int getQuarterNumber(int surahNumber, int verseNumber);
+
   /// Gets the page number for a surah and verse.
   int getPageNumber(int surahNumber, int verseNumber);
 }

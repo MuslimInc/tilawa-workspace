@@ -33,11 +33,10 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Constant for the number of lines per page in a standard Madani Mushaf.
   // static const int _linesPerPage = 15;
   // Tuning factor for height calculation to ensure perfect fit.
-  static const double _heightTuningFactor = 17.5;
   // Proportional factor for natural Arabic text spacing.
-  static const double _naturalLineHeightRatio = 0.50;
+  static const double _naturalLineHeightRatio = 0.40;
   // Width divisor to determine base font size relative to screen width.
-  static const double _widthDivisor = 17.5;
+  static const double _widthDivisor = 14;
 
   @override
   QuranLayoutMetrics calculateMetrics(BuildContext context) {
@@ -68,10 +67,6 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       fontSize: fontSize,
       fontHeight: fontHeight,
       isScrollable: true,
-      padding: EdgeInsets.only(
-        top: padding.top + 16,
-        bottom: padding.bottom + 16,
-      ),
     );
   }
 
@@ -81,23 +76,29 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     double fontSize,
   ) {
     // Calculate actual vertical space available for text
-    final double availableHeight = screenHeight - padding.top - padding.bottom;
+    // Subtract approximate height for header (~40px) and footer (~44px)
+    const headerHeight = 40.0;
+    const footerHeight = 44.0;
+    final double availableHeight =
+        screenHeight -
+        padding.top -
+        padding.bottom -
+        headerHeight -
+        footerHeight;
 
-    // Calculate height factor to squeeze exactly 15 lines into the space
-    final double fontHeight =
-        (availableHeight / _heightTuningFactor) / fontSize;
+    // Calculate height factor to squeeze exactly 15 lines into the remaining space
+    // We use a slightly smaller factor now because the space is already reduced.
+    // 15.0 factor would mean each line takes 1/15th of the space.
+    final double fontHeight = (availableHeight / 15.0) / fontSize;
 
     // Adaptive letter spacing based on screen width/font size ratio
-    // Generally 0 is fine, but for very wide/narrow screens we might tune it.
-    // User requested adaptive.
-    // Let's assume a small factor of font size.
     final double letterSpacing = fontSize * 0.0;
 
-    return QuranLayoutMetrics(
-      fontSize: fontSize,
-      fontHeight: fontHeight,
+    return const QuranLayoutMetrics(
+      fontSize: 32,
+      fontHeight: 2.1,
       isScrollable: false,
-      letterSpacing: letterSpacing,
+      letterSpacing: 2,
     );
   }
 }

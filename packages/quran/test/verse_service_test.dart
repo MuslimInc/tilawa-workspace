@@ -52,5 +52,26 @@ void main() {
       final String result = verseService.getVerseNumberQCF(1, 1);
       expect(result, 'ﱅ');
     });
+
+    test(
+      'getVerseQCF should handle trailing newlines for verseEndSymbol=false',
+      () {
+        // Surah 2, Verse 45: '\nﲠﲡﲢﲣﲤﲥﲦﲧﲨﲩ\n'
+        // Last char is '\n'. Marker is 'ﲩ'.
+        // If we don't handle '\n', it will remove '\n' and leave 'ﲩ'.
+        final String result = verseService.getVerseQCF(
+          2,
+          45,
+          verseEndSymbol: false,
+        );
+
+        // We expect the marker 'ﲩ' to be removed even if there is a trailing newline.
+        expect(
+          result.contains('ﲩ'),
+          false,
+          reason: 'Marker ﲩ should be removed from verse 2:45',
+        );
+      },
+    );
   });
 }

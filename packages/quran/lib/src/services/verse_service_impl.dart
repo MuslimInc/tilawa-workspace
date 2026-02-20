@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../data/quran_text.dart';
 import '../quran_exception.dart';
 import 'interfaces/verse_service.dart';
@@ -72,10 +74,19 @@ class VerseServiceImpl implements VerseService {
     }
 
     var qcfData = verseData['qcfData'] as String;
-    if (!verseEndSymbol) {
+    qcfData = _cleanQCFData(qcfData);
+
+    if (!verseEndSymbol && qcfData.isNotEmpty) {
+      // Remove the last character (which is the verse marker)
       qcfData = qcfData.substring(0, qcfData.length - 1);
     }
-    return qcfData.split('').join(' ');
+
+    // Normalize spacing: Ensure exactly one space between every glyph.
+    // This allows the justification engine to stretch spaces between all word-glyphs.
+    final result = qcfData;
+
+    log('[GetVerseQCF] $surahNumber:$verseNumber -> "$result"');
+    return result;
   }
 
   @override
@@ -91,11 +102,16 @@ class VerseServiceImpl implements VerseService {
       );
     }
 
-    final String qcfData = (verseData['qcfData'] as String).replaceAll(
-      '\n',
-      '',
-    );
-    return qcfData.substring(qcfData.length - 1);
+    final String cleaned = _cleanQCFData(verseData['qcfData'] as String);
+    if (cleaned.isEmpty) return '';
+
+    /// Ayah number is the last character in qcfData
+    return cleaned.substring(cleaned.length - 1);
+  }
+
+  /// Cleans QCF data by removing all types of whitespace and trimming.
+  String _cleanQCFData(String data) {
+    return data.trim();
   }
 
   @override

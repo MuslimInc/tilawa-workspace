@@ -1,5 +1,6 @@
 import '../data/juzs.dart';
 import '../data/page_data.dart';
+import '../data/quarters.dart';
 import '../quran_exception.dart';
 import 'interfaces/quran_data_service.dart';
 
@@ -52,6 +53,19 @@ class QuranDataServiceImpl implements QuranDataService {
       }
     }
     return -1;
+  }
+
+  @override
+  int getQuarterNumber(int surahNumber, int verseNumber) {
+    // Search quarters backwards to find the current active quarter
+    for (int i = quartersData.length - 1; i >= 0; i--) {
+      final Map<String, int> q = quartersData[i];
+      if (surahNumber > q['surah']! ||
+          (surahNumber == q['surah']! && verseNumber >= q['ayah']!)) {
+        return i + 1;
+      }
+    }
+    return 1;
   }
 
   @override
