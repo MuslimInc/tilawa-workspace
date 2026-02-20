@@ -261,7 +261,7 @@ class _PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Muted gold/brown color from screenshot
     const primaryColor = Color(0xFFA68B67);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.040;
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.030;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -333,8 +333,8 @@ class _PageFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     if (pageNumber == 1 || pageNumber == 2) return const SizedBox.shrink();
 
-    final double hizbFontSize = MediaQuery.sizeOf(context).width * 0.040;
-    final double pageNumberFontSize = MediaQuery.sizeOf(context).width * 0.040;
+    final double hizbFontSize = MediaQuery.sizeOf(context).width * 0.030;
+    final double pageNumberFontSize = MediaQuery.sizeOf(context).width * 0.030;
 
     const primaryColor = Color(0xFFA68B67);
     const bgColor = Color(0xFFF4EFE6);
