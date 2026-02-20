@@ -5,12 +5,15 @@ import 'package:quran/quran.dart';
 import '../../domain/entities/entities.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../widgets/quran_page_widget.dart';
+import '../widgets/surah_index_sheet.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for reading Quran text.
 ///
-/// NOTE: This screen expects a [QuranReaderBloc] to be provided in the widget tree.
-/// The bloc is provided by [QuranReaderRoute] in the router configuration.
+/// NOTE: This screen expects a [QuranReaderBloc] to be provided
+/// in the widget tree.
+/// The bloc is provided by [QuranReaderRoute] in the router
+/// configuration.
 class QuranReaderScreen extends StatefulWidget {
   const QuranReaderScreen({
     super.key,
@@ -27,8 +30,6 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   late PageController _pageController;
-  final bool _firstLoad = true;
-  final bool _showControls = true;
 
   @override
   void initState() {
@@ -49,7 +50,18 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: QuranPageView());
+    return Scaffold(
+      body: QuranPageView(controller: _pageController),
+      floatingActionButton: _SurahIndexFab(onSurahSelected: _jumpToSurah),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    );
+  }
+
+  /// Navigates the [PageView] to the first page of the given surah.
+  void _jumpToSurah(int surahNumber) {
+    final int pageNumber = getPageNumber(surahNumber, 1);
+    // PageView uses 0-based index; page numbers are 1-based.
+    _pageController.jumpToPage(pageNumber - 1);
   }
 
   Widget _buildContent(BuildContext context, QuranReaderState state) {
@@ -97,7 +109,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
           return QuranPageWidget(page: pageEntity);
         } else {
           // Trigger load if not loading and not loaded
-          // Using post-frame callback to avoid state change during build
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<QuranReaderBloc>().add(
               QuranReaderEvent.loadPage(pageNum),
@@ -133,6 +144,41 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         settings: state.settings,
         onSettingsChanged: (settings) {
           bloc.add(QuranReaderEvent.updateSettings(settings));
+        },
+      ),
+    );
+  }
+}
+
+/// A floating action button that opens the surah index sheet.
+class _SurahIndexFab extends StatelessWidget {
+  const _SurahIndexFab({required this.onSurahSelected});
+
+  final ValueChanged<int> onSurahSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color(0xFFA68B67);
+
+    return FloatingActionButton.small(
+      onPressed: () => _showSurahIndex(context),
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: const Icon(Icons.menu_book_rounded, size: 20),
+    );
+  }
+
+  void _showSurahIndex(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SurahIndexSheet(
+        onSurahSelected: (surahNumber) {
+          Navigator.of(context).pop();
+          onSurahSelected(surahNumber);
         },
       ),
     );
