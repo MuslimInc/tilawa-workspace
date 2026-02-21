@@ -149,10 +149,9 @@ class _PageContentState extends State<PageContent> {
 
               /// Dynamic font size based on screen size
               fontSize: verseFontSize,
-              fontWeight: fontWeight,
               color: widget.textColor,
-              height: 2.25,
-              backgroundColor: verseBgColor,
+              height: 2.45,
+              // backgroundColor: verseBgColor,
             ),
             children: [
               TextSpan(
@@ -164,7 +163,7 @@ class _PageContentState extends State<PageContent> {
                   /// Ayah number font size
                   fontSize: ayahNumberFontSize,
                   fontWeight: FontWeight.normal,
-                  color: Colors.green,
+                  // color: Colors.green,
                   height: 2.25,
                   backgroundColor: verseBgColor,
                 ),
