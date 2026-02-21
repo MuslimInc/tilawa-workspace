@@ -94,7 +94,7 @@ void main() {
               const double expectedFontSize = 803.6 / 14.0;
 
               // fontHeight = 1 / 0.40
-              const double expectedFontHeight = 2.5;
+              const expectedFontHeight = 2.5;
 
               expect(metrics.isScrollable, true);
               expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));

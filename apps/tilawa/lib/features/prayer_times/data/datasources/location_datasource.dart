@@ -167,25 +167,34 @@ class LocationDataSourceImpl implements LocationDataSource {
             isoCountryCode;
 
         for (final place in placemarks) {
-          if (thoroughfare == null && isValidPart(place.thoroughfare))
+          if (thoroughfare == null && isValidPart(place.thoroughfare)) {
             thoroughfare = place.thoroughfare!.trim();
-          if (subLocality == null && isValidPart(place.subLocality))
+          }
+          if (subLocality == null && isValidPart(place.subLocality)) {
             subLocality = place.subLocality!.trim();
-          if (street == null && isValidPart(place.street))
+          }
+          if (street == null && isValidPart(place.street)) {
             street = place.street!.trim();
-          if (name == null && isValidPart(place.name))
+          }
+          if (name == null && isValidPart(place.name)) {
             name = place.name!.trim();
+          }
 
-          if (locality == null && isValidPart(place.locality))
+          if (locality == null && isValidPart(place.locality)) {
             locality = place.locality!.trim();
-          if (subAdmin == null && isValidPart(place.subAdministrativeArea))
+          }
+          if (subAdmin == null && isValidPart(place.subAdministrativeArea)) {
             subAdmin = place.subAdministrativeArea!.trim();
-          if (admin == null && isValidPart(place.administrativeArea))
+          }
+          if (admin == null && isValidPart(place.administrativeArea)) {
             admin = place.administrativeArea!.trim();
-          if (country == null && isValidPart(place.country))
+          }
+          if (country == null && isValidPart(place.country)) {
             country = place.country!.trim();
-          if (isoCountryCode == null && place.isoCountryCode != null)
+          }
+          if (isoCountryCode == null && place.isoCountryCode != null) {
             isoCountryCode = place.isoCountryCode;
+          }
         }
 
         // 1. Street-level accuracy

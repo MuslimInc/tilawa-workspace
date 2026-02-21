@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
 

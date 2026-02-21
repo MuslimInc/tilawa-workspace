@@ -118,7 +118,8 @@ class QiblaCompassWidget extends StatelessWidget {
 
                 // 3. Qibla Pointer (Central Arrow) - Independent rotation based on manual calculation
                 Transform.rotate(
-                  angle: (qiblaDirection.offset - qiblaDirection.direction) *
+                  angle:
+                      (qiblaDirection.offset - qiblaDirection.direction) *
                       (math.pi / 180),
                   child: _QiblaPointer(isAligned: qiblaDirection.isAligned),
                 ),

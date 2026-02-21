@@ -101,7 +101,9 @@ class SurahHeaderWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _InfoChip(
-                label: surah.isMeccan ? context.l10n.meccan : context.l10n.medinan,
+                label: surah.isMeccan
+                    ? context.l10n.meccan
+                    : context.l10n.medinan,
                 theme: theme,
               ),
               const SizedBox(width: 12),

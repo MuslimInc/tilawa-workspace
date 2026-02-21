@@ -179,9 +179,8 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   @override
   ResultVoid updateQueue(List<AudioEntity> queue) async {
     return _guardVoid(
-      () => _audioHandler.updateQueue(
-        queue.map(_mapEntityToMediaItem).toList(),
-      ),
+      () =>
+          _audioHandler.updateQueue(queue.map(_mapEntityToMediaItem).toList()),
     );
   }
 
@@ -198,9 +197,7 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   @override
   ResultVoid loadAudioPlayerData({bool restorePlayback = true}) async {
     return _guardVoid(
-      () => _audioHandler.loadAudioPlayerData(
-        restorePlayback: restorePlayback,
-      ),
+      () => _audioHandler.loadAudioPlayerData(restorePlayback: restorePlayback),
     );
   }
 

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_core/constants/quran_constants.dart';
 
 import '../../domain/entities/entities.dart';
 import '../controllers/quran_page_audio_controller.dart';

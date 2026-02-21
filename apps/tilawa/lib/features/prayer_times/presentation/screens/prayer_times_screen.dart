@@ -210,9 +210,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             ),
 
             // Fasting hours summary
-            FastingHoursStrip(
-              prayerTimes: state.todayPrayerTimes!,
-            ),
+            FastingHoursStrip(prayerTimes: state.todayPrayerTimes!),
           ],
         ),
       ),

@@ -6,7 +6,7 @@ publish_to: "none"
 version: 0.1.0+16
 
 environment:
-  sdk: ^3.10.8
+  sdk: ^3.11.0
 
 dependencies:
   audio_service: ^0.18.18
@@ -36,8 +36,8 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_downloader: ^1.12.0
-  flutter_local_notifications: ^20.0.0
-  flutter_local_notifications_platform_interface: ^10.0.0
+  flutter_local_notifications: ^21.0.0-dev.1
+  flutter_local_notifications_platform_interface: ^11.0.0-dev.1
   flutter_localizations:
     sdk: flutter
   flutter_screenutil_plus: ^1.4.0
@@ -78,7 +78,7 @@ dependencies:
   shared_preferences: ^2.5.4
   skeletonizer: ^2.1.2
   stream_transform: ^2.1.1
-  timezone: ^0.10.1
+  timezone: ^0.11.0
   geocoding: ^4.0.0
   package_info_plus: ^9.0.0
 
