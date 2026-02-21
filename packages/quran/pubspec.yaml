@@ -27,9 +27,6 @@ flutter:
       fonts:
         - asset: assets/quran_fonts/uthmanic_hafs_v22.ttf
 
-    - family: "versenumber"
-      fonts:
-        - asset: assets/fonts/versenumbers-Regular.otf
     - family: QCF_BSML
       fonts:
         - asset: assets/quran_fonts/QCF4_QBSML-Regular.woff
