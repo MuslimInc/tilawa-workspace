@@ -184,7 +184,7 @@ void main() {
     );
 
     blocTest<QiblaBloc, QiblaState>(
-      'should emit [permissionDenied] when permission is denied after request',
+      'should emit [loading, permissionDenied] when permission is denied after request',
       setUp: () {
         when(
           () => mockRequestLocationPermissionUseCase(any()),
@@ -192,11 +192,14 @@ void main() {
       },
       build: () => qiblaBloc,
       act: (bloc) => bloc.add(const RequestLocationPermission()),
-      expect: () => [const QiblaState(status: QiblaStatus.permissionDenied)],
+      expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
+        const QiblaState(status: QiblaStatus.permissionDenied),
+      ],
     );
 
     blocTest<QiblaBloc, QiblaState>(
-      'should emit [error] when permission request fails',
+      'should emit [loading, error] when permission request fails',
       setUp: () {
         when(() => mockRequestLocationPermissionUseCase(any())).thenAnswer(
           (_) async => const Left(ServerFailure('Permission request failed')),
@@ -205,6 +208,7 @@ void main() {
       build: () => qiblaBloc,
       act: (bloc) => bloc.add(const RequestLocationPermission()),
       expect: () => [
+        const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
           errorMessage: 'Permission request failed',

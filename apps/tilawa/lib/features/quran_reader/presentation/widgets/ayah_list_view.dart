@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -99,9 +100,15 @@ class SurahHeaderWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _InfoChip(label: surah.revelationType, theme: theme),
+              _InfoChip(
+                label: surah.isMeccan ? context.l10n.meccan : context.l10n.medinan,
+                theme: theme,
+              ),
               const SizedBox(width: 12),
-              _InfoChip(label: '${surah.numberOfAyahs} Ayahs', theme: theme),
+              _InfoChip(
+                label: context.l10n.ayahCount(surah.numberOfAyahs),
+                theme: theme,
+              ),
             ],
           ),
         ],
@@ -188,44 +195,31 @@ class AyahWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Ayah number badge
-            if (settings.showAyahNumbers)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.colorScheme.primaryContainer,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      ayah.numberInSurah.toString(),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            // Ayah number badge removed as it is handled by the font
 
             // Arabic text
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: Text(
-                '${ayah.text} ${ayah.formattedNumber}',
-                style: TextStyle(
-                  fontSize: settings.fontSize,
-                  height: settings.lineHeight,
-                  fontFamily: settings.fontFamily,
-                  color: theme.colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.justify,
-              ),
+            Builder(
+              builder: (context) {
+                print(
+                  'Ayah ${ayah.surahNumber}:${ayah.numberInSurah} text: "${ayah.text}"',
+                );
+                print(
+                  'Ayah ${ayah.surahNumber}:${ayah.numberInSurah} runes: ${ayah.text.runes.toList()}',
+                );
+                return Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    ayah.text,
+                    style: TextStyle(
+                      fontSize: settings.fontSize,
+                      height: settings.lineHeight,
+                      fontFamily: settings.fontFamily,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.justify,
+                  ),
+                );
+              },
             ),
 
             // Translation
@@ -256,7 +250,7 @@ class AyahWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Sajda',
+                      context.l10n.sajda,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),

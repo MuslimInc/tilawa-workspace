@@ -91,10 +91,4 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   getLastReadPosition() async {
     return _settingsDataSource.getLastReadPosition();
   }
-
-  @override
-  int get totalJuz => throw UnimplementedError();
-
-  @override
-  int get totalPages => throw UnimplementedError();
 }

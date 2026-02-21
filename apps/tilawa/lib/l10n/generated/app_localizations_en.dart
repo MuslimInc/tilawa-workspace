@@ -1159,4 +1159,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String prayerAwayFrom(String prayer, String time) {
     return '$time remaining until $prayer';
   }
+
+  @override
+  String get surahIndex => 'Surah Index';
+
+  @override
+  String surahCountLabel(int count) {
+    return '$count Surahs';
+  }
+
+  @override
+  String get noSurahsFound => 'No surahs found';
+
+  @override
+  String surahProgress(int current, int total) {
+    return 'Surah $current / $total';
+  }
+
+  @override
+  String surahAyahLabel(int surah, int ayah) {
+    return 'Surah $surah, Ayah $ayah';
+  }
+
+  @override
+  String ayahCountWithPlace(int count, String place) {
+    return '$count Ayahs · $place';
+  }
+
+  @override
+  String get sajda => 'Sajda';
+
+  @override
+  String get surahPrefix => 'Surah';
+
+  @override
+  String ayahCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ayahs',
+      one: '1 Ayah',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get juzPart => 'Part';
+
+  @override
+  String get hizb => 'Hizb';
 }

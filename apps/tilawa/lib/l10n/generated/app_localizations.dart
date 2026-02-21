@@ -2197,6 +2197,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{time} remaining until {prayer}'**
   String prayerAwayFrom(String prayer, String time);
+
+  /// Title of the surah index sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Surah Index'**
+  String get surahIndex;
+
+  /// Surah count label in the index header
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Surahs'**
+  String surahCountLabel(int count);
+
+  /// Message shown when surah search returns no results
+  ///
+  /// In en, this message translates to:
+  /// **'No surahs found'**
+  String get noSurahsFound;
+
+  /// Surah navigation progress indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {current} / {total}'**
+  String surahProgress(int current, int total);
+
+  /// Label showing surah and ayah number
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surah}, Ayah {ayah}'**
+  String surahAyahLabel(int surah, int ayah);
+
+  /// Ayah count with place of revelation
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Ayahs · {place}'**
+  String ayahCountWithPlace(int count, String place);
+
+  /// Sajda indicator label
+  ///
+  /// In en, this message translates to:
+  /// **'Sajda'**
+  String get sajda;
+
+  /// Prefix for surah names
+  ///
+  /// In en, this message translates to:
+  /// **'Surah'**
+  String get surahPrefix;
+
+  /// Pluralized ayah count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Ayah} other{{count} Ayahs}}'**
+  String ayahCount(int count);
+
+  /// Label for Quranic Juz/Part
+  ///
+  /// In en, this message translates to:
+  /// **'Part'**
+  String get juzPart;
+
+  /// Label for Quranic Hizb
+  ///
+  /// In en, this message translates to:
+  /// **'Hizb'**
+  String get hizb;
 }
 
 class _AppLocalizationsDelegate

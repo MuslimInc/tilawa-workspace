@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -72,7 +73,7 @@ class QuranReaderBottomBar extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onPreviousSurah,
                     icon: const Icon(Icons.chevron_left),
-                    label: const Text('Previous'),
+                    label: Text(context.l10n.previous),
                     style: TextButton.styleFrom(
                       foregroundColor: onPreviousSurah != null
                           ? theme.colorScheme.primary
@@ -80,14 +81,14 @@ class QuranReaderBottomBar extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Surah $surahNumber / 114',
+                    context.l10n.surahProgress(surahNumber, 114),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: onNextSurah,
-                    icon: const Text('Next'),
+                    icon: Text(context.l10n.next),
                     label: const Icon(Icons.chevron_right),
                     style: TextButton.styleFrom(
                       foregroundColor: onNextSurah != null

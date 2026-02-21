@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/ayah_entity.dart';
 import '../bloc/quran_reader_bloc.dart';
 
@@ -101,7 +101,10 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
                           ),
                         ),
                         subtitle: Text(
-                          'Surah ${ayah.surahNumber}, Ayah ${ayah.numberInSurah}',
+                          context.l10n.surahAyahLabel(
+                            ayah.surahNumber,
+                            ayah.numberInSurah,
+                          ),
                         ),
                         onTap: () {
                           Navigator.pop(context);

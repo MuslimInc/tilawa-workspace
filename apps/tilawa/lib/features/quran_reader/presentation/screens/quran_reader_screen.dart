@@ -1,225 +1,102 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:quran_mushaf/quran_mushaf.dart';
+import 'package:flutter/material.dart';
+import 'package:quran/quran.dart';
+import 'package:tilawa/core/extensions.dart';
 
-// import '../../domain/entities/entities.dart';
-// import '../bloc/quran_reader_bloc.dart';
-// import '../widgets/quran_page_widget.dart';
-// import '../widgets/widgets.dart';
+import '../widgets/surah_index_sheet.dart';
 
-// /// Screen for reading Quran text.
-// ///
-// /// NOTE: This screen expects a [QuranReaderBloc] to be provided in the widget tree.
-// /// The bloc is provided by [QuranReaderRoute] in the router configuration.
-// class QuranReaderScreen extends StatefulWidget {
-//   const QuranReaderScreen({
-//     super.key,
-//     required this.surahNumber,
-//     this.initialAyah,
-//   });
+/// Screen for reading Quran text in a page-by-page Mushaf view.
+///
+/// Displays [QuranPageView] with a floating action button to open
+/// the surah index sheet for quick navigation.
+class QuranReaderScreen extends StatefulWidget {
+  const QuranReaderScreen({
+    super.key,
+    required this.surahNumber,
+    this.initialAyah,
+  });
 
-//   final int surahNumber;
-//   final int? initialAyah;
+  /// The surah number to open initially.
+  final int surahNumber;
 
-//   @override
-//   State<QuranReaderScreen> createState() => _QuranReaderScreenState();
-// }
+  /// Optional initial ayah to scroll to.
+  final int? initialAyah;
 
-// class _QuranReaderScreenState extends State<QuranReaderScreen> {
-//   late PageController _pageController;
-//   final bool _firstLoad = true;
-//   final bool _showControls = true;
+  @override
+  State<QuranReaderScreen> createState() => _QuranReaderScreenState();
+}
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _pageController = PageController();
-//     _loadSettings();
-//   }
+class _QuranReaderScreenState extends State<QuranReaderScreen> {
+  late PageController _pageController;
 
-//   void _loadSettings() {
-//     context.read<QuranReaderBloc>().add(const QuranReaderEvent.loadSettings());
-//   }
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
 
-//   @override
-//   void dispose() {
-//     _pageController.dispose();
-//     super.dispose();
-//   }
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Scaffold(body: PageviewQuran());
-//     // return const Scaffold(body: PageviewQuranV2());
-//     // return Scaffold(
-//     //   body: BlocConsumer<QuranReaderBloc, QuranReaderState>(
-//     //     listener: (context, state) {
-//     //       // Handle initial navigation to surah's start page
-//     //       if (state.currentSurah != null && _firstLoad) {
-//     //         final int startPage = state.currentSurah!.startPage ?? 1;
-//     //         // Post frame to ensure controller is attached
-//     //         WidgetsBinding.instance.addPostFrameCallback((_) {
-//     //           if (_pageController.hasClients) {
-//     //             _pageController.jumpToPage(startPage - 1);
-//     //             // Trigger load for the start page
-//     //             context.read<QuranReaderBloc>().add(
-//     //               QuranReaderEvent.loadPage(startPage),
-//     //             );
-//     //           }
-//     //         });
-//     //         _firstLoad = false;
-//     //       }
-//     //     },
-//     //     builder: (context, state) {
-//     //       return GestureDetector(
-//     //         onTap: () {
-//     //           setState(() {
-//     //             _showControls = !_showControls;
-//     //           });
-//     //         },
-//     //         child: Stack(
-//     //           children: [
-//     //             // Main content
-//     //             _buildContent(context, state),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: QuranPageView(
+        controller: _pageController,
+        juzLabel: context.l10n.juzPart,
+        hizbLabel: context.l10n.hizb,
+        surahNameBuilder: (surahNumber) {
+          return context.l10n.localeName == 'ar'
+              ? getSurahNameArabic(surahNumber)
+              : getSurahNameEnglish(surahNumber);
+        },
+      ),
+      floatingActionButton: _SurahIndexFab(onSurahSelected: _jumpToSurah),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    );
+  }
 
-//     //             // Top bar
-//     //             AnimatedPositioned(
-//     //               duration: const Duration(milliseconds: 300),
-//     //               top: _showControls ? 0 : -100,
-//     //               left: 0,
-//     //               right: 0,
-//     //               child: QuranReaderAppBar(
-//     //                 title:
-//     //                     state.currentPage?.ayahs.firstOrNull?.surahName ??
-//     //                     state.currentSurah?.name ??
-//     //                     '',
-//     //                 subtitle:
-//     //                     state
-//     //                         .currentPage
-//     //                         ?.ayahs
-//     //                         .firstOrNull
-//     //                         ?.surahNameEnglish ??
-//     //                     state.currentSurah?.nameEnglish ??
-//     //                     '',
-//     //                 onBack: () => Navigator.of(context).pop(),
-//     //                 onSearch: () => _showSearchDialog(context),
-//     //                 onSettings: () => _showSettingsSheet(context, state),
-//     //               ),
-//     //             ),
+  /// Navigates the [PageView] to the first page of [surahNumber].
+  void _jumpToSurah(int surahNumber) {
+    final int pageNumber = getPageNumber(surahNumber, 1);
+    _pageController.jumpToPage(pageNumber - 1);
+  }
+}
 
-//     //             // Bottom controls
-//     //             AnimatedPositioned(
-//     //               duration: const Duration(milliseconds: 300),
-//     //               bottom: _showControls ? 0 : -100,
-//     //               left: 0,
-//     //               right: 0,
-//     //               child: QuranReaderBottomBar(
-//     //                 surahNumber: widget.surahNumber,
-//     //                 settings: state.settings,
-//     //                 onFontSizeChanged: (size) {
-//     //                   context.read<QuranReaderBloc>().add(
-//     //                     QuranReaderEvent.updateFontSize(size),
-//     //                   );
-//     //                 },
-//     //                 onPreviousSurah: widget.surahNumber > 1
-//     //                     ? () => _navigateToSurah(widget.surahNumber - 1)
-//     //                     : null,
-//     //                 onNextSurah: widget.surahNumber < 114
-//     //                     ? () => _navigateToSurah(widget.surahNumber + 1)
-//     //                     : null,
-//     //               ),
-//     //             ),
-//     //           ],
-//     //         ),
-//     //       );
-//     //     },
-//     //   ),
-//     // );
-//   }
+/// A floating action button that opens the surah index sheet.
+class _SurahIndexFab extends StatelessWidget {
+  const _SurahIndexFab({required this.onSurahSelected});
 
-//   Widget _buildContent(BuildContext context, QuranReaderState state) {
-//     // If we have no pages and are loading, show global loader
-//     if (state.status == QuranReaderStatus.loading && state.pages.isEmpty) {
-//       return const Center(child: CircularProgressIndicator());
-//     }
+  final ValueChanged<int> onSurahSelected;
 
-//     if (state.status == QuranReaderStatus.error && state.pages.isEmpty) {
-//       return Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-//             const SizedBox(height: 16),
-//             Text(state.errorMessage, textAlign: TextAlign.center),
-//             const SizedBox(height: 16),
-//             ElevatedButton(
-//               onPressed: () {
-//                 context.read<QuranReaderBloc>().add(
-//                   QuranReaderEvent.loadSurah(widget.surahNumber),
-//                 );
-//               },
-//               child: const Text('Retry'),
-//             ),
-//           ],
-//         ),
-//       );
-//     }
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color(0xFFA68B67);
 
-//     // PageView
-//     return PageView.builder(
-//       controller: _pageController,
-//       itemCount: 604, // Standard Madani Mushaf pages
-//       onPageChanged: (index) {
-//         final int pageNum = index + 1;
-//         // Pre-load next page logic could go here
-//         context.read<QuranReaderBloc>().add(QuranReaderEvent.loadPage(pageNum));
-//       },
-//       itemBuilder: (context, index) {
-//         final int pageNum = index + 1;
-//         final QuranPageEntity? pageEntity = state.pages[pageNum];
+    return FloatingActionButton.small(
+      onPressed: () => _showSurahIndex(context),
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      tooltip: context.l10n.surahIndex,
+      child: const Icon(Icons.menu_book_rounded, size: 20),
+    );
+  }
 
-//         if (pageEntity != null) {
-//           return QuranPageWidget(page: pageEntity);
-//         } else {
-//           // Trigger load if not loading and not loaded
-//           // Using post-frame callback to avoid state change during build
-//           WidgetsBinding.instance.addPostFrameCallback((_) {
-//             context.read<QuranReaderBloc>().add(
-//               QuranReaderEvent.loadPage(pageNum),
-//             );
-//           });
-//           return const Center(child: CircularProgressIndicator());
-//         }
-//       },
-//     );
-//   }
-
-//   void _navigateToSurah(int surahNumber) {
-//     context.read<QuranReaderBloc>().add(
-//       QuranReaderEvent.loadSurah(surahNumber),
-//     );
-//   }
-
-//   void _showSearchDialog(BuildContext context) {
-//     final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
-//     showDialog(
-//       context: context,
-//       builder: (dialogContext) =>
-//           BlocProvider.value(value: bloc, child: const AyahSearchDialog()),
-//     );
-//   }
-
-//   void _showSettingsSheet(BuildContext context, QuranReaderState state) {
-//     final QuranReaderBloc bloc = context.read<QuranReaderBloc>();
-//     showModalBottomSheet(
-//       context: context,
-//       isScrollControlled: true,
-//       builder: (modalContext) => ReaderSettingsSheet(
-//         settings: state.settings,
-//         onSettingsChanged: (settings) {
-//           bloc.add(QuranReaderEvent.updateSettings(settings));
-//         },
-//       ),
-//     );
-//   }
-// }
+  void _showSurahIndex(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SurahIndexSheet(
+        onSurahSelected: (surahNumber) {
+          Navigator.of(context).pop();
+          onSurahSelected(surahNumber);
+        },
+      ),
+    );
+  }
+}
