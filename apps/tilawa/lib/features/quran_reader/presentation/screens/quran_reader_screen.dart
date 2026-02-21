@@ -37,6 +37,19 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
     if (widget.surahNumber > 0) {
       initialPage = getPageNumber(widget.surahNumber, 1);
+      // Trigger load for the specific surah if it's not already loaded or if it's a different surah
+      final bloc = context.read<QuranReaderBloc>();
+      if (bloc.state.currentSurah?.number != widget.surahNumber) {
+        bloc.add(QuranReaderEvent.loadSurah(widget.surahNumber));
+      } else {
+        // Even if already loaded, ensure saveLastRead is triggered for initial position
+        bloc.add(
+          QuranReaderEvent.saveLastRead(
+            surahNumber: widget.surahNumber,
+            page: initialPage,
+          ),
+        );
+      }
     } else {
       // For last read (surahNumber == 0), check if the global bloc already has a page
       final currentState = context.read<QuranReaderBloc>().state;
@@ -62,15 +75,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     return BlocListener<QuranReaderBloc, QuranReaderState>(
       listenWhen: (previous, current) =>
           previous.currentPage != current.currentPage &&
-          !_isInitialPageJumpDone &&
-          widget.surahNumber == 0,
+          current.currentPage != null,
       listener: (context, state) {
-        if (state.currentPage != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (_pageController.hasClients) {
-              _pageController.jumpToPage(state.currentPage!.pageNumber - 1);
-            }
-          });
+        final pageNumber = state.currentPage!.pageNumber;
+
+        // Sync PageController ONLY if it's not already at the correct page
+        // Use a small epsilon for page comparison
+        if (_pageController.hasClients) {
+          final currentPageInController = _pageController.page?.round() ?? 0;
+          if (currentPageInController + 1 != pageNumber) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_pageController.hasClients) {
+                _pageController.jumpToPage(pageNumber - 1);
+              }
+            });
+          }
+        }
+
+        if (!_isInitialPageJumpDone) {
           setState(() {
             _isInitialPageJumpDone = true;
           });
@@ -115,12 +137,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             body: QuranPageView(
               controller: _pageController,
               onPageChanged: (pageNumber) {
-                final surahNumber = getPageData(pageNumber).first['surah']!;
+                // Delegate to bloc - it will handle saving last read and syncing state
                 context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.saveLastRead(
-                    surahNumber: surahNumber,
-                    page: pageNumber,
-                  ),
+                  QuranReaderEvent.loadPage(pageNumber),
                 );
               },
               juzLabel: context.l10n.juzPart,
@@ -142,8 +161,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   /// Navigates the [PageView] to the first page of [surahNumber].
   void _jumpToSurah(int surahNumber) {
-    final int pageNumber = getPageNumber(surahNumber, 1);
-    _pageController.jumpToPage(pageNumber - 1);
+    // Delegate to bloc - it will trigger loadPage which the listener above handles
+    context.read<QuranReaderBloc>().add(
+      QuranReaderEvent.loadSurah(surahNumber),
+    );
   }
 }
 

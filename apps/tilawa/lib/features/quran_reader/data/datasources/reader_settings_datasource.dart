@@ -59,9 +59,13 @@ class ReaderSettingsDataSourceImpl implements ReaderSettingsDataSource {
     await _prefs.setInt(_lastReadSurahKey, surahNumber);
     if (ayahNumber != null) {
       await _prefs.setInt(_lastReadAyahKey, ayahNumber);
+    } else {
+      await _prefs.remove(_lastReadAyahKey);
     }
     if (page != null) {
       await _prefs.setInt(_lastReadPageKey, page);
+    } else {
+      await _prefs.remove(_lastReadPageKey);
     }
   }
 

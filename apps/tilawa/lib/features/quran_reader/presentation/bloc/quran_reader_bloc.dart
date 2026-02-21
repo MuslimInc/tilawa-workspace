@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -63,8 +64,8 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     this._searchAyahsUseCase,
     this._getStartPageForSurahUseCase,
   ) : super(const QuranReaderState()) {
-    on<_LoadSurah>(_onLoadSurah);
-    on<_LoadPage>(_onLoadPage);
+    on<_LoadSurah>(_onLoadSurah, transformer: restartable());
+    on<_LoadPage>(_onLoadPage, transformer: restartable());
     on<_LoadSettings>(_onLoadSettings);
     on<_UpdateSettings>(_onUpdateSettings);
     on<_UpdateFontSize>(_onUpdateFontSize);
@@ -75,8 +76,8 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       transformer: (events, mapper) =>
           events.debounce(const Duration(milliseconds: 500)).switchMap(mapper),
     );
-    on<_LoadLastRead>(_onLoadLastRead);
-    on<_SearchAyahs>(_onSearchAyahs);
+    on<_LoadLastRead>(_onLoadLastRead, transformer: restartable());
+    on<_SearchAyahs>(_onSearchAyahs, transformer: restartable());
     on<_ClearSearch>(_onClearSearch);
   }
 
@@ -93,7 +94,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     _LoadSurah event,
     Emitter<QuranReaderState> emit,
   ) async {
-    emit(state.copyWith(status: QuranReaderStatus.loading));
+    emit(state.copyWith(status: QuranReaderStatus.loading, errorMessage: ''));
 
     final Either<Failure, SurahContentEntity> result =
         await _getSurahContentUseCase.call(surahNumber: event.surahNumber);
@@ -111,14 +112,9 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         );
         // Calculate the starting page of the surah using the UI-agnostic UseCase
         final startPage = _getStartPageForSurahUseCase.call(surah.number);
-        // Save as last read with explicit page number
-        add(
-          QuranReaderEvent.saveLastRead(
-            surahNumber: surah.number,
-            page: startPage,
-          ),
-        );
+
         // Also trigger loading the page into the state
+        // This will handle saving the last read position and updating the currentPage
         add(QuranReaderEvent.loadPage(startPage));
       },
     );
@@ -130,13 +126,31 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   ) async {
     // If page is already cached, just update current page
     if (state.pages.containsKey(event.pageNumber)) {
-      emit(state.copyWith(currentPage: state.pages[event.pageNumber]));
+      final cachedPage = state.pages[event.pageNumber]!;
+
+      // Sync surah if necessary
+      if (cachedPage.ayahs.isNotEmpty) {
+        final firstSurahNum = cachedPage.ayahs.first.surahNumber;
+        if (state.currentSurah?.number != firstSurahNum) {
+          add(QuranReaderEvent.loadSurah(firstSurahNum));
+        }
+
+        // Always save last read when page changes
+        add(
+          QuranReaderEvent.saveLastRead(
+            surahNumber: firstSurahNum,
+            page: cachedPage.pageNumber,
+          ),
+        );
+      }
+
+      emit(state.copyWith(currentPage: cachedPage));
       return;
     }
 
     // Only set loading if we don't have any pages yet (initial load)
     if (state.pages.isEmpty) {
-      emit(state.copyWith(status: QuranReaderStatus.loading));
+      emit(state.copyWith(status: QuranReaderStatus.loading, errorMessage: ''));
     }
 
     final Either<Failure, QuranPageEntity> result = await _getQuranPageUseCase
@@ -152,6 +166,23 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       (page) {
         final newPages = Map<int, QuranPageEntity>.from(state.pages);
         newPages[page.pageNumber] = page;
+
+        // Sync surah if necessary
+        if (page.ayahs.isNotEmpty) {
+          final firstSurahNum = page.ayahs.first.surahNumber;
+          if (state.currentSurah?.number != firstSurahNum) {
+            add(QuranReaderEvent.loadSurah(firstSurahNum));
+          }
+
+          // Always save last read when page changes
+          add(
+            QuranReaderEvent.saveLastRead(
+              surahNumber: firstSurahNum,
+              page: page.pageNumber,
+            ),
+          );
+        }
+
         emit(
           state.copyWith(
             status: QuranReaderStatus.loaded,
@@ -159,14 +190,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
             pages: newPages,
           ),
         );
-        if (page.ayahs.isNotEmpty) {
-          add(
-            QuranReaderEvent.saveLastRead(
-              surahNumber: page.ayahs.first.surahNumber,
-              page: page.pageNumber,
-            ),
-          );
-        }
       },
     );
   }
@@ -234,6 +257,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     _LoadLastRead event,
     Emitter<QuranReaderState> emit,
   ) async {
+    emit(state.copyWith(status: QuranReaderStatus.loading, errorMessage: ''));
     final result = await _getLastReadPositionUseCase.call();
 
     result.fold(

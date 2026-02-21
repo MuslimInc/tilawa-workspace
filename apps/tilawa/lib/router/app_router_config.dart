@@ -19,7 +19,6 @@ import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
-import '../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -291,11 +290,6 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    // Trigger surah load on global bloc
-    context.read<QuranReaderBloc>().add(
-      QuranReaderEvent.loadSurah(surahNumber),
-    );
-
     return QuranReaderScreen(surahNumber: surahNumber, initialAyah: ayahNumber);
   }
 }
