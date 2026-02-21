@@ -2198,6 +2198,18 @@ abstract class AppLocalizations {
   /// **'{time} remaining until {prayer}'**
   String prayerAwayFrom(String prayer, String time);
 
+  /// Quran section title
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get quran;
+
+  /// Button to continue reading Quran from last page
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Reading Quran'**
+  String get continueReadingQuran;
+
   /// Title of the surah index sheet
   ///
   /// In en, this message translates to:

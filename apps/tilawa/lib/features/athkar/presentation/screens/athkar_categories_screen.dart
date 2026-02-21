@@ -2,9 +2,9 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
-import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/di/injection.dart';
+
 import '../../../../router/app_router_config.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
@@ -25,8 +25,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(FluentIcons.book_24_regular),
               tooltip: context.l10n.quranReader,
-              onPressed: () =>
-                  const QuranReaderRoute(surahNumber: 1).push(context),
+              onPressed: () => const QuranLastReadRoute().push(context),
             ),
           ],
         ),

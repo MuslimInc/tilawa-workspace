@@ -2,8 +2,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-
+import 'package:stream_transform/stream_transform.dart';
 import 'package:tilawa_core/errors/failures.dart';
+
 import '../../domain/entities/entities.dart';
 import '../../domain/usecases/usecases.dart';
 
@@ -24,7 +25,9 @@ class QuranReaderEvent with _$QuranReaderEvent {
   const factory QuranReaderEvent.saveLastRead({
     required int surahNumber,
     int? ayahNumber,
+    int? page,
   }) = _SaveLastRead;
+  const factory QuranReaderEvent.loadLastRead() = _LoadLastRead;
   const factory QuranReaderEvent.searchAyahs(String query) = _SearchAyahs;
   const factory QuranReaderEvent.clearSearch() = _ClearSearch;
 }
@@ -56,7 +59,9 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     this._loadReaderSettingsUseCase,
     this._saveReaderSettingsUseCase,
     this._saveLastReadPositionUseCase,
+    this._getLastReadPositionUseCase,
     this._searchAyahsUseCase,
+    this._getStartPageForSurahUseCase,
   ) : super(const QuranReaderState()) {
     on<_LoadSurah>(_onLoadSurah);
     on<_LoadPage>(_onLoadPage);
@@ -65,7 +70,12 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     on<_UpdateFontSize>(_onUpdateFontSize);
     on<_ToggleTranslation>(_onToggleTranslation);
     on<_ScrollToAyah>(_onScrollToAyah);
-    on<_SaveLastRead>(_onSaveLastRead);
+    on<_SaveLastRead>(
+      _onSaveLastRead,
+      transformer: (events, mapper) =>
+          events.debounce(const Duration(milliseconds: 500)).switchMap(mapper),
+    );
+    on<_LoadLastRead>(_onLoadLastRead);
     on<_SearchAyahs>(_onSearchAyahs);
     on<_ClearSearch>(_onClearSearch);
   }
@@ -75,7 +85,9 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   final LoadReaderSettingsUseCase _loadReaderSettingsUseCase;
   final SaveReaderSettingsUseCase _saveReaderSettingsUseCase;
   final SaveLastReadPositionUseCase _saveLastReadPositionUseCase;
+  final GetLastReadPositionUseCase _getLastReadPositionUseCase;
   final SearchAyahsUseCase _searchAyahsUseCase;
+  final GetStartPageForSurahUseCase _getStartPageForSurahUseCase;
 
   Future<void> _onLoadSurah(
     _LoadSurah event,
@@ -93,9 +105,22 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
           errorMessage: failure.toString(),
         ),
       ),
-      (surah) => emit(
-        state.copyWith(status: QuranReaderStatus.loaded, currentSurah: surah),
-      ),
+      (surah) {
+        emit(
+          state.copyWith(status: QuranReaderStatus.loaded, currentSurah: surah),
+        );
+        // Calculate the starting page of the surah using the UI-agnostic UseCase
+        final startPage = _getStartPageForSurahUseCase.call(surah.number);
+        // Save as last read with explicit page number
+        add(
+          QuranReaderEvent.saveLastRead(
+            surahNumber: surah.number,
+            page: startPage,
+          ),
+        );
+        // Also trigger loading the page into the state
+        add(QuranReaderEvent.loadPage(startPage));
+      },
     );
   }
 
@@ -134,6 +159,14 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
             pages: newPages,
           ),
         );
+        if (page.ayahs.isNotEmpty) {
+          add(
+            QuranReaderEvent.saveLastRead(
+              surahNumber: page.ayahs.first.surahNumber,
+              page: page.pageNumber,
+            ),
+          );
+        }
       },
     );
   }
@@ -193,6 +226,33 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     await _saveLastReadPositionUseCase.call(
       surahNumber: event.surahNumber,
       ayahNumber: event.ayahNumber,
+      page: event.page,
+    );
+  }
+
+  Future<void> _onLoadLastRead(
+    _LoadLastRead event,
+    Emitter<QuranReaderState> emit,
+  ) async {
+    final result = await _getLastReadPositionUseCase.call();
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: QuranReaderStatus.error,
+          errorMessage: failure.toString(),
+        ),
+      ),
+      (position) {
+        if (position.page != null) {
+          add(QuranReaderEvent.loadPage(position.page!));
+        } else if (position.surahNumber != null) {
+          add(QuranReaderEvent.loadSurah(position.surahNumber!));
+        } else {
+          // If no last read position, default to first surah
+          add(const QuranReaderEvent.loadSurah(1));
+        }
+      },
     );
   }
 

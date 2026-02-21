@@ -186,8 +186,7 @@ class SettingsScreen extends StatelessWidget {
                     iconColor: AppColors.settingsQuran,
                     title: context.l10n.quranReader,
                     subtitle: context.l10n.continueReading,
-                    onTap: () =>
-                        const QuranReaderRoute(surahNumber: 1).push(context),
+                    onTap: () => const QuranLastReadRoute().push(context),
                     showDivider: false,
                     borderRadius: BorderRadius.vertical(
                       bottom: Radius.circular(16.r),

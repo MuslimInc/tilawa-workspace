@@ -1552,6 +1552,14 @@
             }
         }
     },
+    "quran": "القرآن الكريم",
+    "@quran": {
+        "description": "Quran section title"
+    },
+    "continueReadingQuran": "متابعة قراءة القرآن",
+    "@continueReadingQuran": {
+        "description": "Button to continue reading Quran from last page"
+    },
     "surahIndex": "فهرس السور",
     "@surahIndex": {
         "description": "Title of the surah index sheet"

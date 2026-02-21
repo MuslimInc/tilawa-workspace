@@ -49,4 +49,7 @@ abstract class QuranReaderRepository {
   /// Get last read position
   Future<({int? surahNumber, int? ayahNumber, int? page})>
   getLastReadPosition();
+
+  /// Get the starting page number for a given surah
+  int getStartPageForSurah(int surahNumber);
 }

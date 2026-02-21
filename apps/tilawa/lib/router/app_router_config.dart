@@ -272,6 +272,16 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
   }
 }
 
+@TypedGoRoute<QuranLastReadRoute>(path: '/quran-last-read')
+class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
+  const QuranLastReadRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const QuranReaderScreen(surahNumber: 0);
+  }
+}
+
 @TypedGoRoute<QuranReaderRoute>(path: '/quran-reader/:surahNumber')
 class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
   const QuranReaderRoute({required this.surahNumber, this.ayahNumber});
@@ -281,14 +291,11 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<QuranReaderBloc>()
-            ..add(QuranReaderEvent.loadSurah(surahNumber)),
-      child: QuranReaderScreen(
-        surahNumber: surahNumber,
-        initialAyah: ayahNumber,
-      ),
+    // Trigger surah load on global bloc
+    context.read<QuranReaderBloc>().add(
+      QuranReaderEvent.loadSurah(surahNumber),
     );
+
+    return QuranReaderScreen(surahNumber: surahNumber, initialAyah: ayahNumber);
   }
 }

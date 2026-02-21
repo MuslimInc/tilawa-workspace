@@ -108,6 +108,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 title: Text(l10n.reciters),
                 actions: [
                   IconButton(
+                    icon: const Icon(FluentIcons.book_open_24_regular),
+                    tooltip: l10n.quran,
+                    onPressed: () => const QuranLastReadRoute().push(context),
+                  ),
+                  IconButton(
                     icon: const Icon(FluentIcons.bookmark_24_regular),
                     tooltip: l10n.bookmarks,
                     onPressed: () => const BookmarksRoute().push(context),

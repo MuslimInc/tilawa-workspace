@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:quran/quran.dart';
 
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/quran_reader_repository.dart';
@@ -90,5 +91,10 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   Future<({int? surahNumber, int? ayahNumber, int? page})>
   getLastReadPosition() async {
     return _settingsDataSource.getLastReadPosition();
+  }
+
+  @override
+  int getStartPageForSurah(int surahNumber) {
+    return getPageNumber(surahNumber, 1);
   }
 }

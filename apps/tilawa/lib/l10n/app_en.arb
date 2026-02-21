@@ -1552,6 +1552,14 @@
             }
         }
     },
+    "quran": "Quran",
+    "@quran": {
+        "description": "Quran section title"
+    },
+    "continueReadingQuran": "Continue Reading Quran",
+    "@continueReadingQuran": {
+        "description": "Button to continue reading Quran from last page"
+    },
     "surahIndex": "Surah Index",
     "@surahIndex": {
         "description": "Title of the surah index sheet"
