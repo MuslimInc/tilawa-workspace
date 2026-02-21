@@ -203,8 +203,9 @@ class _PageContentState extends State<PageContent> {
         // vertical: MediaQuery.sizeOf(context).height * 0.030,
       ),
       child: Stack(
+        alignment: Alignment.center,
         children: [
-          Positioned.fill(
+          Positioned(
             child: isLandscape
                 ? SingleChildScrollView(
                     padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
