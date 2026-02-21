@@ -1604,5 +1604,30 @@
                 "type": "String"
             }
         }
+    },
+    "sajda": "سجدة",
+    "@sajda": {
+        "description": "Sajda indicator label"
+    },
+    "surahPrefix": "سورة",
+    "@surahPrefix": {
+        "description": "Prefix for surah names"
+    },
+    "ayahCount": "{count, plural, =1{آية واحدة} =2{آيتان} other{{count} آيات}}",
+    "@ayahCount": {
+        "description": "Pluralized ayah count",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "juzPart": "الجزء",
+    "@juzPart": {
+        "description": "Label for Quranic Juz/Part"
+    },
+    "hizb": "الحزب",
+    "@hizb": {
+        "description": "Label for Quranic Hizb"
     }
 }

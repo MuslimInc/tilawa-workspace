@@ -2233,6 +2233,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} Ayahs · {place}'**
   String ayahCountWithPlace(int count, String place);
+
+  /// Sajda indicator label
+  ///
+  /// In en, this message translates to:
+  /// **'Sajda'**
+  String get sajda;
+
+  /// Prefix for surah names
+  ///
+  /// In en, this message translates to:
+  /// **'Surah'**
+  String get surahPrefix;
+
+  /// Pluralized ayah count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Ayah} other{{count} Ayahs}}'**
+  String ayahCount(int count);
+
+  /// Label for Quranic Juz/Part
+  ///
+  /// In en, this message translates to:
+  /// **'Part'**
+  String get juzPart;
+
+  /// Label for Quranic Hizb
+  ///
+  /// In en, this message translates to:
+  /// **'Hizb'**
+  String get hizb;
 }
 
 class _AppLocalizationsDelegate

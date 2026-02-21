@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -99,9 +100,15 @@ class SurahHeaderWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _InfoChip(label: surah.revelationType, theme: theme),
+              _InfoChip(
+                label: surah.isMeccan ? context.l10n.meccan : context.l10n.medinan,
+                theme: theme,
+              ),
               const SizedBox(width: 12),
-              _InfoChip(label: '${surah.numberOfAyahs} Ayahs', theme: theme),
+              _InfoChip(
+                label: context.l10n.ayahCount(surah.numberOfAyahs),
+                theme: theme,
+              ),
             ],
           ),
         ],
@@ -243,7 +250,7 @@ class AyahWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Sajda',
+                      context.l10n.sajda,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),

@@ -6,34 +6,31 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 24),
-        // padding: const .symmetric(horizontal: 9),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            const Image(
-              image: AssetImage('assets/mainframe.png', package: 'quran'),
-              height: 48,
-              fit: BoxFit.fill,
-            ),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                text: '$suraNumber',
-                style: const TextStyle(
-                  fontFamily: 'arsura',
-                  package: 'quran',
-                  color: Colors.black,
-                  fontSize: 40,
-                ),
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    return Container(
+      width: screenWidth,
+      margin: const EdgeInsets.only(top: 12),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Image(
+            image: const AssetImage('assets/mainframe.png', package: 'quran'),
+            width: screenWidth * 0.90,
+            fit: BoxFit.fill,
+          ),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              text: '$suraNumber',
+              style: TextStyle(
+                fontFamily: 'arsura',
+                package: 'quran',
+                color: Colors.black,
+                fontSize: screenWidth * 0.05,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

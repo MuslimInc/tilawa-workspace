@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quran/quran.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/quran_constants.dart';
 
 import '../../domain/entities/entities.dart';
@@ -92,8 +94,9 @@ class _QuranPageWidgetState extends State<QuranPageWidget> {
   }
 
   Widget _buildSurahHeader(int surahNumber) {
-    final String surahName =
-        QuranConstants.surahNames[surahNumber] ?? 'Surah $surahNumber';
+    final String surahName = context.l10n.localeName == 'ar'
+        ? getSurahNameArabic(surahNumber)
+        : getSurahNameEnglish(surahNumber);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -103,7 +106,7 @@ class _QuranPageWidgetState extends State<QuranPageWidget> {
       ),
       child: Center(
         child: Text(
-          'سورة $surahName',
+          '${context.l10n.surahPrefix} $surahName',
           style: GoogleFonts.amiri(
             fontSize: 22,
             fontWeight: FontWeight.bold,

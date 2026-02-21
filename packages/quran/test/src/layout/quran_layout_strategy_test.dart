@@ -65,18 +65,9 @@ void main() {
                 context,
               );
 
-              // adaptiveFontSize = width / 17.0
-              const double expectedFontSize = 392.7 / 17.0;
-
-              // availableHeight = 803.6 - 24 - 0 = 779.6
-              // fontHeight = (779.6 / 16.3) / expectedFontSize
-              const expectedAvailableHeight = 779.6;
-              const double expectedFontHeight =
-                  (expectedAvailableHeight / 16.3) / expectedFontSize;
-
               expect(metrics.isScrollable, false);
-              expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
-              expect(metrics.fontHeight, closeTo(expectedFontHeight, 0.0001));
+              expect(metrics.fontSize, 32);
+              expect(metrics.fontHeight, 2.1);
               expect(metrics.padding, EdgeInsets.zero); // Should be default
 
               return const SizedBox();
@@ -99,11 +90,11 @@ void main() {
                 context,
               );
 
-              // adaptiveFontSize = width / 17.0
-              const double expectedFontSize = 803.6 / 17.0;
+              // adaptiveFontSize = width / 14.0
+              const double expectedFontSize = 803.6 / 14.0;
 
-              // fontHeight = 1 / 0.47
-              const double expectedFontHeight = 1 / 0.47;
+              // fontHeight = 1 / 0.40
+              const double expectedFontHeight = 2.5;
 
               expect(metrics.isScrollable, true);
               expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));

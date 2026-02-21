@@ -22,6 +22,9 @@ class QuranPageView extends StatefulWidget {
     this.onLongPressUp,
     this.onLongPressCancel,
     this.onLongPressDown,
+    this.juzLabel,
+    this.hizbLabel,
+    this.surahNameBuilder,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
@@ -57,6 +60,9 @@ class QuranPageView extends StatefulWidget {
     LongPressStartDetails details,
   )?
   onLongPressDown;
+  final String? juzLabel;
+  final String? hizbLabel;
+  final String Function(int surahNumber)? surahNameBuilder;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -108,6 +114,9 @@ class _QuranPageViewState extends State<QuranPageView> {
               onLongPressUp: widget.onLongPressUp,
               onLongPressCancel: widget.onLongPressCancel,
               onLongPressDown: widget.onLongPressDown,
+              juzLabel: widget.juzLabel,
+              hizbLabel: widget.hizbLabel,
+              surahNameBuilder: widget.surahNameBuilder,
             );
           },
         ),

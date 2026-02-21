@@ -1176,4 +1176,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String ayahCountWithPlace(int count, String place) {
     return '$count آية · $place';
   }
+
+  @override
+  String get sajda => 'سجدة';
+
+  @override
+  String get surahPrefix => 'سورة';
+
+  @override
+  String ayahCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count آيات',
+      two: 'آيتان',
+      one: 'آية واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get juzPart => 'الجزء';
+
+  @override
+  String get hizb => 'الحزب';
 }

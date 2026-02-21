@@ -67,6 +67,10 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       fontSize: fontSize,
       fontHeight: fontHeight,
       isScrollable: true,
+      padding: EdgeInsets.only(
+        top: padding.top + 16,
+        bottom: padding.bottom + 16,
+      ),
     );
   }
 

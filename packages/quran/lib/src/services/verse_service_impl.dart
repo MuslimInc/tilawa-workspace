@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import '../data/quran_text.dart';
 import '../quran_exception.dart';
 import 'interfaces/verse_service.dart';
@@ -82,12 +80,10 @@ class VerseServiceImpl implements VerseService {
     }
 
     // QCF data stores word-glyphs as consecutive characters with
-    // newlines as line delimiters. letterSpacing in TextStyle controls
-    // the visual gap between glyphs.
-    final result = qcfData;
-
-    log('[GetVerseQCF] $surahNumber:$verseNumber -> "$result"');
-    return result;
+    // newlines as line delimiters. Separating characters with spaces
+    // helps Flutter render them as individual glyphs without
+    // incorrect shaping.
+    return qcfData.split('').join(' ').replaceAll(' \n ', '\n');
   }
 
   @override

@@ -11,10 +11,13 @@ class PageContent extends StatefulWidget {
     required this.pageNumber,
     required this.textColor,
     this.verseBackgroundColor,
-    required this.onLongPress,
-    required this.onLongPressUp,
+    this.onLongPress,
+    this.onLongPressUp,
     required this.onLongPressCancel,
     required this.onLongPressDown,
+    this.juzLabel,
+    this.hizbLabel,
+    this.surahNameBuilder,
   });
   final int pageNumber;
   final Color textColor;
@@ -22,6 +25,9 @@ class PageContent extends StatefulWidget {
   final void Function(int surahNumber, int verseNumber)? onLongPress;
   final void Function(int surahNumber, int verseNumber)? onLongPressUp;
   final void Function(int surahNumber, int verseNumber)? onLongPressCancel;
+  final String? juzLabel;
+  final String? hizbLabel;
+  final String Function(int surahNumber)? surahNameBuilder;
 
   final void Function(
     int surahNumber,
@@ -51,9 +57,13 @@ class _PageContentState extends State<PageContent> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
-    final double verseFontSize = screenWidth * 0.060;
-    final double ayahNumberFontSize = screenWidth * 0.060;
-    final double bismillahFontSize = screenWidth * 0.055;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final double verseFontSize = screenWidth * 0.055;
+    final double ayahNumberFontSize = screenWidth * 0.055;
+    final double bismillahFontSize = isLandscape
+        ? screenWidth * 0.045
+        : screenWidth * 0.055;
 
     final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
     final Map<String, int> firstVerse = ranges.first;
@@ -69,9 +79,11 @@ class _PageContentState extends State<PageContent> {
             firstVerse['start']!,
           );
 
-    final String englishSurahName = QuranServiceLocator.surahService
-        .getName(surahNumber)
-        .replaceAll('Al ', 'Al-');
+    final String displaySurahName =
+        widget.surahNameBuilder?.call(surahNumber) ??
+        QuranServiceLocator.surahService
+            .getName(surahNumber)
+            .replaceAll('Al ', 'Al-');
 
     final pageFont = "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
 
@@ -94,17 +106,18 @@ class _PageContentState extends State<PageContent> {
       for (var v = start; v <= end; v++) {
         if (v == start && v == 1) {
           verseSpans.add(WidgetSpan(child: HeaderWidget(suraNumber: surah)));
-          verseSpans.add(const TextSpan(text: '\u2009'));
+          verseSpans.add(const TextSpan(text: '\n\n'));
           if (surah != 1 && surah != 9) {
             verseSpans.add(
               TextSpan(
-                text: '\ufe9d\ufe8f\ufe95\ufea9\n',
+                text: '\ufad8\ufad7\ufad6\ufad5\n',
                 style: TextStyle(
                   fontFamily: 'QCF_BSML',
                   package: 'quran',
                   fontSize: bismillahFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.black,
+                  height: 1.0,
                 ),
               ),
             );
@@ -170,18 +183,17 @@ class _PageContentState extends State<PageContent> {
     );
 
     final header = _PageHeader(
-      surahName: englishSurahName,
+      surahName: displaySurahName,
       juzNumber: juzNumber,
+      juzLabel: widget.juzLabel ?? 'Part',
       textColor: widget.textColor,
     );
     final footer = _PageFooter(
       quarterNumber: quarterNumber,
       pageNumber: widget.pageNumber,
+      hizbLabel: widget.hizbLabel ?? 'Hizb',
       textColor: widget.textColor,
     );
-
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     final double horizontalPadding = screenWidth * 0.020;
 
@@ -200,8 +212,8 @@ class _PageContentState extends State<PageContent> {
                   )
                 : readerText,
           ),
-          Positioned(top: 0, left: 0, right: 0, child: header),
-          Positioned(bottom: 0, left: 0, right: 0, child: footer),
+          Positioned(top: 8, left: 0, right: 0, child: header),
+          Positioned(bottom: 12, left: 0, right: 0, child: footer),
         ],
       ),
     );
@@ -212,15 +224,13 @@ class _PageContentState extends State<PageContent> {
   /// for Arabic clusters — explicit spaces are the only reliable way to
   /// create visual gaps between QCF word-glyphs.
   String _spaceQcfGlyphs(String qcfText, {bool isFirstVerseOnPage = false}) {
-    // لو مش أول آية، رجع النص زي ما هو بدون مسافات إضافية
     if (!isFirstVerseOnPage || qcfText.isEmpty) return qcfText;
 
-    // لو هي أول آية، هنطبق المسافة (\u200A) على أول حرفين (glyphs) بس
-    if (qcfText.length >= 2) {
-      // بناخد أول حرفين، ندمجهم بمسافة رفيعة جداً، ونضيف عليهم باقي النص
-      final String firstTwo = qcfText.substring(0, 2).split('\u2009').join();
-      final String rest = qcfText.substring(2);
-      return firstTwo + rest;
+    if (qcfText.length >= 2 && !qcfText.contains('\u2009')) {
+      if (qcfText[1] == ' ') {
+        return '${qcfText[0]}\u2009${qcfText.substring(2)}';
+      }
+      return '${qcfText[0]}\u2009${qcfText.substring(1)}';
     }
 
     return qcfText;
@@ -248,16 +258,18 @@ class _PageHeader extends StatelessWidget {
     required this.surahName,
     required this.juzNumber,
     required this.textColor,
+    required this.juzLabel,
   });
 
   final String surahName;
   final int juzNumber;
   final Color textColor;
+  final String juzLabel;
 
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFFA68B67);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.025;
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.020;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -277,7 +289,7 @@ class _PageHeader extends StatelessWidget {
           ),
           Flexible(
             child: Text(
-              'Part $juzNumber',
+              '$juzLabel $juzNumber',
               style: TextStyle(
                 color: primaryColor,
                 fontSize: verseFontSize,
@@ -296,11 +308,13 @@ class _PageFooter extends StatelessWidget {
   const _PageFooter({
     required this.quarterNumber,
     required this.pageNumber,
+    required this.hizbLabel,
     required this.textColor,
   });
 
   final int? quarterNumber;
   final int pageNumber;
+  final String hizbLabel;
   final Color textColor;
 
   String _getHizbLabel() {
@@ -322,7 +336,7 @@ class _PageFooter extends StatelessWidget {
         prefix = '';
     }
 
-    return '${prefix}Hizb $hizbIndex';
+    return '$prefix$hizbLabel $hizbIndex';
   }
 
   @override

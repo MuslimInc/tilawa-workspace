@@ -43,7 +43,16 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: QuranPageView(controller: _pageController),
+      body: QuranPageView(
+        controller: _pageController,
+        juzLabel: context.l10n.juzPart,
+        hizbLabel: context.l10n.hizb,
+        surahNameBuilder: (surahNumber) {
+          return context.l10n.localeName == 'ar'
+              ? getSurahNameArabic(surahNumber)
+              : getSurahNameEnglish(surahNumber);
+        },
+      ),
       floatingActionButton: _SurahIndexFab(onSurahSelected: _jumpToSurah),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
