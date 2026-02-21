@@ -49,10 +49,4 @@ abstract class QuranReaderRepository {
   /// Get last read position
   Future<({int? surahNumber, int? ayahNumber, int? page})>
   getLastReadPosition();
-
-  /// Get total page count
-  int get totalPages => 604;
-
-  /// Get total juz count
-  int get totalJuz => 30;
 }

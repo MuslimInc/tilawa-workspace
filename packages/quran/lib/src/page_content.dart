@@ -51,9 +51,9 @@ class _PageContentState extends State<PageContent> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
-    final double verseFontSize = screenWidth * 0.055;
+    final double verseFontSize = screenWidth * 0.060;
     final double ayahNumberFontSize = screenWidth * 0.060;
-    final double bismillahFontSize = screenWidth * 0.060;
+    final double bismillahFontSize = screenWidth * 0.055;
 
     final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
     final Map<String, int> firstVerse = ranges.first;
@@ -85,7 +85,7 @@ class _PageContentState extends State<PageContent> {
     const FontWeight fontWeight = FontWeight.w500;
 
     final verseSpans = <InlineSpan>[];
-    var isFirstVerseOnPage = true;
+    var isFirstVerseOfPage = true;
     for (final r in ranges) {
       final int surah = r['surah']!;
       final int start = r['start']!;
@@ -94,34 +94,20 @@ class _PageContentState extends State<PageContent> {
       for (var v = start; v <= end; v++) {
         if (v == start && v == 1) {
           verseSpans.add(WidgetSpan(child: HeaderWidget(suraNumber: surah)));
-          if (widget.pageNumber != 1 && widget.pageNumber != 187) {
-            if (surah != 97) {
-              verseSpans.add(
-                TextSpan(
-                  text: ' ﱁ  ﱂﱃﱄ\n',
-                  style: TextStyle(
-                    fontFamily: 'QCF_P001',
-                    package: 'quran',
-                    fontSize: bismillahFontSize,
-                    fontWeight: fontWeight,
-                    color: Colors.black,
-                  ),
+          verseSpans.add(const TextSpan(text: '\u2009'));
+          if (surah != 1 && surah != 9) {
+            verseSpans.add(
+              TextSpan(
+                text: '\ufe9d\ufe8f\ufe95\ufea9\n',
+                style: TextStyle(
+                  fontFamily: 'QCF_BSML',
+                  package: 'quran',
+                  fontSize: bismillahFontSize,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
                 ),
-              );
-            } else {
-              verseSpans.add(
-                TextSpan(
-                  text: '齃𧻓𥳐龎\n',
-                  style: TextStyle(
-                    fontFamily: 'QCF_BSML',
-                    package: 'quran',
-                    fontSize: bismillahFontSize,
-                    fontWeight: fontWeight,
-                    color: Colors.black,
-                  ),
-                ),
-              );
-            }
+              ),
+            );
           }
         }
         final spanRecognizer = LongPressGestureRecognizer();
@@ -134,20 +120,11 @@ class _PageContentState extends State<PageContent> {
             widget.onLongPressCancel?.call(surah, v);
 
         final Color? verseBgColor = widget.verseBackgroundColor?.call(surah, v);
-
-        String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
-        if (isFirstVerseOnPage && verseText.isNotEmpty) {
-          if (verseText.length > 1 &&
-              verseText[1] != ' ' &&
-              verseText[1] != '\u2009') {
-            verseText = '${verseText[0]}\u2009${verseText.substring(1)}';
-          } else if (verseText.length == 1 &&
-              verseText != ' ' &&
-              verseText != '\u2009') {
-            verseText = '$verseText\u2009';
-          }
-          isFirstVerseOnPage = false;
-        }
+        final String verseText = _spaceQcfGlyphs(
+          getVerseQCF(surah, v, verseEndSymbol: false),
+          isFirstVerseOnPage: isFirstVerseOfPage,
+        );
+        isFirstVerseOfPage = false;
 
         verseSpans.add(
           TextSpan(
@@ -162,7 +139,6 @@ class _PageContentState extends State<PageContent> {
               fontWeight: fontWeight,
               color: widget.textColor,
               height: 2.25,
-              letterSpacing: 2,
               backgroundColor: verseBgColor,
             ),
             children: [
@@ -176,7 +152,7 @@ class _PageContentState extends State<PageContent> {
                   fontSize: ayahNumberFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.green,
-                  height: 1.35,
+                  height: 2.25,
                   backgroundColor: verseBgColor,
                 ),
               ),
@@ -186,22 +162,11 @@ class _PageContentState extends State<PageContent> {
       }
     }
 
-    final Widget readerText = Center(
-      child: Text.rich(
-        TextSpan(children: [...verseSpans]),
-        locale: const Locale('ar'),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.rtl,
-        style: TextStyle(
-          fontFamily: pageFont,
-          package: 'quran',
-          fontSize: verseFontSize,
-          fontWeight: fontWeight,
-          color: widget.textColor,
-          height: 2,
-          letterSpacing: 2,
-        ),
-      ),
+    final Widget readerText = RichText(
+      text: TextSpan(children: verseSpans),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      strutStyle: StrutStyle(fontSize: verseFontSize),
     );
 
     final header = _PageHeader(
@@ -218,12 +183,12 @@ class _PageContentState extends State<PageContent> {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
-    final double horizontalPadding = screenWidth * 0.040;
+    final double horizontalPadding = screenWidth * 0.020;
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
-        vertical: MediaQuery.sizeOf(context).height * 0.030,
+        // vertical: MediaQuery.sizeOf(context).height * 0.030,
       ),
       child: Stack(
         children: [
@@ -233,16 +198,48 @@ class _PageContentState extends State<PageContent> {
                     padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
                     child: readerText,
                   )
-                : Padding(
-                    padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
-                    child: readerText,
-                  ),
+                : readerText,
           ),
           Positioned(top: 0, left: 0, right: 0, child: header),
           Positioned(bottom: 0, left: 0, right: 0, child: footer),
         ],
       ),
     );
+  }
+
+  /// Inserts a space between each consecutive QCF glyph on the same line.
+  /// This is needed because Flutter's RTL text rendering ignores letterSpacing
+  /// for Arabic clusters — explicit spaces are the only reliable way to
+  /// create visual gaps between QCF word-glyphs.
+  String _spaceQcfGlyphs(String qcfText, {bool isFirstVerseOnPage = false}) {
+    // لو مش أول آية، رجع النص زي ما هو بدون مسافات إضافية
+    if (!isFirstVerseOnPage || qcfText.isEmpty) return qcfText;
+
+    // لو هي أول آية، هنطبق المسافة (\u200A) على أول حرفين (glyphs) بس
+    if (qcfText.length >= 2) {
+      // بناخد أول حرفين، ندمجهم بمسافة رفيعة جداً، ونضيف عليهم باقي النص
+      final String firstTwo = qcfText.substring(0, 2).split('\u2009').join();
+      final String rest = qcfText.substring(2);
+      return firstTwo + rest;
+    }
+
+    return qcfText;
+  }
+
+  String _addWhiteSpace(bool isFirstVerseOnPage, String verseText) {
+    if (isFirstVerseOnPage && verseText.isNotEmpty) {
+      if (verseText.length > 1 &&
+          verseText[1] != ' ' &&
+          verseText[1] != '\u2009') {
+        verseText = '${verseText[0]}\u2009${verseText.substring(1)}';
+      } else if (verseText.length == 1 &&
+          verseText != ' ' &&
+          verseText != '\u2009') {
+        verseText = '$verseText\u2009';
+      }
+      isFirstVerseOnPage = false;
+    }
+    return verseText;
   }
 }
 
@@ -263,7 +260,7 @@ class _PageHeader extends StatelessWidget {
     final double verseFontSize = MediaQuery.sizeOf(context).width * 0.025;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 30.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -346,45 +343,26 @@ class _PageFooter extends StatelessWidget {
     const borderColor = Color(0xFFDED3C4);
     final String hizbLabel = _getHizbLabel();
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomPadding, top: 4.0),
-      child: Align(
-        alignment: pageNumber.isOdd
-            ? Alignment.bottomRight
-            : Alignment.bottomLeft,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: verticalPadding),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: borderColor, width: 0.8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (hizbLabel.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text(
-                    hizbLabel,
-                    style: TextStyle(
-                      color: primaryColor.withValues(alpha: 0.9),
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 0.8,
-                  height: fontSize * 1.5,
-                  color: borderColor,
-                ),
-              ],
+    return Align(
+      alignment: pageNumber.isOdd
+          ? Alignment.bottomRight
+          : Alignment.bottomLeft,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: verticalPadding),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: borderColor, width: 0.8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (hizbLabel.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
-                  '$pageNumber',
+                  hizbLabel,
                   style: TextStyle(
                     color: primaryColor.withValues(alpha: 0.9),
                     fontSize: fontSize,
@@ -392,8 +370,20 @@ class _PageFooter extends StatelessWidget {
                   ),
                 ),
               ),
+              Container(width: 0.8, height: fontSize * 1.5, color: borderColor),
             ],
-          ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text(
+                '$pageNumber',
+                style: TextStyle(
+                  color: primaryColor.withValues(alpha: 0.9),
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

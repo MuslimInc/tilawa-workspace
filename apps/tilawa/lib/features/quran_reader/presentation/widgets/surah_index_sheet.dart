@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa/core/extensions.dart';
 
 /// A bottom sheet widget that displays the Quran surah index.
 ///
@@ -26,7 +27,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
     super.dispose();
   }
 
-  /// Returns true if the [surahNumber] matches the current search query.
+  /// Returns true if the [surahNumber] matches the current query.
   bool _matchesSearch(int surahNumber) {
     if (_searchQuery.isEmpty) return true;
 
@@ -45,6 +46,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     const primaryColor = Color(0xFFA68B67);
     const bgColor = Color(0xFFFAF7F2);
@@ -103,14 +105,14 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Surah Index',
+                            l10n.surahIndex,
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            '${QuranConstants.totalSurahCount} Surahs',
+                            l10n.surahCountLabel(114),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: primaryColor.withValues(alpha: 0.7),
                             ),
@@ -137,7 +139,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                     color: const Color(0xFF3E3E3E),
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Search surah...',
+                    hintText: l10n.searchSurah,
                     hintStyle: TextStyle(
                       color: primaryColor.withValues(alpha: 0.5),
                       fontSize: 14,
@@ -204,7 +206,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'No surahs found',
+                              l10n.noSurahsFound,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: primaryColor.withValues(alpha: 0.5),
                               ),
@@ -219,7 +221,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                           vertical: 12,
                         ),
                         itemCount: filteredSurahs.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 6),
+                        separatorBuilder: (_, _) => const SizedBox(height: 6),
                         itemBuilder: (context, index) {
                           final surahNumber = filteredSurahs[index];
                           return _SurahTile(
@@ -247,6 +249,7 @@ class _SurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     const primaryColor = Color(0xFFA68B67);
     const cardColor = Color(0xFFF4EFE6);
@@ -307,7 +310,7 @@ class _SurahTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$verseCount Ayahs · $place',
+                      l10n.ayahCountWithPlace(verseCount, place),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: primaryColor.withValues(alpha: 0.7),
                         fontSize: 11,

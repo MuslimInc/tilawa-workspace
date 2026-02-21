@@ -11,7 +11,7 @@ class HeaderWidget extends StatelessWidget {
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 24),
-        padding: const .symmetric(horizontal: 9),
+        // padding: const .symmetric(horizontal: 9),
         child: Stack(
           alignment: Alignment.center,
           children: [

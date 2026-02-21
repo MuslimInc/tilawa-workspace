@@ -81,8 +81,9 @@ class VerseServiceImpl implements VerseService {
       qcfData = qcfData.substring(0, qcfData.length - 1);
     }
 
-    // Normalize spacing: Ensure exactly one space between every glyph.
-    // This allows the justification engine to stretch spaces between all word-glyphs.
+    // QCF data stores word-glyphs as consecutive characters with
+    // newlines as line delimiters. letterSpacing in TextStyle controls
+    // the visual gap between glyphs.
     final result = qcfData;
 
     log('[GetVerseQCF] $surahNumber:$verseNumber -> "$result"');

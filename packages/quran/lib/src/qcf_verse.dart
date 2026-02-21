@@ -73,7 +73,7 @@ class _QcfVerseState extends State<QcfVerse> {
         style: TextStyle(
           color: widget.textColor,
           height: 2.0 / widget.h,
-          letterSpacing: 0,
+          // letterSpacing: 192,
           package: 'quran',
           wordSpacing: 0,
           fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",

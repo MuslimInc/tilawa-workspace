@@ -98,7 +98,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       fontSize: 32,
       fontHeight: 2.1,
       isScrollable: false,
-      letterSpacing: 2,
+      // letterSpacing: 2,
     );
   }
 }

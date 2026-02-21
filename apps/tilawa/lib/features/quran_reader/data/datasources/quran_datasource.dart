@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -90,8 +91,9 @@ class QuranDataSourceImpl implements QuranDataSource {
         final text = map['text'] ?? '';
         if (surahNumber == 2 &&
             (map['numberInSurah'] == 38 || map['numberInSurah'] == 43)) {
-          print(
-            'DataSource: Scanned Ayah $surahNumber:${map['numberInSurah']} raw text: "$text"',
+          developer.log(
+            'Scanned Ayah $surahNumber:${map['numberInSurah']} raw text: "$text"',
+            name: 'QuranDataSource',
           );
         }
         return AyahEntity(

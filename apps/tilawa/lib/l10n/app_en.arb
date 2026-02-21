@@ -1551,5 +1551,58 @@
                 "type": "String"
             }
         }
+    },
+    "surahIndex": "Surah Index",
+    "@surahIndex": {
+        "description": "Title of the surah index sheet"
+    },
+    "surahCountLabel": "{count} Surahs",
+    "@surahCountLabel": {
+        "description": "Surah count label in the index header",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noSurahsFound": "No surahs found",
+    "@noSurahsFound": {
+        "description": "Message shown when surah search returns no results"
+    },
+    "surahProgress": "Surah {current} / {total}",
+    "@surahProgress": {
+        "description": "Surah navigation progress indicator",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "surahAyahLabel": "Surah {surah}, Ayah {ayah}",
+    "@surahAyahLabel": {
+        "description": "Label showing surah and ayah number",
+        "placeholders": {
+            "surah": {
+                "type": "int"
+            },
+            "ayah": {
+                "type": "int"
+            }
+        }
+    },
+    "ayahCountWithPlace": "{count} Ayahs · {place}",
+    "@ayahCountWithPlace": {
+        "description": "Ayah count with place of revelation",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "place": {
+                "type": "String"
+            }
+        }
     }
 }
