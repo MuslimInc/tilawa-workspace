@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0+16] - 2026-02-21
+
+### Added
+
+- **Quran Reader**: Implemented a comprehensive Quran reader feature with high-quality QCF fonts, decorative banners, and responsive 15-line layout.
+
+### Changed
+
+- **Prayer Times**: Rewrote the Prayer Times UI for a more premium look and feel, including improved location handling and accurate countdowns.
+- **SDK**: Updated Flutter SDK version to 3.41.1.
+
+### Fixed
+
+- **Prayer Times**: Resolved several bugs in prayer time calculations and UI synchronization.
+
 ## [0.0.11+15] - 2026-02-11
 
 ### Fixed
