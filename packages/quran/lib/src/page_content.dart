@@ -224,7 +224,9 @@ class _PageContentState extends State<PageContent> {
   /// for Arabic clusters — explicit spaces are the only reliable way to
   /// create visual gaps between QCF word-glyphs.
   String _spaceQcfGlyphs(String qcfText, {bool isFirstVerseOnPage = false}) {
-    if (!isFirstVerseOnPage || qcfText.isEmpty) return qcfText;
+    if (!isFirstVerseOnPage || qcfText.isEmpty) {
+      return qcfText;
+    }
 
     if (qcfText.length >= 2 && !qcfText.contains('\u2009')) {
       if (qcfText[1] == ' ') {
@@ -318,7 +320,9 @@ class _PageFooter extends StatelessWidget {
   final Color textColor;
 
   String _getHizbLabel() {
-    if (quarterNumber == null) return '';
+    if (quarterNumber == null) {
+      return '';
+    }
     final int hizbIndex = (quarterNumber! - 1) ~/ 4 + 1;
     final int quarterInHizb = (quarterNumber! - 1) % 4;
 
@@ -341,7 +345,9 @@ class _PageFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (pageNumber == 1 || pageNumber == 2) return const SizedBox.shrink();
+    if (pageNumber == 1 || pageNumber == 2) {
+      return const SizedBox.shrink();
+    }
 
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;

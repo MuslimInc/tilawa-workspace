@@ -100,7 +100,9 @@ class VerseServiceImpl implements VerseService {
     }
 
     final String cleaned = _cleanQCFData(verseData['qcfData'] as String);
-    if (cleaned.isEmpty) return '';
+    if (cleaned.isEmpty) {
+      return '';
+    }
 
     /// Ayah number is the last character in qcfData
     return cleaned.substring(cleaned.length - 1);
