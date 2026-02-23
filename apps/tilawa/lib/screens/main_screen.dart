@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/presentation/widgets/offline_indicator_widget.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -68,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
+          final theme = Theme.of(context);
           return PopScope(
             canPop: _currentIndex == 0,
             onPopInvokedWithResult: (didPop, result) {
@@ -94,22 +96,60 @@ class _MainScreenState extends State<MainScreen> {
                   const BottomPlayerWidget(),
                 ],
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    _currentIndex = 0;
-                  });
-                  _handleTabSideEffects(context, 0);
-                },
-                backgroundColor: const Color(
-                  0xFF26C6DA,
-                ), // Teal/Cyan color from screenshot
-                elevation: 4,
-                shape: const CircleBorder(),
-                child: Icon(
-                  FluentIcons.book_open_24_filled,
-                  color: Colors.white,
-                  size: 28.sp,
+              floatingActionButton: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.primaryColor.withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                    BoxShadow(
+                      color: theme.primaryColor.withValues(alpha: 0.2),
+                      blurRadius: 25,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentIndex = 0;
+                    });
+                    _handleTabSideEffects(context, 0);
+                  },
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  highlightElevation: 0,
+                  shape: const CircleBorder(),
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.primaryColor.withValues(alpha: 0.8),
+                          theme.primaryColor,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/quran_icon.svg',
+                        width: 28.sp,
+                        height: 28.sp,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               floatingActionButtonLocation:
@@ -117,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
               bottomNavigationBar: BottomAppBar(
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 8.0,
-                color: Theme.of(context).cardColor,
+                color: theme.cardColor,
                 child: Directionality(
                   textDirection: TextDirection.ltr,
                   child: Row(
@@ -139,6 +179,7 @@ class _MainScreenState extends State<MainScreen> {
                         currentIndex: _currentIndex,
                         icon: FluentIcons.book_open_24_regular,
                         activeIcon: FluentIcons.book_open_24_filled,
+                        svgPath: 'assets/icons/athkar_icon.svg',
                         label: context.l10n.athkar,
                         onTap: (index) {
                           setState(() => _currentIndex = index);
@@ -186,6 +227,7 @@ class _BottomNavItem extends StatelessWidget {
     required this.currentIndex,
     required this.icon,
     required this.activeIcon,
+    this.svgPath,
     required this.label,
     required this.onTap,
   });
@@ -194,6 +236,7 @@ class _BottomNavItem extends StatelessWidget {
   final int currentIndex;
   final IconData icon;
   final IconData activeIcon;
+  final String? svgPath;
   final String label;
   final ValueChanged<int> onTap;
 
@@ -211,13 +254,28 @@ class _BottomNavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              size: 24.sp,
-              color: isSelected
-                  ? theme.primaryColor
-                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
+            if (svgPath != null)
+              SvgPicture.asset(
+                svgPath!,
+                width: 24.sp,
+                height: 24.sp,
+                colorFilter: ColorFilter.mode(
+                  isSelected
+                      ? theme.primaryColor
+                      : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                  BlendMode.srcIn,
+                ),
+              )
+            else
+              Icon(
+                isSelected ? activeIcon : icon,
+                size: 24.sp,
+                color: isSelected
+                    ? theme.primaryColor
+                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
             SizedBox(height: 2.h), // Reduced to fix overflow
             Text(
               label,
