@@ -1214,4 +1214,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hizb => 'Hizb';
+
+  @override
+  String get preparingFonts => 'Preparing High-Quality Quran Fonts...';
+
+  @override
+  String get loadingQuran => 'Loading Quran...';
+
+  @override
+  String get fontsDownloadDescription =>
+      'This is a one-time download (~50MB) for the best reading experience.';
+
+  @override
+  String get fontsFailedToLoad => 'Failed to load fonts';
 }

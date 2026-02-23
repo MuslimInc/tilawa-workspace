@@ -1206,4 +1206,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get hizb => 'الحزب';
+
+  @override
+  String get preparingFonts => 'جاري تجهيز خطوط القرآن الكريم عالية الجودة...';
+
+  @override
+  String get loadingQuran => 'جاري تحميل القرآن...';
+
+  @override
+  String get fontsDownloadDescription =>
+      'هذا التنزيل لمرة واحدة فقط (~50 ميجابايت) للحصول على أفضل تجربة قراءة.';
+
+  @override
+  String get fontsFailedToLoad => 'فشل تحميل الخطوط';
 }

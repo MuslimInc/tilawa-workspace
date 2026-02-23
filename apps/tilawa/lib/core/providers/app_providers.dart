@@ -9,6 +9,7 @@ import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
+import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
@@ -55,6 +56,14 @@ class AppProviders {
     // Auth provider with initialization
     BlocProvider<AuthBloc>(
       create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
+    ),
+
+    // Font Loader provider
+    BlocProvider<QuranFontLoaderBloc>(
+      create: (context) =>
+          getIt<QuranFontLoaderBloc>()
+            ..add(const QuranFontLoaderEvent.initialize()),
+      lazy: false,
     ),
 
     // Quran Reader provider (Global for UX and persistence)

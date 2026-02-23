@@ -12,6 +12,9 @@ class QuranFontService {
       'https://pub-7f6f6686010343899ba5b2f0ac6cb7b3.r2.dev/quran_fonts.zip';
   final int _totalFonts = 604;
 
+  static bool _fontsLoadedToEngine = false;
+  static bool get hasLoadedFontsToEngine => _fontsLoadedToEngine;
+
   String? _fontsDirectory;
 
   /// Returns the local directory where fonts are stored.
@@ -112,6 +115,8 @@ class QuranFontService {
 
   /// Registers all 604 fonts with the Flutter engine so they can be used via TextStyle(fontFamily: 'QCF_Pxxx').
   Future<void> loadFontsToEngine() async {
+    if (_fontsLoadedToEngine) return;
+
     if (!await areFontsDownloaded()) {
       throw Exception(
         'Fonts have not been downloaded yet. Call downloadFonts() first.',
@@ -153,6 +158,8 @@ class QuranFontService {
         }
       }
     }
+
+    _fontsLoadedToEngine = true;
   }
 
   Future<ByteData> _getFontByteData(File file) async {
