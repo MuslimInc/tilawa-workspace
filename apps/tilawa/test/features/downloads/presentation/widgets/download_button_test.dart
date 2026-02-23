@@ -8,15 +8,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/network/network_info.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/downloads/domain/usecases/check_surah_downloaded_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/download_surah_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/pause_download_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/resume_download_use_case.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/network/network_info.dart';
 
 class MockDownloadsBloc extends MockBloc<DownloadsEvent, DownloadsState>
     implements DownloadsBloc {}
@@ -28,6 +30,10 @@ class MockCheckSurahDownloadedUseCase extends Mock
 
 class MockDownloadSurahUseCase extends Mock implements DownloadSurahUseCase {}
 
+class MockPauseDownloadUseCase extends Mock implements PauseDownloadUseCase {}
+
+class MockResumeDownloadUseCase extends Mock implements ResumeDownloadUseCase {}
+
 class MockNetworkInfo extends Mock implements NetworkInfo {}
 
 void main() {
@@ -35,14 +41,17 @@ void main() {
   late MockDownloadsRepository mockDownloadsRepository;
   late MockCheckSurahDownloadedUseCase mockCheckSurahDownloadedUseCase;
   late MockDownloadSurahUseCase mockDownloadSurahUseCase;
+  late MockPauseDownloadUseCase mockPauseDownloadUseCase;
+  late MockResumeDownloadUseCase mockResumeDownloadUseCase;
   late MockNetworkInfo mockNetworkInfo;
 
   setUp(() {
     mockDownloadsBloc = MockDownloadsBloc();
     mockDownloadsRepository = MockDownloadsRepository();
     mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
-    mockCheckSurahDownloadedUseCase = MockCheckSurahDownloadedUseCase();
     mockDownloadSurahUseCase = MockDownloadSurahUseCase();
+    mockPauseDownloadUseCase = MockPauseDownloadUseCase();
+    mockResumeDownloadUseCase = MockResumeDownloadUseCase();
     mockNetworkInfo = MockNetworkInfo();
 
     // Register mocks in GetIt
@@ -54,6 +63,16 @@ void main() {
     if (!GetIt.instance.isRegistered<DownloadSurahUseCase>()) {
       GetIt.instance.registerSingleton<DownloadSurahUseCase>(
         mockDownloadSurahUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<PauseDownloadUseCase>()) {
+      GetIt.instance.registerSingleton<PauseDownloadUseCase>(
+        mockPauseDownloadUseCase,
+      );
+    }
+    if (!GetIt.instance.isRegistered<ResumeDownloadUseCase>()) {
+      GetIt.instance.registerSingleton<ResumeDownloadUseCase>(
+        mockResumeDownloadUseCase,
       );
     }
     if (!GetIt.instance.isRegistered<DownloadsRepository>()) {

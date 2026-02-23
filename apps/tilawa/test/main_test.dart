@@ -127,7 +127,7 @@ void main() {
     when(() => mockCrashlytics.initialize()).thenAnswer((_) async {});
     when(() => mockAnalytics.initialize()).thenAnswer((_) async {});
     when(
-      () => mockNotificationPermission.requestPermissionOnFirstLaunch(),
+      () => mockNotificationPermission.requestPermissionIfNecessary(),
     ).thenAnswer((_) async {});
     when(
       () => mockNotificationsRepo.requestPermission(),
@@ -233,17 +233,17 @@ void main() {
     test('requestNotificationPermission success', () async {
       await requestNotificationPermission();
       verify(
-        () => mockNotificationPermission.requestPermissionOnFirstLaunch(),
+        () => mockNotificationPermission.requestPermissionIfNecessary(),
       ).called(1);
     });
 
     test('requestNotificationPermission failure', () async {
       when(
-        () => mockNotificationPermission.requestPermissionOnFirstLaunch(),
+        () => mockNotificationPermission.requestPermissionIfNecessary(),
       ).thenThrow(Exception('Fail'));
       await requestNotificationPermission();
       verify(
-        () => mockNotificationPermission.requestPermissionOnFirstLaunch(),
+        () => mockNotificationPermission.requestPermissionIfNecessary(),
       ).called(1);
     });
 

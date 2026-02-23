@@ -290,7 +290,7 @@ Future<void> requestNotificationPermission() async {
   try {
     final NotificationPermissionService notificationPermissionService =
         getIt<NotificationPermissionService>();
-    await notificationPermissionService.requestPermissionOnFirstLaunch();
+    await notificationPermissionService.requestPermissionIfNecessary();
     logger.d('Notification permission request completed');
   } catch (e) {
     logger.d('Warning: Could not request notification permission: $e');

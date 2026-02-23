@@ -33,9 +33,11 @@ import 'package:tilawa/features/downloads/domain/usecases/get_valid_completed_do
 import 'package:tilawa/features/downloads/domain/usecases/observe_download_progress_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/observe_global_download_progress_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/pause_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/play_all_downloads_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/play_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/remove_from_download_queue_use_case.dart';
+import 'package:tilawa/features/downloads/domain/usecases/resume_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/retry_download_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/validate_downloaded_file_use_case.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -88,6 +90,8 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
     GetDownloadStatusUseCase,
     RemoveFromDownloadQueueUseCase,
     DownloadStatusMapper,
+    PauseDownloadUseCase,
+    ResumeDownloadUseCase,
     SharedPreferencesAsync,
     INotificationDispatcher,
   ],

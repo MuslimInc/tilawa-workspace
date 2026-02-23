@@ -65,7 +65,7 @@ class _QcfVerseState extends State<QcfVerse> {
             text: getVerseNumberQCF(widget.surahNumber, widget.verseNumber),
             style: TextStyle(
               fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",
-              package: 'quran',
+
               height: 1.35 / widget.h,
             ),
           ),
@@ -73,8 +73,8 @@ class _QcfVerseState extends State<QcfVerse> {
         style: TextStyle(
           color: widget.textColor,
           height: 2.0 / widget.h,
+
           // letterSpacing: 192,
-          package: 'quran',
           wordSpacing: 0,
           fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",
           backgroundColor: widget.backgroundColor,

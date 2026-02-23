@@ -23,6 +23,7 @@ import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dar
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciter_details_screen.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/surah_list_tile.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -465,32 +466,30 @@ void main() {
     // verifying a different item is visible is often enough.
     // However, for restoration test, checking the scroll offset is better.
 
-    final ScrollController scrollController = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView)),
-    );
-    final double initialOffset = scrollController.offset;
-    expect(initialOffset, greaterThan(0));
+    // To verify scroll position, we check the vertical position of an item.
+    final Finder firstVisibleItem = find.byType(SurahListTile).first;
+    final double scrolledY = tester.getTopLeft(firstVisibleItem).dy;
+    expect(scrolledY, lessThan(300)); // It should have moved up
 
     // Simulate state restoration (terminate and restart app)
     await tester.restartAndRestore();
     await tester.pumpAndSettle();
 
     // Re-verify content loaded (mock state persists across widget rebuilds in test context)
-    // But we need to ensure the bloc still returns the correct state if the widget re-subscribes
     when(() => mockReciterDetailsBloc.state).thenReturn(
       ReciterDetailsState(
         status: ReciterDetailsStatus.loaded,
         surahList: longSurahList,
         selectedMoshaf: testReciter.moshaf.first,
+        searchQuery: '',
       ),
     );
 
-    // Get the new scroll controller
-    final ScrollController newScrollController = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView)),
-    );
+    // After restore, verify we are still scrolled down
+    final double restoredY = tester.getTopLeft(firstVisibleItem).dy;
 
-    expect(newScrollController.offset, equals(initialOffset));
+    // Scroll position should be restored
+    expect(restoredY, scrolledY);
   });
 
   testWidgets('ReciterDetailsScreen shows skeleton when loading', (
@@ -689,7 +688,9 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.textContaining('Pause')); // Refactored text is Pause
+    await tester.tap(
+      find.byKey(const Key('reciter_details_download_all_button')),
+    );
     verify(
       () => mockReciterDownloadBloc.add(
         const CancelReciterDownloadAll(reciterName: 'Test Reciter'),
@@ -922,9 +923,7 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    final Finder surahCardFinder = find.byKey(
-      ValueKey('surah_${testSurahList[0].id}'),
-    );
+    final Finder surahCardFinder = find.byType(SurahListTile).first;
 
     expect(find.byIcon(Icons.graphic_eq_rounded), findsOneWidget);
     expect(
@@ -1011,7 +1010,7 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(ValueKey('surah_${testSurahList[0].id}')));
+      await tester.tap(find.byType(SurahListTile).first);
       await tester.pump();
 
       verify(

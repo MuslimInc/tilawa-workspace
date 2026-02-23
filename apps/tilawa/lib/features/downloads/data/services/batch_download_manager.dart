@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
@@ -11,16 +13,85 @@ import 'download_service_interface.dart';
 /// Manages batch downloads and their notifications
 @lazySingleton
 class BatchDownloadManager {
-  BatchDownloadManager(this._downloadService, this._notificationService);
+  BatchDownloadManager(
+    this._downloadService,
+    this._notificationService,
+    this._prefs,
+  );
 
   final DownloadServiceInterface _downloadService;
   final IDownloadNotificationService _notificationService;
+  final SharedPreferencesAsync _prefs;
+
+  static const String _storageKey = 'batch_downloads_data';
 
   // Track active batches
   final Map<String, _BatchInfo> _activeBatches = {};
+  // Reverse map for O(1) lookups during progress updates
+  final Map<String, String> _downloadIdToBatchId = {};
+  bool _isDisposed = false;
 
   // Stream subscription for progress updates
   StreamSubscription? _progressSubscription;
+
+  /// Initialize and restore any persisted batches
+  Future<void> initialize() async {
+    try {
+      final String? data = await _prefs.getString(_storageKey);
+      if (data == null || data.isEmpty) {
+        return;
+      }
+
+      final Map<String, dynamic> decoded = jsonDecode(data);
+      for (final entry in decoded.entries) {
+        final String batchId = entry.key;
+        final _BatchInfo batchInfo = _BatchInfo.fromJson(
+          entry.value as Map<String, dynamic>,
+        );
+
+        // Fetch initial state for each item in the batch
+        for (final itemId in batchInfo.itemIds) {
+          _downloadIdToBatchId[itemId] = batchId;
+          final DownloadProgress? progress = await _downloadService
+              .getDownloadProgress(itemId);
+          if (progress != null) {
+            batchInfo.updateItemProgress(progress);
+          }
+        }
+
+        _activeBatches[batchId] = batchInfo;
+        logger.i('[BatchDownloadManager] Restored batch: $batchId');
+
+        // Resume notification if not finished
+        if (!batchInfo.isFinished) {
+          _updateNotification(batchId);
+        }
+      }
+
+      if (_activeBatches.isNotEmpty) {
+        _ensureListening();
+      }
+    } catch (e) {
+      logger.e('[BatchDownloadManager] Error during initialization: $e');
+    }
+  }
+
+  /// Persist current active batches
+  Future<void> _persistBatches() async {
+    try {
+      if (_activeBatches.isEmpty) {
+        await _prefs.remove(_storageKey);
+        return;
+      }
+
+      final Map<String, dynamic> data = _activeBatches.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      );
+      await _prefs.setString(_storageKey, jsonEncode(data));
+    } catch (e) {
+      logger.e('[BatchDownloadManager] Error persisting batches: $e');
+    }
+  }
 
   /// Start tracking a new batch
   void startBatch({
@@ -43,6 +114,9 @@ class BatchDownloadManager {
     );
 
     _activeBatches[batchId] = batchInfo;
+    for (final id in downloadIds) {
+      _downloadIdToBatchId[id] = batchId;
+    }
 
     // Ensure we are listening to updates
     _ensureListening();
@@ -53,6 +127,7 @@ class BatchDownloadManager {
 
     // Initial notification
     _updateNotification(batchId);
+    _persistBatches();
   }
 
   /// Cancel a batch
@@ -67,9 +142,13 @@ class BatchDownloadManager {
     // Cancel all items (Repository usually handles this, but we can helper here or just update UI)
     // Actually, repository should cancel items. We just update notification.
 
+    for (final id in batch.itemIds) {
+      _downloadIdToBatchId.remove(id);
+    }
     _activeBatches.remove(batchId);
     await _notificationService.cancelNotification(batchId);
 
+    await _persistBatches();
     _checkCleanup();
   }
 
@@ -100,9 +179,16 @@ class BatchDownloadManager {
     // Cancel each batch notification and remove from tracking
     for (final String batchId in batchIdsToCancel) {
       await _notificationService.cancelNotification(batchId);
+      final batch = _activeBatches[batchId];
+      if (batch != null) {
+        for (final id in batch.itemIds) {
+          _downloadIdToBatchId.remove(id);
+        }
+      }
       _activeBatches.remove(batchId);
     }
 
+    await _persistBatches();
     _checkCleanup();
   }
 
@@ -127,7 +213,9 @@ class BatchDownloadManager {
 
     // Clear all active batches
     _activeBatches.clear();
+    _downloadIdToBatchId.clear();
 
+    await _persistBatches();
     _checkCleanup();
   }
 
@@ -151,32 +239,38 @@ class BatchDownloadManager {
       return;
     }
 
-    final List<String> batchesToRemove = [];
-
-    for (final _BatchInfo batch in _activeBatches.values) {
-      if (batch.itemIds.contains(progress.id)) {
-        // Update item progress
-        batch.updateItemProgress(progress);
-
-        // Update notification
-        _updateNotification(batch.id);
-
-        // Check if batch is complete
-        if (batch.isFinished) {
-          // We might want to keep the "Completed" notification for a bit or until dismissed
-          // For now, we leave it as "Completed" status in notification service
-          // and remove from active tracking after a delay or immediately?
-          // If we remove immediately, we stop updating.
-
-          if (batch.isFullyCompleted) {
-            batchesToRemove.add(batch.id);
-          }
-        }
-      }
+    final String? batchId = _downloadIdToBatchId[progress.id];
+    if (batchId == null) {
+      return;
     }
 
-    // Remove finished batches from active tracking
-    batchesToRemove.forEach(_activeBatches.remove);
+    final _BatchInfo? batch = _activeBatches[batchId];
+    if (batch == null) {
+      // Clean up orphaned ID
+      _downloadIdToBatchId.remove(progress.id);
+      return;
+    }
+
+    // Update item progress and check if notification is needed
+    final bool didChange = batch.updateItemProgress(progress);
+
+    if (didChange) {
+      // Update notification
+      _updateNotification(batch.id);
+    }
+
+    // Check if batch is complete
+    if (batch.isFinished && batch.isFullyCompleted) {
+      Future.delayed(const Duration(seconds: 5), () {
+        if (_isDisposed) return;
+        _activeBatches.remove(batch.id);
+        for (final id in batch.itemIds) {
+          _downloadIdToBatchId.remove(id);
+        }
+        _persistBatches();
+        _checkCleanup();
+      });
+    }
 
     _checkCleanup();
   }
@@ -203,6 +297,13 @@ class BatchDownloadManager {
       _progressSubscription = null;
     }
   }
+
+  Future<void> dispose() async {
+    _isDisposed = true;
+    _progressSubscription?.cancel();
+    _progressSubscription = null;
+    _activeBatches.clear();
+  }
 }
 
 class _BatchInfo {
@@ -226,13 +327,14 @@ class _BatchInfo {
   int cancelledCount = 0;
   final Map<String, int> _itemProgress = {};
 
-  void updateItemProgress(DownloadProgress progress) {
+  bool updateItemProgress(DownloadProgress progress) {
     // track status
     if (progress.status == DownloadStatus.completed) {
       if (!_itemProgress.containsKey(progress.id) ||
           _itemProgress[progress.id] != 100) {
         _itemProgress[progress.id] = 100;
         completedCount++;
+        return true;
       }
     } else if (progress.status == DownloadStatus.failed) {
       // If it failed, we count it as processed
@@ -240,17 +342,25 @@ class _BatchInfo {
           _itemProgress[progress.id] != -1) {
         _itemProgress[progress.id] = -1; // mark as failed
         failedCount++;
+        return true;
       }
     } else if (progress.status == DownloadStatus.cancelled) {
       if (!_itemProgress.containsKey(progress.id) ||
           _itemProgress[progress.id] != -2) {
         _itemProgress[progress.id] = -2; // mark as cancelled
         cancelledCount++;
+        return true;
       }
     } else {
       // Running
-      _itemProgress[progress.id] = (progress.progress * 100).toInt();
+      final int newProgress = (progress.progress * 100).toInt();
+      if (!_itemProgress.containsKey(progress.id) ||
+          _itemProgress[progress.id] != newProgress) {
+        _itemProgress[progress.id] = newProgress;
+        return true;
+      }
     }
+    return false;
   }
 
   int get overallProgress {
@@ -292,4 +402,22 @@ class _BatchInfo {
 
   // Helper to know if we are done-done (like all success or mix)
   bool get isFullyCompleted => isFinished;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'item_ids': itemIds.toList(),
+    'reciter_name': reciterName,
+    'total_items': totalItems,
+  };
+
+  factory _BatchInfo.fromJson(Map<String, dynamic> json) {
+    return _BatchInfo(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      itemIds: Set.from(json['item_ids'] as List),
+      totalItems: json['total_items'] as int,
+      reciterName: json['reciter_name'] as String?,
+    );
+  }
 }

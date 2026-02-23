@@ -195,6 +195,12 @@ class DownloadRecoveryService {
         return download.copyWith(status: DownloadStatus.downloading);
       }
       return download;
+    } else if (backgroundStatus == DownloadStatus.paused) {
+      // Download is paused in background, update status
+      if (download.status != DownloadStatus.paused) {
+        return download.copyWith(status: DownloadStatus.paused);
+      }
+      return download;
     } else if (download.status == DownloadStatus.downloading) {
       // Was downloading but not active anymore - check if it completed or failed
       if (backgroundStatus == DownloadStatus.completed) {
@@ -249,8 +255,8 @@ class DownloadRecoveryService {
           throw Exception('File exists but size is null');
         }
 
-        final int tolerance = (download.fileSize * 0.05)
-            .round(); // Increased to 5% tolerance
+        final int tolerance = (download.fileSize * 0.01)
+            .round(); // Strict 1% tolerance for audio integrity
         final int sizeDiff = (actualFileSize - download.fileSize).abs();
 
         if (sizeDiff > tolerance) {

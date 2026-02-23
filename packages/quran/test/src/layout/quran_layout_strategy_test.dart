@@ -63,6 +63,7 @@ void main() {
             builder: (context) {
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
+                const BoxConstraints(maxWidth: 392.7, maxHeight: 803.6),
               );
 
               expect(metrics.isScrollable, false);
@@ -88,6 +89,7 @@ void main() {
             builder: (context) {
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
+                const BoxConstraints(maxWidth: 803.6, maxHeight: 392.7),
               );
 
               // adaptiveFontSize = width / 14.0

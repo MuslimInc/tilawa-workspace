@@ -55,203 +55,243 @@ class _PageContentState extends State<PageContent> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLandscape =
+              MediaQuery.orientationOf(context) == Orientation.landscape;
 
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final double verseFontSize = screenWidth * 0.055;
-    final double ayahNumberFontSize = screenWidth * 0.055;
-    final double bismillahFontSize = isLandscape
-        ? screenWidth * 0.045
-        : screenWidth * 0.055;
-
-    final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
-    final Map<String, int> firstVerse = ranges.first;
-    final int surahNumber = firstVerse['surah']!;
-    final int juzNumber = QuranServiceLocator.quranDataService.getJuzNumber(
-      surahNumber,
-      firstVerse['start']!,
-    );
-    final int? quarterNumber = widget.pageNumber == 1 || widget.pageNumber == 2
-        ? null
-        : QuranServiceLocator.quranDataService.getQuarterNumber(
-            surahNumber,
-            firstVerse['start']!,
+          // Use the strategy to calculate layout metrics based on actual available space
+          final layoutStrategy = StandardQuranLayoutStrategy();
+          final QuranLayoutMetrics metrics = layoutStrategy.calculateMetrics(
+            context,
+            constraints,
           );
 
-    final String displaySurahName =
-        widget.surahNameBuilder?.call(surahNumber) ??
-        QuranServiceLocator.surahService
-            .getName(surahNumber)
-            .replaceAll('Al ', 'Al-');
+          final double verseFontSize = metrics.fontSize;
+          final double fontHeight = metrics.fontHeight;
+          final double ayahNumberFontSize = metrics.fontSize;
+          final double bismillahFontSize = isLandscape
+              ? constraints.maxWidth * 0.045
+              : constraints.maxWidth * 0.055;
 
-    final pageFont = "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
+          final List<Map<String, int>> ranges = getPageData(widget.pageNumber);
+          final Map<String, int> firstVerse = ranges.first;
+          final int surahNumber = firstVerse['surah']!;
+          final int juzNumber = QuranServiceLocator.quranDataService
+              .getJuzNumber(surahNumber, firstVerse['start']!);
+          final int? quarterNumber =
+              widget.pageNumber == 1 || widget.pageNumber == 2
+              ? null
+              : QuranServiceLocator.quranDataService.getQuarterNumber(
+                  surahNumber,
+                  firstVerse['start']!,
+                );
 
-    // Use the strategy to calculate layout metrics
-    final layoutStrategy = StandardQuranLayoutStrategy();
-    // final QuranLayoutMetrics metrics = layoutStrategy.calculateMetrics(context);
+          final String displaySurahName =
+              widget.surahNameBuilder?.call(surahNumber) ??
+              QuranServiceLocator.surahService
+                  .getName(surahNumber)
+                  .replaceAll('Al ', 'Al-');
 
-    // Alias for readability
-    // final double adaptiveFontSize = metrics.fontSize;
-    // final double adaptiveFontHeight = metrics.fontHeight;
-    const FontWeight fontWeight = FontWeight.w500;
+          final pageFont =
+              "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
 
-    final verseSpans = <InlineSpan>[];
-    var isFirstVerseOfPage = true;
-    for (final r in ranges) {
-      final int surah = r['surah']!;
-      final int start = r['start']!;
-      final int end = r['end']!;
+          final verseSpans = <InlineSpan>[];
+          for (final r in ranges) {
+            final int surah = r['surah']!;
+            final int start = r['start']!;
+            final int end = r['end']!;
 
-      for (var v = start; v <= end; v++) {
-        if (v == start && v == 1) {
-          verseSpans.add(WidgetSpan(child: HeaderWidget(suraNumber: surah)));
-          verseSpans.add(const TextSpan(text: '\n\n'));
-          if (surah != 1 && surah != 9) {
-            verseSpans.add(
-              TextSpan(
-                text: '\ufad8\ufad7\ufad6\ufad5\n',
-                style: TextStyle(
-                  fontFamily: 'QCF_BSML',
-                  package: 'quran',
-                  fontSize: bismillahFontSize,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-                  height: 1.0,
+            for (var v = start; v <= end; v++) {
+              if (v == start && v == 1) {
+                verseSpans.add(
+                  WidgetSpan(child: _SurahHeaderBanner(suraNumber: surah)),
+                );
+                verseSpans.add(const TextSpan(text: '\n'));
+                if (surah != 1 && surah != 9) {
+                  final String bismillahText = getVerseQCF(
+                    1,
+                    1,
+                    verseEndSymbol: false,
+                  );
+
+                  verseSpans.add(
+                    WidgetSpan(
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.only(top: 8, bottom: 12),
+                        child: Text(
+                          bismillahText,
+                          style: TextStyle(
+                            fontFamily: 'QCF_P001',
+                            fontSize: bismillahFontSize * 1.1,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.black,
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                  verseSpans.add(const TextSpan(text: '\n'));
+                }
+              }
+              final spanRecognizer = LongPressGestureRecognizer();
+              spanRecognizer.onLongPress = () =>
+                  widget.onLongPress?.call(surah, v);
+              spanRecognizer.onLongPressStart = (LongPressStartDetails d) =>
+                  widget.onLongPressDown?.call(surah, v, d);
+              spanRecognizer.onLongPressUp = () =>
+                  widget.onLongPressUp?.call(surah, v);
+              spanRecognizer.onLongPressEnd = (LongPressEndDetails d) =>
+                  widget.onLongPressCancel?.call(surah, v);
+
+              final Color? verseBgColor = widget.verseBackgroundColor?.call(
+                surah,
+                v,
+              );
+              final String verseText = getVerseQCF(
+                surah,
+
+                /// Make is false if the page is 1 or 2
+                addSpace: widget.pageNumber != 1 && widget.pageNumber != 2,
+                v,
+                verseEndSymbol: false,
+              );
+
+              verseSpans.add(
+                TextSpan(
+                  text: '$verseText ',
+                  recognizer: spanRecognizer,
+                  style: TextStyle(
+                    fontFamily: pageFont,
+                    fontSize: verseFontSize,
+                    color: widget.textColor,
+                    height: fontHeight,
+                    letterSpacing: metrics.letterSpacing,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: '${getVerseNumberQCF(surah, v)} ',
+                      style: TextStyle(
+                        fontFamily: pageFont,
+                        fontSize: ayahNumberFontSize,
+                        fontWeight: FontWeight.normal,
+                        height: fontHeight,
+                        letterSpacing: metrics.letterSpacing,
+                        backgroundColor: verseBgColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            );
+              );
+            }
           }
-        }
-        final spanRecognizer = LongPressGestureRecognizer();
-        spanRecognizer.onLongPress = () => widget.onLongPress?.call(surah, v);
-        spanRecognizer.onLongPressStart = (LongPressStartDetails d) =>
-            widget.onLongPressDown?.call(surah, v, d);
-        spanRecognizer.onLongPressUp = () =>
-            widget.onLongPressUp?.call(surah, v);
-        spanRecognizer.onLongPressEnd = (LongPressEndDetails d) =>
-            widget.onLongPressCancel?.call(surah, v);
 
-        final Color? verseBgColor = widget.verseBackgroundColor?.call(surah, v);
-        final String verseText = _spaceQcfGlyphs(
-          getVerseQCF(surah, v, verseEndSymbol: false),
-          isFirstVerseOnPage: isFirstVerseOfPage,
-        );
-        isFirstVerseOfPage = false;
-
-        verseSpans.add(
-          TextSpan(
-            text: verseText,
-            recognizer: spanRecognizer,
-            style: TextStyle(
-              fontFamily: pageFont,
-              package: 'quran',
-
-              /// Dynamic font size based on screen size
-              fontSize: verseFontSize,
-              color: widget.textColor,
-              height: 2.45,
-              // backgroundColor: verseBgColor,
+          // Force full justification for the last line of the Mushaf page.
+          // Flutter's TextAlign.justify skips the last line; appending a wide
+          // zero-height widget forces the text onto a 'non-terminal' line.
+          verseSpans.add(
+            const WidgetSpan(
+              child: SizedBox(width: double.infinity, height: 0),
             ),
-            children: [
-              TextSpan(
-                text: getVerseNumberQCF(surah, v),
-                style: TextStyle(
-                  fontFamily: pageFont,
-                  package: 'quran',
+          );
 
-                  /// Ayah number font size
-                  fontSize: ayahNumberFontSize,
-                  fontWeight: FontWeight.normal,
-                  // color: Colors.green,
-                  height: 2.25,
-                  backgroundColor: verseBgColor,
+          final Widget readerText = RichText(
+            text: TextSpan(children: verseSpans),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+            strutStyle: StrutStyle(
+              fontSize: verseFontSize,
+              height: fontHeight,
+              forceStrutHeight: true,
+            ),
+          );
+
+          final header = _PageHeader(
+            surahName: displaySurahName,
+            juzNumber: juzNumber,
+            juzLabel: widget.juzLabel ?? 'Part',
+            textColor: widget.textColor,
+          );
+          final footer = _PageFooter(
+            quarterNumber: quarterNumber,
+            pageNumber: widget.pageNumber,
+            hizbLabel: widget.hizbLabel ?? 'Hizb',
+            textColor: widget.textColor,
+          );
+
+          final double horizontalPadding = widget.pageNumber <= 2
+              ? constraints.maxWidth * 0.15
+              : constraints.maxWidth * 0.035;
+
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  top: 45,
+                  bottom: 55,
+                  left: 0,
+                  right: 0,
+                  child: isLandscape
+                      ? SingleChildScrollView(
+                          padding: const EdgeInsets.only(
+                            top: 45.0,
+                            bottom: 45.0,
+                          ),
+                          child: readerText,
+                        )
+                      : (widget.pageNumber <= 2
+                            ? Center(child: readerText)
+                            : readerText),
                 ),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-
-    final Widget readerText = RichText(
-      text: TextSpan(children: verseSpans),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.rtl,
-      strutStyle: StrutStyle(fontSize: verseFontSize),
-    );
-
-    final header = _PageHeader(
-      surahName: displaySurahName,
-      juzNumber: juzNumber,
-      juzLabel: widget.juzLabel ?? 'Part',
-      textColor: widget.textColor,
-    );
-    final footer = _PageFooter(
-      quarterNumber: quarterNumber,
-      pageNumber: widget.pageNumber,
-      hizbLabel: widget.hizbLabel ?? 'Hizb',
-      textColor: widget.textColor,
-    );
-
-    final double horizontalPadding = screenWidth * 0.020;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        // vertical: MediaQuery.sizeOf(context).height * 0.030,
+                Positioned(top: 8, left: 0, right: 0, child: header),
+                Positioned(bottom: 12, left: 0, right: 0, child: footer),
+              ],
+            ),
+          );
+        },
       ),
+    );
+  }
+}
+
+class _SurahHeaderBanner extends StatelessWidget {
+  const _SurahHeaderBanner({required this.suraNumber});
+  final int suraNumber;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned(
-            child: isLandscape
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 45.0, bottom: 45.0),
-                    child: readerText,
-                  )
-                : readerText,
+          const Image(
+            image: AssetImage('assets/mainframe.png', package: 'quran'),
+            width: double.infinity,
+            fit: BoxFit.contain,
           ),
-          Positioned(top: 8, left: 0, right: 0, child: header),
-          Positioned(bottom: 12, left: 0, right: 0, child: footer),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Text(
+              '$suraNumber',
+              style: const TextStyle(
+                fontFamily: 'arsura',
+                package: 'quran',
+                color: Colors.black,
+                fontSize: 24,
+              ),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  /// Inserts a space between each consecutive QCF glyph on the same line.
-  /// This is needed because Flutter's RTL text rendering ignores letterSpacing
-  /// for Arabic clusters — explicit spaces are the only reliable way to
-  /// create visual gaps between QCF word-glyphs.
-  String _spaceQcfGlyphs(String qcfText, {bool isFirstVerseOnPage = false}) {
-    if (!isFirstVerseOnPage || qcfText.isEmpty) {
-      return qcfText;
-    }
-
-    if (qcfText.length >= 2 && !qcfText.contains('\u2009')) {
-      if (qcfText[1] == ' ') {
-        return '${qcfText[0]}\u2009${qcfText.substring(2)}';
-      }
-      return '${qcfText[0]}\u2009${qcfText.substring(1)}';
-    }
-
-    return qcfText;
-  }
-
-  String _addWhiteSpace(bool isFirstVerseOnPage, String verseText) {
-    if (isFirstVerseOnPage && verseText.isNotEmpty) {
-      if (verseText.length > 1 &&
-          verseText[1] != ' ' &&
-          verseText[1] != '\u2009') {
-        verseText = '${verseText[0]}\u2009${verseText.substring(1)}';
-      } else if (verseText.length == 1 &&
-          verseText != ' ' &&
-          verseText != '\u2009') {
-        verseText = '$verseText\u2009';
-      }
-      isFirstVerseOnPage = false;
-    }
-    return verseText;
   }
 }
 
@@ -270,8 +310,8 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFA68B67);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.020;
+    const primaryColor = Color(0xFF7A6855);
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.040;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -284,7 +324,7 @@ class _PageHeader extends StatelessWidget {
               style: TextStyle(
                 color: primaryColor,
                 fontSize: verseFontSize,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -354,25 +394,32 @@ class _PageFooter extends StatelessWidget {
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
     // Use responsive font sizes rather than fixed .sp which can act weirdly in landscape
-    final double fontSize = screenWidth * (isLandscape ? 0.015 : 0.025);
+    final double fontSize = screenWidth * (isLandscape ? 0.020 : 0.035);
     final verticalPadding = isLandscape ? 4.0 : 6.0;
-    final bottomPadding = isLandscape ? 12.0 : 22.0;
 
-    const primaryColor = Color(0xFFA68B67);
-    const bgColor = Color(0xFFF4EFE6);
+    const primaryColor = Color(0xFF7A6855);
+    const bgColor = Color(0xFFE8E0D1);
     const borderColor = Color(0xFFDED3C4);
     final String hizbLabel = _getHizbLabel();
 
     return Align(
-      alignment: pageNumber.isOdd
-          ? Alignment.bottomRight
-          : Alignment.bottomLeft,
+      alignment: Alignment.bottomCenter,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: verticalPadding),
+        padding: EdgeInsets.symmetric(
+          vertical: verticalPadding,
+          horizontal: 16,
+        ),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderColor, width: 0.8),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../data/services/batch_download_manager.dart';
+import '../../data/services/download_queue_manager.dart';
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
 
@@ -15,15 +16,24 @@ class CancelDownloadsForReciterUseCase implements UseCase<void, String> {
     this._repository,
     this._recitersRepository,
     this._batchDownloadManager,
+    this._queueManager,
   );
 
   final DownloadsRepository _repository;
   final RecitersRepository _recitersRepository;
   final BatchDownloadManager _batchDownloadManager;
+  final DownloadQueueManager _queueManager;
 
   @override
   Future<Either<Failure, void>> call(String reciterName) async {
     try {
+      // Step 0: Synchronously drain the queue for this reciter BEFORE any async
+      // work. _handleDownloadProgress triggers _processQueue when a download
+      // finishes/is cancelled, which can pick up the next queued item for the
+      // same reciter before the loop below has had a chance to remove it.
+      // Clearing the queue here prevents those items from ever starting.
+      _queueManager.dequeueForReciter(reciterName);
+
       // Cancel batch notifications for this reciter immediately
       // This ensures notifications are cancelled even if individual download
       // cancellation takes time
@@ -48,7 +58,7 @@ class CancelDownloadsForReciterUseCase implements UseCase<void, String> {
         },
       );
 
-      // 3. Filter
+      // 3. Filter — only active downloads remain (queue was already drained)
       final List<DownloadItem> toCancel = [];
       for (final download in allDownloads) {
         var isMatch = false;

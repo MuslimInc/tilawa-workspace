@@ -62,7 +62,6 @@ export 'src/qcf_verse.dart';
 // =============================================================================
 export 'src/quran_exception.dart';
 export 'src/quran_page_view.dart';
-export 'src/quran_pageview_v2.dart';
 // =============================================================================
 // CONVENIENCE FUNCTIONS (backward compatible global functions)
 // =============================================================================
@@ -82,6 +81,7 @@ export 'src/services/interfaces/verse_service.dart';
 // SERVICE IMPLEMENTATIONS
 // =============================================================================
 export 'src/services/quran_data_service_impl.dart';
+export 'src/services/quran_font_service.dart';
 export 'src/services/quran_service_locator.dart';
 export 'src/services/search_service_impl.dart';
 export 'src/services/surah_service_impl.dart';

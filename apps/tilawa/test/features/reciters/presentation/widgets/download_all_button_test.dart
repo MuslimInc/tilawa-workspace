@@ -80,8 +80,8 @@ void main() {
       await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.cloud_download_outlined), findsOneWidget);
-      expect(find.text('Download All (0/10)'), findsOneWidget);
+      expect(find.byIcon(Icons.download_rounded), findsOneWidget);
+      expect(find.text('0/10'), findsOneWidget);
     },
   );
 
@@ -101,7 +101,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Pause 50% (5/10)'), findsOneWidget);
+      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+      expect(find.text('5/10'), findsOneWidget);
     },
   );
 
@@ -110,7 +111,7 @@ void main() {
   ) async {
     when(
       () => mockBloc.state,
-    ).thenReturn(const ReciterDownloadState(isPending: true));
+    ).thenReturn(const ReciterDownloadState(isPending: true, totalCount: 10));
 
     await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));
     await tester.pumpAndSettle();
@@ -124,7 +125,9 @@ void main() {
   testWidgets('DownloadAllButton fires StartReciterDownloadAll on tap', (
     tester,
   ) async {
-    when(() => mockBloc.state).thenReturn(const ReciterDownloadState());
+    when(
+      () => mockBloc.state,
+    ).thenReturn(const ReciterDownloadState(totalCount: 10));
 
     await tester.pumpWidget(
       createWidget(reciter: testReciter, surahs: const []),
@@ -176,10 +179,13 @@ void main() {
     whenListen(
       mockBloc,
       Stream.fromIterable([
-        const ReciterDownloadState(),
-        const ReciterDownloadState(errorMessage: 'No internet connection'),
+        const ReciterDownloadState(totalCount: 10),
+        const ReciterDownloadState(
+          errorMessage: 'No internet connection',
+          totalCount: 10,
+        ),
       ]),
-      initialState: const ReciterDownloadState(),
+      initialState: const ReciterDownloadState(totalCount: 10),
     );
 
     await tester.pumpWidget(createWidget(reciter: testReciter, surahs: []));

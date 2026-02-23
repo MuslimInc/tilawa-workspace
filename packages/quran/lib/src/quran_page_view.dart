@@ -16,7 +16,7 @@ class QuranPageView extends StatefulWidget {
     this.controller,
     this.onPageChanged,
     this.textColor = const Color(0xFF000000),
-    this.pageBackgroundColor = const Color(0xFFFFFFFF),
+    this.pageBackgroundColor = const Color(0xFFF9F5EF),
     this.verseBackgroundColor,
     this.onLongPress,
     this.onLongPressUp,

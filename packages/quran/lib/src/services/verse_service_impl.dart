@@ -1,3 +1,4 @@
+import '../data/qcf_v4_data.dart';
 import '../data/quran_text.dart';
 import '../quran_exception.dart';
 import 'interfaces/verse_service.dart';
@@ -58,20 +59,18 @@ class VerseServiceImpl implements VerseService {
   String getVerseQCF(
     int surahNumber,
     int verseNumber, {
+    bool addSpace = true,
     bool verseEndSymbol = true,
   }) {
-    final Map<String, dynamic>? verseData = _findVerse(
-      surahNumber,
-      verseNumber,
-    );
+    final key = '$surahNumber:$verseNumber';
+    String? qcfData = qcfV4Data[key];
 
-    if (verseData == null) {
+    if (qcfData == null) {
       throw const QuranException(
         'No verse found with given surahNumber and verseNumber.',
       );
     }
 
-    var qcfData = verseData['qcfData'] as String;
     qcfData = _cleanQCFData(qcfData);
 
     if (!verseEndSymbol && qcfData.isNotEmpty) {
@@ -79,27 +78,26 @@ class VerseServiceImpl implements VerseService {
       qcfData = qcfData.substring(0, qcfData.length - 1);
     }
 
-    // QCF data stores word-glyphs as consecutive characters with
-    // newlines as line delimiters. Separating characters with spaces
-    // helps Flutter render them as individual glyphs without
-    // incorrect shaping.
-    return qcfData.split('').join(' ').replaceAll(' \n ', '\n');
+    if (addSpace) {
+      qcfData = qcfData.split('').join(' ');
+    }
+
+    // QCF data stores word-glyphs as consecutive characters.
+    return qcfData;
   }
 
   @override
   String getVerseNumberQCF(int surahNumber, int verseNumber) {
-    final Map<String, dynamic>? verseData = _findVerse(
-      surahNumber,
-      verseNumber,
-    );
+    final key = '$surahNumber:$verseNumber';
+    final String? qcfDataRaw = qcfV4Data[key];
 
-    if (verseData == null) {
+    if (qcfDataRaw == null) {
       throw const QuranException(
         'No verse found with given surahNumber and verseNumber.',
       );
     }
 
-    final String cleaned = _cleanQCFData(verseData['qcfData'] as String);
+    final String cleaned = _cleanQCFData(qcfDataRaw);
     if (cleaned.isEmpty) {
       return '';
     }

@@ -109,7 +109,14 @@ void main() {
       mockDownloadService.isStatusDownloadActive(any),
     ).thenAnswer((_) async => false);
     when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+    when(mockDownloadService.pause(any)).thenAnswer((_) async {});
+    when(mockDownloadService.resume(any)).thenAnswer((_) async {});
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+
+    // Stub testing-specific new logic
+    when(
+      mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
+    ).thenAnswer((_) async => false);
 
     // Stub common methods to avoid MissingStubError during initialization
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((
@@ -212,6 +219,8 @@ void main() {
     when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {
       return;
     });
+
+    when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
   });
 
   tearDown(() async {
@@ -561,8 +570,8 @@ void main() {
 
         // Assert
         verify(mockQueueManager.isQueued(any)).called(1);
-        // getDownloadsDir is called before the early return
-        verify(mockPathResolver.getDownloadsDir()).called(1);
+        // getDownloadsDir is called before the early return, and again inside isSurahDownloaded check
+        verify(mockPathResolver.getDownloadsDir()).called(2);
 
         // Restore
         if (getIt.isRegistered<DownloadQueueManager>()) {
@@ -668,7 +677,7 @@ void main() {
         );
 
         // Assert
-        verify(mockPathResolver.getDownloadsDir()).called(1);
+        verify(mockPathResolver.getDownloadsDir()).called(2);
 
         // Verify that the download item is created
         // With the queue system, downloads are created with 'pending' status
@@ -834,6 +843,9 @@ void main() {
         await repository.startDownloadBatch(items);
 
         // Assert
+        // getDownloadsDir is called once at the top of startDownloadBatch.
+        // The per-item isSurahDownloaded check was replaced with an in-memory
+        // scan of the pre-fetched existingDownloads list, so no extra calls.
         verify(mockPathResolver.getDownloadsDir()).called(1);
         verify(mockLocalDataSource.addDownloads(any)).called(1);
         verifyNever(mockLocalDataSource.addDownload(any));
@@ -2416,7 +2428,7 @@ void main() {
   });
 
   group('pauseDownload', () {
-    test('should update status to paused', () async {
+    test('should delegate to download service when download exists', () async {
       // Arrange
       const testId = 'test_download_id';
       final download = DownloadItem(
@@ -2434,24 +2446,18 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
-        return;
-      });
+      when(mockDownloadService.pause(any)).thenAnswer((_) async {});
 
       // Act
       await repository.pauseDownload(testId);
 
       // Assert
-      final List<dynamic> captured = verify(
-        mockLocalDataSource.updateDownload(captureAny),
-      ).captured;
-      final updatedDownload = captured.first as DownloadItem;
-      expect(updatedDownload.status, DownloadStatus.paused);
+      verify(mockDownloadService.pause(testId)).called(1);
     });
   });
 
   group('resumeDownload', () {
-    test('should update status to downloading', () async {
+    test('should delegate to download service when download exists', () async {
       // Arrange
       const testId = 'test_download_id';
       final download = DownloadItem(
@@ -2469,19 +2475,13 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
-        return;
-      });
+      when(mockDownloadService.resume(any)).thenAnswer((_) async {});
 
       // Act
       await repository.resumeDownload(testId);
 
       // Assert
-      final List<dynamic> captured = verify(
-        mockLocalDataSource.updateDownload(captureAny),
-      ).captured;
-      final updatedDownload = captured.first as DownloadItem;
-      expect(updatedDownload.status, DownloadStatus.downloading);
+      verify(mockDownloadService.resume(testId)).called(1);
     });
   });
 
