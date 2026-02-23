@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -13,7 +14,6 @@ import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
-import '../widgets/reciter_card.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -211,7 +211,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                           children: [
                             Expanded(
                               child: Container(
-                                height: 54.h,
+                                height: 54.r,
                                 decoration: BoxDecoration(
                                   color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(16.r),
@@ -306,8 +306,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             ),
                             SizedBox(width: 10.w),
                             Container(
-                              height: 54.h,
-                              width: 54.h,
+                              height: 54.r,
+                              width: 54.r,
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.surface,
                                 borderRadius: BorderRadius.circular(16.r),
@@ -439,22 +439,21 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   ),
                                 )
                               : state is RecitersLoaded
-                              ? ListView.separated(
-                                  separatorBuilder: (_, _) =>
-                                      SizedBox(height: 8.h),
-                                  controller: _scrollController,
-                                  itemCount: state.filteredReciters.length,
-                                  padding: EdgeInsets.only(
-                                    left: 8.w,
-                                    right: 8.w,
-                                    top: 8.h,
-                                    bottom: 80.h,
+                              ? ResponsiveBuilder(
+                                  xs: (context) => _ReciterListView(
+                                    state: state,
+                                    scrollController: _scrollController,
                                   ),
-                                  itemBuilder: (context, index) {
-                                    final ReciterEntity reciter =
-                                        state.filteredReciters[index];
-                                    return ReciterCard(reciter: reciter);
-                                  },
+                                  sm: (context) => _ReciterGridView(
+                                    state: state,
+                                    scrollController: _scrollController,
+                                    crossAxisCount: 2,
+                                  ),
+                                  lg: (context) => _ReciterGridView(
+                                    state: state,
+                                    scrollController: _scrollController,
+                                    crossAxisCount: 3,
+                                  ),
                                 )
                               : const SizedBox.shrink(),
                         ),
@@ -478,6 +477,58 @@ class _RecitersScreenState extends State<RecitersScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _ReciterListView extends StatelessWidget {
+  const _ReciterListView({required this.state, required this.scrollController});
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+      controller: scrollController,
+      itemCount: state.filteredReciters.length,
+      padding: EdgeInsets.only(left: 8.w, right: 8.w, top: 8.h, bottom: 80.h),
+      itemBuilder: (context, index) {
+        final ReciterEntity reciter = state.filteredReciters[index];
+        return ReciterCard(reciter: reciter);
+      },
+    );
+  }
+}
+
+class _ReciterGridView extends StatelessWidget {
+  const _ReciterGridView({
+    required this.state,
+    required this.scrollController,
+    required this.crossAxisCount,
+  });
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+  final int crossAxisCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      controller: scrollController,
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 8.h, bottom: 80.h),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12.h,
+        crossAxisSpacing: 12.w,
+        mainAxisExtent: 120.r,
+      ),
+      itemCount: state.filteredReciters.length,
+      itemBuilder: (context, index) {
+        final ReciterEntity reciter = state.filteredReciters[index];
+        return ReciterCard(reciter: reciter);
+      },
     );
   }
 }

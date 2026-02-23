@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -33,6 +34,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   @override
   void initState() {
     super.initState();
+    // Enable landscape and portrait for this screen only
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     int initialPage = 1;
 
     if (widget.surahNumber > 0) {
@@ -65,6 +74,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    // Revert to portrait only when leaving this screen
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.dispose();
   }
 

@@ -1,0 +1,822 @@
+Resolving dependencies in `/Users/mohammadkamel/flutter_projects/tilawa_workspace`...
+Downloading packages...
+  _fe_analyzer_shared 92.0.0 (96.0.0 available)
+  analyzer 9.0.0 (10.2.0 available)
+  bloc_lint 0.3.6 (0.4.0 available)
+  dart_style 3.1.3 (3.1.5 available)
+  geocoding_android 4.0.1 (5.0.0 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  lean_builder 0.1.6 (0.1.7 available)
+  meta 1.17.0 (1.18.1 available)
+  rx 0.4.0 (0.5.0 available)
+! test_api 0.7.7 (overridden) (0.7.9 available)
+  watcher 1.1.4 (1.2.1 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies in `/Users/mohammadkamel/flutter_projects/tilawa_workspace`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing tilawa...                                             
+
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_category_card.dart:62:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_category_card.dart:66:38 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_category_card.dart:71:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_category_card.dart:75:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_category_card.dart:80:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:70:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:71:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:72:36 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:80:51 • const_eval_extension_method
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:90:41 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/athkar_item_widget.dart:100:38 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:35:23 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:36:24 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:42:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:43:30 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:49:29 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:50:30 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:68:28 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:69:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:112:39 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:120:45 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:130:30 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:137:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:137:76 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/athkar/presentation/widgets/item_count_widget.dart:146:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:33:39 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:40:42 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:41:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:53:41 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:56:48 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:60:47 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:70:38 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:101:38 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:115:67 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:152:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:152:70 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:186:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:186:70 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:238:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:238:70 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:275:26 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:287:32 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:288:32 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:297:65 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:308:41 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:321:39 • const_eval_extension_method
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:395:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:397:56 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:449:35 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:454:36 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/audio_player/presentation/widgets/sleep_timer_dialog.dart:458:35 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/auth/presentation/screens/login_screen.dart:63:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/auth/presentation/screens/login_screen.dart:85:67 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/auth/presentation/screens/login_screen.dart:101:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/auth/presentation/screens/login_screen.dart:105:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/auth/presentation/screens/login_screen.dart:135:33 • const_eval_extension_method
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:157:19 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:173:54 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:173:74 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:183:28 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:184:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:190:28 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/auth/presentation/screens/login_screen.dart:191:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:76:51 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:84:69 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:124:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:127:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:131:37 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:135:40 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:164:65 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:171:49 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:203:23 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:208:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:214:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:221:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/screens/bookmarks_screen.dart:227:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:38:30 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:39:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:52:35 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:62:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:69:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:74:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:80:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:86:37 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:89:44 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:93:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:98:46 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:102:48 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:103:46 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:112:49 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:131:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/bookmarks/presentation/widgets/bookmark_card.dart:150:19 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/block_picker.dart:72:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:239:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:259:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:274:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:300:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:332:45 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:336:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:353:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:445:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:526:67 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:551:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:553:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:556:52 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:626:45 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:669:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:712:45 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:733:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/color_picker.dart:746:70 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:133:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:134:47 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:173:63 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:175:64 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:233:63 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:235:64 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:252:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:254:60 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:265:54 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:266:55 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:339:75 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:361:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:363:60 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:378:65 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/material_picker.dart:394:63 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:976:61 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:988:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1029:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1075:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1081:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1095:70 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1241:70 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1299:62 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/color_picker/palette.dart:1303:62 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:177:21 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:180:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:183:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:186:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:226:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:254:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:265:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:269:25 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:273:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:300:55 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:302:57 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/screens/downloads_screen.dart:316:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_button.dart:181:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_button.dart:218:14 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:34:21 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:44:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:53:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:66:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:80:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:88:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:177:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:196:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:204:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:209:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:217:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:222:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:230:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:235:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:243:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:248:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:256:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:261:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/download_item_card.dart:269:19 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:59:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:90:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:95:45 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:120:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:132:42 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:156:57 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:172:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:182:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:203:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:244:67 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:271:29 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/downloads/presentation/widgets/reciter_downloads_section.dart:300:71 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:61:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:88:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:100:71 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:118:66 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:146:25 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:149:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:151:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:172:54 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:173:42 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:185:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:186:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:188:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:228:29 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/screens/history_screen.dart:247:67 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:24:54 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:30:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:53:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:82:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:94:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:106:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:113:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:122:47 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:142:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_card.dart:163:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_search_bar.dart:40:23 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_stats_card.dart:22:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_stats_card.dart:100:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/history/presentation/widgets/history_stats_card.dart:110:32 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/onboarding/presentation/screens/onboarding_screen.dart:93:69 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/onboarding/presentation/screens/onboarding_screen.dart:94:36 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/onboarding/presentation/screens/onboarding_screen.dart:108:67 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/onboarding/presentation/screens/onboarding_screen.dart:133:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/onboarding/presentation/widgets/onboarding_page.dart:14:53 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/onboarding/presentation/widgets/onboarding_page.dart:20:58 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/create_playlist_dialog.dart:68:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/create_playlist_dialog.dart:85:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/create_playlist_dialog.dart:111:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:32:54 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:37:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:55:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:86:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:96:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:111:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:128:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:142:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:150:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:157:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:163:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_card.dart:174:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_search_bar.dart:25:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/playlists/presentation/widgets/playlist_search_bar.dart:41:25 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:71:29 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:74:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:76:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:112:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:121:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:127:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:135:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:144:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:156:30 • const_eval_extension_method
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/screens/prayer_times_screen.dart:182:52 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:38:52 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:38:69 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:39:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:39:71 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:56:27 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/fasting_hours_strip.dart:58:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:28:54 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:28:73 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:41:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:45:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:57:41 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:72:35 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:75:30 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:76:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/location_row.dart:85:29 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/monthly_prayer_times_view.dart:80:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/monthly_prayer_times_view.dart:105:57 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/monthly_prayer_times_view.dart:145:33 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:38:52 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:38:69 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:39:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:39:71 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:58:33 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:67:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:73:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:80:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:84:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/next_prayer_countdown_card.dart:91:29 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:60:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:67:54 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:78:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:94:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:100:51 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:120:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:140:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:163:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:227:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart:248:58 • const_eval_extension_method
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:45:57 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:45:76 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:57:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:66:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:75:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:84:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_time_card.dart:141:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_grid.dart:45:53 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_list.dart:29:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_list.dart:29:70 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_list.dart:36:49 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_location_header.dart:46:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_location_header.dart:46:70 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/prayer_times/presentation/widgets/prayer_times_location_header.dart:57:32 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:88:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:94:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:98:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:102:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:121:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:142:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:147:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:153:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:157:73 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:162:73 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:167:73 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:191:25 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:195:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:234:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:236:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:252:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:259:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:263:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:269:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:272:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:274:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:298:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:299:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:302:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:305:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:322:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:323:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:326:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:329:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:358:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/screens/premium_screen.dart:362:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:30:65 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:31:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:36:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:47:62 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:48:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:52:29 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:56:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:110:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/premium_upgrade_dialog.dart:114:33 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:21:60 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:25:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:55:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:65:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:73:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:80:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:88:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:92:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:101:41 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:104:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:114:35 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:123:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:128:63 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:133:29 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:136:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:140:58 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:147:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:157:65 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/premium/presentation/widgets/subscription_plan_card.dart:167:31 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:97:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:98:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:105:39 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:130:53 • undefined_getter
+  error • The getter 'spr' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:136:23 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:139:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:143:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:149:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:153:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:158:32 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:165:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/screens/qibla_screen.dart:166:31 • undefined_getter
+  error • The getter 'wr' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:103:30 • undefined_getter
+  error • The getter 'hr' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:104:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:130:30 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:134:27 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:148:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:152:27 • undefined_getter
+  error • The getter 'hr' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:182:45 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:189:31 • undefined_getter
+  error • The getter 'spr' isn't defined for the type 'double' • lib/features/qibla/presentation/widgets/qibla_compass_widget.dart:221:20 • undefined_getter
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:26:62 • unnecessary_null_in_if_null_operators
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:27:60 • unnecessary_null_in_if_null_operators
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:28:60 • unnecessary_null_in_if_null_operators
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:80:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:86:25 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:89:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:94:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:98:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:102:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:104:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:112:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:125:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:129:55 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:130:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:134:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:138:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_font_loader_screen.dart:144:40 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_reader_screen.dart:119:70 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_reader_screen.dart:120:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_reader_screen.dart:122:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/screens/quran_reader_screen.dart:189:56 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:49:58 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:65:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:66:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:85:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:99:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:110:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:132:55 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:155:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:189:57 • const_eval_extension_method
+   info • Don't invoke 'print' in production code • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:206:17 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:209:17 • avoid_print
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:230:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:245:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_list_view.dart:254:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:28:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:36:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:54:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:58:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:76:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_options_sheet.dart:100:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_search_dialog.dart:32:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_search_dialog.dart:39:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_search_dialog.dart:67:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/ayah_search_dialog.dart:126:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_page_widget.dart:48:55 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_page_widget.dart:70:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_page_widget.dart:76:50 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_page_widget.dart:87:48 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_page_widget.dart:101:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_reader_app_bar.dart:43:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/quran_reader_bottom_bar.dart:41:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:51:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:58:52 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:69:47 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:76:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:82:49 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:97:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:112:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:131:44 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/reader_settings_sheet.dart:174:46 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:71:70 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:77:52 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:92:53 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:100:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:103:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:131:31 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:168:74 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:173:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:180:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:187:32 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:194:57 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:208:52 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:221:39 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:225:76 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:272:59 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:298:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/features/quran_reader/presentation/widgets/surah_index_sheet.dart:312:44 • const_eval_extension_method
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/favorites_screen.dart:64:77 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/favorites_screen.dart:71:61 • undefined_getter
+  error • The getter 'spr' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/favorites_screen.dart:104:23 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/favorites_screen.dart:107:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/favorites_screen.dart:111:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_loader.dart:34:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_loader.dart:37:42 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_loader.dart:39:42 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:264:62 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:264:77 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:358:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:358:70 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:365:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:405:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:408:38 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:411:50 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:413:38 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:427:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:428:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:448:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:451:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:454:52 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:471:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:474:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:477:52 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:488:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:489:25 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:490:26 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:522:21 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:523:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:524:24 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:535:60 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:552:22 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:553:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciter_details_screen.dart:554:24 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:139:65 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:141:47 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:142:45 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:158:45 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:160:53 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:166:51 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:169:52 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:172:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:173:50 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:184:53 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:202:49 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:214:45 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:243:55 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:257:57 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:261:53 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:276:61 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:307:49 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:309:43 • undefined_getter
+  error • The getter 'wh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:310:42 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:339:49 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:375:60 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:378:72 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:390:51 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:393:60 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:398:57 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:402:60 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:411:74 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:425:51 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:428:60 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:434:57 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:444:59 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:448:46 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:449:47 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:450:45 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/screens/reciters_screen.dart:451:49 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:42:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:42:76 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:53:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:55:36 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:61:35 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:87:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:87:76 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:104:32 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:105:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:115:38 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:121:37 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:124:38 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:128:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:134:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:136:38 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/download_all_button.dart:142:37 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/moshaf_selector.dart:22:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/moshaf_selector.dart:22:70 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/moshaf_selector.dart:40:27 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/moshaf_selector.dart:49:60 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:37:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:57:37 • undefined_getter
+  error • The getter 'wr' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:78:18 • undefined_getter
+  error • The getter 'hr' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:79:19 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:97:27 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:114:27 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:120:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:126:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:127:32 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:141:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:150:41 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:163:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_card.dart:167:29 • undefined_getter
+  error • The getter 'spw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_details_app_bar.dart:36:52 • undefined_getter
+  error • The getter 'spw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_details_app_bar.dart:41:52 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_details_app_bar.dart:58:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_details_app_bar.dart:63:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_details_app_bar.dart:70:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:31:57 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:36:27 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:39:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:44:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:51:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:53:23 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:55:59 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:58:60 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:97:55 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:97:72 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:117:25 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:119:32 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:124:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:131:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_history_section.dart:135:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_search_header.dart:53:45 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_search_header.dart:54:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/reciter_search_header.dart:108:40 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:102:38 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:103:36 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:117:39 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:127:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:131:35 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:140:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:149:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:154:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:166:35 • undefined_getter
+  error • The getter 'wsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:171:32 • undefined_getter
+  error • The getter 'hsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_grid_item.dart:172:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:54:71 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:82:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:82:77 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:87:30 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:88:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:109:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:118:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:122:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:131:41 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:140:43 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:144:41 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:168:41 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:172:34 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:173:35 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:198:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:225:34 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:227:26 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:228:26 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:234:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:237:46 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:239:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:261:34 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:280:24 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:281:25 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:287:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:294:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:295:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:301:37 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:303:30 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:304:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:317:28 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:318:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:324:35 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:326:28 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/features/reciters/presentation/widgets/surah_list_tile.dart:327:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:45:57 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:45:75 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:50:36 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:105:36 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:154:36 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:198:36 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:237:36 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:252:71 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/settings/presentation/screens/settings_screen.dart:259:39 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:261:51 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:266:49 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:283:38 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:293:36 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:305:41 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:312:43 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:316:41 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:327:36 • undefined_getter
+  error • The getter 'wr' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:365:28 • undefined_getter
+  error • The getter 'hr' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:366:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:378:31 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:383:35 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:391:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:396:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:400:39 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:444:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:447:46 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:449:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:477:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:522:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:525:46 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:527:34 • undefined_getter
+  error • The getter 'wr' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:564:28 • undefined_getter
+  error • The getter 'hr' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:565:29 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:599:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:653:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:656:46 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:658:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:689:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:706:34 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:709:46 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:711:34 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:726:34 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:775:29 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/features/settings/presentation/screens/settings_screen.dart:789:29 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:831:31 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:832:28 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:841:70 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:846:31 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:854:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:863:25 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:870:48 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:870:63 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:953:33 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:954:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:967:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:970:39 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:978:43 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:983:47 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:987:45 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:1009:48 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/features/settings/presentation/screens/settings_screen.dart:1009:63 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/features/splash/presentation/screens/splash_screen.dart:51:37 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/helpers/show_slider_dialog.dart:72:27 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/preview.dart:43:37 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router.dart:34:45 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router.dart:35:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router.dart:37:38 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router_config.dart:149:43 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router_config.dart:150:36 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/router/app_router_config.dart:152:36 • const_eval_extension_method
+  error • The getter 'rr' isn't defined for the type 'double' • lib/screens/main_screen.dart:115:39 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/screens/main_screen.dart:150:41 • undefined_getter
+  error • The getter 'sp5' isn't defined for the type 'double' • lib/screens/main_screen.dart:154:40 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:161:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:165:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:173:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:177:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:184:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:188:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:193:74 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:194:71 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:200:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/screens/main_screen.dart:204:41 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/screens/playlists_screen.dart:118:42 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/playlists_screen.dart:124:42 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/playlists_screen.dart:173:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/playlists_screen.dart:178:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/playlists_screen.dart:186:34 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/route_list_screen.dart:20:69 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/screens/route_list_screen.dart:38:50 • const_eval_extension_method
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:96:24 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:114:61 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:124:39 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:125:38 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:126:69 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/arabic_alphabet_scrollbar.dart:148:47 • undefined_getter
+  error • The getter 'rr' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:52:29 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:86:35 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:87:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:96:36 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:97:37 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:120:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:131:45 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:140:47 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:144:45 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:158:40 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:168:40 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:169:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:174:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:183:46 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:187:40 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:188:41 • undefined_getter
+  error • The getter 'rr' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:197:50 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:209:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:215:46 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:219:40 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:220:41 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:225:43 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:234:46 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:239:42 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:240:43 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:247:45 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/bottom_player_ui.dart:273:19 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/shared/widgets/control_buttons.dart:90:46 • const_eval_extension_method
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:162:43 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:170:47 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:186:47 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:198:48 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:214:49 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:215:50 • undefined_getter
+  error • The getter 'rr' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:223:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:249:48 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:253:75 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:259:51 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:266:53 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:270:51 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:281:48 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:286:48 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:291:48 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:311:19 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:326:53 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:339:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:347:33 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:354:33 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:368:53 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:379:27 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:405:27 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:418:26 • undefined_getter
+  error • The getter 'hw' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:419:27 • undefined_getter
+  error • The getter 'rr' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:426:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:437:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:460:27 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/expanded_player_screen.dart:475:69 • undefined_getter
+  error • The getter 'ww' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:56:59 • undefined_getter
+  error • The getter 'hh' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:56:76 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:71:29 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:80:37 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:87:31 • undefined_getter
+  error • The getter 'spsp' isn't defined for the type 'double' • lib/shared/widgets/language_switcher.dart:123:25 • undefined_getter
+  error • Extension methods can't be used in constant expressions • lib/shared/widgets/seek_bar.dart:59:58 • const_eval_extension_method
+  error • Extension methods can't be used in constant expressions • lib/shared/widgets/view_reciter_button.dart:48:63 • const_eval_extension_method
+   info • Don't invoke 'print' in production code • parse_json.dart:8:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:10:5 • avoid_print
+warning • The value of the local variable 'wordText' isn't used • parse_json.dart:19:13 • unused_local_variable
+   info • Don't invoke 'print' in production code • parse_json.dart:28:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:36:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:63:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:65:5 • avoid_print
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/core/services/athkar_notification_service_test.mocks.dart:597:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/core/services/user_email_service_test.mocks.dart:385:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/auth/data/providers/google_auth_provider_impl_test.mocks.dart:679:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/auth/data/providers/google_auth_provider_impl_test.mocks.dart:731:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/downloads/helpers/mock_helper.mocks.dart:2741:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/localization/data/datasources/localization_local_datasource_test.mocks.dart:29:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/onboarding/data/repositories/onboarding_repository_impl_test.mocks.dart:29:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/prayer_times/data/datasources/prayer_settings_datasource_test.mocks.dart:29:12 • duplicate_ignore
+warning • The value of the local variable 'tPrayerTimes' isn't used • test/features/prayer_times/presentation/screens/prayer_times_screen_test.dart:48:9 • unused_local_variable
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/router/router_mock_helper.mocks.dart:1091:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/shared/audio/audio_player_handler_impl_test.mocks.dart:302:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/shared/audio/audio_source_error_test.mocks.dart:302:12 • duplicate_ignore
+

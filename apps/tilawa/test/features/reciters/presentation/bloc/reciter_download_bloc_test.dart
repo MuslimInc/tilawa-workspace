@@ -376,7 +376,9 @@ void main() {
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // Add stream item after Start
@@ -430,7 +432,9 @@ void main() {
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // Add stream item with pending status
@@ -484,7 +488,9 @@ void main() {
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // First, add a downloading item

@@ -50,6 +50,12 @@ Future<void> bootstrap({
     // Enable edge-to-edge display (Flutter recommended approach)
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+    // Lock global orientation to portrait by default
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     // ========================================================================
     // CRITICAL: Must complete before app starts (blocking)
     // ========================================================================

@@ -159,63 +159,62 @@ class ReciterDownloadBloc
       return;
     }
 
-    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!).listen((
-      item,
-    ) {
-      var stateChanged = false;
+    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!)
+        .listen((item) {
+          var stateChanged = false;
 
-      if (item.status == DownloadStatus.completed) {
-        _activeBatchItemIds.remove(item.url);
-        if (!_completedSurahs.containsKey(item.url)) {
-          _completedSurahs[item.url] = true;
-          stateChanged = true;
-        }
-        if (_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.remove(item.url);
-          stateChanged = true;
-        }
-      } else if (item.status == DownloadStatus.downloading ||
-          item.status == DownloadStatus.pending) {
-        if (!_isCancelling && !_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.add(item.url);
-          stateChanged = true;
-        }
-      } else if (item.status == DownloadStatus.failed ||
-          item.status == DownloadStatus.cancelled) {
-        _activeBatchItemIds.remove(item.url);
-        if (_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.remove(item.url);
-          stateChanged = true;
-        }
-      }
+          if (item.status == DownloadStatus.completed) {
+            _activeBatchItemIds.remove(item.url);
+            if (!_completedSurahs.containsKey(item.url)) {
+              _completedSurahs[item.url] = true;
+              stateChanged = true;
+            }
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.downloading ||
+              item.status == DownloadStatus.pending) {
+            if (!_isCancelling && !_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.add(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.failed ||
+              item.status == DownloadStatus.cancelled) {
+            _activeBatchItemIds.remove(item.url);
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          }
 
-      if (_isBatchDownload &&
-          !_isEnqueuingBatch &&
-          _activeBatchItemIds.isEmpty) {
-        _isBatchDownload = false;
-        stateChanged = true;
-      }
+          if (_isBatchDownload &&
+              !_isEnqueuingBatch &&
+              _activeBatchItemIds.isEmpty) {
+            _isBatchDownload = false;
+            stateChanged = true;
+          }
 
-      if (stateChanged) {
-        // Since this is a listener, we can't emit directly.
-        // We'll add an event to the bloc.
-        final double progress = _totalSurahsInRange > 0
-            ? _completedSurahs.length / _totalSurahsInRange
-            : 0.0;
+          if (stateChanged) {
+            // Since this is a listener, we can't emit directly.
+            // We'll add an event to the bloc.
+            final double progress = _totalSurahsInRange > 0
+                ? _completedSurahs.length / _totalSurahsInRange
+                : 0.0;
 
-        // isDownloadingAll reflects whether any surah is currently active
-        final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
+            // isDownloadingAll reflects whether any surah is currently active
+            final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
 
-        add(
-          UpdateReciterDownloadProgress(
-            progress: progress,
-            isDownloading: isDownloadingAll,
-            downloadedCount: _completedSurahs.length,
-            totalCount: _totalSurahsInRange,
-          ),
-        );
-      }
-    });
+            add(
+              UpdateReciterDownloadProgress(
+                progress: progress,
+                isDownloading: isDownloadingAll,
+                downloadedCount: _completedSurahs.length,
+                totalCount: _totalSurahsInRange,
+              ),
+            );
+          }
+        });
   }
 
   void _updateProgressAndEmit(Emitter<ReciterDownloadState> emit) {

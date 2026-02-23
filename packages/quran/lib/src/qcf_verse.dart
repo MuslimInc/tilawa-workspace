@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -66,13 +67,13 @@ class _QcfVerseState extends State<QcfVerse> {
             style: TextStyle(
               fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",
 
-              height: 1.35 / widget.h,
+              height: 1.35.h / widget.h,
             ),
           ),
         ],
         style: TextStyle(
           color: widget.textColor,
-          height: 2.0 / widget.h,
+          height: 2.0.h / widget.h,
 
           // letterSpacing: 192,
           wordSpacing: 0,

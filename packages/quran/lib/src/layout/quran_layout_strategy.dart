@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/widgets.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
@@ -85,7 +86,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     EdgeInsets mediaQueryPadding,
   ) {
     // Current layout uses Positioned blocks for header and footer.
-    // Text block is between top: 45 and bottom: 55.
+    // Text block is between top: 45.hand bottom: 55.
     const headerAreaHeight = 45.0;
     const footerAreaHeight = 55.0;
 
