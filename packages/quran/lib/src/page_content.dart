@@ -18,6 +18,8 @@ class PageContent extends StatefulWidget {
     this.juzLabel,
     this.hizbLabel,
     this.surahNameBuilder,
+    this.onSurahSelected,
+    this.onShowIndex,
   });
   final int pageNumber;
   final Color textColor;
@@ -28,6 +30,8 @@ class PageContent extends StatefulWidget {
   final String? juzLabel;
   final String? hizbLabel;
   final String Function(int surahNumber)? surahNameBuilder;
+  final ValueChanged<int>? onSurahSelected;
+  final VoidCallback? onShowIndex;
 
   final void Function(
     int surahNumber,
@@ -106,7 +110,9 @@ class _PageContentState extends State<PageContent> {
             for (var v = start; v <= end; v++) {
               if (v == start && v == 1) {
                 verseSpans.add(
-                  WidgetSpan(child: _SurahHeaderBanner(suraNumber: surah)),
+                  WidgetSpan(
+                    child: _SurahHeaderBanner(surahName: displaySurahName),
+                  ),
                 );
                 verseSpans.add(const TextSpan(text: '\n'));
                 if (surah != 1 && surah != 9) {
@@ -216,12 +222,6 @@ class _PageContentState extends State<PageContent> {
             juzLabel: widget.juzLabel ?? 'Part',
             textColor: widget.textColor,
           );
-          final footer = _PageFooter(
-            quarterNumber: quarterNumber,
-            pageNumber: widget.pageNumber,
-            hizbLabel: widget.hizbLabel ?? 'Hizb',
-            textColor: widget.textColor,
-          );
 
           final double horizontalPadding = widget.pageNumber <= 2
               ? constraints.maxWidth * 0.15
@@ -229,28 +229,29 @@ class _PageContentState extends State<PageContent> {
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: Stack(
-              alignment: Alignment.center,
+            child: Column(
               children: [
-                Positioned(
-                  top: 45,
-                  bottom: 55,
-                  left: 0,
-                  right: 0,
-                  child: isLandscape
-                      ? SingleChildScrollView(
-                          padding: const EdgeInsets.only(
-                            top: 45.0,
-                            bottom: 45.0,
-                          ),
-                          child: readerText,
-                        )
-                      : (widget.pageNumber <= 2
-                            ? Center(child: readerText)
-                            : readerText),
+                header,
+                Expanded(
+                  child: Center(
+                    child: isLandscape
+                        ? SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: readerText,
+                          )
+                        : (widget.pageNumber <= 2
+                              ? Center(child: readerText)
+                              : readerText),
+                  ),
                 ),
-                Positioned(top: 8, left: 0, right: 0, child: header),
-                Positioned(bottom: 12, left: 0, right: 0, child: footer),
+                _PageFooter(
+                  quarterNumber: quarterNumber,
+                  pageNumber: widget.pageNumber,
+                  hizbLabel: widget.hizbLabel ?? 'Hizb',
+                  textColor: widget.textColor,
+                  onSurahSelected: widget.onSurahSelected,
+                  onShowIndex: widget.onShowIndex,
+                ),
               ],
             ),
           );
@@ -261,14 +262,13 @@ class _PageContentState extends State<PageContent> {
 }
 
 class _SurahHeaderBanner extends StatelessWidget {
-  const _SurahHeaderBanner({required this.suraNumber});
-  final int suraNumber;
+  const _SurahHeaderBanner({required this.surahName});
+  final String surahName;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -280,9 +280,9 @@ class _SurahHeaderBanner extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 4.0),
             child: Text(
-              '$suraNumber',
+              surahName,
               style: const TextStyle(
-                fontFamily: 'arsura',
+                fontFamily: 'assets/quran_fonts/QCF4_QBSML-Regular.woff',
                 package: 'quran',
                 color: Colors.black,
                 fontSize: 24,
@@ -311,37 +311,34 @@ class _PageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF7A6855);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.040;
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.034;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Text(
-              surahName,
-              style: TextStyle(
-                color: primaryColor,
-                fontSize: verseFontSize,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            surahName,
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: verseFontSize,
+              fontWeight: FontWeight.bold,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
-          Flexible(
-            child: Text(
-              '$juzLabel $juzNumber',
-              style: TextStyle(
-                color: primaryColor,
-                fontSize: verseFontSize,
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
+        ),
+        Flexible(
+          child: Text(
+            '$juzLabel $juzNumber',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: verseFontSize,
+              fontWeight: FontWeight.w600,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -352,12 +349,16 @@ class _PageFooter extends StatelessWidget {
     required this.pageNumber,
     required this.hizbLabel,
     required this.textColor,
+    required this.onSurahSelected,
+    required this.onShowIndex,
   });
 
   final int? quarterNumber;
   final int pageNumber;
   final String hizbLabel;
   final Color textColor;
+  final ValueChanged<int>? onSurahSelected;
+  final VoidCallback? onShowIndex;
 
   String _getHizbLabel() {
     if (quarterNumber == null) {
@@ -389,68 +390,96 @@ class _PageFooter extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    // Use responsive font sizes rather than fixed .sp which can act weirdly in landscape
-    final double fontSize = screenWidth * (isLandscape ? 0.020 : 0.035);
-    final verticalPadding = isLandscape ? 4.0 : 6.0;
-
-    const primaryColor = Color(0xFF7A6855);
-    const bgColor = Color(0xFFE8E0D1);
-    const borderColor = Color(0xFFDED3C4);
     final String hizbLabel = _getHizbLabel();
 
-    return Align(
-      alignment: Alignment.bottomCenter,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Surah Index Button (Integrated into content flow)
+          _SurahIndexButton(onShowIndex: onShowIndex),
+
+          // Pill info badge
+          _QuranPageIndex(hizbLabel: hizbLabel, pageNumber: pageNumber),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuranPageIndex extends StatelessWidget {
+  const _QuranPageIndex({
+    super.key,
+    required this.hizbLabel,
+    required this.pageNumber,
+  });
+
+  final String hizbLabel;
+  final int pageNumber;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFE6D5),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hizbLabel.isNotEmpty) ...[
+            Text(
+              hizbLabel,
+              style: const TextStyle(
+                color: Color(0xFF7A6855),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 1,
+              height: 14,
+              color: const Color(0xFF7A6855).withValues(alpha: 0.3),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Text(
+            '$pageNumber',
+            style: const TextStyle(
+              color: Color(0xFF7A6855),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SurahIndexButton extends StatelessWidget {
+  const _SurahIndexButton({required this.onShowIndex});
+
+  final VoidCallback? onShowIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onShowIndex,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: verticalPadding,
-          horizontal: 16,
+        width: 40,
+        height: 40,
+        decoration: const BoxDecoration(
+          color: Color(0xFF8B6B4E),
+          borderRadius: BorderRadius.all(Radius.circular(14)),
         ),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: borderColor),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (hizbLabel.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Text(
-                  hizbLabel,
-                  style: TextStyle(
-                    color: primaryColor.withValues(alpha: 0.9),
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(width: 0.8, height: fontSize * 1.5, color: borderColor),
-            ],
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                '$pageNumber',
-                style: TextStyle(
-                  color: primaryColor.withValues(alpha: 0.9),
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+        child: const Icon(
+          Icons.menu_book_rounded,
+          size: 20,
+          color: Colors.white,
         ),
       ),
     );

@@ -12,7 +12,7 @@ import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/qibla/presentation/bloc/qibla_bloc.dart';
-import '../features/qibla/presentation/screens/qibla_screen.dart';
+import '../features/quran_reader/presentation/screens/quran_font_loader_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../shared/widgets/bottom_player_widget.dart';
@@ -35,19 +35,20 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
+    const QuranFontLoaderScreen(surahNumber: 0),
     const RecitersScreen(),
     const PrayerTimesScreen(),
     const AthkarCategoriesScreen(),
-    const QiblaScreen(),
     const SettingsScreen(),
   ];
 
   void _handleTabSideEffects(BuildContext context, int index) {
     final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
-    prayerTimesBloc.setCountdownActive(index == 1);
+    prayerTimesBloc.setCountdownActive(index == 2);
 
-    if (index == 3) {
-      context.read<QiblaBloc>().add(const CheckLocationService());
+    if (index == 5) {
+      // Qibla is no longer in main nav, but if it was index 5
+      // context.read<QiblaBloc>().add(const CheckLocationService());
     } else {
       context.read<QiblaBloc>().add(const StopQiblaStream());
     }
@@ -62,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
         BlocProvider(
           create: (_) => getIt<PrayerTimesBloc>()
             ..add(const PrayerTimesEvent.loadPrayerTimes())
-            ..setCountdownActive(_currentIndex == 1),
+            ..setCountdownActive(_currentIndex == 2),
         ),
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
@@ -79,20 +80,6 @@ class _MainScreenState extends State<MainScreen> {
               _handleTabSideEffects(context, _currentIndex);
             },
             child: Scaffold(
-              // floatingActionButton: kDebugMode
-              //     ? FloatingActionButton(
-              //         heroTag: null,
-              //         onPressed: () {
-              //           /// TODO: implement push notification
-              //           final IAthkarNotificationService notificationService =
-              //               getIt<IAthkarNotificationService>();
-              //           notificationService.scheduleDebugAthkarNotification(
-              //             isMorning: true,
-              //           );
-              //         },
-              //         child: const Icon(Icons.play_arrow),
-              //       )
-              //     : null,
               body: Column(
                 children: [
                   const OfflineIndicatorWidget(),
@@ -107,114 +94,143 @@ class _MainScreenState extends State<MainScreen> {
                   const BottomPlayerWidget(),
                 ],
               ),
-              bottomNavigationBar: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 20.r,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    _currentIndex = 0;
+                  });
+                  _handleTabSideEffects(context, 0);
+                },
+                backgroundColor: const Color(
+                  0xFF26C6DA,
+                ), // Teal/Cyan color from screenshot
+                elevation: 4,
+                shape: const CircleBorder(),
+                child: Icon(
+                  FluentIcons.book_open_24_filled,
+                  color: Colors.white,
+                  size: 28.sp,
                 ),
-                child: Builder(
-                  builder: (context) {
-                    final theme = Theme.of(context);
-                    return Theme(
-                      data: theme.copyWith(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                      ),
-                      child: BottomNavigationBar(
+              ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              bottomNavigationBar: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 8.0,
+                color: Theme.of(context).cardColor,
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _BottomNavItem(
+                        index: 4,
                         currentIndex: _currentIndex,
+                        icon: FluentIcons.settings_24_regular,
+                        activeIcon: FluentIcons.settings_24_filled,
+                        label: context.l10n.settings,
                         onTap: (index) {
-                          if (!shouldHandleBottomNavTap(
-                            currentIndex: _currentIndex,
-                            tappedIndex: index,
-                          )) {
-                            return;
-                          }
-
-                          setState(() {
-                            _currentIndex = index;
-                          });
+                          setState(() => _currentIndex = index);
                           _handleTabSideEffects(context, index);
                         },
-                        type: BottomNavigationBarType.fixed,
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        selectedItemColor: theme.primaryColor,
-                        unselectedItemColor: theme.colorScheme.onSurfaceVariant
-                            .withValues(alpha: 0.5),
-                        selectedLabelStyle: TextStyle(
-                          fontSize: 10.5.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        unselectedLabelStyle: TextStyle(
-                          fontSize: 9.5.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        items: [
-                          BottomNavigationBarItem(
-                            icon: Icon(
-                              FluentIcons.person_24_regular,
-                              size: 24.sp,
-                            ),
-                            activeIcon: Icon(
-                              FluentIcons.person_24_filled,
-                              size: 24.sp,
-                            ),
-                            label: context.l10n.reciters,
-                            tooltip: context.l10n.reciters,
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(
-                              FluentIcons.clock_24_regular,
-                              size: 24.sp,
-                            ),
-                            activeIcon: Icon(
-                              FluentIcons.clock_24_filled,
-                              size: 24.sp,
-                            ),
-                            label: context.l10n.prayerTimes,
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(
-                              FluentIcons.book_open_24_regular,
-                              size: 24.sp,
-                            ),
-                            activeIcon: Icon(
-                              FluentIcons.book_open_24_filled,
-                              size: 24.sp,
-                            ),
-                            label: context.l10n.athkar,
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(Icons.explore_outlined, size: 24.sp),
-                            activeIcon: Icon(Icons.explore, size: 24.sp),
-                            label: context.l10n.qibla,
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(
-                              FluentIcons.settings_24_regular,
-                              size: 24.sp,
-                            ),
-                            activeIcon: Icon(
-                              FluentIcons.settings_24_filled,
-                              size: 24.sp,
-                            ),
-                            label: context.l10n.settings,
-                          ),
-                        ],
                       ),
-                    );
-                  },
+                      _BottomNavItem(
+                        index: 3,
+                        currentIndex: _currentIndex,
+                        icon: FluentIcons.book_open_24_regular,
+                        activeIcon: FluentIcons.book_open_24_filled,
+                        label: context.l10n.athkar,
+                        onTap: (index) {
+                          setState(() => _currentIndex = index);
+                          _handleTabSideEffects(context, index);
+                        },
+                      ),
+                      const SizedBox(width: 40), // Space for FAB
+                      _BottomNavItem(
+                        index: 2,
+                        currentIndex: _currentIndex,
+                        icon: FluentIcons.clock_24_regular,
+                        activeIcon: FluentIcons.clock_24_filled,
+                        label: context.l10n.prayerTimes,
+                        onTap: (index) {
+                          setState(() => _currentIndex = index);
+                          _handleTabSideEffects(context, index);
+                        },
+                      ),
+                      _BottomNavItem(
+                        index: 1,
+                        currentIndex: _currentIndex,
+                        icon: FluentIcons.person_24_regular,
+                        activeIcon: FluentIcons.person_24_filled,
+                        label: context.l10n.reciters,
+                        onTap: (index) {
+                          setState(() => _currentIndex = index);
+                          _handleTabSideEffects(context, index);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.index,
+    required this.currentIndex,
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final int index;
+  final int currentIndex;
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSelected = currentIndex == index;
+
+    return InkWell(
+      onTap: () => onTap(index),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              size: 24.sp,
+              color: isSelected
+                  ? theme.primaryColor
+                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            SizedBox(height: 2.h), // Reduced to fix overflow
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isSelected ? 10.5.sp : 9.5.sp,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? theme.primaryColor
+                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

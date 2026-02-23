@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -52,6 +53,7 @@ class AppProviders {
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
     BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),
     BlocProvider<PremiumBloc>(create: (context) => getIt<PremiumBloc>()),
+    BlocProvider<QiblaBloc>(create: (context) => getIt<QiblaBloc>()),
 
     // Auth provider with initialization
     BlocProvider<AuthBloc>(

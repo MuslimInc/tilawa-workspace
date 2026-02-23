@@ -3,12 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
+
 import '../../../../router/app_router_config.dart';
 import '../bloc/qibla_bloc.dart';
 import '../widgets/qibla_compass_widget.dart';
 
-class QiblaScreen extends StatelessWidget {
+class QiblaScreen extends StatefulWidget {
   const QiblaScreen({super.key});
+
+  @override
+  State<QiblaScreen> createState() => _QiblaScreenState();
+}
+
+class _QiblaScreenState extends State<QiblaScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<QiblaBloc>().add(const CheckLocationService());
+    });
+  }
+
+  @override
+  void dispose() {
+    // Stop the stream when leaving the screen
+    context.read<QiblaBloc>().add(const StopQiblaStream());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

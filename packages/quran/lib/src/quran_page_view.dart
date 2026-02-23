@@ -25,6 +25,8 @@ class QuranPageView extends StatefulWidget {
     this.juzLabel,
     this.hizbLabel,
     this.surahNameBuilder,
+    this.onSurahSelected,
+    this.onShowIndex,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
@@ -63,6 +65,8 @@ class QuranPageView extends StatefulWidget {
   final String? juzLabel;
   final String? hizbLabel;
   final String Function(int surahNumber)? surahNameBuilder;
+  final ValueChanged<int>? onSurahSelected;
+  final VoidCallback? onShowIndex;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -117,6 +121,8 @@ class _QuranPageViewState extends State<QuranPageView> {
               juzLabel: widget.juzLabel,
               hizbLabel: widget.hizbLabel,
               surahNameBuilder: widget.surahNameBuilder,
+              onSurahSelected: widget.onSurahSelected,
+              onShowIndex: widget.onShowIndex,
             );
           },
         ),

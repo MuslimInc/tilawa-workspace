@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 
 import '../bloc/quran_reader_bloc.dart';
-import '../widgets/surah_index_sheet.dart';
 
 /// Screen for reading Quran text in a page-by-page Mushaf view.
 ///
@@ -163,11 +163,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                     ? getSurahNameArabic(surahNumber)
                     : getSurahNameEnglish(surahNumber);
               },
+              onSurahSelected: _jumpToSurah,
+              onShowIndex: () => _showSurahIndex(context),
             ),
-            floatingActionButton: _SurahIndexFab(onSurahSelected: _jumpToSurah),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.startFloat,
           );
+        },
+      ),
+    );
+  }
+
+  void _showSurahIndex(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SurahIndexSheet(
+        onSurahSelected: (surahNumber) {
+          Navigator.of(context).pop();
+          _jumpToSurah(surahNumber);
         },
       ),
     );
@@ -178,42 +191,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
     // Delegate to bloc - it will trigger loadPage which the listener above handles
     context.read<QuranReaderBloc>().add(
       QuranReaderEvent.loadSurah(surahNumber),
-    );
-  }
-}
-
-/// A floating action button that opens the surah index sheet.
-class _SurahIndexFab extends StatelessWidget {
-  const _SurahIndexFab({required this.onSurahSelected});
-
-  final ValueChanged<int> onSurahSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFA68B67);
-
-    return FloatingActionButton.small(
-      onPressed: () => _showSurahIndex(context),
-      backgroundColor: primaryColor,
-      foregroundColor: Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      tooltip: context.l10n.surahIndex,
-      child: const Icon(Icons.menu_book_rounded, size: 20),
-    );
-  }
-
-  void _showSurahIndex(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SurahIndexSheet(
-        onSurahSelected: (surahNumber) {
-          Navigator.of(context).pop();
-          onSurahSelected(surahNumber);
-        },
-      ),
     );
   }
 }
