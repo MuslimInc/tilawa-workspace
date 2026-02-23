@@ -223,9 +223,7 @@ class _PageContentState extends State<PageContent> {
             textColor: widget.textColor,
           );
 
-          final double horizontalPadding = widget.pageNumber <= 2
-              ? constraints.maxWidth * 0.15
-              : constraints.maxWidth * 0.035;
+          final double horizontalPadding = constraints.maxWidth * 0.035;
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -233,16 +231,12 @@ class _PageContentState extends State<PageContent> {
               children: [
                 header,
                 Expanded(
-                  child: Center(
-                    child: isLandscape
-                        ? SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: readerText,
-                          )
-                        : (widget.pageNumber <= 2
-                              ? Center(child: readerText)
-                              : readerText),
-                  ),
+                  child: isLandscape
+                      ? SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: readerText,
+                        )
+                      : readerText,
                 ),
                 _PageFooter(
                   quarterNumber: quarterNumber,
