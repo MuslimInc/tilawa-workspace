@@ -25,10 +25,6 @@ flutter:
     - assets/quran_fonts/quran_page_index.json
 
   fonts:
-    - family: "arsura"
-      fonts:
-        - asset: assets/fonts/arsura.ttf
-
     - family: QCF_BSML
       fonts:
         - asset: assets/quran_fonts/QCF4_QBSML-Regular.woff
