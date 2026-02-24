@@ -21,14 +21,13 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - assets/quran_fonts/qpc-v4.json
+    - assets/quran_fonts/quran_page_index.json
 
   fonts:
     - family: "arsura"
       fonts:
         - asset: assets/fonts/arsura.ttf
-    - family: "UthmanicHafsV22"
-      fonts:
-        - asset: assets/quran_fonts/uthmanic_hafs_v22.ttf
 
     - family: QCF_BSML
       fonts:

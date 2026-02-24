@@ -1,4 +1,3 @@
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/widgets.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
@@ -38,9 +37,15 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Proportional factor for natural Arabic text spacing.
   static const double _naturalLineHeightRatio = 0.40;
   // Width divisor to determine base font size relative to screen width.
-  static const double _widthDivisor = 17.10;
+  // Increased to 21.0 to absolutely prevent horizontal wrapping for any page.
+  static const double _widthDivisor = 20.00;
   // Standard horizontal padding for the Mushaf lines.
-  static const double _horizontalPaddingRatio = 0.035;
+  static const double _horizontalPaddingRatio = 0.025;
+
+  // Static constants for shared vertical space allocation
+  static const double headerAreaHeight = 45.0;
+  static const double footerAreaHeight =
+      65.0; // Increased to account for 12px padding
 
   @override
   QuranLayoutMetrics calculateMetrics(
@@ -58,7 +63,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       return _calculateLandscapeMetrics(adaptiveFontSize, mediaQuery.padding);
     } else {
       // Use actual constraints provided by the parent (e.g. SafeArea)
-      return _calculatePortraitMetrics(constraints, mediaQuery.padding);
+      return _calculatePortraitMetrics(constraints);
     }
   }
 
@@ -81,15 +86,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     );
   }
 
-  QuranLayoutMetrics _calculatePortraitMetrics(
-    BoxConstraints constraints,
-    EdgeInsets mediaQueryPadding,
-  ) {
-    // Current layout uses Positioned blocks for header and footer.
-    // Text block is between top: 45.hand bottom: 55.
-    const headerAreaHeight = 45.0;
-    const footerAreaHeight = 55.0;
-
+  QuranLayoutMetrics _calculatePortraitMetrics(BoxConstraints constraints) {
     final double availableWidth =
         constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
     final double fontSize = availableWidth / _widthDivisor;
@@ -104,7 +101,6 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       fontSize: fontSize,
       fontHeight: fontHeight,
       isScrollable: false,
-      letterSpacing: -0.2,
     );
   }
 }
