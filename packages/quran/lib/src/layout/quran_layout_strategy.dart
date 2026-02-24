@@ -38,7 +38,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   static const double _naturalLineHeightRatio = 0.40;
   // Width divisor to determine base font size relative to screen width.
   // Increased to 21.0 to absolutely prevent horizontal wrapping for any page.
-  static const double _widthDivisor = 20.00;
+  static const double _widthDivisor = 16.50;
   // Standard horizontal padding for the Mushaf lines.
   static const double _horizontalPaddingRatio = 0.025;
 

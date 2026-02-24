@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -141,7 +142,7 @@ class _PageContentState extends State<PageContent> {
       return [];
     }
 
-    return lineWords[lineIndex].map<InlineSpan>((word) {
+    final List<InlineSpan> spans = lineWords[lineIndex].map<InlineSpan>((word) {
       final int surahNumber = int.tryParse(word['surah'] as String) ?? 0;
       final int verseNumber = int.tryParse(word['ayah'] as String) ?? 0;
       return TextSpan(
@@ -157,6 +158,23 @@ class _PageContentState extends State<PageContent> {
         ),
       );
     }).toList();
+
+    // Insert a thin space after the first word on the first content line of
+    // every page. In RTL layout the first word sits at the right edge, so
+    // the space appears immediately to its left, marking the page-start word.
+    final isFirstContentLine =
+        lineIndex == _firstContentLineIndex(widget.pageNumber);
+    if (isFirstContentLine && spans.length > 1) {
+      spans.insert(
+        1,
+        TextSpan(
+          text: '\u200A',
+          style: TextStyle(fontFamily: pageFont, fontSize: fontSize),
+        ),
+      );
+    }
+
+    return spans;
   }
 
   @override
@@ -236,7 +254,10 @@ class _PageContentState extends State<PageContent> {
                 width: double.infinity,
                 height: lineHeight,
                 child: Center(
-                  child: RichText(text: TextSpan(children: spans)),
+                  child: RichText(
+                    textDirection: TextDirection.rtl,
+                    text: TextSpan(children: spans),
+                  ),
                 ),
               );
             }),
@@ -244,6 +265,20 @@ class _PageContentState extends State<PageContent> {
         },
       ),
     );
+  }
+
+  /// Returns the 0-based line index of the first line that has content on
+  /// [pageNumber]. For most pages this is 0, but pages 1 and 2 start later.
+  int _firstContentLineIndex(int pageNumber) {
+    final Map<String, dynamic>? pageIndex = _pageIndex;
+    if (pageIndex == null) {
+      return 0;
+    }
+    final lineMap = pageIndex[pageNumber.toString()] as Map<String, dynamic>?;
+    if (lineMap == null || lineMap.isEmpty) {
+      return 0;
+    }
+    return lineMap.keys.map(int.parse).reduce(min) - 1;
   }
 
   bool _isSurahHeader(int page, int line) => false;
