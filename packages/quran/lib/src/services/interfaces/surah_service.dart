@@ -16,4 +16,22 @@ abstract class SurahService {
 
   /// Gets the total verse count in a surah.
   int getVerseCount(int surahNumber);
+
+  /// Gets the English meaning of the surah name.
+  String getEnglishName(int surahNumber);
+
+  /// Gets the Turkish name of the surah.
+  String getTurkishName(int surahNumber);
+
+  /// Gets the detailed surah information.
+  String getSurahInfo(int surahNumber);
+
+  /// Gets the surah info from a specific book.
+  String getSurahInfoFromBook(int surahNumber);
+
+  /// Gets alternative names for the surah.
+  String getSurahNames(int surahNumber);
+
+  /// Gets surah names from a specific book.
+  String getSurahNamesFromBook(int surahNumber);
 }

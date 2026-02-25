@@ -98,5 +98,37 @@ void main() {
         expect(() => service.getVerseCount(0), throwsA(isA<QuranException>()));
       });
     });
+
+    group('getSurahInfo', () {
+      test('returns info for Al-Fatiha', () {
+        expect(service.getSurahInfo(1), contains('سورة الفاتحة'));
+      });
+
+      test('throws for invalid surah', () {
+        expect(() => service.getSurahInfo(0), throwsA(isA<QuranException>()));
+      });
+    });
+
+    group('getTurkishName', () {
+      test('returns Turkish name for Al-Fatiha', () {
+        expect(service.getTurkishName(1), 'Fâtiha');
+      });
+
+      test('returns Turkish name for Al-Baqarah', () {
+        expect(service.getTurkishName(2), 'Bakara');
+      });
+    });
+
+    group('getEnglishName', () {
+      test('returns English meaning for Al-Fatiha', () {
+        expect(service.getEnglishName(1), 'The Opening');
+      });
+    });
+
+    group('getSurahNames', () {
+      test('returns alternative names for Al-Fatiha', () {
+        expect(service.getSurahNames(1), contains('الْفَاتِحَةُ'));
+      });
+    });
   });
 }

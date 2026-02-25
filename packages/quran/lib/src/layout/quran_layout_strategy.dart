@@ -37,15 +37,10 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Proportional factor for natural Arabic text spacing.
   static const double _naturalLineHeightRatio = 0.40;
   // Width divisor to determine base font size relative to screen width.
-  // Increased to 21.0 to absolutely prevent horizontal wrapping for any page.
-  static const double _widthDivisor = 16.50;
+  // Higher values produce a smaller font to prevent horizontal wrapping.
+  static const double _widthDivisor = 16.35;
   // Standard horizontal padding for the Mushaf lines.
   static const double _horizontalPaddingRatio = 0.025;
-
-  // Static constants for shared vertical space allocation
-  static const double headerAreaHeight = 45.0;
-  static const double footerAreaHeight =
-      65.0; // Increased to account for 12px padding
 
   @override
   QuranLayoutMetrics calculateMetrics(
@@ -91,11 +86,9 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
     final double fontSize = availableWidth / _widthDivisor;
 
-    final double availableHeight =
-        constraints.maxHeight - headerAreaHeight - footerAreaHeight;
-
-    // Calculate height factor to squeeze exactly 15 lines into the available height
-    final double fontHeight = (availableHeight / 15.0) / fontSize;
+    // constraints.maxHeight already excludes header/footer since the
+    // LayoutBuilder sits inside an Expanded sibling of header and footer.
+    final double fontHeight = (constraints.maxHeight / 15.0) / fontSize;
 
     return QuranLayoutMetrics(
       fontSize: fontSize,

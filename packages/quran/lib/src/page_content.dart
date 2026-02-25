@@ -141,7 +141,10 @@ class _PageContentState extends State<PageContent> {
     final List<List<Map<String, dynamic>>> lineWords = _getWordsGroupedByLine(
       widget.pageNumber,
     );
-    if (lineIndex >= lineWords.length) {
+    if (lineWords.length < 15) {
+      lineWords.addAll(List.generate(15 - lineWords.length, (_) => []));
+    }
+    if (lineIndex < 0 || lineIndex >= 15) {
       return [];
     }
 
@@ -240,17 +243,9 @@ class _PageContentState extends State<PageContent> {
                 final pageFont =
                     'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
-                // Use the desired font height; in portrait cap it so
-                // 15 lines never exceed the available height.
-                final bool isLandscape =
+                final isLandscape =
                     MediaQuery.orientationOf(context) == Orientation.landscape;
-                const double desiredFontHeight = 2.25;
-                final double maxFontHeight =
-                    constraints.maxHeight / (15 * metrics.fontSize);
-                final double fontHeight = isLandscape
-                    ? desiredFontHeight
-                    : min(desiredFontHeight, maxFontHeight);
-                final double lineHeight = metrics.fontSize * fontHeight;
+                final double lineHeight = metrics.fontSize * metrics.fontHeight;
 
                 final lines = Column(
                   children: List.generate(15, (lineIndex) {
@@ -295,23 +290,20 @@ class _PageContentState extends State<PageContent> {
                       lineIndex,
                       metrics.fontSize,
                       pageFont,
-                      fontHeight: fontHeight,
+                      fontHeight: metrics.fontHeight,
                     );
-
-                    // Empty lines (no content for this slot) collapse to zero height.
-                    if (spans.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
 
                     return SizedBox(
                       width: double.infinity,
                       height: lineHeight,
-                      child: Center(
-                        child: RichText(
-                          textDirection: TextDirection.rtl,
-                          text: TextSpan(children: spans),
-                        ),
-                      ),
+                      child: spans.isEmpty
+                          ? const SizedBox()
+                          : Center(
+                              child: RichText(
+                                textDirection: TextDirection.rtl,
+                                text: TextSpan(children: spans),
+                              ),
+                            ),
                     );
                   }),
                 );
@@ -469,30 +461,33 @@ class _SurahHeaderBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: lineHeight,
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/mainframe.png',
-              package: 'quran',
-              fit: BoxFit.contain,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.w),
+      child: SizedBox(
+        height: lineHeight,
+        width: double.infinity,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/mainframe.png',
+                package: 'quran',
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-          Text(
-            String.fromCharCode(0xF100 + surahNumber - 1),
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontFamily: 'packages/quran/QCF_BSML',
-              fontSize: lineHeight * 0.45,
-              color: const Color(0xFF000000),
-              height: 1.0,
+            Text(
+              String.fromCharCode(0xF100 + surahNumber - 1),
+              textDirection: TextDirection.rtl,
+              style: TextStyle(
+                fontFamily: 'packages/quran/QCF_BSML',
+                fontSize: lineHeight * 0.45,
+                color: const Color(0xFF000000),
+                height: 1.0,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

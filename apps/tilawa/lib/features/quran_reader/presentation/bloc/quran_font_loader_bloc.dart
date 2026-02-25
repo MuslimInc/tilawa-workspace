@@ -57,9 +57,15 @@ class QuranFontLoaderBloc
       final isDownloaded = await _checkFontsDownloadedUseCase();
       if (!isDownloaded) {
         emit(const QuranFontLoaderState.downloading(0));
+        var lastEmittedProgress = 0.0;
         await _downloadQuranFontsUseCase(
           onProgress: (progress) {
-            add(QuranFontLoaderEvent.updateProgress(progress));
+            final currentPercent = (progress * 100).floor();
+            final lastPercent = (lastEmittedProgress * 100).floor();
+            if (currentPercent > lastPercent || progress >= 1.0) {
+              lastEmittedProgress = progress;
+              emit(QuranFontLoaderState.downloading(progress));
+            }
           },
         );
       }
