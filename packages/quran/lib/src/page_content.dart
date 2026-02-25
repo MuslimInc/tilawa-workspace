@@ -275,7 +275,7 @@ class _PageContentState extends State<PageContent> {
                         height: lineHeight,
                         child: Center(
                           child: Text(
-                            _getVerseQCF(1, 1, addSpace: false),
+                            _getVerseQCF(1, 1, spaceChar: '\u200A'),
                             style: TextStyle(
                               fontFamily: 'QCF_P001',
                               fontSize: metrics.fontSize * 1.1,
@@ -431,7 +431,7 @@ class _PageContentState extends State<PageContent> {
     return special;
   }
 
-  String _getVerseQCF(int surah, int ayah, {bool addSpace = true}) {
+  String _getVerseQCF(int surah, int ayah, {bool addSpace = true, String spaceChar = ' '}) {
     if (_qpcV4Data == null) {
       return '';
     }
@@ -443,7 +443,7 @@ class _PageContentState extends State<PageContent> {
       if (wordData != null) {
         buffer.write(wordData['text']);
         if (addSpace) {
-          buffer.write(' ');
+          buffer.write(spaceChar);
         }
         wordIndex++;
       } else {
