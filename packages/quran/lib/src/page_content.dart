@@ -293,14 +293,17 @@ class _PageContentState extends State<PageContent> {
                       fontHeight: metrics.fontHeight,
                     );
 
-                    return SizedBox(
+                    return Container(
                       width: double.infinity,
                       height: lineHeight,
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: spans.isEmpty
                           ? const SizedBox()
-                          : Center(
+                          : FittedBox(
+                              fit: BoxFit.fill,
                               child: RichText(
                                 textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.justify,
                                 text: TextSpan(children: spans),
                               ),
                             ),
