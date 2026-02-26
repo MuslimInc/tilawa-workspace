@@ -37,12 +37,17 @@ class BottomPlayerWidget extends StatefulWidget {
 }
 
 class BottomPlayerWidgetState extends State<BottomPlayerWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   int? _currentReciterId;
   String? _currentReciterName;
   bool _isDismissed = false;
 
   late AnimationController _expandController;
+
+  /// Controls the swipe-down-to-dismiss offset for the mini player.
+  double _dismissOffsetY = 0;
+  Animation<double>? _dismissAnimation;
+  late AnimationController _dismissAnimController;
 
   /// The height of the mini player bar (excluding nav bar offset).
   double get _miniPlayerHeight => 88.h;
@@ -58,42 +63,56 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     super.initState();
     _expandController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 400),
     );
     _expandController.addListener(() {
       setState(() {});
+    });
+
+    _dismissAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _dismissAnimController.addListener(() {
+      setState(() {
+        _dismissOffsetY = _dismissAnimation?.value ?? 0;
+      });
     });
   }
 
   @override
   void dispose() {
     _expandController.dispose();
+    _dismissAnimController.dispose();
     super.dispose();
   }
 
   /// Expand the player to full-screen.
   void expand() {
     HapticFeedback.lightImpact();
-    _expandController.animateTo(
-      1.0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+    _expandController.forward();
   }
 
   /// Collapse the player back to the mini bar.
   void collapse() {
-    _expandController.animateTo(
-      0.0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+    _expandController.reverse();
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
+    final primaryDelta = details.primaryDelta ?? 0;
+
+    // When collapsed and dragging down, track dismiss offset
+    if ((_expandController.value == 0 && primaryDelta > 0) ||
+        _dismissOffsetY > 0) {
+      setState(() {
+        _dismissOffsetY = (_dismissOffsetY + primaryDelta).clamp(0.0, 200.0);
+      });
+      return;
+    }
+
     final screenHeight = MediaQuery.of(context).size.height;
     // Negative primaryDelta = dragging up = expanding
-    final delta = -(details.primaryDelta ?? 0) / screenHeight;
+    final delta = -primaryDelta / screenHeight;
     _expandController.value = (_expandController.value + delta * 1.5).clamp(
       0.0,
       1.0,
@@ -101,12 +120,58 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
-    final velocity = -(details.primaryVelocity ?? 0);
-    if (velocity > 500 || _expandController.value > 0.5) {
+    final velocity = details.primaryVelocity ?? 0;
+
+    // Handle dismiss gesture when swiping down on collapsed player
+    if (_dismissOffsetY > 0) {
+      if (velocity > 300 || _dismissOffsetY > 80) {
+        _dismiss();
+      } else {
+        _cancelDismiss();
+      }
+      return;
+    }
+
+    final negVelocity = -velocity;
+    if (negVelocity > 500 || _expandController.value > 0.5) {
       expand();
-    } else if (velocity < -500 || _expandController.value <= 0.5) {
+    } else if (negVelocity < -500 || _expandController.value <= 0.5) {
       collapse();
     }
+  }
+
+  /// Animate the mini player off-screen and stop audio.
+  void _dismiss() {
+    HapticFeedback.lightImpact();
+    final targetOffset = _miniPlayerHeight + widget.bottomNavBarHeight + 40;
+    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: targetOffset)
+        .animate(
+          CurvedAnimation(
+            parent: _dismissAnimController,
+            curve: Curves.easeOut,
+          ),
+        );
+    _dismissAnimController.forward(from: 0).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _isDismissed = true;
+        _dismissOffsetY = 0;
+      });
+      context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
+    });
+  }
+
+  /// Cancel the dismiss gesture and spring back.
+  void _cancelDismiss() {
+    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: 0).animate(
+      CurvedAnimation(parent: _dismissAnimController, curve: Curves.easeOut),
+    );
+    _dismissAnimController.forward(from: 0).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _dismissOffsetY = 0;
+      });
+    });
   }
 
   @override
@@ -189,15 +254,21 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                       ),
                       left: 0,
                       right: 0,
-                      child: Opacity(
-                        opacity: (1 - progress * 2.5).clamp(0.0, 1.0),
-                        child: IgnorePointer(
-                          ignoring: progress > 0.4,
-                          child: _buildMiniPlayer(
-                            context,
-                            state,
-                            audio,
-                            position,
+                      child: Transform.translate(
+                        offset: Offset(0, _dismissOffsetY),
+                        child: Opacity(
+                          opacity:
+                              ((1 - progress * 2.5) *
+                                      (1 - _dismissOffsetY / 200))
+                                  .clamp(0.0, 1.0),
+                          child: IgnorePointer(
+                            ignoring: progress > 0.4,
+                            child: _buildMiniPlayer(
+                              context,
+                              state,
+                              audio,
+                              position,
+                            ),
                           ),
                         ),
                       ),

@@ -306,7 +306,12 @@ class _PageContentState extends State<PageContent> {
                       child: spans.isEmpty
                           ? const SizedBox()
                           : FittedBox(
-                              fit: BoxFit.fill,
+                              /// If page number is 1 or 2, use fit: BoxFit.contain to prevent stretching the single line of text.
+                              fit:
+                                  (widget.pageNumber == 1 ||
+                                      widget.pageNumber == 2)
+                                  ? BoxFit.contain
+                                  : BoxFit.fill,
                               child: RichText(
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.justify,
@@ -422,7 +427,7 @@ class _PageContentState extends State<PageContent> {
           if (surah == 1) {
             // Fatiha Page 1 special logic
             if (pageNumber == 1) {
-              special[5] = 'HEADER:1';
+              special[1] = 'HEADER:1';
             }
           } else if (surah == 9) {
             // At-Tawbah: Header only
