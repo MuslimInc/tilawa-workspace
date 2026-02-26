@@ -1,9 +1,11 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
+
 import '../models/position_data.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
@@ -42,220 +44,215 @@ class BottomPlayerUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16.r,
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12.r,
             offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+          color: theme.dividerColor.withValues(alpha: 0.1),
           width: 0.5,
         ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16.r),
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Progress Bar (Slim at top)
-              LinearProgressIndicator(
-                value: positionData.duration.inMilliseconds > 0
-                    ? positionData.position.inMilliseconds /
-                          positionData.duration.inMilliseconds
-                    : 0.0,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColor.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).primaryColor,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Progress Bar (Slim at top)
+                LinearProgressIndicator(
+                  value: positionData.duration.inMilliseconds > 0
+                      ? positionData.position.inMilliseconds /
+                            positionData.duration.inMilliseconds
+                      : 0.0,
+                  backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+                  minHeight: 3.h,
                 ),
-                minHeight: 3.h,
-              ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                child: Row(
-                  children: [
-                    // Album Art - no Hero to avoid duplicate tag conflicts
-                    // during page transitions when multiple bottom players exist
-                    Material(
-                      type: MaterialType.transparency,
-                      child: Container(
-                        width: 48.w,
-                        height: 48.w,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.r),
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
+                  child: Row(
+                    children: [
+                      // Album Art
+                      Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                          width: 48.w,
+                          height: 48.w,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.r),
+                            color: theme.primaryColor.withValues(alpha: 0.1),
+                          ),
+                          child: audio.artUri != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  child: CachedNetworkImage(
+                                    imageUrl: audio.artUri.toString(),
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, error, stackTrace) =>
+                                        _buildDefaultIcon(context),
+                                    placeholder: (context, url) =>
+                                        _buildDefaultIcon(context),
+                                  ),
+                                )
+                              : _buildDefaultIcon(context),
                         ),
-                        child: audio.artUri != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12.r),
-                                child: CachedNetworkImage(
-                                  imageUrl: audio.artUri.toString(),
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, error, stackTrace) =>
-                                      _buildDefaultIcon(context),
-                                  placeholder: (context, url) =>
-                                      _buildDefaultIcon(context),
-                                ),
-                              )
-                            : _buildDefaultIcon(context),
                       ),
-                    ),
 
-                    SizedBox(width: 12.w),
+                      SizedBox(width: 12.w),
 
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            audio.title,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyLarge?.color,
+                      // Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              audio.title,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: theme.textTheme.bodyLarge?.color,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            audio.artist ?? 'Unknown Reciter',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color
-                                  ?.withValues(alpha: 0.7),
+                            SizedBox(height: 2.h),
+                            Text(
+                              audio.artist ?? 'Unknown Reciter',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withValues(alpha: 0.7),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
 
-                    SizedBox(width: 8.w),
+                      SizedBox(width: 8.w),
 
-                    // Controls
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Previous
-                          SizedBox(
-                            width: 32.w,
-                            height: 32.w,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(
-                                FluentIcons.previous_20_filled,
-                                size: 20.sp,
-                                color: canGoPrevious
-                                    ? Theme.of(context).iconTheme.color
-                                    : Colors.grey.withValues(alpha: 0.3),
-                              ),
-                              onPressed: canGoPrevious ? onPrevious : null,
-                            ),
-                          ),
-
-                          SizedBox(width: 4.w),
-
-                          // Play/Pause
-                          Container(
-                            width: 36.w,
-                            height: 36.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(context).primaryColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.3),
-                                  blurRadius: 8.r,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(
-                                isPlaying
-                                    ? FluentIcons.pause_16_filled
-                                    : FluentIcons.play_16_filled,
-                                color: Colors.white,
-                                size: 16.sp,
-                              ),
-                              onPressed: onPlayPause,
-                            ),
-                          ),
-
-                          SizedBox(width: 4.w),
-
-                          // Next
-                          SizedBox(
-                            width: 32.w,
-                            height: 32.w,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(
-                                FluentIcons.next_20_filled,
-                                size: 20.sp,
-                                color: canGoNext
-                                    ? Theme.of(context).iconTheme.color
-                                    : Colors.grey.withValues(alpha: 0.3),
-                              ),
-                              onPressed: canGoNext ? onNext : null,
-                            ),
-                          ),
-
-                          SizedBox(width: 4.w),
-
-                          // Sleep Timer
-                          if (isSleepTimerEnabled)
+                      // Controls
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Previous
                             SizedBox(
                               width: 32.w,
                               height: 32.w,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
-                                  isSleepTimerActive
-                                      ? FluentIcons.timer_20_filled
-                                      : FluentIcons.timer_20_regular,
+                                  FluentIcons.previous_20_filled,
                                   size: 20.sp,
-                                  color: isSleepTimerActive
-                                      ? Theme.of(context).primaryColor
+                                  color: canGoPrevious
+                                      ? theme.iconTheme.color
                                       : Colors.grey.withValues(alpha: 0.3),
                                 ),
-                                onPressed: onSleepTimerTap,
+                                onPressed: canGoPrevious ? onPrevious : null,
                               ),
                             ),
-                        ],
+
+                            SizedBox(width: 4.w),
+
+                            // Play/Pause
+                            Container(
+                              width: 36.w,
+                              height: 36.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.primaryColor,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.primaryColor.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    blurRadius: 8.r,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(
+                                  isPlaying
+                                      ? FluentIcons.pause_16_filled
+                                      : FluentIcons.play_16_filled,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
+                                onPressed: onPlayPause,
+                              ),
+                            ),
+
+                            SizedBox(width: 4.w),
+
+                            // Next
+                            SizedBox(
+                              width: 32.w,
+                              height: 32.w,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(
+                                  FluentIcons.next_20_filled,
+                                  size: 20.sp,
+                                  color: canGoNext
+                                      ? theme.iconTheme.color
+                                      : Colors.grey.withValues(alpha: 0.3),
+                                ),
+                                onPressed: canGoNext ? onNext : null,
+                              ),
+                            ),
+
+                            SizedBox(width: 4.w),
+
+                            // Sleep Timer
+                            if (isSleepTimerEnabled)
+                              SizedBox(
+                                width: 32.w,
+                                height: 32.w,
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: Icon(
+                                    isSleepTimerActive
+                                        ? FluentIcons.timer_20_filled
+                                        : FluentIcons.timer_20_regular,
+                                    size: 20.sp,
+                                    color: isSleepTimerActive
+                                        ? theme.primaryColor
+                                        : Colors.grey.withValues(alpha: 0.3),
+                                  ),
+                                  onPressed: onSleepTimerTap,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

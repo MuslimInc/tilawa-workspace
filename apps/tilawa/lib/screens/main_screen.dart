@@ -8,6 +8,7 @@ import 'package:tilawa/core/presentation/widgets/offline_indicator_widget.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 
+import '../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
@@ -55,6 +56,13 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Color _getBackgroundColor(BuildContext context) {
+    if (_currentIndex == 0) {
+      return const Color(0xFFF9F5EF); // Match Quran reader bg
+    }
+    return Theme.of(context).scaffoldBackgroundColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -66,6 +74,7 @@ class _MainScreenState extends State<MainScreen> {
             ..add(const PrayerTimesEvent.loadPrayerTimes())
             ..setCountdownActive(_currentIndex == 2),
         ),
+        BlocProvider(create: (_) => getIt<UiVisibilityCubit>()),
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
@@ -82,136 +91,179 @@ class _MainScreenState extends State<MainScreen> {
               _handleTabSideEffects(context, _currentIndex);
             },
             child: Scaffold(
-              body: Column(
-                children: [
-                  const OfflineIndicatorWidget(),
-                  // Main content
-                  Expanded(
-                    child: IndexedStack(
-                      index: _currentIndex,
-                      children: _screens,
-                    ),
-                  ),
+              backgroundColor: _getBackgroundColor(context),
+              extendBody: true,
+              body: BlocBuilder<UiVisibilityCubit, bool>(
+                builder: (context, isVisible) {
+                  return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                    builder: (context, audioState) {
+                      // Calculate if the bottom player is actively showing content
+                      final bool isPlayerVisible =
+                          isVisible &&
+                          audioState.shouldShowBottomPlayer &&
+                          audioState.currentAudio != null;
 
-                  const BottomPlayerWidget(),
-                ],
-              ),
-              floatingActionButton: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.primaryColor.withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                    BoxShadow(
-                      color: theme.primaryColor.withValues(alpha: 0.2),
-                      blurRadius: 25,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentIndex = 0;
-                    });
-                    _handleTabSideEffects(context, 0);
-                  },
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  highlightElevation: 0,
-                  shape: const CircleBorder(),
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          theme.primaryColor.withValues(alpha: 0.8),
-                          theme.primaryColor,
+                      // Base height (~72h) + top/bottom padding (8h + 8h)
+                      final double playerHeight = isPlayerVisible ? 88.h : 0;
+
+                      return Stack(
+                        children: [
+                          // Main content layer - Using Positioned.fill to keep layout bounds stable
+                          Positioned.fill(
+                            child: AnimatedPadding(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              padding: EdgeInsets.only(
+                                bottom: isVisible
+                                    ? (80.h + playerHeight)
+                                    : (MediaQuery.viewPaddingOf(
+                                            context,
+                                          ).bottom +
+                                          20.h),
+                              ),
+                              child: IndexedStack(
+                                index: _currentIndex,
+                                children: _screens,
+                              ),
+                            ),
+                          ),
+
+                          // Offline indicator overlay at the top
+                          const Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: OfflineIndicatorWidget(),
+                          ),
+
+                          // Bottom Player overlay
+                          Positioned(
+                            bottom: isVisible
+                                ? 80.h
+                                : -200, // Slide out below stack
+                            left: 0,
+                            right: 0,
+                            child: AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              child: isPlayerVisible
+                                  ? const BottomPlayerWidget()
+                                  : const SizedBox.shrink(),
+                            ),
+                          ),
                         ],
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SvgPicture.asset(
-                        'assets/icons/quran_icon.svg',
-                        width: 28.sp,
-                        height: 28.sp,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                      );
+                    },
+                  );
+                },
               ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
-              bottomNavigationBar: BottomAppBar(
-                shape: const CircularNotchedRectangle(),
-                notchMargin: 8.0,
-                color: theme.cardColor,
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _BottomNavItem(
-                        index: 4,
-                        currentIndex: _currentIndex,
-                        icon: FluentIcons.settings_24_regular,
-                        activeIcon: FluentIcons.settings_24_filled,
-                        label: context.l10n.settings,
-                        onTap: (index) {
-                          setState(() => _currentIndex = index);
-                          _handleTabSideEffects(context, index);
-                        },
-                      ),
-                      _BottomNavItem(
-                        index: 3,
-                        currentIndex: _currentIndex,
-                        icon: FluentIcons.book_open_24_regular,
-                        activeIcon: FluentIcons.book_open_24_filled,
-                        svgPath: 'assets/icons/athkar_icon.svg',
-                        label: context.l10n.athkar,
-                        onTap: (index) {
-                          setState(() => _currentIndex = index);
-                          _handleTabSideEffects(context, index);
-                        },
-                      ),
-                      const SizedBox(width: 40), // Space for FAB
-                      _BottomNavItem(
-                        index: 2,
-                        currentIndex: _currentIndex,
-                        icon: FluentIcons.clock_24_regular,
-                        activeIcon: FluentIcons.clock_24_filled,
-                        label: context.l10n.prayerTimes,
-                        onTap: (index) {
-                          setState(() => _currentIndex = index);
-                          _handleTabSideEffects(context, index);
-                        },
-                      ),
-                      _BottomNavItem(
-                        index: 1,
-                        currentIndex: _currentIndex,
-                        icon: FluentIcons.person_24_regular,
-                        activeIcon: FluentIcons.person_24_filled,
-                        label: context.l10n.reciters,
-                        onTap: (index) {
-                          setState(() => _currentIndex = index);
-                          _handleTabSideEffects(context, index);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+              bottomNavigationBar: BlocBuilder<UiVisibilityCubit, bool>(
+                builder: (context, isVisible) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) {
+                      final offsetAnimation =
+                          Tween<Offset>(
+                            begin: const Offset(0, 1),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeInOut,
+                            ),
+                          );
+                      return SlideTransition(
+                        position: offsetAnimation,
+                        child: child,
+                      );
+                    },
+                    child: isVisible
+                        ? BottomAppBar(
+                            key: const ValueKey('bottom_app_bar'),
+                            elevation:
+                                8, // Added elevation for better separation
+                            color: theme.cardColor,
+                            child: Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Expanded(
+                                    child: _BottomNavItem(
+                                      index: 4,
+                                      currentIndex: _currentIndex,
+                                      icon: FluentIcons.settings_24_regular,
+                                      activeIcon:
+                                          FluentIcons.settings_24_filled,
+                                      label: context.l10n.settings,
+                                      onTap: (index) {
+                                        setState(() => _currentIndex = index);
+                                        _handleTabSideEffects(context, index);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: _BottomNavItem(
+                                      index: 3,
+                                      currentIndex: _currentIndex,
+                                      icon: FluentIcons.book_open_24_regular,
+                                      activeIcon:
+                                          FluentIcons.book_open_24_filled,
+                                      svgPath: 'assets/icons/athkar_icon.svg',
+                                      label: context.l10n.athkar,
+                                      onTap: (index) {
+                                        setState(() => _currentIndex = index);
+                                        _handleTabSideEffects(context, index);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: _BottomNavItem(
+                                      index: 0,
+                                      currentIndex: _currentIndex,
+                                      icon: FluentIcons.book_24_regular,
+                                      activeIcon: FluentIcons.book_24_filled,
+                                      svgPath: 'assets/icons/quran_icon.svg',
+                                      label: context.l10n.quran,
+                                      onTap: (index) {
+                                        setState(() => _currentIndex = index);
+                                        _handleTabSideEffects(context, index);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: _BottomNavItem(
+                                      index: 2,
+                                      currentIndex: _currentIndex,
+                                      icon: FluentIcons.clock_24_regular,
+                                      activeIcon: FluentIcons.clock_24_filled,
+                                      label: context.l10n.prayerTimes,
+                                      onTap: (index) {
+                                        setState(() => _currentIndex = index);
+                                        _handleTabSideEffects(context, index);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: _BottomNavItem(
+                                      index: 1,
+                                      currentIndex: _currentIndex,
+                                      icon: FluentIcons.person_24_regular,
+                                      activeIcon: FluentIcons.person_24_filled,
+                                      label: context.l10n.reciters,
+                                      onTap: (index) {
+                                        setState(() => _currentIndex = index);
+                                        _handleTabSideEffects(context, index);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(key: ValueKey('empty_bar')),
+                  );
+                },
               ),
             ),
           );
@@ -279,6 +331,9 @@ class _BottomNavItem extends StatelessWidget {
             SizedBox(height: 2.h), // Reduced to fix overflow
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSelected ? 10.5.sp : 9.5.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

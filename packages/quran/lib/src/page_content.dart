@@ -228,10 +228,11 @@ class _PageContentState extends State<PageContent> {
     );
 
     return SafeArea(
+      bottom: false, // Allow it to extend to the very bottom
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: header,
           ),
           Expanded(
@@ -318,7 +319,10 @@ class _PageContentState extends State<PageContent> {
               },
             ),
           ),
-          footer,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: footer,
+          ),
         ],
       ),
     );
@@ -431,7 +435,12 @@ class _PageContentState extends State<PageContent> {
     return special;
   }
 
-  String _getVerseQCF(int surah, int ayah, {bool addSpace = true, String spaceChar = ' '}) {
+  String _getVerseQCF(
+    int surah,
+    int ayah, {
+    bool addSpace = true,
+    String spaceChar = ' ',
+  }) {
     if (_qpcV4Data == null) {
       return '';
     }
@@ -511,7 +520,9 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF7A6855);
+    const primaryColor = Color(
+      0xFF4E342E,
+    ); // Darker brown for better contrast (WCAG AA)
     final double verseFontSize = MediaQuery.sizeOf(context).width * 0.030;
 
     return Row(
@@ -594,7 +605,9 @@ class _PageFooter extends StatelessWidget {
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: 8.w,
+      ), // Increased horizontal spacing
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -617,8 +630,15 @@ class _QuranPageIndex extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFE6D5),
-        borderRadius: BorderRadius.circular(10.r),
+        color: const Color(0xFFF9F5EF),
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -627,7 +647,7 @@ class _QuranPageIndex extends StatelessWidget {
             Text(
               hizbLabel,
               style: const TextStyle(
-                color: Color(0xFF7A6855),
+                color: Color(0xFF4E342E), // Match header contrast
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -636,14 +656,14 @@ class _QuranPageIndex extends StatelessWidget {
             Container(
               width: 1,
               height: 14,
-              color: const Color(0xFF7A6855).withValues(alpha: 0.3),
+              color: const Color(0xFF4E342E).withValues(alpha: 0.3),
             ),
             const SizedBox(width: 12),
           ],
           Text(
             '$pageNumber',
             style: const TextStyle(
-              color: Color(0xFF7A6855),
+              color: Color(0xFF4E342E), // Match header contrast
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
@@ -663,17 +683,25 @@ class _SurahIndexButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onShowIndex,
-      borderRadius: const BorderRadius.all(Radius.circular(14)),
       child: Container(
-        width: 35.h,
-        height: 35.h,
-        decoration: const BoxDecoration(
-          color: Color(0xFF8B6B4E),
-          borderRadius: BorderRadius.all(Radius.circular(14)),
+        width: 40.h, // Slightly larger for better touch target and circularity
+        height: 40.h,
+        decoration: BoxDecoration(
+          color: const Color(0xFFA68B67),
+          shape: BoxShape.circle, // Circular design
+          boxShadow: [
+            BoxShadow(
+              color: const Color(
+                0xFFA68B67,
+              ).withValues(alpha: 0.3), // Changed to withOpacity
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: const Icon(
           Icons.menu_book_rounded,
-          size: 20,
+          size: 22,
           color: Colors.white,
         ),
       ),

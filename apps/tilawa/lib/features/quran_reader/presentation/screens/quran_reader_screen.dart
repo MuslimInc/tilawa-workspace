@@ -5,6 +5,7 @@ import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 
+import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../bloc/quran_reader_bloc.dart';
 
 /// Screen for reading Quran text in a page-by-page Mushaf view.
@@ -41,6 +42,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+
+    // Ensure UI is visible when entering the reader
+    context.read<UiVisibilityCubit>().show();
 
     int initialPage = 1;
 
@@ -79,6 +83,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    // Ensure UI is visible when leaving the reader
+    if (mounted) {
+      context.read<UiVisibilityCubit>().show();
+    }
     super.dispose();
   }
 
@@ -148,23 +156,33 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
           }
 
           return Scaffold(
-            body: QuranPageView(
-              controller: _pageController,
-              onPageChanged: (pageNumber) {
-                // Delegate to bloc - it will handle saving last read and syncing state
-                context.read<QuranReaderBloc>().add(
-                  QuranReaderEvent.loadPage(pageNumber),
-                );
+            body: GestureDetector(
+              onTap: () {
+                context.read<UiVisibilityCubit>().toggle();
               },
-              juzLabel: context.l10n.juzPart,
-              hizbLabel: context.l10n.hizb,
-              surahNameBuilder: (surahNumber) {
-                return context.l10n.localeName == 'ar'
-                    ? getSurahNameArabic(surahNumber)
-                    : getSurahNameEnglish(surahNumber);
-              },
-              onSurahSelected: _jumpToSurah,
-              onShowIndex: () => _showSurahIndex(context),
+              behavior: HitTestBehavior.opaque,
+              child: BlocBuilder<UiVisibilityCubit, bool>(
+                builder: (context, isVisible) {
+                  return QuranPageView(
+                    controller: _pageController,
+                    onPageChanged: (pageNumber) {
+                      // Delegate to bloc - it will handle saving last read and syncing state
+                      context.read<QuranReaderBloc>().add(
+                        QuranReaderEvent.loadPage(pageNumber),
+                      );
+                    },
+                    juzLabel: context.l10n.juzPart,
+                    hizbLabel: context.l10n.hizb,
+                    surahNameBuilder: (surahNumber) {
+                      return context.l10n.localeName == 'ar'
+                          ? getSurahNameArabic(surahNumber)
+                          : getSurahNameEnglish(surahNumber);
+                    },
+                    onSurahSelected: _jumpToSurah,
+                    onShowIndex: () => _showSurahIndex(context),
+                  );
+                },
+              ),
             ),
           );
         },

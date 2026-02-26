@@ -78,70 +78,54 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               const AudioPlayerEvent.stopAudio(),
             );
           },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.1),
-              border: Border(
-                top: BorderSide(color: Theme.of(context).colorScheme.surface),
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16.w,
-                8.h,
-                16.w,
-                20.h + MediaQuery.paddingOf(context).bottom,
-              ),
-              child: BottomPlayerUi(
-                audio: audio,
-                positionData: position,
-                isPlaying: state.isPlaying,
-                canGoPrevious: state.canGoPrevious,
-                canGoNext: state.canGoNext,
-                isSleepTimerActive: state.isSleepTimerActive,
-                isSleepTimerEnabled: context
-                    .watch<SettingsCubit>()
-                    .state
-                    .isSleepTimerEnabled,
-                onPlayPause: () {
-                  if (state.isPlaying) {
-                    context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.pauseAudio(),
-                    );
-                  } else {
-                    context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.playAudio(),
-                    );
-                  }
-                },
-                onPrevious: () {
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+            child: BottomPlayerUi(
+              audio: audio,
+              positionData: position,
+              isPlaying: state.isPlaying,
+              canGoPrevious: state.canGoPrevious,
+              canGoNext: state.canGoNext,
+              isSleepTimerActive: state.isSleepTimerActive,
+              isSleepTimerEnabled: context
+                  .watch<SettingsCubit>()
+                  .state
+                  .isSleepTimerEnabled,
+              onPlayPause: () {
+                if (state.isPlaying) {
                   context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToPrevious(),
+                    const AudioPlayerEvent.pauseAudio(),
                   );
-                },
-                onNext: () {
+                } else {
                   context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToNext(),
+                    const AudioPlayerEvent.playAudio(),
                   );
-                },
-                onSleepTimerTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => const SleepTimerDialog(),
-                  );
-                },
-                onClose: () {
-                  // Provide haptic feedback for consistency
-                  HapticFeedback.lightImpact();
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.stopAudio(),
-                  );
-                },
-                onTap: () => const ExpandedPlayerRoute().push(context),
-              ),
+                }
+              },
+              onPrevious: () {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToPrevious(),
+                );
+              },
+              onNext: () {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToNext(),
+                );
+              },
+              onSleepTimerTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const SleepTimerDialog(),
+                );
+              },
+              onClose: () {
+                // Provide haptic feedback for consistency
+                HapticFeedback.lightImpact();
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.stopAudio(),
+                );
+              },
+              onTap: () => const ExpandedPlayerRoute().push(context),
             ),
           ),
         );
