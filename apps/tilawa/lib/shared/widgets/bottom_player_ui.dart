@@ -48,12 +48,12 @@ class BottomPlayerUi extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.transparent,
+        color: theme.cardColor.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12.r,
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 16.r,
             offset: const Offset(0, 4),
           ),
         ],

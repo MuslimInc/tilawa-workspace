@@ -24,7 +24,7 @@ class SurahServiceImpl implements SurahService {
   @override
   String getNameEnglish(int surahNumber) {
     _validateSurahNumber(surahNumber);
-    return surah[surahNumber]!.englishName;
+    return surah[surahNumber]!.name;
   }
 
   @override

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
 
 import '../../../../helpers/datetime_helper.dart';
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../domain/entities/history_entity.dart';
 import '../bloc/history_bloc.dart';
 import '../widgets/history_card.dart';
@@ -70,58 +72,66 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<HistoryBloc, HistoryState>(
-        builder: (context, state) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<HistoryBloc>().add(
-                const HistoryEvent.refreshHistory(),
+      body: Stack(
+        children: [
+          BlocBuilder<HistoryBloc, HistoryState>(
+            builder: (context, state) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<HistoryBloc>().add(
+                    const HistoryEvent.refreshHistory(),
+                  );
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    // Stats card
+                    if (state.historyList.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: HistoryStatsCard(
+                            totalItems: state.historyList.length,
+                            totalListeningTimeMs: state.totalListeningTimeMs,
+                          ),
+                        ),
+                      ),
+
+                    // Search bar
+                    if (state.historyList.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: HistorySearchBar(
+                            controller: _searchController,
+                            onChanged: (query) {
+                              context.read<HistoryBloc>().add(
+                                HistoryEvent.searchHistory(query),
+                              );
+                            },
+                            onClear: () {
+                              _searchController.clear();
+                              context.read<HistoryBloc>().add(
+                                const HistoryEvent.clearSearch(),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                    // Content based on state
+                    _buildContent(context, state),
+
+                    // Bottom padding for the player
+                    SliverToBoxAdapter(child: SizedBox(height: 120.h)),
+                  ],
+                ),
               );
             },
-            child: CustomScrollView(
-              slivers: [
-                // Stats card
-                if (state.historyList.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: HistoryStatsCard(
-                        totalItems: state.historyList.length,
-                        totalListeningTimeMs: state.totalListeningTimeMs,
-                      ),
-                    ),
-                  ),
-
-                // Search bar
-                if (state.historyList.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: HistorySearchBar(
-                        controller: _searchController,
-                        onChanged: (query) {
-                          context.read<HistoryBloc>().add(
-                            HistoryEvent.searchHistory(query),
-                          );
-                        },
-                        onClear: () {
-                          _searchController.clear();
-                          context.read<HistoryBloc>().add(
-                            const HistoryEvent.clearSearch(),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                // Content based on state
-                _buildContent(context, state),
-              ],
-            ),
-          );
-        },
+          ),
+          const Positioned.fill(child: BottomPlayerWidget()),
+        ],
       ),
     );
   }

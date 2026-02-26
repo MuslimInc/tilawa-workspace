@@ -17,6 +17,7 @@ import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
+import '../presentation/cubit/ui_visibility_cubit.dart';
 
 /// Centralized configuration for all BlocProviders in the application.
 /// This class provides a single place to manage all state management providers.
@@ -73,6 +74,10 @@ class AppProviders {
       create: (context) =>
           getIt<QuranReaderBloc>()..add(const QuranReaderEvent.loadLastRead()),
       lazy: false,
+    ),
+    // UI Visibility provider (Global for immersive mode across routes)
+    BlocProvider<UiVisibilityCubit>(
+      create: (context) => getIt<UiVisibilityCubit>(),
     ),
   ];
 

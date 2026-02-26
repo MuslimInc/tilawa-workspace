@@ -69,7 +69,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             padding: EdgeInsets.symmetric(
               vertical: 16.h,
               horizontal: 16.w,
-            ).copyWith(bottom: 32.h),
+            ).copyWith(bottom: 120.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

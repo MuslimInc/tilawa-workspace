@@ -176,7 +176,11 @@ class _PageContentState extends State<PageContent> {
         1,
         TextSpan(
           text: '\u200A',
-          style: TextStyle(fontFamily: pageFont, fontSize: fontSize),
+          style: TextStyle(
+            fontFamily: pageFont,
+            fontSize: fontSize,
+            height: fontHeight,
+          ),
         ),
       );
     }
@@ -281,6 +285,7 @@ class _PageContentState extends State<PageContent> {
                               fontFamily: 'QCF_P001',
                               fontSize: metrics.fontSize * 1.1,
                               color: widget.textColor,
+                              height: 1.0,
                             ),
                           ),
                         ),
@@ -305,6 +310,10 @@ class _PageContentState extends State<PageContent> {
                               child: RichText(
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.justify,
+                                textHeightBehavior: const TextHeightBehavior(
+                                  applyHeightToFirstAscent: false,
+                                  applyHeightToLastDescent: false,
+                                ),
                                 text: TextSpan(children: spans),
                               ),
                             ),
@@ -320,7 +329,7 @@ class _PageContentState extends State<PageContent> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            padding: EdgeInsets.only(bottom: 10.h),
             child: footer,
           ),
         ],

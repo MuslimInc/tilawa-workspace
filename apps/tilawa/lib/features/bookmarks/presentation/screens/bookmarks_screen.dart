@@ -2,9 +2,10 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
 import '../widgets/bookmark_card.dart';
@@ -49,101 +50,111 @@ class BookmarksScreen extends StatelessWidget {
           );
         },
         builder: (context, state) {
-          return state.when(
-            initial: () => const Center(child: CircularProgressIndicator()),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
-              children: [
-                BookmarkSearchBar(
-                  onSearchChanged: (query) {
-                    context.read<BookmarksBloc>().add(
-                      SearchBookmarksEvent(query: query),
-                    );
-                  },
-                  onClearSearch: () {
-                    context.read<BookmarksBloc>().add(
-                      const ClearBookmarksSearchEvent(),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: filteredBookmarks.isEmpty
-                      ? _buildEmptyState(context, searchQuery.isNotEmpty)
-                      : ListView.separated(
-                          padding: EdgeInsets.all(16.r),
-                          itemCount: filteredBookmarks.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(height: 8.h),
-                          itemBuilder: (context, index) {
-                            final BookmarkEntity bookmark =
-                                filteredBookmarks[index];
-                            return Dismissible(
-                              key: ValueKey(bookmark.id),
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: EdgeInsets.only(right: 20.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(16.r),
-                                ),
-                                child: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: Colors.white,
-                                ),
+          return Stack(
+            children: [
+              state.when(
+                initial: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
+                  children: [
+                    BookmarkSearchBar(
+                      onSearchChanged: (query) {
+                        context.read<BookmarksBloc>().add(
+                          SearchBookmarksEvent(query: query),
+                        );
+                      },
+                      onClearSearch: () {
+                        context.read<BookmarksBloc>().add(
+                          const ClearBookmarksSearchEvent(),
+                        );
+                      },
+                    ),
+                    Expanded(
+                      child: filteredBookmarks.isEmpty
+                          ? _buildEmptyState(context, searchQuery.isNotEmpty)
+                          : ListView.separated(
+                              padding: EdgeInsets.fromLTRB(
+                                16.r,
+                                16.r,
+                                16.r,
+                                120.h,
                               ),
-                              onDismissed: (direction) {
-                                context.read<BookmarksBloc>().add(
-                                  DeleteBookmarkEvent(id: bookmark.id),
+                              itemCount: filteredBookmarks.length,
+                              separatorBuilder: (context, index) =>
+                                  SizedBox(height: 8.h),
+                              itemBuilder: (context, index) {
+                                final BookmarkEntity bookmark =
+                                    filteredBookmarks[index];
+                                return Dismissible(
+                                  key: ValueKey(bookmark.id),
+                                  background: Container(
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.only(right: 20.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  onDismissed: (direction) {
+                                    context.read<BookmarksBloc>().add(
+                                      DeleteBookmarkEvent(id: bookmark.id),
+                                    );
+                                  },
+                                  child: BookmarkCard(
+                                    bookmark: bookmark,
+                                    onTap: () =>
+                                        _playFromBookmark(context, bookmark),
+                                    onEdit: () =>
+                                        _showEditLabelDialog(context, bookmark),
+                                  ),
                                 );
                               },
-                              child: BookmarkCard(
-                                bookmark: bookmark,
-                                onTap: () =>
-                                    _playFromBookmark(context, bookmark),
-                                onEdit: () =>
-                                    _showEditLabelDialog(context, bookmark),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            ),
-            bookmarkCreated: (_, bookmarks) =>
-                _buildLoadedList(context, bookmarks),
-            bookmarkUpdated: (_, bookmarks) =>
-                _buildLoadedList(context, bookmarks),
-            bookmarkDeleted: (_, bookmarks) =>
-                _buildLoadedList(context, bookmarks),
-            error: (message) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 64.sp,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    message,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: Theme.of(context).colorScheme.error,
+                            ),
                     ),
+                  ],
+                ),
+                bookmarkCreated: (_, bookmarks) =>
+                    _buildLoadedList(context, bookmarks),
+                bookmarkUpdated: (_, bookmarks) =>
+                    _buildLoadedList(context, bookmarks),
+                bookmarkDeleted: (_, bookmarks) =>
+                    _buildLoadedList(context, bookmarks),
+                error: (message) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 64.sp,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        message,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<BookmarksBloc>().add(
+                            const LoadBookmarksEvent(),
+                          );
+                        },
+                        child: Text(context.l10n.retry),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 16.h),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<BookmarksBloc>().add(
-                        const LoadBookmarksEvent(),
-                      );
-                    },
-                    child: Text(context.l10n.retry),
-                  ),
-                ],
+                ),
               ),
-            ),
+              const Positioned.fill(child: BottomPlayerWidget()),
+            ],
           );
         },
       ),
@@ -159,7 +170,7 @@ class BookmarksScreen extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.fromLTRB(16.r, 16.r, 16.r, 120.h),
       itemCount: bookmarks.length,
       separatorBuilder: (context, index) => SizedBox(height: 8.h),
       itemBuilder: (context, index) {

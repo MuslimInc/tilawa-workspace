@@ -6,6 +6,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../bloc/quran_reader_bloc.dart';
 
 /// Screen for reading Quran text in a page-by-page Mushaf view.
@@ -155,35 +156,40 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
             );
           }
 
-          return Scaffold(
-            body: GestureDetector(
-              onTap: () {
-                context.read<UiVisibilityCubit>().toggle();
-              },
-              behavior: HitTestBehavior.opaque,
-              child: BlocBuilder<UiVisibilityCubit, bool>(
-                builder: (context, isVisible) {
-                  return QuranPageView(
-                    controller: _pageController,
-                    onPageChanged: (pageNumber) {
-                      // Delegate to bloc - it will handle saving last read and syncing state
-                      context.read<QuranReaderBloc>().add(
-                        QuranReaderEvent.loadPage(pageNumber),
+          return Stack(
+            children: [
+              Scaffold(
+                body: GestureDetector(
+                  onTap: () {
+                    context.read<UiVisibilityCubit>().toggle();
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: BlocBuilder<UiVisibilityCubit, bool>(
+                    builder: (context, isVisible) {
+                      return QuranPageView(
+                        controller: _pageController,
+                        onPageChanged: (pageNumber) {
+                          // Delegate to bloc - it will handle saving last read and syncing state
+                          context.read<QuranReaderBloc>().add(
+                            QuranReaderEvent.loadPage(pageNumber),
+                          );
+                        },
+                        juzLabel: context.l10n.juzPart,
+                        hizbLabel: context.l10n.hizb,
+                        surahNameBuilder: (surahNumber) {
+                          return context.l10n.localeName == 'ar'
+                              ? getSurahNameArabic(surahNumber)
+                              : getSurahNameEnglish(surahNumber);
+                        },
+                        onSurahSelected: _jumpToSurah,
+                        onShowIndex: () => _showSurahIndex(context),
                       );
                     },
-                    juzLabel: context.l10n.juzPart,
-                    hizbLabel: context.l10n.hizb,
-                    surahNameBuilder: (surahNumber) {
-                      return context.l10n.localeName == 'ar'
-                          ? getSurahNameArabic(surahNumber)
-                          : getSurahNameEnglish(surahNumber);
-                    },
-                    onSurahSelected: _jumpToSurah,
-                    onShowIndex: () => _showSurahIndex(context),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
+              const Positioned.fill(child: BottomPlayerWidget()),
+            ],
           );
         },
       ),

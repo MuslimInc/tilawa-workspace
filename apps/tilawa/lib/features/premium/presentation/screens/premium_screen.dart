@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../bloc/premium_bloc.dart';
@@ -27,53 +29,61 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.premium),
-        backgroundColor: Colors.amber,
-        foregroundColor: Colors.black,
-      ),
-      body: BlocConsumer<PremiumBloc, PremiumState>(
-        listener: (context, state) {
-          state.when(
-            initial: () {},
-            loading: () {},
-            loaded: (status, plans, canDownload) {},
-            error: (message) {
-              ToastUtils.showErrorToast(message);
-            },
-            purchaseSuccess: (message) {
-              ToastUtils.showSuccessToast(message);
-            },
-            purchaseFailed: (message) {
-              ToastUtils.showErrorToast(message);
-            },
-            trialStarted: (message) {
-              ToastUtils.showSuccessToast(message);
-            },
-            trialNotEligible: (message) {
-              ToastUtils.showToast(
-                msg: message,
-                backgroundColor: Colors.orange,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(context.l10n.premium),
+            backgroundColor: Colors.amber,
+            foregroundColor: Colors.black,
+          ),
+          body: BlocConsumer<PremiumBloc, PremiumState>(
+            listener: (context, state) {
+              state.when(
+                initial: () {},
+                loading: () {},
+                loaded: (status, plans, canDownload) {},
+                error: (message) {
+                  ToastUtils.showErrorToast(message);
+                },
+                purchaseSuccess: (message) {
+                  ToastUtils.showSuccessToast(message);
+                },
+                purchaseFailed: (message) {
+                  ToastUtils.showErrorToast(message);
+                },
+                trialStarted: (message) {
+                  ToastUtils.showSuccessToast(message);
+                },
+                trialNotEligible: (message) {
+                  ToastUtils.showToast(
+                    msg: message,
+                    backgroundColor: Colors.orange,
+                  );
+                },
               );
             },
-          );
-        },
-        builder: (context, state) {
-          return state.when(
-            initial: () => const Center(child: CircularProgressIndicator()),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            loaded: (status, plans, canDownload) =>
-                _buildLoadedContent(context, status, plans, canDownload),
-            error: (message) => _buildErrorContent(context, message),
-            purchaseSuccess: (message) =>
-                _buildSuccessContent(context, message),
-            purchaseFailed: (message) => _buildErrorContent(context, message),
-            trialStarted: (message) => _buildSuccessContent(context, message),
-            trialNotEligible: (message) => _buildErrorContent(context, message),
-          );
-        },
-      ),
+            builder: (context, state) {
+              return state.when(
+                initial: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                loaded: (status, plans, canDownload) =>
+                    _buildLoadedContent(context, status, plans, canDownload),
+                error: (message) => _buildErrorContent(context, message),
+                purchaseSuccess: (message) =>
+                    _buildSuccessContent(context, message),
+                purchaseFailed: (message) =>
+                    _buildErrorContent(context, message),
+                trialStarted: (message) =>
+                    _buildSuccessContent(context, message),
+                trialNotEligible: (message) =>
+                    _buildErrorContent(context, message),
+              );
+            },
+          ),
+        ),
+        const Positioned.fill(child: BottomPlayerWidget()),
+      ],
     );
   }
 
@@ -84,7 +94,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     bool canDownload,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16).copyWith(bottom: 120.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

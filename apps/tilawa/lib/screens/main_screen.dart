@@ -74,7 +74,6 @@ class _MainScreenState extends State<MainScreen> {
             ..add(const PrayerTimesEvent.loadPrayerTimes())
             ..setCountdownActive(_currentIndex == 2),
         ),
-        BlocProvider(create: (_) => getIt<UiVisibilityCubit>()),
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
         builder: (context, state) {
@@ -97,14 +96,15 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (context, isVisible) {
                   return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                     builder: (context, audioState) {
-                      // Calculate if the bottom player is actively showing content
-                      final bool isPlayerVisible =
-                          isVisible &&
+                      // Base height (~72h) + top/bottom padding (8h + 8h)
+                      // We always reserve space if the player SHOULD be showing,
+                      // even if it's currently animatng.
+                      final bool playerShouldShow =
                           audioState.shouldShowBottomPlayer &&
                           audioState.currentAudio != null;
-
-                      // Base height (~72h) + top/bottom padding (8h + 8h)
-                      final double playerHeight = isPlayerVisible ? 88.h : 0;
+                      final double playerHeight = isVisible && playerShouldShow
+                          ? 88.h
+                          : 0;
 
                       return Stack(
                         children: [
@@ -136,18 +136,11 @@ class _MainScreenState extends State<MainScreen> {
                             child: OfflineIndicatorWidget(),
                           ),
 
-                          // Bottom Player overlay
-                          Positioned(
-                            bottom: isVisible
-                                ? 80.h
-                                : -200, // Slide out below stack
-                            left: 0,
-                            right: 0,
-                            child: AnimatedSize(
-                              duration: const Duration(milliseconds: 300),
-                              child: isPlayerVisible
-                                  ? const BottomPlayerWidget()
-                                  : const SizedBox.shrink(),
+                          // Bottom Player overlay — Positioned.fill allows
+                          // the player to expand to full-screen (YouTube/Spotify UX).
+                          Positioned.fill(
+                            child: BottomPlayerWidget(
+                              bottomNavBarHeight: isVisible ? 80.h : 0,
                             ),
                           ),
                         ],

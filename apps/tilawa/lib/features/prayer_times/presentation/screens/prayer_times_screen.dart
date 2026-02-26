@@ -4,6 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -38,73 +39,78 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.prayerTimes),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.explore_outlined),
-            onPressed: () => context.push('/qibla'),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(context.l10n.prayerTimes),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.explore_outlined),
+                onPressed: () => context.push('/qibla'),
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => _showSettingsDialog(context),
+              ),
+            ],
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: context.l10n.today),
+                Tab(text: context.l10n.monthly),
+              ],
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showSettingsDialog(context),
+          body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+            builder: (context, state) {
+              switch (state.status) {
+                case PrayerTimesStatus.initial:
+                case PrayerTimesStatus.loading:
+                  return const Center(child: CircularProgressIndicator());
+
+                case PrayerTimesStatus.error:
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(state.errorMessage, textAlign: TextAlign.center),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<PrayerTimesBloc>().add(
+                              const PrayerTimesEvent.loadPrayerTimes(),
+                            );
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                case PrayerTimesStatus.locationRequired:
+                  return _buildLocationRequiredView(context, state);
+
+                case PrayerTimesStatus.loaded:
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildTodayView(context, state),
+                      _buildMonthlyView(context, state),
+                    ],
+                  );
+              }
+            },
           ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: context.l10n.today),
-            Tab(text: context.l10n.monthly),
-          ],
         ),
-      ),
-      body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
-        builder: (context, state) {
-          switch (state.status) {
-            case PrayerTimesStatus.initial:
-            case PrayerTimesStatus.loading:
-              return const Center(child: CircularProgressIndicator());
-
-            case PrayerTimesStatus.error:
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(state.errorMessage, textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<PrayerTimesBloc>().add(
-                          const PrayerTimesEvent.loadPrayerTimes(),
-                        );
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-
-            case PrayerTimesStatus.locationRequired:
-              return _buildLocationRequiredView(context, state);
-
-            case PrayerTimesStatus.loaded:
-              return TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildTodayView(context, state),
-                  _buildMonthlyView(context, state),
-                ],
-              );
-          }
-        },
-      ),
+        const Positioned.fill(child: BottomPlayerWidget()),
+      ],
     );
   }
 
@@ -184,7 +190,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(vertical: 8.h),
+        padding: EdgeInsets.symmetric(vertical: 8.h).copyWith(bottom: 120.h),
         child: Column(
           children: [
             // Location header
