@@ -90,6 +90,16 @@ class _QuranPageViewState extends State<QuranPageView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Precache the Surah header banner image to avoid jank during swiping.
+    precacheImage(
+      const AssetImage('assets/mainframe.png', package: 'quran'),
+      context,
+    );
+  }
+
+  @override
   void dispose() {
     if (_ownsController) {
       _internalController?.dispose();
@@ -106,8 +116,10 @@ class _QuranPageViewState extends State<QuranPageView> {
         child: PageView.builder(
           controller: _controller,
           itemCount: QuranConstants.totalPagesCount,
-          onPageChanged: (index) =>
-              widget.onPageChanged?.call(index + 1), // 1-based
+          onPageChanged: (index) {
+            final int pageNumber = index + 1;
+            widget.onPageChanged?.call(pageNumber);
+          },
           itemBuilder: (context, index) {
             final int pageNumber = index + 1; // 1-based page
             return PageContent(
@@ -130,3 +142,4 @@ class _QuranPageViewState extends State<QuranPageView> {
     );
   }
 }
+

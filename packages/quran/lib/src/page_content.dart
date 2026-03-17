@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -47,18 +48,50 @@ class PageContent extends StatefulWidget {
   State<PageContent> createState() => _PageContentState();
 }
 
-class _PageContentState extends State<PageContent> {
+/// Pre-seeds the QPC v4 data cache for testing. Avoids the need for
+/// `rootBundle` + `compute()` in the test environment.
+@visibleForTesting
+void preloadPageContentCache(
+  Map<String, dynamic> qpcV4Data,
+  Map<int, List<List<Map<String, dynamic>>>> processedPageIndex,
+) {
+  _PageContentState._qpcV4Data = qpcV4Data;
+  _PageContentState._processedPageIndex = processedPageIndex;
+  _PageContentState._loadCompleter = Completer<void>()..complete();
+}
+
+/// Clears the QPC v4 data cache. Call in test tearDown to reset state.
+@visibleForTesting
+void clearPageContentCache() {
+  _PageContentState._qpcV4Data = null;
+  _PageContentState._processedPageIndex = null;
+  _PageContentState._loadCompleter = null;
+}
+
+class _PageContentState extends State<PageContent>
+    with AutomaticKeepAliveClientMixin {
   /// Word glyph data keyed by "surah:ayah:wordPos" -> { text, surah, ayah, ... }
   static Map<String, dynamic>? _qpcV4Data;
 
-  /// Page index: page (str) -> line (str) -> [word keys sorted by id]
-  /// Structure: { "3": { "1": ["2:6:1", "2:6:2", ...], "2": [...], ... }, ... }
-  static Map<String, dynamic>? _pageIndex;
+  /// Processed Page index: page (int) -> 15-element list of word-map lists.
+  static Map<int, List<List<Map<String, dynamic>>>>? _processedPageIndex;
 
-  /// Cache: pageNumber -> 15-element list of word-map lists (one per line).
-  static final Map<int, List<List<Map<String, dynamic>>>> _pageLineCache = {};
+  static Completer<void>? _loadCompleter;
+
+  /// Shared layout strategy instance (stateless — no need to recreate).
+  static final StandardQuranLayoutStrategy _layoutStrategy =
+      StandardQuranLayoutStrategy();
 
   bool _isLoading = true;
+
+  /// Caches the rendered page as a raster image after first paint so that
+  /// subsequent frames during swipe animation composite a cached bitmap
+  /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
+  final SnapshotController _snapshotController =
+      SnapshotController(allowSnapshotting: false);
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -66,57 +99,72 @@ class _PageContentState extends State<PageContent> {
     _initQuranData();
   }
 
+  @override
+  void dispose() {
+    _snapshotController.dispose();
+    super.dispose();
+  }
+
   Future<void> _initQuranData() async {
-    if (_qpcV4Data == null || _pageIndex == null) {
-      try {
-        final List<String> responses = await Future.wait([
-          rootBundle.loadString(
-            'packages/quran/assets/quran_fonts/qpc-v4.json',
-          ),
-          rootBundle.loadString(
-            'packages/quran/assets/quran_fonts/quran_page_index.json',
-          ),
-        ]);
-        _qpcV4Data = json.decode(responses[0]) as Map<String, dynamic>;
-        _pageIndex = json.decode(responses[1]) as Map<String, dynamic>;
-      } catch (e) {
-        debugPrint('Error loading Quran data: $e');
-      }
+    if (_qpcV4Data != null && _processedPageIndex != null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
+
+    if (_loadCompleter != null) {
+      await _loadCompleter!.future;
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    _loadCompleter = Completer<void>();
+    try {
+      final List<String> responses = await Future.wait([
+        rootBundle.loadString('packages/quran/assets/quran_fonts/qpc-v4.json'),
+        rootBundle.loadString(
+          'packages/quran/assets/quran_fonts/quran_page_index.json',
+        ),
+      ]);
+
+      // Offload decoding and heavy processing to a background isolate.
+      final List<dynamic> decoded = await compute(_decodeAndProcess, responses);
+
+      _qpcV4Data = decoded[0] as Map<String, dynamic>;
+      _processedPageIndex =
+          decoded[1] as Map<int, List<List<Map<String, dynamic>>>>;
+
+      _loadCompleter!.complete();
+    } catch (e) {
+      debugPrint('Error loading Quran data: $e');
+      _loadCompleter!.completeError(e);
+      _loadCompleter = null; // Allow retry
+    }
+
     if (mounted) {
       setState(() => _isLoading = false);
     }
   }
 
-  /// Returns words for [pageNumber] grouped into 15 lines.
-  ///
-  /// [_pageIndex] maps page → line → pre-sorted list of word keys.
-  /// Each key is looked up in [_qpcV4Data] to get the glyph text and
-  /// surah/ayah metadata. The result is cached after the first call.
-  List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
-    if (_pageLineCache.containsKey(pageNumber)) {
-      return _pageLineCache[pageNumber]!;
-    }
+  /// Heavy lifting: decode JSON and pre-build the O(1) page lookup map.
+  static List<dynamic> _decodeAndProcess(List<String> jsonStrings) {
+    final qpc = json.decode(jsonStrings[0]) as Map<String, dynamic>;
+    final pageIndexRaw = json.decode(jsonStrings[1]) as Map<String, dynamic>;
 
-    final Map<String, dynamic>? qpc = _qpcV4Data;
-    final Map<String, dynamic>? pageIndex = _pageIndex;
-    if (qpc == null || pageIndex == null) {
-      return List.generate(15, (_) => []);
-    }
+    final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
 
-    final pageKey = pageNumber.toString();
-    final lineMap = pageIndex[pageKey] as Map<String, dynamic>?;
+    for (final pageEntry in pageIndexRaw.entries) {
+      final int pageNum = int.parse(pageEntry.key);
+      final Map<String, dynamic> lineMap =
+          pageEntry.value as Map<String, dynamic>;
 
-    // Build a 15-element list; lines not present in the index stay empty.
-    final List<List<Map<String, dynamic>>> lines = List.generate(
-      15,
-      (_) => <Map<String, dynamic>>[],
-    );
+      final List<List<Map<String, dynamic>>> lines = List.generate(
+        15,
+        (_) => <Map<String, dynamic>>[],
+      );
 
-    if (lineMap != null) {
-      for (final MapEntry<String, dynamic> entry in lineMap.entries) {
-        final int lineIndex = (int.parse(entry.key) - 1).clamp(0, 14);
-        final List<String> wordKeys = (entry.value as List<dynamic>)
+      for (final lineEntry in lineMap.entries) {
+        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
+        final List<String> wordKeys = (lineEntry.value as List<dynamic>)
             .cast<String>();
         for (final key in wordKeys) {
           final wordData = qpc[key] as Map<String, dynamic>?;
@@ -125,71 +173,64 @@ class _PageContentState extends State<PageContent> {
           }
         }
       }
+      processedIndex[pageNum] = lines;
     }
 
-    _pageLineCache[pageNumber] = lines;
-    return lines;
+    return [qpc, processedIndex];
   }
 
-  /// Returns the [InlineSpan]s to render for [lineIndex] on the current page.
+  /// Returns words for [pageNumber] grouped into 15 lines (O(1) lookup).
+  List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
+    return _processedPageIndex?[pageNumber] ?? List.generate(15, (_) => []);
+  }
+
+  /// Returns the [InlineSpan]s to render for [lineIndex] from pre-fetched [lines].
+  ///
+  /// Accepts a pre-built [baseStyle] to avoid allocating a new TextStyle per
+  /// word when no verse-specific background color is needed.
   List<InlineSpan> _getSpansForLine(
+    List<List<Map<String, dynamic>>> lines,
     int lineIndex,
-    double fontSize,
-    String pageFont, {
-    double? fontHeight,
-  }) {
-    final List<List<Map<String, dynamic>>> lineWords = _getWordsGroupedByLine(
-      widget.pageNumber,
-    );
-    if (lineWords.length < 15) {
-      lineWords.addAll(List.generate(15 - lineWords.length, (_) => []));
-    }
+    TextStyle baseStyle,
+  ) {
     if (lineIndex < 0 || lineIndex >= 15) {
       return [];
     }
+    final List<Map<String, dynamic>> lineWords = lines[lineIndex];
+    if (lineWords.isEmpty) return [];
 
-    final List<InlineSpan> spans = lineWords[lineIndex].map<InlineSpan>((word) {
+    final bool hasVerseColorCallback = widget.verseBackgroundColor != null;
+
+    final List<InlineSpan> spans = lineWords.map<InlineSpan>((word) {
+      final String text = word['text'] as String;
+
+      if (!hasVerseColorCallback) {
+        return TextSpan(text: text, style: baseStyle);
+      }
+
       final int surahNumber = int.tryParse(word['surah'] as String) ?? 0;
       final int verseNumber = int.tryParse(word['ayah'] as String) ?? 0;
+      final Color? bgColor = widget.verseBackgroundColor!(
+        surahNumber,
+        verseNumber,
+      );
+
+      if (bgColor == null) {
+        return TextSpan(text: text, style: baseStyle);
+      }
+
       return TextSpan(
-        text: word['text'] as String,
-        style: TextStyle(
-          fontFamily: pageFont,
-          fontSize: fontSize,
-          color: widget.textColor,
-          height: fontHeight,
-          backgroundColor: widget.verseBackgroundColor?.call(
-            surahNumber,
-            verseNumber,
-          ),
-        ),
+        text: text,
+        style: baseStyle.copyWith(backgroundColor: bgColor),
       );
     }).toList();
-
-    // Insert a thin space after the first word on the first content line of
-    // every page. In RTL layout the first word sits at the right edge, so
-    // the space appears immediately to its left, marking the page-start word.
-    final isFirstContentLine =
-        lineIndex == _firstContentLineIndex(widget.pageNumber);
-    if (isFirstContentLine && spans.length > 1) {
-      spans.insert(
-        1,
-        TextSpan(
-          text: '\u200A',
-          style: TextStyle(
-            fontFamily: pageFont,
-            fontSize: fontSize,
-            height: fontHeight,
-          ),
-        ),
-      );
-    }
 
     return spans;
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -215,14 +256,14 @@ class _PageContentState extends State<PageContent> {
             .getName(surahNumber)
             .replaceAll('Al ', 'Al-');
 
-    final header = _PageHeader(
+    final _PageHeader header = _PageHeader(
       surahName: displaySurahName,
       juzNumber: juzNumber,
       juzLabel: widget.juzLabel ?? 'Juz',
       textColor: widget.textColor,
     );
 
-    final footer = _PageFooter(
+    final _PageFooter footer = _PageFooter(
       quarterNumber: quarterNumber,
       pageNumber: widget.pageNumber,
       hizbLabel: widget.hizbLabel ?? 'Hizb',
@@ -231,29 +272,60 @@ class _PageContentState extends State<PageContent> {
       onShowIndex: widget.onShowIndex,
     );
 
-    return SafeArea(
-      bottom: false, // Allow it to extend to the very bottom
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w),
-            child: header,
-          ),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final layoutStrategy = StandardQuranLayoutStrategy();
-                final QuranLayoutMetrics metrics = layoutStrategy
-                    .calculateMetrics(context, constraints);
-                final pageFont =
-                    'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+    // Fetch line data once — does not depend on layout constraints.
+    final List<List<Map<String, dynamic>>> pageLines =
+        _getWordsGroupedByLine(widget.pageNumber);
+    final int firstLineIdx = _firstContentLineIndexFromLines(pageLines);
+    // Enable raster caching after the first frame so swipe animation
+    // composites a cached bitmap instead of re-rasterizing.
+    if (!_snapshotController.allowSnapshotting) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _snapshotController.allowSnapshotting = true;
+        }
+      });
+    }
 
-                final isLandscape =
-                    MediaQuery.orientationOf(context) == Orientation.landscape;
-                final double lineHeight = metrics.fontSize * metrics.fontHeight;
+    final Widget result = SnapshotWidget(
+      controller: _snapshotController,
+      child: SafeArea(
+        bottom: false, // Allow it to extend to the very bottom
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              child: header,
+            ),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final QuranLayoutMetrics metrics = _layoutStrategy
+                      .calculateMetrics(context, constraints);
+                  final pageFont =
+                      'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
-                final lines = Column(
-                  children: List.generate(15, (lineIndex) {
+                  final isLandscape =
+                      MediaQuery.orientationOf(context) == Orientation.landscape;
+                  final double lineHeight = metrics.fontSize * metrics.fontHeight;
+
+                  // Build one shared TextStyle for the entire page — all words
+                  // share font, size, color, height. Only verse background
+                  // color (rare) needs a per-word override via copyWith.
+                  final baseStyle = TextStyle(
+                    fontFamily: pageFont,
+                    fontSize: metrics.fontSize,
+                    color: widget.textColor,
+                    height: metrics.fontHeight,
+                  );
+
+                  // Thin-space style for first content line separator.
+                  final spaceStyle = TextStyle(
+                    fontFamily: pageFont,
+                    fontSize: metrics.fontSize,
+                    height: metrics.fontHeight,
+                  );
+
+                  final List<Widget> lineWidgets = List.generate(15, (lineIndex) {
                     final bool isHeader = _isSurahHeader(
                       widget.pageNumber,
                       lineIndex + 1,
@@ -293,80 +365,77 @@ class _PageContentState extends State<PageContent> {
                     }
 
                     final List<InlineSpan> spans = _getSpansForLine(
+                      pageLines,
                       lineIndex,
-                      metrics.fontSize,
-                      pageFont,
-                      fontHeight: metrics.fontHeight,
+                      baseStyle,
                     );
+
+                    // Insert a thin space after the first word on the first content line
+                    final isFirstContentLine = lineIndex == firstLineIdx;
+                    if (isFirstContentLine && spans.length > 1) {
+                      spans.insert(
+                        1,
+                        TextSpan(text: '\u200A', style: spaceStyle),
+                      );
+                    }
+
+                    if (spans.isEmpty) return const SizedBox();
 
                     return Container(
                       width: double.infinity,
                       height: lineHeight,
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
-                      child: spans.isEmpty
-                          ? const SizedBox()
-                          : FittedBox(
-                              /// If page number is 1 or 2, use fit: BoxFit.contain to prevent stretching the single line of text.
-                              fit:
-                                  (widget.pageNumber == 1 ||
-                                      widget.pageNumber == 2)
-                                  ? BoxFit.contain
-                                  : BoxFit.fill,
-                              child: RichText(
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.justify,
-                                textHeightBehavior: const TextHeightBehavior(
-                                  applyHeightToFirstAscent: false,
-                                  applyHeightToLastDescent: false,
-                                ),
-                                text: TextSpan(children: spans),
-                              ),
-                            ),
+                      child: FittedBox(
+                        fit: (widget.pageNumber == 1 || widget.pageNumber == 2)
+                            ? BoxFit.contain
+                            : BoxFit.fill,
+                        child: RichText(
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.justify,
+                          textHeightBehavior: const TextHeightBehavior(
+                            applyHeightToFirstAscent: false,
+                            applyHeightToLastDescent: false,
+                          ),
+                          text: TextSpan(children: spans),
+                        ),
+                      ),
                     );
-                  }),
-                );
+                  });
 
-                if (isLandscape) {
-                  return SingleChildScrollView(child: lines);
-                }
-                return lines;
-              },
+                  final lines = Column(children: lineWidgets);
+
+                  if (isLandscape) {
+                    return SingleChildScrollView(child: lines);
+                  }
+                  return lines;
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: footer,
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: footer,
+            ),
+          ],
+        ),
       ),
     );
+    return result;
   }
 
-  /// Returns the 0-based line index of the first line that has content on
-  /// [pageNumber]. For most pages this is 0, but pages 1 and 2 start later.
-  int _firstContentLineIndex(int pageNumber) {
-    final Map<String, dynamic>? pageIndex = _pageIndex;
-    if (pageIndex == null) {
-      return 0;
+  /// Returns the 0-based line index of the first line that has content
+  /// from pre-fetched [lines]. Avoids a redundant `_getWordsGroupedByLine` call.
+  int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].isNotEmpty) return i;
     }
-    final lineMap = pageIndex[pageNumber.toString()] as Map<String, dynamic>?;
-    if (lineMap == null || lineMap.isEmpty) {
-      return 0;
-    }
-    return lineMap.keys.map(int.parse).reduce(min) - 1;
+    return 0;
   }
 
   bool _isSurahHeader(int page, int line) {
-    if (_pageIndex == null) {
-      return false;
-    }
     return _getSpecialType(page, line)?.startsWith('HEADER') ?? false;
   }
 
   bool _isBismillah(int page, int line) {
-    if (_pageIndex == null) {
-      return false;
-    }
     return _getSpecialType(page, line)?.startsWith('BISMILLAH') ?? false;
   }
 
@@ -379,7 +448,9 @@ class _PageContentState extends State<PageContent> {
       }
     }
 
-    final List<dynamic> wordsByLine = _getWordsGroupedByLine(page);
+    final List<List<Map<String, dynamic>>> wordsByLine = _getWordsGroupedByLine(
+      page,
+    );
     final int lineIdx = line - 1;
     if (lineIdx >= 0 && lineIdx < wordsByLine.length) {
       final List<Map<String, dynamic>> words = wordsByLine[lineIdx];
@@ -390,7 +461,7 @@ class _PageContentState extends State<PageContent> {
     return 1;
   }
 
-  final Map<int, Map<int, String>> _specialLinesCache = {};
+  static final Map<int, Map<int, String>> _specialLinesCache = {};
 
   String? _getSpecialType(int page, int line) {
     if (!_specialLinesCache.containsKey(page)) {
@@ -401,29 +472,22 @@ class _PageContentState extends State<PageContent> {
 
   Map<int, String> _calculateSpecialLines(int pageNumber) {
     final Map<int, String> special = {};
-    if (_pageIndex == null) {
-      return special;
-    }
-
-    final pageKey = pageNumber.toString();
-    final lineMap = _pageIndex![pageKey] as Map<String, dynamic>?;
-    if (lineMap == null) {
-      return special;
-    }
+    final List<List<Map<String, dynamic>>> lines = _getWordsGroupedByLine(
+      pageNumber,
+    );
 
     // Standard Quran Mushaf layout logic for headers and bismillah:
     // 1. Scan for Verse 1 of any Surah starting on this page.
-    for (final MapEntry<String, dynamic> entry in lineMap.entries) {
-      final int lineNum = int.parse(entry.key);
-      final List<String> wordKeys = (entry.value as List<dynamic>)
-          .cast<String>();
-      if (wordKeys.isNotEmpty) {
-        final List<String> parts = wordKeys.first.split(':');
-        final int surah = int.parse(parts[0]);
-        final int ayah = int.parse(parts[1]);
-        final int word = int.parse(parts[2]);
+    for (int i = 0; i < lines.length; i++) {
+      final List<Map<String, dynamic>> lineWords = lines[i];
+      if (lineWords.isNotEmpty) {
+        final Map<String, dynamic> firstWord = lineWords.first;
+        final int surah = int.tryParse(firstWord['surah'].toString()) ?? 0;
+        final int ayah = int.tryParse(firstWord['ayah'].toString()) ?? 0;
+        final int word = int.tryParse(firstWord['word'].toString()) ?? 0;
 
         if (ayah == 1 && word == 1) {
+          final int lineNum = i + 1;
           if (surah == 1) {
             // Fatiha Page 1 special logic
             if (pageNumber == 1) {
@@ -485,34 +549,40 @@ class _SurahHeaderBanner extends StatelessWidget {
   final int surahNumber;
   final double lineHeight;
 
+  static const AssetImage _bannerImage =
+      AssetImage('assets/mainframe.png', package: 'quran');
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.w),
-      child: SizedBox(
-        height: lineHeight,
-        width: double.infinity,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/mainframe.png',
-                package: 'quran',
-                fit: BoxFit.contain,
+    return RepaintBoundary(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        child: SizedBox(
+          height: lineHeight,
+          width: double.infinity,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: Image(
+                  image: _bannerImage,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.low,
+                ),
               ),
-            ),
-            Text(
-              String.fromCharCode(0xF100 + surahNumber - 1),
-              textDirection: TextDirection.rtl,
-              style: TextStyle(
-                fontFamily: 'packages/quran/QCF_BSML',
-                fontSize: lineHeight * 0.45,
-                color: const Color(0xFF000000),
-                height: 1.0,
+              Text(
+                String.fromCharCode(0xF100 + surahNumber - 1),
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'QCF_BSML',
+                  package: 'quran',
+                  fontSize: lineHeight * 0.45,
+                  color: const Color(0xFF000000),
+                  height: 1.0,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -639,50 +709,54 @@ class _QuranPageIndex extends StatelessWidget {
   final String hizbLabel;
   final int pageNumber;
 
+  static final List<BoxShadow> _shadows = [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.05),
+      blurRadius: 4,
+      offset: const Offset(0, 2),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9F5EF),
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hizbLabel.isNotEmpty) ...[
+    return RepaintBoundary(
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9F5EF),
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: _shadows,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hizbLabel.isNotEmpty) ...[
+              Text(
+                hizbLabel,
+                style: const TextStyle(
+                  color: Color(0xFF4E342E), // Match header contrast
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 1,
+                height: 14,
+                color: const Color(0xFF4E342E).withValues(alpha: 0.3),
+              ),
+              const SizedBox(width: 12),
+            ],
             Text(
-              hizbLabel,
+              '$pageNumber',
               style: const TextStyle(
                 color: Color(0xFF4E342E), // Match header contrast
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 12),
-            Container(
-              width: 1,
-              height: 14,
-              color: const Color(0xFF4E342E).withValues(alpha: 0.3),
-            ),
-            const SizedBox(width: 12),
           ],
-          Text(
-            '$pageNumber',
-            style: const TextStyle(
-              color: Color(0xFF4E342E), // Match header contrast
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -693,30 +767,32 @@ class _SurahIndexButton extends StatelessWidget {
 
   final VoidCallback? onShowIndex;
 
+  static final List<BoxShadow> _shadows = [
+    BoxShadow(
+      color: const Color(0xFFA68B67).withValues(alpha: 0.3),
+      blurRadius: 8,
+      offset: const Offset(0, 4),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onShowIndex,
-      child: Container(
-        width: 40.h, // Slightly larger for better touch target and circularity
-        height: 40.h,
-        decoration: BoxDecoration(
-          color: const Color(0xFFA68B67),
-          shape: BoxShape.circle, // Circular design
-          boxShadow: [
-            BoxShadow(
-              color: const Color(
-                0xFFA68B67,
-              ).withValues(alpha: 0.3), // Changed to withOpacity
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.menu_book_rounded,
-          size: 22,
-          color: Colors.white,
+    return RepaintBoundary(
+      child: InkWell(
+        onTap: onShowIndex,
+        child: Container(
+          width: 40.h,
+          height: 40.h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFA68B67),
+            shape: BoxShape.circle,
+            boxShadow: _shadows,
+          ),
+          child: const Icon(
+            Icons.menu_book_rounded,
+            size: 22,
+            color: Colors.white,
+          ),
         ),
       ),
     );

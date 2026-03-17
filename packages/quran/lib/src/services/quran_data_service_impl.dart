@@ -68,27 +68,32 @@ class QuranDataServiceImpl implements QuranDataService {
     return 1;
   }
 
+  static Map<String, int>? _pageLookupCache;
+
   @override
   int getPageNumber(int surahNumber, int verseNumber) {
     if (surahNumber > 114 || surahNumber <= 0) {
       throw const QuranException('No Surah found with given surahNumber');
     }
 
-    for (var pageIndex = 0; pageIndex < pageData.length; pageIndex++) {
-      for (
-        var surahIndexInPage = 0;
-        surahIndexInPage < pageData[pageIndex].length;
-        surahIndexInPage++
-      ) {
-        final Map<String, int> e = pageData[pageIndex][surahIndexInPage];
-        if (e['surah'] == surahNumber &&
-            e['start']! <= verseNumber &&
-            e['end']! >= verseNumber) {
-          return pageIndex + 1;
+    if (_pageLookupCache == null) {
+      _pageLookupCache = {};
+      for (var pageIndex = 0; pageIndex < pageData.length; pageIndex++) {
+        for (final entry in pageData[pageIndex]) {
+          final int surah = entry['surah']!;
+          final int start = entry['start']!;
+          final int end = entry['end']!;
+          for (var v = start; v <= end; v++) {
+            _pageLookupCache!["$surah:$v"] = pageIndex + 1;
+          }
         }
       }
     }
 
-    throw const QuranException('Invalid verse number.');
+    final page = _pageLookupCache!["$surahNumber:$verseNumber"];
+    if (page == null) {
+      throw const QuranException('Invalid verse number.');
+    }
+    return page;
   }
 }

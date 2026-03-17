@@ -47,15 +47,17 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final Orientation orientation = mediaQuery.orientation;
+    // Use narrow MediaQuery accessors to avoid rebuilds on unrelated changes
+    // (e.g., keyboard appearance, text scale factor).
+    final Orientation orientation = MediaQuery.orientationOf(context);
 
     if (orientation == Orientation.landscape) {
+      final EdgeInsets padding = MediaQuery.paddingOf(context);
       // Common Base Font Size based on AVAILABLE width (after padding)
       final double availableWidth =
           constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
       final double adaptiveFontSize = availableWidth / _widthDivisor;
-      return _calculateLandscapeMetrics(adaptiveFontSize, mediaQuery.padding);
+      return _calculateLandscapeMetrics(adaptiveFontSize, padding);
     } else {
       // Use actual constraints provided by the parent (e.g. SafeArea)
       return _calculatePortraitMetrics(constraints);

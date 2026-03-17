@@ -27,4 +27,4 @@ flutter:
   fonts:
     - family: QCF_BSML
       fonts:
-        - asset: assets/quran_fonts/QCF4_QBSML-Regular.woff
+        - asset: assets/quran_fonts/QCF4_QBSML-Regular.ttf

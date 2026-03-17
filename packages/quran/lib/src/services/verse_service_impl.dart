@@ -23,15 +23,18 @@ class VerseServiceImpl implements VerseService {
     '9': '۹',
   };
 
+  static Map<String, Map<String, dynamic>>? _verseCache;
+
   /// Finds verse data from quran text.
   Map<String, dynamic>? _findVerse(int surahNumber, int verseNumber) {
-    for (final Map<String, dynamic> i in quranText) {
-      if (i['surah_number'] == surahNumber &&
-          i['verse_number'] == verseNumber) {
-        return i;
+    if (_verseCache == null) {
+      _verseCache = {};
+      for (final Map<String, dynamic> i in quranText) {
+        final key = "${i['surah_number']}:${i['verse_number']}";
+        _verseCache![key] = i;
       }
     }
-    return null;
+    return _verseCache!["$surahNumber:$verseNumber"];
   }
 
   @override
@@ -79,7 +82,13 @@ class VerseServiceImpl implements VerseService {
     }
 
     if (addSpace) {
-      qcfData = qcfData.split('').join(' ');
+      final buffer = StringBuffer();
+      final runes = qcfData.runes.toList();
+      for (int i = 0; i < runes.length; i++) {
+        if (i > 0) buffer.write(' ');
+        buffer.writeCharCode(runes[i]);
+      }
+      qcfData = buffer.toString();
     }
 
     // QCF data stores word-glyphs as consecutive characters.

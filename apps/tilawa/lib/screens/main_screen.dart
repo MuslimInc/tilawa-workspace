@@ -65,6 +65,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+    final isKeyboardOpen = keyboardHeight > 0;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<InternetStatusBloc>()),
@@ -92,6 +96,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Scaffold(
               backgroundColor: _getBackgroundColor(context),
               extendBody: true,
+              resizeToAvoidBottomInset: false,
               body: BlocBuilder<UiVisibilityCubit, bool>(
                 builder: (context, isVisible) {
                   return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
@@ -115,11 +120,8 @@ class _MainScreenState extends State<MainScreen> {
                               curve: Curves.easeInOut,
                               padding: EdgeInsets.only(
                                 bottom: isVisible
-                                    ? (80.h + playerHeight)
-                                    : (MediaQuery.viewPaddingOf(
-                                            context,
-                                          ).bottom +
-                                          20.h),
+                                    ? (80.h + playerHeight + bottomPadding)
+                                    : (bottomPadding + 20.h),
                               ),
                               child: IndexedStack(
                                 index: _currentIndex,
@@ -140,7 +142,10 @@ class _MainScreenState extends State<MainScreen> {
                           // the player to expand to full-screen (YouTube/Spotify UX).
                           Positioned.fill(
                             child: BottomPlayerWidget(
-                              bottomNavBarHeight: isVisible ? 80.h : 0,
+                              bottomNavBarHeight: isVisible
+                                  ? 80.h + bottomPadding
+                                  : 0,
+                              isKeyboardOpen: isKeyboardOpen,
                             ),
                           ),
                         ],

@@ -128,6 +128,7 @@ class QuranFontService {
     if (!dir.existsSync()) return;
 
     final List<FileSystemEntity> files = dir.listSync();
+    final List<Future<void>> loadFutures = [];
 
     for (final file in files) {
       if (file is File) {
@@ -154,9 +155,13 @@ class QuranFontService {
 
           final fontLoader = FontLoader(fontFamily);
           fontLoader.addFont(_getFontByteData(file));
-          await fontLoader.load();
+          loadFutures.add(fontLoader.load());
         }
       }
+    }
+
+    if (loadFutures.isNotEmpty) {
+      await Future.wait(loadFutures);
     }
 
     _fontsLoadedToEngine = true;

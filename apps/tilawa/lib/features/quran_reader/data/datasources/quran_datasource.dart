@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
@@ -17,17 +16,18 @@ abstract class QuranDataSource {
   Future<QuranPageEntity> getPage(int pageNumber);
   Future<List<AyahEntity>> getJuz(int juzNumber);
   Future<List<AyahEntity>> searchAyahs(String query);
-  Future<Map<String, List<QuranWord>>> getPageWords(int pageNumber);
 }
 
 @LazySingleton(as: QuranDataSource)
 class QuranDataSourceImpl implements QuranDataSource {
   QuranDataSourceImpl();
 
-  final _dio = Dio();
-
   Map<String, dynamic>? _quranData;
   List<dynamic>? _surahList;
+
+  /// Pre-built index: pageNumber -> list of ayah maps with surah info.
+  /// Built once on first use to avoid O(6236) full scan per getPage call.
+  Map<int, List<Map<String, dynamic>>>? _pageIndex;
 
   /// Load Quran data from assets
   Future<void> _ensureDataLoaded() async {
@@ -145,13 +145,36 @@ class QuranDataSourceImpl implements QuranDataSource {
     return surah.getAyahByNumber(ayahNumber);
   }
 
+  /// Builds an O(1) page lookup index from the full surah list.
+  /// Called once, then all subsequent getPage calls are O(ayahs-on-page).
+  void _buildPageIndex() {
+    if (_pageIndex != null || _surahList == null) return;
+    _pageIndex = {};
+    for (final Map<String, dynamic> surah
+        in _surahList!.cast<Map<String, dynamic>>()) {
+      final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
+      final String surahName = surah['name'] as String? ?? '';
+      final String surahNameEn = surah['englishName'] as String? ?? '';
+      final int surahNum = surah['number'] as int? ?? 0;
+
+      for (final dynamic ayah in surahAyahs) {
+        final ayahMap = ayah as Map<String, dynamic>;
+        final int? page = ayahMap['page'] as int?;
+        if (page != null) {
+          _pageIndex!.putIfAbsent(page, () => []).add({
+            'surahNumber': surahNum,
+            'surahName': surahName,
+            'surahNameEnglish': surahNameEn,
+            'ayahMap': ayahMap,
+          });
+        }
+      }
+    }
+  }
+
   @override
   Future<QuranPageEntity> getPage(int pageNumber) async {
     await _ensureDataLoaded();
-
-    final List<PageAyahInfo> pageAyahs = [];
-    int? pageJuz;
-    int? pageHizbQuarter;
 
     if (_surahList == null || _surahList!.isEmpty) {
       return QuranPageEntity(
@@ -162,42 +185,36 @@ class QuranDataSourceImpl implements QuranDataSource {
       );
     }
 
-    // Fetch word-by-word data for the page (Prototype)
-    final Map<String, List<QuranWord>> wordsMap = await getPageWords(
-      pageNumber,
-    );
+    // Build page index once (O(total ayahs)), then O(1) lookup per page.
+    _buildPageIndex();
 
-    for (final Map<String, dynamic> surah
-        in _surahList!.cast<Map<String, dynamic>>()) {
-      final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
-      final String surahName = surah['name'] as String? ?? '';
-      final int surahNum = surah['number'] as int? ?? 0;
+    final List<Map<String, dynamic>> entries = _pageIndex?[pageNumber] ?? [];
 
-      for (final dynamic ayah in surahAyahs) {
-        final ayahMap = ayah as Map<String, dynamic>;
-        if (ayahMap['page'] == pageNumber) {
-          if (pageJuz == null && ayahMap['juz'] != null) {
-            pageJuz = ayahMap['juz'] as int;
-          }
-          if (pageHizbQuarter == null && ayahMap['hizbQuarter'] != null) {
-            pageHizbQuarter = ayahMap['hizbQuarter'] as int;
-          }
+    final List<PageAyahInfo> pageAyahs = [];
+    int? pageJuz;
+    int? pageHizbQuarter;
 
-          final int ayahNum = ayahMap['numberInSurah'] as int? ?? 0;
-          final verseKey = '$surahNum:$ayahNum';
-
-          pageAyahs.add(
-            PageAyahInfo(
-              surahNumber: surahNum,
-              surahName: surahName,
-              surahNameEnglish: surah['englishName'] as String? ?? '',
-              ayahNumber: ayahNum,
-              text: ayahMap['text'] as String? ?? '',
-              words: wordsMap[verseKey],
-            ),
-          );
-        }
+    for (final entry in entries) {
+      final ayahMap = entry['ayahMap'] as Map<String, dynamic>;
+      if (pageJuz == null && ayahMap['juz'] != null) {
+        pageJuz = ayahMap['juz'] as int;
       }
+      if (pageHizbQuarter == null && ayahMap['hizbQuarter'] != null) {
+        pageHizbQuarter = ayahMap['hizbQuarter'] as int;
+      }
+
+      final int surahNum = entry['surahNumber'] as int;
+      final int ayahNum = ayahMap['numberInSurah'] as int? ?? 0;
+
+      pageAyahs.add(
+        PageAyahInfo(
+          surahNumber: surahNum,
+          surahName: entry['surahName'] as String,
+          surahNameEnglish: entry['surahNameEnglish'] as String,
+          ayahNumber: ayahNum,
+          text: ayahMap['text'] as String? ?? '',
+        ),
+      );
     }
 
     // Determine juz and hizb from the first ayah on the page, or calculate if empty
@@ -310,41 +327,6 @@ class QuranDataSourceImpl implements QuranDataSource {
     );
   }
 
-  @override
-  Future<Map<String, List<QuranWord>>> getPageWords(int pageNumber) async {
-    try {
-      final Response<dynamic> response = await _dio.get(
-        'https://api.quran.com/api/v4/verses/by_page/$pageNumber',
-        queryParameters: {'words': true, 'word_fields': 'text_uthmani'},
-      );
-
-      final data = response.data as Map<String, dynamic>?;
-      if (data == null || data['verses'] == null) {
-        return {};
-      }
-
-      final Map<String, List<QuranWord>> result = {};
-      final verses = data['verses'] as List;
-
-      for (final dynamic verseDynamic in verses) {
-        final verse = verseDynamic as Map<String, dynamic>;
-        final verseKey = verse['verse_key'] as String;
-        final wordsData = verse['words'] as List?;
-
-        if (wordsData != null) {
-          final List<QuranWord> words = wordsData
-              .map((w) => QuranWord.fromJson(w as Map<String, dynamic>))
-              .toList();
-          result[verseKey] = words;
-        }
-      }
-
-      return result;
-    } catch (e) {
-      // In a real app, handle error properly. For prototype, return empty.
-      return {};
-    }
-  }
 }
 
 /// Basic surah information

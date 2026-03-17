@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
@@ -51,19 +52,23 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
     if (widget.surahNumber > 0) {
       initialPage = getPageNumber(widget.surahNumber, 1);
-      // Trigger load for the specific surah if it's not already loaded or if it's a different surah
+      // Save last-read position. Use loadSurah with loadStartPage: false
+      // so it only updates surah metadata — the PageController already
+      // starts at the correct page via initialPage, so we must NOT
+      // trigger loadPage which would cause an async round-trip and
+      // a redundant jumpToPage via the BlocListener.
       final bloc = context.read<QuranReaderBloc>();
       if (bloc.state.currentSurah?.number != widget.surahNumber) {
-        bloc.add(QuranReaderEvent.loadSurah(widget.surahNumber));
-      } else {
-        // Even if already loaded, ensure saveLastRead is triggered for initial position
         bloc.add(
-          QuranReaderEvent.saveLastRead(
-            surahNumber: widget.surahNumber,
-            page: initialPage,
-          ),
+          QuranReaderEvent.loadSurah(widget.surahNumber, loadStartPage: false),
         );
       }
+      bloc.add(
+        QuranReaderEvent.saveLastRead(
+          surahNumber: widget.surahNumber,
+          page: initialPage,
+        ),
+      );
     } else {
       // For last read (surahNumber == 0), check if the global bloc already has a page
       final currentState = context.read<QuranReaderBloc>().state;
@@ -103,12 +108,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         final pageNumber = state.currentPage!.pageNumber;
 
         // Sync PageController ONLY if it's not already at the correct page
-        // Use a small epsilon for page comparison
         if (_pageController.hasClients) {
-          final currentPageInController = _pageController.page?.round() ?? 0;
-          if (currentPageInController + 1 != pageNumber) {
+          final currentPageInController = _pageController.page ??
+              _pageController.initialPage.toDouble();
+
+          if ((currentPageInController + 1 - pageNumber).abs() > 0.1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_pageController.hasClients) {
+              if (_pageController.hasClients &&
+                  !_pageController.position.isScrollingNotifier.value) {
                 _pageController.jumpToPage(pageNumber - 1);
               }
             });
@@ -122,6 +129,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
         }
       },
       child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
+        buildWhen: (previous, current) =>
+            previous.status != current.status ||
+            previous.errorMessage != current.errorMessage,
         builder: (context, state) {
           // Show loading if we are waiting for the last read position
           if (widget.surahNumber == 0 &&
@@ -166,23 +176,38 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   behavior: HitTestBehavior.opaque,
                   child: BlocBuilder<UiVisibilityCubit, bool>(
                     builder: (context, isVisible) {
-                      return QuranPageView(
-                        controller: _pageController,
-                        onPageChanged: (pageNumber) {
-                          // Delegate to bloc - it will handle saving last read and syncing state
-                          context.read<QuranReaderBloc>().add(
-                            QuranReaderEvent.loadPage(pageNumber),
+                      return BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                        buildWhen: (oldState, newState) {
+                          // Only rebuild if settings or critical status changes.
+                          // Don't rebuild on currentPage change because QuranPageView
+                          // handles its own navigation via PageController.
+                          return oldState.settings != newState.settings ||
+                              oldState.status != newState.status;
+                        },
+                        builder: (context, state) {
+                          return QuranPageView(
+                            controller: _pageController,
+                            onPageChanged: (pageNumber) {
+                              final pageData = getPageData(pageNumber);
+                              final surahNumber = pageData.first['surah']!;
+                              context.read<QuranReaderBloc>().add(
+                                QuranReaderEvent.saveLastRead(
+                                  surahNumber: surahNumber,
+                                  page: pageNumber,
+                                ),
+                              );
+                            },
+                            juzLabel: context.l10n.juzPart,
+                            hizbLabel: context.l10n.hizb,
+                            surahNameBuilder: (surahNumber) {
+                              return context.l10n.localeName == 'ar'
+                                  ? getSurahNameArabic(surahNumber)
+                                  : getSurahNameEnglish(surahNumber);
+                            },
+                            onSurahSelected: _jumpToSurah,
+                            onShowIndex: () => _showSurahIndex(context),
                           );
                         },
-                        juzLabel: context.l10n.juzPart,
-                        hizbLabel: context.l10n.hizb,
-                        surahNameBuilder: (surahNumber) {
-                          return context.l10n.localeName == 'ar'
-                              ? getSurahNameArabic(surahNumber)
-                              : getSurahNameEnglish(surahNumber);
-                        },
-                        onSurahSelected: _jumpToSurah,
-                        onShowIndex: () => _showSurahIndex(context),
                       );
                     },
                   ),
@@ -211,10 +236,23 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   }
 
   /// Navigates the [PageView] to the first page of [surahNumber].
+  ///
+  /// Jumps the PageController **immediately** using static page data,
+  /// then updates the bloc state in the background for bookkeeping.
+  /// Previously this dispatched loadSurah which made 2 async network calls
+  /// (~700ms) before the page even started to move.
   void _jumpToSurah(int surahNumber) {
-    // Delegate to bloc - it will trigger loadPage which the listener above handles
+    final int targetPage = getPageNumber(surahNumber, 1);
+
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(targetPage - 1);
+    }
+
     context.read<QuranReaderBloc>().add(
-      QuranReaderEvent.loadSurah(surahNumber),
+      QuranReaderEvent.saveLastRead(
+        surahNumber: surahNumber,
+        page: targetPage,
+      ),
     );
   }
 }

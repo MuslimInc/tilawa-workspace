@@ -173,6 +173,20 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         final newPages = Map<int, QuranPageEntity>.from(state.pages);
         newPages[page.pageNumber] = page;
 
+        // Evict oldest entries if cache exceeds max size to bound memory.
+        const maxCachedPages = 20;
+        if (newPages.length > maxCachedPages) {
+          final keysToRemove = newPages.keys
+              .where((k) => k != page.pageNumber)
+              .toList()
+            ..sort((a, b) => (a - page.pageNumber).abs().compareTo(
+                (b - page.pageNumber).abs()));
+          // Remove pages furthest from current page
+          while (newPages.length > maxCachedPages) {
+            newPages.remove(keysToRemove.removeLast());
+          }
+        }
+
         // Sync surah if necessary
         if (page.ayahs.isNotEmpty) {
           final firstSurahNum = page.ayahs.first.surahNumber;

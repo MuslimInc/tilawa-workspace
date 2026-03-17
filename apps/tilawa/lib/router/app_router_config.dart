@@ -28,7 +28,6 @@ import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
-import '../shared/widgets/expanded_player_screen.dart';
 
 part 'app_router_config.g.dart';
 
@@ -70,24 +69,6 @@ class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
         BlocProvider(create: (context) => getIt<ReciterDownloadBloc>()),
       ],
       child: ReciterDetailsScreen(reciter: $extra!),
-    );
-  }
-}
-
-@TypedGoRoute<ExpandedPlayerRoute>(path: '/expandedPlayer')
-class ExpandedPlayerRoute extends GoRouteData with $ExpandedPlayerRoute {
-  const ExpandedPlayerRoute();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return CustomTransitionPage<void>(
-      key: state.pageKey,
-      child: const ExpandedPlayerScreen(),
-      opaque: false,
-      barrierColor: Colors.transparent,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
     );
   }
 }

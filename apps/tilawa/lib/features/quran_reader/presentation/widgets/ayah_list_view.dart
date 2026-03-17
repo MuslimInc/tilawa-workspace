@@ -200,28 +200,18 @@ class AyahWidget extends StatelessWidget {
             // Ayah number badge removed as it is handled by the font
 
             // Arabic text
-            Builder(
-              builder: (context) {
-                print(
-                  'Ayah ${ayah.surahNumber}:${ayah.numberInSurah} text: "${ayah.text}"',
-                );
-                print(
-                  'Ayah ${ayah.surahNumber}:${ayah.numberInSurah} runes: ${ayah.text.runes.toList()}',
-                );
-                return Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Text(
-                    ayah.text,
-                    style: TextStyle(
-                      fontSize: settings.fontSize,
-                      height: settings.lineHeight,
-                      fontFamily: settings.fontFamily,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.justify,
-                  ),
-                );
-              },
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text(
+                ayah.text,
+                style: TextStyle(
+                  fontSize: settings.fontSize,
+                  height: settings.lineHeight,
+                  fontFamily: settings.fontFamily,
+                  color: theme.colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
 
             // Translation

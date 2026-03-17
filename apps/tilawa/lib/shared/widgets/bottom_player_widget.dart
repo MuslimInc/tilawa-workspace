@@ -27,10 +27,17 @@ import 'seek_bar.dart';
 /// Tap or swipe up to expand to a full-screen player.
 /// Swipe down or tap the chevron to collapse back.
 class BottomPlayerWidget extends StatefulWidget {
-  const BottomPlayerWidget({super.key, this.bottomNavBarHeight = 0});
+  const BottomPlayerWidget({
+    super.key,
+    this.bottomNavBarHeight = 0,
+    this.isKeyboardOpen = false,
+  });
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
+
+  /// Whether the keyboard is currently open.
+  final bool isKeyboardOpen;
 
   @override
   State<BottomPlayerWidget> createState() => BottomPlayerWidgetState();
@@ -193,8 +200,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       builder: (context, state) {
         final AudioEntity? audio = state.currentAudio;
 
-        // Hide if no media, error, or manually dismissed
-        if (!state.shouldShowBottomPlayer || audio == null || _isDismissed) {
+        // Hide if no media, error, manually dismissed, or if keyboard is open
+        if (!state.shouldShowBottomPlayer ||
+            audio == null ||
+            _isDismissed ||
+            (widget.isKeyboardOpen && !isExpanding)) {
           return const SizedBox.shrink();
         }
 
