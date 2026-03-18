@@ -1,7 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
@@ -33,6 +35,7 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   late PageController _pageController;
+  int _currentPageNumber = 1;
 
   @override
   void initState() {
@@ -78,6 +81,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       }
     }
 
+    _currentPageNumber = initialPage;
     _pageController = PageController(initialPage: initialPage - 1);
   }
 
@@ -109,8 +113,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
         // Sync PageController ONLY if it's not already at the correct page
         if (_pageController.hasClients) {
-          final currentPageInController = _pageController.page ??
-              _pageController.initialPage.toDouble();
+          final currentPageInController =
+              _pageController.page ?? _pageController.initialPage.toDouble();
 
           if ((currentPageInController + 1 - pageNumber).abs() > 0.1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -178,9 +182,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                     builder: (context, isVisible) {
                       return BlocBuilder<QuranReaderBloc, QuranReaderState>(
                         buildWhen: (oldState, newState) {
-                          // Only rebuild if settings or critical status changes.
-                          // Don't rebuild on currentPage change because QuranPageView
-                          // handles its own navigation via PageController.
                           return oldState.settings != newState.settings ||
                               oldState.status != newState.status;
                         },
@@ -188,6 +189,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                           return QuranPageView(
                             controller: _pageController,
                             onPageChanged: (pageNumber) {
+                              setState(() {
+                                _currentPageNumber = pageNumber;
+                              });
                               final pageData = getPageData(pageNumber);
                               final surahNumber = pageData.first['surah']!;
                               context.read<QuranReaderBloc>().add(
@@ -213,6 +217,26 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   ),
                 ),
               ),
+              // Page navigation slider — appears when UI chrome is visible
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BlocBuilder<UiVisibilityCubit, bool>(
+                  builder: (context, isVisible) {
+                    return AnimatedSlide(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                      offset: isVisible ? Offset.zero : const Offset(0, 1),
+                      child: _PageNavigationBar(
+                        currentPage: _currentPageNumber,
+                        onPageChanged: _jumpToPage,
+                        onShowIndex: () => _showSurahIndex(context),
+                      ),
+                    );
+                  },
+                ),
+              ),
               const Positioned.fill(child: BottomPlayerWidget()),
             ],
           );
@@ -236,22 +260,218 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   }
 
   /// Navigates the [PageView] to the first page of [surahNumber].
-  ///
-  /// Jumps the PageController **immediately** using static page data,
-  /// then updates the bloc state in the background for bookkeeping.
-  /// Previously this dispatched loadSurah which made 2 async network calls
-  /// (~700ms) before the page even started to move.
   void _jumpToSurah(int surahNumber) {
     final int targetPage = getPageNumber(surahNumber, 1);
+    _jumpToPage(targetPage);
+  }
 
+  /// Navigates the [PageView] to the given 1-based [pageNumber].
+  void _jumpToPage(int pageNumber) {
     if (_pageController.hasClients) {
-      _pageController.jumpToPage(targetPage - 1);
+      _pageController.jumpToPage(pageNumber - 1);
     }
 
+    final pageData = getPageData(pageNumber);
+    final surahNumber = pageData.first['surah']!;
     context.read<QuranReaderBloc>().add(
-      QuranReaderEvent.saveLastRead(
-        surahNumber: surahNumber,
-        page: targetPage,
+      QuranReaderEvent.saveLastRead(surahNumber: surahNumber, page: pageNumber),
+    );
+  }
+}
+
+/// A bottom bar with a slider for quick page navigation and a surah index button.
+class _PageNavigationBar extends StatelessWidget {
+  const _PageNavigationBar({
+    required this.currentPage,
+    required this.onPageChanged,
+    required this.onShowIndex,
+  });
+
+  final int currentPage;
+  final ValueChanged<int> onPageChanged;
+  final VoidCallback onShowIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    const totalPages = 604;
+    const primaryColor = Color(0xFF4E342E);
+    const accentColor = Color(0xFFA68B67);
+
+    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+
+    // Determine surah name(s) for the current page
+    final pageData = getPageData(currentPage);
+    final isArabic = context.l10n.localeName == 'ar';
+    final uniqueSurahNumbers = pageData.map((e) => e['surah']!).toSet();
+    final surahName = uniqueSurahNumbers
+        .map((s) => isArabic ? getSurahNameArabic(s) : getSurahNameEnglish(s))
+        .join(' · ');
+    final juzNumber = getJuzNumber(
+      pageData.first['surah']!,
+      pageData.first['start']!,
+    );
+
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: EdgeInsets.only(
+            left: 16.w,
+            right: 16.w,
+            top: 12.h,
+            bottom: bottomPadding + 8.h,
+          ),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9F5EF).withValues(alpha: 0.92),
+            border: const Border(
+              top: BorderSide(color: Color(0x1A4E342E), width: 0.5),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Surah name + page info row
+              Padding(
+                padding: EdgeInsets.only(bottom: 8.h),
+                child: Row(
+                  children: [
+                    // Surah index button
+                    GestureDetector(
+                      onTap: onShowIndex,
+                      child: Container(
+                        width: 36.h,
+                        height: 36.h,
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.menu_book_rounded,
+                          size: 18.sp,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
+                    // Surah name
+                    Expanded(
+                      child: Text(
+                        surahName,
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Juz + page number
+                    Text(
+                      '${context.l10n.juzPart} $juzNumber',
+                      style: TextStyle(
+                        color: primaryColor.withValues(alpha: 0.5),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        '$currentPage',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Page slider (RTL: page 1 on the right, 604 on the left)
+              SizedBox(
+                height: 32.h,
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: accentColor,
+                      inactiveTrackColor: accentColor.withValues(alpha: 0.15),
+                      thumbColor: accentColor,
+                      overlayColor: accentColor.withValues(alpha: 0.12),
+                      trackHeight: 3.h,
+                      thumbShape: RoundSliderThumbShape(
+                        enabledThumbRadius: 7.r,
+                      ),
+                      overlayShape: RoundSliderOverlayShape(
+                        overlayRadius: 16.r,
+                      ),
+                    ),
+                    child: Slider(
+                      value: currentPage.toDouble(),
+                      min: 1,
+                      max: totalPages.toDouble(),
+                      onChanged: (value) {
+                        final page = value.round();
+                        if (page != currentPage) {
+                          HapticFeedback.selectionClick();
+                          onPageChanged(page);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              // Page range labels (RTL: 604 on the left, 1 on the right)
+              _PageRange(totalPages: totalPages),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PageRange extends StatelessWidget {
+  const _PageRange({required this.totalPages});
+
+  final int totalPages;
+
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF4E342E);
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$totalPages',
+              style: TextStyle(
+                color: primaryColor.withValues(alpha: 0.35),
+                fontSize: 10.sp,
+              ),
+            ),
+            Text(
+              '1',
+              style: TextStyle(
+                color: primaryColor.withValues(alpha: 0.35),
+                fontSize: 10.sp,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

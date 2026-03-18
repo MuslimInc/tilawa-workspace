@@ -1,6 +1,6 @@
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../quran.dart';
 
@@ -94,10 +94,7 @@ class _QcfVerseState extends State<QcfVerse> {
         children: [
           TextSpan(
             text: getVerseNumberQCF(widget.surahNumber, widget.verseNumber),
-            style: TextStyle(
-              fontFamily: _pageFont,
-              height: 1.35.h / widget.h,
-            ),
+            style: TextStyle(fontFamily: _pageFont, height: 1.35.h / widget.h),
           ),
         ],
         style: TextStyle(

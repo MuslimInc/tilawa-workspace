@@ -10,24 +10,28 @@ import 'package:quran/src/page_content.dart';
 /// Loads QPC v4 JSON files from disk and returns the processed data
 /// in the same format as [_PageContentState._decodeAndProcess].
 Map<String, dynamic> _loadQpcFromDisk() {
-  final qpcRaw = File('assets/quran_fonts/qpc-v4.json').readAsStringSync();
-  final pageIndexRaw =
-      File('assets/quran_fonts/quran_page_index.json').readAsStringSync();
+  final String qpcRaw = File(
+    'assets/quran_fonts/qpc-v4.json',
+  ).readAsStringSync();
+  final String pageIndexRaw = File(
+    'assets/quran_fonts/quran_page_index.json',
+  ).readAsStringSync();
 
   final qpc = json.decode(qpcRaw) as Map<String, dynamic>;
   final pageIndexJson = json.decode(pageIndexRaw) as Map<String, dynamic>;
 
   final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
-  for (final pageEntry in pageIndexJson.entries) {
+  for (final MapEntry<String, dynamic> pageEntry in pageIndexJson.entries) {
     final int pageNum = int.parse(pageEntry.key);
-    final Map<String, dynamic> lineMap =
-        pageEntry.value as Map<String, dynamic>;
-    final List<List<Map<String, dynamic>>> lines =
-        List.generate(15, (_) => <Map<String, dynamic>>[]);
-    for (final lineEntry in lineMap.entries) {
+    final lineMap = pageEntry.value as Map<String, dynamic>;
+    final List<List<Map<String, dynamic>>> lines = List.generate(
+      15,
+      (_) => <Map<String, dynamic>>[],
+    );
+    for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
       final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
-      final List<String> wordKeys =
-          (lineEntry.value as List<dynamic>).cast<String>();
+      final List<String> wordKeys = (lineEntry.value as List<dynamic>)
+          .cast<String>();
       for (final key in wordKeys) {
         final wordData = qpc[key] as Map<String, dynamic>?;
         if (wordData != null) {
@@ -50,7 +54,7 @@ void main() {
   late Map<int, List<List<Map<String, dynamic>>>> processedIndex;
 
   setUpAll(() {
-    final data = _loadQpcFromDisk();
+    final Map<String, dynamic> data = _loadQpcFromDisk();
     qpcData = data['qpc'] as Map<String, dynamic>;
     processedIndex =
         data['index'] as Map<int, List<List<Map<String, dynamic>>>>;
@@ -71,7 +75,7 @@ void main() {
   group('Page data service lookups', () {
     test('getPageData is fast for all 604 pages', () {
       final sw = Stopwatch()..start();
-      for (int page = 1; page <= 604; page++) {
+      for (var page = 1; page <= 604; page++) {
         getPageData(page);
       }
       sw.stop();
@@ -84,10 +88,10 @@ void main() {
 
     test('getJuzNumber is fast across representative pages', () {
       final sw = Stopwatch()..start();
-      for (int page = 1; page <= 604; page++) {
-        final data = getPageData(page);
-        final surah = data.first['surah']!;
-        final start = data.first['start']!;
+      for (var page = 1; page <= 604; page++) {
+        final List<Map<String, int>> data = getPageData(page);
+        final int surah = data.first['surah']!;
+        final int start = data.first['start']!;
         getJuzNumber(surah, start);
       }
       sw.stop();
@@ -109,10 +113,10 @@ void main() {
 
       // Subsequent calls should be O(1)
       final swHot = Stopwatch()..start();
-      for (int page = 1; page <= 604; page++) {
-        final data = getPageData(page);
-        final surah = data.first['surah']!;
-        final start = data.first['start']!;
+      for (var page = 1; page <= 604; page++) {
+        final List<Map<String, int>> data = getPageData(page);
+        final int surah = data.first['surah']!;
+        final int start = data.first['start']!;
         getPageNumber(surah, start);
       }
       swHot.stop();
@@ -132,7 +136,7 @@ void main() {
       const service = VerseServiceImpl();
       // Al-Baqarah 2:282 is the longest verse in the Quran
       final sw = Stopwatch()..start();
-      for (int i = 0; i < 100; i++) {
+      for (var i = 0; i < 100; i++) {
         service.getVerseQCF(2, 282);
       }
       sw.stop();
@@ -146,13 +150,13 @@ void main() {
     test('getVerseQCF without space is cheaper than with space', () {
       const service = VerseServiceImpl();
       final swWithSpace = Stopwatch()..start();
-      for (int i = 0; i < 1000; i++) {
+      for (var i = 0; i < 1000; i++) {
         service.getVerseQCF(1, 1);
       }
       swWithSpace.stop();
 
       final swNoSpace = Stopwatch()..start();
-      for (int i = 0; i < 1000; i++) {
+      for (var i = 0; i < 1000; i++) {
         service.getVerseQCF(1, 1, addSpace: false);
       }
       swNoSpace.stop();
@@ -171,29 +175,33 @@ void main() {
   // ---------------------------------------------------------------------------
   group('QPC v4 data loading', () {
     test('JSON decode and page index build time', () async {
-      final qpcJson = await rootBundle.loadString(
+      final String qpcJson = await rootBundle.loadString(
         'packages/quran/assets/quran_fonts/qpc-v4.json',
       );
-      final pageIndexJson = await rootBundle.loadString(
+      final String pageIndexJson = await rootBundle.loadString(
         'packages/quran/assets/quran_fonts/quran_page_index.json',
       );
 
       final sw = Stopwatch()..start();
       final qpc = json.decode(qpcJson) as Map<String, dynamic>;
-      final swDecode1 = sw.elapsedMicroseconds;
+      final int swDecode1 = sw.elapsedMicroseconds;
 
       final pageIndexRaw = json.decode(pageIndexJson) as Map<String, dynamic>;
-      final swDecode2 = sw.elapsedMicroseconds;
+      final int swDecode2 = sw.elapsedMicroseconds;
 
       // Process page index (mirrors PageContent._decodeAndProcess)
       final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
-      for (final pageEntry in pageIndexRaw.entries) {
-        final pageNum = int.parse(pageEntry.key);
+      for (final MapEntry<String, dynamic> pageEntry in pageIndexRaw.entries) {
+        final int pageNum = int.parse(pageEntry.key);
         final lineMap = pageEntry.value as Map<String, dynamic>;
-        final lines = List.generate(15, (_) => <Map<String, dynamic>>[]);
-        for (final lineEntry in lineMap.entries) {
-          final lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
-          final wordKeys = (lineEntry.value as List<dynamic>).cast<String>();
+        final List<List<Map<String, dynamic>>> lines = List.generate(
+          15,
+          (_) => <Map<String, dynamic>>[],
+        );
+        for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
+          final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
+          final List<String> wordKeys = (lineEntry.value as List<dynamic>)
+              .cast<String>();
           for (final key in wordKeys) {
             final wordData = qpc[key] as Map<String, dynamic>?;
             if (wordData != null) {
@@ -205,41 +213,42 @@ void main() {
       }
       sw.stop();
 
-      debugPrint('  qpc-v4.json decode: ${swDecode1}µs');
-      debugPrint(
-        '  quran_page_index.json decode: ${swDecode2 - swDecode1}µs',
-      );
+      debugPrint('  qpc-v4.json decode: $swDecode1µs');
+      debugPrint('  quran_page_index.json decode: ${swDecode2 - swDecode1}µs');
       debugPrint(
         '  Page index processing: ${sw.elapsedMicroseconds - swDecode2}µs',
       );
-      debugPrint('  TOTAL (runs on main thread via compute): '
-          '${sw.elapsedMicroseconds}µs '
-          '(${sw.elapsedMilliseconds}ms)');
+      debugPrint(
+        '  TOTAL (runs on main thread via compute): '
+        '${sw.elapsedMicroseconds}µs '
+        '(${sw.elapsedMilliseconds}ms)',
+      );
       debugPrint('  Processed pages: ${processedIndex.length}');
 
       expect(processedIndex.length, 604);
     });
 
     test('word count per page varies but stays reasonable', () async {
-      final qpcJson = await rootBundle.loadString(
+      final String qpcJson = await rootBundle.loadString(
         'packages/quran/assets/quran_fonts/qpc-v4.json',
       );
-      final pageIndexJson = await rootBundle.loadString(
+      final String pageIndexJson = await rootBundle.loadString(
         'packages/quran/assets/quran_fonts/quran_page_index.json',
       );
       json.decode(qpcJson); // warm up
       final pageIndexRaw = json.decode(pageIndexJson) as Map<String, dynamic>;
 
-      int maxWords = 0;
-      int maxWordsPage = 0;
-      int totalWords = 0;
+      var maxWords = 0;
+      var maxWordsPage = 0;
+      var totalWords = 0;
 
-      for (final pageEntry in pageIndexRaw.entries) {
-        final pageNum = int.parse(pageEntry.key);
+      for (final MapEntry<String, dynamic> pageEntry in pageIndexRaw.entries) {
+        final int pageNum = int.parse(pageEntry.key);
         final lineMap = pageEntry.value as Map<String, dynamic>;
-        int pageWordCount = 0;
-        for (final lineEntry in lineMap.entries) {
-          final wordKeys = (lineEntry.value as List<dynamic>).cast<String>();
+        var pageWordCount = 0;
+        for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
+          final List<String> wordKeys = (lineEntry.value as List<dynamic>)
+              .cast<String>();
           pageWordCount += wordKeys.length;
         }
         totalWords += pageWordCount;
@@ -249,15 +258,22 @@ void main() {
         }
       }
 
-      debugPrint('  Max words on a single page: $maxWords (page $maxWordsPage)');
+      debugPrint(
+        '  Max words on a single page: $maxWords (page $maxWordsPage)',
+      );
       debugPrint(
         '  Average words per page: ${(totalWords / 604).toStringAsFixed(1)}',
       );
-      debugPrint('  → Each word = 1 TextSpan + 1 TextStyle allocation per build');
+      debugPrint(
+        '  → Each word = 1 TextSpan + 1 TextStyle allocation per build',
+      );
 
       // Each word becomes a TextSpan — too many = expensive layout
-      expect(maxWords, lessThan(300),
-          reason: 'No page should have > 300 words (TextSpan objects)');
+      expect(
+        maxWords,
+        lessThan(300),
+        reason: 'No page should have > 300 words (TextSpan objects)',
+      );
     });
   });
 
@@ -276,8 +292,8 @@ void main() {
             body: PageContent(
               pageNumber: 3,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
@@ -304,8 +320,8 @@ void main() {
             body: PageContent(
               pageNumber: 3,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
@@ -320,8 +336,8 @@ void main() {
             body: PageContent(
               pageNumber: 50,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
@@ -343,8 +359,8 @@ void main() {
             body: PageContent(
               pageNumber: 1,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
@@ -364,8 +380,8 @@ void main() {
             body: PageContent(
               pageNumber: 1,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
@@ -374,15 +390,15 @@ void main() {
 
       // Simulate rapid page changes (like fast swiping)
       final sw = Stopwatch()..start();
-      for (int page = 2; page <= 10; page++) {
+      for (var page = 2; page <= 10; page++) {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: PageContent(
                 pageNumber: page,
                 textColor: Colors.black,
-                onLongPressCancel: (_, __) {},
-                onLongPressDown: (_, __, ___) {},
+                onLongPressCancel: (_, _) {},
+                onLongPressDown: (_, _, _) {},
               ),
             ),
           ),
@@ -403,9 +419,7 @@ void main() {
   // 5. Widget tree complexity per page
   // ---------------------------------------------------------------------------
   group('Widget tree complexity', () {
-    testWidgets('measures widget counts per page', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('measures widget counts per page', (WidgetTester tester) async {
       seedCache();
       await tester.pumpWidget(
         MaterialApp(
@@ -413,30 +427,37 @@ void main() {
             body: PageContent(
               pageNumber: 50,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
       );
       await tester.pump();
 
-      final richTextCount =
-          tester.widgetList(find.byType(RichText)).length;
-      final fittedBoxCount =
-          tester.widgetList(find.byType(FittedBox)).length;
-      final repaintBoundaryCount =
-          tester.widgetList(find.byType(RepaintBoundary)).length;
+      final int richTextCount = tester.widgetList(find.byType(RichText)).length;
+      final int fittedBoxCount = tester
+          .widgetList(find.byType(FittedBox))
+          .length;
+      final int repaintBoundaryCount = tester
+          .widgetList(find.byType(RepaintBoundary))
+          .length;
 
       debugPrint('  Page 50 widget counts:');
       debugPrint('    RichText:        $richTextCount');
       debugPrint('    FittedBox:       $fittedBoxCount');
       debugPrint('    RepaintBoundary: $repaintBoundaryCount');
 
-      expect(richTextCount, lessThan(25),
-          reason: 'Too many RichText widgets cause layout jank');
-      expect(fittedBoxCount, lessThanOrEqualTo(15),
-          reason: 'Should have at most 15 FittedBox widgets (one per line)');
+      expect(
+        richTextCount,
+        lessThan(25),
+        reason: 'Too many RichText widgets cause layout jank',
+      );
+      expect(
+        fittedBoxCount,
+        lessThanOrEqualTo(15),
+        reason: 'Should have at most 15 FittedBox widgets (one per line)',
+      );
     });
 
     testWidgets('measures TextSpan count per page', (
@@ -449,25 +470,28 @@ void main() {
             body: PageContent(
               pageNumber: 50,
               textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+              onLongPressCancel: (_, _) {},
+              onLongPressDown: (_, _, _) {},
             ),
           ),
         ),
       );
       await tester.pump();
 
-      int totalSpans = 0;
-      final richTexts = tester.widgetList<RichText>(find.byType(RichText));
+      var totalSpans = 0;
+      final Iterable<RichText> richTexts = tester.widgetList<RichText>(
+        find.byType(RichText),
+      );
       for (final rt in richTexts) {
         void countSpans(InlineSpan span) {
           totalSpans++;
           if (span is TextSpan && span.children != null) {
-            for (final child in span.children!) {
+            for (final InlineSpan child in span.children!) {
               countSpans(child);
             }
           }
         }
+
         countSpans(rt.text);
       }
 
@@ -476,76 +500,73 @@ void main() {
         '  → Each span requires TextStyle + paint allocation during layout',
       );
 
-      expect(totalSpans, lessThan(300),
-          reason: 'Too many TextSpan objects cause expensive text layout');
+      expect(
+        totalSpans,
+        lessThan(300),
+        reason: 'Too many TextSpan objects cause expensive text layout',
+      );
     });
 
-    testWidgets('each line creates a new TextStyle per word (allocation check)',
-        (WidgetTester tester) async {
-      seedCache();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: PageContent(
-              pageNumber: 100,
-              textColor: Colors.black,
-              onLongPressCancel: (_, __) {},
-              onLongPressDown: (_, __, ___) {},
+    testWidgets(
+      'each line creates a new TextStyle per word (allocation check)',
+      (WidgetTester tester) async {
+        seedCache();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: PageContent(
+                pageNumber: 100,
+                textColor: Colors.black,
+                onLongPressCancel: (_, _) {},
+                onLongPressDown: (_, _, _) {},
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      // Count unique TextStyle instances across all spans
-      final styles = <TextStyle>{};
-      final richTexts = tester.widgetList<RichText>(find.byType(RichText));
-      for (final rt in richTexts) {
-        void collectStyles(InlineSpan span) {
-          if (span is TextSpan) {
-            if (span.style != null) styles.add(span.style!);
-            if (span.children != null) {
-              for (final child in span.children!) {
-                collectStyles(child);
+        // Count unique TextStyle instances across all spans
+        final styles = <TextStyle>{};
+        final Iterable<RichText> richTexts = tester.widgetList<RichText>(
+          find.byType(RichText),
+        );
+        for (final rt in richTexts) {
+          void collectStyles(InlineSpan span) {
+            if (span is TextSpan) {
+              if (span.style != null) styles.add(span.style!);
+              if (span.children != null) {
+                for (final InlineSpan child in span.children!) {
+                  collectStyles(child);
+                }
               }
             }
           }
-        }
-        collectStyles(rt.text);
-      }
 
-      debugPrint('  Page 100 unique TextStyle instances: ${styles.length}');
-      debugPrint(
-        '  → If close to total span count, styles are not being reused',
-      );
-    });
+          collectStyles(rt.text);
+        }
+
+        debugPrint('  Page 100 unique TextStyle instances: ${styles.length}');
+        debugPrint(
+          '  → If close to total span count, styles are not being reused',
+        );
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
   // 6. QuranPageView (full PageView) build test
   // ---------------------------------------------------------------------------
   group('QuranPageView integration', () {
-    testWidgets('builds and renders first page', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('builds and renders first page', (WidgetTester tester) async {
       seedCache();
       final sw = Stopwatch()..start();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPageView(
-              initialPageNumber: 1,
-              textColor: Colors.black,
-            ),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: QuranPageView())),
       );
       await tester.pump();
       sw.stop();
 
-      debugPrint(
-        '  QuranPageView initial build: ${sw.elapsedMilliseconds}ms',
-      );
+      debugPrint('  QuranPageView initial build: ${sw.elapsedMilliseconds}ms');
       expect(find.byType(PageView), findsOneWidget);
     });
 
@@ -553,7 +574,7 @@ void main() {
       WidgetTester tester,
     ) async {
       seedCache();
-      int buildCount = 0;
+      var buildCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -561,10 +582,7 @@ void main() {
             body: Builder(
               builder: (context) {
                 buildCount++;
-                return QuranPageView(
-                  initialPageNumber: 1,
-                  textColor: Colors.black,
-                );
+                return const QuranPageView();
               },
             ),
           ),
@@ -581,8 +599,11 @@ void main() {
       debugPrint(
         '  Build count: initial=$initialBuildCount, after swipe=$buildCount',
       );
-      expect(buildCount, initialBuildCount,
-          reason: 'QuranPageView should not rebuild on page swipe');
+      expect(
+        buildCount,
+        initialBuildCount,
+        reason: 'QuranPageView should not rebuild on page swipe',
+      );
     });
   });
 
@@ -590,33 +611,32 @@ void main() {
   // 7. LayoutBuilder rebuild behavior
   // ---------------------------------------------------------------------------
   group('LayoutBuilder rebuild behavior', () {
-    testWidgets(
-      'does not rebuild when constraints unchanged',
-      (WidgetTester tester) async {
-        int layoutBuilderCallCount = 0;
+    testWidgets('does not rebuild when constraints unchanged', (
+      WidgetTester tester,
+    ) async {
+      var layoutBuilderCallCount = 0;
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  layoutBuilderCallCount++;
-                  return const SizedBox();
-                },
-              ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                layoutBuilderCallCount++;
+                return const SizedBox();
+              },
             ),
           ),
-        );
+        ),
+      );
 
-        final initialCount = layoutBuilderCallCount;
-        await tester.pump();
+      final initialCount = layoutBuilderCallCount;
+      await tester.pump();
 
-        debugPrint(
-          '  LayoutBuilder calls: initial=$initialCount, '
-          'after pump=$layoutBuilderCallCount',
-        );
-        expect(layoutBuilderCallCount, initialCount);
-      },
-    );
+      debugPrint(
+        '  LayoutBuilder calls: initial=$initialCount, '
+        'after pump=$layoutBuilderCallCount',
+      );
+      expect(layoutBuilderCallCount, initialCount);
+    });
   });
 }

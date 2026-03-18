@@ -142,4 +142,3 @@ class _QuranPageViewState extends State<QuranPageView> {
     );
   }
 }
-

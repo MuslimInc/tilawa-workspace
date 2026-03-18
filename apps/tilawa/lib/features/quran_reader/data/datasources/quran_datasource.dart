@@ -326,7 +326,6 @@ class QuranDataSourceImpl implements QuranDataSource {
       ayahs: ayahs,
     );
   }
-
 }
 
 /// Basic surah information

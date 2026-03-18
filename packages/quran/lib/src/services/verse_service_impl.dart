@@ -34,7 +34,7 @@ class VerseServiceImpl implements VerseService {
         _verseCache![key] = i;
       }
     }
-    return _verseCache!["$surahNumber:$verseNumber"];
+    return _verseCache!['$surahNumber:$verseNumber'];
   }
 
   @override
@@ -83,8 +83,8 @@ class VerseServiceImpl implements VerseService {
 
     if (addSpace) {
       final buffer = StringBuffer();
-      final runes = qcfData.runes.toList();
-      for (int i = 0; i < runes.length; i++) {
+      final List<int> runes = qcfData.runes.toList();
+      for (var i = 0; i < runes.length; i++) {
         if (i > 0) buffer.write(' ');
         buffer.writeCharCode(runes[i]);
       }

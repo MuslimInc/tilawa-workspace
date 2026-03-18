@@ -74,14 +74,8 @@ void main() {
                   (803.6 / 15.0) / expectedFontSize;
 
               expect(metrics.isScrollable, false);
-              expect(
-                metrics.fontSize,
-                closeTo(expectedFontSize, 0.0001),
-              );
-              expect(
-                metrics.fontHeight,
-                closeTo(expectedFontHeight, 0.0001),
-              );
+              expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
+              expect(metrics.fontHeight, closeTo(expectedFontHeight, 0.0001));
               expect(metrics.padding, EdgeInsets.zero); // Should be default
 
               return const SizedBox();

@@ -1,5 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -175,87 +176,97 @@ class _MainScreenState extends State<MainScreen> {
                       );
                     },
                     child: isVisible
-                        ? BottomAppBar(
+                        ? DecoratedBox(
                             key: const ValueKey('bottom_app_bar'),
-                            elevation:
-                                8, // Added elevation for better separation
-                            color: theme.cardColor,
-                            child: Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    child: _BottomNavItem(
-                                      index: 4,
-                                      currentIndex: _currentIndex,
-                                      icon: FluentIcons.settings_24_regular,
-                                      activeIcon:
-                                          FluentIcons.settings_24_filled,
-                                      label: context.l10n.settings,
-                                      onTap: (index) {
-                                        setState(() => _currentIndex = index);
-                                        _handleTabSideEffects(context, index);
-                                      },
+                            decoration: BoxDecoration(
+                              color: theme.cardColor,
+                              border: const Border(
+                                top: BorderSide(
+                                  color: Color(0x14000000),
+                                  width: 0.5,
+                                ),
+                              ),
+                            ),
+                            child: SafeArea(
+                              top: false,
+                              child: Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Expanded(
+                                      child: _BottomNavItem(
+                                        index: 4,
+                                        currentIndex: _currentIndex,
+                                        icon: FluentIcons.settings_24_regular,
+                                        activeIcon:
+                                            FluentIcons.settings_24_filled,
+                                        label: context.l10n.settings,
+                                        onTap: (index) {
+                                          setState(() => _currentIndex = index);
+                                          _handleTabSideEffects(context, index);
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: _BottomNavItem(
-                                      index: 3,
-                                      currentIndex: _currentIndex,
-                                      icon: FluentIcons.book_open_24_regular,
-                                      activeIcon:
-                                          FluentIcons.book_open_24_filled,
-                                      svgPath: 'assets/icons/athkar_icon.svg',
-                                      label: context.l10n.athkar,
-                                      onTap: (index) {
-                                        setState(() => _currentIndex = index);
-                                        _handleTabSideEffects(context, index);
-                                      },
+                                    Expanded(
+                                      child: _BottomNavItem(
+                                        index: 3,
+                                        currentIndex: _currentIndex,
+                                        icon: FluentIcons.book_open_24_regular,
+                                        activeIcon:
+                                            FluentIcons.book_open_24_filled,
+                                        svgPath: 'assets/icons/athkar_icon.svg',
+                                        label: context.l10n.athkar,
+                                        onTap: (index) {
+                                          setState(() => _currentIndex = index);
+                                          _handleTabSideEffects(context, index);
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: _BottomNavItem(
-                                      index: 0,
-                                      currentIndex: _currentIndex,
-                                      icon: FluentIcons.book_24_regular,
-                                      activeIcon: FluentIcons.book_24_filled,
-                                      svgPath: 'assets/icons/quran_icon.svg',
-                                      label: context.l10n.quran,
-                                      onTap: (index) {
-                                        setState(() => _currentIndex = index);
-                                        _handleTabSideEffects(context, index);
-                                      },
+                                    Expanded(
+                                      child: _BottomNavItem(
+                                        index: 0,
+                                        currentIndex: _currentIndex,
+                                        icon: FluentIcons.book_24_regular,
+                                        activeIcon: FluentIcons.book_24_filled,
+                                        svgPath: 'assets/icons/quran_icon.svg',
+                                        label: context.l10n.quran,
+                                        onTap: (index) {
+                                          setState(() => _currentIndex = index);
+                                          _handleTabSideEffects(context, index);
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: _BottomNavItem(
-                                      index: 2,
-                                      currentIndex: _currentIndex,
-                                      icon: FluentIcons.clock_24_regular,
-                                      activeIcon: FluentIcons.clock_24_filled,
-                                      label: context.l10n.prayerTimes,
-                                      onTap: (index) {
-                                        setState(() => _currentIndex = index);
-                                        _handleTabSideEffects(context, index);
-                                      },
+                                    Expanded(
+                                      child: _BottomNavItem(
+                                        index: 2,
+                                        currentIndex: _currentIndex,
+                                        icon: FluentIcons.clock_24_regular,
+                                        activeIcon: FluentIcons.clock_24_filled,
+                                        label: context.l10n.prayerTimes,
+                                        onTap: (index) {
+                                          setState(() => _currentIndex = index);
+                                          _handleTabSideEffects(context, index);
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: _BottomNavItem(
-                                      index: 1,
-                                      currentIndex: _currentIndex,
-                                      icon: FluentIcons.person_24_regular,
-                                      activeIcon: FluentIcons.person_24_filled,
-                                      label: context.l10n.reciters,
-                                      onTap: (index) {
-                                        setState(() => _currentIndex = index);
-                                        _handleTabSideEffects(context, index);
-                                      },
+                                    Expanded(
+                                      child: _BottomNavItem(
+                                        index: 1,
+                                        currentIndex: _currentIndex,
+                                        icon: FluentIcons.person_24_regular,
+                                        activeIcon:
+                                            FluentIcons.person_24_filled,
+                                        label: context.l10n.reciters,
+                                        onTap: (index) {
+                                          setState(() => _currentIndex = index);
+                                          _handleTabSideEffects(context, index);
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           )
@@ -294,50 +305,69 @@ class _BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isSelected = currentIndex == index;
+    final activeColor = theme.primaryColor;
+    final inactiveColor = theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: 0.45,
+    );
 
-    return InkWell(
-      onTap: () => onTap(index),
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap(index);
+      },
+      behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 2.h),
+        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (svgPath != null)
-              SvgPicture.asset(
-                svgPath!,
-                width: 24.sp,
-                height: 24.sp,
-                colorFilter: ColorFilter.mode(
-                  isSelected
-                      ? theme.primaryColor
-                      : theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                  BlendMode.srcIn,
-                ),
-              )
-            else
-              Icon(
-                isSelected ? activeIcon : icon,
-                size: 24.sp,
-                color: isSelected
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            // Active indicator pill
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              width: isSelected ? 32.w : 0,
+              height: 3.h,
+              margin: EdgeInsets.only(bottom: 4.h),
+              decoration: BoxDecoration(
+                color: isSelected ? activeColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(2.r),
               ),
-            SizedBox(height: 2.h), // Reduced to fix overflow
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+            ),
+            // Icon with animated color transition
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: svgPath != null
+                  ? SvgPicture.asset(
+                      svgPath!,
+                      key: ValueKey('${svgPath}_$isSelected'),
+                      width: 22.sp,
+                      height: 22.sp,
+                      colorFilter: ColorFilter.mode(
+                        isSelected ? activeColor : inactiveColor,
+                        BlendMode.srcIn,
+                      ),
+                    )
+                  : Icon(
+                      isSelected ? activeIcon : icon,
+                      key: ValueKey('${icon.hashCode}_$isSelected'),
+                      size: 22.sp,
+                      color: isSelected ? activeColor : inactiveColor,
+                    ),
+            ),
+            SizedBox(height: 3.h),
+            // Label with consistent size (no jitter)
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
               style: TextStyle(
-                fontSize: isSelected ? 10.5.sp : 9.5.sp,
+                fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: isSelected ? activeColor : inactiveColor,
+              ),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

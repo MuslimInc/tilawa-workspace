@@ -79,18 +79,18 @@ class QuranDataServiceImpl implements QuranDataService {
     if (_pageLookupCache == null) {
       _pageLookupCache = {};
       for (var pageIndex = 0; pageIndex < pageData.length; pageIndex++) {
-        for (final entry in pageData[pageIndex]) {
+        for (final Map<String, int> entry in pageData[pageIndex]) {
           final int surah = entry['surah']!;
           final int start = entry['start']!;
           final int end = entry['end']!;
           for (var v = start; v <= end; v++) {
-            _pageLookupCache!["$surah:$v"] = pageIndex + 1;
+            _pageLookupCache!['$surah:$v'] = pageIndex + 1;
           }
         }
       }
     }
 
-    final page = _pageLookupCache!["$surahNumber:$verseNumber"];
+    final int? page = _pageLookupCache!['$surahNumber:$verseNumber'];
     if (page == null) {
       throw const QuranException('Invalid verse number.');
     }

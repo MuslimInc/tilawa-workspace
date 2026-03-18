@@ -87,8 +87,7 @@ class _PageContentState extends State<PageContent>
   /// Caches the rendered page as a raster image after first paint so that
   /// subsequent frames during swipe animation composite a cached bitmap
   /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
-  final SnapshotController _snapshotController =
-      SnapshotController(allowSnapshotting: false);
+  final SnapshotController _snapshotController = SnapshotController();
 
   @override
   bool get wantKeepAlive => true;
@@ -152,17 +151,16 @@ class _PageContentState extends State<PageContent>
 
     final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
 
-    for (final pageEntry in pageIndexRaw.entries) {
+    for (final MapEntry<String, dynamic> pageEntry in pageIndexRaw.entries) {
       final int pageNum = int.parse(pageEntry.key);
-      final Map<String, dynamic> lineMap =
-          pageEntry.value as Map<String, dynamic>;
+      final lineMap = pageEntry.value as Map<String, dynamic>;
 
       final List<List<Map<String, dynamic>>> lines = List.generate(
         15,
         (_) => <Map<String, dynamic>>[],
       );
 
-      for (final lineEntry in lineMap.entries) {
+      for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
         final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
         final List<String> wordKeys = (lineEntry.value as List<dynamic>)
             .cast<String>();
@@ -199,10 +197,10 @@ class _PageContentState extends State<PageContent>
     final List<Map<String, dynamic>> lineWords = lines[lineIndex];
     if (lineWords.isEmpty) return [];
 
-    final bool hasVerseColorCallback = widget.verseBackgroundColor != null;
+    final hasVerseColorCallback = widget.verseBackgroundColor != null;
 
     final List<InlineSpan> spans = lineWords.map<InlineSpan>((word) {
-      final String text = word['text'] as String;
+      final text = word['text'] as String;
 
       if (!hasVerseColorCallback) {
         return TextSpan(text: text, style: baseStyle);
@@ -256,14 +254,14 @@ class _PageContentState extends State<PageContent>
             .getName(surahNumber)
             .replaceAll('Al ', 'Al-');
 
-    final _PageHeader header = _PageHeader(
+    final header = _PageHeader(
       surahName: displaySurahName,
       juzNumber: juzNumber,
       juzLabel: widget.juzLabel ?? 'Juz',
       textColor: widget.textColor,
     );
 
-    final _PageFooter footer = _PageFooter(
+    final footer = _PageFooter(
       quarterNumber: quarterNumber,
       pageNumber: widget.pageNumber,
       hizbLabel: widget.hizbLabel ?? 'Hizb',
@@ -273,8 +271,9 @@ class _PageContentState extends State<PageContent>
     );
 
     // Fetch line data once — does not depend on layout constraints.
-    final List<List<Map<String, dynamic>>> pageLines =
-        _getWordsGroupedByLine(widget.pageNumber);
+    final List<List<Map<String, dynamic>>> pageLines = _getWordsGroupedByLine(
+      widget.pageNumber,
+    );
     final int firstLineIdx = _firstContentLineIndexFromLines(pageLines);
     // Enable raster caching after the first frame so swipe animation
     // composites a cached bitmap instead of re-rasterizing.
@@ -305,8 +304,10 @@ class _PageContentState extends State<PageContent>
                       'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
                   final isLandscape =
-                      MediaQuery.orientationOf(context) == Orientation.landscape;
-                  final double lineHeight = metrics.fontSize * metrics.fontHeight;
+                      MediaQuery.orientationOf(context) ==
+                      Orientation.landscape;
+                  final double lineHeight =
+                      metrics.fontSize * metrics.fontHeight;
 
                   // Build one shared TextStyle for the entire page — all words
                   // share font, size, color, height. Only verse background
@@ -325,7 +326,9 @@ class _PageContentState extends State<PageContent>
                     height: metrics.fontHeight,
                   );
 
-                  final List<Widget> lineWidgets = List.generate(15, (lineIndex) {
+                  final List<Widget> lineWidgets = List.generate(15, (
+                    lineIndex,
+                  ) {
                     final bool isHeader = _isSurahHeader(
                       widget.pageNumber,
                       lineIndex + 1,
@@ -391,7 +394,7 @@ class _PageContentState extends State<PageContent>
                             : BoxFit.fill,
                         child: RichText(
                           textDirection: TextDirection.rtl,
-                          textAlign: TextAlign.justify,
+                          // textAlign: TextAlign.justify,
                           textHeightBehavior: const TextHeightBehavior(
                             applyHeightToFirstAscent: false,
                             applyHeightToLastDescent: false,
@@ -425,7 +428,7 @@ class _PageContentState extends State<PageContent>
   /// Returns the 0-based line index of the first line that has content
   /// from pre-fetched [lines]. Avoids a redundant `_getWordsGroupedByLine` call.
   int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
-    for (int i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       if (lines[i].isNotEmpty) return i;
     }
     return 0;
@@ -478,7 +481,7 @@ class _PageContentState extends State<PageContent>
 
     // Standard Quran Mushaf layout logic for headers and bismillah:
     // 1. Scan for Verse 1 of any Surah starting on this page.
-    for (int i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
       final List<Map<String, dynamic>> lineWords = lines[i];
       if (lineWords.isNotEmpty) {
         final Map<String, dynamic> firstWord = lineWords.first;
@@ -549,8 +552,10 @@ class _SurahHeaderBanner extends StatelessWidget {
   final int surahNumber;
   final double lineHeight;
 
-  static const AssetImage _bannerImage =
-      AssetImage('assets/mainframe.png', package: 'quran');
+  static const AssetImage _bannerImage = AssetImage(
+    'assets/mainframe.png',
+    package: 'quran',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -563,7 +568,7 @@ class _SurahHeaderBanner extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(
+              const Positioned.fill(
                 child: Image(
                   image: _bannerImage,
                   fit: BoxFit.contain,
@@ -604,36 +609,45 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(
-      0xFF4E342E,
-    ); // Darker brown for better contrast (WCAG AA)
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.030;
+    const primaryColor = Color(0xFF4E342E);
+    const dividerColor = Color(0x1A4E342E);
+    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.032;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          child: Text(
-            surahName,
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: verseFontSize,
-              fontWeight: FontWeight.bold,
-            ),
-            overflow: TextOverflow.ellipsis,
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 4.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  surahName,
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: verseFontSize,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  '$juzLabel $juzNumber',
+                  style: TextStyle(
+                    color: primaryColor.withValues(alpha: 0.6),
+                    fontSize: verseFontSize * 0.9,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ),
-        Flexible(
-          child: Text(
-            '$juzLabel $juzNumber',
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: verseFontSize,
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        const Divider(color: dividerColor, height: 1, thickness: 0.5),
       ],
     );
   }
@@ -689,13 +703,15 @@ class _PageFooter extends StatelessWidget {
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 8.w,
-      ), // Increased horizontal spacing
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _SurahIndexButton(onShowIndex: onShowIndex),
+          // Show index button only when callback is provided
+          if (onShowIndex != null)
+            _SurahIndexButton(onShowIndex: onShowIndex)
+          else
+            const SizedBox.shrink(),
           _QuranPageIndex(hizbLabel: hizbLabel, pageNumber: pageNumber),
         ],
       ),

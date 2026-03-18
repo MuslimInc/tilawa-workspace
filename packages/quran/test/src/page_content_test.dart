@@ -7,21 +7,27 @@ import 'package:quran/src/page_content.dart';
 
 void main() {
   setUpAll(() {
-    final qpcRaw = File('assets/quran_fonts/qpc-v4.json').readAsStringSync();
-    final pageIndexRaw =
-        File('assets/quran_fonts/quran_page_index.json').readAsStringSync();
+    final String qpcRaw = File(
+      'assets/quran_fonts/qpc-v4.json',
+    ).readAsStringSync();
+    final String pageIndexRaw = File(
+      'assets/quran_fonts/quran_page_index.json',
+    ).readAsStringSync();
     final qpc = json.decode(qpcRaw) as Map<String, dynamic>;
     final pageIndexJson = json.decode(pageIndexRaw) as Map<String, dynamic>;
 
     final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
-    for (final pageEntry in pageIndexJson.entries) {
+    for (final MapEntry<String, dynamic> pageEntry in pageIndexJson.entries) {
       final int pageNum = int.parse(pageEntry.key);
-      final Map<String, dynamic> lineMap =
-          pageEntry.value as Map<String, dynamic>;
-      final lines = List.generate(15, (_) => <Map<String, dynamic>>[]);
-      for (final lineEntry in lineMap.entries) {
+      final lineMap = pageEntry.value as Map<String, dynamic>;
+      final List<List<Map<String, dynamic>>> lines = List.generate(
+        15,
+        (_) => <Map<String, dynamic>>[],
+      );
+      for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
         final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
-        final wordKeys = (lineEntry.value as List<dynamic>).cast<String>();
+        final List<String> wordKeys = (lineEntry.value as List<dynamic>)
+            .cast<String>();
         for (final key in wordKeys) {
           final wordData = qpc[key] as Map<String, dynamic>?;
           if (wordData != null) lines[lineIndex].add(wordData);

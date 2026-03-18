@@ -185,16 +185,9 @@ class _SurahTextSectionState extends State<SurahTextSection> {
                 3,
                 '0',
               );
-              final String ayahStr = ayah.ayahNumber.toString().padLeft(
-                3,
-                '0',
-              );
-              final String wordStr = word.position.toString().padLeft(
-                3,
-                '0',
-              );
-              final correctedUrl =
-                  'wbw/${surahStr}_${ayahStr}_$wordStr.mp3';
+              final String ayahStr = ayah.ayahNumber.toString().padLeft(3, '0');
+              final String wordStr = word.position.toString().padLeft(3, '0');
+              final correctedUrl = 'wbw/${surahStr}_${ayahStr}_$wordStr.mp3';
 
               widget.audioController.playWord(correctedUrl, word.id);
             };
@@ -244,18 +237,11 @@ class _SurahTextSectionState extends State<SurahTextSection> {
               );
 
               // Non-interactive space span to prevent hit-test overlaps
-              spans.add(
-                TextSpan(text: ' ', style: _spaceStyle),
-              );
+              spans.add(TextSpan(text: ' ', style: _spaceStyle));
             }
           } else {
             // Fallback
-            spans.add(
-              TextSpan(
-                text: '${ayah.text} ',
-                style: _baseStyle,
-              ),
-            );
+            spans.add(TextSpan(text: '${ayah.text} ', style: _baseStyle));
           }
         }
 

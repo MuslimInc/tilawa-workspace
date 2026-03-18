@@ -18,7 +18,7 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    const String assetsBase = 'assets/quran_fonts';
+    const assetsBase = 'assets/quran_fonts';
 
     // pageIndex and qpcV4 are bundled Flutter assets.
     final List<String> assetResults = await Future.wait([
@@ -29,8 +29,9 @@ void main() {
     qpcV4 = json.decode(assetResults[1]) as Map<String, dynamic>;
 
     // lineMap is not a bundled asset — read it directly from the file system.
-    final String lineMapRaw =
-        File('$assetsBase/quran_page_line_map.json').readAsStringSync();
+    final String lineMapRaw = File(
+      '$assetsBase/quran_page_line_map.json',
+    ).readAsStringSync();
     lineMap = json.decode(lineMapRaw) as Map<String, dynamic>;
   });
 
@@ -39,7 +40,7 @@ void main() {
   // ---------------------------------------------------------------------------
   group('quran_page_index.json structure', () {
     test('contains all 604 pages', () {
-      for (int page = 1; page <= 604; page++) {
+      for (var page = 1; page <= 604; page++) {
         expect(
           pageIndex.containsKey('$page'),
           isTrue,
@@ -49,10 +50,9 @@ void main() {
     });
 
     test('every page has exactly 15 line entries', () {
-      for (int page = 1; page <= 604; page++) {
-        final Map<String, dynamic> lines =
-            pageIndex['$page'] as Map<String, dynamic>;
-        for (int line = 1; line <= 15; line++) {
+      for (var page = 1; page <= 604; page++) {
+        final lines = pageIndex['$page'] as Map<String, dynamic>;
+        for (var line = 1; line <= 15; line++) {
           expect(
             lines.containsKey('$line'),
             isTrue,
@@ -64,8 +64,7 @@ void main() {
 
     test('no line number exceeds 15 or is less than 1', () {
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         for (final String lineKey in lines.keys) {
           final int lineNum = int.parse(lineKey);
           expect(
@@ -78,12 +77,11 @@ void main() {
     });
 
     test('word keys in page index are valid references to qpc-v4.json', () {
-      int checkedCount = 0;
+      var checkedCount = 0;
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         for (final MapEntry<String, dynamic> lineEntry in lines.entries) {
-          final List<dynamic> words = lineEntry.value as List<dynamic>;
+          final words = lineEntry.value as List<dynamic>;
           for (final dynamic wordKey in words) {
             expect(
               qpcV4.containsKey(wordKey),
@@ -102,10 +100,9 @@ void main() {
     test('every qpc-v4 word appears exactly once in page index', () {
       final Set<String> indexedKeys = {};
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         for (final MapEntry<String, dynamic> lineEntry in lines.entries) {
-          final List<dynamic> words = lineEntry.value as List<dynamic>;
+          final words = lineEntry.value as List<dynamic>;
           for (final dynamic wordKey in words) {
             expect(
               indexedKeys.add(wordKey as String),
@@ -142,10 +139,9 @@ void main() {
 
     test('every entry has valid page (1-604) and line (1-15)', () {
       for (final MapEntry<String, dynamic> entry in lineMap.entries) {
-        final Map<String, dynamic> info =
-            entry.value as Map<String, dynamic>;
-        final int page = info['p'] as int;
-        final int line = info['l'] as int;
+        final info = entry.value as Map<String, dynamic>;
+        final page = info['p'] as int;
+        final line = info['l'] as int;
         expect(
           page >= 1 && page <= 604,
           isTrue,
@@ -162,15 +158,13 @@ void main() {
     test('line map and page index are consistent', () {
       for (final MapEntry<String, dynamic> entry in lineMap.entries) {
         final String key = entry.key;
-        final Map<String, dynamic> info =
-            entry.value as Map<String, dynamic>;
-        final int page = info['p'] as int;
-        final int line = info['l'] as int;
+        final info = entry.value as Map<String, dynamic>;
+        final page = info['p'] as int;
+        final line = info['l'] as int;
 
-        final Map<String, dynamic> pageLines =
-            pageIndex['$page'] as Map<String, dynamic>;
-        final List<String> wordsOnLine =
-            (pageLines['$line'] as List<dynamic>).cast<String>();
+        final pageLines = pageIndex['$page'] as Map<String, dynamic>;
+        final List<String> wordsOnLine = (pageLines['$line'] as List<dynamic>)
+            .cast<String>();
         expect(
           wordsOnLine.contains(key),
           isTrue,
@@ -188,24 +182,24 @@ void main() {
   group('word ordering', () {
     test('words within each line are ordered by surah, ayah, position', () {
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         for (final MapEntry<String, dynamic> lineEntry in lines.entries) {
-          final List<String> words =
-              (lineEntry.value as List<dynamic>).cast<String>();
+          final List<String> words = (lineEntry.value as List<dynamic>)
+              .cast<String>();
           if (words.length < 2) continue;
 
-          for (int i = 0; i < words.length - 1; i++) {
-            final List<int> curr =
-                words[i].split(':').map(int.parse).toList();
-            final List<int> next =
-                words[i + 1].split(':').map(int.parse).toList();
+          for (var i = 0; i < words.length - 1; i++) {
+            final List<int> curr = words[i].split(':').map(int.parse).toList();
+            final List<int> next = words[i + 1]
+                .split(':')
+                .map(int.parse)
+                .toList();
 
             final int cmp = curr[0] != next[0]
                 ? curr[0].compareTo(next[0])
                 : curr[1] != next[1]
-                    ? curr[1].compareTo(next[1])
-                    : curr[2].compareTo(next[2]);
+                ? curr[1].compareTo(next[1])
+                : curr[2].compareTo(next[2]);
 
             expect(
               cmp < 0,
@@ -221,23 +215,20 @@ void main() {
 
     test('words across lines on a page are in sequential order', () {
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         String? prevKey;
-        for (int line = 1; line <= 15; line++) {
-          final List<String> words =
-              (lines['$line'] as List<dynamic>).cast<String>();
-          for (final String wordKey in words) {
+        for (var line = 1; line <= 15; line++) {
+          final List<String> words = (lines['$line'] as List<dynamic>)
+              .cast<String>();
+          for (final wordKey in words) {
             if (prevKey != null) {
-              final List<int> prev =
-                  prevKey.split(':').map(int.parse).toList();
-              final List<int> curr =
-                  wordKey.split(':').map(int.parse).toList();
+              final List<int> prev = prevKey.split(':').map(int.parse).toList();
+              final List<int> curr = wordKey.split(':').map(int.parse).toList();
               final int cmp = prev[0] != curr[0]
                   ? prev[0].compareTo(curr[0])
                   : prev[1] != curr[1]
-                      ? prev[1].compareTo(curr[1])
-                      : prev[2].compareTo(curr[2]);
+                  ? prev[1].compareTo(curr[1])
+                  : prev[2].compareTo(curr[2]);
               expect(
                 cmp < 0,
                 isTrue,
@@ -258,10 +249,9 @@ void main() {
   // ---------------------------------------------------------------------------
   group('page 207 (end of At-Tawbah)', () {
     test('has 15 lines with content on all of them', () {
-      final Map<String, dynamic> lines =
-          pageIndex['207'] as Map<String, dynamic>;
-      for (int line = 1; line <= 15; line++) {
-        final List<dynamic> words = lines['$line'] as List<dynamic>;
+      final lines = pageIndex['207'] as Map<String, dynamic>;
+      for (var line = 1; line <= 15; line++) {
+        final words = lines['$line'] as List<dynamic>;
         expect(
           words.isNotEmpty,
           isTrue,
@@ -271,25 +261,24 @@ void main() {
     });
 
     test('line 1 has 7 words starting with 9:123:1', () {
-      final List<String> line1 =
-          (pageIndex['207']['1'] as List<dynamic>).cast<String>();
+      final List<String> line1 = (pageIndex['207']['1'] as List<dynamic>)
+          .cast<String>();
       expect(line1.length, 7);
       expect(line1.first, '9:123:1');
       expect(line1.last, '9:123:7');
     });
 
     test('line 15 has 9 words ending with 9:129:16', () {
-      final List<String> line15 =
-          (pageIndex['207']['15'] as List<dynamic>).cast<String>();
+      final List<String> line15 = (pageIndex['207']['15'] as List<dynamic>)
+          .cast<String>();
       expect(line15.length, 9);
       expect(line15.first, '9:129:8');
       expect(line15.last, '9:129:16');
     });
 
     test('total word count is 119', () {
-      final Map<String, dynamic> lines =
-          pageIndex['207'] as Map<String, dynamic>;
-      int total = 0;
+      final lines = pageIndex['207'] as Map<String, dynamic>;
+      var total = 0;
       for (final dynamic lineEntry in lines.values) {
         total += (lineEntry as List<dynamic>).length;
       }
@@ -297,8 +286,7 @@ void main() {
     });
 
     test('contains only surah 9 (At-Tawbah) verses 123-129', () {
-      final Map<String, dynamic> lines =
-          pageIndex['207'] as Map<String, dynamic>;
+      final lines = pageIndex['207'] as Map<String, dynamic>;
       for (final dynamic lineEntry in lines.values) {
         for (final dynamic wordKey in lineEntry as List<dynamic>) {
           final List<String> parts = (wordKey as String).split(':');
@@ -315,14 +303,26 @@ void main() {
 
     test('word distribution per line matches King Fahd mushaf', () {
       // Verified against The_Holy_Quran.db mushaf_id=2 (1439 AH edition).
-      const Map<int, int> expectedWordCounts = <int, int>{
-        1: 7, 2: 7, 3: 9, 4: 7, 5: 6, 6: 8, 7: 7, 8: 9,
-        9: 9, 10: 8, 11: 8, 12: 8, 13: 7, 14: 10, 15: 9,
+      const expectedWordCounts = <int, int>{
+        1: 7,
+        2: 7,
+        3: 9,
+        4: 7,
+        5: 6,
+        6: 8,
+        7: 7,
+        8: 9,
+        9: 9,
+        10: 8,
+        11: 8,
+        12: 8,
+        13: 7,
+        14: 10,
+        15: 9,
       };
-      final Map<String, dynamic> lines =
-          pageIndex['207'] as Map<String, dynamic>;
+      final lines = pageIndex['207'] as Map<String, dynamic>;
       for (final MapEntry<int, int> entry in expectedWordCounts.entries) {
-        final List<dynamic> words = lines['${entry.key}'] as List<dynamic>;
+        final words = lines['${entry.key}'] as List<dynamic>;
         expect(
           words.length,
           entry.value,
@@ -339,9 +339,8 @@ void main() {
   // ---------------------------------------------------------------------------
   group('page 3 (first standard page)', () {
     test('all 15 lines have content', () {
-      final Map<String, dynamic> lines =
-          pageIndex['3'] as Map<String, dynamic>;
-      for (int line = 1; line <= 15; line++) {
+      final lines = pageIndex['3'] as Map<String, dynamic>;
+      for (var line = 1; line <= 15; line++) {
         expect(
           (lines['$line'] as List<dynamic>).isNotEmpty,
           isTrue,
@@ -351,9 +350,8 @@ void main() {
     });
 
     test('total word count is 138', () {
-      final Map<String, dynamic> lines =
-          pageIndex['3'] as Map<String, dynamic>;
-      int total = 0;
+      final lines = pageIndex['3'] as Map<String, dynamic>;
+      var total = 0;
       for (final dynamic lineEntry in lines.values) {
         total += (lineEntry as List<dynamic>).length;
       }
@@ -361,8 +359,8 @@ void main() {
     });
 
     test('line 1 starts with 2:6:1', () {
-      final List<String> line1 =
-          (pageIndex['3']['1'] as List<dynamic>).cast<String>();
+      final List<String> line1 = (pageIndex['3']['1'] as List<dynamic>)
+          .cast<String>();
       expect(line1.first, '2:6:1');
     });
   });
@@ -372,9 +370,8 @@ void main() {
   // ---------------------------------------------------------------------------
   group('pages 1-2 (special layout)', () {
     test('page 1: lines 1 and 9-15 are empty', () {
-      final Map<String, dynamic> lines =
-          pageIndex['1'] as Map<String, dynamic>;
-      for (final int emptyLine in [1, 9, 10, 11, 12, 13, 14, 15]) {
+      final lines = pageIndex['1'] as Map<String, dynamic>;
+      for (final emptyLine in [1, 9, 10, 11, 12, 13, 14, 15]) {
         expect(
           (lines['$emptyLine'] as List<dynamic>).isEmpty,
           isTrue,
@@ -384,10 +381,9 @@ void main() {
     });
 
     test('page 1: lines 2-8 contain Al-Fatiha', () {
-      final Map<String, dynamic> lines =
-          pageIndex['1'] as Map<String, dynamic>;
-      for (int line = 2; line <= 8; line++) {
-        final List<dynamic> words = lines['$line'] as List<dynamic>;
+      final lines = pageIndex['1'] as Map<String, dynamic>;
+      for (var line = 2; line <= 8; line++) {
+        final words = lines['$line'] as List<dynamic>;
         expect(
           words.isNotEmpty,
           isTrue,
@@ -404,8 +400,7 @@ void main() {
     });
 
     test('page 2: first content starts at line 3', () {
-      final Map<String, dynamic> lines =
-          pageIndex['2'] as Map<String, dynamic>;
+      final lines = pageIndex['2'] as Map<String, dynamic>;
       expect((lines['1'] as List<dynamic>).isEmpty, isTrue);
       expect((lines['2'] as List<dynamic>).isEmpty, isTrue);
       expect((lines['3'] as List<dynamic>).isNotEmpty, isTrue);
@@ -417,8 +412,7 @@ void main() {
   // ---------------------------------------------------------------------------
   group('page 77 (An-Nisa start)', () {
     test('lines 1-2 are empty (reserved for header and bismillah)', () {
-      final Map<String, dynamic> lines =
-          pageIndex['77'] as Map<String, dynamic>;
+      final lines = pageIndex['77'] as Map<String, dynamic>;
       expect(
         (lines['1'] as List<dynamic>).isEmpty,
         isTrue,
@@ -432,19 +426,18 @@ void main() {
     });
 
     test('content starts at line 3 with surah 4 (An-Nisa)', () {
-      final List<String> line3 =
-          (pageIndex['77']['3'] as List<dynamic>).cast<String>();
+      final List<String> line3 = (pageIndex['77']['3'] as List<dynamic>)
+          .cast<String>();
       expect(line3.isNotEmpty, isTrue);
       expect(line3.first.startsWith('4:'), isTrue);
     });
 
     test('all content is surah 4', () {
-      final Map<String, dynamic> lines =
-          pageIndex['77'] as Map<String, dynamic>;
-      for (int line = 3; line <= 15; line++) {
-        final List<String> words =
-            (lines['$line'] as List<dynamic>).cast<String>();
-        for (final String wordKey in words) {
+      final lines = pageIndex['77'] as Map<String, dynamic>;
+      for (var line = 3; line <= 15; line++) {
+        final List<String> words = (lines['$line'] as List<dynamic>)
+            .cast<String>();
+        for (final wordKey in words) {
           expect(
             wordKey.startsWith('4:'),
             isTrue,
@@ -460,14 +453,13 @@ void main() {
   // ---------------------------------------------------------------------------
   group('page 187 (At-Tawbah start, no bismillah)', () {
     test('line 1 is empty (reserved for surah header)', () {
-      final Map<String, dynamic> lines =
-          pageIndex['187'] as Map<String, dynamic>;
+      final lines = pageIndex['187'] as Map<String, dynamic>;
       expect((lines['1'] as List<dynamic>).isEmpty, isTrue);
     });
 
     test('content starts at line 2 with surah 9', () {
-      final List<String> line2 =
-          (pageIndex['187']['2'] as List<dynamic>).cast<String>();
+      final List<String> line2 = (pageIndex['187']['2'] as List<dynamic>)
+          .cast<String>();
       expect(line2.isNotEmpty, isTrue);
       expect(line2.first, '9:1:1');
     });
@@ -478,8 +470,7 @@ void main() {
   // ---------------------------------------------------------------------------
   group('page 604 (last page)', () {
     test('contains surahs 112, 113, and 114', () {
-      final Map<String, dynamic> lines =
-          pageIndex['604'] as Map<String, dynamic>;
+      final lines = pageIndex['604'] as Map<String, dynamic>;
       final Set<int> surahs = {};
       for (final dynamic lineEntry in lines.values) {
         for (final dynamic wordKey in lineEntry as List<dynamic>) {
@@ -490,9 +481,8 @@ void main() {
     });
 
     test('total word count is 73', () {
-      final Map<String, dynamic> lines =
-          pageIndex['604'] as Map<String, dynamic>;
-      int total = 0;
+      final lines = pageIndex['604'] as Map<String, dynamic>;
+      var total = 0;
       for (final dynamic lineEntry in lines.values) {
         total += (lineEntry as List<dynamic>).length;
       }
@@ -500,8 +490,8 @@ void main() {
     });
 
     test('ends with surah 114 (An-Nas)', () {
-      final List<String> line15 =
-          (pageIndex['604']['15'] as List<dynamic>).cast<String>();
+      final List<String> line15 = (pageIndex['604']['15'] as List<dynamic>)
+          .cast<String>();
       expect(line15.isNotEmpty, isTrue);
       expect(line15.last.startsWith('114:'), isTrue);
     });
@@ -513,21 +503,20 @@ void main() {
   group('cross-page continuity', () {
     test('all words across all pages form a continuous sequence', () {
       final List<String> allKeys = [];
-      for (int page = 1; page <= 604; page++) {
-        final Map<String, dynamic> lines =
-            pageIndex['$page'] as Map<String, dynamic>;
-        for (int line = 1; line <= 15; line++) {
-          final List<String> words =
-              (lines['$line'] as List<dynamic>).cast<String>();
+      for (var page = 1; page <= 604; page++) {
+        final lines = pageIndex['$page'] as Map<String, dynamic>;
+        for (var line = 1; line <= 15; line++) {
+          final List<String> words = (lines['$line'] as List<dynamic>)
+              .cast<String>();
           allKeys.addAll(words);
         }
       }
 
       // Within each verse, word positions must be sequential (1, 2, 3, ...).
       final Map<String, int> lastWordPos = {};
-      for (final String key in allKeys) {
+      for (final key in allKeys) {
         final List<String> parts = key.split(':');
-        final String verseKey = '${parts[0]}:${parts[1]}';
+        final verseKey = '${parts[0]}:${parts[1]}';
         final int wordPos = int.parse(parts[2]);
 
         if (lastWordPos.containsKey(verseKey)) {
@@ -542,8 +531,7 @@ void main() {
           expect(
             wordPos,
             1,
-            reason:
-                'Verse $verseKey should start at position 1, got $wordPos',
+            reason: 'Verse $verseKey should start at position 1, got $wordPos',
           );
         }
         lastWordPos[verseKey] = wordPos;
@@ -551,11 +539,10 @@ void main() {
     });
 
     test('first word of Quran is 1:1:1 on page 1', () {
-      final Map<String, dynamic> lines =
-          pageIndex['1'] as Map<String, dynamic>;
-      for (int line = 1; line <= 15; line++) {
-        final List<String> words =
-            (lines['$line'] as List<dynamic>).cast<String>();
+      final lines = pageIndex['1'] as Map<String, dynamic>;
+      for (var line = 1; line <= 15; line++) {
+        final List<String> words = (lines['$line'] as List<dynamic>)
+            .cast<String>();
         if (words.isNotEmpty) {
           expect(words.first, '1:1:1');
           break;
@@ -564,8 +551,8 @@ void main() {
     });
 
     test('last word of Quran is on page 604 line 15', () {
-      final List<String> line15 =
-          (pageIndex['604']['15'] as List<dynamic>).cast<String>();
+      final List<String> line15 = (pageIndex['604']['15'] as List<dynamic>)
+          .cast<String>();
       expect(line15.isNotEmpty, isTrue);
       final String lastKey = line15.last;
       expect(
@@ -580,15 +567,31 @@ void main() {
   // Pages that previously had only 14 lines (the original bug)
   // ---------------------------------------------------------------------------
   group('previously broken pages (14-line bug)', () {
-    const List<int> affectedPages = [
-      76, 207, 331, 341, 349, 366, 376, 414,
-      417, 445, 452, 498, 506, 525, 548, 555, 557, 584,
+    const affectedPages = <int>[
+      76,
+      207,
+      331,
+      341,
+      349,
+      366,
+      376,
+      414,
+      417,
+      445,
+      452,
+      498,
+      506,
+      525,
+      548,
+      555,
+      557,
+      584,
     ];
 
-    for (final int page in affectedPages) {
+    for (final page in affectedPages) {
       test('page $page has content on line 15', () {
-        final List<String> line15 =
-            (pageIndex['$page']['15'] as List<dynamic>).cast<String>();
+        final List<String> line15 = (pageIndex['$page']['15'] as List<dynamic>)
+            .cast<String>();
         expect(
           line15.isNotEmpty,
           isTrue,
@@ -603,10 +606,9 @@ void main() {
   // ---------------------------------------------------------------------------
   group('global invariants', () {
     test('total glyph count matches qpc-v4.json', () {
-      int pageIndexTotal = 0;
+      var pageIndexTotal = 0;
       for (final MapEntry<String, dynamic> pageEntry in pageIndex.entries) {
-        final Map<String, dynamic> lines =
-            pageEntry.value as Map<String, dynamic>;
+        final lines = pageEntry.value as Map<String, dynamic>;
         for (final dynamic lineEntry in lines.values) {
           pageIndexTotal += (lineEntry as List<dynamic>).length;
         }
@@ -619,11 +621,10 @@ void main() {
     });
 
     test('pages 3-604 have at least 9 lines with content', () {
-      for (int page = 3; page <= 604; page++) {
-        final Map<String, dynamic> lines =
-            pageIndex['$page'] as Map<String, dynamic>;
-        int contentLines = 0;
-        for (int line = 1; line <= 15; line++) {
+      for (var page = 3; page <= 604; page++) {
+        final lines = pageIndex['$page'] as Map<String, dynamic>;
+        var contentLines = 0;
+        for (var line = 1; line <= 15; line++) {
           if ((lines['$line'] as List<dynamic>).isNotEmpty) {
             contentLines++;
           }
@@ -637,10 +638,9 @@ void main() {
     });
 
     test('no page has more than 190 words', () {
-      for (int page = 1; page <= 604; page++) {
-        final Map<String, dynamic> lines =
-            pageIndex['$page'] as Map<String, dynamic>;
-        int total = 0;
+      for (var page = 1; page <= 604; page++) {
+        final lines = pageIndex['$page'] as Map<String, dynamic>;
+        var total = 0;
         for (final dynamic lineEntry in lines.values) {
           total += (lineEntry as List<dynamic>).length;
         }
@@ -655,12 +655,9 @@ void main() {
     test('surah:ayah metadata in qpc-v4 matches word key', () {
       for (final MapEntry<String, dynamic> entry in qpcV4.entries) {
         final List<String> parts = entry.key.split(':');
-        final Map<String, dynamic> data =
-            entry.value as Map<String, dynamic>;
-        expect(data['surah'], parts[0],
-            reason: '${entry.key}: surah mismatch');
-        expect(data['ayah'], parts[1],
-            reason: '${entry.key}: ayah mismatch');
+        final data = entry.value as Map<String, dynamic>;
+        expect(data['surah'], parts[0], reason: '${entry.key}: surah mismatch');
+        expect(data['ayah'], parts[1], reason: '${entry.key}: ayah mismatch');
       }
     });
   });
