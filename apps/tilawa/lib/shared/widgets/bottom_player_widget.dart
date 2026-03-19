@@ -57,7 +57,9 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   late AnimationController _dismissAnimController;
 
   /// The height of the mini player bar (excluding nav bar offset).
-  double get _miniPlayerHeight => 88.h;
+  /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
+  /// inner padding (12+12) + row content (~48) = ~99.
+  double get _miniPlayerHeight => 100.h;
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;

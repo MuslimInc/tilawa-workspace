@@ -94,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
                           audioState.shouldShowBottomPlayer &&
                           audioState.currentAudio != null;
                       final double playerHeight = isVisible && playerShouldShow
-                          ? 88.h
+                          ? 100.h
                           : 0;
 
                       final double contentBottomPadding = isVisible
