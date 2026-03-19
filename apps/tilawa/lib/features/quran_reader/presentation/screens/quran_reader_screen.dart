@@ -9,7 +9,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
 
 /// Screen for reading Quran text in a page-by-page Mushaf view.
@@ -50,6 +50,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
     // Ensure UI is visible when entering the reader
     context.read<UiVisibilityCubit>().show();
+
+    // Pause audio playback for a distraction-free reading experience
+    final audioBloc = context.read<AudioPlayerBloc>();
+    if (audioBloc.state.isPlaying) {
+      audioBloc.add(const AudioPlayerEvent.pauseAudio());
+    }
 
     int initialPage = 1;
 
@@ -239,7 +245,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   );
                 },
               ),
-              const Positioned.fill(child: BottomPlayerWidget()),
             ],
           );
         },
