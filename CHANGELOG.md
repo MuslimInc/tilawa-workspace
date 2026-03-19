@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2+19] - 2026-03-19
+
+### Added
+
+- **Quran Reader**: Added last-read navigation, a searchable surah index, and a dedicated font loader flow that downloads QCF4 fonts on demand before opening the reader.
+- **Reciters**: Added favorites-only filtering on the reciters list and quick Quran access from the reciters screen.
+- **Downloads**: Added pause and resume actions for individual surah downloads.
+
+### Changed
+
+- **Quran Reader**: Reworked page rendering around JSON glyph and page-index data with responsive layout tuning, better `PageView` synchronization, and improved caching/performance.
+- **Navigation**: Refined the main screen and bottom player so the player remains persistent while the navigation chrome can hide and show dynamically.
+- **Reader UX**: Locked the app to portrait by default, while allowing landscape inside the Quran reader and automatically pausing audio playback during reading.
+- **Reciters**: Improved scrolling to the currently playing surah in reciter details and refreshed several reciter list/grid layouts.
+- **Dependencies**: Updated the Dart SDK to `^3.11.0`, upgraded `flutter_screenutil_plus` to `1.5.0`, and refreshed `flutter_local_notifications` and `timezone`.
+
+### Fixed
+
+- **Downloads**: Fixed batch download tracking, queue synchronization, cancellation handling, and recovery behavior.
+- **Quran Reader**: Fixed Mushaf word spacing and page layout issues, including inconsistent early-page handling.
+- **UI**: Improved scroll-to-top behavior and playback state synchronization across reader and reciter screens.
+
+### Removed
+
+- **Assets**: Removed bundled QCF font assets from the app package in favor of downloadable fonts.
+
 ## [0.1.0+17] - 2026-02-22
 
 ### Added
