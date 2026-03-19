@@ -306,6 +306,12 @@ class _PageContentState extends State<PageContent>
                   final isLandscape =
                       MediaQuery.orientationOf(context) ==
                       Orientation.landscape;
+
+                  // Pages 1-2 use the same 15-line grid height as all
+                  // other pages. With BoxFit.contain the text stays compact
+                  // and the column centers vertically in available space.
+                  final bool isSpecialPage =
+                      widget.pageNumber == 1 || widget.pageNumber == 2;
                   final double lineHeight =
                       metrics.fontSize * metrics.fontHeight;
 
@@ -325,6 +331,11 @@ class _PageContentState extends State<PageContent>
                     fontSize: metrics.fontSize,
                     height: metrics.fontHeight,
                   );
+
+                  // No special short-surah detection needed — QCF fonts
+                  // are designed to fill width on all pages (BoxFit.fill).
+                  // Only pages 1-2 use contain since they have fewer than
+                  // 15 content lines.
 
                   final List<Widget> lineWidgets = List.generate(15, (
                     lineIndex,
@@ -358,7 +369,7 @@ class _PageContentState extends State<PageContent>
                             _getVerseQCF(1, 1, spaceChar: '\u200A'),
                             style: TextStyle(
                               fontFamily: 'QCF_P001',
-                              fontSize: metrics.fontSize * 1.1,
+                              // fontSize: metrics.fontSize * 1.1,
                               color: widget.textColor,
                               height: 1.0,
                             ),
@@ -384,28 +395,41 @@ class _PageContentState extends State<PageContent>
 
                     if (spans.isEmpty) return const SizedBox();
 
+                    final richText = RichText(
+                      textDirection: TextDirection.rtl,
+                      textHeightBehavior: const TextHeightBehavior(
+                        applyHeightToFirstAscent: false,
+                        applyHeightToLastDescent: false,
+                      ),
+                      text: TextSpan(children: spans),
+                    );
+
+                    // Pages 1-2: contain to keep text compact.
+                    // All other pages: fill for edge-to-edge Mushaf layout
+                    // (QCF fonts are designed to fill width).
+                    final BoxFit lineFit = isSpecialPage
+                        ? BoxFit.contain
+                        : BoxFit.fill;
+
                     return Container(
                       width: double.infinity,
                       height: lineHeight,
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: FittedBox(
-                        fit: (widget.pageNumber == 1 || widget.pageNumber == 2)
-                            ? BoxFit.contain
-                            : BoxFit.fill,
-                        child: RichText(
-                          textDirection: TextDirection.rtl,
-                          // textAlign: TextAlign.justify,
-                          textHeightBehavior: const TextHeightBehavior(
-                            applyHeightToFirstAscent: false,
-                            applyHeightToLastDescent: false,
-                          ),
-                          text: TextSpan(children: spans),
-                        ),
+                        fit: lineFit,
+                        child: richText,
                       ),
                     );
                   });
 
-                  final lines = Column(children: lineWidgets);
+                  // Pages 1-2 have few content lines — center
+                  // them vertically instead of top-aligning.
+                  final lines = Column(
+                    mainAxisAlignment: isSpecialPage
+                        ? MainAxisAlignment.center
+                        : MainAxisAlignment.start,
+                    children: lineWidgets,
+                  );
 
                   if (isLandscape) {
                     return SingleChildScrollView(child: lines);
