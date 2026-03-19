@@ -2,6 +2,8 @@ part of 'audio_player_bloc.dart';
 
 enum AudioPlayerStatus { initial, loading, success }
 
+enum SleepTimerType { preset, endOfTrack, custom }
+
 @freezed
 abstract class AudioPlayerState with _$AudioPlayerState {
   @JsonSerializable(explicitToJson: true)
@@ -16,6 +18,7 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     @Default(AudioShuffleMode.none) AudioShuffleMode shuffleMode,
     DateTime? sleepTimerTargetTime,
     Duration? lastSleepTimerDuration,
+    SleepTimerType? lastSleepTimerType,
     String? dismissedAudioId,
   }) = _AudioPlayerState;
 

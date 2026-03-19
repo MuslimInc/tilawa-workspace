@@ -68,8 +68,7 @@ void main() {
     testWidgets('renders correctly when timer is inactive', (tester) async {
       await pumpDialog(tester, const SleepTimerDialog());
 
-      // Note: recitationDuration is "مدة التلاوة" in app_en.arb
-      expect(find.text('مدة التلاوة'), findsOneWidget);
+      expect(find.text('Recitation Duration'), findsOneWidget);
       expect(find.text('15 Minutes'), findsOneWidget);
       expect(find.text('30 Minutes'), findsOneWidget);
       expect(find.text('60 Minutes'), findsOneWidget);
@@ -134,7 +133,10 @@ void main() {
 
       verify(
         () => mockAudioPlayerBloc.add(
-          const AudioPlayerEvent.setSleepTimer(Duration(minutes: 15)),
+          const AudioPlayerEvent.setSleepTimer(
+            Duration(minutes: 15),
+            type: SleepTimerType.endOfTrack,
+          ),
         ),
       ).called(1);
     });
@@ -157,15 +159,14 @@ void main() {
       expect(chip.onPressed, isNull);
     });
 
-    testWidgets('renders End of Track as active (Lines 188, 192)', (
-      tester,
-    ) async {
+    testWidgets('renders End of Track as active', (tester) async {
       const remaining = Duration(minutes: 15);
       when(() => mockAudioPlayerBloc.state).thenReturn(
         AudioPlayerState(
           status: AudioPlayerStatus.success,
           sleepTimerTargetTime: DateTime.now().add(remaining),
           lastSleepTimerDuration: remaining,
+          lastSleepTimerType: SleepTimerType.endOfTrack,
           positionData: const PositionData(
             position: Duration(minutes: 5),
             bufferedPosition: Duration(minutes: 10),
@@ -188,12 +189,13 @@ void main() {
       );
     });
 
-    testWidgets('renders Custom as active (Lines 240, 244)', (tester) async {
+    testWidgets('renders Custom as active', (tester) async {
       when(() => mockAudioPlayerBloc.state).thenReturn(
         AudioPlayerState(
           status: AudioPlayerStatus.success,
           sleepTimerTargetTime: DateTime.now().add(const Duration(minutes: 45)),
           lastSleepTimerDuration: const Duration(minutes: 45),
+          lastSleepTimerType: SleepTimerType.custom,
         ),
       );
 
@@ -247,7 +249,10 @@ void main() {
 
       verify(
         () => mockAudioPlayerBloc.add(
-          const AudioPlayerEvent.setSleepTimer(Duration(minutes: 15)),
+          const AudioPlayerEvent.setSleepTimer(
+            Duration(minutes: 15),
+            type: SleepTimerType.custom,
+          ),
         ),
       ).called(1);
     });

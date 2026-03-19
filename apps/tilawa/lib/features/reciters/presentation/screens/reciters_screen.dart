@@ -93,11 +93,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 title: Text(l10n.reciters),
                 actions: [
                   IconButton(
-                    icon: const Icon(FluentIcons.book_open_24_regular),
-                    tooltip: l10n.quran,
-                    onPressed: () => const QuranLastReadRoute().push(context),
-                  ),
-                  IconButton(
                     icon: const Icon(FluentIcons.bookmark_24_regular),
                     tooltip: l10n.bookmarks,
                     onPressed: () => const BookmarksRoute().push(context),
@@ -108,6 +103,13 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     onPressed: () => const HistoryRoute().push(context),
                   ),
                 ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => const QuranLastReadRoute().push(context),
+                backgroundColor: const Color(0xFFA68B67),
+                foregroundColor: Colors.white,
+                elevation: 4,
+                child: const Icon(Icons.menu_book_rounded),
               ),
               body: Column(
                 children: [

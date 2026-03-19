@@ -15,7 +15,6 @@ import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/qibla/presentation/bloc/qibla_bloc.dart';
-import '../features/quran_reader/presentation/screens/quran_font_loader_screen.dart';
 import '../features/reciters/presentation/screens/reciters_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../shared/widgets/bottom_player_widget.dart';
@@ -38,7 +37,6 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const QuranFontLoaderScreen(surahNumber: 0),
     const RecitersScreen(),
     const PrayerTimesScreen(),
     const AthkarCategoriesScreen(),
@@ -47,21 +45,8 @@ class _MainScreenState extends State<MainScreen> {
 
   void _handleTabSideEffects(BuildContext context, int index) {
     final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
-    prayerTimesBloc.setCountdownActive(index == 2);
-
-    if (index == 5) {
-      // Qibla is no longer in main nav, but if it was index 5
-      // context.read<QiblaBloc>().add(const CheckLocationService());
-    } else {
-      context.read<QiblaBloc>().add(const StopQiblaStream());
-    }
-  }
-
-  Color _getBackgroundColor(BuildContext context) {
-    if (_currentIndex == 0) {
-      return const Color(0xFFF9F5EF); // Match Quran reader bg
-    }
-    return Theme.of(context).scaffoldBackgroundColor;
+    prayerTimesBloc.setCountdownActive(index == 1);
+    context.read<QiblaBloc>().add(const StopQiblaStream());
   }
 
   @override
@@ -77,7 +62,7 @@ class _MainScreenState extends State<MainScreen> {
         BlocProvider(
           create: (_) => getIt<PrayerTimesBloc>()
             ..add(const PrayerTimesEvent.loadPrayerTimes())
-            ..setCountdownActive(_currentIndex == 2),
+            ..setCountdownActive(_currentIndex == 1),
         ),
       ],
       child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
@@ -95,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
               _handleTabSideEffects(context, _currentIndex);
             },
             child: Scaffold(
-              backgroundColor: _getBackgroundColor(context),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               extendBody: true,
               resizeToAvoidBottomInset: false,
               body: BlocBuilder<UiVisibilityCubit, bool>(
@@ -112,17 +97,19 @@ class _MainScreenState extends State<MainScreen> {
                           ? 88.h
                           : 0;
 
+                      final double contentBottomPadding = isVisible
+                          ? (80.h + playerHeight + bottomPadding)
+                          : (bottomPadding + 20.h);
+
                       return Stack(
                         children: [
-                          // Main content layer - Using Positioned.fill to keep layout bounds stable
+                          // Main content layer
                           Positioned.fill(
                             child: AnimatedPadding(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
                               padding: EdgeInsets.only(
-                                bottom: isVisible
-                                    ? (80.h + playerHeight + bottomPadding)
-                                    : (bottomPadding + 20.h),
+                                bottom: contentBottomPadding,
                               ),
                               child: IndexedStack(
                                 index: _currentIndex,
@@ -197,7 +184,7 @@ class _MainScreenState extends State<MainScreen> {
                                   children: [
                                     Expanded(
                                       child: _BottomNavItem(
-                                        index: 4,
+                                        index: 3,
                                         currentIndex: _currentIndex,
                                         icon: FluentIcons.settings_24_regular,
                                         activeIcon:
@@ -211,7 +198,7 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                     Expanded(
                                       child: _BottomNavItem(
-                                        index: 3,
+                                        index: 2,
                                         currentIndex: _currentIndex,
                                         icon: FluentIcons.book_open_24_regular,
                                         activeIcon:
@@ -226,21 +213,7 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                     Expanded(
                                       child: _BottomNavItem(
-                                        index: 0,
-                                        currentIndex: _currentIndex,
-                                        icon: FluentIcons.book_24_regular,
-                                        activeIcon: FluentIcons.book_24_filled,
-                                        svgPath: 'assets/icons/quran_icon.svg',
-                                        label: context.l10n.quran,
-                                        onTap: (index) {
-                                          setState(() => _currentIndex = index);
-                                          _handleTabSideEffects(context, index);
-                                        },
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _BottomNavItem(
-                                        index: 2,
+                                        index: 1,
                                         currentIndex: _currentIndex,
                                         icon: FluentIcons.clock_24_regular,
                                         activeIcon: FluentIcons.clock_24_filled,
@@ -253,7 +226,7 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                     Expanded(
                                       child: _BottomNavItem(
-                                        index: 1,
+                                        index: 0,
                                         currentIndex: _currentIndex,
                                         icon: FluentIcons.person_24_regular,
                                         activeIcon:

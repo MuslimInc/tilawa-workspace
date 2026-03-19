@@ -22,12 +22,6 @@ class SurahServiceImpl implements SurahService {
   }
 
   @override
-  String getNameEnglish(int surahNumber) {
-    _validateSurahNumber(surahNumber);
-    return surah[surahNumber]!.name;
-  }
-
-  @override
   String getNameArabic(int surahNumber) {
     _validateSurahNumber(surahNumber);
     return surah[surahNumber]!.arabicName;
@@ -43,18 +37,6 @@ class SurahServiceImpl implements SurahService {
   int getVerseCount(int surahNumber) {
     _validateSurahNumber(surahNumber);
     return surah[surahNumber]!.ayahCount;
-  }
-
-  @override
-  String getEnglishName(int surahNumber) {
-    _validateSurahNumber(surahNumber);
-    return surah[surahNumber]!.englishName;
-  }
-
-  @override
-  String getTurkishName(int surahNumber) {
-    _validateSurahNumber(surahNumber);
-    return surah[surahNumber]!.turkishName;
   }
 
   @override

@@ -382,12 +382,14 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
         // Change status to initial and mark current audio as dismissed.
         // We preserve currentAudio to ensure we know "which" audio was dismissed.
-        // Also clear the sleep timer target time.
+        // Clear sleep timer state entirely — stop ends the session.
         emit(
           state.copyWith(
             status: AudioPlayerStatus.initial,
             dismissedAudioId: state.currentAudio?.id,
             sleepTimerTargetTime: null,
+            lastSleepTimerDuration: null,
+            lastSleepTimerType: null,
           ),
         );
       },
@@ -469,6 +471,16 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         // Don't proceed with playback
       },
       (_) async {
+        // New playback session — reset sleep timer state
+        _sleepTimer?.cancel();
+        _sleepTimer = null;
+        emit(
+          state.copyWith(
+            sleepTimerTargetTime: null,
+            lastSleepTimerDuration: null,
+            lastSleepTimerType: null,
+          ),
+        );
         // Playback allowed - proceed normally
         await _playFromQueue(event.queue, event.index);
       },
@@ -553,6 +565,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       state.copyWith(
         sleepTimerTargetTime: DateTime.now().add(event.duration),
         lastSleepTimerDuration: event.duration,
+        lastSleepTimerType: event.type,
         status: AudioPlayerStatus.success,
       ),
     );
@@ -570,6 +583,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         lastSleepTimerDuration: event.clearPreference
             ? null
             : state.lastSleepTimerDuration,
+        lastSleepTimerType: event.clearPreference
+            ? null
+            : state.lastSleepTimerType,
         status: AudioPlayerStatus.success,
       ),
     );

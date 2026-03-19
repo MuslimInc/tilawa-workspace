@@ -15,7 +15,7 @@ String getSurahName(int surahNumber) =>
 ///
 /// Throws [QuranException] if surah number is invalid.
 String getSurahNameEnglish(int surahNumber) =>
-    QuranServiceLocator.surahService.getNameEnglish(surahNumber);
+    QuranServiceLocator.surahService.getName(surahNumber);
 
 /// Takes [surahNumber] and returns the Surah name in Arabic.
 ///

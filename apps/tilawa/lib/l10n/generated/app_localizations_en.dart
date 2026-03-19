@@ -770,7 +770,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startJourney => 'Let\'s start our journey with the Quran';
 
   @override
-  String get recitationDuration => 'مدة التلاوة';
+  String get recitationDuration => 'Recitation Duration';
 
   @override
   String get minutes15 => '15 Minutes';

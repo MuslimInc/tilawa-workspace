@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Tests that validate [quran_page_index.json] and [quran_page_line_map.json]
@@ -16,21 +15,19 @@ void main() {
   late Map<String, dynamic> qpcV4;
 
   setUpAll(() async {
-    TestWidgetsFlutterBinding.ensureInitialized();
+    final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+        ? 'assets/quran_fonts'
+        : 'packages/quran/assets/quran_fonts';
 
-    const assetsBase = 'assets/quran_fonts';
+    pageIndex = json.decode(
+      File('$base/quran_page_index.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    qpcV4 = json.decode(
+      File('$base/qpc-v4.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
 
-    // pageIndex and qpcV4 are bundled Flutter assets.
-    final List<String> assetResults = await Future.wait([
-      rootBundle.loadString('packages/quran/$assetsBase/quran_page_index.json'),
-      rootBundle.loadString('packages/quran/$assetsBase/qpc-v4.json'),
-    ]);
-    pageIndex = json.decode(assetResults[0]) as Map<String, dynamic>;
-    qpcV4 = json.decode(assetResults[1]) as Map<String, dynamic>;
-
-    // lineMap is not a bundled asset — read it directly from the file system.
     final String lineMapRaw = File(
-      '$assetsBase/quran_page_line_map.json',
+      '$base/quran_page_line_map.json',
     ).readAsStringSync();
     lineMap = json.decode(lineMapRaw) as Map<String, dynamic>;
   });

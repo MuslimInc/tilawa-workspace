@@ -3,8 +3,6 @@ final Map<
   ({
     String name,
     int ayahCount,
-    String englishName,
-    String turkishName,
     String placeOfRevelation,
     String arabicName,
     String surahInfo,
@@ -17,8 +15,6 @@ surah = {
   1: (
     name: r'''Al Fatiha''',
     ayahCount: 7,
-    englishName: r'''The Opening''',
-    turkishName: r'''Fâtiha''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الفاتحة''',
     surahInfo:
@@ -31,8 +27,6 @@ surah = {
   2: (
     name: r'''Al Baqarah''',
     ayahCount: 286,
-    englishName: r'''The Cow''',
-    turkishName: r'''Bakara''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''البقرة''',
     surahInfo:
@@ -45,8 +39,6 @@ surah = {
   3: (
     name: r'''Al Imran''',
     ayahCount: 200,
-    englishName: r'''The Family of Imran''',
-    turkishName: r'''Âl-i İmrân''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''آل عمران''',
     surahInfo:
@@ -59,8 +51,6 @@ surah = {
   4: (
     name: r'''An Nisa''',
     ayahCount: 176,
-    englishName: r'''The Women''',
-    turkishName: r'''Nisâ''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''النساء''',
     surahInfo:
@@ -72,8 +62,6 @@ surah = {
   5: (
     name: r'''Al Ma'idah''',
     ayahCount: 120,
-    englishName: r'''The Table''',
-    turkishName: r'''Mâide''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''المائدة''',
     surahInfo:
@@ -86,8 +74,6 @@ surah = {
   6: (
     name: r'''Al An'am''',
     ayahCount: 165,
-    englishName: r'''The Cattle''',
-    turkishName: r'''En'âm''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الأنعام''',
     surahInfo:
@@ -99,8 +85,6 @@ surah = {
   7: (
     name: r'''Al A'raf''',
     ayahCount: 206,
-    englishName: r'''The Heights''',
-    turkishName: r'''A'râf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الأعراف''',
     surahInfo:
@@ -112,8 +96,6 @@ surah = {
   8: (
     name: r'''Al Anfal''',
     ayahCount: 75,
-    englishName: r'''The Spoils of War''',
-    turkishName: r'''Enfâl''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الأنفال''',
     surahInfo:
@@ -126,8 +108,6 @@ surah = {
   9: (
     name: r'''At Tawbah''',
     ayahCount: 129,
-    englishName: r'''At-Tawbah''',
-    turkishName: r'''Tevbe''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''التوبة''',
     surahInfo:
@@ -140,8 +120,6 @@ surah = {
   10: (
     name: r'''Al Yunus''',
     ayahCount: 109,
-    englishName: r'''Jonah''',
-    turkishName: r'''Yûnus''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''يونس''',
     surahInfo:
@@ -153,8 +131,6 @@ surah = {
   11: (
     name: r'''Hud''',
     ayahCount: 123,
-    englishName: r'''Hud''',
-    turkishName: r'''Hûd''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''هود''',
     surahInfo:
@@ -166,8 +142,6 @@ surah = {
   12: (
     name: r'''Yusuf''',
     ayahCount: 111,
-    englishName: r'''Joseph''',
-    turkishName: r'''Yûsuf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''يوسف''',
     surahInfo:
@@ -179,8 +153,6 @@ surah = {
   13: (
     name: r'''Ar Ra'd''',
     ayahCount: 43,
-    englishName: r'''The Thunder''',
-    turkishName: r'''Ra'd''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الرعد''',
     surahInfo:
@@ -192,8 +164,6 @@ surah = {
   14: (
     name: r'''Ibrahim''',
     ayahCount: 52,
-    englishName: r'''Abraham''',
-    turkishName: r'''İbrâhîm''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''ابراهيم''',
     surahInfo:
@@ -205,8 +175,6 @@ surah = {
   15: (
     name: r'''Al Hijr''',
     ayahCount: 99,
-    englishName: r'''The Stoneland''',
-    turkishName: r'''Hicr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الحجر''',
     surahInfo:
@@ -218,8 +186,6 @@ surah = {
   16: (
     name: r'''An Nahl''',
     ayahCount: 128,
-    englishName: r'''The Honey Bee''',
-    turkishName: r'''Nahl''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''النحل''',
     surahInfo:
@@ -230,10 +196,8 @@ surah = {
     surahNamesFromBook: r'''كتاب الإتقان في علوم القرآن [الجلال السيوطي]''',
   ),
   17: (
-    name: r"""Al Isra'""",
+    name: r'''Al Isra''',
     ayahCount: 111,
-    englishName: r'''The Night Journey''',
-    turkishName: r'''İsrâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الإسراء''',
     surahInfo:
@@ -246,8 +210,6 @@ surah = {
   18: (
     name: r'''Al Kahf''',
     ayahCount: 110,
-    englishName: r'''The Cave''',
-    turkishName: r'''Kehf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الكهف''',
     surahInfo:
@@ -260,8 +222,6 @@ surah = {
   19: (
     name: r'''Maryam''',
     ayahCount: 98,
-    englishName: r'''Mary''',
-    turkishName: r'''Meryem''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''مريم''',
     surahInfo:
@@ -273,8 +233,6 @@ surah = {
   20: (
     name: r'''Ta Ha''',
     ayahCount: 135,
-    englishName: r'''Ta Ha''',
-    turkishName: r'''Tâhâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''طه''',
     surahInfo:
@@ -287,8 +245,6 @@ surah = {
   21: (
     name: r'''Al Anbiya''',
     ayahCount: 112,
-    englishName: r'''The Prophets''',
-    turkishName: r'''Enbiyâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الأنبياء''',
     surahInfo:
@@ -301,8 +257,6 @@ surah = {
   22: (
     name: r'''Al Hajj''',
     ayahCount: 78,
-    englishName: r'''The Pilgrimage''',
-    turkishName: r'''Hac''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الحج''',
     surahInfo:
@@ -314,8 +268,6 @@ surah = {
   23: (
     name: r'''Al Mu minun''',
     ayahCount: 118,
-    englishName: r'''The Believers''',
-    turkishName: r'''Mü'minûn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المؤمنون''',
     surahInfo:
@@ -327,8 +279,6 @@ surah = {
   24: (
     name: r'''An Nur''',
     ayahCount: 64,
-    englishName: r'''The Light''',
-    turkishName: r'''Nûr''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''النور''',
     surahInfo:
@@ -340,8 +290,6 @@ surah = {
   25: (
     name: r'''Al Furqan''',
     ayahCount: 77,
-    englishName: r'''The Criterion''',
-    turkishName: r'''Furkân''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الفرقان''',
     surahInfo:
@@ -353,8 +301,6 @@ surah = {
   26: (
     name: r'''As Su'ara''',
     ayahCount: 227,
-    englishName: r'''The Poets''',
-    turkishName: r'''Şuarâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الشعراء''',
     surahInfo:
@@ -367,8 +313,6 @@ surah = {
   27: (
     name: r'''An Naml''',
     ayahCount: 93,
-    englishName: r'''The Ant''',
-    turkishName: r'''Neml''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''النمل''',
     surahInfo:
@@ -380,8 +324,6 @@ surah = {
   28: (
     name: r'''Al Qasas''',
     ayahCount: 88,
-    englishName: r'''The Narrations''',
-    turkishName: r'''Kasas''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القصص''',
     surahInfo:
@@ -393,8 +335,6 @@ surah = {
   29: (
     name: r'''Al Ankabut''',
     ayahCount: 69,
-    englishName: r'''The Spider''',
-    turkishName: r'''Ankebût''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''العنكبوت''',
     surahInfo:
@@ -406,8 +346,6 @@ surah = {
   30: (
     name: r'''Ar Rum''',
     ayahCount: 60,
-    englishName: r'''Rome''',
-    turkishName: r'''Rûm''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الروم''',
     surahInfo:
@@ -419,8 +357,6 @@ surah = {
   31: (
     name: r'''Luqman''',
     ayahCount: 34,
-    englishName: r'''Luqman''',
-    turkishName: r'''Lokmân''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''لقمان''',
     surahInfo:
@@ -432,8 +368,6 @@ surah = {
   32: (
     name: r'''As Sajdah''',
     ayahCount: 30,
-    englishName: r'''The Prostration''',
-    turkishName: r'''Secde''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''السجدة''',
     surahInfo:
@@ -445,8 +379,6 @@ surah = {
   33: (
     name: r'''Al Ahzab''',
     ayahCount: 73,
-    englishName: r'''The Clans''',
-    turkishName: r'''Ahzâb''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الأحزاب''',
     surahInfo:
@@ -456,10 +388,8 @@ surah = {
     surahNamesFromBook: r'',
   ),
   34: (
-    name: r"""Saba'""",
+    name: r'''Saba''',
     ayahCount: 54,
-    englishName: r'''Sheba''',
-    turkishName: r"""Sebe'""",
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''سبإ''',
     surahInfo:
@@ -471,8 +401,6 @@ surah = {
   35: (
     name: r'''Fatir''',
     ayahCount: 45,
-    englishName: r'''The Originator''',
-    turkishName: r'''Fâtır''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''فاطر''',
     surahInfo:
@@ -484,8 +412,6 @@ surah = {
   36: (
     name: r'''Ya'sin''',
     ayahCount: 83,
-    englishName: r'''Ya Sin''',
-    turkishName: r'''Yâsîn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''يس''',
     surahInfo:
@@ -498,8 +424,6 @@ surah = {
   37: (
     name: r'''As Saffat''',
     ayahCount: 182,
-    englishName: r'''Those Who Set The Ranks''',
-    turkishName: r'''Sâffât''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الصافات''',
     surahInfo:
@@ -511,8 +435,6 @@ surah = {
   38: (
     name: r'''Saad''',
     ayahCount: 88,
-    englishName: r'''Ṣād''',
-    turkishName: r'''Sâd''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''ص''',
     surahInfo:
@@ -524,8 +446,6 @@ surah = {
   39: (
     name: r'''Az Zumar''',
     ayahCount: 75,
-    englishName: r'''The Crowds''',
-    turkishName: r'''Zümer''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الزمر''',
     surahInfo:
@@ -537,8 +457,6 @@ surah = {
   40: (
     name: r'''Ghafir''',
     ayahCount: 85,
-    englishName: r'''The Forgiver''',
-    turkishName: r'''Mü'min''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''غافر''',
     surahInfo:
@@ -551,8 +469,6 @@ surah = {
   41: (
     name: r'''Fussilat''',
     ayahCount: 54,
-    englishName: r'''Expounded''',
-    turkishName: r'''Fussilet''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''فصلت''',
     surahInfo:
@@ -564,8 +480,6 @@ surah = {
   42: (
     name: r'''As Sura''',
     ayahCount: 53,
-    englishName: r'''The Consultation''',
-    turkishName: r'''Şûrâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الشورى''',
     surahInfo:
@@ -577,8 +491,6 @@ surah = {
   43: (
     name: r'''Az Zukhruf''',
     ayahCount: 89,
-    englishName: r'''The Gold Adornments''',
-    turkishName: r'''Zuhruf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الزخرف''',
     surahInfo:
@@ -590,8 +502,6 @@ surah = {
   44: (
     name: r'''Ad Dukhan''',
     ayahCount: 59,
-    englishName: r'''The Smoke''',
-    turkishName: r'''Duhân''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الدخان''',
     surahInfo:
@@ -603,8 +513,6 @@ surah = {
   45: (
     name: r'''Al Jaathiyah''',
     ayahCount: 37,
-    englishName: r'''The Kneeling Down''',
-    turkishName: r'''Câsiye''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الجاثية''',
     surahInfo:
@@ -617,8 +525,6 @@ surah = {
   46: (
     name: r'''Al Ahqaf''',
     ayahCount: 35,
-    englishName: r'''Winding Sand tracts''',
-    turkishName: r'''Ahkâf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الأحقاف''',
     surahInfo:
@@ -630,8 +536,6 @@ surah = {
   47: (
     name: r'''Muhammad''',
     ayahCount: 38,
-    englishName: r'''Muhammad''',
-    turkishName: r'''Muhammed''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''محمد''',
     surahInfo:
@@ -643,8 +547,6 @@ surah = {
   48: (
     name: r'''Al Fath''',
     ayahCount: 29,
-    englishName: r'''The Victory''',
-    turkishName: r'''Fetih''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الفتح''',
     surahInfo:
@@ -656,8 +558,6 @@ surah = {
   49: (
     name: r'''Al Hujurut''',
     ayahCount: 18,
-    englishName: r'''The Private Apartments''',
-    turkishName: r'''Hucurât''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الحجرات''',
     surahInfo:
@@ -669,8 +569,6 @@ surah = {
   50: (
     name: r'''Qaaf''',
     ayahCount: 45,
-    englishName: r'''Q̈āf''',
-    turkishName: r'''Kâf''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''ق''',
     surahInfo:
@@ -682,8 +580,6 @@ surah = {
   51: (
     name: r'''Ad Dariyat''',
     ayahCount: 60,
-    englishName: r'''The Wind That Scatter''',
-    turkishName: r'''Zâriyât''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الذاريات''',
     surahInfo:
@@ -695,8 +591,6 @@ surah = {
   52: (
     name: r'''At Toor''',
     ayahCount: 49,
-    englishName: r'''The Mount''',
-    turkishName: r'''Tûr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الطور''',
     surahInfo:
@@ -708,8 +602,6 @@ surah = {
   53: (
     name: r'''An Najm''',
     ayahCount: 62,
-    englishName: r'''The Star''',
-    turkishName: r'''Necm''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''النجم''',
     surahInfo:
@@ -721,8 +613,6 @@ surah = {
   54: (
     name: r'''Al Qamar''',
     ayahCount: 55,
-    englishName: r'''The Moon''',
-    turkishName: r'''Kamer''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القمر''',
     surahInfo:
@@ -735,8 +625,6 @@ surah = {
   55: (
     name: r'''Ar Rahman''',
     ayahCount: 78,
-    englishName: r'''The Most Merciful''',
-    turkishName: r'''Rahmân''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الرحمن''',
     surahInfo:
@@ -749,8 +637,6 @@ surah = {
   56: (
     name: r'''Al Waqiah''',
     ayahCount: 96,
-    englishName: r'''The Inevitable''',
-    turkishName: r'''Vâkıa''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الواقعة''',
     surahInfo:
@@ -762,8 +648,6 @@ surah = {
   57: (
     name: r'''Al Hadeed''',
     ayahCount: 29,
-    englishName: r'''The Iron''',
-    turkishName: r'''Hadîd''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الحديد''',
     surahInfo:
@@ -775,8 +659,6 @@ surah = {
   58: (
     name: r'''Al Mujadila''',
     ayahCount: 22,
-    englishName: r'''The Pleading''',
-    turkishName: r'''Mücâdele''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''المجادلة''',
     surahInfo:
@@ -789,8 +671,6 @@ surah = {
   59: (
     name: r'''Al Hashr''',
     ayahCount: 24,
-    englishName: r'''The Mustering''',
-    turkishName: r'''Haşr''',
     placeOfRevelation: r'''Manidah''',
     arabicName: r'''الحشر''',
     surahInfo:
@@ -803,8 +683,6 @@ surah = {
   60: (
     name: r'''Al Mumtahanah''',
     ayahCount: 13,
-    englishName: r'''The Examined One''',
-    turkishName: r'''Mümtehine''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الممتحنة''',
     surahInfo:
@@ -817,8 +695,6 @@ surah = {
   61: (
     name: r'''As Saff''',
     ayahCount: 14,
-    englishName: r'''The Ranks''',
-    turkishName: r'''Saff''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الصف''',
     surahInfo:
@@ -830,8 +706,6 @@ surah = {
   62: (
     name: r'''Al Jumu'ah''',
     ayahCount: 11,
-    englishName: r'''Congregation (Friday)''',
-    turkishName: r'''Cuma''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الجمعة''',
     surahInfo:
@@ -843,8 +717,6 @@ surah = {
   63: (
     name: r'''Al Munafiqoon''',
     ayahCount: 11,
-    englishName: r'''The Hypocrites''',
-    turkishName: r'''Münâfikûn''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''المنافقون''',
     surahInfo:
@@ -856,8 +728,6 @@ surah = {
   64: (
     name: r'''At Taghabun''',
     ayahCount: 18,
-    englishName: r'''The Cheating''',
-    turkishName: r'''Tegâbün''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''التغابن''',
     surahInfo:
@@ -869,8 +739,6 @@ surah = {
   65: (
     name: r'''At Talaq''',
     ayahCount: 12,
-    englishName: r'''Divorce''',
-    turkishName: r'''Talâk''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الطلاق''',
     surahInfo:
@@ -883,8 +751,6 @@ surah = {
   66: (
     name: r'''At Tahreem''',
     ayahCount: 12,
-    englishName: r'''The Prohibition''',
-    turkishName: r'''Tahrîm''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''التحريم''',
     surahInfo:
@@ -897,8 +763,6 @@ surah = {
   67: (
     name: r'''Al Mulk''',
     ayahCount: 30,
-    englishName: r'''The Dominion''',
-    turkishName: r'''Mülk''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الملك''',
     surahInfo:
@@ -911,8 +775,6 @@ surah = {
   68: (
     name: r'''Al Qalam''',
     ayahCount: 52,
-    englishName: r'''The Pen''',
-    turkishName: r'''Kalem''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القلم''',
     surahInfo:
@@ -924,8 +786,6 @@ surah = {
   69: (
     name: r'''Al Haaqqah''',
     ayahCount: 52,
-    englishName: r'''The Sure Reality''',
-    turkishName: r'''Hâkka''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الحاقة''',
     surahInfo:
@@ -937,8 +797,6 @@ surah = {
   70: (
     name: r'''Al Ma'arij''',
     ayahCount: 44,
-    englishName: r'''The Ways of Ascent''',
-    turkishName: r'''Meâric''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المعارج''',
     surahInfo:
@@ -950,8 +808,6 @@ surah = {
   71: (
     name: r'''Nooh''',
     ayahCount: 28,
-    englishName: r'''Noah''',
-    turkishName: r'''Nûh''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''نوح''',
     surahInfo:
@@ -963,8 +819,6 @@ surah = {
   72: (
     name: r'''Al Jinn''',
     ayahCount: 28,
-    englishName: r'''The Jinn''',
-    turkishName: r'''Cin''',
     placeOfRevelation: r'''makkah''',
     arabicName: r'''الجن''',
     surahInfo:
@@ -976,8 +830,6 @@ surah = {
   73: (
     name: r'''Al Muzammil''',
     ayahCount: 20,
-    englishName: r'''The Enfolded One''',
-    turkishName: r'''Müzzemmil''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المزمل''',
     surahInfo:
@@ -989,8 +841,6 @@ surah = {
   74: (
     name: r'''Al Muddathir''',
     ayahCount: 56,
-    englishName: r'''The One Wrapped Up''',
-    turkishName: r'''Müddessir''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المدثر''',
     surahInfo:
@@ -1002,8 +852,6 @@ surah = {
   75: (
     name: r'''Al Qiyamah''',
     ayahCount: 40,
-    englishName: r'''Resurrection''',
-    turkishName: r'''Kıyâmet''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القيامة''',
     surahInfo:
@@ -1015,8 +863,6 @@ surah = {
   76: (
     name: r'''Al Insaan''',
     ayahCount: 31,
-    englishName: r'''The Human''',
-    turkishName: r'''İnsân''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الانسان''',
     surahInfo:
@@ -1028,8 +874,6 @@ surah = {
   77: (
     name: r'''Al Mursalat''',
     ayahCount: 50,
-    englishName: r'''Those Sent Forth''',
-    turkishName: r'''Mürselât''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المرسلات''',
     surahInfo:
@@ -1041,8 +885,6 @@ surah = {
   78: (
     name: r'''An Naba''',
     ayahCount: 40,
-    englishName: r'''The Great News''',
-    turkishName: r'''Nebe''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''النبأ''',
     surahInfo:
@@ -1055,8 +897,6 @@ surah = {
   79: (
     name: r'''An Naaziat''',
     ayahCount: 46,
-    englishName: r'''Those Who Tear Out''',
-    turkishName: r'''Naziât''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''النازعات''',
     surahInfo:
@@ -1068,8 +908,6 @@ surah = {
   80: (
     name: r'''Abasa''',
     ayahCount: 42,
-    englishName: r'''He Frowned''',
-    turkishName: r'''Abese''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''عبس''',
     surahInfo:
@@ -1081,8 +919,6 @@ surah = {
   81: (
     name: r'''At Takweer''',
     ayahCount: 29,
-    englishName: r'''The Folding Up''',
-    turkishName: r'''Tekvîr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''التكوير''',
     surahInfo:
@@ -1094,8 +930,6 @@ surah = {
   82: (
     name: r'''Al Infitar''',
     ayahCount: 19,
-    englishName: r'''The Overthrowing''',
-    turkishName: r'''İnfitâr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الإنفطار''',
     surahInfo:
@@ -1107,8 +941,6 @@ surah = {
   83: (
     name: r'''Al Mutaffifin''',
     ayahCount: 36,
-    englishName: r'''The Cleaving Asunder''',
-    turkishName: r'''Mutaffifîn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المطففين''',
     surahInfo:
@@ -1120,8 +952,6 @@ surah = {
   84: (
     name: r'''Al Inshiqaaq''',
     ayahCount: 25,
-    englishName: r'''The Dealers in Fraud''',
-    turkishName: r'''İnşikâk''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الإنشقاق''',
     surahInfo:
@@ -1133,8 +963,6 @@ surah = {
   85: (
     name: r'''Al Burooj''',
     ayahCount: 22,
-    englishName: r'''The Constellations''',
-    turkishName: r'''Burûc''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''البروج''',
     surahInfo:
@@ -1146,8 +974,6 @@ surah = {
   86: (
     name: r'''At Taariq''',
     ayahCount: 17,
-    englishName: r'''The Morning Star''',
-    turkishName: r'''Târık''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الطارق''',
     surahInfo:
@@ -1159,8 +985,6 @@ surah = {
   87: (
     name: r'''Al A'laa''',
     ayahCount: 19,
-    englishName: r'''The Most High''',
-    turkishName: r'''A'lâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الأعلى''',
     surahInfo:
@@ -1172,8 +996,6 @@ surah = {
   88: (
     name: r'''Al Ghaashiyah''',
     ayahCount: 26,
-    englishName: r'''The Overwhelming Event''',
-    turkishName: r'''Gâşiye''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الغاشية''',
     surahInfo:
@@ -1185,8 +1007,6 @@ surah = {
   89: (
     name: r'''Al Fajr''',
     ayahCount: 30,
-    englishName: r'''The Daybreak''',
-    turkishName: r'''Fecr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الفجر''',
     surahInfo:
@@ -1198,8 +1018,6 @@ surah = {
   90: (
     name: r'''Al Balad''',
     ayahCount: 20,
-    englishName: r'''The City''',
-    turkishName: r'''Beled''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''البلد''',
     surahInfo:
@@ -1211,8 +1029,6 @@ surah = {
   91: (
     name: r'''Ash Shams''',
     ayahCount: 15,
-    englishName: r'''The Sun''',
-    turkishName: r'''Şems''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الشمس''',
     surahInfo:
@@ -1224,8 +1040,6 @@ surah = {
   92: (
     name: r'''Al Layl''',
     ayahCount: 21,
-    englishName: r'''The Night''',
-    turkishName: r'''Leyl''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الليل''',
     surahInfo:
@@ -1237,8 +1051,6 @@ surah = {
   93: (
     name: r'''Ad Dhuha''',
     ayahCount: 11,
-    englishName: r'''The Glorious Morning Light''',
-    turkishName: r'''Duhâ''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الضحى''',
     surahInfo:
@@ -1250,8 +1062,6 @@ surah = {
   94: (
     name: r'''Ash Sharh''',
     ayahCount: 8,
-    englishName: r'''The Opening Up of the Heart''',
-    turkishName: r'''İnşirâh''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الشرح''',
     surahInfo:
@@ -1263,8 +1073,6 @@ surah = {
   95: (
     name: r'''At Teen''',
     ayahCount: 8,
-    englishName: r'''The Fig Tree''',
-    turkishName: r'''Tîn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''التين''',
     surahInfo:
@@ -1276,8 +1084,6 @@ surah = {
   96: (
     name: r'''Al Alaq''',
     ayahCount: 19,
-    englishName: r'''The Clinging Clot''',
-    turkishName: r'''Alak''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''العلق''',
     surahInfo:
@@ -1289,8 +1095,6 @@ surah = {
   97: (
     name: r'''Al Qadr''',
     ayahCount: 5,
-    englishName: r'''The Night of Honor''',
-    turkishName: r'''Kadir''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القدر''',
     surahInfo:
@@ -1302,8 +1106,6 @@ surah = {
   98: (
     name: r'''Al Bayyinah''',
     ayahCount: 8,
-    englishName: r'''The Clear Evidence''',
-    turkishName: r'''Beyyine''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''البينة''',
     surahInfo:
@@ -1316,8 +1118,6 @@ surah = {
   99: (
     name: r'''Az Zalzalah''',
     ayahCount: 8,
-    englishName: r'''The Earthquake''',
-    turkishName: r'''Zilzâl''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''الزلزلة''',
     surahInfo:
@@ -1329,8 +1129,6 @@ surah = {
   100: (
     name: r'''Al Aadiyaat''',
     ayahCount: 11,
-    englishName: r'''The Courser''',
-    turkishName: r'''Âdiyât''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''العاديات''',
     surahInfo:
@@ -1342,8 +1140,6 @@ surah = {
   101: (
     name: r'''Al Qaari'ah''',
     ayahCount: 11,
-    englishName: r'''The Striking Hour''',
-    turkishName: r'''Kâria''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''القارعة''',
     surahInfo:
@@ -1355,8 +1151,6 @@ surah = {
   102: (
     name: r'''At Takaathur''',
     ayahCount: 8,
-    englishName: r'''The Piling Up''',
-    turkishName: r'''Tekâsür''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''التكاثر''',
     surahInfo:
@@ -1368,8 +1162,6 @@ surah = {
   103: (
     name: r'''Al Asr''',
     ayahCount: 3,
-    englishName: r'''The Time''',
-    turkishName: r'''Asr''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''العصر''',
     surahInfo:
@@ -1381,8 +1173,6 @@ surah = {
   104: (
     name: r'''Al Humazah''',
     ayahCount: 9,
-    englishName: r'''The Scandalmonger''',
-    turkishName: r'''Hümeze''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الهمزة''',
     surahInfo:
@@ -1394,8 +1184,6 @@ surah = {
   105: (
     name: r'''Al Feel''',
     ayahCount: 5,
-    englishName: r'''The Elephant''',
-    turkishName: r'''Fîl''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الفيل''',
     surahInfo:
@@ -1407,8 +1195,6 @@ surah = {
   106: (
     name: r'''Quraysh''',
     ayahCount: 4,
-    englishName: r'''The Quraysh''',
-    turkishName: r'''Kureyş''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''قريش''',
     surahInfo:
@@ -1420,8 +1206,6 @@ surah = {
   107: (
     name: r'''Al Maa'oon''',
     ayahCount: 7,
-    englishName: r'''The Neighbourly Assistance''',
-    turkishName: r'''Maûn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الماعون''',
     surahInfo:
@@ -1434,8 +1218,6 @@ surah = {
   108: (
     name: r'''Al Kawthar''',
     ayahCount: 3,
-    englishName: r'''Abundance''',
-    turkishName: r'''Kevser''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الكوثر''',
     surahInfo:
@@ -1447,8 +1229,6 @@ surah = {
   109: (
     name: r'''Al Kaafiroon''',
     ayahCount: 6,
-    englishName: r'''The Disbelievers''',
-    turkishName: r'''Kâfirûn''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الكافرون''',
     surahInfo:
@@ -1461,8 +1241,6 @@ surah = {
   110: (
     name: r'''An Nasr''',
     ayahCount: 3,
-    englishName: r'''The Help''',
-    turkishName: r'''Nasr''',
     placeOfRevelation: r'''Madinah''',
     arabicName: r'''النصر''',
     surahInfo:
@@ -1475,8 +1253,6 @@ surah = {
   111: (
     name: r'''Al Masad''',
     ayahCount: 5,
-    englishName: r'''The Plaited Rope''',
-    turkishName: r'''Tebbet''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''المسد''',
     surahInfo:
@@ -1488,8 +1264,6 @@ surah = {
   112: (
     name: r'''Al Ikhlaas''',
     ayahCount: 4,
-    englishName: r'''Purity of Faith''',
-    turkishName: r'''İhlâs''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الإخلاص''',
     surahInfo:
@@ -1502,8 +1276,6 @@ surah = {
   113: (
     name: r'''Al Falaq''',
     ayahCount: 5,
-    englishName: r'''The Rising Dawn''',
-    turkishName: r'''Felak''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الفلق''',
     surahInfo:
@@ -1516,8 +1288,6 @@ surah = {
   114: (
     name: r'''An Naas''',
     ayahCount: 6,
-    englishName: r'''Mankind''',
-    turkishName: r'''Nâs''',
     placeOfRevelation: r'''Makkah''',
     arabicName: r'''الناس''',
     surahInfo:

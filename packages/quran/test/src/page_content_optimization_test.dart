@@ -17,11 +17,12 @@ void main() {
   late Map<int, List<List<Map<String, dynamic>>>> processedIndex;
 
   setUpAll(() {
-    final String qpcRaw = File(
-      'assets/quran_fonts/qpc-v4.json',
-    ).readAsStringSync();
+    final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+        ? 'assets/quran_fonts'
+        : 'packages/quran/assets/quran_fonts';
+    final String qpcRaw = File('$base/qpc-v4.json').readAsStringSync();
     final String pageIndexRaw = File(
-      'assets/quran_fonts/quran_page_index.json',
+      '$base/quran_page_index.json',
     ).readAsStringSync();
     final qpc = json.decode(qpcRaw) as Map<String, dynamic>;
     final pageIndexJson = json.decode(pageIndexRaw) as Map<String, dynamic>;

@@ -10,11 +10,12 @@ import 'package:quran/src/page_content.dart';
 /// Loads QPC v4 JSON files from disk and returns the processed data
 /// in the same format as [_PageContentState._decodeAndProcess].
 Map<String, dynamic> _loadQpcFromDisk() {
-  final String qpcRaw = File(
-    'assets/quran_fonts/qpc-v4.json',
-  ).readAsStringSync();
+  final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+      ? 'assets/quran_fonts'
+      : 'packages/quran/assets/quran_fonts';
+  final String qpcRaw = File('$base/qpc-v4.json').readAsStringSync();
   final String pageIndexRaw = File(
-    'assets/quran_fonts/quran_page_index.json',
+    '$base/quran_page_index.json',
   ).readAsStringSync();
 
   final qpc = json.decode(qpcRaw) as Map<String, dynamic>;
@@ -174,13 +175,14 @@ void main() {
   // 3. JSON decode + page index processing (cold start cost)
   // ---------------------------------------------------------------------------
   group('QPC v4 data loading', () {
-    test('JSON decode and page index build time', () async {
-      final String qpcJson = await rootBundle.loadString(
-        'packages/quran/assets/quran_fonts/qpc-v4.json',
-      );
-      final String pageIndexJson = await rootBundle.loadString(
-        'packages/quran/assets/quran_fonts/quran_page_index.json',
-      );
+    test('JSON decode and page index build time', () {
+      final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+          ? 'assets/quran_fonts'
+          : 'packages/quran/assets/quran_fonts';
+      final String qpcJson = File('$base/qpc-v4.json').readAsStringSync();
+      final String pageIndexJson = File(
+        '$base/quran_page_index.json',
+      ).readAsStringSync();
 
       final sw = Stopwatch()..start();
       final qpc = json.decode(qpcJson) as Map<String, dynamic>;
@@ -228,13 +230,14 @@ void main() {
       expect(processedIndex.length, 604);
     });
 
-    test('word count per page varies but stays reasonable', () async {
-      final String qpcJson = await rootBundle.loadString(
-        'packages/quran/assets/quran_fonts/qpc-v4.json',
-      );
-      final String pageIndexJson = await rootBundle.loadString(
-        'packages/quran/assets/quran_fonts/quran_page_index.json',
-      );
+    test('word count per page varies but stays reasonable', () {
+      final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+          ? 'assets/quran_fonts'
+          : 'packages/quran/assets/quran_fonts';
+      final String qpcJson = File('$base/qpc-v4.json').readAsStringSync();
+      final String pageIndexJson = File(
+        '$base/quran_page_index.json',
+      ).readAsStringSync();
       json.decode(qpcJson); // warm up
       final pageIndexRaw = json.decode(pageIndexJson) as Map<String, dynamic>;
 

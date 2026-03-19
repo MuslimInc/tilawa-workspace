@@ -1034,7 +1034,7 @@
     "@startJourney": {
         "description": "Start button text"
     },
-    "recitationDuration": "مدة التلاوة",
+    "recitationDuration": "Recitation Duration",
     "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },

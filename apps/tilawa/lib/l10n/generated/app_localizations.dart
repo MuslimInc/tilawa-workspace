@@ -1463,7 +1463,7 @@ abstract class AppLocalizations {
   /// Sleep timer dialog title
   ///
   /// In en, this message translates to:
-  /// **'مدة التلاوة'**
+  /// **'Recitation Duration'**
   String get recitationDuration;
 
   /// 15 minutes option

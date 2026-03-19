@@ -217,14 +217,16 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                   ),
                 ),
               ),
-              // Page navigation slider — appears when UI chrome is visible
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: BlocBuilder<UiVisibilityCubit, bool>(
-                  builder: (context, isVisible) {
-                    return AnimatedSlide(
+              // Page navigation slider — appears when UI chrome is visible.
+              BlocBuilder<UiVisibilityCubit, bool>(
+                builder: (context, isVisible) {
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedSlide(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
                       offset: isVisible ? Offset.zero : const Offset(0, 1),
@@ -233,9 +235,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                         onPageChanged: _jumpToPage,
                         onShowIndex: () => _showSurahIndex(context),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
               const Positioned.fill(child: BottomPlayerWidget()),
             ],
@@ -314,125 +316,128 @@ class _PageNavigationBar extends StatelessWidget {
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: EdgeInsets.only(
-            left: 16.w,
-            right: 16.w,
-            top: 12.h,
-            bottom: bottomPadding + 8.h,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF9F5EF).withValues(alpha: 0.92),
-            border: const Border(
-              top: BorderSide(color: Color(0x1A4E342E), width: 0.5),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.only(
+              left: 16.w,
+              right: 16.w,
+              top: 12.h,
+              bottom: bottomPadding + 8.h,
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Surah name + page info row
-              Padding(
-                padding: EdgeInsets.only(bottom: 8.h),
-                child: Row(
-                  children: [
-                    // Surah index button
-                    GestureDetector(
-                      onTap: onShowIndex,
-                      child: Container(
-                        width: 36.h,
-                        height: 36.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F5EF).withValues(alpha: 0.92),
+              border: const Border(
+                top: BorderSide(color: Color(0x1A4E342E), width: 0.5),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Surah name + page info row
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: Row(
+                    children: [
+                      // Surah index button
+                      GestureDetector(
+                        onTap: onShowIndex,
+                        child: Container(
+                          width: 36.h,
+                          height: 36.h,
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.menu_book_rounded,
+                            size: 18.sp,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      // Surah name
+                      Expanded(
+                        child: Text(
+                          surahName,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Juz + page number
+                      Text(
+                        '${context.l10n.juzPart} $juzNumber',
+                        style: TextStyle(
+                          color: primaryColor.withValues(alpha: 0.5),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 4.h,
+                        ),
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
-                        child: Icon(
-                          Icons.menu_book_rounded,
-                          size: 18.sp,
-                          color: accentColor,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
-                    // Surah name
-                    Expanded(
-                      child: Text(
-                        surahName,
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    // Juz + page number
-                    Text(
-                      '${context.l10n.juzPart} $juzNumber',
-                      style: TextStyle(
-                        color: primaryColor.withValues(alpha: 0.5),
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        '$currentPage',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
+                        child: Text(
+                          '$currentPage',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              // Page slider (RTL: page 1 on the right, 604 on the left)
-              SizedBox(
-                height: 32.h,
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: SliderTheme(
-                    data: SliderThemeData(
-                      activeTrackColor: accentColor,
-                      inactiveTrackColor: accentColor.withValues(alpha: 0.15),
-                      thumbColor: accentColor,
-                      overlayColor: accentColor.withValues(alpha: 0.12),
-                      trackHeight: 3.h,
-                      thumbShape: RoundSliderThumbShape(
-                        enabledThumbRadius: 7.r,
+                // Page slider (RTL: page 1 on the right, 604 on the left)
+                SizedBox(
+                  height: 32.h,
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        activeTrackColor: accentColor,
+                        inactiveTrackColor: accentColor.withValues(alpha: 0.15),
+                        thumbColor: accentColor,
+                        overlayColor: accentColor.withValues(alpha: 0.12),
+                        trackHeight: 3.h,
+                        thumbShape: RoundSliderThumbShape(
+                          enabledThumbRadius: 7.r,
+                        ),
+                        overlayShape: RoundSliderOverlayShape(
+                          overlayRadius: 16.r,
+                        ),
                       ),
-                      overlayShape: RoundSliderOverlayShape(
-                        overlayRadius: 16.r,
+                      child: Slider(
+                        value: currentPage.toDouble(),
+                        min: 1,
+                        max: totalPages.toDouble(),
+                        onChanged: (value) {
+                          final page = value.round();
+                          if (page != currentPage) {
+                            HapticFeedback.selectionClick();
+                            onPageChanged(page);
+                          }
+                        },
                       ),
-                    ),
-                    child: Slider(
-                      value: currentPage.toDouble(),
-                      min: 1,
-                      max: totalPages.toDouble(),
-                      onChanged: (value) {
-                        final page = value.round();
-                        if (page != currentPage) {
-                          HapticFeedback.selectionClick();
-                          onPageChanged(page);
-                        }
-                      },
                     ),
                   ),
                 ),
-              ),
-              // Page range labels (RTL: 604 on the left, 1 on the right)
-              _PageRange(totalPages: totalPages),
-            ],
+                // Page range labels (RTL: 604 on the left, 1 on the right)
+                _PageRange(totalPages: totalPages),
+              ],
+            ),
           ),
         ),
       ),

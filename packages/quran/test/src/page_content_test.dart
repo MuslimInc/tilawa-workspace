@@ -7,11 +7,13 @@ import 'package:quran/src/page_content.dart';
 
 void main() {
   setUpAll(() {
-    final String qpcRaw = File(
-      'assets/quran_fonts/qpc-v4.json',
-    ).readAsStringSync();
+    // Resolve asset base relative to the package root, regardless of CWD.
+    final String base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+        ? 'assets/quran_fonts'
+        : 'packages/quran/assets/quran_fonts';
+    final String qpcRaw = File('$base/qpc-v4.json').readAsStringSync();
     final String pageIndexRaw = File(
-      'assets/quran_fonts/quran_page_index.json',
+      '$base/quran_page_index.json',
     ).readAsStringSync();
     final qpc = json.decode(qpcRaw) as Map<String, dynamic>;
     final pageIndexJson = json.decode(pageIndexRaw) as Map<String, dynamic>;
@@ -80,8 +82,8 @@ void main() {
         // Since we are looking for the Quran verses on page 18, which start with ﱁ
         if (plainText.contains('ﱁ')) {
           firstVerseText = plainText;
-          // The first word ﱁ should be followed by a thin space \u2009
-          if (plainText.contains('ﱁ\u2009')) {
+          // The first word ﱁ should be followed by a hair space \u200A
+          if (plainText.contains('ﱁ\u200A')) {
             foundThinSpace = true;
           }
           break;
@@ -97,7 +99,7 @@ void main() {
         foundThinSpace,
         isTrue,
         reason:
-            'The first word should be followed by a thin space (\\u2009)\nFound text: "$firstVerseText"',
+            'The first word should be followed by a hair space (\\u200A)\nFound text: "$firstVerseText"',
       );
     });
 
@@ -132,17 +134,17 @@ void main() {
         for (final richText in richTexts) {
           final String plainText = richText.text.toPlainText();
           expect(
-            plainText.contains(' \u2009'),
+            plainText.contains(' \u200A'),
             isFalse,
             reason: 'Should not have both standard space and thin space',
           );
           expect(
-            plainText.contains('\u2009 '),
+            plainText.contains('\u200A '),
             isFalse,
             reason: 'Should not have both standard space and thin space',
           );
           expect(
-            plainText.contains('\u2009\u2009'),
+            plainText.contains('\u200A\u200A'),
             isFalse,
             reason: 'Should not have double thin space',
           );

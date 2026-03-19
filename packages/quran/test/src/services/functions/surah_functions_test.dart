@@ -28,11 +28,11 @@ void main() {
 
     group('getSurahNameEnglish', () {
       test('returns English name for Al-Fatiha', () {
-        expect(getSurahNameEnglish(1), 'The Opening');
+        expect(getSurahNameEnglish(1), 'Al Fatiha');
       });
 
       test('returns English name for Al-Baqarah', () {
-        expect(getSurahNameEnglish(2), 'The Cow');
+        expect(getSurahNameEnglish(2), 'Al Baqarah');
       });
 
       test('throws for invalid surah', () {
