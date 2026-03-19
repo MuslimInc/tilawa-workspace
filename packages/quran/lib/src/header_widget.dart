@@ -18,16 +18,15 @@ class HeaderWidget extends StatelessWidget {
             width: screenWidth * 0.90,
             fit: BoxFit.fill,
           ),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              text: '$suraNumber',
-              style: TextStyle(
-                fontFamily: 'arsura',
-                package: 'quran',
-                color: Colors.black,
-                fontSize: screenWidth * 0.05,
-              ),
+          Text(
+            String.fromCharCode(0xF100 + suraNumber - 1),
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              fontFamily: 'QCF_BSML',
+              package: 'quran',
+              color: Colors.black,
+              fontSize: screenWidth * 0.05,
+              height: 1.0,
             ),
           ),
         ],

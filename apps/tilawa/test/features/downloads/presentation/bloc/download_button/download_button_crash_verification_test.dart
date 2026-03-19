@@ -382,6 +382,8 @@ void main() {
     late MockCheckSurahDownloadedUseCase mockCheckSurahDownloaded;
     late MockDownloadSurahUseCase mockDownloadSurah;
     late MockCancelDownloadUseCase mockCancelDownload;
+    late MockPauseDownloadUseCase mockPauseDownload;
+    late MockResumeDownloadUseCase mockResumeDownload;
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
     late MockNetworkInfo mockNetworkInfo;
 
@@ -394,6 +396,8 @@ void main() {
       mockCheckSurahDownloaded = MockCheckSurahDownloadedUseCase();
       mockDownloadSurah = MockDownloadSurahUseCase();
       mockCancelDownload = MockCancelDownloadUseCase();
+      mockPauseDownload = MockPauseDownloadUseCase();
+      mockResumeDownload = MockResumeDownloadUseCase();
       mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
       mockNetworkInfo = MockNetworkInfo();
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
@@ -431,6 +435,8 @@ void main() {
           checkSurahDownloaded: mockCheckSurahDownloaded,
           downloadSurah: mockDownloadSurah,
           cancelDownload: mockCancelDownload,
+          pauseDownload: mockPauseDownload,
+          resumeDownload: mockResumeDownload,
           observeDownloadProgress: mockObserveDownloadProgress,
           networkInfo: mockNetworkInfo,
         );

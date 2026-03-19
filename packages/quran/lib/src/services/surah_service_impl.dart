@@ -18,30 +18,48 @@ class SurahServiceImpl implements SurahService {
   @override
   String getName(int surahNumber) {
     _validateSurahNumber(surahNumber);
-    return surah[surahNumber - 1]['name'] as String;
-  }
-
-  @override
-  String getNameEnglish(int surahNumber) {
-    _validateSurahNumber(surahNumber);
-    return surah[surahNumber - 1]['english'] as String;
+    return surah[surahNumber]!.name;
   }
 
   @override
   String getNameArabic(int surahNumber) {
     _validateSurahNumber(surahNumber);
-    return surah[surahNumber - 1]['arabic'] as String;
+    return surah[surahNumber]!.arabicName;
   }
 
   @override
   String getPlaceOfRevelation(int surahNumber) {
     _validateSurahNumber(surahNumber);
-    return surah[surahNumber - 1]['place'] as String;
+    return surah[surahNumber]!.placeOfRevelation;
   }
 
   @override
   int getVerseCount(int surahNumber) {
     _validateSurahNumber(surahNumber);
-    return surah[surahNumber - 1]['aya'] as int;
+    return surah[surahNumber]!.ayahCount;
+  }
+
+  @override
+  String getSurahInfo(int surahNumber) {
+    _validateSurahNumber(surahNumber);
+    return surah[surahNumber]!.surahInfo;
+  }
+
+  @override
+  String getSurahInfoFromBook(int surahNumber) {
+    _validateSurahNumber(surahNumber);
+    return surah[surahNumber]!.surahInfoFromBook;
+  }
+
+  @override
+  String getSurahNames(int surahNumber) {
+    _validateSurahNumber(surahNumber);
+    return surah[surahNumber]!.surahNames;
+  }
+
+  @override
+  String getSurahNamesFromBook(int surahNumber) {
+    _validateSurahNumber(surahNumber);
+    return surah[surahNumber]!.surahNamesFromBook;
   }
 }

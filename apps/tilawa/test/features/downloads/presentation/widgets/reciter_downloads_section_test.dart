@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/downloads_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/reciter_downloads_section.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/entities/audio.dart';
 
 class MockDownloadsBloc extends MockBloc<DownloadsEvent, DownloadsState>
     implements DownloadsBloc {}
@@ -96,7 +96,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Reciter 1'), findsOneWidget);
-    expect(find.text('1 surahs'), findsOneWidget);
+    expect(find.text('1 Surahs'), findsOneWidget);
     expect(find.text('R'), findsOneWidget); // Avatar letter
   });
 
@@ -299,7 +299,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Shows narrative count
-    expect(find.text('2 surahs • 2 narratives'), findsOneWidget);
+    expect(find.text('2 Surahs • 2 narratives'), findsOneWidget);
 
     // Tap to expand
     await tester.tap(find.byType(InkWell).first);

@@ -142,94 +142,106 @@ class SurahTextSection extends StatefulWidget {
 }
 
 class _SurahTextSectionState extends State<SurahTextSection> {
-  final List<TapGestureRecognizer> _recognizers = [];
+  List<TapGestureRecognizer> _recognizers = [];
+
+  // Cached text styles — avoid calling GoogleFonts on every build.
+  static final TextStyle _baseStyle = GoogleFonts.amiri(
+    fontSize: 24,
+    height: 2.2,
+    color: Colors.black,
+  );
+  static final TextStyle _spaceStyle = GoogleFonts.amiri(
+    fontSize: 24,
+    height: 2.2,
+  );
+  static final TextStyle _playingStyle = _baseStyle.copyWith(
+    color: Colors.amber[900],
+    backgroundColor: Colors.amber.withValues(alpha: 0.2),
+  );
 
   @override
-  void dispose() {
+  void initState() {
+    super.initState();
+    _buildRecognizers();
+  }
+
+  @override
+  void didUpdateWidget(covariant SurahTextSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.ayahs, widget.ayahs)) {
+      _disposeRecognizers();
+      _buildRecognizers();
+    }
+  }
+
+  void _buildRecognizers() {
+    final recognizers = <TapGestureRecognizer>[];
+    for (final PageAyahInfo ayah in widget.ayahs) {
+      if (ayah.words != null) {
+        for (final QuranWord word in ayah.words!) {
+          final recognizer = TapGestureRecognizer()
+            ..onTap = () {
+              final String surahStr = ayah.surahNumber.toString().padLeft(
+                3,
+                '0',
+              );
+              final String ayahStr = ayah.ayahNumber.toString().padLeft(3, '0');
+              final String wordStr = word.position.toString().padLeft(3, '0');
+              final correctedUrl = 'wbw/${surahStr}_${ayahStr}_$wordStr.mp3';
+
+              widget.audioController.playWord(correctedUrl, word.id);
+            };
+          recognizers.add(recognizer);
+        }
+      }
+    }
+    _recognizers = recognizers;
+  }
+
+  void _disposeRecognizers() {
     for (final TapGestureRecognizer r in _recognizers) {
       r.dispose();
     }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Clear old recognizers on rebuild (e.g. if updated)
-    // Note: In a real app, optimize to not rebuild recognizers if content is same.
-    for (final TapGestureRecognizer r in _recognizers) {
-      r.dispose();
-    }
-    _recognizers.clear();
-
     return ListenableBuilder(
       listenable: widget.audioController,
       builder: (context, child) {
         final int? playingId = widget.audioController.playingWordId;
         final spans = <InlineSpan>[];
+        int recognizerIndex = 0;
 
         for (final PageAyahInfo ayah in widget.ayahs) {
           if (ayah.words != null) {
             for (final QuranWord word in ayah.words!) {
               final isPlaying = word.id == playingId;
-              final recognizer = TapGestureRecognizer()
-                ..onTap = () {
-                  // Construct URL manually to fix API mismatch (off-by-one/skips)
-                  // API returns e.g. ...014.mp3 for word 13, but correct audio is ...013.mp3
-                  final String surahStr = ayah.surahNumber.toString().padLeft(
-                    3,
-                    '0',
-                  );
-                  final String ayahStr = ayah.ayahNumber.toString().padLeft(
-                    3,
-                    '0',
-                  );
-                  final String wordStr = word.position.toString().padLeft(
-                    3,
-                    '0',
-                  );
-                  final correctedUrl =
-                      'wbw/${surahStr}_${ayahStr}_$wordStr.mp3';
-
-                  widget.audioController.playWord(correctedUrl, word.id);
-                };
-              _recognizers.add(recognizer);
+              final recognizer = recognizerIndex < _recognizers.length
+                  ? _recognizers[recognizerIndex]
+                  : null;
+              recognizerIndex++;
 
               spans.add(
                 TextSpan(
                   text: word.textUthmani ?? word.text,
                   recognizer: recognizer,
-                  style: GoogleFonts.amiri(
-                    fontSize: 24,
-                    height: 2.2,
-                    color: isPlaying ? Colors.amber[900] : Colors.black,
-                    backgroundColor: isPlaying
-                        ? Colors.amber.withValues(alpha: 0.2)
-                        : null,
-                  ),
+                  style: isPlaying ? _playingStyle : _baseStyle,
                 ),
               );
 
-              // Add space as a separate non-interactive span to preventing hit-test overlaps
-              // especially after symbols like Waqf that might have wide bounding boxes.
-              spans.add(
-                TextSpan(
-                  text: ' ',
-                  style: GoogleFonts.amiri(fontSize: 24, height: 2.2),
-                ),
-              );
+              // Non-interactive space span to prevent hit-test overlaps
+              spans.add(TextSpan(text: ' ', style: _spaceStyle));
             }
           } else {
             // Fallback
-            spans.add(
-              TextSpan(
-                text: '${ayah.text} ',
-                style: GoogleFonts.amiri(
-                  fontSize: 24,
-                  height: 2.2,
-                  color: Colors.black,
-                ),
-              ),
-            );
+            spans.add(TextSpan(text: '${ayah.text} ', style: _baseStyle));
           }
         }
 

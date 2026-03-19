@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -32,6 +33,8 @@ class DownloadButtonBloc
     required CheckSurahDownloadedUseCase checkSurahDownloaded,
     required DownloadSurahUseCase downloadSurah,
     required CancelDownloadUseCase cancelDownload,
+    required PauseDownloadUseCase pauseDownload,
+    required ResumeDownloadUseCase resumeDownload,
     required ObserveDownloadProgressUseCase observeDownloadProgress,
     required NetworkInfo networkInfo,
     bool? initialIsDownloaded,
@@ -43,6 +46,8 @@ class DownloadButtonBloc
        _checkSurahDownloaded = checkSurahDownloaded,
        _downloadSurah = downloadSurah,
        _cancelDownload = cancelDownload,
+       _pauseDownload = pauseDownload,
+       _resumeDownload = resumeDownload,
        _observeDownloadProgress = observeDownloadProgress,
        _networkInfo = networkInfo,
        _initialIsDownloaded = initialIsDownloaded,
@@ -54,6 +59,8 @@ class DownloadButtonBloc
         initialize: (_) async => _onInitialize(emit),
         startDownload: (e) async => _onStartDownload(e.surahTitle, emit),
         cancel: (_) async => _onCancel(emit),
+        requestPause: (_) async => _onRequestPause(emit),
+        requestResume: (_) async => _onRequestResume(emit),
         progressUpdated: (e) async => _onProgressUpdated(
           e.progress,
           e.downloadedBytes,
@@ -75,6 +82,8 @@ class DownloadButtonBloc
   final CheckSurahDownloadedUseCase _checkSurahDownloaded;
   final DownloadSurahUseCase _downloadSurah;
   final CancelDownloadUseCase _cancelDownload;
+  final PauseDownloadUseCase _pauseDownload;
+  final ResumeDownloadUseCase _resumeDownload;
   final ObserveDownloadProgressUseCase _observeDownloadProgress;
   final NetworkInfo _networkInfo;
 
@@ -82,6 +91,7 @@ class DownloadButtonBloc
   final bool? _initialIsDownloading;
   final double? _initialProgress;
   StreamSubscription<DownloadItem>? _progressSubscription;
+  DateTime? _lastProgressUpdateTime;
 
   Future<void> _onInitialize(Emitter<DownloadButtonState> emit) async {
     // 1. If we have explicit initial state, use it immediately
@@ -144,38 +154,69 @@ class DownloadButtonBloc
     emit(const DownloadButtonState.pending());
     _listenToProgress();
 
-    final Either<Failure, void> result = await _downloadSurah(
-      surahId: _url,
-      surahTitle: surahTitle,
-      reciterName: _reciterName,
-      reciterId: _reciterId,
-    );
+    try {
+      final Either<Failure, void> result = await _downloadSurah(
+        surahId: _url,
+        surahTitle: surahTitle,
+        reciterName: _reciterName,
+        reciterId: _reciterId,
+      );
 
-    await result.fold(
-      (failure) async {
-        if (failure is NetworkFailure) {
-          emit(DownloadButtonState.networkError(errorMessage: failure.message));
-        } else {
-          emit(DownloadButtonState.failed(errorMessage: failure.message));
-        }
-      },
-      (_) async {
-        // Success means download started (enqueued).
-        // Stream will handle updates.
-        logger.d('[DownloadButtonBloc] Download started via UseCase');
-      },
-    );
+      await result.fold(
+        (failure) async {
+          if (failure is NetworkFailure) {
+            emit(
+              DownloadButtonState.networkError(errorMessage: failure.message),
+            );
+          } else {
+            emit(DownloadButtonState.failed(errorMessage: failure.message));
+          }
+        },
+        (_) async {
+          // Success means download started (enqueued).
+          // Stream will handle updates.
+          logger.d('[DownloadButtonBloc] Download started via UseCase');
+        },
+      );
+    } catch (e, stackTrace) {
+      logger.e(
+        '[DownloadButtonBloc] Uncaught exception starting download: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      emit(DownloadButtonState.failed(errorMessage: 'Unexpected error: $e'));
+    }
   }
 
   Future<void> _onCancel(Emitter<DownloadButtonState> emit) async {
     final Either<Failure, void> result = await _cancelDownload(_url);
     result.fold(
-      (failure) => emit(
-        const DownloadButtonState.failed(errorMessage: 'Failed to cancel'),
-      ),
+      (failure) =>
+          emit(DownloadButtonState.failed(errorMessage: failure.message)),
       (_) {
         emit(const DownloadButtonState.cancelled());
-        _progressSubscription?.cancel();
+      },
+    );
+  }
+
+  Future<void> _onRequestPause(Emitter<DownloadButtonState> emit) async {
+    final Either<Failure, void> result = await _pauseDownload(_url);
+    result.fold(
+      (failure) =>
+          emit(DownloadButtonState.failed(errorMessage: failure.message)),
+      (_) {
+        // State will be updated by progress stream
+      },
+    );
+  }
+
+  Future<void> _onRequestResume(Emitter<DownloadButtonState> emit) async {
+    final Either<Failure, void> result = await _resumeDownload(_url);
+    result.fold(
+      (failure) =>
+          emit(DownloadButtonState.failed(errorMessage: failure.message)),
+      (_) {
+        // State will be updated by progress stream
       },
     );
   }
@@ -196,7 +237,8 @@ class DownloadButtonBloc
   }
 
   void _onCompleted(Emitter<DownloadButtonState> emit) {
-    _progressSubscription?.cancel();
+    // We intentionally don't cancel the subscription here.
+    // Keeps the widget reactive in case the file gets deleted globally or redownloaded
     emit(const DownloadButtonState.completed());
   }
 
@@ -206,7 +248,7 @@ class DownloadButtonBloc
   }
 
   void _onCancelled(Emitter<DownloadButtonState> emit) {
-    _progressSubscription?.cancel();
+    // Keep listening in case user restarts it as part of a batch
     emit(const DownloadButtonState.cancelled());
   }
 
@@ -218,6 +260,7 @@ class DownloadButtonBloc
   void _listenToProgress() {
     logger.i('[DownloadButtonBloc] _listenToProgress for $_url');
     _progressSubscription?.cancel();
+    _lastProgressUpdateTime = null; // Reset throttle on new listen session
     _progressSubscription = _observeDownloadProgress(_url).listen(
       (item) {
         // Prevent adding events if bloc is already closed
@@ -231,13 +274,22 @@ class DownloadButtonBloc
             // This handles widget rebuild scenarios (e.g., scroll off-screen)
             add(const DownloadButtonEvent.pendingDetected());
           case DownloadStatus.downloading:
-            add(
-              DownloadButtonEvent.progressUpdated(
-                progress: item.progress,
-                downloadedBytes: item.downloadedSize,
-                totalBytes: item.fileSize,
-              ),
-            );
+            final DateTime now = clock.now();
+            final bool shouldUpdate =
+                _lastProgressUpdateTime == null ||
+                now.difference(_lastProgressUpdateTime!).inMilliseconds > 150 ||
+                item.progress >= 1.0;
+
+            if (shouldUpdate) {
+              _lastProgressUpdateTime = now;
+              add(
+                DownloadButtonEvent.progressUpdated(
+                  progress: item.progress,
+                  downloadedBytes: item.downloadedSize,
+                  totalBytes: item.fileSize,
+                ),
+              );
+            }
           case DownloadStatus.completed:
             add(const DownloadButtonEvent.completed());
           case DownloadStatus.failed:
@@ -255,11 +307,10 @@ class DownloadButtonBloc
         if (isClosed) {
           return;
         }
-        add(
-          const DownloadButtonEvent.failed(
-            errorMessage: 'Progress stream error',
-          ),
+        logger.e(
+          '[DownloadButtonBloc] Progress stream error for $_url: $error',
         );
+        add(DownloadButtonEvent.failed(errorMessage: 'Stream error: $error'));
       },
     );
   }

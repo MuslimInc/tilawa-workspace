@@ -1,0 +1,5502 @@
+[
+  {
+    "key": "1:1:1",
+    "value": {
+      "id": 1,
+      "surah": "1",
+      "ayah": "1",
+      "word": "1",
+      "location": "1:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "1:1:2",
+    "value": {
+      "id": 2,
+      "surah": "1",
+      "ayah": "1",
+      "word": "2",
+      "location": "1:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "1:1:3",
+    "value": {
+      "id": 3,
+      "surah": "1",
+      "ayah": "1",
+      "word": "3",
+      "location": "1:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "1:1:4",
+    "value": {
+      "id": 4,
+      "surah": "1",
+      "ayah": "1",
+      "word": "4",
+      "location": "1:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "1:1:5",
+    "value": {
+      "id": 5,
+      "surah": "1",
+      "ayah": "1",
+      "word": "5",
+      "location": "1:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "2:1:1",
+    "value": {
+      "id": 37,
+      "surah": "2",
+      "ayah": "1",
+      "word": "1",
+      "location": "2:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "2:1:2",
+    "value": {
+      "id": 38,
+      "surah": "2",
+      "ayah": "1",
+      "word": "2",
+      "location": "2:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "3:1:1",
+    "value": {
+      "id": 6440,
+      "surah": "3",
+      "ayah": "1",
+      "word": "1",
+      "location": "3:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "3:1:2",
+    "value": {
+      "id": 6441,
+      "surah": "3",
+      "ayah": "1",
+      "word": "2",
+      "location": "3:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "4:1:1",
+    "value": {
+      "id": 10121,
+      "surah": "4",
+      "ayah": "1",
+      "word": "1",
+      "location": "4:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "4:1:2",
+    "value": {
+      "id": 10122,
+      "surah": "4",
+      "ayah": "1",
+      "word": "2",
+      "location": "4:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "4:1:3",
+    "value": {
+      "id": 10123,
+      "surah": "4",
+      "ayah": "1",
+      "word": "3",
+      "location": "4:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "4:1:4",
+    "value": {
+      "id": 10124,
+      "surah": "4",
+      "ayah": "1",
+      "word": "4",
+      "location": "4:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "4:1:5",
+    "value": {
+      "id": 10125,
+      "surah": "4",
+      "ayah": "1",
+      "word": "5",
+      "location": "4:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "4:1:6",
+    "value": {
+      "id": 10126,
+      "surah": "4",
+      "ayah": "1",
+      "word": "6",
+      "location": "4:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "4:1:7",
+    "value": {
+      "id": 10127,
+      "surah": "4",
+      "ayah": "1",
+      "word": "7",
+      "location": "4:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "4:1:8",
+    "value": {
+      "id": 10128,
+      "surah": "4",
+      "ayah": "1",
+      "word": "8",
+      "location": "4:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "4:1:9",
+    "value": {
+      "id": 10129,
+      "surah": "4",
+      "ayah": "1",
+      "word": "9",
+      "location": "4:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "4:1:10",
+    "value": {
+      "id": 10130,
+      "surah": "4",
+      "ayah": "1",
+      "word": "10",
+      "location": "4:1:10",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "4:1:11",
+    "value": {
+      "id": 10131,
+      "surah": "4",
+      "ayah": "1",
+      "word": "11",
+      "location": "4:1:11",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "4:1:12",
+    "value": {
+      "id": 10132,
+      "surah": "4",
+      "ayah": "1",
+      "word": "12",
+      "location": "4:1:12",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "4:1:13",
+    "value": {
+      "id": 10133,
+      "surah": "4",
+      "ayah": "1",
+      "word": "13",
+      "location": "4:1:13",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "4:1:14",
+    "value": {
+      "id": 10134,
+      "surah": "4",
+      "ayah": "1",
+      "word": "14",
+      "location": "4:1:14",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "4:1:15",
+    "value": {
+      "id": 10135,
+      "surah": "4",
+      "ayah": "1",
+      "word": "15",
+      "location": "4:1:15",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "4:1:16",
+    "value": {
+      "id": 10136,
+      "surah": "4",
+      "ayah": "1",
+      "word": "16",
+      "location": "4:1:16",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "4:1:17",
+    "value": {
+      "id": 10137,
+      "surah": "4",
+      "ayah": "1",
+      "word": "17",
+      "location": "4:1:17",
+      "text": "ﱑﱒ"
+    }
+  },
+  {
+    "key": "4:1:18",
+    "value": {
+      "id": 10138,
+      "surah": "4",
+      "ayah": "1",
+      "word": "18",
+      "location": "4:1:18",
+      "text": "ﱓ"
+    }
+  },
+  {
+    "key": "4:1:19",
+    "value": {
+      "id": 10139,
+      "surah": "4",
+      "ayah": "1",
+      "word": "19",
+      "location": "4:1:19",
+      "text": "ﱔ"
+    }
+  },
+  {
+    "key": "4:1:20",
+    "value": {
+      "id": 10140,
+      "surah": "4",
+      "ayah": "1",
+      "word": "20",
+      "location": "4:1:20",
+      "text": "ﱕ"
+    }
+  },
+  {
+    "key": "4:1:21",
+    "value": {
+      "id": 10141,
+      "surah": "4",
+      "ayah": "1",
+      "word": "21",
+      "location": "4:1:21",
+      "text": "ﱖ"
+    }
+  },
+  {
+    "key": "4:1:22",
+    "value": {
+      "id": 10142,
+      "surah": "4",
+      "ayah": "1",
+      "word": "22",
+      "location": "4:1:22",
+      "text": "ﱗ"
+    }
+  },
+  {
+    "key": "4:1:23",
+    "value": {
+      "id": 10143,
+      "surah": "4",
+      "ayah": "1",
+      "word": "23",
+      "location": "4:1:23",
+      "text": "ﱘﱙ"
+    }
+  },
+  {
+    "key": "4:1:24",
+    "value": {
+      "id": 10144,
+      "surah": "4",
+      "ayah": "1",
+      "word": "24",
+      "location": "4:1:24",
+      "text": "ﱚ"
+    }
+  },
+  {
+    "key": "4:1:25",
+    "value": {
+      "id": 10145,
+      "surah": "4",
+      "ayah": "1",
+      "word": "25",
+      "location": "4:1:25",
+      "text": "ﱛ"
+    }
+  },
+  {
+    "key": "4:1:26",
+    "value": {
+      "id": 10146,
+      "surah": "4",
+      "ayah": "1",
+      "word": "26",
+      "location": "4:1:26",
+      "text": "ﱜ"
+    }
+  },
+  {
+    "key": "4:1:27",
+    "value": {
+      "id": 10147,
+      "surah": "4",
+      "ayah": "1",
+      "word": "27",
+      "location": "4:1:27",
+      "text": "ﱝ"
+    }
+  },
+  {
+    "key": "4:1:28",
+    "value": {
+      "id": 10148,
+      "surah": "4",
+      "ayah": "1",
+      "word": "28",
+      "location": "4:1:28",
+      "text": "ﱞ"
+    }
+  },
+  {
+    "key": "4:1:29",
+    "value": {
+      "id": 10149,
+      "surah": "4",
+      "ayah": "1",
+      "word": "29",
+      "location": "4:1:29",
+      "text": "ﱟ"
+    }
+  },
+  {
+    "key": "5:1:1",
+    "value": {
+      "id": 14044,
+      "surah": "5",
+      "ayah": "1",
+      "word": "1",
+      "location": "5:1:1",
+      "text": "ﱺ"
+    }
+  },
+  {
+    "key": "5:1:2",
+    "value": {
+      "id": 14045,
+      "surah": "5",
+      "ayah": "1",
+      "word": "2",
+      "location": "5:1:2",
+      "text": "ﱻ"
+    }
+  },
+  {
+    "key": "5:1:3",
+    "value": {
+      "id": 14046,
+      "surah": "5",
+      "ayah": "1",
+      "word": "3",
+      "location": "5:1:3",
+      "text": "ﱼ"
+    }
+  },
+  {
+    "key": "5:1:4",
+    "value": {
+      "id": 14047,
+      "surah": "5",
+      "ayah": "1",
+      "word": "4",
+      "location": "5:1:4",
+      "text": "ﱽ"
+    }
+  },
+  {
+    "key": "5:1:5",
+    "value": {
+      "id": 14048,
+      "surah": "5",
+      "ayah": "1",
+      "word": "5",
+      "location": "5:1:5",
+      "text": "ﱾﱿ"
+    }
+  },
+  {
+    "key": "5:1:6",
+    "value": {
+      "id": 14049,
+      "surah": "5",
+      "ayah": "1",
+      "word": "6",
+      "location": "5:1:6",
+      "text": "ﲀ"
+    }
+  },
+  {
+    "key": "5:1:7",
+    "value": {
+      "id": 14050,
+      "surah": "5",
+      "ayah": "1",
+      "word": "7",
+      "location": "5:1:7",
+      "text": "ﲁ"
+    }
+  },
+  {
+    "key": "5:1:8",
+    "value": {
+      "id": 14051,
+      "surah": "5",
+      "ayah": "1",
+      "word": "8",
+      "location": "5:1:8",
+      "text": "ﲂ"
+    }
+  },
+  {
+    "key": "5:1:9",
+    "value": {
+      "id": 14052,
+      "surah": "5",
+      "ayah": "1",
+      "word": "9",
+      "location": "5:1:9",
+      "text": "ﲃ"
+    }
+  },
+  {
+    "key": "5:1:10",
+    "value": {
+      "id": 14053,
+      "surah": "5",
+      "ayah": "1",
+      "word": "10",
+      "location": "5:1:10",
+      "text": "ﲄ"
+    }
+  },
+  {
+    "key": "5:1:11",
+    "value": {
+      "id": 14054,
+      "surah": "5",
+      "ayah": "1",
+      "word": "11",
+      "location": "5:1:11",
+      "text": "ﲅ"
+    }
+  },
+  {
+    "key": "5:1:12",
+    "value": {
+      "id": 14055,
+      "surah": "5",
+      "ayah": "1",
+      "word": "12",
+      "location": "5:1:12",
+      "text": "ﲆ"
+    }
+  },
+  {
+    "key": "5:1:13",
+    "value": {
+      "id": 14056,
+      "surah": "5",
+      "ayah": "1",
+      "word": "13",
+      "location": "5:1:13",
+      "text": "ﲇ"
+    }
+  },
+  {
+    "key": "5:1:14",
+    "value": {
+      "id": 14057,
+      "surah": "5",
+      "ayah": "1",
+      "word": "14",
+      "location": "5:1:14",
+      "text": "ﲈ"
+    }
+  },
+  {
+    "key": "5:1:15",
+    "value": {
+      "id": 14058,
+      "surah": "5",
+      "ayah": "1",
+      "word": "15",
+      "location": "5:1:15",
+      "text": "ﲉ"
+    }
+  },
+  {
+    "key": "5:1:16",
+    "value": {
+      "id": 14059,
+      "surah": "5",
+      "ayah": "1",
+      "word": "16",
+      "location": "5:1:16",
+      "text": "ﲊ"
+    }
+  },
+  {
+    "key": "5:1:17",
+    "value": {
+      "id": 14060,
+      "surah": "5",
+      "ayah": "1",
+      "word": "17",
+      "location": "5:1:17",
+      "text": "ﲋ"
+    }
+  },
+  {
+    "key": "5:1:18",
+    "value": {
+      "id": 14061,
+      "surah": "5",
+      "ayah": "1",
+      "word": "18",
+      "location": "5:1:18",
+      "text": "ﲌﲍ"
+    }
+  },
+  {
+    "key": "5:1:19",
+    "value": {
+      "id": 14062,
+      "surah": "5",
+      "ayah": "1",
+      "word": "19",
+      "location": "5:1:19",
+      "text": "ﲎ"
+    }
+  },
+  {
+    "key": "5:1:20",
+    "value": {
+      "id": 14063,
+      "surah": "5",
+      "ayah": "1",
+      "word": "20",
+      "location": "5:1:20",
+      "text": "ﲏ"
+    }
+  },
+  {
+    "key": "5:1:21",
+    "value": {
+      "id": 14064,
+      "surah": "5",
+      "ayah": "1",
+      "word": "21",
+      "location": "5:1:21",
+      "text": "ﲐ"
+    }
+  },
+  {
+    "key": "5:1:22",
+    "value": {
+      "id": 14065,
+      "surah": "5",
+      "ayah": "1",
+      "word": "22",
+      "location": "5:1:22",
+      "text": "ﲑ"
+    }
+  },
+  {
+    "key": "5:1:23",
+    "value": {
+      "id": 14066,
+      "surah": "5",
+      "ayah": "1",
+      "word": "23",
+      "location": "5:1:23",
+      "text": "ﲒ"
+    }
+  },
+  {
+    "key": "5:1:24",
+    "value": {
+      "id": 14067,
+      "surah": "5",
+      "ayah": "1",
+      "word": "24",
+      "location": "5:1:24",
+      "text": "ﲓ"
+    }
+  },
+  {
+    "key": "6:1:1",
+    "value": {
+      "id": 16968,
+      "surah": "6",
+      "ayah": "1",
+      "word": "1",
+      "location": "6:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "6:1:2",
+    "value": {
+      "id": 16969,
+      "surah": "6",
+      "ayah": "1",
+      "word": "2",
+      "location": "6:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "6:1:3",
+    "value": {
+      "id": 16970,
+      "surah": "6",
+      "ayah": "1",
+      "word": "3",
+      "location": "6:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "6:1:4",
+    "value": {
+      "id": 16971,
+      "surah": "6",
+      "ayah": "1",
+      "word": "4",
+      "location": "6:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "6:1:5",
+    "value": {
+      "id": 16972,
+      "surah": "6",
+      "ayah": "1",
+      "word": "5",
+      "location": "6:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "6:1:6",
+    "value": {
+      "id": 16973,
+      "surah": "6",
+      "ayah": "1",
+      "word": "6",
+      "location": "6:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "6:1:7",
+    "value": {
+      "id": 16974,
+      "surah": "6",
+      "ayah": "1",
+      "word": "7",
+      "location": "6:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "6:1:8",
+    "value": {
+      "id": 16975,
+      "surah": "6",
+      "ayah": "1",
+      "word": "8",
+      "location": "6:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "6:1:9",
+    "value": {
+      "id": 16976,
+      "surah": "6",
+      "ayah": "1",
+      "word": "9",
+      "location": "6:1:9",
+      "text": "ﱉﱊ"
+    }
+  },
+  {
+    "key": "6:1:10",
+    "value": {
+      "id": 16977,
+      "surah": "6",
+      "ayah": "1",
+      "word": "10",
+      "location": "6:1:10",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "6:1:11",
+    "value": {
+      "id": 16978,
+      "surah": "6",
+      "ayah": "1",
+      "word": "11",
+      "location": "6:1:11",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "6:1:12",
+    "value": {
+      "id": 16979,
+      "surah": "6",
+      "ayah": "1",
+      "word": "12",
+      "location": "6:1:12",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "6:1:13",
+    "value": {
+      "id": 16980,
+      "surah": "6",
+      "ayah": "1",
+      "word": "13",
+      "location": "6:1:13",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "6:1:14",
+    "value": {
+      "id": 16981,
+      "surah": "6",
+      "ayah": "1",
+      "word": "14",
+      "location": "6:1:14",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "6:1:15",
+    "value": {
+      "id": 16982,
+      "surah": "6",
+      "ayah": "1",
+      "word": "15",
+      "location": "6:1:15",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "7:1:1",
+    "value": {
+      "id": 20183,
+      "surah": "7",
+      "ayah": "1",
+      "word": "1",
+      "location": "7:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "7:1:2",
+    "value": {
+      "id": 20184,
+      "surah": "7",
+      "ayah": "1",
+      "word": "2",
+      "location": "7:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "8:1:1",
+    "value": {
+      "id": 23709,
+      "surah": "8",
+      "ayah": "1",
+      "word": "1",
+      "location": "8:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "8:1:2",
+    "value": {
+      "id": 23710,
+      "surah": "8",
+      "ayah": "1",
+      "word": "2",
+      "location": "8:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "8:1:3",
+    "value": {
+      "id": 23711,
+      "surah": "8",
+      "ayah": "1",
+      "word": "3",
+      "location": "8:1:3",
+      "text": "ﱃﱄ"
+    }
+  },
+  {
+    "key": "8:1:4",
+    "value": {
+      "id": 23712,
+      "surah": "8",
+      "ayah": "1",
+      "word": "4",
+      "location": "8:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "8:1:5",
+    "value": {
+      "id": 23713,
+      "surah": "8",
+      "ayah": "1",
+      "word": "5",
+      "location": "8:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "8:1:6",
+    "value": {
+      "id": 23714,
+      "surah": "8",
+      "ayah": "1",
+      "word": "6",
+      "location": "8:1:6",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "8:1:7",
+    "value": {
+      "id": 23715,
+      "surah": "8",
+      "ayah": "1",
+      "word": "7",
+      "location": "8:1:7",
+      "text": "ﱈﱉ"
+    }
+  },
+  {
+    "key": "8:1:8",
+    "value": {
+      "id": 23716,
+      "surah": "8",
+      "ayah": "1",
+      "word": "8",
+      "location": "8:1:8",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "8:1:9",
+    "value": {
+      "id": 23717,
+      "surah": "8",
+      "ayah": "1",
+      "word": "9",
+      "location": "8:1:9",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "8:1:10",
+    "value": {
+      "id": 23718,
+      "surah": "8",
+      "ayah": "1",
+      "word": "10",
+      "location": "8:1:10",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "8:1:11",
+    "value": {
+      "id": 23719,
+      "surah": "8",
+      "ayah": "1",
+      "word": "11",
+      "location": "8:1:11",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "8:1:12",
+    "value": {
+      "id": 23720,
+      "surah": "8",
+      "ayah": "1",
+      "word": "12",
+      "location": "8:1:12",
+      "text": "ﱎﱏ"
+    }
+  },
+  {
+    "key": "8:1:13",
+    "value": {
+      "id": 23721,
+      "surah": "8",
+      "ayah": "1",
+      "word": "13",
+      "location": "8:1:13",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "8:1:14",
+    "value": {
+      "id": 23722,
+      "surah": "8",
+      "ayah": "1",
+      "word": "14",
+      "location": "8:1:14",
+      "text": "ﱑ"
+    }
+  },
+  {
+    "key": "8:1:15",
+    "value": {
+      "id": 23723,
+      "surah": "8",
+      "ayah": "1",
+      "word": "15",
+      "location": "8:1:15",
+      "text": "ﱒ"
+    }
+  },
+  {
+    "key": "8:1:16",
+    "value": {
+      "id": 23724,
+      "surah": "8",
+      "ayah": "1",
+      "word": "16",
+      "location": "8:1:16",
+      "text": "ﱓ"
+    }
+  },
+  {
+    "key": "8:1:17",
+    "value": {
+      "id": 23725,
+      "surah": "8",
+      "ayah": "1",
+      "word": "17",
+      "location": "8:1:17",
+      "text": "ﱔ"
+    }
+  },
+  {
+    "key": "8:1:18",
+    "value": {
+      "id": 23726,
+      "surah": "8",
+      "ayah": "1",
+      "word": "18",
+      "location": "8:1:18",
+      "text": "ﱕ"
+    }
+  },
+  {
+    "key": "8:1:19",
+    "value": {
+      "id": 23727,
+      "surah": "8",
+      "ayah": "1",
+      "word": "19",
+      "location": "8:1:19",
+      "text": "ﱖ"
+    }
+  },
+  {
+    "key": "9:1:1",
+    "value": {
+      "id": 25018,
+      "surah": "9",
+      "ayah": "1",
+      "word": "1",
+      "location": "9:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "9:1:2",
+    "value": {
+      "id": 25019,
+      "surah": "9",
+      "ayah": "1",
+      "word": "2",
+      "location": "9:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "9:1:3",
+    "value": {
+      "id": 25020,
+      "surah": "9",
+      "ayah": "1",
+      "word": "3",
+      "location": "9:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "9:1:4",
+    "value": {
+      "id": 25021,
+      "surah": "9",
+      "ayah": "1",
+      "word": "4",
+      "location": "9:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "9:1:5",
+    "value": {
+      "id": 25022,
+      "surah": "9",
+      "ayah": "1",
+      "word": "5",
+      "location": "9:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "9:1:6",
+    "value": {
+      "id": 25023,
+      "surah": "9",
+      "ayah": "1",
+      "word": "6",
+      "location": "9:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "9:1:7",
+    "value": {
+      "id": 25024,
+      "surah": "9",
+      "ayah": "1",
+      "word": "7",
+      "location": "9:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "9:1:8",
+    "value": {
+      "id": 25025,
+      "surah": "9",
+      "ayah": "1",
+      "word": "8",
+      "location": "9:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "9:1:9",
+    "value": {
+      "id": 25026,
+      "surah": "9",
+      "ayah": "1",
+      "word": "9",
+      "location": "9:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "9:1:10",
+    "value": {
+      "id": 25027,
+      "surah": "9",
+      "ayah": "1",
+      "word": "10",
+      "location": "9:1:10",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "10:1:1",
+    "value": {
+      "id": 27645,
+      "surah": "10",
+      "ayah": "1",
+      "word": "1",
+      "location": "10:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "10:1:2",
+    "value": {
+      "id": 27646,
+      "surah": "10",
+      "ayah": "1",
+      "word": "2",
+      "location": "10:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "10:1:3",
+    "value": {
+      "id": 27647,
+      "surah": "10",
+      "ayah": "1",
+      "word": "3",
+      "location": "10:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "10:1:4",
+    "value": {
+      "id": 27648,
+      "surah": "10",
+      "ayah": "1",
+      "word": "4",
+      "location": "10:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "10:1:5",
+    "value": {
+      "id": 27649,
+      "surah": "10",
+      "ayah": "1",
+      "word": "5",
+      "location": "10:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "10:1:6",
+    "value": {
+      "id": 27650,
+      "surah": "10",
+      "ayah": "1",
+      "word": "6",
+      "location": "10:1:6",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "11:1:1",
+    "value": {
+      "id": 29587,
+      "surah": "11",
+      "ayah": "1",
+      "word": "1",
+      "location": "11:1:1",
+      "text": "ﲄﲅ"
+    }
+  },
+  {
+    "key": "11:1:2",
+    "value": {
+      "id": 29588,
+      "surah": "11",
+      "ayah": "1",
+      "word": "2",
+      "location": "11:1:2",
+      "text": "ﲆ"
+    }
+  },
+  {
+    "key": "11:1:3",
+    "value": {
+      "id": 29589,
+      "surah": "11",
+      "ayah": "1",
+      "word": "3",
+      "location": "11:1:3",
+      "text": "ﲇ"
+    }
+  },
+  {
+    "key": "11:1:4",
+    "value": {
+      "id": 29590,
+      "surah": "11",
+      "ayah": "1",
+      "word": "4",
+      "location": "11:1:4",
+      "text": "ﲈ"
+    }
+  },
+  {
+    "key": "11:1:5",
+    "value": {
+      "id": 29591,
+      "surah": "11",
+      "ayah": "1",
+      "word": "5",
+      "location": "11:1:5",
+      "text": "ﲉ"
+    }
+  },
+  {
+    "key": "11:1:6",
+    "value": {
+      "id": 29592,
+      "surah": "11",
+      "ayah": "1",
+      "word": "6",
+      "location": "11:1:6",
+      "text": "ﲊ"
+    }
+  },
+  {
+    "key": "11:1:7",
+    "value": {
+      "id": 29593,
+      "surah": "11",
+      "ayah": "1",
+      "word": "7",
+      "location": "11:1:7",
+      "text": "ﲋ"
+    }
+  },
+  {
+    "key": "11:1:8",
+    "value": {
+      "id": 29594,
+      "surah": "11",
+      "ayah": "1",
+      "word": "8",
+      "location": "11:1:8",
+      "text": "ﲌ"
+    }
+  },
+  {
+    "key": "11:1:9",
+    "value": {
+      "id": 29595,
+      "surah": "11",
+      "ayah": "1",
+      "word": "9",
+      "location": "11:1:9",
+      "text": "ﲍ"
+    }
+  },
+  {
+    "key": "11:1:10",
+    "value": {
+      "id": 29596,
+      "surah": "11",
+      "ayah": "1",
+      "word": "10",
+      "location": "11:1:10",
+      "text": "ﲎ"
+    }
+  },
+  {
+    "key": "11:1:11",
+    "value": {
+      "id": 29597,
+      "surah": "11",
+      "ayah": "1",
+      "word": "11",
+      "location": "11:1:11",
+      "text": "ﲏ"
+    }
+  },
+  {
+    "key": "12:1:1",
+    "value": {
+      "id": 31627,
+      "surah": "12",
+      "ayah": "1",
+      "word": "1",
+      "location": "12:1:1",
+      "text": "ﲒﲓ"
+    }
+  },
+  {
+    "key": "12:1:2",
+    "value": {
+      "id": 31628,
+      "surah": "12",
+      "ayah": "1",
+      "word": "2",
+      "location": "12:1:2",
+      "text": "ﲔ"
+    }
+  },
+  {
+    "key": "12:1:3",
+    "value": {
+      "id": 31629,
+      "surah": "12",
+      "ayah": "1",
+      "word": "3",
+      "location": "12:1:3",
+      "text": "ﲕ"
+    }
+  },
+  {
+    "key": "12:1:4",
+    "value": {
+      "id": 31630,
+      "surah": "12",
+      "ayah": "1",
+      "word": "4",
+      "location": "12:1:4",
+      "text": "ﲖ"
+    }
+  },
+  {
+    "key": "12:1:5",
+    "value": {
+      "id": 31631,
+      "surah": "12",
+      "ayah": "1",
+      "word": "5",
+      "location": "12:1:5",
+      "text": "ﲗ"
+    }
+  },
+  {
+    "key": "12:1:6",
+    "value": {
+      "id": 31632,
+      "surah": "12",
+      "ayah": "1",
+      "word": "6",
+      "location": "12:1:6",
+      "text": "ﲘ"
+    }
+  },
+  {
+    "key": "13:1:1",
+    "value": {
+      "id": 33515,
+      "surah": "13",
+      "ayah": "1",
+      "word": "1",
+      "location": "13:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "13:1:2",
+    "value": {
+      "id": 33516,
+      "surah": "13",
+      "ayah": "1",
+      "word": "2",
+      "location": "13:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "13:1:3",
+    "value": {
+      "id": 33517,
+      "surah": "13",
+      "ayah": "1",
+      "word": "3",
+      "location": "13:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "13:1:4",
+    "value": {
+      "id": 33518,
+      "surah": "13",
+      "ayah": "1",
+      "word": "4",
+      "location": "13:1:4",
+      "text": "ﱅﱆ"
+    }
+  },
+  {
+    "key": "13:1:5",
+    "value": {
+      "id": 33519,
+      "surah": "13",
+      "ayah": "1",
+      "word": "5",
+      "location": "13:1:5",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "13:1:6",
+    "value": {
+      "id": 33520,
+      "surah": "13",
+      "ayah": "1",
+      "word": "6",
+      "location": "13:1:6",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "13:1:7",
+    "value": {
+      "id": 33521,
+      "surah": "13",
+      "ayah": "1",
+      "word": "7",
+      "location": "13:1:7",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "13:1:8",
+    "value": {
+      "id": 33522,
+      "surah": "13",
+      "ayah": "1",
+      "word": "8",
+      "location": "13:1:8",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "13:1:9",
+    "value": {
+      "id": 33523,
+      "surah": "13",
+      "ayah": "1",
+      "word": "9",
+      "location": "13:1:9",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "13:1:10",
+    "value": {
+      "id": 33524,
+      "surah": "13",
+      "ayah": "1",
+      "word": "10",
+      "location": "13:1:10",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "13:1:11",
+    "value": {
+      "id": 33525,
+      "surah": "13",
+      "ayah": "1",
+      "word": "11",
+      "location": "13:1:11",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "13:1:12",
+    "value": {
+      "id": 33526,
+      "surah": "13",
+      "ayah": "1",
+      "word": "12",
+      "location": "13:1:12",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "13:1:13",
+    "value": {
+      "id": 33527,
+      "surah": "13",
+      "ayah": "1",
+      "word": "13",
+      "location": "13:1:13",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "13:1:14",
+    "value": {
+      "id": 33528,
+      "surah": "13",
+      "ayah": "1",
+      "word": "14",
+      "location": "13:1:14",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "13:1:15",
+    "value": {
+      "id": 33529,
+      "surah": "13",
+      "ayah": "1",
+      "word": "15",
+      "location": "13:1:15",
+      "text": "ﱑ"
+    }
+  },
+  {
+    "key": "13:1:16",
+    "value": {
+      "id": 33530,
+      "surah": "13",
+      "ayah": "1",
+      "word": "16",
+      "location": "13:1:16",
+      "text": "ﱒ"
+    }
+  },
+  {
+    "key": "14:1:1",
+    "value": {
+      "id": 34412,
+      "surah": "14",
+      "ayah": "1",
+      "word": "1",
+      "location": "14:1:1",
+      "text": "ﱒﱓ"
+    }
+  },
+  {
+    "key": "14:1:2",
+    "value": {
+      "id": 34413,
+      "surah": "14",
+      "ayah": "1",
+      "word": "2",
+      "location": "14:1:2",
+      "text": "ﱔ"
+    }
+  },
+  {
+    "key": "14:1:3",
+    "value": {
+      "id": 34414,
+      "surah": "14",
+      "ayah": "1",
+      "word": "3",
+      "location": "14:1:3",
+      "text": "ﱕ"
+    }
+  },
+  {
+    "key": "14:1:4",
+    "value": {
+      "id": 34415,
+      "surah": "14",
+      "ayah": "1",
+      "word": "4",
+      "location": "14:1:4",
+      "text": "ﱖ"
+    }
+  },
+  {
+    "key": "14:1:5",
+    "value": {
+      "id": 34416,
+      "surah": "14",
+      "ayah": "1",
+      "word": "5",
+      "location": "14:1:5",
+      "text": "ﱗ"
+    }
+  },
+  {
+    "key": "14:1:6",
+    "value": {
+      "id": 34417,
+      "surah": "14",
+      "ayah": "1",
+      "word": "6",
+      "location": "14:1:6",
+      "text": "ﱘ"
+    }
+  },
+  {
+    "key": "14:1:7",
+    "value": {
+      "id": 34418,
+      "surah": "14",
+      "ayah": "1",
+      "word": "7",
+      "location": "14:1:7",
+      "text": "ﱙ"
+    }
+  },
+  {
+    "key": "14:1:8",
+    "value": {
+      "id": 34419,
+      "surah": "14",
+      "ayah": "1",
+      "word": "8",
+      "location": "14:1:8",
+      "text": "ﱚ"
+    }
+  },
+  {
+    "key": "14:1:9",
+    "value": {
+      "id": 34420,
+      "surah": "14",
+      "ayah": "1",
+      "word": "9",
+      "location": "14:1:9",
+      "text": "ﱛ"
+    }
+  },
+  {
+    "key": "14:1:10",
+    "value": {
+      "id": 34421,
+      "surah": "14",
+      "ayah": "1",
+      "word": "10",
+      "location": "14:1:10",
+      "text": "ﱜ"
+    }
+  },
+  {
+    "key": "14:1:11",
+    "value": {
+      "id": 34422,
+      "surah": "14",
+      "ayah": "1",
+      "word": "11",
+      "location": "14:1:11",
+      "text": "ﱝ"
+    }
+  },
+  {
+    "key": "14:1:12",
+    "value": {
+      "id": 34423,
+      "surah": "14",
+      "ayah": "1",
+      "word": "12",
+      "location": "14:1:12",
+      "text": "ﱞ"
+    }
+  },
+  {
+    "key": "14:1:13",
+    "value": {
+      "id": 34424,
+      "surah": "14",
+      "ayah": "1",
+      "word": "13",
+      "location": "14:1:13",
+      "text": "ﱟ"
+    }
+  },
+  {
+    "key": "14:1:14",
+    "value": {
+      "id": 34425,
+      "surah": "14",
+      "ayah": "1",
+      "word": "14",
+      "location": "14:1:14",
+      "text": "ﱠ"
+    }
+  },
+  {
+    "key": "14:1:15",
+    "value": {
+      "id": 34426,
+      "surah": "14",
+      "ayah": "1",
+      "word": "15",
+      "location": "14:1:15",
+      "text": "ﱡ"
+    }
+  },
+  {
+    "key": "14:1:16",
+    "value": {
+      "id": 34427,
+      "surah": "14",
+      "ayah": "1",
+      "word": "16",
+      "location": "14:1:16",
+      "text": "ﱢ"
+    }
+  },
+  {
+    "key": "14:1:17",
+    "value": {
+      "id": 34428,
+      "surah": "14",
+      "ayah": "1",
+      "word": "17",
+      "location": "14:1:17",
+      "text": "ﱣ"
+    }
+  },
+  {
+    "key": "15:1:1",
+    "value": {
+      "id": 35294,
+      "surah": "15",
+      "ayah": "1",
+      "word": "1",
+      "location": "15:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "15:1:2",
+    "value": {
+      "id": 35295,
+      "surah": "15",
+      "ayah": "1",
+      "word": "2",
+      "location": "15:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "15:1:3",
+    "value": {
+      "id": 35296,
+      "surah": "15",
+      "ayah": "1",
+      "word": "3",
+      "location": "15:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "15:1:4",
+    "value": {
+      "id": 35297,
+      "surah": "15",
+      "ayah": "1",
+      "word": "4",
+      "location": "15:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "15:1:5",
+    "value": {
+      "id": 35298,
+      "surah": "15",
+      "ayah": "1",
+      "word": "5",
+      "location": "15:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "15:1:6",
+    "value": {
+      "id": 35299,
+      "surah": "15",
+      "ayah": "1",
+      "word": "6",
+      "location": "15:1:6",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "15:1:7",
+    "value": {
+      "id": 35300,
+      "surah": "15",
+      "ayah": "1",
+      "word": "7",
+      "location": "15:1:7",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "16:1:1",
+    "value": {
+      "id": 36048,
+      "surah": "16",
+      "ayah": "1",
+      "word": "1",
+      "location": "16:1:1",
+      "text": "ﱸ"
+    }
+  },
+  {
+    "key": "16:1:2",
+    "value": {
+      "id": 36049,
+      "surah": "16",
+      "ayah": "1",
+      "word": "2",
+      "location": "16:1:2",
+      "text": "ﱹ"
+    }
+  },
+  {
+    "key": "16:1:3",
+    "value": {
+      "id": 36050,
+      "surah": "16",
+      "ayah": "1",
+      "word": "3",
+      "location": "16:1:3",
+      "text": "ﱺ"
+    }
+  },
+  {
+    "key": "16:1:4",
+    "value": {
+      "id": 36051,
+      "surah": "16",
+      "ayah": "1",
+      "word": "4",
+      "location": "16:1:4",
+      "text": "ﱻ"
+    }
+  },
+  {
+    "key": "16:1:5",
+    "value": {
+      "id": 36052,
+      "surah": "16",
+      "ayah": "1",
+      "word": "5",
+      "location": "16:1:5",
+      "text": "ﱼﱽ"
+    }
+  },
+  {
+    "key": "16:1:6",
+    "value": {
+      "id": 36053,
+      "surah": "16",
+      "ayah": "1",
+      "word": "6",
+      "location": "16:1:6",
+      "text": "ﱾ"
+    }
+  },
+  {
+    "key": "16:1:7",
+    "value": {
+      "id": 36054,
+      "surah": "16",
+      "ayah": "1",
+      "word": "7",
+      "location": "16:1:7",
+      "text": "ﱿ"
+    }
+  },
+  {
+    "key": "16:1:8",
+    "value": {
+      "id": 36055,
+      "surah": "16",
+      "ayah": "1",
+      "word": "8",
+      "location": "16:1:8",
+      "text": "ﲀ"
+    }
+  },
+  {
+    "key": "16:1:9",
+    "value": {
+      "id": 36056,
+      "surah": "16",
+      "ayah": "1",
+      "word": "9",
+      "location": "16:1:9",
+      "text": "ﲁ"
+    }
+  },
+  {
+    "key": "16:1:10",
+    "value": {
+      "id": 36057,
+      "surah": "16",
+      "ayah": "1",
+      "word": "10",
+      "location": "16:1:10",
+      "text": "ﲂ"
+    }
+  },
+  {
+    "key": "17:1:1",
+    "value": {
+      "id": 38020,
+      "surah": "17",
+      "ayah": "1",
+      "word": "1",
+      "location": "17:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "17:1:2",
+    "value": {
+      "id": 38021,
+      "surah": "17",
+      "ayah": "1",
+      "word": "2",
+      "location": "17:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "17:1:3",
+    "value": {
+      "id": 38022,
+      "surah": "17",
+      "ayah": "1",
+      "word": "3",
+      "location": "17:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "17:1:4",
+    "value": {
+      "id": 38023,
+      "surah": "17",
+      "ayah": "1",
+      "word": "4",
+      "location": "17:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "17:1:5",
+    "value": {
+      "id": 38024,
+      "surah": "17",
+      "ayah": "1",
+      "word": "5",
+      "location": "17:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "17:1:6",
+    "value": {
+      "id": 38025,
+      "surah": "17",
+      "ayah": "1",
+      "word": "6",
+      "location": "17:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "17:1:7",
+    "value": {
+      "id": 38026,
+      "surah": "17",
+      "ayah": "1",
+      "word": "7",
+      "location": "17:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "17:1:8",
+    "value": {
+      "id": 38027,
+      "surah": "17",
+      "ayah": "1",
+      "word": "8",
+      "location": "17:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "17:1:9",
+    "value": {
+      "id": 38028,
+      "surah": "17",
+      "ayah": "1",
+      "word": "9",
+      "location": "17:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "17:1:10",
+    "value": {
+      "id": 38029,
+      "surah": "17",
+      "ayah": "1",
+      "word": "10",
+      "location": "17:1:10",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "17:1:11",
+    "value": {
+      "id": 38030,
+      "surah": "17",
+      "ayah": "1",
+      "word": "11",
+      "location": "17:1:11",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "17:1:12",
+    "value": {
+      "id": 38031,
+      "surah": "17",
+      "ayah": "1",
+      "word": "12",
+      "location": "17:1:12",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "17:1:13",
+    "value": {
+      "id": 38032,
+      "surah": "17",
+      "ayah": "1",
+      "word": "13",
+      "location": "17:1:13",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "17:1:14",
+    "value": {
+      "id": 38033,
+      "surah": "17",
+      "ayah": "1",
+      "word": "14",
+      "location": "17:1:14",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "17:1:15",
+    "value": {
+      "id": 38034,
+      "surah": "17",
+      "ayah": "1",
+      "word": "15",
+      "location": "17:1:15",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "17:1:16",
+    "value": {
+      "id": 38035,
+      "surah": "17",
+      "ayah": "1",
+      "word": "16",
+      "location": "17:1:16",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "17:1:17",
+    "value": {
+      "id": 38036,
+      "surah": "17",
+      "ayah": "1",
+      "word": "17",
+      "location": "17:1:17",
+      "text": "ﱑﱒ"
+    }
+  },
+  {
+    "key": "17:1:18",
+    "value": {
+      "id": 38037,
+      "surah": "17",
+      "ayah": "1",
+      "word": "18",
+      "location": "17:1:18",
+      "text": "ﱓ"
+    }
+  },
+  {
+    "key": "17:1:19",
+    "value": {
+      "id": 38038,
+      "surah": "17",
+      "ayah": "1",
+      "word": "19",
+      "location": "17:1:19",
+      "text": "ﱔ"
+    }
+  },
+  {
+    "key": "17:1:20",
+    "value": {
+      "id": 38039,
+      "surah": "17",
+      "ayah": "1",
+      "word": "20",
+      "location": "17:1:20",
+      "text": "ﱕ"
+    }
+  },
+  {
+    "key": "17:1:21",
+    "value": {
+      "id": 38040,
+      "surah": "17",
+      "ayah": "1",
+      "word": "21",
+      "location": "17:1:21",
+      "text": "ﱖ"
+    }
+  },
+  {
+    "key": "17:1:22",
+    "value": {
+      "id": 38041,
+      "surah": "17",
+      "ayah": "1",
+      "word": "22",
+      "location": "17:1:22",
+      "text": "ﱗ"
+    }
+  },
+  {
+    "key": "17:2:1",
+    "value": {
+      "id": 38042,
+      "surah": "17",
+      "ayah": "2",
+      "word": "1",
+      "location": "17:2:1",
+      "text": "ﱘ"
+    }
+  },
+  {
+    "key": "17:2:2",
+    "value": {
+      "id": 38043,
+      "surah": "17",
+      "ayah": "2",
+      "word": "2",
+      "location": "17:2:2",
+      "text": "ﱙ"
+    }
+  },
+  {
+    "key": "17:2:3",
+    "value": {
+      "id": 38044,
+      "surah": "17",
+      "ayah": "2",
+      "word": "3",
+      "location": "17:2:3",
+      "text": "ﱚ"
+    }
+  },
+  {
+    "key": "17:2:4",
+    "value": {
+      "id": 38045,
+      "surah": "17",
+      "ayah": "2",
+      "word": "4",
+      "location": "17:2:4",
+      "text": "ﱛ"
+    }
+  },
+  {
+    "key": "17:2:5",
+    "value": {
+      "id": 38046,
+      "surah": "17",
+      "ayah": "2",
+      "word": "5",
+      "location": "17:2:5",
+      "text": "ﱜ"
+    }
+  },
+  {
+    "key": "17:2:6",
+    "value": {
+      "id": 38047,
+      "surah": "17",
+      "ayah": "2",
+      "word": "6",
+      "location": "17:2:6",
+      "text": "ﱝ"
+    }
+  },
+  {
+    "key": "17:2:7",
+    "value": {
+      "id": 38048,
+      "surah": "17",
+      "ayah": "2",
+      "word": "7",
+      "location": "17:2:7",
+      "text": "ﱞ"
+    }
+  },
+  {
+    "key": "17:2:8",
+    "value": {
+      "id": 38049,
+      "surah": "17",
+      "ayah": "2",
+      "word": "8",
+      "location": "17:2:8",
+      "text": "ﱟ"
+    }
+  },
+  {
+    "key": "17:2:9",
+    "value": {
+      "id": 38050,
+      "surah": "17",
+      "ayah": "2",
+      "word": "9",
+      "location": "17:2:9",
+      "text": "ﱠ"
+    }
+  },
+  {
+    "key": "17:2:10",
+    "value": {
+      "id": 38051,
+      "surah": "17",
+      "ayah": "2",
+      "word": "10",
+      "location": "17:2:10",
+      "text": "ﱡ"
+    }
+  },
+  {
+    "key": "17:2:11",
+    "value": {
+      "id": 38052,
+      "surah": "17",
+      "ayah": "2",
+      "word": "11",
+      "location": "17:2:11",
+      "text": "ﱢ"
+    }
+  },
+  {
+    "key": "17:2:12",
+    "value": {
+      "id": 38053,
+      "surah": "17",
+      "ayah": "2",
+      "word": "12",
+      "location": "17:2:12",
+      "text": "ﱣ"
+    }
+  },
+  {
+    "key": "17:2:13",
+    "value": {
+      "id": 38054,
+      "surah": "17",
+      "ayah": "2",
+      "word": "13",
+      "location": "17:2:13",
+      "text": "ﱤ"
+    }
+  },
+  {
+    "key": "18:1:1",
+    "value": {
+      "id": 39687,
+      "surah": "18",
+      "ayah": "1",
+      "word": "1",
+      "location": "18:1:1",
+      "text": "ﲭ"
+    }
+  },
+  {
+    "key": "18:1:2",
+    "value": {
+      "id": 39688,
+      "surah": "18",
+      "ayah": "1",
+      "word": "2",
+      "location": "18:1:2",
+      "text": "ﲮ"
+    }
+  },
+  {
+    "key": "18:1:3",
+    "value": {
+      "id": 39689,
+      "surah": "18",
+      "ayah": "1",
+      "word": "3",
+      "location": "18:1:3",
+      "text": "ﲯ"
+    }
+  },
+  {
+    "key": "18:1:4",
+    "value": {
+      "id": 39690,
+      "surah": "18",
+      "ayah": "1",
+      "word": "4",
+      "location": "18:1:4",
+      "text": "ﲰ"
+    }
+  },
+  {
+    "key": "18:1:5",
+    "value": {
+      "id": 39691,
+      "surah": "18",
+      "ayah": "1",
+      "word": "5",
+      "location": "18:1:5",
+      "text": "ﲱ"
+    }
+  },
+  {
+    "key": "18:1:6",
+    "value": {
+      "id": 39692,
+      "surah": "18",
+      "ayah": "1",
+      "word": "6",
+      "location": "18:1:6",
+      "text": "ﲲ"
+    }
+  },
+  {
+    "key": "18:1:7",
+    "value": {
+      "id": 39693,
+      "surah": "18",
+      "ayah": "1",
+      "word": "7",
+      "location": "18:1:7",
+      "text": "ﲳ"
+    }
+  },
+  {
+    "key": "18:1:8",
+    "value": {
+      "id": 39694,
+      "surah": "18",
+      "ayah": "1",
+      "word": "8",
+      "location": "18:1:8",
+      "text": "ﲴ"
+    }
+  },
+  {
+    "key": "18:1:9",
+    "value": {
+      "id": 39695,
+      "surah": "18",
+      "ayah": "1",
+      "word": "9",
+      "location": "18:1:9",
+      "text": "ﲵ"
+    }
+  },
+  {
+    "key": "18:1:10",
+    "value": {
+      "id": 39696,
+      "surah": "18",
+      "ayah": "1",
+      "word": "10",
+      "location": "18:1:10",
+      "text": "ﲶ"
+    }
+  },
+  {
+    "key": "18:1:11",
+    "value": {
+      "id": 39697,
+      "surah": "18",
+      "ayah": "1",
+      "word": "11",
+      "location": "18:1:11",
+      "text": "ﲷﲸ"
+    }
+  },
+  {
+    "key": "18:1:12",
+    "value": {
+      "id": 39698,
+      "surah": "18",
+      "ayah": "1",
+      "word": "12",
+      "location": "18:1:12",
+      "text": "ﲹ"
+    }
+  },
+  {
+    "key": "18:2:1",
+    "value": {
+      "id": 39699,
+      "surah": "18",
+      "ayah": "2",
+      "word": "1",
+      "location": "18:2:1",
+      "text": "ﲺ"
+    }
+  },
+  {
+    "key": "18:2:2",
+    "value": {
+      "id": 39700,
+      "surah": "18",
+      "ayah": "2",
+      "word": "2",
+      "location": "18:2:2",
+      "text": "ﲻ"
+    }
+  },
+  {
+    "key": "18:2:3",
+    "value": {
+      "id": 39701,
+      "surah": "18",
+      "ayah": "2",
+      "word": "3",
+      "location": "18:2:3",
+      "text": "ﲼ"
+    }
+  },
+  {
+    "key": "18:2:4",
+    "value": {
+      "id": 39702,
+      "surah": "18",
+      "ayah": "2",
+      "word": "4",
+      "location": "18:2:4",
+      "text": "ﲽ"
+    }
+  },
+  {
+    "key": "18:2:5",
+    "value": {
+      "id": 39703,
+      "surah": "18",
+      "ayah": "2",
+      "word": "5",
+      "location": "18:2:5",
+      "text": "ﲾ"
+    }
+  },
+  {
+    "key": "18:2:6",
+    "value": {
+      "id": 39704,
+      "surah": "18",
+      "ayah": "2",
+      "word": "6",
+      "location": "18:2:6",
+      "text": "ﲿ"
+    }
+  },
+  {
+    "key": "18:2:7",
+    "value": {
+      "id": 39705,
+      "surah": "18",
+      "ayah": "2",
+      "word": "7",
+      "location": "18:2:7",
+      "text": "ﳀ"
+    }
+  },
+  {
+    "key": "18:2:8",
+    "value": {
+      "id": 39706,
+      "surah": "18",
+      "ayah": "2",
+      "word": "8",
+      "location": "18:2:8",
+      "text": "ﳁ"
+    }
+  },
+  {
+    "key": "18:2:9",
+    "value": {
+      "id": 39707,
+      "surah": "18",
+      "ayah": "2",
+      "word": "9",
+      "location": "18:2:9",
+      "text": "ﳂ"
+    }
+  },
+  {
+    "key": "18:2:10",
+    "value": {
+      "id": 39708,
+      "surah": "18",
+      "ayah": "2",
+      "word": "10",
+      "location": "18:2:10",
+      "text": "ﳃ"
+    }
+  },
+  {
+    "key": "18:2:11",
+    "value": {
+      "id": 39709,
+      "surah": "18",
+      "ayah": "2",
+      "word": "11",
+      "location": "18:2:11",
+      "text": "ﳄ"
+    }
+  },
+  {
+    "key": "18:2:12",
+    "value": {
+      "id": 39710,
+      "surah": "18",
+      "ayah": "2",
+      "word": "12",
+      "location": "18:2:12",
+      "text": "ﳅ"
+    }
+  },
+  {
+    "key": "18:2:13",
+    "value": {
+      "id": 39711,
+      "surah": "18",
+      "ayah": "2",
+      "word": "13",
+      "location": "18:2:13",
+      "text": "ﳆ"
+    }
+  },
+  {
+    "key": "18:2:14",
+    "value": {
+      "id": 39712,
+      "surah": "18",
+      "ayah": "2",
+      "word": "14",
+      "location": "18:2:14",
+      "text": "ﳇ"
+    }
+  },
+  {
+    "key": "18:2:15",
+    "value": {
+      "id": 39713,
+      "surah": "18",
+      "ayah": "2",
+      "word": "15",
+      "location": "18:2:15",
+      "text": "ﳈ"
+    }
+  },
+  {
+    "key": "18:2:16",
+    "value": {
+      "id": 39714,
+      "surah": "18",
+      "ayah": "2",
+      "word": "16",
+      "location": "18:2:16",
+      "text": "ﳉ"
+    }
+  },
+  {
+    "key": "19:1:1",
+    "value": {
+      "id": 41376,
+      "surah": "19",
+      "ayah": "1",
+      "word": "1",
+      "location": "19:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "19:1:2",
+    "value": {
+      "id": 41377,
+      "surah": "19",
+      "ayah": "1",
+      "word": "2",
+      "location": "19:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "19:2:1",
+    "value": {
+      "id": 41378,
+      "surah": "19",
+      "ayah": "2",
+      "word": "1",
+      "location": "19:2:1",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "19:2:2",
+    "value": {
+      "id": 41379,
+      "surah": "19",
+      "ayah": "2",
+      "word": "2",
+      "location": "19:2:2",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "19:2:3",
+    "value": {
+      "id": 41380,
+      "surah": "19",
+      "ayah": "2",
+      "word": "3",
+      "location": "19:2:3",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "19:2:4",
+    "value": {
+      "id": 41381,
+      "surah": "19",
+      "ayah": "2",
+      "word": "4",
+      "location": "19:2:4",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "19:2:5",
+    "value": {
+      "id": 41382,
+      "surah": "19",
+      "ayah": "2",
+      "word": "5",
+      "location": "19:2:5",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "19:2:6",
+    "value": {
+      "id": 41383,
+      "surah": "19",
+      "ayah": "2",
+      "word": "6",
+      "location": "19:2:6",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "20:1:1",
+    "value": {
+      "id": 42435,
+      "surah": "20",
+      "ayah": "1",
+      "word": "1",
+      "location": "20:1:1",
+      "text": "ﱥ"
+    }
+  },
+  {
+    "key": "20:1:2",
+    "value": {
+      "id": 42436,
+      "surah": "20",
+      "ayah": "1",
+      "word": "2",
+      "location": "20:1:2",
+      "text": "ﱦ"
+    }
+  },
+  {
+    "key": "21:1:1",
+    "value": {
+      "id": 43905,
+      "surah": "21",
+      "ayah": "1",
+      "word": "1",
+      "location": "21:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "21:1:2",
+    "value": {
+      "id": 43906,
+      "surah": "21",
+      "ayah": "1",
+      "word": "2",
+      "location": "21:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "21:1:3",
+    "value": {
+      "id": 43907,
+      "surah": "21",
+      "ayah": "1",
+      "word": "3",
+      "location": "21:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "21:1:4",
+    "value": {
+      "id": 43908,
+      "surah": "21",
+      "ayah": "1",
+      "word": "4",
+      "location": "21:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "21:1:5",
+    "value": {
+      "id": 43909,
+      "surah": "21",
+      "ayah": "1",
+      "word": "5",
+      "location": "21:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "21:1:6",
+    "value": {
+      "id": 43910,
+      "surah": "21",
+      "ayah": "1",
+      "word": "6",
+      "location": "21:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "21:1:7",
+    "value": {
+      "id": 43911,
+      "surah": "21",
+      "ayah": "1",
+      "word": "7",
+      "location": "21:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "21:1:8",
+    "value": {
+      "id": 43912,
+      "surah": "21",
+      "ayah": "1",
+      "word": "8",
+      "location": "21:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "22:1:1",
+    "value": {
+      "id": 45186,
+      "surah": "22",
+      "ayah": "1",
+      "word": "1",
+      "location": "22:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "22:1:2",
+    "value": {
+      "id": 45187,
+      "surah": "22",
+      "ayah": "1",
+      "word": "2",
+      "location": "22:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "22:1:3",
+    "value": {
+      "id": 45188,
+      "surah": "22",
+      "ayah": "1",
+      "word": "3",
+      "location": "22:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "22:1:4",
+    "value": {
+      "id": 45189,
+      "surah": "22",
+      "ayah": "1",
+      "word": "4",
+      "location": "22:1:4",
+      "text": "ﱄﱅ"
+    }
+  },
+  {
+    "key": "22:1:5",
+    "value": {
+      "id": 45190,
+      "surah": "22",
+      "ayah": "1",
+      "word": "5",
+      "location": "22:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "22:1:6",
+    "value": {
+      "id": 45191,
+      "surah": "22",
+      "ayah": "1",
+      "word": "6",
+      "location": "22:1:6",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "22:1:7",
+    "value": {
+      "id": 45192,
+      "surah": "22",
+      "ayah": "1",
+      "word": "7",
+      "location": "22:1:7",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "22:1:8",
+    "value": {
+      "id": 45193,
+      "surah": "22",
+      "ayah": "1",
+      "word": "8",
+      "location": "22:1:8",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "22:1:9",
+    "value": {
+      "id": 45194,
+      "surah": "22",
+      "ayah": "1",
+      "word": "9",
+      "location": "22:1:9",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "22:1:10",
+    "value": {
+      "id": 45195,
+      "surah": "22",
+      "ayah": "1",
+      "word": "10",
+      "location": "22:1:10",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "23:1:1",
+    "value": {
+      "id": 46538,
+      "surah": "23",
+      "ayah": "1",
+      "word": "1",
+      "location": "23:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "23:1:2",
+    "value": {
+      "id": 46539,
+      "surah": "23",
+      "ayah": "1",
+      "word": "2",
+      "location": "23:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "23:1:3",
+    "value": {
+      "id": 46540,
+      "surah": "23",
+      "ayah": "1",
+      "word": "3",
+      "location": "23:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "23:1:4",
+    "value": {
+      "id": 46541,
+      "surah": "23",
+      "ayah": "1",
+      "word": "4",
+      "location": "23:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "24:1:1",
+    "value": {
+      "id": 47706,
+      "surah": "24",
+      "ayah": "1",
+      "word": "1",
+      "location": "24:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "24:1:2",
+    "value": {
+      "id": 47707,
+      "surah": "24",
+      "ayah": "1",
+      "word": "2",
+      "location": "24:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "24:1:3",
+    "value": {
+      "id": 47708,
+      "surah": "24",
+      "ayah": "1",
+      "word": "3",
+      "location": "24:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "24:1:4",
+    "value": {
+      "id": 47709,
+      "surah": "24",
+      "ayah": "1",
+      "word": "4",
+      "location": "24:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "24:1:5",
+    "value": {
+      "id": 47710,
+      "surah": "24",
+      "ayah": "1",
+      "word": "5",
+      "location": "24:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "24:1:6",
+    "value": {
+      "id": 47711,
+      "surah": "24",
+      "ayah": "1",
+      "word": "6",
+      "location": "24:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "24:1:7",
+    "value": {
+      "id": 47712,
+      "surah": "24",
+      "ayah": "1",
+      "word": "7",
+      "location": "24:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "24:1:8",
+    "value": {
+      "id": 47713,
+      "surah": "24",
+      "ayah": "1",
+      "word": "8",
+      "location": "24:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "24:1:9",
+    "value": {
+      "id": 47714,
+      "surah": "24",
+      "ayah": "1",
+      "word": "9",
+      "location": "24:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "24:1:10",
+    "value": {
+      "id": 47715,
+      "surah": "24",
+      "ayah": "1",
+      "word": "10",
+      "location": "24:1:10",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "25:1:1",
+    "value": {
+      "id": 49086,
+      "surah": "25",
+      "ayah": "1",
+      "word": "1",
+      "location": "25:1:1",
+      "text": "ﲣ"
+    }
+  },
+  {
+    "key": "25:1:2",
+    "value": {
+      "id": 49087,
+      "surah": "25",
+      "ayah": "1",
+      "word": "2",
+      "location": "25:1:2",
+      "text": "ﲤ"
+    }
+  },
+  {
+    "key": "25:1:3",
+    "value": {
+      "id": 49088,
+      "surah": "25",
+      "ayah": "1",
+      "word": "3",
+      "location": "25:1:3",
+      "text": "ﲥ"
+    }
+  },
+  {
+    "key": "25:1:4",
+    "value": {
+      "id": 49089,
+      "surah": "25",
+      "ayah": "1",
+      "word": "4",
+      "location": "25:1:4",
+      "text": "ﲦ"
+    }
+  },
+  {
+    "key": "25:1:5",
+    "value": {
+      "id": 49090,
+      "surah": "25",
+      "ayah": "1",
+      "word": "5",
+      "location": "25:1:5",
+      "text": "ﲧ"
+    }
+  },
+  {
+    "key": "25:1:6",
+    "value": {
+      "id": 49091,
+      "surah": "25",
+      "ayah": "1",
+      "word": "6",
+      "location": "25:1:6",
+      "text": "ﲨ"
+    }
+  },
+  {
+    "key": "25:1:7",
+    "value": {
+      "id": 49092,
+      "surah": "25",
+      "ayah": "1",
+      "word": "7",
+      "location": "25:1:7",
+      "text": "ﲩ"
+    }
+  },
+  {
+    "key": "25:1:8",
+    "value": {
+      "id": 49093,
+      "surah": "25",
+      "ayah": "1",
+      "word": "8",
+      "location": "25:1:8",
+      "text": "ﲪ"
+    }
+  },
+  {
+    "key": "25:1:9",
+    "value": {
+      "id": 49094,
+      "surah": "25",
+      "ayah": "1",
+      "word": "9",
+      "location": "25:1:9",
+      "text": "ﲫ"
+    }
+  },
+  {
+    "key": "25:1:10",
+    "value": {
+      "id": 49095,
+      "surah": "25",
+      "ayah": "1",
+      "word": "10",
+      "location": "25:1:10",
+      "text": "ﲬ"
+    }
+  },
+  {
+    "key": "26:1:1",
+    "value": {
+      "id": 50056,
+      "surah": "26",
+      "ayah": "1",
+      "word": "1",
+      "location": "26:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "26:1:2",
+    "value": {
+      "id": 50057,
+      "surah": "26",
+      "ayah": "1",
+      "word": "2",
+      "location": "26:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "27:1:1",
+    "value": {
+      "id": 51601,
+      "surah": "27",
+      "ayah": "1",
+      "word": "1",
+      "location": "27:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "27:1:2",
+    "value": {
+      "id": 51602,
+      "surah": "27",
+      "ayah": "1",
+      "word": "2",
+      "location": "27:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "27:1:3",
+    "value": {
+      "id": 51603,
+      "surah": "27",
+      "ayah": "1",
+      "word": "3",
+      "location": "27:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "27:1:4",
+    "value": {
+      "id": 51604,
+      "surah": "27",
+      "ayah": "1",
+      "word": "4",
+      "location": "27:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "27:1:5",
+    "value": {
+      "id": 51605,
+      "surah": "27",
+      "ayah": "1",
+      "word": "5",
+      "location": "27:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "27:1:6",
+    "value": {
+      "id": 51606,
+      "surah": "27",
+      "ayah": "1",
+      "word": "6",
+      "location": "27:1:6",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "27:1:7",
+    "value": {
+      "id": 51607,
+      "surah": "27",
+      "ayah": "1",
+      "word": "7",
+      "location": "27:1:7",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "28:1:1",
+    "value": {
+      "id": 52845,
+      "surah": "28",
+      "ayah": "1",
+      "word": "1",
+      "location": "28:1:1",
+      "text": "ﲍ"
+    }
+  },
+  {
+    "key": "28:1:2",
+    "value": {
+      "id": 52846,
+      "surah": "28",
+      "ayah": "1",
+      "word": "2",
+      "location": "28:1:2",
+      "text": "ﲎ"
+    }
+  },
+  {
+    "key": "29:1:1",
+    "value": {
+      "id": 54363,
+      "surah": "29",
+      "ayah": "1",
+      "word": "1",
+      "location": "29:1:1",
+      "text": "ﲑ"
+    }
+  },
+  {
+    "key": "29:1:2",
+    "value": {
+      "id": 54364,
+      "surah": "29",
+      "ayah": "1",
+      "word": "2",
+      "location": "29:1:2",
+      "text": "ﲒ"
+    }
+  },
+  {
+    "key": "30:1:1",
+    "value": {
+      "id": 55408,
+      "surah": "30",
+      "ayah": "1",
+      "word": "1",
+      "location": "30:1:1",
+      "text": "ﲛ"
+    }
+  },
+  {
+    "key": "30:1:2",
+    "value": {
+      "id": 55409,
+      "surah": "30",
+      "ayah": "1",
+      "word": "2",
+      "location": "30:1:2",
+      "text": "ﲜ"
+    }
+  },
+  {
+    "key": "31:1:1",
+    "value": {
+      "id": 56285,
+      "surah": "31",
+      "ayah": "1",
+      "word": "1",
+      "location": "31:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "31:1:2",
+    "value": {
+      "id": 56286,
+      "surah": "31",
+      "ayah": "1",
+      "word": "2",
+      "location": "31:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "32:1:1",
+    "value": {
+      "id": 56865,
+      "surah": "32",
+      "ayah": "1",
+      "word": "1",
+      "location": "32:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "32:1:2",
+    "value": {
+      "id": 56866,
+      "surah": "32",
+      "ayah": "1",
+      "word": "2",
+      "location": "32:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "33:1:1",
+    "value": {
+      "id": 57267,
+      "surah": "33",
+      "ayah": "1",
+      "word": "1",
+      "location": "33:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "33:1:2",
+    "value": {
+      "id": 57268,
+      "surah": "33",
+      "ayah": "1",
+      "word": "2",
+      "location": "33:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "33:1:3",
+    "value": {
+      "id": 57269,
+      "surah": "33",
+      "ayah": "1",
+      "word": "3",
+      "location": "33:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "33:1:4",
+    "value": {
+      "id": 57270,
+      "surah": "33",
+      "ayah": "1",
+      "word": "4",
+      "location": "33:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "33:1:5",
+    "value": {
+      "id": 57271,
+      "surah": "33",
+      "ayah": "1",
+      "word": "5",
+      "location": "33:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "33:1:6",
+    "value": {
+      "id": 57272,
+      "surah": "33",
+      "ayah": "1",
+      "word": "6",
+      "location": "33:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "33:1:7",
+    "value": {
+      "id": 57273,
+      "surah": "33",
+      "ayah": "1",
+      "word": "7",
+      "location": "33:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "33:1:8",
+    "value": {
+      "id": 57274,
+      "surah": "33",
+      "ayah": "1",
+      "word": "8",
+      "location": "33:1:8",
+      "text": "ﱈﱉ"
+    }
+  },
+  {
+    "key": "33:1:9",
+    "value": {
+      "id": 57275,
+      "surah": "33",
+      "ayah": "1",
+      "word": "9",
+      "location": "33:1:9",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "33:1:10",
+    "value": {
+      "id": 57276,
+      "surah": "33",
+      "ayah": "1",
+      "word": "10",
+      "location": "33:1:10",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "33:1:11",
+    "value": {
+      "id": 57277,
+      "surah": "33",
+      "ayah": "1",
+      "word": "11",
+      "location": "33:1:11",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "33:1:12",
+    "value": {
+      "id": 57278,
+      "surah": "33",
+      "ayah": "1",
+      "word": "12",
+      "location": "33:1:12",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "33:1:13",
+    "value": {
+      "id": 57279,
+      "surah": "33",
+      "ayah": "1",
+      "word": "13",
+      "location": "33:1:13",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "33:1:14",
+    "value": {
+      "id": 57280,
+      "surah": "33",
+      "ayah": "1",
+      "word": "14",
+      "location": "33:1:14",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "34:1:1",
+    "value": {
+      "id": 58627,
+      "surah": "34",
+      "ayah": "1",
+      "word": "1",
+      "location": "34:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "34:1:2",
+    "value": {
+      "id": 58628,
+      "surah": "34",
+      "ayah": "1",
+      "word": "2",
+      "location": "34:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "34:1:3",
+    "value": {
+      "id": 58629,
+      "surah": "34",
+      "ayah": "1",
+      "word": "3",
+      "location": "34:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "34:1:4",
+    "value": {
+      "id": 58630,
+      "surah": "34",
+      "ayah": "1",
+      "word": "4",
+      "location": "34:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "34:1:5",
+    "value": {
+      "id": 58631,
+      "surah": "34",
+      "ayah": "1",
+      "word": "5",
+      "location": "34:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "34:1:6",
+    "value": {
+      "id": 58632,
+      "surah": "34",
+      "ayah": "1",
+      "word": "6",
+      "location": "34:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "34:1:7",
+    "value": {
+      "id": 58633,
+      "surah": "34",
+      "ayah": "1",
+      "word": "7",
+      "location": "34:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "34:1:8",
+    "value": {
+      "id": 58634,
+      "surah": "34",
+      "ayah": "1",
+      "word": "8",
+      "location": "34:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "34:1:9",
+    "value": {
+      "id": 58635,
+      "surah": "34",
+      "ayah": "1",
+      "word": "9",
+      "location": "34:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "34:1:10",
+    "value": {
+      "id": 58636,
+      "surah": "34",
+      "ayah": "1",
+      "word": "10",
+      "location": "34:1:10",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "34:1:11",
+    "value": {
+      "id": 58637,
+      "surah": "34",
+      "ayah": "1",
+      "word": "11",
+      "location": "34:1:11",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "34:1:12",
+    "value": {
+      "id": 58638,
+      "surah": "34",
+      "ayah": "1",
+      "word": "12",
+      "location": "34:1:12",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "34:1:13",
+    "value": {
+      "id": 58639,
+      "surah": "34",
+      "ayah": "1",
+      "word": "13",
+      "location": "34:1:13",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "34:1:14",
+    "value": {
+      "id": 58640,
+      "surah": "34",
+      "ayah": "1",
+      "word": "14",
+      "location": "34:1:14",
+      "text": "ﱎﱏ"
+    }
+  },
+  {
+    "key": "34:1:15",
+    "value": {
+      "id": 58641,
+      "surah": "34",
+      "ayah": "1",
+      "word": "15",
+      "location": "34:1:15",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "34:1:16",
+    "value": {
+      "id": 58642,
+      "surah": "34",
+      "ayah": "1",
+      "word": "16",
+      "location": "34:1:16",
+      "text": "ﱑ"
+    }
+  },
+  {
+    "key": "34:1:17",
+    "value": {
+      "id": 58643,
+      "surah": "34",
+      "ayah": "1",
+      "word": "17",
+      "location": "34:1:17",
+      "text": "ﱒ"
+    }
+  },
+  {
+    "key": "34:1:18",
+    "value": {
+      "id": 58644,
+      "surah": "34",
+      "ayah": "1",
+      "word": "18",
+      "location": "34:1:18",
+      "text": "ﱓ"
+    }
+  },
+  {
+    "key": "35:1:1",
+    "value": {
+      "id": 59564,
+      "surah": "35",
+      "ayah": "1",
+      "word": "1",
+      "location": "35:1:1",
+      "text": "ﲏ"
+    }
+  },
+  {
+    "key": "35:1:2",
+    "value": {
+      "id": 59565,
+      "surah": "35",
+      "ayah": "1",
+      "word": "2",
+      "location": "35:1:2",
+      "text": "ﲐ"
+    }
+  },
+  {
+    "key": "35:1:3",
+    "value": {
+      "id": 59566,
+      "surah": "35",
+      "ayah": "1",
+      "word": "3",
+      "location": "35:1:3",
+      "text": "ﲑ"
+    }
+  },
+  {
+    "key": "35:1:4",
+    "value": {
+      "id": 59567,
+      "surah": "35",
+      "ayah": "1",
+      "word": "4",
+      "location": "35:1:4",
+      "text": "ﲒ"
+    }
+  },
+  {
+    "key": "35:1:5",
+    "value": {
+      "id": 59568,
+      "surah": "35",
+      "ayah": "1",
+      "word": "5",
+      "location": "35:1:5",
+      "text": "ﲓ"
+    }
+  },
+  {
+    "key": "35:1:6",
+    "value": {
+      "id": 59569,
+      "surah": "35",
+      "ayah": "1",
+      "word": "6",
+      "location": "35:1:6",
+      "text": "ﲔ"
+    }
+  },
+  {
+    "key": "35:1:7",
+    "value": {
+      "id": 59570,
+      "surah": "35",
+      "ayah": "1",
+      "word": "7",
+      "location": "35:1:7",
+      "text": "ﲕ"
+    }
+  },
+  {
+    "key": "35:1:8",
+    "value": {
+      "id": 59571,
+      "surah": "35",
+      "ayah": "1",
+      "word": "8",
+      "location": "35:1:8",
+      "text": "ﲖ"
+    }
+  },
+  {
+    "key": "35:1:9",
+    "value": {
+      "id": 59572,
+      "surah": "35",
+      "ayah": "1",
+      "word": "9",
+      "location": "35:1:9",
+      "text": "ﲗ"
+    }
+  },
+  {
+    "key": "35:1:10",
+    "value": {
+      "id": 59573,
+      "surah": "35",
+      "ayah": "1",
+      "word": "10",
+      "location": "35:1:10",
+      "text": "ﲘ"
+    }
+  },
+  {
+    "key": "35:1:11",
+    "value": {
+      "id": 59574,
+      "surah": "35",
+      "ayah": "1",
+      "word": "11",
+      "location": "35:1:11",
+      "text": "ﲙ"
+    }
+  },
+  {
+    "key": "35:1:12",
+    "value": {
+      "id": 59575,
+      "surah": "35",
+      "ayah": "1",
+      "word": "12",
+      "location": "35:1:12",
+      "text": "ﲚ"
+    }
+  },
+  {
+    "key": "35:1:13",
+    "value": {
+      "id": 59576,
+      "surah": "35",
+      "ayah": "1",
+      "word": "13",
+      "location": "35:1:13",
+      "text": "ﲛﲜ"
+    }
+  },
+  {
+    "key": "35:1:14",
+    "value": {
+      "id": 59577,
+      "surah": "35",
+      "ayah": "1",
+      "word": "14",
+      "location": "35:1:14",
+      "text": "ﲝ"
+    }
+  },
+  {
+    "key": "35:1:15",
+    "value": {
+      "id": 59578,
+      "surah": "35",
+      "ayah": "1",
+      "word": "15",
+      "location": "35:1:15",
+      "text": "ﲞ"
+    }
+  },
+  {
+    "key": "35:1:16",
+    "value": {
+      "id": 59579,
+      "surah": "35",
+      "ayah": "1",
+      "word": "16",
+      "location": "35:1:16",
+      "text": "ﲟ"
+    }
+  },
+  {
+    "key": "35:1:17",
+    "value": {
+      "id": 59580,
+      "surah": "35",
+      "ayah": "1",
+      "word": "17",
+      "location": "35:1:17",
+      "text": "ﲠ"
+    }
+  },
+  {
+    "key": "35:1:18",
+    "value": {
+      "id": 59581,
+      "surah": "35",
+      "ayah": "1",
+      "word": "18",
+      "location": "35:1:18",
+      "text": "ﲡﲢ"
+    }
+  },
+  {
+    "key": "35:1:19",
+    "value": {
+      "id": 59582,
+      "surah": "35",
+      "ayah": "1",
+      "word": "19",
+      "location": "35:1:19",
+      "text": "ﲣ"
+    }
+  },
+  {
+    "key": "35:1:20",
+    "value": {
+      "id": 59583,
+      "surah": "35",
+      "ayah": "1",
+      "word": "20",
+      "location": "35:1:20",
+      "text": "ﲤ"
+    }
+  },
+  {
+    "key": "35:1:21",
+    "value": {
+      "id": 59584,
+      "surah": "35",
+      "ayah": "1",
+      "word": "21",
+      "location": "35:1:21",
+      "text": "ﲥ"
+    }
+  },
+  {
+    "key": "35:1:22",
+    "value": {
+      "id": 59585,
+      "surah": "35",
+      "ayah": "1",
+      "word": "22",
+      "location": "35:1:22",
+      "text": "ﲦ"
+    }
+  },
+  {
+    "key": "35:1:23",
+    "value": {
+      "id": 59586,
+      "surah": "35",
+      "ayah": "1",
+      "word": "23",
+      "location": "35:1:23",
+      "text": "ﲧ"
+    }
+  },
+  {
+    "key": "35:1:24",
+    "value": {
+      "id": 59587,
+      "surah": "35",
+      "ayah": "1",
+      "word": "24",
+      "location": "35:1:24",
+      "text": "ﲨ"
+    }
+  },
+  {
+    "key": "35:1:25",
+    "value": {
+      "id": 59588,
+      "surah": "35",
+      "ayah": "1",
+      "word": "25",
+      "location": "35:1:25",
+      "text": "ﲩ"
+    }
+  },
+  {
+    "key": "36:1:1",
+    "value": {
+      "id": 60384,
+      "surah": "36",
+      "ayah": "1",
+      "word": "1",
+      "location": "36:1:1",
+      "text": "ﱜ"
+    }
+  },
+  {
+    "key": "36:1:2",
+    "value": {
+      "id": 60385,
+      "surah": "36",
+      "ayah": "1",
+      "word": "2",
+      "location": "36:1:2",
+      "text": "ﱝ"
+    }
+  },
+  {
+    "key": "37:1:1",
+    "value": {
+      "id": 61192,
+      "surah": "37",
+      "ayah": "1",
+      "word": "1",
+      "location": "37:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "37:1:2",
+    "value": {
+      "id": 61193,
+      "surah": "37",
+      "ayah": "1",
+      "word": "2",
+      "location": "37:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "37:1:3",
+    "value": {
+      "id": 61194,
+      "surah": "37",
+      "ayah": "1",
+      "word": "3",
+      "location": "37:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "38:1:1",
+    "value": {
+      "id": 62234,
+      "surah": "38",
+      "ayah": "1",
+      "word": "1",
+      "location": "38:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "38:1:2",
+    "value": {
+      "id": 62235,
+      "surah": "38",
+      "ayah": "1",
+      "word": "2",
+      "location": "38:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "38:1:3",
+    "value": {
+      "id": 62236,
+      "surah": "38",
+      "ayah": "1",
+      "word": "3",
+      "location": "38:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "38:1:4",
+    "value": {
+      "id": 62237,
+      "surah": "38",
+      "ayah": "1",
+      "word": "4",
+      "location": "38:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "38:1:5",
+    "value": {
+      "id": 62238,
+      "surah": "38",
+      "ayah": "1",
+      "word": "5",
+      "location": "38:1:5",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "39:1:1",
+    "value": {
+      "id": 63055,
+      "surah": "39",
+      "ayah": "1",
+      "word": "1",
+      "location": "39:1:1",
+      "text": "ﱤ"
+    }
+  },
+  {
+    "key": "39:1:2",
+    "value": {
+      "id": 63056,
+      "surah": "39",
+      "ayah": "1",
+      "word": "2",
+      "location": "39:1:2",
+      "text": "ﱥ"
+    }
+  },
+  {
+    "key": "39:1:3",
+    "value": {
+      "id": 63057,
+      "surah": "39",
+      "ayah": "1",
+      "word": "3",
+      "location": "39:1:3",
+      "text": "ﱦ"
+    }
+  },
+  {
+    "key": "39:1:4",
+    "value": {
+      "id": 63058,
+      "surah": "39",
+      "ayah": "1",
+      "word": "4",
+      "location": "39:1:4",
+      "text": "ﱧ"
+    }
+  },
+  {
+    "key": "39:1:5",
+    "value": {
+      "id": 63059,
+      "surah": "39",
+      "ayah": "1",
+      "word": "5",
+      "location": "39:1:5",
+      "text": "ﱨ"
+    }
+  },
+  {
+    "key": "39:1:6",
+    "value": {
+      "id": 63060,
+      "surah": "39",
+      "ayah": "1",
+      "word": "6",
+      "location": "39:1:6",
+      "text": "ﱩ"
+    }
+  },
+  {
+    "key": "39:1:7",
+    "value": {
+      "id": 63061,
+      "surah": "39",
+      "ayah": "1",
+      "word": "7",
+      "location": "39:1:7",
+      "text": "ﱪ"
+    }
+  },
+  {
+    "key": "40:1:1",
+    "value": {
+      "id": 64302,
+      "surah": "40",
+      "ayah": "1",
+      "word": "1",
+      "location": "40:1:1",
+      "text": "ﱕ"
+    }
+  },
+  {
+    "key": "40:1:2",
+    "value": {
+      "id": 64303,
+      "surah": "40",
+      "ayah": "1",
+      "word": "2",
+      "location": "40:1:2",
+      "text": "ﱖ"
+    }
+  },
+  {
+    "key": "40:2:1",
+    "value": {
+      "id": 64304,
+      "surah": "40",
+      "ayah": "2",
+      "word": "1",
+      "location": "40:2:1",
+      "text": "ﱗ"
+    }
+  },
+  {
+    "key": "40:2:2",
+    "value": {
+      "id": 64305,
+      "surah": "40",
+      "ayah": "2",
+      "word": "2",
+      "location": "40:2:2",
+      "text": "ﱘ"
+    }
+  },
+  {
+    "key": "40:2:3",
+    "value": {
+      "id": 64306,
+      "surah": "40",
+      "ayah": "2",
+      "word": "3",
+      "location": "40:2:3",
+      "text": "ﱙ"
+    }
+  },
+  {
+    "key": "40:2:4",
+    "value": {
+      "id": 64307,
+      "surah": "40",
+      "ayah": "2",
+      "word": "4",
+      "location": "40:2:4",
+      "text": "ﱚ"
+    }
+  },
+  {
+    "key": "40:2:5",
+    "value": {
+      "id": 64308,
+      "surah": "40",
+      "ayah": "2",
+      "word": "5",
+      "location": "40:2:5",
+      "text": "ﱛ"
+    }
+  },
+  {
+    "key": "40:2:6",
+    "value": {
+      "id": 64309,
+      "surah": "40",
+      "ayah": "2",
+      "word": "6",
+      "location": "40:2:6",
+      "text": "ﱜ"
+    }
+  },
+  {
+    "key": "40:2:7",
+    "value": {
+      "id": 64310,
+      "surah": "40",
+      "ayah": "2",
+      "word": "7",
+      "location": "40:2:7",
+      "text": "ﱝ"
+    }
+  },
+  {
+    "key": "41:1:1",
+    "value": {
+      "id": 65606,
+      "surah": "41",
+      "ayah": "1",
+      "word": "1",
+      "location": "41:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "41:1:2",
+    "value": {
+      "id": 65607,
+      "surah": "41",
+      "ayah": "1",
+      "word": "2",
+      "location": "41:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "41:2:1",
+    "value": {
+      "id": 65608,
+      "surah": "41",
+      "ayah": "2",
+      "word": "1",
+      "location": "41:2:1",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "41:2:2",
+    "value": {
+      "id": 65609,
+      "surah": "41",
+      "ayah": "2",
+      "word": "2",
+      "location": "41:2:2",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "41:2:3",
+    "value": {
+      "id": 65610,
+      "surah": "41",
+      "ayah": "2",
+      "word": "3",
+      "location": "41:2:3",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "41:2:4",
+    "value": {
+      "id": 65611,
+      "surah": "41",
+      "ayah": "2",
+      "word": "4",
+      "location": "41:2:4",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "41:2:5",
+    "value": {
+      "id": 65612,
+      "surah": "41",
+      "ayah": "2",
+      "word": "5",
+      "location": "41:2:5",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "42:1:1",
+    "value": {
+      "id": 66454,
+      "surah": "42",
+      "ayah": "1",
+      "word": "1",
+      "location": "42:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "42:1:2",
+    "value": {
+      "id": 66455,
+      "surah": "42",
+      "ayah": "1",
+      "word": "2",
+      "location": "42:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "42:2:1",
+    "value": {
+      "id": 66456,
+      "surah": "42",
+      "ayah": "2",
+      "word": "1",
+      "location": "42:2:1",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "42:2:2",
+    "value": {
+      "id": 66457,
+      "surah": "42",
+      "ayah": "2",
+      "word": "2",
+      "location": "42:2:2",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "43:1:1",
+    "value": {
+      "id": 67367,
+      "surah": "43",
+      "ayah": "1",
+      "word": "1",
+      "location": "43:1:1",
+      "text": "ﱰ"
+    }
+  },
+  {
+    "key": "43:1:2",
+    "value": {
+      "id": 67368,
+      "surah": "43",
+      "ayah": "1",
+      "word": "2",
+      "location": "43:1:2",
+      "text": "ﱱ"
+    }
+  },
+  {
+    "key": "43:2:1",
+    "value": {
+      "id": 67369,
+      "surah": "43",
+      "ayah": "2",
+      "word": "1",
+      "location": "43:2:1",
+      "text": "ﱲ"
+    }
+  },
+  {
+    "key": "43:2:2",
+    "value": {
+      "id": 67370,
+      "surah": "43",
+      "ayah": "2",
+      "word": "2",
+      "location": "43:2:2",
+      "text": "ﱳ"
+    }
+  },
+  {
+    "key": "43:2:3",
+    "value": {
+      "id": 67371,
+      "surah": "43",
+      "ayah": "2",
+      "word": "3",
+      "location": "43:2:3",
+      "text": "ﱴ"
+    }
+  },
+  {
+    "key": "44:1:1",
+    "value": {
+      "id": 68286,
+      "surah": "44",
+      "ayah": "1",
+      "word": "1",
+      "location": "44:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "44:1:2",
+    "value": {
+      "id": 68287,
+      "surah": "44",
+      "ayah": "1",
+      "word": "2",
+      "location": "44:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "44:2:1",
+    "value": {
+      "id": 68288,
+      "surah": "44",
+      "ayah": "2",
+      "word": "1",
+      "location": "44:2:1",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "44:2:2",
+    "value": {
+      "id": 68289,
+      "surah": "44",
+      "ayah": "2",
+      "word": "2",
+      "location": "44:2:2",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "44:2:3",
+    "value": {
+      "id": 68290,
+      "surah": "44",
+      "ayah": "2",
+      "word": "3",
+      "location": "44:2:3",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "45:1:1",
+    "value": {
+      "id": 68691,
+      "surah": "45",
+      "ayah": "1",
+      "word": "1",
+      "location": "45:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "45:1:2",
+    "value": {
+      "id": 68692,
+      "surah": "45",
+      "ayah": "1",
+      "word": "2",
+      "location": "45:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "45:2:1",
+    "value": {
+      "id": 68693,
+      "surah": "45",
+      "ayah": "2",
+      "word": "1",
+      "location": "45:2:1",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "45:2:2",
+    "value": {
+      "id": 68694,
+      "surah": "45",
+      "ayah": "2",
+      "word": "2",
+      "location": "45:2:2",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "45:2:3",
+    "value": {
+      "id": 68695,
+      "surah": "45",
+      "ayah": "2",
+      "word": "3",
+      "location": "45:2:3",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "45:2:4",
+    "value": {
+      "id": 68696,
+      "surah": "45",
+      "ayah": "2",
+      "word": "4",
+      "location": "45:2:4",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "45:2:5",
+    "value": {
+      "id": 68697,
+      "surah": "45",
+      "ayah": "2",
+      "word": "5",
+      "location": "45:2:5",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "45:2:6",
+    "value": {
+      "id": 68698,
+      "surah": "45",
+      "ayah": "2",
+      "word": "6",
+      "location": "45:2:6",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "45:2:7",
+    "value": {
+      "id": 68699,
+      "surah": "45",
+      "ayah": "2",
+      "word": "7",
+      "location": "45:2:7",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "46:1:1",
+    "value": {
+      "id": 69216,
+      "surah": "46",
+      "ayah": "1",
+      "word": "1",
+      "location": "46:1:1",
+      "text": "ﲁ"
+    }
+  },
+  {
+    "key": "46:1:2",
+    "value": {
+      "id": 69217,
+      "surah": "46",
+      "ayah": "1",
+      "word": "2",
+      "location": "46:1:2",
+      "text": "ﲂ"
+    }
+  },
+  {
+    "key": "46:2:1",
+    "value": {
+      "id": 69218,
+      "surah": "46",
+      "ayah": "2",
+      "word": "1",
+      "location": "46:2:1",
+      "text": "ﲃ"
+    }
+  },
+  {
+    "key": "46:2:2",
+    "value": {
+      "id": 69219,
+      "surah": "46",
+      "ayah": "2",
+      "word": "2",
+      "location": "46:2:2",
+      "text": "ﲄ"
+    }
+  },
+  {
+    "key": "46:2:3",
+    "value": {
+      "id": 69220,
+      "surah": "46",
+      "ayah": "2",
+      "word": "3",
+      "location": "46:2:3",
+      "text": "ﲅ"
+    }
+  },
+  {
+    "key": "46:2:4",
+    "value": {
+      "id": 69221,
+      "surah": "46",
+      "ayah": "2",
+      "word": "4",
+      "location": "46:2:4",
+      "text": "ﲆ"
+    }
+  },
+  {
+    "key": "46:2:5",
+    "value": {
+      "id": 69222,
+      "surah": "46",
+      "ayah": "2",
+      "word": "5",
+      "location": "46:2:5",
+      "text": "ﲇ"
+    }
+  },
+  {
+    "key": "46:2:6",
+    "value": {
+      "id": 69223,
+      "surah": "46",
+      "ayah": "2",
+      "word": "6",
+      "location": "46:2:6",
+      "text": "ﲈ"
+    }
+  },
+  {
+    "key": "46:2:7",
+    "value": {
+      "id": 69224,
+      "surah": "46",
+      "ayah": "2",
+      "word": "7",
+      "location": "46:2:7",
+      "text": "ﲉ"
+    }
+  },
+  {
+    "key": "47:1:1",
+    "value": {
+      "id": 69894,
+      "surah": "47",
+      "ayah": "1",
+      "word": "1",
+      "location": "47:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "47:1:2",
+    "value": {
+      "id": 69895,
+      "surah": "47",
+      "ayah": "1",
+      "word": "2",
+      "location": "47:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "47:1:3",
+    "value": {
+      "id": 69896,
+      "surah": "47",
+      "ayah": "1",
+      "word": "3",
+      "location": "47:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "47:1:4",
+    "value": {
+      "id": 69897,
+      "surah": "47",
+      "ayah": "1",
+      "word": "4",
+      "location": "47:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "47:1:5",
+    "value": {
+      "id": 69898,
+      "surah": "47",
+      "ayah": "1",
+      "word": "5",
+      "location": "47:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "47:1:6",
+    "value": {
+      "id": 69899,
+      "surah": "47",
+      "ayah": "1",
+      "word": "6",
+      "location": "47:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "47:1:7",
+    "value": {
+      "id": 69900,
+      "surah": "47",
+      "ayah": "1",
+      "word": "7",
+      "location": "47:1:7",
+      "text": "ﱇ"
+    }
+  },
+  {
+    "key": "47:1:8",
+    "value": {
+      "id": 69901,
+      "surah": "47",
+      "ayah": "1",
+      "word": "8",
+      "location": "47:1:8",
+      "text": "ﱈ"
+    }
+  },
+  {
+    "key": "47:1:9",
+    "value": {
+      "id": 69902,
+      "surah": "47",
+      "ayah": "1",
+      "word": "9",
+      "location": "47:1:9",
+      "text": "ﱉ"
+    }
+  },
+  {
+    "key": "47:2:1",
+    "value": {
+      "id": 69903,
+      "surah": "47",
+      "ayah": "2",
+      "word": "1",
+      "location": "47:2:1",
+      "text": "ﱊ"
+    }
+  },
+  {
+    "key": "47:2:2",
+    "value": {
+      "id": 69904,
+      "surah": "47",
+      "ayah": "2",
+      "word": "2",
+      "location": "47:2:2",
+      "text": "ﱋ"
+    }
+  },
+  {
+    "key": "47:2:3",
+    "value": {
+      "id": 69905,
+      "surah": "47",
+      "ayah": "2",
+      "word": "3",
+      "location": "47:2:3",
+      "text": "ﱌ"
+    }
+  },
+  {
+    "key": "47:2:4",
+    "value": {
+      "id": 69906,
+      "surah": "47",
+      "ayah": "2",
+      "word": "4",
+      "location": "47:2:4",
+      "text": "ﱍ"
+    }
+  },
+  {
+    "key": "47:2:5",
+    "value": {
+      "id": 69907,
+      "surah": "47",
+      "ayah": "2",
+      "word": "5",
+      "location": "47:2:5",
+      "text": "ﱎ"
+    }
+  },
+  {
+    "key": "47:2:6",
+    "value": {
+      "id": 69908,
+      "surah": "47",
+      "ayah": "2",
+      "word": "6",
+      "location": "47:2:6",
+      "text": "ﱏ"
+    }
+  },
+  {
+    "key": "47:2:7",
+    "value": {
+      "id": 69909,
+      "surah": "47",
+      "ayah": "2",
+      "word": "7",
+      "location": "47:2:7",
+      "text": "ﱐ"
+    }
+  },
+  {
+    "key": "47:2:8",
+    "value": {
+      "id": 69910,
+      "surah": "47",
+      "ayah": "2",
+      "word": "8",
+      "location": "47:2:8",
+      "text": "ﱑ"
+    }
+  },
+  {
+    "key": "47:2:9",
+    "value": {
+      "id": 69911,
+      "surah": "47",
+      "ayah": "2",
+      "word": "9",
+      "location": "47:2:9",
+      "text": "ﱒ"
+    }
+  },
+  {
+    "key": "47:2:10",
+    "value": {
+      "id": 69912,
+      "surah": "47",
+      "ayah": "2",
+      "word": "10",
+      "location": "47:2:10",
+      "text": "ﱓ"
+    }
+  },
+  {
+    "key": "47:2:11",
+    "value": {
+      "id": 69913,
+      "surah": "47",
+      "ayah": "2",
+      "word": "11",
+      "location": "47:2:11",
+      "text": "ﱔ"
+    }
+  },
+  {
+    "key": "48:1:1",
+    "value": {
+      "id": 70471,
+      "surah": "48",
+      "ayah": "1",
+      "word": "1",
+      "location": "48:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "48:1:2",
+    "value": {
+      "id": 70472,
+      "surah": "48",
+      "ayah": "1",
+      "word": "2",
+      "location": "48:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "48:1:3",
+    "value": {
+      "id": 70473,
+      "surah": "48",
+      "ayah": "1",
+      "word": "3",
+      "location": "48:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "48:1:4",
+    "value": {
+      "id": 70474,
+      "surah": "48",
+      "ayah": "1",
+      "word": "4",
+      "location": "48:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "48:1:5",
+    "value": {
+      "id": 70475,
+      "surah": "48",
+      "ayah": "1",
+      "word": "5",
+      "location": "48:1:5",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "48:1:6",
+    "value": {
+      "id": 70476,
+      "surah": "48",
+      "ayah": "1",
+      "word": "6",
+      "location": "48:1:6",
+      "text": "ﱆ"
+    }
+  },
+  {
+    "key": "49:1:1",
+    "value": {
+      "id": 71060,
+      "surah": "49",
+      "ayah": "1",
+      "word": "1",
+      "location": "49:1:1",
+      "text": "ﱾ"
+    }
+  },
+  {
+    "key": "49:1:2",
+    "value": {
+      "id": 71061,
+      "surah": "49",
+      "ayah": "1",
+      "word": "2",
+      "location": "49:1:2",
+      "text": "ﱿ"
+    }
+  },
+  {
+    "key": "49:1:3",
+    "value": {
+      "id": 71062,
+      "surah": "49",
+      "ayah": "1",
+      "word": "3",
+      "location": "49:1:3",
+      "text": "ﲀ"
+    }
+  },
+  {
+    "key": "49:1:4",
+    "value": {
+      "id": 71063,
+      "surah": "49",
+      "ayah": "1",
+      "word": "4",
+      "location": "49:1:4",
+      "text": "ﲁ"
+    }
+  },
+  {
+    "key": "49:1:5",
+    "value": {
+      "id": 71064,
+      "surah": "49",
+      "ayah": "1",
+      "word": "5",
+      "location": "49:1:5",
+      "text": "ﲂ"
+    }
+  },
+  {
+    "key": "49:1:6",
+    "value": {
+      "id": 71065,
+      "surah": "49",
+      "ayah": "1",
+      "word": "6",
+      "location": "49:1:6",
+      "text": "ﲃ"
+    }
+  },
+  {
+    "key": "49:1:7",
+    "value": {
+      "id": 71066,
+      "surah": "49",
+      "ayah": "1",
+      "word": "7",
+      "location": "49:1:7",
+      "text": "ﲄ"
+    }
+  },
+  {
+    "key": "49:1:8",
+    "value": {
+      "id": 71067,
+      "surah": "49",
+      "ayah": "1",
+      "word": "8",
+      "location": "49:1:8",
+      "text": "ﲅ"
+    }
+  },
+  {
+    "key": "49:1:9",
+    "value": {
+      "id": 71068,
+      "surah": "49",
+      "ayah": "1",
+      "word": "9",
+      "location": "49:1:9",
+      "text": "ﲆﲇ"
+    }
+  },
+  {
+    "key": "49:1:10",
+    "value": {
+      "id": 71069,
+      "surah": "49",
+      "ayah": "1",
+      "word": "10",
+      "location": "49:1:10",
+      "text": "ﲈ"
+    }
+  },
+  {
+    "key": "49:1:11",
+    "value": {
+      "id": 71070,
+      "surah": "49",
+      "ayah": "1",
+      "word": "11",
+      "location": "49:1:11",
+      "text": "ﲉﲊ"
+    }
+  },
+  {
+    "key": "49:1:12",
+    "value": {
+      "id": 71071,
+      "surah": "49",
+      "ayah": "1",
+      "word": "12",
+      "location": "49:1:12",
+      "text": "ﲋ"
+    }
+  },
+  {
+    "key": "49:1:13",
+    "value": {
+      "id": 71072,
+      "surah": "49",
+      "ayah": "1",
+      "word": "13",
+      "location": "49:1:13",
+      "text": "ﲌ"
+    }
+  },
+  {
+    "key": "49:1:14",
+    "value": {
+      "id": 71073,
+      "surah": "49",
+      "ayah": "1",
+      "word": "14",
+      "location": "49:1:14",
+      "text": "ﲍ"
+    }
+  },
+  {
+    "key": "49:1:15",
+    "value": {
+      "id": 71074,
+      "surah": "49",
+      "ayah": "1",
+      "word": "15",
+      "location": "49:1:15",
+      "text": "ﲎ"
+    }
+  },
+  {
+    "key": "49:1:16",
+    "value": {
+      "id": 71075,
+      "surah": "49",
+      "ayah": "1",
+      "word": "16",
+      "location": "49:1:16",
+      "text": "ﲏ"
+    }
+  },
+  {
+    "key": "50:1:1",
+    "value": {
+      "id": 71425,
+      "surah": "50",
+      "ayah": "1",
+      "word": "1",
+      "location": "50:1:1",
+      "text": "ﱁﱂ"
+    }
+  },
+  {
+    "key": "50:1:2",
+    "value": {
+      "id": 71426,
+      "surah": "50",
+      "ayah": "1",
+      "word": "2",
+      "location": "50:1:2",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "50:1:3",
+    "value": {
+      "id": 71427,
+      "surah": "50",
+      "ayah": "1",
+      "word": "3",
+      "location": "50:1:3",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "50:1:4",
+    "value": {
+      "id": 71428,
+      "surah": "50",
+      "ayah": "1",
+      "word": "4",
+      "location": "50:1:4",
+      "text": "ﱅ"
+    }
+  },
+  {
+    "key": "51:1:1",
+    "value": {
+      "id": 71843,
+      "surah": "51",
+      "ayah": "1",
+      "word": "1",
+      "location": "51:1:1",
+      "text": "ﲳ"
+    }
+  },
+  {
+    "key": "51:1:2",
+    "value": {
+      "id": 71844,
+      "surah": "51",
+      "ayah": "1",
+      "word": "2",
+      "location": "51:1:2",
+      "text": "ﲴ"
+    }
+  },
+  {
+    "key": "51:1:3",
+    "value": {
+      "id": 71845,
+      "surah": "51",
+      "ayah": "1",
+      "word": "3",
+      "location": "51:1:3",
+      "text": "ﲵ"
+    }
+  },
+  {
+    "key": "52:1:1",
+    "value": {
+      "id": 72263,
+      "surah": "52",
+      "ayah": "1",
+      "word": "1",
+      "location": "52:1:1",
+      "text": "ﲎ"
+    }
+  },
+  {
+    "key": "52:1:2",
+    "value": {
+      "id": 72264,
+      "surah": "52",
+      "ayah": "1",
+      "word": "2",
+      "location": "52:1:2",
+      "text": "ﲏ"
+    }
+  },
+  {
+    "key": "53:1:1",
+    "value": {
+      "id": 72624,
+      "surah": "53",
+      "ayah": "1",
+      "word": "1",
+      "location": "53:1:1",
+      "text": "ﱁ"
+    }
+  },
+  {
+    "key": "53:1:2",
+    "value": {
+      "id": 72625,
+      "surah": "53",
+      "ayah": "1",
+      "word": "2",
+      "location": "53:1:2",
+      "text": "ﱂ"
+    }
+  },
+  {
+    "key": "53:1:3",
+    "value": {
+      "id": 72626,
+      "surah": "53",
+      "ayah": "1",
+      "word": "3",
+      "location": "53:1:3",
+      "text": "ﱃ"
+    }
+  },
+  {
+    "key": "53:1:4",
+    "value": {
+      "id": 72627,
+      "surah": "53",
+      "ayah": "1",
+      "word": "4",
+      "location": "53:1:4",
+      "text": "ﱄ"
+    }
+  },
+  {
+    "key": "54:1:1",
+    "value": {
+      "id": 73046,
+      "surah": "54",
+      "ayah": "1",
+      "word": "1",
+      "location": "54:1:1",
+      "text": "ﲞ"
+    }
+  },
+  {
+    "key": "54:1:2",
+    "value": {
+      "id": 73047,
+      "surah": "54",
+      "ayah": "1",
+      "word": "2",
+      "location": "54:1:2",
+      "text": "ﲟ"
+    }
+  },
+  {
+    "key": "54:1:3",
+    "value": {
+      "id": 73048,
+      "surah": "54",
+      "ayah": "1",
+      "word": "3",
+      "location": "54:1:3",
+      "text": "ﲠ"
+    }
+  },
+  {
+    "key": "54:1:4",
+    "value": {
+      "id": 73049,
+      "surah": "54",
+      "ayah": "1",
+      "word": "4",
+      "location": "54:1:4",
+      "text": "ﲡ"
+    }
+  },
+  {
+    "key": "54:1:5",
+    "value": {
+      "id": 73050,
+      "surah": "54",
+      "ayah": "1",
+      "word": "5",
+      "location": "54:1:5",
+      "text": "ﲢ"
+    }
+  },
+  {
+    "key": "55:1:1",
+    "value": {
+      "id": 73443,
+      "surah": "55",
+      "ayah": "1",
+      "word": "1",
+      "location": "55:1:1",
+      "text": "ﱧ"
+    }
+  },
+  {
+    "key": "55:1:2",
+    "value": {
+      "id": 73444,
+      "surah": "55",
+      "ayah": "1",
+      "word": "2",
+      "location": "55:1:2",
+      "text": "ﱨ"
+    }
+  },
+  {
+    "key": "56:1:1",
+    "value": {
+      "id": 73872,
+      "surah": "56",
+      "ayah": "1",
+      "word": "1",
+      "location": "56:1:1",
+      "text": "ﱳ"
+    }
+  }
+]

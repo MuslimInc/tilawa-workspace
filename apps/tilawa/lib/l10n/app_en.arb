@@ -1034,7 +1034,7 @@
     "@startJourney": {
         "description": "Start button text"
     },
-    "recitationDuration": "مدة التلاوة",
+    "recitationDuration": "Recitation Duration",
     "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },
@@ -1637,5 +1637,21 @@
     "hizb": "Hizb",
     "@hizb": {
         "description": "Label for Quranic Hizb"
+    },
+    "preparingFonts": "Preparing High-Quality Quran Fonts...",
+    "@preparingFonts": {
+        "description": "Message during Quran font download"
+    },
+    "loadingQuran": "Loading Quran...",
+    "@loadingQuran": {
+        "description": "Message during Quran rendering"
+    },
+    "fontsDownloadDescription": "This is a one-time download (~50MB) for the best reading experience.",
+    "@fontsDownloadDescription": {
+        "description": "Description of the Quran fonts download"
+    },
+    "fontsFailedToLoad": "Failed to load fonts",
+    "@fontsFailedToLoad": {
+        "description": "Error message when Quran fonts fail to load"
     }
 }

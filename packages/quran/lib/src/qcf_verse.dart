@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../quran.dart';
 
@@ -39,21 +40,51 @@ class QcfVerse extends StatefulWidget {
 }
 
 class _QcfVerseState extends State<QcfVerse> {
+  late final LongPressGestureRecognizer _recognizer;
+  late int _pageNumber;
+  late String _pageFont;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = LongPressGestureRecognizer();
+    _computePageNumber();
+  }
+
+  @override
+  void didUpdateWidget(covariant QcfVerse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.surahNumber != widget.surahNumber ||
+        oldWidget.verseNumber != widget.verseNumber) {
+      _computePageNumber();
+    }
+  }
+
+  void _computePageNumber() {
+    _pageNumber = getPageNumber(widget.surahNumber, widget.verseNumber);
+    _pageFont = "QCF_P${_pageNumber.toString().padLeft(3, '0')}";
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final int pageNumber = getPageNumber(
-      widget.surahNumber,
-      widget.verseNumber,
-    );
+    // Update recognizer handlers
+    _recognizer
+      ..onLongPress = widget.onLongPress
+      ..onLongPressDown = widget.onLongPressDown
+      ..onLongPressUp = widget.onLongPressUp
+      ..onLongPressCancel = widget.onLongPressCancel;
+
     return RichText(
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.center,
       text: TextSpan(
-        recognizer: LongPressGestureRecognizer()
-          ..onLongPress = widget.onLongPress
-          ..onLongPressDown = widget.onLongPressDown
-          ..onLongPressUp = widget.onLongPressUp
-          ..onLongPressCancel = widget.onLongPressCancel,
+        recognizer: _recognizer,
         text: getVerseQCF(
           widget.surahNumber,
           widget.verseNumber,
@@ -63,20 +94,14 @@ class _QcfVerseState extends State<QcfVerse> {
         children: [
           TextSpan(
             text: getVerseNumberQCF(widget.surahNumber, widget.verseNumber),
-            style: TextStyle(
-              fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",
-              package: 'quran',
-              height: 1.35 / widget.h,
-            ),
+            style: TextStyle(fontFamily: _pageFont, height: 1.35.h / widget.h),
           ),
         ],
         style: TextStyle(
           color: widget.textColor,
-          height: 2.0 / widget.h,
-          // letterSpacing: 192,
-          package: 'quran',
+          height: 2.0.h / widget.h,
           wordSpacing: 0,
-          fontFamily: "QCF_P${pageNumber.toString().padLeft(3, '0')}",
+          fontFamily: _pageFont,
           backgroundColor: widget.backgroundColor,
         ),
       ),

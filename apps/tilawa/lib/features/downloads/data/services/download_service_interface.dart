@@ -20,6 +20,9 @@ abstract class DownloadServiceInterface {
   /// Get the current status of a download.
   Future<DownloadStatus?> getStatus(String id);
 
+  /// Get the full progress details of a download (status, progress, size).
+  Future<DownloadProgress?> getDownloadProgress(String id);
+
   /// Start a new download.
   Future<void> download({
     required String id,
@@ -33,6 +36,12 @@ abstract class DownloadServiceInterface {
 
   /// Cancel a download by its ID.
   Future<void> cancel(String id);
+
+  /// Pause a download by its ID.
+  Future<void> pause(String id);
+
+  /// Resume a download by its ID.
+  Future<void> resume(String id);
 
   /// Cancel all active downloads.
   Future<void> cancelAll();

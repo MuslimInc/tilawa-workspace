@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+
 import '../../../../main.dart';
+import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import '../bloc/downloads_status.dart';
@@ -102,10 +104,15 @@ class _DownloadsScreenState extends State<DownloadsScreen>
           ),
         ],
       ),
-      body: BlocBuilder<DownloadsBloc, DownloadsState>(
-        builder: (context, state) {
-          return _DownloadsBody(state: state);
-        },
+      body: Stack(
+        children: [
+          BlocBuilder<DownloadsBloc, DownloadsState>(
+            builder: (context, state) {
+              return _DownloadsBody(state: state);
+            },
+          ),
+          const Positioned.fill(child: BottomPlayerWidget()),
+        ],
       ),
     );
   }
@@ -218,6 +225,7 @@ class _DownloadsList extends StatelessWidget {
         _DownloadsSizeWidget(formattedSize: formattedSize),
         Expanded(
           child: ListView(
+            padding: EdgeInsets.only(bottom: 120.h),
             children: [
               for (int i = 0; i < downloadsByReciter.length; i++)
                 Padding(

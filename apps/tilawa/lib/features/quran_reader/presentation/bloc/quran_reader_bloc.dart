@@ -14,7 +14,10 @@ part 'quran_reader_bloc.freezed.dart';
 // Events
 @freezed
 class QuranReaderEvent with _$QuranReaderEvent {
-  const factory QuranReaderEvent.loadSurah(int surahNumber) = _LoadSurah;
+  const factory QuranReaderEvent.loadSurah(
+    int surahNumber, {
+    @Default(true) bool loadStartPage,
+  }) = _LoadSurah;
   const factory QuranReaderEvent.loadPage(int pageNumber) = _LoadPage;
   const factory QuranReaderEvent.loadSettings() = _LoadSettings;
   const factory QuranReaderEvent.updateSettings(ReaderSettingsEntity settings) =
@@ -110,12 +113,15 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         emit(
           state.copyWith(status: QuranReaderStatus.loaded, currentSurah: surah),
         );
-        // Calculate the starting page of the surah using the UI-agnostic UseCase
-        final startPage = _getStartPageForSurahUseCase.call(surah.number);
 
-        // Also trigger loading the page into the state
-        // This will handle saving the last read position and updating the currentPage
-        add(QuranReaderEvent.loadPage(startPage));
+        if (event.loadStartPage) {
+          // Calculate the starting page of the surah using the UI-agnostic UseCase
+          final startPage = _getStartPageForSurahUseCase.call(surah.number);
+
+          // Also trigger loading the page into the state
+          // This will handle saving the last read position and updating the currentPage
+          add(QuranReaderEvent.loadPage(startPage));
+        }
       },
     );
   }
@@ -132,7 +138,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       if (cachedPage.ayahs.isNotEmpty) {
         final firstSurahNum = cachedPage.ayahs.first.surahNumber;
         if (state.currentSurah?.number != firstSurahNum) {
-          add(QuranReaderEvent.loadSurah(firstSurahNum));
+          add(QuranReaderEvent.loadSurah(firstSurahNum, loadStartPage: false));
         }
 
         // Always save last read when page changes
@@ -167,11 +173,28 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         final newPages = Map<int, QuranPageEntity>.from(state.pages);
         newPages[page.pageNumber] = page;
 
+        // Evict oldest entries if cache exceeds max size to bound memory.
+        const maxCachedPages = 20;
+        if (newPages.length > maxCachedPages) {
+          final keysToRemove =
+              newPages.keys.where((k) => k != page.pageNumber).toList()..sort(
+                (a, b) => (a - page.pageNumber).abs().compareTo(
+                  (b - page.pageNumber).abs(),
+                ),
+              );
+          // Remove pages furthest from current page
+          while (newPages.length > maxCachedPages) {
+            newPages.remove(keysToRemove.removeLast());
+          }
+        }
+
         // Sync surah if necessary
         if (page.ayahs.isNotEmpty) {
           final firstSurahNum = page.ayahs.first.surahNumber;
           if (state.currentSurah?.number != firstSurahNum) {
-            add(QuranReaderEvent.loadSurah(firstSurahNum));
+            add(
+              QuranReaderEvent.loadSurah(firstSurahNum, loadStartPage: false),
+            );
           }
 
           // Always save last read when page changes

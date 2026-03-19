@@ -4,15 +4,15 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa_core/entities/audio.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/download_all_surahs_use_case.dart';
 import 'package:tilawa/features/downloads/domain/usecases/observe_reciter_downloads_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
+import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 class MockDownloadAllSurahsUseCase extends Mock
     implements DownloadAllSurahsUseCase {}
@@ -207,15 +207,17 @@ void main() {
         ),
       );
       await Future.delayed(Duration.zero);
-      // Start batch download manually to simulate flow
-      bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: []));
+      // Start batch download with 1 surah to test completion
+      bloc.add(
+        const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+      );
       await Future.delayed(Duration.zero);
 
       // 1. Surah 1 starts downloading
       downloadUpdatesController.add(
         DownloadItem(
           id: '1',
-          url: 'url1',
+          url: '1',
           title: 'S1',
           filePath: '',
           reciterName: 'Mishary',
@@ -235,7 +237,7 @@ void main() {
       downloadUpdatesController.add(
         DownloadItem(
           id: '1',
-          url: 'url1',
+          url: '1',
           title: 'S1',
           filePath: '',
           reciterName: 'Mishary',
@@ -254,7 +256,7 @@ void main() {
     });
 
     blocTest<ReciterDownloadBloc, ReciterDownloadState>(
-      'does not set isDownloadingAll when single download updates',
+      'does not set isDownloadingAll when a single completed event arrives without a prior downloading event',
       build: () => bloc,
       act: (bloc) async {
         bloc.add(
@@ -270,7 +272,7 @@ void main() {
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title',
             status: DownloadStatus.completed,
             progress: 1.0,
@@ -293,7 +295,67 @@ void main() {
     );
 
     blocTest<ReciterDownloadBloc, ReciterDownloadState>(
-      'sets isDownloadingAll only when StartReciterDownloadAll is called',
+      'sets isDownloadingAll to true when a downloading stream event arrives, even without a batch',
+      build: () => bloc,
+      act: (bloc) async {
+        bloc.add(
+          const InitializeReciterDownload(
+            reciterName: 'Mishary',
+            totalSurahs: 10,
+            downloadedSurahIds: [],
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        // Single individual download starts — no StartReciterDownloadAll
+        downloadUpdatesController.add(
+          DownloadItem(
+            id: '1',
+            url: '1',
+            title: 'title',
+            status: DownloadStatus.downloading,
+            progress: 0.5,
+            fileSize: 100,
+            downloadedSize: 50,
+            createdAt: DateTime.now(),
+            reciterName: 'Mishary',
+            filePath: '',
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        // And completes
+        downloadUpdatesController.add(
+          DownloadItem(
+            id: '1',
+            url: '1',
+            title: 'title',
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            fileSize: 100,
+            downloadedSize: 100,
+            createdAt: DateTime.now(),
+            reciterName: 'Mishary',
+            filePath: '',
+          ),
+        );
+      },
+      expect: () => [
+        const ReciterDownloadState(totalCount: 10),
+        // Individual download active → isDownloadingAll flips to true
+        const ReciterDownloadState(totalCount: 10, isDownloadingAll: true),
+        // Completed → isDownloadingAll back to false
+        const ReciterDownloadState(
+          totalCount: 10,
+          isDownloadingAll: false,
+          downloadedCount: 1,
+          progress: 0.1,
+        ),
+      ],
+    );
+
+    blocTest<ReciterDownloadBloc, ReciterDownloadState>(
+      'sets isDownloadingAll via StartReciterDownloadAll batch flow',
       build: () {
         when(
           () => downloadAllSurahs(
@@ -308,20 +370,22 @@ void main() {
         bloc.add(
           const InitializeReciterDownload(
             reciterName: 'Mishary',
-            totalSurahs: 10,
+            totalSurahs: 1,
             downloadedSurahIds: [],
           ),
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: []));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // Add stream item after Start
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title',
             status: DownloadStatus.downloading,
             progress: 0.5,
@@ -337,12 +401,12 @@ void main() {
       expect: () => [
         // Start -> Pending=true, DownloadingAll=true
         const ReciterDownloadState(
-          totalCount: 10,
+          totalCount: 1,
           isDownloadingAll: true,
           isPending: true,
         ),
         // Update -> Pending=false, DownloadingAll=true (batch flag true)
-        const ReciterDownloadState(totalCount: 10, isDownloadingAll: true),
+        const ReciterDownloadState(totalCount: 1, isDownloadingAll: true),
       ],
     );
 
@@ -362,20 +426,22 @@ void main() {
         bloc.add(
           const InitializeReciterDownload(
             reciterName: 'Mishary',
-            totalSurahs: 10,
+            totalSurahs: 1,
             downloadedSurahIds: [],
           ),
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: []));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // Add stream item with pending status
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title',
             status: DownloadStatus.pending,
             progress: 0.0,
@@ -391,12 +457,12 @@ void main() {
       expect: () => [
         // Start -> Pending=true, DownloadingAll=true
         const ReciterDownloadState(
-          totalCount: 10,
+          totalCount: 1,
           isDownloadingAll: true,
           isPending: true,
         ),
         // Pending status update -> still downloading
-        const ReciterDownloadState(totalCount: 10, isDownloadingAll: true),
+        const ReciterDownloadState(totalCount: 1, isDownloadingAll: true),
       ],
     );
 
@@ -422,14 +488,16 @@ void main() {
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: []));
+        bloc.add(
+          const StartReciterDownloadAll(reciter: reciter, surahs: [surah1]),
+        );
         await Future.delayed(Duration.zero);
 
         // First, add a downloading item
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title',
             status: DownloadStatus.downloading,
             progress: 0.5,
@@ -446,7 +514,7 @@ void main() {
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title',
             status: DownloadStatus.failed,
             progress: 0.5,
@@ -469,7 +537,7 @@ void main() {
         // Downloading status -> still downloading
         const ReciterDownloadState(totalCount: 2, isDownloadingAll: true),
         // Failed status -> download stops since no more items
-        const ReciterDownloadState(totalCount: 2),
+        const ReciterDownloadState(totalCount: 2, progress: 0.0),
       ],
     );
 
@@ -489,20 +557,25 @@ void main() {
         bloc.add(
           const InitializeReciterDownload(
             reciterName: 'Mishary',
-            totalSurahs: 3,
+            totalSurahs: 2,
             downloadedSurahIds: [],
           ),
         );
         await Future.delayed(Duration.zero);
 
-        bloc.add(const StartReciterDownloadAll(reciter: reciter, surahs: []));
+        bloc.add(
+          const StartReciterDownloadAll(
+            reciter: reciter,
+            surahs: [surah1, surah2],
+          ),
+        );
         await Future.delayed(Duration.zero);
 
         // Start downloading two items
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title1',
             status: DownloadStatus.downloading,
             progress: 0.5,
@@ -518,7 +591,7 @@ void main() {
         downloadUpdatesController.add(
           DownloadItem(
             id: '2',
-            url: 'url2',
+            url: '2',
             title: 'title2',
             status: DownloadStatus.downloading,
             progress: 0.3,
@@ -535,7 +608,7 @@ void main() {
         downloadUpdatesController.add(
           DownloadItem(
             id: '1',
-            url: 'url1',
+            url: '1',
             title: 'title1',
             status: DownloadStatus.failed,
             progress: 0.5,
@@ -552,7 +625,7 @@ void main() {
         downloadUpdatesController.add(
           DownloadItem(
             id: '2',
-            url: 'url2',
+            url: '2',
             title: 'title2',
             status: DownloadStatus.completed,
             progress: 1.0,
@@ -568,19 +641,19 @@ void main() {
       expect: () => [
         // Start -> Pending=true, DownloadingAll=true
         const ReciterDownloadState(
-          totalCount: 3,
+          totalCount: 2,
           isDownloadingAll: true,
           isPending: true,
         ),
         // First item downloading (adds to set, pending becomes false)
-        const ReciterDownloadState(totalCount: 3, isDownloadingAll: true),
+        const ReciterDownloadState(totalCount: 2, isDownloadingAll: true),
         // Note: Adding second item to set doesn't change visible state values
         // Failed status removes from set but visible state unchanged
         // Second item completed (set empty, batch ends)
         const ReciterDownloadState(
-          totalCount: 3,
+          totalCount: 2,
           downloadedCount: 1,
-          progress: 1 / 3,
+          progress: 0.5,
         ),
       ],
     );

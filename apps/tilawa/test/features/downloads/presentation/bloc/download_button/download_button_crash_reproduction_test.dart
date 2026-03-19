@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../helpers/mock_helper.mocks.dart';
 
@@ -30,6 +30,8 @@ void main() {
   late MockCheckSurahDownloadedUseCase mockCheckSurahDownloaded;
   late MockDownloadSurahUseCase mockDownloadSurah;
   late MockCancelDownloadUseCase mockCancelDownload;
+  late MockPauseDownloadUseCase mockPauseDownload;
+  late MockResumeDownloadUseCase mockResumeDownload;
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
   late MockNetworkInfo mockNetworkInfo;
 
@@ -42,6 +44,8 @@ void main() {
     mockCheckSurahDownloaded = MockCheckSurahDownloadedUseCase();
     mockDownloadSurah = MockDownloadSurahUseCase();
     mockCancelDownload = MockCancelDownloadUseCase();
+    mockPauseDownload = MockPauseDownloadUseCase();
+    mockResumeDownload = MockResumeDownloadUseCase();
     mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
     mockNetworkInfo = MockNetworkInfo();
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
@@ -81,6 +85,8 @@ void main() {
         checkSurahDownloaded: mockCheckSurahDownloaded,
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
+        pauseDownload: mockPauseDownload,
+        resumeDownload: mockResumeDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
         networkInfo: mockNetworkInfo,
       );
@@ -212,6 +218,8 @@ void main() {
         checkSurahDownloaded: mockCheckSurahDownloaded,
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
+        pauseDownload: mockPauseDownload,
+        resumeDownload: mockResumeDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
         networkInfo: mockNetworkInfo,
       );
@@ -255,6 +263,8 @@ void main() {
         checkSurahDownloaded: mockCheckSurahDownloaded,
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
+        pauseDownload: mockPauseDownload,
+        resumeDownload: mockResumeDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
         networkInfo: mockNetworkInfo,
       );

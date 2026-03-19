@@ -241,13 +241,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       safeFileName,
     );
 
-    // Check if download is already queued or active
+    // Check if download is already queued, active, or completed
     final bool isQueued = queueManager.isQueued(downloadId);
     final bool isActive = queueManager.isActive(downloadId);
+    final bool isDownloaded = await isSurahDownloaded(trimmedUrl, reciterName);
 
-    if (isQueued || isActive) {
+    if (isQueued || isActive || isDownloaded) {
       logger.d(
-        '[DownloadsRepositoryImpl] Download already queued or active: id=$downloadId (queued=$isQueued, active=$isActive)',
+        '[DownloadsRepositoryImpl] Download already queued, active, or downloaded: id=$downloadId (queued=$isQueued, active=$isActive, downloaded=$isDownloaded)',
       );
       return;
     }
@@ -324,6 +325,12 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       throw NetworkException('No internet connection');
     }
     final String downloadsDir = await pathResolver.getDownloadsDir();
+
+    // Pre-fetch the downloads list once to avoid N sequential DB reads in the loop.
+    // isSurahDownloaded() would call getDownloads() on every iteration otherwise.
+    final List<DownloadItem> existingDownloads = await localDataSource
+        .getDownloads();
+
     final List<
       ({
         String id,
@@ -355,9 +362,35 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         safeFileName,
       );
 
-      // Skip if already in queue or active (check both fast)
+      // Skip if already in queue or active (fast, synchronous checks)
       if (queueManager.isQueued(downloadId) ||
           queueManager.isActive(downloadId)) {
+        continue;
+      }
+
+      // Skip if already completed — check against pre-fetched list
+      // Also verify the file exists on disk to avoid skipping if file was deleted
+      bool isAlreadyDownloaded = false;
+      for (final d in existingDownloads) {
+        if (d.url == trimmedUrl &&
+            d.reciterName == item.reciterName &&
+            d.status == DownloadStatus.completed) {
+          // Resolve path to make sure it's accurate
+          final resolvedDbItem = pathResolver.resolveDownloadPath(
+            d,
+            downloadsDir,
+          );
+          final bool isFileExists = await validator.verifyFileExists(
+            resolvedDbItem.filePath,
+          );
+          if (isFileExists) {
+            isAlreadyDownloaded = true;
+            break;
+          }
+        }
+      }
+
+      if (isAlreadyDownloaded) {
         continue;
       }
 
@@ -442,27 +475,17 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<void> pauseDownload(String id) async {
-    // Pause functionality not implemented in new DownloadService
-    // Downloads run to completion in individual isolates
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final DownloadItem updatedDownload = download.copyWith(
-        status: DownloadStatus.paused,
-      );
-      await updateDownload(updatedDownload);
+      await downloadService.pause(id);
     }
   }
 
   @override
   Future<void> resumeDownload(String id) async {
-    // Resume functionality not implemented in new DownloadService
-    // Downloads run to completion in individual isolates
     final DownloadItem? download = await getDownloadItem(id);
     if (download != null) {
-      final DownloadItem updatedDownload = download.copyWith(
-        status: DownloadStatus.downloading,
-      );
-      await updateDownload(updatedDownload);
+      await downloadService.resume(id);
     }
   }
 

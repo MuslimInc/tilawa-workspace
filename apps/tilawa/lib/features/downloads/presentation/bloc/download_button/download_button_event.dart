@@ -14,6 +14,12 @@ class DownloadButtonEvent with _$DownloadButtonEvent {
   /// Cancel an active download
   const factory DownloadButtonEvent.cancel() = _Cancel;
 
+  /// Pause an active download
+  const factory DownloadButtonEvent.requestPause() = _RequestPause;
+
+  /// Resume a paused download
+  const factory DownloadButtonEvent.requestResume() = _RequestResume;
+
   /// Progress update received
   const factory DownloadButtonEvent.progressUpdated({
     required double progress,

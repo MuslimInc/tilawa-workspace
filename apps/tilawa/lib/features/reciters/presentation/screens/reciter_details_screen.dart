@@ -6,7 +6,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/di/injection.dart';
-import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -35,7 +34,7 @@ class ReciterDetailsScreen extends StatefulWidget {
 class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   late final TextEditingController _searchController;
   final ScrollController _scrollController = ScrollController();
-  final Map<String, GlobalKey> _surahKeys = {};
+  final GlobalKey _playingSurahKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToPlaying = false;
   ReciterViewMode _lastViewMode = ReciterViewMode.list;
@@ -103,30 +102,38 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
     if (playingIndex < 0) return;
 
-    final surah = surahs[playingIndex];
-
-    // Ensure a GlobalKey exists for this surah.
-    final key = _surahKeys.putIfAbsent(surah.id, GlobalKey.new);
+    final bool isGrid =
+        context.read<ReciterDetailsBloc>().state.viewMode ==
+        ReciterViewMode.grid;
 
     // If the item is already built, scroll directly.
-    if (key.currentContext != null) {
-      _ensureVisibleForKey(key);
+    if (_playingSurahKey.currentContext != null) {
+      _ensureVisibleForKey(_playingSurahKey);
       return;
     }
 
     // Step 1: Jump approximately so the lazy builder creates the item.
-    // Rough estimate of headers (~300) + item position.
-    // Only needs to be "close enough" — Step 2 handles precision.
     final double approxHeaderHeight = 300.0;
-    final double approxOffset = approxHeaderHeight + (playingIndex * 88.0);
+    double itemOffset = 0.0;
+    if (isGrid) {
+      final int row = playingIndex ~/ 2;
+      final double screenWidth = MediaQuery.sizeOf(context).width;
+      final double itemHeight = ((screenWidth - 32.0 - 12.0) / 2.0) / 0.99;
+      itemOffset = row * (itemHeight + 12.0);
+    } else {
+      itemOffset = playingIndex * 88.0;
+    }
+
+    final double approxOffset = approxHeaderHeight + itemOffset;
     final double maxScroll = _scrollController.position.maxScrollExtent;
     _scrollController.jumpTo(approxOffset.clamp(0.0, maxScroll));
 
     // Step 2: After the frame, the item is now built with its GlobalKey.
     // Use ensureVisible for pixel-perfect positioning.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (key.currentContext != null) {
-        _ensureVisibleForKey(key);
+      if (!mounted) return;
+      if (_playingSurahKey.currentContext != null) {
+        _ensureVisibleForKey(_playingSurahKey);
       }
     });
   }
@@ -149,151 +156,161 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       floatingActionButton: AnimatedSlide(
         offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
         duration: const Duration(milliseconds: 250),
-        child: AnimatedOpacity(
-          opacity: _showScrollToTop ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 250),
-          child: FloatingActionButton.small(
-            onPressed: _scrollToTop,
-            backgroundColor: Theme.of(
-              context,
-            ).primaryColor.withValues(alpha: 0.9),
-            child: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
+        child: IgnorePointer(
+          ignoring: !_showScrollToTop,
+          child: AnimatedOpacity(
+            opacity: _showScrollToTop ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 250),
+            child: FloatingActionButton.small(
+              onPressed: _scrollToTop,
+              backgroundColor: Theme.of(
+                context,
+              ).primaryColor.withValues(alpha: 0.9),
+              child: const Icon(
+                Icons.arrow_upward_rounded,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      body: Column(
+      floatingActionButtonLocation: _CustomFloatingActionButtonLocation(
+        offset: 100.h,
+      ),
+      body: Stack(
         children: [
-          Expanded(
-            child: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
-              listenWhen: (previous, current) =>
-                  (previous.searchQuery != current.searchQuery &&
-                      current.searchQuery.isEmpty) ||
-                  (current.playCommand != null &&
-                      previous.playCommand != current.playCommand) ||
-                  (previous.status != current.status &&
-                      current.status == ReciterDetailsStatus.loaded) ||
-                  previous.viewMode != current.viewMode,
-              listener: (context, state) {
-                if (state.searchQuery.isEmpty &&
-                    _searchController.text.isNotEmpty) {
-                  _searchController.clear();
+          BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
+            listenWhen: (previous, current) =>
+                (previous.searchQuery != current.searchQuery &&
+                    current.searchQuery.isEmpty) ||
+                (current.playCommand != null &&
+                    previous.playCommand != current.playCommand) ||
+                (previous.status != current.status &&
+                    current.status == ReciterDetailsStatus.loaded) ||
+                previous.viewMode != current.viewMode,
+            buildWhen: (previous, current) =>
+                previous.status != current.status ||
+                previous.viewMode != current.viewMode ||
+                previous.filteredSurahs != current.filteredSurahs ||
+                previous.searchQuery != current.searchQuery ||
+                previous.listeningHistory != current.listeningHistory ||
+                previous.selectedMoshaf != current.selectedMoshaf,
+            listener: (context, state) {
+              if (state.searchQuery.isEmpty &&
+                  _searchController.text.isNotEmpty) {
+                _searchController.clear();
+              }
+
+              // Scroll to playing surah when switching list ↔ grid
+              if (state.viewMode != _lastViewMode) {
+                _lastViewMode = state.viewMode;
+                if (_scrollController.hasClients) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToPlayingSurah(state.filteredSurahs);
+                  });
                 }
+              }
 
-                // Scroll to playing surah when switching list ↔ grid
-                if (state.viewMode != _lastViewMode) {
-                  _lastViewMode = state.viewMode;
-                  if (_scrollController.hasClients) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToPlayingSurah(state.filteredSurahs);
-                    });
-                  }
-                }
-
-                final PlaySurahCommand? command = state.playCommand;
-                if (command != null) {
-                  context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.playFromQueue(
-                      command.playlist,
-                      command.initialIndex,
-                    ),
-                  );
-                }
-
-                if (state.status == ReciterDetailsStatus.loaded) {
-                  context.read<ReciterDownloadBloc>().add(
-                    InitializeReciterDownload(
-                      reciterName: widget.reciter.name,
-                      totalSurahs: state.surahList.length,
-                      downloadedSurahIds: state.surahList
-                          .where((s) => s.isDownloaded)
-                          .map((s) => s.id)
-                          .toList(),
-                    ),
-                  );
-
-                  // Auto-scroll to playing surah only on first load
-                  if (!_hasScrolledToPlaying) {
-                    _hasScrolledToPlaying = true;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_scrollController.hasClients) {
-                        _scrollToPlayingSurah(state.filteredSurahs);
-                      }
-                    });
-                  }
-                }
-              },
-              builder: (context, state) {
-                return GestureDetector(
-                  onTap: () => FocusScope.of(context).unfocus(),
-                  child: RefreshIndicator(
-                    onRefresh: _onRefresh,
-                    edgeOffset: kToolbarHeight + 64.h,
-                    child: CustomScrollView(
-                      controller: _scrollController,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      restorationId: 'reciter_details_scroll_view',
-                      slivers: [
-                        ReciterDetailsAppBar(reciter: widget.reciter),
-                        ReciterSearchHeader(controller: _searchController),
-
-                        // Continue Listening chips
-                        if (state.listeningHistory.isNotEmpty &&
-                            state.searchQuery.isEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 8.h, bottom: 4.h),
-                              child: ReciterHistorySection(
-                                historyList: state.listeningHistory,
-                                onPlay: (history) =>
-                                    _onPlayHistory(context, state, history),
-                              ),
-                            ),
-                          ),
-
-                        // Moshaf selector (only if multiple)
-                        if (widget.reciter.moshaf.length > 1 &&
-                            state.searchQuery.isEmpty)
-                          SliverToBoxAdapter(
-                            child: MoshafSelector(
-                              reciter: widget.reciter,
-                              state: state,
-                            ),
-                          ),
-
-                        // Surah header row with count + Download All
-                        if (state.status == ReciterDetailsStatus.loaded &&
-                            state.surahList.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: _SurahHeaderRow(
-                              count: state.filteredSurahs.length,
-                              reciter: widget.reciter,
-                              surahs: state.surahList,
-                              showDownload: state.searchQuery.isEmpty,
-                            ),
-                          ),
-
-                        // Animated content switcher
-                        _ReciterDetailsContent(
-                          reciter: widget.reciter,
-                          state: state,
-                          surahKeys: _surahKeys,
-                          onPlaySurah: (surah) {
-                            HapticFeedback.lightImpact();
-                            context.read<ReciterDetailsBloc>().add(
-                              PlaySurahRequested(surah),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+              final PlaySurahCommand? command = state.playCommand;
+              if (command != null) {
+                context.read<AudioPlayerBloc>().add(
+                  AudioPlayerEvent.playFromQueue(
+                    command.playlist,
+                    command.initialIndex,
                   ),
                 );
-              },
-            ),
+              }
+
+              if (state.status == ReciterDetailsStatus.loaded) {
+                context.read<ReciterDownloadBloc>().add(
+                  InitializeReciterDownload(
+                    reciterName: widget.reciter.name,
+                    totalSurahs: state.surahList.length,
+                    downloadedSurahIds: state.surahList
+                        .where((s) => s.isDownloaded)
+                        .map((s) => s.id)
+                        .toList(),
+                  ),
+                );
+
+                // Auto-scroll to playing surah only on first load
+                if (!_hasScrolledToPlaying) {
+                  _hasScrolledToPlaying = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollToPlayingSurah(state.filteredSurahs);
+                    }
+                  });
+                }
+              }
+            },
+            builder: (context, state) {
+              return RefreshIndicator(
+                onRefresh: _onRefresh,
+                edgeOffset: kToolbarHeight + 64.h,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  restorationId: 'reciter_details_scroll_view',
+                  slivers: [
+                    ReciterDetailsAppBar(reciter: widget.reciter),
+                    ReciterSearchHeader(controller: _searchController),
+
+                    // Continue Listening chips
+                    if (state.listeningHistory.isNotEmpty &&
+                        state.searchQuery.isEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 8.h, bottom: 4.h),
+                          child: ReciterHistorySection(
+                            historyList: state.listeningHistory,
+                            onPlay: (history) =>
+                                _onPlayHistory(context, state, history),
+                          ),
+                        ),
+                      ),
+
+                    // Moshaf selector (only if multiple)
+                    if (widget.reciter.moshaf.length > 1 &&
+                        state.searchQuery.isEmpty)
+                      SliverToBoxAdapter(
+                        child: MoshafSelector(
+                          reciter: widget.reciter,
+                          state: state,
+                        ),
+                      ),
+
+                    // Surah header row with count + Download All
+                    if (state.status == ReciterDetailsStatus.loaded &&
+                        state.surahList.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: _SurahHeaderRow(
+                          count: state.filteredSurahs.length,
+                          reciter: widget.reciter,
+                          surahs: state.surahList,
+                          showDownload: state.searchQuery.isEmpty,
+                        ),
+                      ),
+
+                    // Animated content switcher
+                    _ReciterDetailsContent(
+                      reciter: widget.reciter,
+                      state: state,
+                      playingSurahKey: _playingSurahKey,
+                      onPlaySurah: (surah) {
+                        HapticFeedback.lightImpact();
+                        context.read<ReciterDetailsBloc>().add(
+                          PlaySurahRequested(surah),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-          const BottomPlayerWidget(),
+          const Positioned.fill(child: BottomPlayerWidget()),
         ],
       ),
     );
@@ -305,31 +322,16 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     dynamic history,
   ) {
     HapticFeedback.lightImpact();
-    final surah = state.surahList.firstWhere(
-      (s) {
-        final id = s.audio.extras?['surahId'];
-        return id != null && id.toString() == history.surahId.toString();
-      },
-      orElse: () => SurahEntity(
-        audio: AudioEntity(
-          id: history.audioUrl,
-          url: history.audioUrl,
-          title: history.surahName,
-          artist: history.reciterName,
-          duration: Duration(milliseconds: history.durationMs),
-          extras: {
-            'reciterId': history.reciterId,
-            'moshafId': history.moshafId,
-            'surahId': history.surahId,
-            'url': history.audioUrl,
-          },
-        ),
-        isDownloaded: false,
-        downloadProgress: 0,
-      ),
-    );
+    final int surahIdx = state.surahList.indexWhere((s) {
+      final id = s.audio.extras?['surahId'];
+      return id != null && id.toString() == history.surahId.toString();
+    });
 
-    context.read<ReciterDetailsBloc>().add(PlaySurahRequested(surah));
+    if (surahIdx >= 0) {
+      context.read<ReciterDetailsBloc>().add(
+        PlaySurahRequested(state.surahList[surahIdx]),
+      );
+    }
   }
 }
 
@@ -377,17 +379,21 @@ class _ReciterDetailsContent extends StatelessWidget {
     required this.reciter,
     required this.state,
     required this.onPlaySurah,
-    required this.surahKeys,
+    required this.playingSurahKey,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
   final Function(SurahEntity) onPlaySurah;
-  final Map<String, GlobalKey> surahKeys;
+  final GlobalKey playingSurahKey;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final double bottomPadding = 20.h + MediaQuery.paddingOf(context).bottom;
+    // Mini player is 88.h + some buffer
+    final double bottomPadding = 120.h + MediaQuery.paddingOf(context).bottom;
+    final currentAudio = context.select(
+      (AudioPlayerBloc bloc) => bloc.state.currentAudio,
+    );
     switch (state.status) {
       case ReciterDetailsStatus.error:
         return SliverFillRemaining(
@@ -494,7 +500,11 @@ class _ReciterDetailsContent extends StatelessWidget {
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];
-                final key = surahKeys.putIfAbsent(surah.id, GlobalKey.new);
+                final bool isPlaying =
+                    currentAudio?.id == surah.id ||
+                    (currentAudio != null &&
+                        currentAudio.url == surah.audio.url);
+                final key = isPlaying ? playingSurahKey : null;
                 return SurahGridItem(
                   key: key,
                   surah: surah,
@@ -518,7 +528,10 @@ class _ReciterDetailsContent extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final SurahEntity surah = filteredSurahs[index];
-              final key = surahKeys.putIfAbsent(surah.id, GlobalKey.new);
+              final bool isPlaying =
+                  currentAudio?.id == surah.id ||
+                  (currentAudio != null && currentAudio.url == surah.audio.url);
+              final key = isPlaying ? playingSurahKey : null;
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: 4.h),
                 child: SurahListTile(
@@ -543,14 +556,52 @@ class _ReciterDetailsContent extends StatelessWidget {
             bottom: bottomPadding,
           ),
           sliver: SliverSkeletonizer(
-            child: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => const SkeletonSurahListTile(),
-                childCount: 8,
-              ),
-            ),
+            child: state.viewMode == ReciterViewMode.grid
+                ? SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12.h,
+                      crossAxisSpacing: 12.w,
+                      childAspectRatio: 0.99,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        child: const SizedBox.expand(),
+                      ),
+                      childCount: 8,
+                    ),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => const SkeletonSurahListTile(),
+                      childCount: 8,
+                    ),
+                  ),
           ),
         );
     }
+  }
+}
+
+class _CustomFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _CustomFloatingActionButtonLocation({required this.offset});
+  final double offset;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Default miniEndFloat style position
+    final double x =
+        scaffoldGeometry.scaffoldSize.width -
+        scaffoldGeometry.floatingActionButtonSize.width -
+        16.w;
+    final double y =
+        scaffoldGeometry.scaffoldSize.height -
+        scaffoldGeometry.floatingActionButtonSize.height -
+        offset;
+
+    return Offset(x, y);
   }
 }

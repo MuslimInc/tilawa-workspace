@@ -46,78 +46,78 @@ class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
     return List.from(_cache!);
   }
 
-  @override
-  Future<void> saveDownloads(List<DownloadItem> downloads) async {
-    _cache = List.from(downloads);
-    final List<String> downloadsJson = downloads
-        .map((download) => jsonEncode(download.toJson()))
-        .toList();
+  Future<void> _persistCache() async {
+    if (_cache == null) return;
+    final List<String> downloadsJson =
+        _cache?.map((download) => jsonEncode(download.toJson())).toList() ?? [];
     await _prefs.setStringList(_downloadsKey, downloadsJson);
   }
 
   @override
+  Future<void> saveDownloads(List<DownloadItem> downloads) async {
+    _cache = List.from(downloads);
+    await _persistCache();
+  }
+
+  @override
   Future<void> addDownload(DownloadItem download) async {
-    final List<DownloadItem> downloads = await getDownloads();
-    final int index = downloads.indexWhere((d) => d.id == download.id);
+    await getDownloads(); // Ensure cache is loaded
+    final int index = _cache?.indexWhere((d) => d.id == download.id) ?? -1;
     if (index != -1) {
-      downloads[index] = download;
+      _cache?[index] = download;
     } else {
-      downloads.add(download);
+      _cache?.add(download);
     }
-    await saveDownloads(downloads);
+    await _persistCache();
   }
 
   @override
   Future<void> addDownloads(List<DownloadItem> items) async {
-    if (items.isEmpty) {
-      return;
-    }
-    final List<DownloadItem> downloads = await getDownloads();
+    if (items.isEmpty) return;
+    await getDownloads(); // Ensure cache is loaded
     for (final item in items) {
-      final int index = downloads.indexWhere((d) => d.id == item.id);
+      final int index = _cache?.indexWhere((d) => d.id == item.id) ?? -1;
       if (index != -1) {
-        downloads[index] = item;
+        _cache?[index] = item;
       } else {
-        downloads.add(item);
+        _cache?.add(item);
       }
     }
-    await saveDownloads(downloads);
+    await _persistCache();
   }
 
   @override
   Future<void> updateDownload(DownloadItem download) async {
-    final List<DownloadItem> downloads = await getDownloads();
-    final int index = downloads.indexWhere((d) => d.id == download.id);
+    await getDownloads(); // Ensure cache is loaded
+    final int index = _cache?.indexWhere((d) => d.id == download.id) ?? -1;
     if (index != -1) {
-      downloads[index] = download;
-      await saveDownloads(downloads);
+      _cache?[index] = download;
+      await _persistCache();
     }
   }
 
   @override
   Future<void> updateDownloads(List<DownloadItem> items) async {
-    if (items.isEmpty) {
-      return;
-    }
-    final List<DownloadItem> downloads = await getDownloads();
+    if (items.isEmpty) return;
+    await getDownloads(); // Ensure cache is loaded
     var changed = false;
     for (final item in items) {
-      final int index = downloads.indexWhere((d) => d.id == item.id);
+      final int index = _cache?.indexWhere((d) => d.id == item.id) ?? -1;
       if (index != -1) {
-        downloads[index] = item;
+        _cache?[index] = item;
         changed = true;
       }
     }
     if (changed) {
-      await saveDownloads(downloads);
+      await _persistCache();
     }
   }
 
   @override
   Future<void> deleteDownload(String id) async {
-    final List<DownloadItem> downloads = await getDownloads();
-    downloads.removeWhere((d) => d.id == id);
-    await saveDownloads(downloads);
+    await getDownloads(); // Ensure cache is loaded
+    _cache?.removeWhere((d) => d.id == id);
+    await _persistCache();
   }
 
   @override

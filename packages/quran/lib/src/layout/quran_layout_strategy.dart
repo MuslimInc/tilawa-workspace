@@ -5,8 +5,11 @@ import 'package:flutter/widgets.dart';
 /// Adheres to the Strategy pattern to allow for different layout algorithms
 /// (e.g., standard, large text, experimental) without modifying the widget code.
 abstract class QuranLayoutStrategy {
-  /// Calculates the font size and line height based on the available screen constraints.
-  QuranLayoutMetrics calculateMetrics(BuildContext context);
+  /// Calculates font size and line height based on widget constraints.
+  QuranLayoutMetrics calculateMetrics(
+    BuildContext context,
+    BoxConstraints constraints,
+  );
 }
 
 /// The result of a layout calculation.
@@ -30,28 +33,34 @@ class QuranLayoutMetrics {
 /// - **Portrait**: Fits exactly 15 lines into the available vertical space (minus safe areas).
 /// - **Landscape**: Uses a natural proportional line height and enables scrolling.
 class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
-  // Constant for the number of lines per page in a standard Madani Mushaf.
-  // static const int _linesPerPage = 15;
   // Tuning factor for height calculation to ensure perfect fit.
   // Proportional factor for natural Arabic text spacing.
   static const double _naturalLineHeightRatio = 0.40;
   // Width divisor to determine base font size relative to screen width.
-  static const double _widthDivisor = 14;
+  // Higher values produce a smaller font to prevent horizontal wrapping.
+  static const double _widthDivisor = 16.35;
+  // Standard horizontal padding for the Mushaf lines.
+  static const double _horizontalPaddingRatio = 0.025;
 
   @override
-  QuranLayoutMetrics calculateMetrics(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final Orientation orientation = mediaQuery.orientation;
-    final Size size = mediaQuery.size;
-    final EdgeInsets padding = mediaQuery.padding;
-
-    // Common Base Font Size
-    final double adaptiveFontSize = size.width / _widthDivisor;
+  QuranLayoutMetrics calculateMetrics(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    // Use narrow MediaQuery accessors to avoid rebuilds on unrelated changes
+    // (e.g., keyboard appearance, text scale factor).
+    final Orientation orientation = MediaQuery.orientationOf(context);
 
     if (orientation == Orientation.landscape) {
+      final EdgeInsets padding = MediaQuery.paddingOf(context);
+      // Common Base Font Size based on AVAILABLE width (after padding)
+      final double availableWidth =
+          constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
+      final double adaptiveFontSize = availableWidth / _widthDivisor;
       return _calculateLandscapeMetrics(adaptiveFontSize, padding);
     } else {
-      return _calculatePortraitMetrics(size.height, padding, adaptiveFontSize);
+      // Use actual constraints provided by the parent (e.g. SafeArea)
+      return _calculatePortraitMetrics(constraints);
     }
   }
 
@@ -74,35 +83,19 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     );
   }
 
-  QuranLayoutMetrics _calculatePortraitMetrics(
-    double screenHeight,
-    EdgeInsets padding,
-    double fontSize,
-  ) {
-    // Calculate actual vertical space available for text
-    // Subtract approximate height for header (~40px) and footer (~44px)
-    const headerHeight = 40.0;
-    const footerHeight = 44.0;
-    final double availableHeight =
-        screenHeight -
-        padding.top -
-        padding.bottom -
-        headerHeight -
-        footerHeight;
+  QuranLayoutMetrics _calculatePortraitMetrics(BoxConstraints constraints) {
+    final double availableWidth =
+        constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
+    final double fontSize = availableWidth / _widthDivisor;
 
-    // Calculate height factor to squeeze exactly 15 lines into the remaining space
-    // We use a slightly smaller factor now because the space is already reduced.
-    // 15.0 factor would mean each line takes 1/15th of the space.
-    final double fontHeight = (availableHeight / 15.0) / fontSize;
+    // constraints.maxHeight already excludes header/footer since the
+    // LayoutBuilder sits inside an Expanded sibling of header and footer.
+    final double fontHeight = (constraints.maxHeight / 15.0) / fontSize;
 
-    // Adaptive letter spacing based on screen width/font size ratio
-    final double letterSpacing = fontSize * 0.0;
-
-    return const QuranLayoutMetrics(
-      fontSize: 32,
-      fontHeight: 2.1,
+    return QuranLayoutMetrics(
+      fontSize: fontSize,
+      fontHeight: fontHeight,
       isScrollable: false,
-      // letterSpacing: 2,
     );
   }
 }

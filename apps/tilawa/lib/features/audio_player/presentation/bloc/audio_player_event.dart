@@ -40,8 +40,10 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
       SetRepeatMode;
   const factory AudioPlayerEvent.setShuffleMode(AudioShuffleMode shuffleMode) =
       SetShuffleMode;
-  const factory AudioPlayerEvent.setSleepTimer(Duration duration) =
-      SetSleepTimer;
+  const factory AudioPlayerEvent.setSleepTimer(
+    Duration duration, {
+    @Default(SleepTimerType.preset) SleepTimerType type,
+  }) = SetSleepTimer;
   const factory AudioPlayerEvent.cancelSleepTimer({
     @Default(true) bool clearPreference,
   }) = CancelSleepTimer;

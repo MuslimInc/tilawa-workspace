@@ -1,10 +1,11 @@
+import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_core/network/network_info.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/network/network_info.dart';
+
 import '../../data/services/downloads_initialization_service.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/usecases/usecases.dart';
@@ -53,6 +54,8 @@ class DownloadButton extends StatelessWidget {
           checkSurahDownloaded: getIt<CheckSurahDownloadedUseCase>(),
           downloadSurah: getIt<DownloadSurahUseCase>(),
           cancelDownload: CancelDownloadUseCase(repo),
+          pauseDownload: PauseDownloadUseCase(repo),
+          resumeDownload: ResumeDownloadUseCase(repo),
           observeDownloadProgress: ObserveDownloadProgressUseCase(repo),
           networkInfo: getIt<NetworkInfo>(),
           initialIsDownloaded: initialIsDownloaded,
@@ -101,6 +104,11 @@ class DownloadButton extends StatelessWidget {
                 downloading: (progress, downloadedBytes, totalBytes) =>
                     _DownloadingProgressButton(
                       progress: progress,
+                      onPause: () {
+                        context.read<DownloadButtonBloc>().add(
+                          const DownloadButtonEvent.requestPause(),
+                        );
+                      },
                       onCancel: () {
                         context.read<DownloadButtonBloc>().add(
                           const DownloadButtonEvent.cancel(),
@@ -122,10 +130,15 @@ class DownloadButton extends StatelessWidget {
                     );
                   },
                 ),
-                paused: () => _DefaultDownloadButton(
-                  onDownload: () {
+                paused: () => _PausedDownloadButton(
+                  onResume: () {
                     context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                      const DownloadButtonEvent.requestResume(),
+                    );
+                  },
+                  onCancel: () {
+                    context.read<DownloadButtonBloc>().add(
+                      const DownloadButtonEvent.cancel(),
                     );
                   },
                 ),
@@ -213,9 +226,14 @@ class _LoadingDownloadButton extends StatelessWidget {
 
 /// Downloading progress state widget (simplified - no StreamBuilder!)
 class _DownloadingProgressButton extends StatelessWidget {
-  const _DownloadingProgressButton({required this.progress, this.onCancel});
+  const _DownloadingProgressButton({
+    required this.progress,
+    this.onPause,
+    this.onCancel,
+  });
 
   final double progress;
+  final VoidCallback? onPause;
   final VoidCallback? onCancel;
 
   @override
@@ -250,23 +268,72 @@ class _DownloadingProgressButton extends StatelessWidget {
               ),
             ),
             // Percentage text or icon
-            if (progress > 0)
-              Text(
-                '${(progress * 100).toInt()}',
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: theme.primaryColor,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+            InkWell(
+              onTap: onPause,
+              borderRadius: BorderRadius.circular(18),
+              child: progress > 0
+                  ? Text(
+                      '${(progress * 100).toInt()}',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    )
+                  : Icon(
+                      Icons.pause_rounded,
+                      size: 14,
+                      color: theme.primaryColor,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Paused download state widget
+class _PausedDownloadButton extends StatelessWidget {
+  const _PausedDownloadButton({required this.onResume, required this.onCancel});
+
+  final VoidCallback onResume;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Background circle
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.primaryColor.withValues(alpha: 0.2),
+                  width: 1,
                 ),
-              )
-            else
-              // Show indeterminate spinner icon
-              Icon(
-                Icons.downloading_rounded,
-                size: 14,
+              ),
+            ),
+            // Play icon (Resume)
+            IconButton(
+              icon: Icon(
+                Icons.play_arrow_rounded,
+                size: 20,
                 color: theme.primaryColor,
               ),
+              onPressed: onResume,
+            ),
           ],
         ),
       ),
@@ -338,8 +405,8 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
             children: [
               // Pulsing circle
               Container(
-                width: 24 + (_animation.value * 8),
-                height: 24 + (_animation.value * 8),
+                width: 24.w + (_animation.value * 8),
+                height: 24.h + (_animation.value * 8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(

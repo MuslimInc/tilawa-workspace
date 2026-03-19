@@ -120,6 +120,8 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
   Widget build(BuildContext context) {
     return ScreenUtilPlusInit(
       designSize: const Size(390, 844),
+      minTextAdapt: true,
+      splitScreenMode: true,
       child: AppProviders.create(child: const _PlayerApp()),
     );
   }

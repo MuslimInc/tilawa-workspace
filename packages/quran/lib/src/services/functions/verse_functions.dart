@@ -33,10 +33,12 @@ String getVerseEndSymbol(int verseNumber, {bool arabicNumeral = true}) =>
 String getVerseQCF(
   int surahNumber,
   int verseNumber, {
+  bool addSpace = true,
   bool verseEndSymbol = true,
 }) => QuranServiceLocator.verseService.getVerseQCF(
   surahNumber,
   verseNumber,
+  addSpace: addSpace,
   verseEndSymbol: verseEndSymbol,
 );
 

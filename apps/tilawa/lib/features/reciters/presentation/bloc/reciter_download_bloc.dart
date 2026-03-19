@@ -5,9 +5,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
+
 import '../../../downloads/domain/entities/download_item.dart';
 import '../../../downloads/domain/usecases/cancel_downloads_for_reciter_use_case.dart';
 import '../../../downloads/domain/usecases/download_all_surahs_use_case.dart';
@@ -39,8 +39,11 @@ class ReciterDownloadBloc
   String? _currentReciterName;
   bool _isCancelling = false;
   bool _isBatchDownload = false;
+  bool _isEnqueuingBatch = false;
   final Map<String, bool> _completedSurahs = {}; // surahId -> isDownloaded
   final Set<String> _downloadingSurahs = {}; // surahId (actively downloading)
+  final Set<String> _activeBatchItemIds =
+      {}; // Items that are part of the CURRENT active batch
   int _totalSurahsInRange = 0;
 
   void _onInitialize(
@@ -54,6 +57,7 @@ class ReciterDownloadBloc
       _completedSurahs[id] = true;
     }
     _downloadingSurahs.clear();
+    _activeBatchItemIds.clear();
     _isBatchDownload = false;
 
     _subscribeToDownloads();
@@ -65,6 +69,9 @@ class ReciterDownloadBloc
     Emitter<ReciterDownloadState> emit,
   ) async {
     _isBatchDownload = true;
+    _isEnqueuingBatch = true;
+    _activeBatchItemIds.clear();
+    _activeBatchItemIds.addAll(event.surahs.map((s) => s.id));
     // Clear previous error message and set pending state
     emit(
       ReciterDownloadState(
@@ -85,6 +92,7 @@ class ReciterDownloadBloc
     result.fold(
       (failure) {
         // Handle immediate failures (like network error)
+        _isEnqueuingBatch = false;
         _isBatchDownload = false;
         emit(
           state.copyWith(
@@ -96,8 +104,21 @@ class ReciterDownloadBloc
       },
       (_) {
         // Successfully enqueued - clear pending state
-        // isDownloadingAll will be updated by the stream listener
-        emit(state.copyWith(isPending: false));
+        _isEnqueuingBatch = false;
+        // Guard against race: all items may have already completed/failed while
+        // the use case was awaiting, leaving _activeBatchItemIds empty with no
+        // further stream events to trigger the batch-done check.
+        if (_activeBatchItemIds.isEmpty) {
+          _isBatchDownload = false;
+          emit(
+            state.copyWith(
+              isPending: false,
+              isDownloadingAll: _downloadingSurahs.isNotEmpty,
+            ),
+          );
+        } else {
+          emit(state.copyWith(isPending: false));
+        }
       },
     );
   }
@@ -108,7 +129,9 @@ class ReciterDownloadBloc
   ) async {
     _isCancelling = true;
     _isBatchDownload = false;
+    _isEnqueuingBatch = false;
     _downloadingSurahs.clear();
+    _activeBatchItemIds.clear();
     _updateProgressAndEmit(emit);
 
     await _cancelDownloadsForReciterUseCase(event.reciterName);
@@ -136,59 +159,62 @@ class ReciterDownloadBloc
       return;
     }
 
-    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!).listen((
-      item,
-    ) {
-      var stateChanged = false;
+    _downloadsSubscription = _observeReciterDownloads(_currentReciterName!)
+        .listen((item) {
+          var stateChanged = false;
 
-      if (item.status == DownloadStatus.completed) {
-        if (!_completedSurahs.containsKey(item.url)) {
-          _completedSurahs[item.url] = true;
-          stateChanged = true;
-        }
-        if (_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.remove(item.url);
-          stateChanged = true;
-        }
-      } else if (item.status == DownloadStatus.downloading ||
-          item.status == DownloadStatus.pending) {
-        if (!_isCancelling && !_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.add(item.url);
-          stateChanged = true;
-        }
-      } else if (item.status == DownloadStatus.failed) {
-        if (_downloadingSurahs.contains(item.url)) {
-          _downloadingSurahs.remove(item.url);
-          stateChanged = true;
-        }
-      }
+          if (item.status == DownloadStatus.completed) {
+            _activeBatchItemIds.remove(item.url);
+            if (!_completedSurahs.containsKey(item.url)) {
+              _completedSurahs[item.url] = true;
+              stateChanged = true;
+            }
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.downloading ||
+              item.status == DownloadStatus.pending) {
+            if (!_isCancelling && !_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.add(item.url);
+              stateChanged = true;
+            }
+          } else if (item.status == DownloadStatus.failed ||
+              item.status == DownloadStatus.cancelled) {
+            _activeBatchItemIds.remove(item.url);
+            if (_downloadingSurahs.contains(item.url)) {
+              _downloadingSurahs.remove(item.url);
+              stateChanged = true;
+            }
+          }
 
-      if (_downloadingSurahs.isEmpty && _isBatchDownload) {
-        _isBatchDownload = false;
-        stateChanged = true;
-      }
+          if (_isBatchDownload &&
+              !_isEnqueuingBatch &&
+              _activeBatchItemIds.isEmpty) {
+            _isBatchDownload = false;
+            stateChanged = true;
+          }
 
-      if (stateChanged) {
-        // Since this is a listener, we can't emit directly.
-        // We'll add an event to the bloc.
-        final double progress = _totalSurahsInRange > 0
-            ? _completedSurahs.length / _totalSurahsInRange
-            : 0.0;
+          if (stateChanged) {
+            // Since this is a listener, we can't emit directly.
+            // We'll add an event to the bloc.
+            final double progress = _totalSurahsInRange > 0
+                ? _completedSurahs.length / _totalSurahsInRange
+                : 0.0;
 
-        // isDownloadingAll should only be true when there are actual active downloads
-        final bool hasActiveDownloads =
-            _downloadingSurahs.isNotEmpty && _isBatchDownload;
+            // isDownloadingAll reflects whether any surah is currently active
+            final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
 
-        add(
-          UpdateReciterDownloadProgress(
-            progress: progress,
-            isDownloading: hasActiveDownloads,
-            downloadedCount: _completedSurahs.length,
-            totalCount: _totalSurahsInRange,
-          ),
-        );
-      }
-    });
+            add(
+              UpdateReciterDownloadProgress(
+                progress: progress,
+                isDownloading: isDownloadingAll,
+                downloadedCount: _completedSurahs.length,
+                totalCount: _totalSurahsInRange,
+              ),
+            );
+          }
+        });
   }
 
   void _updateProgressAndEmit(Emitter<ReciterDownloadState> emit) {
@@ -196,14 +222,13 @@ class ReciterDownloadBloc
         ? _completedSurahs.length / _totalSurahsInRange
         : 0.0;
 
-    // isDownloadingAll should only be true when there are actual active downloads
-    final bool hasActiveDownloads =
-        _downloadingSurahs.isNotEmpty && _isBatchDownload;
+    // isDownloadingAll reflects whether any surah is currently active
+    final bool isDownloadingAll = _downloadingSurahs.isNotEmpty;
 
     emit(
       state.copyWith(
         progress: progress,
-        isDownloadingAll: hasActiveDownloads,
+        isDownloadingAll: isDownloadingAll,
         isPending: false,
         downloadedCount: _completedSurahs.length,
         totalCount: _totalSurahsInRange,

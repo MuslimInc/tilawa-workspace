@@ -1,39 +1,192 @@
 import 'dart:convert';
+import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/reciter_helper.dart';
-import '../../router/app_router_config.dart';
+import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import '../models/reciter_model.dart';
 import 'bottom_player_ui.dart';
+import 'seek_bar.dart';
 
-/// Bloc-connected wrapper for BottomPlayerUI that handles state management
+/// A YouTube/Spotify-style sliding player panel.
+///
+/// When collapsed, shows a mini player bar at the bottom.
+/// Tap or swipe up to expand to a full-screen player.
+/// Swipe down or tap the chevron to collapse back.
 class BottomPlayerWidget extends StatefulWidget {
-  const BottomPlayerWidget({super.key});
+  const BottomPlayerWidget({
+    super.key,
+    this.bottomNavBarHeight = 0,
+    this.isKeyboardOpen = false,
+  });
+
+  /// Height of the bottom navigation bar to offset the mini player.
+  final double bottomNavBarHeight;
+
+  /// Whether the keyboard is currently open.
+  final bool isKeyboardOpen;
 
   @override
-  State<BottomPlayerWidget> createState() => _BottomPlayerWidgetState();
+  State<BottomPlayerWidget> createState() => BottomPlayerWidgetState();
 }
 
-class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
+class BottomPlayerWidgetState extends State<BottomPlayerWidget>
+    with TickerProviderStateMixin {
   int? _currentReciterId;
   String? _currentReciterName;
   bool _isDismissed = false;
+
+  late AnimationController _expandController;
+
+  /// Controls the swipe-down-to-dismiss offset for the mini player.
+  double _dismissOffsetY = 0;
+  Animation<double>? _dismissAnimation;
+  late AnimationController _dismissAnimController;
+
+  /// The height of the mini player bar (excluding nav bar offset).
+  /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
+  /// inner padding (12+12) + row content (~48) = ~99.
+  double get _miniPlayerHeight => 100.h;
+
+  /// Whether the player is currently expanded.
+  bool get isExpanded => _expandController.value == 1.0;
+
+  /// Whether the player is currently expanding or expanded.
+  bool get isExpanding => _expandController.value > 0.01;
+
+  @override
+  void initState() {
+    super.initState();
+    _expandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _expandController.addListener(() {
+      setState(() {});
+    });
+
+    _dismissAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _dismissAnimController.addListener(() {
+      setState(() {
+        _dismissOffsetY = _dismissAnimation?.value ?? 0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _expandController.dispose();
+    _dismissAnimController.dispose();
+    super.dispose();
+  }
+
+  /// Expand the player to full-screen.
+  void expand() {
+    HapticFeedback.lightImpact();
+    _expandController.forward();
+  }
+
+  /// Collapse the player back to the mini bar.
+  void collapse() {
+    _expandController.reverse();
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    final primaryDelta = details.primaryDelta ?? 0;
+
+    // When collapsed and dragging down, track dismiss offset
+    if ((_expandController.value == 0 && primaryDelta > 0) ||
+        _dismissOffsetY > 0) {
+      setState(() {
+        _dismissOffsetY = (_dismissOffsetY + primaryDelta).clamp(0.0, 200.0);
+      });
+      return;
+    }
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Negative primaryDelta = dragging up = expanding
+    final delta = -primaryDelta / screenHeight;
+    _expandController.value = (_expandController.value + delta * 1.5).clamp(
+      0.0,
+      1.0,
+    );
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+
+    // Handle dismiss gesture when swiping down on collapsed player
+    if (_dismissOffsetY > 0) {
+      if (velocity > 300 || _dismissOffsetY > 80) {
+        _dismiss();
+      } else {
+        _cancelDismiss();
+      }
+      return;
+    }
+
+    final negVelocity = -velocity;
+    if (negVelocity > 500 || _expandController.value > 0.5) {
+      expand();
+    } else if (negVelocity < -500 || _expandController.value <= 0.5) {
+      collapse();
+    }
+  }
+
+  /// Animate the mini player off-screen and stop audio.
+  void _dismiss() {
+    HapticFeedback.lightImpact();
+    final targetOffset = _miniPlayerHeight + widget.bottomNavBarHeight + 40;
+    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: targetOffset)
+        .animate(
+          CurvedAnimation(
+            parent: _dismissAnimController,
+            curve: Curves.easeOut,
+          ),
+        );
+    _dismissAnimController.forward(from: 0).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _isDismissed = true;
+        _dismissOffsetY = 0;
+      });
+      context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
+    });
+  }
+
+  /// Cancel the dismiss gesture and spring back.
+  void _cancelDismiss() {
+    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: 0).animate(
+      CurvedAnimation(parent: _dismissAnimController, curve: Curves.easeOut),
+    );
+    _dismissAnimController.forward(from: 0).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _dismissOffsetY = 0;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
-        // Reset _isDismissed when audio changes or bottom player needs to show again
         return previous.currentAudio?.id != current.currentAudio?.id ||
             (!previous.shouldShowBottomPlayer &&
                 current.shouldShowBottomPlayer) ||
@@ -49,12 +202,15 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
       builder: (context, state) {
         final AudioEntity? audio = state.currentAudio;
 
-        // Hide if no media, error, or manually dismissed
-        if (!state.shouldShowBottomPlayer || audio == null || _isDismissed) {
+        // Hide if no media, error, manually dismissed, or if keyboard is open
+        if (!state.shouldShowBottomPlayer ||
+            audio == null ||
+            _isDismissed ||
+            (widget.isKeyboardOpen && !isExpanding)) {
           return const SizedBox.shrink();
         }
 
-        // Load reciter ID if it's not cached or if the reciter name changed
+        // Load reciter ID if not cached or if the reciter name changed
         if (_currentReciterId == null || _currentReciterName != audio.artist) {
           _loadReciterId(audio);
         }
@@ -67,47 +223,488 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
               duration: Duration.zero,
             );
 
-        return Dismissible(
-          key: Key(audio.id),
-          direction: DismissDirection.down,
-          onDismissed: (direction) {
-            setState(() {
-              _isDismissed = true;
-            });
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.stopAudio(),
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.1),
-              border: Border(
-                top: BorderSide(color: Theme.of(context).colorScheme.surface),
+        final double progress = _expandController.value;
+        final double screenHeight = MediaQuery.of(context).size.height;
+        // When collapsed (progress=0), the height must be
+        // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
+        final double currentHeight = lerpDouble(
+          _miniPlayerHeight + widget.bottomNavBarHeight,
+          screenHeight,
+          progress,
+        )!;
+
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            onVerticalDragEnd: _onVerticalDragEnd,
+            child: SizedBox(
+              height: currentHeight,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Expanded player (behind, fades in)
+                  if (progress > 0.01)
+                    Opacity(
+                      opacity: progress.clamp(0.0, 1.0),
+                      child: _buildExpandedPlayer(
+                        context,
+                        state,
+                        audio,
+                        position,
+                      ),
+                    ),
+
+                  // Mini player (in front, fades out quickly)
+                  if (progress < 0.99)
+                    Positioned(
+                      bottom: lerpDouble(
+                        widget.bottomNavBarHeight,
+                        0,
+                        progress,
+                      ),
+                      left: 0,
+                      right: 0,
+                      child: Transform.translate(
+                        offset: Offset(0, _dismissOffsetY),
+                        child: Opacity(
+                          opacity:
+                              ((1 - progress * 2.5) *
+                                      (1 - _dismissOffsetY / 200))
+                                  .clamp(0.0, 1.0),
+                          child: IgnorePointer(
+                            ignoring: progress > 0.4,
+                            child: _buildMiniPlayer(
+                              context,
+                              state,
+                              audio,
+                              position,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
             ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16.w,
-                8.h,
-                16.w,
-                20.h + MediaQuery.paddingOf(context).bottom,
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mini Player
+  // ---------------------------------------------------------------------------
+
+  Widget _buildMiniPlayer(
+    BuildContext context,
+    AudioPlayerState state,
+    AudioEntity audio,
+    PositionData position,
+  ) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+      child: BottomPlayerUi(
+        audio: audio,
+        positionData: position,
+        isPlaying: state.isPlaying,
+        canGoPrevious: state.canGoPrevious,
+        canGoNext: state.canGoNext,
+        isSleepTimerActive: state.isSleepTimerActive,
+        isSleepTimerEnabled: context
+            .watch<SettingsCubit>()
+            .state
+            .isSleepTimerEnabled,
+        onPlayPause: () {
+          if (state.isPlaying) {
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.pauseAudio(),
+            );
+          } else {
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.playAudio(),
+            );
+          }
+        },
+        onPrevious: () {
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.skipToPrevious(),
+          );
+        },
+        onNext: () {
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.skipToNext(),
+          );
+        },
+        onSleepTimerTap: () {
+          showDialog(
+            context: context,
+            builder: (_) => const SleepTimerDialog(),
+          );
+        },
+        onClose: () {
+          HapticFeedback.lightImpact();
+          setState(() {
+            _isDismissed = true;
+          });
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.stopAudio(),
+          );
+        },
+        onTap: expand,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Expanded Player
+  // ---------------------------------------------------------------------------
+
+  Widget _buildExpandedPlayer(
+    BuildContext context,
+    AudioPlayerState state,
+    AudioEntity audio,
+    PositionData position,
+  ) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Background image
+            if (audio.artUri != null)
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: audio.artUri!,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => Container(color: Colors.grey),
+                  placeholder: (_, _) => Container(color: Colors.grey),
+                ),
+              )
+            else
+              Container(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
               ),
-              child: BottomPlayerUi(
-                audio: audio,
-                positionData: position,
-                isPlaying: state.isPlaying,
-                canGoPrevious: state.canGoPrevious,
-                canGoNext: state.canGoNext,
-                isSleepTimerActive: state.isSleepTimerActive,
-                isSleepTimerEnabled: context
-                    .watch<SettingsCubit>()
-                    .state
-                    .isSleepTimerEnabled,
-                onPlayPause: () {
-                  if (state.isPlaying) {
+
+            // 2. Blur overlay
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: Container(color: Colors.black.withValues(alpha: 0.4)),
+              ),
+            ),
+
+            // 3. Content — Use LayoutBuilder so the Column can shrink
+            // gracefully during the expand/collapse animation.
+            Positioned.fill(
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildExpandedAppBar(context, state),
+
+                            // Artwork — flexible via ConstrainedBox
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              child: Container(
+                                width: 280.w,
+                                height: (constraints.maxHeight * 0.35).clamp(
+                                  0.0,
+                                  280.w,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      blurRadius: 30.r,
+                                      offset: const Offset(0, 15),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24.r),
+                                  child: audio.artUri != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: audio.artUri!,
+                                          fit: BoxFit.cover,
+                                          errorWidget: (_, _, _) =>
+                                              _buildDefaultArt(context),
+                                        )
+                                      : _buildDefaultArt(context),
+                                ),
+                              ),
+                            ),
+
+                            // Title & Artist
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    audio.title,
+                                    style: TextStyle(
+                                      fontSize: 24.sp,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    audio.artist ?? 'Unknown',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 16.h),
+
+                            // Seek bar
+                            _buildProgressBar(context, state),
+
+                            SizedBox(height: 16.h),
+
+                            // Controls
+                            _buildControls(context, state),
+
+                            SizedBox(height: 24.h),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // Drag handle at top
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedAppBar(BuildContext context, AudioPlayerState state) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: IconButton(
+        icon: Icon(
+          FluentIcons.chevron_down_24_regular,
+          color: Colors.white,
+          size: 28.sp,
+        ),
+        onPressed: collapse,
+      ),
+      title: Text(
+        context.l10n.currentPlaying,
+        style: TextStyle(color: Colors.white, fontSize: 16.sp),
+      ),
+      actions: [
+        if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
+          IconButton(
+            icon: Icon(
+              state.isSleepTimerActive
+                  ? FluentIcons.timer_24_filled
+                  : FluentIcons.timer_24_regular,
+              color: state.isSleepTimerActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.white,
+              size: 24.sp,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => const SleepTimerDialog(),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDefaultArt(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white.withValues(alpha: 0.1),
+      child: Icon(
+        FluentIcons.music_note_1_24_regular,
+        color: Colors.white,
+        size: 80.sp,
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(BuildContext context, AudioPlayerState state) {
+    final PositionData positionData =
+        state.positionData ??
+        const PositionData(
+          position: Duration.zero,
+          bufferedPosition: Duration.zero,
+          duration: Duration.zero,
+        );
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Column(
+        children: [
+          SeekBar(
+            duration: positionData.duration,
+            position: positionData.position,
+            bufferedPosition: positionData.bufferedPosition,
+            onChangeEnd: (newPosition) {
+              context.read<AudioPlayerBloc>().add(
+                AudioPlayerEvent.seekTo(newPosition),
+              );
+            },
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatDuration(positionData.position),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12.sp,
+                ),
+              ),
+              Text(
+                _formatDuration(positionData.duration),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12.sp,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControls(BuildContext context, AudioPlayerState state) {
+    final bool isPlaying = state.isPlaying;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Volume
+            IconButton(
+              icon: Icon(
+                FluentIcons.speaker_2_24_regular,
+                color: Colors.white,
+                size: 24.sp,
+              ),
+              onPressed: () {
+                showSliderDialog(
+                  context: context,
+                  title: 'Adjust volume',
+                  divisions: 10,
+                  min: 0.0,
+                  max: 1.0,
+                  value: state.volume,
+                  onChanged: (newVolume) {
+                    context.read<AudioPlayerBloc>().add(
+                      AudioPlayerEvent.setVolume(newVolume),
+                    );
+                  },
+                );
+              },
+            ),
+
+            // Previous
+            IconButton(
+              icon: Icon(
+                FluentIcons.previous_24_filled,
+                color: state.canGoPrevious
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.3),
+                size: 32.sp,
+              ),
+              onPressed: state.canGoPrevious
+                  ? () {
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.skipToPrevious(),
+                      );
+                    }
+                  : null,
+            ),
+
+            // Play/Pause
+            Container(
+              width: 72.w,
+              height: 72.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20.r,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(
+                  isPlaying
+                      ? FluentIcons.pause_24_filled
+                      : FluentIcons.play_24_filled,
+                  color: Colors.black,
+                  size: 32.sp,
+                ),
+                onPressed: () {
+                  if (isPlaying) {
                     context.read<AudioPlayerBloc>().add(
                       const AudioPlayerEvent.pauseAudio(),
                     );
@@ -117,47 +714,73 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
                     );
                   }
                 },
-                onPrevious: () {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToPrevious(),
-                  );
-                },
-                onNext: () {
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToNext(),
-                  );
-                },
-                onSleepTimerTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => const SleepTimerDialog(),
-                  );
-                },
-                onClose: () {
-                  // Provide haptic feedback for consistency
-                  HapticFeedback.lightImpact();
-                  context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.stopAudio(),
-                  );
-                },
-                onTap: () => const ExpandedPlayerRoute().push(context),
               ),
             ),
-          ),
-        );
-      },
+
+            // Next
+            IconButton(
+              icon: Icon(
+                FluentIcons.next_24_filled,
+                color: state.canGoNext
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.3),
+                size: 32.sp,
+              ),
+              onPressed: state.canGoNext
+                  ? () {
+                      context.read<AudioPlayerBloc>().add(
+                        const AudioPlayerEvent.skipToNext(),
+                      );
+                    }
+                  : null,
+            ),
+
+            // Speed
+            IconButton(
+              icon: Text(
+                '${state.speed.toStringAsFixed(1)}x',
+                style: TextStyle(color: Colors.white, fontSize: 14.sp),
+              ),
+              onPressed: () {
+                showSliderDialog(
+                  context: context,
+                  title: 'Adjust speed',
+                  divisions: 10,
+                  min: 0.5,
+                  max: 1.5,
+                  value: state.speed,
+                  onChanged: (newSpeed) {
+                    context.read<AudioPlayerBloc>().add(
+                      AudioPlayerEvent.setSpeed(newSpeed),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  /// Load reciter ID asynchronously and cache it
-  void _loadReciterId(AudioEntity audio) {
-    if (audio.artist == null) {
-      return;
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    if (duration.inHours > 0) {
+      return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
+    } else {
+      return '$twoDigitMinutes:$twoDigitSeconds';
     }
+  }
 
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  void _loadReciterId(AudioEntity audio) {
+    if (audio.artist == null) return;
     _currentReciterName = audio.artist;
-
-    // Load reciter ID asynchronously
     ReciterHelper.getReciterFromAudioEntity(audio)
         .then((reciter) {
           if (mounted && reciter != null) {
@@ -166,50 +789,30 @@ class _BottomPlayerWidgetState extends State<BottomPlayerWidget> {
             });
           }
         })
-        .catchError((error) {
-          // Silently handle errors (e.g., GetIt not initialized in tests)
-          // The reciter ID is optional, so we can continue without it
-        });
+        .catchError((_) {});
   }
 
-  /// Check if the current route is already viewing the reciter's details
   bool isCurrentRouteAlreadyViewing(BuildContext context) {
     try {
       final GoRouterState routerState = GoRouterState.of(context);
-
-      // Check if we're on the reciter details route by checking path parameters
       final String? currentReciterId = routerState.pathParameters['reciterId'];
-
-      if (currentReciterId == null) {
-        // Not on a reciter details route
-        return false;
-      }
-
-      // Compare with cached reciter ID if available
+      if (currentReciterId == null) return false;
       if (_currentReciterId != null) {
         return currentReciterId == _currentReciterId.toString();
       }
-
-      // If ID is not cached yet, try to get reciter from query parameters
-      // The route includes the reciter object in query parameters
       final String? reciterJson = routerState.uri.queryParameters['reciter'];
       if (reciterJson != null) {
         try {
           final reciter = Reciter.fromJson(
             jsonDecode(reciterJson) as Map<String, dynamic>,
           );
-          // Compare by name as fallback
           return reciter.name == _currentReciterName;
-        } catch (e) {
-          // If parsing fails, fall back to false
+        } catch (_) {
           return false;
         }
       }
-
-      // If we can't determine, return false to show the button
       return false;
-    } catch (e) {
-      // If GoRouterState is not available, return false to show the button
+    } catch (_) {
       return false;
     }
   }

@@ -2,9 +2,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart' as entity;
 import 'package:tilawa_core/errors/failures.dart';
+
 import '../../domain/usecases/get_reciters_use_case.dart';
 
 part 'reciters_event.dart';
@@ -18,6 +18,8 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<ClearSearch>(_onClearSearch);
+    on<ToggleFavoritesFilter>(_onToggleFavoritesFilter);
+    on<ClearFavoritesFilter>(_onClearFavoritesFilter);
     on<LanguageChanged>(_onLanguageChanged);
   }
   final GetRecitersUseCase _getRecitersUseCase;
@@ -66,6 +68,8 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       currentState.reciters,
       event.query,
       null, // Clear letter filter when searching
+      currentState.showFavoritesOnly,
+      currentState.favoriteIds,
     );
 
     emit(
@@ -87,6 +91,8 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       currentState.reciters,
       '', // Clear search when filtering by letter
       event.letter,
+      currentState.showFavoritesOnly,
+      currentState.favoriteIds,
     );
 
     emit(
@@ -111,6 +117,8 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       currentState.reciters,
       currentState.searchQuery,
       null,
+      currentState.showFavoritesOnly,
+      currentState.favoriteIds,
     );
 
     emit(
@@ -131,6 +139,8 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       currentState.reciters,
       '',
       currentState.selectedLetter,
+      currentState.showFavoritesOnly,
+      currentState.favoriteIds,
     );
 
     emit(
@@ -141,10 +151,66 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     );
   }
 
+  void _onToggleFavoritesFilter(
+    ToggleFavoritesFilter event,
+    Emitter<RecitersState> emit,
+  ) {
+    if (state is! RecitersLoaded) {
+      return;
+    }
+
+    final currentState = state as RecitersLoaded;
+    final bool newShowFavoritesOnly = !currentState.showFavoritesOnly;
+
+    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
+      currentState.reciters,
+      currentState.searchQuery,
+      currentState.selectedLetter,
+      newShowFavoritesOnly,
+      event.favoriteIds,
+    );
+
+    emit(
+      currentState.copyWith(
+        showFavoritesOnly: newShowFavoritesOnly,
+        favoriteIds: event.favoriteIds,
+        filteredReciters: filteredReciters,
+      ),
+    );
+  }
+
+  void _onClearFavoritesFilter(
+    ClearFavoritesFilter event,
+    Emitter<RecitersState> emit,
+  ) {
+    if (state is! RecitersLoaded) {
+      return;
+    }
+
+    final currentState = state as RecitersLoaded;
+    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
+      currentState.reciters,
+      currentState.searchQuery,
+      currentState.selectedLetter,
+      false,
+      const [],
+    );
+
+    emit(
+      currentState.copyWith(
+        showFavoritesOnly: false,
+        favoriteIds: const [],
+        filteredReciters: filteredReciters,
+      ),
+    );
+  }
+
   List<entity.ReciterEntity> _filterReciters(
     List<entity.ReciterEntity> reciters,
     String searchQuery,
     String? selectedLetter,
+    bool showFavoritesOnly,
+    List<int> favoriteIds,
   ) {
     var filtered = reciters;
 
@@ -160,6 +226,13 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     if (selectedLetter != null) {
       filtered = filtered.where((reciter) {
         return reciter.letter == selectedLetter;
+      }).toList();
+    }
+
+    // Filter by favorites
+    if (showFavoritesOnly) {
+      filtered = filtered.where((reciter) {
+        return favoriteIds.contains(reciter.id);
       }).toList();
     }
 

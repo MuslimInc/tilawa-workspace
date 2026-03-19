@@ -1463,7 +1463,7 @@ abstract class AppLocalizations {
   /// Sleep timer dialog title
   ///
   /// In en, this message translates to:
-  /// **'مدة التلاوة'**
+  /// **'Recitation Duration'**
   String get recitationDuration;
 
   /// 15 minutes option
@@ -2275,6 +2275,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hizb'**
   String get hizb;
+
+  /// Message during Quran font download
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing High-Quality Quran Fonts...'**
+  String get preparingFonts;
+
+  /// Message during Quran rendering
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Quran...'**
+  String get loadingQuran;
+
+  /// Description of the Quran fonts download
+  ///
+  /// In en, this message translates to:
+  /// **'This is a one-time download (~50MB) for the best reading experience.'**
+  String get fontsDownloadDescription;
+
+  /// Error message when Quran fonts fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load fonts'**
+  String get fontsFailedToLoad;
 }
 
 class _AppLocalizationsDelegate

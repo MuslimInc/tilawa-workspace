@@ -35,6 +35,18 @@ class ClearSearch extends RecitersEvent {
   const ClearSearch();
 }
 
+class ToggleFavoritesFilter extends RecitersEvent {
+  const ToggleFavoritesFilter(this.favoriteIds);
+  final List<int> favoriteIds;
+
+  @override
+  List<Object?> get props => [favoriteIds];
+}
+
+class ClearFavoritesFilter extends RecitersEvent {
+  const ClearFavoritesFilter();
+}
+
 class LanguageChanged extends RecitersEvent {
   const LanguageChanged();
 }

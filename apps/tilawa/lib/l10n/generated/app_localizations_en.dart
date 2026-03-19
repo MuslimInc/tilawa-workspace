@@ -770,7 +770,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startJourney => 'Let\'s start our journey with the Quran';
 
   @override
-  String get recitationDuration => 'مدة التلاوة';
+  String get recitationDuration => 'Recitation Duration';
 
   @override
   String get minutes15 => '15 Minutes';
@@ -1214,4 +1214,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hizb => 'Hizb';
+
+  @override
+  String get preparingFonts => 'Preparing High-Quality Quran Fonts...';
+
+  @override
+  String get loadingQuran => 'Loading Quran...';
+
+  @override
+  String get fontsDownloadDescription =>
+      'This is a one-time download (~50MB) for the best reading experience.';
+
+  @override
+  String get fontsFailedToLoad => 'Failed to load fonts';
 }

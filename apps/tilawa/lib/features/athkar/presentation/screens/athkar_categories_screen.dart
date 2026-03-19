@@ -37,7 +37,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
               return Center(child: Text(state.message));
             } else if (state is AthkarCategoriesLoaded) {
               return GridView.builder(
-                padding: EdgeInsets.all(20.r),
+                padding: EdgeInsets.all(20.r).copyWith(bottom: 120.h),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.r,

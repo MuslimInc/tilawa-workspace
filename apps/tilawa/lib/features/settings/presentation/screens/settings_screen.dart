@@ -23,26 +23,33 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        state.when(
-          initial: () {},
-          loading: () {},
-          authenticated: (_) {},
-          unauthenticated: () {
-            // Navigate to login on logout
-            const LoginRoute().go(context);
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            state.when(
+              initial: () {},
+              loading: () {},
+              authenticated: (_) {},
+              unauthenticated: () {
+                // Navigate to login on logout
+                const LoginRoute().go(context);
+              },
+              error: (message) {
+                ToastUtils.showErrorToast(message);
+              },
+            );
           },
-          error: (message) {
-            ToastUtils.showErrorToast(message);
-          },
-        );
-      },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(title: Text(context.l10n.settings)),
         body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 20.h,
+          ).copyWith(bottom: 120.h),
           child: Column(
             children: [
               // User Profile Section
@@ -264,8 +271,6 @@ class SettingsScreen extends StatelessWidget {
                                 style: TextStyle(
                                   color: AppColors.error,
                                   fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ],
@@ -323,8 +328,6 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
-
-              SizedBox(height: 32.h),
             ],
           ),
         ),

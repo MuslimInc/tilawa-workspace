@@ -228,38 +228,53 @@ class DownloadServiceImpl implements DownloadServiceInterface {
     final List<DownloadTask>? existingTasks = await _queryTasksByUrl(url);
 
     if (existingTasks != null && existingTasks.isNotEmpty) {
-      final DownloadTask task = existingTasks.first;
+      bool shouldReturn = false;
 
-      if (task.status == DownloadTaskStatus.complete) {
-        // Verify the file actually exists
-        final bool exists = _fileHelper.isFileExists(filePath);
-        if (exists) {
-          // Already completed and file exists
-          _globalProgressController.add(
-            DownloadProgress(
-              id: id,
-              status: DownloadStatus.completed,
-              progress: 1.0,
-              downloadedSize: 0,
-              fileSize: 0,
-            ),
-          );
-          return;
-        } else {
-          // Stale task - DB says complete but file is missing
+      // Process all tasks to ensure we remove all abandoned ones
+      for (final DownloadTask task in existingTasks) {
+        if (task.status == DownloadTaskStatus.complete) {
+          // Verify the file actually exists
+          final bool exists = _fileHelper.isFileExists(filePath);
+          if (exists) {
+            // Already completed and file exists
+            _globalProgressController.add(
+              DownloadProgress(
+                id: id,
+                status: DownloadStatus.completed,
+                progress: 1.0,
+                downloadedSize: 0,
+                fileSize: 0,
+              ),
+            );
+            shouldReturn = true;
+          } else {
+            // Stale task - DB says complete but file is missing
+            logger.i(
+              '[DownloadService] Found stale complete task for $url. File missing at $filePath. Removing stale task.',
+            );
+            await _removeTaskWithRetries(task.taskId);
+          }
+        } else if (task.status == DownloadTaskStatus.running ||
+            task.status == DownloadTaskStatus.enqueued) {
+          // Already active, map it
+          _taskIdToUrlMap[task.taskId] = id;
+          _activeDownloadUrls.add(id);
+          shouldReturn = true;
+        } else if (task.status == DownloadTaskStatus.failed ||
+            task.status == DownloadTaskStatus.canceled ||
+            task.status == DownloadTaskStatus.paused) {
+          // Abandoned task - remove it so flutter_downloader can start a fresh one cleanly
           logger.i(
-            '[DownloadService] Found stale complete task for $url. File missing at $filePath. Removing stale task and restarting download.',
+            '[DownloadService] Found abandoned ${task.status} task for $url. Removing.',
           );
           await _removeTaskWithRetries(task.taskId);
-          // Continue to enqueue new download...
+        } else {
+          // Any other weird status, just remove it
+          await _removeTaskWithRetries(task.taskId);
         }
-      } else if (task.status == DownloadTaskStatus.running ||
-          task.status == DownloadTaskStatus.enqueued) {
-        // Already active, map it
-        _taskIdToUrlMap[task.taskId] = id;
-        _activeDownloadUrls.add(id);
-        return;
       }
+
+      if (shouldReturn) return;
     }
 
     // Create directory if needed
@@ -349,6 +364,63 @@ class DownloadServiceImpl implements DownloadServiceInterface {
       DownloadProgress(
         id: id,
         status: DownloadStatus.cancelled,
+        progress: 0.0,
+        downloadedSize: 0,
+        fileSize: 0,
+      ),
+    );
+  }
+
+  @override
+  Future<void> pause(String id) async {
+    await initialize();
+
+    final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
+
+    if (tasks != null) {
+      for (final DownloadTask task in tasks) {
+        try {
+          await _flutterDownloader.pause(taskId: task.taskId);
+        } catch (e) {
+          logger.w('[DownloadService] Error pausing task ${task.taskId}: $e');
+        }
+      }
+    }
+
+    _activeDownloadUrls.remove(id);
+
+    _globalProgressController.add(
+      DownloadProgress(
+        id: id,
+        status: DownloadStatus.paused,
+        progress: 0.0,
+        downloadedSize: 0,
+        fileSize: 0,
+      ),
+    );
+  }
+
+  @override
+  Future<void> resume(String id) async {
+    await initialize();
+
+    final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
+
+    if (tasks != null) {
+      for (final DownloadTask task in tasks) {
+        try {
+          await _flutterDownloader.resume(taskId: task.taskId);
+          _activeDownloadUrls.add(id);
+        } catch (e) {
+          logger.w('[DownloadService] Error resuming task ${task.taskId}: $e');
+        }
+      }
+    }
+
+    _globalProgressController.add(
+      DownloadProgress(
+        id: id,
+        status: DownloadStatus.pending,
         progress: 0.0,
         downloadedSize: 0,
         fileSize: 0,
@@ -451,6 +523,25 @@ class DownloadServiceImpl implements DownloadServiceInterface {
     }
 
     return _statusMapper.mapTaskStatusToDownloadStatus(tasks.last.status);
+  }
+
+  @override
+  Future<DownloadProgress?> getDownloadProgress(String id) async {
+    await initialize();
+    final List<DownloadTask>? tasks = await _queryTasksByUrl(id);
+
+    if (tasks == null || tasks.isEmpty) {
+      return null;
+    }
+
+    final task = tasks.last;
+    return DownloadProgress(
+      id: id,
+      status: _statusMapper.mapTaskStatusToDownloadStatus(task.status),
+      progress: task.progress / 100.0,
+      downloadedSize: 0, // Not available in loadTasks()
+      fileSize: 0, // Not available in loadTasks()
+    );
   }
 
   /// Cleanup and dispose of resources.

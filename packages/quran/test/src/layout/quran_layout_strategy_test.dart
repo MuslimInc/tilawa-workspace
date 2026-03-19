@@ -63,11 +63,19 @@ void main() {
             builder: (context) {
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
+                const BoxConstraints(maxWidth: 392.7, maxHeight: 803.6),
               );
 
+              // availableWidth = 392.7 * (1.0 - 0.05) = 373.065
+              // fontSize = 373.065 / 16.35
+              const double expectedFontSize = 373.065 / 16.35;
+              // fontHeight = (803.6 / 15.0) / fontSize
+              const double expectedFontHeight =
+                  (803.6 / 15.0) / expectedFontSize;
+
               expect(metrics.isScrollable, false);
-              expect(metrics.fontSize, 32);
-              expect(metrics.fontHeight, 2.1);
+              expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
+              expect(metrics.fontHeight, closeTo(expectedFontHeight, 0.0001));
               expect(metrics.padding, EdgeInsets.zero); // Should be default
 
               return const SizedBox();
@@ -88,10 +96,12 @@ void main() {
             builder: (context) {
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
+                const BoxConstraints(maxWidth: 803.6, maxHeight: 392.7),
               );
 
-              // adaptiveFontSize = width / 14.0
-              const double expectedFontSize = 803.6 / 14.0;
+              // availableWidth = 803.6 * (1.0 - 0.05) = 763.42
+              // adaptiveFontSize = 763.42 / 16.35
+              const double expectedFontSize = 763.42 / 16.35;
 
               // fontHeight = 1 / 0.40
               const expectedFontHeight = 2.5;

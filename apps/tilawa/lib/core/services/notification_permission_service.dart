@@ -98,17 +98,11 @@ class NotificationPermissionService {
 
   /// Request notification permission on first launch
   /// This should be called when the app starts for the first time
-  Future<void> requestPermissionOnFirstLaunch() async {
+  /// Request notification permission if it hasn't been requested already.
+  /// This ensures that users upgrading from older versions on Android 13+
+  /// are correctly prompted.
+  Future<void> requestPermissionIfNecessary() async {
     try {
-      // Check if this is the first launch
-      final bool firstLaunch = await isFirstLaunch();
-      if (!firstLaunch) {
-        logger.d(
-          '[NotificationPermissionService] Not first launch, skipping permission request',
-        );
-        return;
-      }
-
       // Check if permission has already been requested
       final bool hasRequested = await hasRequestedPermission();
       if (hasRequested) {
@@ -128,12 +122,12 @@ class NotificationPermissionService {
 
       // Request permission
       logger.d(
-        '[NotificationPermissionService] Requesting notification permission on first launch',
+        '[NotificationPermissionService] Requesting notification permission if necessary',
       );
       await requestPermission();
     } catch (e) {
       logger.d(
-        '[NotificationPermissionService] Error in requestPermissionOnFirstLaunch: $e',
+        '[NotificationPermissionService] Error in requestPermissionIfNecessary: $e',
       );
     }
   }

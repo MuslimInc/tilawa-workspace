@@ -259,6 +259,7 @@ class _SurahTile extends StatelessWidget {
     final englishName = getSurahName(surahNumber);
     final verseCount = getVerseCount(surahNumber);
     final place = getPlaceOfRevelation(surahNumber);
+    final startPage = getPageNumber(surahNumber, 1);
 
     return Material(
       color: Colors.transparent,
@@ -308,9 +309,9 @@ class _SurahTile extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
-                      l10n.ayahCountWithPlace(verseCount, place),
+                      '${l10n.ayahCountWithPlace(verseCount, place)} · ${l10n.page} $startPage',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: primaryColor.withValues(alpha: 0.7),
                         fontSize: 11,

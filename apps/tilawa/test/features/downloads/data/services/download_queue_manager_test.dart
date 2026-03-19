@@ -285,6 +285,7 @@ void main() {
           mockNotification.cancelAllNotifications(),
         ).thenAnswer((_) async {});
 
+        simulateBusyQueue();
         GetIt.instance<DownloadQueueManager>().initialize();
 
         // Enqueue items
@@ -603,65 +604,71 @@ void main() {
   });
 
   group('DownloadQueueManager - Robustness', () {
-    test('should remove download from queue if it fails to start (status null)', () {
-      fakeAsync((async) {
-        // Arrange
-        // Mock enqueue to return a task ID, simulating successful "request"
-        when(
-          mockDownloader.enqueue(
-            url: anyNamed('url'),
-            savedDir: anyNamed('savedDir'),
-            fileName: anyNamed('fileName'),
-            showNotification: anyNamed('showNotification'),
-            openFileFromNotification: anyNamed('openFileFromNotification'),
-            title: anyNamed('title'),
-            headers: anyNamed('headers'),
-            requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
-            saveInPublicStorage: anyNamed('saveInPublicStorage'),
-          ),
-        ).thenAnswer((_) async => 'fake_task_id');
+    test(
+      'should remove download from queue if it fails to start (status null)',
+      () {
+        fakeAsync((async) {
+          // Arrange
+          // Mock enqueue to return a task ID, simulating successful "request"
+          when(
+            mockDownloader.enqueue(
+              url: anyNamed('url'),
+              savedDir: anyNamed('savedDir'),
+              fileName: anyNamed('fileName'),
+              showNotification: anyNamed('showNotification'),
+              openFileFromNotification: anyNamed('openFileFromNotification'),
+              title: anyNamed('title'),
+              headers: anyNamed('headers'),
+              requiresStorageNotLow: anyNamed('requiresStorageNotLow'),
+              saveInPublicStorage: anyNamed('saveInPublicStorage'),
+            ),
+          ).thenAnswer((_) async => 'fake_task_id');
 
-        // Mock loadTasksWithRawQuery to ALWAYS return empty list
-        // This simulates "status == null" because DownloadService.getDownloadStatus returns null if no task found
-        when(
-          mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
-        ).thenAnswer((_) async => []);
+          // Mock loadTasksWithRawQuery to ALWAYS return empty list
+          // This simulates "status == null" because DownloadService.getDownloadStatus returns null if no task found
+          when(
+            mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
+          ).thenAnswer((_) async => []);
 
-        // Act
-        GetIt.instance<DownloadQueueManager>().initialize();
-        // Don't await enqueue because it waits for _processQueue which waits for time
-        // We just want to trigger it
-        unawaited(
-          GetIt.instance<DownloadQueueManager>().enqueue(
-            id: 'test_id',
-            url: 'http://example.com/test.mp3',
-            filePath: '${tempDir.path}/test.mp3',
-            title: 'Test Title',
-            reciterName: 'Reciter',
-          ),
-        );
+          // Act
+          GetIt.instance<DownloadQueueManager>().initialize();
+          // Don't simulate busy queue here, we want it to be processed and then fail status check
+          unawaited(
+            GetIt.instance<DownloadQueueManager>().enqueue(
+              id: 'test_id',
+              url: 'http://example.com/test.mp3',
+              filePath: '${tempDir.path}/test.mp3',
+              title: 'Test Title',
+              reciterName: 'Reciter',
+            ),
+          );
 
-        // Verify added to queue (enqueue adds to list before awaiting process)
-        // We process microtasks to ensure the async function starts
-        async.flushMicrotasks();
+          // Verify added to queue
+          async.flushMicrotasks();
 
-        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+          expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+          // It becomes active immediately due to "assume success" logic
+          expect(
+            GetIt.instance<DownloadQueueManager>().isActive('test_id'),
+            isTrue,
+          );
 
-        // DQM will try to start download, then enter the retry loop (10 retries * 500ms = 5s)
-        // We explicitly advance time to cover the retry period
-        // 5.5 seconds should be enough to exhaust 10 retries
-        async.elapse(const Duration(milliseconds: 6000));
+          // Advance clock to trigger periodic sync (5s) + buffer
+          async.elapse(const Duration(seconds: 31));
 
-        // Assert
-        // Should satisfy: queueLength == 0 (removed because it failed)
-        expect(
-          GetIt.instance<DownloadQueueManager>().queueLength,
-          0,
-          reason: 'Failed download should be removed from queue',
-        );
-        expect(GetIt.instance<DownloadQueueManager>().activeDownloadsCount, 0);
-      });
-    });
+          // Periodic sync should see null status and remove it from active
+          expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+          expect(
+            GetIt.instance<DownloadQueueManager>().activeDownloadsCount,
+            0,
+          );
+          expect(
+            GetIt.instance<DownloadQueueManager>().isActive('test_id'),
+            isFalse,
+          );
+        });
+      },
+    );
 
     test('watchdog should cancel stuck downloads after 30 seconds', () {
       fakeAsync((async) {
@@ -737,8 +744,8 @@ void main() {
           reason: 'Download 1 should still be active',
         );
 
-        // Advance time by another 15s (total 35s) - watchdog (runs every 5s) should catch it
-        async.elapse(const Duration(seconds: 15));
+        // Advance time by another 41s (total 61s) - watchdog (runs every 30s) should catch it
+        async.elapse(const Duration(seconds: 41));
 
         // Assert
         // Download 1 should be cancelled and removed because no progress updates were received for >30s
@@ -1140,7 +1147,7 @@ void main() {
 
         async.flushMicrotasks();
         // Allow sync (every 5s) and processing
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         // Note: The periodic timer or handleProgress details verify space and trigger processQueue.
         // processQueue will see actualRunning=0 (mock returned []) and start next item.
@@ -1183,7 +1190,7 @@ void main() {
           ).thenAnswer((_) async => [externalTask]);
 
           // Wait for sync interval (5 sec)
-          async.elapse(const Duration(seconds: 6));
+          async.elapse(const Duration(seconds: 31));
 
           expect(manager.activeDownloadsCount, 1);
           expect(
@@ -1214,12 +1221,12 @@ void main() {
           );
           when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
-          async.elapse(const Duration(seconds: 6));
+          async.elapse(const Duration(seconds: 31));
           expect(manager.activeDownloadsCount, 1);
 
           // Mock removal (task gone)
           when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
-          async.elapse(const Duration(seconds: 6));
+          async.elapse(const Duration(seconds: 31));
 
           expect(manager.activeDownloadsCount, 0);
         });
@@ -1257,7 +1264,7 @@ void main() {
           ),
         ).thenAnswer((_) async {});
 
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
         expect(
           manager.activeDownloadsCount,
           1,
@@ -1292,8 +1299,8 @@ void main() {
           reason: 'Should be active because timer reset',
         );
 
-        // Advance another 20s. Total since update=35s.
-        async.elapse(const Duration(seconds: 20));
+        // Advance another 50s. Total since update=65s.
+        async.elapse(const Duration(seconds: 50));
 
         expect(manager.activeDownloadsCount, 0, reason: 'Should timeout');
       });
@@ -1359,7 +1366,7 @@ void main() {
           when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
           // Wait for sync
-          async.elapse(const Duration(seconds: 6));
+          async.elapse(const Duration(seconds: 31));
 
           // Should have called cancelNotification for the stale download
           verify(
@@ -1394,7 +1401,7 @@ void main() {
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
         // Wait for sync to pick up external download
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         expect(manager.activeDownloadsCount, 1);
 
@@ -1402,7 +1409,7 @@ void main() {
         when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
 
         // Wait for sync
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         // The fallback path should cancel notification by ID
         verify(
@@ -1576,7 +1583,7 @@ void main() {
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
         // Wait for sync to pick it up
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
         expect(manager.activeDownloadsCount, 1);
 
         // Emit completed with normalized URL
@@ -1593,7 +1600,7 @@ void main() {
               ),
             );
         async.flushMicrotasks();
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         expect(manager.activeDownloadsCount, 0);
       });
@@ -1801,7 +1808,7 @@ void main() {
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
         // Wait for initial sync
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
         expect(manager.activeDownloadsCount, 1);
 
         // Now add to queue manually (simulating queue waiting for capacity)
@@ -1839,7 +1846,7 @@ void main() {
         );
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
         expect(manager.activeDownloadsCount, 1);
 
         // Emit failed status
@@ -1856,7 +1863,7 @@ void main() {
               ),
             );
         async.flushMicrotasks();
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         expect(manager.activeDownloadsCount, 0);
       });
@@ -1879,7 +1886,7 @@ void main() {
         );
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
         expect(manager.activeDownloadsCount, 1);
 
         // Emit cancelled status
@@ -1896,7 +1903,7 @@ void main() {
               ),
             );
         async.flushMicrotasks();
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         expect(manager.activeDownloadsCount, 0);
       });
@@ -1920,7 +1927,7 @@ void main() {
         );
         when(mockDownloader.loadTasks()).thenAnswer((_) async => [task1]);
 
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         // Should be tracked (normalized)
         expect(manager.activeDownloadsCount, 1);
@@ -1939,7 +1946,7 @@ void main() {
               ),
             );
         async.flushMicrotasks();
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         expect(manager.activeDownloadsCount, 0);
       });
@@ -2032,6 +2039,7 @@ void main() {
           timeCreated: 0,
           allowCellular: true,
         );
+        when(mockFileHelper.isFileExists(any)).thenReturn(true);
         when(
           mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
         ).thenAnswer((_) async => [task]);
@@ -2161,12 +2169,12 @@ void main() {
           ),
         );
         async.flushMicrotasks();
-        async.elapse(const Duration(seconds: 6)); // Retries
+        async.elapse(const Duration(seconds: 31)); // Retries
 
-        // Should give up and NOT mark active
+        // Should NOT mark active because count check failed
         expect(GetIt.instance<DownloadQueueManager>().isActive('id'), isFalse);
-        // removed because failing
-        expect(GetIt.instance<DownloadQueueManager>().isQueued('id'), isFalse);
+        // BUT should stay in queue for retry later
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('id'), isTrue);
       });
     });
 
@@ -2309,20 +2317,22 @@ void main() {
 
         async.flushMicrotasks();
 
-        // It should catch the error and fall back to internal count.
-        // It logs a warning but continues.
-        // Since internal count is 0 and max is 2, it proceeds to try download.
-        verify(
+        // It should catch the error and ABORT _processQueue.
+        // It logs a warning and returns, leaving the item in the queue.
+        verifyNever(
           throwingService.download(
-            id: 'id',
-            url: 'url',
-            filePath: 'path',
-            title: 't',
-            reciterName: 'r',
+            id: anyNamed('id'),
+            url: anyNamed('url'),
+            filePath: anyNamed('filePath'),
+            title: anyNamed('title'),
+            reciterName: anyNamed('reciterName'),
             reciterId: anyNamed('reciterId'),
             showNotification: anyNamed('showNotification'),
           ),
-        ).called(1);
+        );
+
+        expect(dqm.isQueued('id'), isTrue);
+        expect(dqm.isActive('id'), isFalse);
       });
     });
 
@@ -2549,7 +2559,7 @@ void main() {
 
         // Should hit catch block (450), cancel task, remove from queue
         // We need to elapse time for the status check retries (10 * 500ms = 5s)
-        async.elapse(const Duration(seconds: 6));
+        async.elapse(const Duration(seconds: 31));
 
         // verify the task is removed from queue
         expect(
@@ -2558,5 +2568,201 @@ void main() {
         );
       });
     });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // dequeueForReciter
+  // ─────────────────────────────────────────────────────────────────────────
+  group('DownloadQueueManager - dequeueForReciter', () {
+    test('removes all queued items for the given reciter', () {
+      fakeAsync((async) {
+        simulateBusyQueue(); // keep slots occupied so items stay in queue
+        GetIt.instance<DownloadQueueManager>().initialize();
+
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'id1',
+            url: 'url1',
+            filePath: 'f1',
+            title: 'Surah 1',
+            reciterName: 'Al-Sudais',
+          ),
+        );
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'id2',
+            url: 'url2',
+            filePath: 'f2',
+            title: 'Surah 2',
+            reciterName: 'Al-Sudais',
+          ),
+        );
+        async.flushMicrotasks();
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 2);
+
+        GetIt.instance<DownloadQueueManager>().dequeueForReciter('Al-Sudais');
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('id1'), isFalse);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('id2'), isFalse);
+      });
+    });
+
+    test('does not remove items belonging to other reciters', () {
+      fakeAsync((async) {
+        simulateBusyQueue();
+        GetIt.instance<DownloadQueueManager>().initialize();
+
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'target1',
+            url: 'url1',
+            filePath: 'f1',
+            title: 'Surah 1',
+            reciterName: 'Al-Sudais',
+          ),
+        );
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'other1',
+            url: 'url2',
+            filePath: 'f2',
+            title: 'Surah 2',
+            reciterName: 'Mishary Alafasy',
+          ),
+        );
+        async.flushMicrotasks();
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 2);
+
+        GetIt.instance<DownloadQueueManager>().dequeueForReciter('Al-Sudais');
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+        expect(
+          GetIt.instance<DownloadQueueManager>().isQueued('target1'),
+          isFalse,
+        );
+        expect(
+          GetIt.instance<DownloadQueueManager>().isQueued('other1'),
+          isTrue,
+        );
+      });
+    });
+
+    test('is case-insensitive — matches regardless of casing', () {
+      fakeAsync((async) {
+        simulateBusyQueue();
+        GetIt.instance<DownloadQueueManager>().initialize();
+
+        // Enqueued with mixed case
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'id1',
+            url: 'url1',
+            filePath: 'f1',
+            title: 'Surah 1',
+            reciterName: 'Al-Sudais',
+          ),
+        );
+        async.flushMicrotasks();
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+
+        // Dequeue with all-uppercase name
+        GetIt.instance<DownloadQueueManager>().dequeueForReciter('AL-SUDAIS');
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('id1'), isFalse);
+      });
+    });
+
+    test('is a no-op when reciter has no queued items', () {
+      fakeAsync((async) {
+        simulateBusyQueue();
+        GetIt.instance<DownloadQueueManager>().initialize();
+
+        unawaited(
+          GetIt.instance<DownloadQueueManager>().enqueue(
+            id: 'id1',
+            url: 'url1',
+            filePath: 'f1',
+            title: 'Surah 1',
+            reciterName: 'Mishary Alafasy',
+          ),
+        );
+        async.flushMicrotasks();
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+
+        // Dequeue for a different reciter — nothing should change
+        GetIt.instance<DownloadQueueManager>().dequeueForReciter('Al-Sudais');
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+        expect(GetIt.instance<DownloadQueueManager>().isQueued('id1'), isTrue);
+      });
+    });
+
+    test('is a no-op on an empty queue', () {
+      fakeAsync((async) {
+        simulateBusyQueue();
+        GetIt.instance<DownloadQueueManager>().initialize();
+        async.flushMicrotasks();
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+
+        // Should not throw
+        expect(
+          () => GetIt.instance<DownloadQueueManager>().dequeueForReciter(
+            'Al-Sudais',
+          ),
+          returnsNormally,
+        );
+
+        expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+      });
+    });
+
+    test(
+      'subsequent enqueue with same ID succeeds after dequeue (no phantom state)',
+      () {
+        fakeAsync((async) {
+          simulateBusyQueue();
+          GetIt.instance<DownloadQueueManager>().initialize();
+
+          unawaited(
+            GetIt.instance<DownloadQueueManager>().enqueue(
+              id: 'id1',
+              url: 'url1',
+              filePath: 'f1',
+              title: 'Surah 1',
+              reciterName: 'Al-Sudais',
+            ),
+          );
+          async.flushMicrotasks();
+
+          GetIt.instance<DownloadQueueManager>().dequeueForReciter('Al-Sudais');
+          expect(GetIt.instance<DownloadQueueManager>().queueLength, 0);
+
+          // Re-enqueue the same ID — should be accepted, not silently skipped
+          unawaited(
+            GetIt.instance<DownloadQueueManager>().enqueue(
+              id: 'id1',
+              url: 'url1',
+              filePath: 'f1',
+              title: 'Surah 1',
+              reciterName: 'Al-Sudais',
+            ),
+          );
+          async.flushMicrotasks();
+
+          expect(GetIt.instance<DownloadQueueManager>().queueLength, 1);
+          expect(
+            GetIt.instance<DownloadQueueManager>().isQueued('id1'),
+            isTrue,
+          );
+        });
+      },
+    );
   });
 }

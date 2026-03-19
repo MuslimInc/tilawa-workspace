@@ -139,7 +139,9 @@ class SleepTimerDialog extends StatelessWidget {
     Duration duration,
     AudioPlayerState state,
   ) {
-    final isActive = state.lastSleepTimerDuration == duration;
+    final isActive =
+        state.lastSleepTimerType == SleepTimerType.preset &&
+        state.lastSleepTimerDuration == duration;
 
     return ActionChip(
       label: Text(
@@ -171,9 +173,9 @@ class SleepTimerDialog extends StatelessWidget {
   Widget _buildEndTrackChip(BuildContext context, AudioPlayerState state) {
     final Duration? remaining = _calculateRemaining(state);
     final bool canUse = remaining != null && remaining.inSeconds > 0;
-    // For "End of Track", we check if the last duration matches exactly what was set
-    // This is a bit tricky if the track duration changes, but usually okay for the dialog session
-    final bool isActive = canUse && state.lastSleepTimerDuration == remaining;
+    final bool isActive =
+        state.isSleepTimerActive &&
+        state.lastSleepTimerType == SleepTimerType.endOfTrack;
 
     return ActionChip(
       label: Text(
@@ -203,7 +205,10 @@ class SleepTimerDialog extends StatelessWidget {
       onPressed: canUse
           ? () {
               context.read<AudioPlayerBloc>().add(
-                AudioPlayerEvent.setSleepTimer(remaining),
+                AudioPlayerEvent.setSleepTimer(
+                  remaining,
+                  type: SleepTimerType.endOfTrack,
+                ),
               );
               context.pop();
             }
@@ -212,20 +217,9 @@ class SleepTimerDialog extends StatelessWidget {
   }
 
   Widget _buildCustomChip(BuildContext context, AudioPlayerState state) {
-    // A chip is "Custom" if it's active but doesn't match any preset or "End of Track"
-    // We can just check if it's NOT 15, 30, 60 AND not end of track.
-    // Simpler: if we had a custom selection that wasn't one of those.
-    final bool isPreset = [
-      const Duration(minutes: 15),
-      const Duration(minutes: 30),
-      const Duration(minutes: 60),
-    ].contains(state.lastSleepTimerDuration);
-
-    final Duration? remaining = _calculateRemaining(state);
-    final bool isEndTrack =
-        remaining != null && state.lastSleepTimerDuration == remaining;
-
-    final bool isActive = state.isSleepTimerActive && !isPreset && !isEndTrack;
+    final bool isActive =
+        state.isSleepTimerActive &&
+        state.lastSleepTimerType == SleepTimerType.custom;
 
     return ActionChip(
       label: Text(
@@ -338,7 +332,7 @@ class SleepTimerDialog extends StatelessWidget {
 
     if (picked != null && picked.inSeconds > 0 && context.mounted) {
       context.read<AudioPlayerBloc>().add(
-        AudioPlayerEvent.setSleepTimer(picked),
+        AudioPlayerEvent.setSleepTimer(picked, type: SleepTimerType.custom),
       );
       context.pop(); // Close main dialog
     }
@@ -437,8 +431,9 @@ class _DurationWheelPickerState extends State<_DurationWheelPicker> {
       diameterRatio: 1.2,
       physics: const FixedExtentScrollPhysics(),
       onSelectedItemChanged: (_) => _updateDuration(),
-      childDelegate: ListWheelChildLoopingListDelegate(
-        children: List.generate(itemCount, (index) {
+      childDelegate: ListWheelChildBuilderDelegate(
+        childCount: itemCount,
+        builder: (context, index) {
           return Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -462,7 +457,7 @@ class _DurationWheelPickerState extends State<_DurationWheelPicker> {
               ],
             ),
           );
-        }),
+        },
       ),
     );
   }

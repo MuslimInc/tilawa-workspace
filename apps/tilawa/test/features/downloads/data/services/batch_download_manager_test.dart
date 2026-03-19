@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -8,15 +9,20 @@ import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 
 import '../../helpers/mock_helper.mocks.dart';
 
+// No need to redeclare mocks here if they are in mock_helper.mocks.dart
+// But we need to use them from there.
+
 void main() {
   late BatchDownloadManager manager;
   late MockDownloadServiceInterface mockDownloadService;
   late MockDownloadNotificationService mockNotificationService;
+  late MockSharedPreferencesAsync mockPrefs;
   late StreamController<DownloadProgress> progressController;
 
   setUp(() {
     mockDownloadService = MockDownloadServiceInterface();
     mockNotificationService = MockDownloadNotificationService();
+    mockPrefs = MockSharedPreferencesAsync();
     progressController = StreamController<DownloadProgress>.broadcast();
 
     // Setup default mock behavior
@@ -37,9 +43,14 @@ void main() {
       mockNotificationService.cancelNotification(any),
     ).thenAnswer((_) async => Future.value());
 
+    when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async => Future.value());
+    when(mockPrefs.remove(any)).thenAnswer((_) async => Future.value());
+
     manager = BatchDownloadManager(
       mockDownloadService,
       mockNotificationService,
+      mockPrefs,
     );
   });
 
@@ -655,6 +666,88 @@ void main() {
           status: anyNamed('status'),
         ),
       ).called(1);
+    });
+  });
+
+  group('BatchDownloadManager - Persistence', () {
+    test('should restore batches on initialization', () async {
+      // Arrange
+      final batchData = {
+        'batch-1': {
+          'id': 'batch-1',
+          'title': 'Restored Batch',
+          'item_ids': ['id1', 'id2'],
+          'total_items': 2,
+          'reciter_name': 'Reciter A',
+        },
+      };
+
+      when(
+        mockPrefs.getString('batch_downloads_data'),
+      ).thenAnswer((_) async => jsonEncode(batchData));
+
+      when(mockDownloadService.getDownloadProgress('id1')).thenAnswer(
+        (_) async => const DownloadProgress(
+          id: 'id1',
+          progress: 1.0,
+          downloadedSize: 1000,
+          fileSize: 1000,
+          status: DownloadStatus.completed,
+        ),
+      );
+
+      when(mockDownloadService.getDownloadProgress('id2')).thenAnswer(
+        (_) async => const DownloadProgress(
+          id: 'id2',
+          progress: 0.5,
+          downloadedSize: 500,
+          fileSize: 1000,
+          status: DownloadStatus.downloading,
+        ),
+      );
+
+      // Act
+      await manager.initialize();
+
+      // Assert
+      verify(
+        mockNotificationService.showBatchDownloadProgress(
+          batchId: 'batch-1',
+          title: 'Restored Batch',
+          progress: 75, // (100 + 50) / 2
+          completedCount: 1,
+          totalCount: 2,
+          status: DownloadStatus.downloading,
+        ),
+      ).called(1);
+    });
+
+    test('should persist batches when a new batch starts', () async {
+      // Act
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'New Batch',
+        downloadIds: ['id1'],
+      );
+
+      // Assert
+      verify(mockPrefs.setString('batch_downloads_data', any)).called(1);
+    });
+
+    test('should persist batches when a batch is removed', () async {
+      // Arrange
+      manager.startBatch(
+        batchId: 'batch-1',
+        title: 'New Batch',
+        downloadIds: ['id1'],
+      );
+      clearInteractions(mockPrefs);
+
+      // Act
+      await manager.cancelBatch('batch-1');
+
+      // Assert
+      verify(mockPrefs.remove('batch_downloads_data')).called(1);
     });
   });
 }

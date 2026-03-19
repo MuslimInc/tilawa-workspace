@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../cubit/favorites_cubit.dart';
@@ -29,42 +29,24 @@ class ReciterCard extends StatelessWidget {
               $extra: reciter,
             ).push(context);
           },
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.primaryColor.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             padding: EdgeInsets.all(12.r),
             child: Row(
               children: [
-                _buildAvatar(context),
+                _ReciterAvatar(reciter: reciter),
                 SizedBox(width: 14.w),
-                Expanded(child: _buildInfo(context)),
-                InkWell(
-                  borderRadius: BorderRadius.circular(20.r),
-                  onTap: () {
-                    context.read<FavoritesCubit>().toggleFavorite(reciter);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
-                      builder: (context, state) {
-                        final bool isFavorite =
-                            state is FavoritesLoaded &&
-                            state.favoriteIds.contains(reciter.id);
-                        return Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          size: 20.sp,
-                          color: isFavorite
-                              ? Colors.red
-                              : theme.colorScheme.onSurfaceVariant.withValues(
-                                  alpha: 0.6,
-                                ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                Expanded(child: _ReciterInfo(reciter: reciter)),
+                _FavoriteButton(reciter: reciter),
               ],
             ),
           ),
@@ -72,19 +54,34 @@ class ReciterCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildAvatar(BuildContext context) {
+class _ReciterAvatar extends StatelessWidget {
+  const _ReciterAvatar({required this.reciter});
+
+  final ReciterEntity reciter;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 60.r,
       height: 60.r,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18.r),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primaryColor.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor.withValues(alpha: 0.9),
-            Theme.of(context).primaryColor,
+            theme.primaryColor.withValues(alpha: 0.8),
+            theme.primaryColor,
           ],
         ),
       ),
@@ -101,9 +98,16 @@ class ReciterCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildInfo(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+class _ReciterInfo extends StatelessWidget {
+  const _ReciterInfo({required this.reciter});
+
+  final ReciterEntity reciter;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -169,6 +173,46 @@ class ReciterCard extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _FavoriteButton extends StatelessWidget {
+  const _FavoriteButton({required this.reciter});
+
+  final ReciterEntity reciter;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(20.r),
+      onTap: () {
+        context.read<FavoritesCubit>().toggleFavorite(reciter);
+      },
+      child: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withValues(alpha: 0.05),
+          shape: BoxShape.circle,
+        ),
+        child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, state) {
+            final bool isFavorite =
+                state is FavoritesLoaded &&
+                state.favoriteIds.contains(reciter.id);
+            return Icon(
+              isFavorite
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_outline_rounded,
+              size: 22.sp,
+              color: isFavorite
+                  ? Colors.redAccent
+                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            );
+          },
+        ),
+      ),
     );
   }
 }

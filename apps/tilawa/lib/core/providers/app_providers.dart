@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -9,12 +10,14 @@ import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
+import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
+import '../presentation/cubit/ui_visibility_cubit.dart';
 
 /// Centralized configuration for all BlocProviders in the application.
 /// This class provides a single place to manage all state management providers.
@@ -51,10 +54,19 @@ class AppProviders {
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
     BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),
     BlocProvider<PremiumBloc>(create: (context) => getIt<PremiumBloc>()),
+    BlocProvider<QiblaBloc>(create: (context) => getIt<QiblaBloc>()),
 
     // Auth provider with initialization
     BlocProvider<AuthBloc>(
       create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
+    ),
+
+    // Font Loader provider
+    BlocProvider<QuranFontLoaderBloc>(
+      create: (context) =>
+          getIt<QuranFontLoaderBloc>()
+            ..add(const QuranFontLoaderEvent.initialize()),
+      lazy: false,
     ),
 
     // Quran Reader provider (Global for UX and persistence)
@@ -62,6 +74,10 @@ class AppProviders {
       create: (context) =>
           getIt<QuranReaderBloc>()..add(const QuranReaderEvent.loadLastRead()),
       lazy: false,
+    ),
+    // UI Visibility provider (Global for immersive mode across routes)
+    BlocProvider<UiVisibilityCubit>(
+      create: (context) => getIt<UiVisibilityCubit>(),
     ),
   ];
 

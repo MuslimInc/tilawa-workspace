@@ -50,6 +50,12 @@ Future<void> bootstrap({
     // Enable edge-to-edge display (Flutter recommended approach)
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+    // Lock global orientation to portrait by default
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     // ========================================================================
     // CRITICAL: Must complete before app starts (blocking)
     // ========================================================================
@@ -290,7 +296,7 @@ Future<void> requestNotificationPermission() async {
   try {
     final NotificationPermissionService notificationPermissionService =
         getIt<NotificationPermissionService>();
-    await notificationPermissionService.requestPermissionOnFirstLaunch();
+    await notificationPermissionService.requestPermissionIfNecessary();
     logger.d('Notification permission request completed');
   } catch (e) {
     logger.d('Warning: Could not request notification permission: $e');

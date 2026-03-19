@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -13,7 +14,7 @@ import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
-import '../widgets/reciter_card.dart';
+import '../cubit/favorites_state.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -88,30 +89,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
         child: BlocBuilder<RecitersBloc, RecitersState>(
           builder: (context, state) {
             return Scaffold(
-              floatingActionButtonLocation:
-                  Directionality.of(context) == TextDirection.rtl
-                  ? FloatingActionButtonLocation.endFloat
-                  : FloatingActionButtonLocation.startFloat,
-              floatingActionButton: FloatingActionButton(
-                heroTag: 'reciters_fab',
-                onPressed: () async {
-                  await const FavoritesRoute().push(context);
-                  if (context.mounted) {
-                    await context.read<FavoritesCubit>().loadFavorites();
-                  }
-                },
-                backgroundColor: theme.colorScheme.primaryContainer,
-                foregroundColor: theme.colorScheme.onPrimaryContainer,
-                child: const Icon(Icons.favorite_rounded),
-              ),
               appBar: AppBar(
                 title: Text(l10n.reciters),
                 actions: [
-                  IconButton(
-                    icon: const Icon(FluentIcons.book_open_24_regular),
-                    tooltip: l10n.quran,
-                    onPressed: () => const QuranLastReadRoute().push(context),
-                  ),
                   IconButton(
                     icon: const Icon(FluentIcons.bookmark_24_regular),
                     tooltip: l10n.bookmarks,
@@ -123,6 +103,13 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     onPressed: () => const HistoryRoute().push(context),
                   ),
                 ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => const QuranLastReadRoute().push(context),
+                backgroundColor: const Color(0xFFA68B67),
+                foregroundColor: Colors.white,
+                elevation: 4,
+                child: const Icon(Icons.menu_book_rounded),
               ),
               body: Column(
                 children: [
@@ -207,141 +194,20 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             ),
                           ),
                         // Search field
+                        // Search and Filters
                         Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                height: 54.h,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primaryColor.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                  border: Border.all(
-                                    color: theme.colorScheme.outlineVariant
-                                        .withValues(alpha: 0.2),
-                                  ),
-                                ),
-                                child: Focus(
-                                  onFocusChange: (hasFocus) {
-                                    setState(() {});
-                                  },
-                                  child: Center(
-                                    child: TextField(
-                                      focusNode: _focusNode,
-                                      controller: _searchController,
-                                      textAlignVertical:
-                                          TextAlignVertical.center,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      decoration: InputDecoration(
-                                        isDense: true,
-                                        filled: true,
-                                        fillColor: Colors.transparent,
-                                        border: InputBorder.none,
-                                        hintText: l10n.searchReciters,
-                                        hintStyle: TextStyle(
-                                          color: theme
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                              .withValues(alpha: 0.4),
-                                          fontSize: 14.sp,
-                                        ),
-                                        prefixIcon: Icon(
-                                          FluentIcons.search_24_regular,
-                                          size: 20.sp,
-                                          color: _focusNode.hasFocus
-                                              ? theme.primaryColor
-                                              : theme
-                                                    .colorScheme
-                                                    .onSurfaceVariant
-                                                    .withValues(alpha: 0.6),
-                                        ),
-                                        suffixIcon:
-                                            (state is RecitersLoaded &&
-                                                state.searchQuery.isNotEmpty)
-                                            ? IconButton(
-                                                icon: Icon(
-                                                  FluentIcons
-                                                      .dismiss_24_regular,
-                                                  size: 18.sp,
-                                                ),
-                                                onPressed: () {
-                                                  _searchController.clear();
-                                                  context
-                                                      .read<RecitersBloc>()
-                                                      .add(const ClearSearch());
-                                                  context
-                                                      .read<
-                                                        AlphabetScrollbarBloc
-                                                      >()
-                                                      .add(
-                                                        const ClearSelection(),
-                                                      );
-                                                },
-                                              )
-                                            : null,
-                                      ),
-                                      onChanged: (value) {
-                                        context.read<RecitersBloc>().add(
-                                          SearchRecitersEvent(value),
-                                        );
-                                      },
-                                      onTapOutside: (event) {
-                                        _focusNode.unfocus();
-                                      },
-                                    ),
-                                  ),
-                                ),
+                              child: _SearchField(
+                                state: state,
+                                controller: _searchController,
+                                focusNode: _focusNode,
                               ),
                             ),
                             SizedBox(width: 10.w),
-                            Container(
-                              height: 54.h,
-                              width: 54.h,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surface,
-                                borderRadius: BorderRadius.circular(16.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: theme.primaryColor.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: theme.primaryColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                ),
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  onTap: () =>
-                                      const DownloadsRoute().push(context),
-                                  child: Center(
-                                    child: Icon(
-                                      FluentIcons.arrow_download_24_regular,
-                                      color: theme.primaryColor,
-                                      size: 24.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            _FavoritesToggle(state: state),
+                            SizedBox(width: 10.w),
+                            const _DownloadsButton(),
                           ],
                         ),
                       ],
@@ -439,22 +305,21 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   ),
                                 )
                               : state is RecitersLoaded
-                              ? ListView.separated(
-                                  separatorBuilder: (_, _) =>
-                                      SizedBox(height: 8.h),
-                                  controller: _scrollController,
-                                  itemCount: state.filteredReciters.length,
-                                  padding: EdgeInsets.only(
-                                    left: 8.w,
-                                    right: 8.w,
-                                    top: 8.h,
-                                    bottom: 80.h,
+                              ? ResponsiveBuilder(
+                                  xs: (context) => _ReciterListView(
+                                    state: state,
+                                    scrollController: _scrollController,
                                   ),
-                                  itemBuilder: (context, index) {
-                                    final ReciterEntity reciter =
-                                        state.filteredReciters[index];
-                                    return ReciterCard(reciter: reciter);
-                                  },
+                                  sm: (context) => _ReciterGridView(
+                                    state: state,
+                                    scrollController: _scrollController,
+                                    crossAxisCount: 2,
+                                  ),
+                                  lg: (context) => _ReciterGridView(
+                                    state: state,
+                                    scrollController: _scrollController,
+                                    crossAxisCount: 3,
+                                  ),
                                 )
                               : const SizedBox.shrink(),
                         ),
@@ -478,6 +343,244 @@ class _RecitersScreenState extends State<RecitersScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    required this.state,
+    required this.controller,
+    required this.focusNode,
+  });
+
+  final RecitersState state;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return ListenableBuilder(
+      listenable: focusNode,
+      builder: (context, _) {
+        return Container(
+          height: 54.r,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: theme.primaryColor.withValues(alpha: 0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+            border: Border.all(
+              color: focusNode.hasFocus
+                  ? theme.primaryColor.withValues(alpha: 0.3)
+                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              controller: controller,
+              textAlignVertical: TextAlignVertical.center,
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+              decoration: InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.transparent,
+                border: InputBorder.none,
+                hintText: l10n.searchReciters,
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.4,
+                  ),
+                  fontSize: 14.sp,
+                ),
+                prefixIcon: Icon(
+                  FluentIcons.search_24_regular,
+                  size: 20.sp,
+                  color: focusNode.hasFocus
+                      ? theme.primaryColor
+                      : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.6,
+                        ),
+                ),
+                suffixIcon:
+                    (state is RecitersLoaded &&
+                        (state as RecitersLoaded).searchQuery.isNotEmpty)
+                    ? IconButton(
+                        icon: Icon(FluentIcons.dismiss_24_regular, size: 18.sp),
+                        onPressed: () {
+                          controller.clear();
+                          context.read<RecitersBloc>().add(const ClearSearch());
+                          context.read<AlphabetScrollbarBloc>().add(
+                            const ClearSelection(),
+                          );
+                        },
+                      )
+                    : null,
+              ),
+              onChanged: (value) {
+                context.read<RecitersBloc>().add(SearchRecitersEvent(value));
+              },
+              onTapOutside: (event) => focusNode.unfocus(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FavoritesToggle extends StatelessWidget {
+  const _FavoritesToggle({required this.state});
+
+  final RecitersState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isActive =
+        state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
+
+    return Container(
+      height: 54.r,
+      width: 54.r,
+      decoration: BoxDecoration(
+        color: isActive ? theme.primaryColor : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: isActive
+                ? theme.primaryColor.withValues(alpha: 0.2)
+                : theme.primaryColor.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: isActive
+              ? theme.primaryColor
+              : theme.primaryColor.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: () {
+            final favoritesState = context.read<FavoritesCubit>().state;
+            if (favoritesState is FavoritesLoaded) {
+              context.read<RecitersBloc>().add(
+                ToggleFavoritesFilter(favoritesState.favoriteIds.toList()),
+              );
+            }
+          },
+          child: Center(
+            child: Icon(
+              isActive ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              color: isActive ? Colors.white : theme.primaryColor,
+              size: 22.sp,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DownloadsButton extends StatelessWidget {
+  const _DownloadsButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: 54.r,
+      width: 54.r,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primaryColor.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: theme.primaryColor.withValues(alpha: 0.12)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: () => const DownloadsRoute().push(context),
+          child: Center(
+            child: Icon(
+              FluentIcons.arrow_download_24_regular,
+              color: theme.primaryColor,
+              size: 24.sp,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReciterListView extends StatelessWidget {
+  const _ReciterListView({required this.state, required this.scrollController});
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+      controller: scrollController,
+      itemCount: state.filteredReciters.length,
+      padding: EdgeInsets.only(left: 8.w, right: 8.w, top: 8.h, bottom: 80.h),
+      itemBuilder: (context, index) {
+        final ReciterEntity reciter = state.filteredReciters[index];
+        return ReciterCard(reciter: reciter);
+      },
+    );
+  }
+}
+
+class _ReciterGridView extends StatelessWidget {
+  const _ReciterGridView({
+    required this.state,
+    required this.scrollController,
+    required this.crossAxisCount,
+  });
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+  final int crossAxisCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      controller: scrollController,
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 8.h, bottom: 80.h),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12.h,
+        crossAxisSpacing: 12.w,
+        mainAxisExtent: 120.r,
+      ),
+      itemCount: state.filteredReciters.length,
+      itemBuilder: (context, index) {
+        final ReciterEntity reciter = state.filteredReciters[index];
+        return ReciterCard(reciter: reciter);
+      },
     );
   }
 }

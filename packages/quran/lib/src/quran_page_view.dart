@@ -16,7 +16,7 @@ class QuranPageView extends StatefulWidget {
     this.controller,
     this.onPageChanged,
     this.textColor = const Color(0xFF000000),
-    this.pageBackgroundColor = const Color(0xFFFFFFFF),
+    this.pageBackgroundColor = const Color(0xFFF9F5EF),
     this.verseBackgroundColor,
     this.onLongPress,
     this.onLongPressUp,
@@ -25,6 +25,8 @@ class QuranPageView extends StatefulWidget {
     this.juzLabel,
     this.hizbLabel,
     this.surahNameBuilder,
+    this.onSurahSelected,
+    this.onShowIndex,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
@@ -63,6 +65,8 @@ class QuranPageView extends StatefulWidget {
   final String? juzLabel;
   final String? hizbLabel;
   final String Function(int surahNumber)? surahNameBuilder;
+  final ValueChanged<int>? onSurahSelected;
+  final VoidCallback? onShowIndex;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -86,6 +90,16 @@ class _QuranPageViewState extends State<QuranPageView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Precache the Surah header banner image to avoid jank during swiping.
+    precacheImage(
+      const AssetImage('assets/mainframe.png', package: 'quran'),
+      context,
+    );
+  }
+
+  @override
   void dispose() {
     if (_ownsController) {
       _internalController?.dispose();
@@ -102,8 +116,10 @@ class _QuranPageViewState extends State<QuranPageView> {
         child: PageView.builder(
           controller: _controller,
           itemCount: QuranConstants.totalPagesCount,
-          onPageChanged: (index) =>
-              widget.onPageChanged?.call(index + 1), // 1-based
+          onPageChanged: (index) {
+            final int pageNumber = index + 1;
+            widget.onPageChanged?.call(pageNumber);
+          },
           itemBuilder: (context, index) {
             final int pageNumber = index + 1; // 1-based page
             return PageContent(
@@ -117,6 +133,8 @@ class _QuranPageViewState extends State<QuranPageView> {
               juzLabel: widget.juzLabel,
               hizbLabel: widget.hizbLabel,
               surahNameBuilder: widget.surahNameBuilder,
+              onSurahSelected: widget.onSurahSelected,
+              onShowIndex: widget.onShowIndex,
             );
           },
         ),
