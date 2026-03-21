@@ -836,7 +836,8 @@ class _QuranPageIndex extends StatelessWidget {
                       [
                         if (hizbInfo.title.isNotEmpty) hizbInfo.title,
                         if (hizbInfo.index != null) hizbInfo.index!,
-                        if (hizbInfo.fraction != null) '(${hizbInfo.fraction!})',
+                        if (hizbInfo.fraction != null)
+                          '(${hizbInfo.fraction!})',
                       ].join(' '),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
