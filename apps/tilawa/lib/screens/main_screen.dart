@@ -33,6 +33,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  static const double _bottomNavBarBaseHeight = 56;
+
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -86,9 +88,12 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (context, isVisible) {
                   return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                     builder: (context, audioState) {
-                      // Base height (~72h) + top/bottom padding (8h + 8h)
-                      // We always reserve space if the player SHOULD be showing,
-                      // even if it's currently animatng.
+                      final double bottomNavBarHeight = isVisible
+                          ? (_bottomNavBarBaseHeight + bottomPadding)
+                          : 0;
+
+                      // We always reserve space if the player should be shown,
+                      // even if it's currently animating.
                       final bool playerShouldShow =
                           audioState.shouldShowBottomPlayer &&
                           audioState.currentAudio != null;
@@ -97,7 +102,7 @@ class _MainScreenState extends State<MainScreen> {
                           : 0;
 
                       final double contentBottomPadding = isVisible
-                          ? (80 + playerHeight + bottomPadding)
+                          ? (bottomNavBarHeight + playerHeight)
                           : (bottomPadding + 20);
 
                       return Stack(
@@ -129,9 +134,7 @@ class _MainScreenState extends State<MainScreen> {
                           // the player to expand to full-screen (YouTube/Spotify UX).
                           Positioned.fill(
                             child: BottomPlayerWidget(
-                              bottomNavBarHeight: isVisible
-                                  ? 80 + bottomPadding
-                                  : 0,
+                              bottomNavBarHeight: bottomNavBarHeight,
                               isKeyboardOpen: isKeyboardOpen,
                             ),
                           ),
