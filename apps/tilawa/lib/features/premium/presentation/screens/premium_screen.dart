@@ -31,11 +31,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            title: Text(context.l10n.premium),
-            backgroundColor: Colors.amber,
-            foregroundColor: Colors.black,
-          ),
+          appBar: AppBar(title: Text(context.l10n.premium)),
           body: BlocConsumer<PremiumBloc, PremiumState>(
             listener: (context, state) {
               state.when(

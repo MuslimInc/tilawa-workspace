@@ -11,11 +11,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Color appBarForegroundColor = theme.colorScheme.onPrimary;
 
     return SliverAppBar(
       pinned: true,
       backgroundColor: theme.primaryColor,
-      leading: const BackButton(color: Colors.white),
+      foregroundColor: appBarForegroundColor,
+      leading: BackButton(color: appBarForegroundColor),
       centerTitle: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -49,11 +51,11 @@ class ReciterDetailsAppBar extends StatelessWidget {
           // Small inline avatar
           CircleAvatar(
             radius: 16,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
             child: Text(
               reciter.name[0],
               style: TextStyle(
-                color: Colors.white,
+                color: appBarForegroundColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -64,7 +66,7 @@ class ReciterDetailsAppBar extends StatelessWidget {
             child: Text(
               reciter.name,
               style: TextStyle(
-                color: Colors.white,
+                color: appBarForegroundColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -90,7 +92,9 @@ class _DecorativeCircle extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: opacity),
+        color: Theme.of(
+          context,
+        ).colorScheme.onPrimary.withValues(alpha: opacity),
       ),
     );
   }
