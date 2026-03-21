@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/location_row.dart';
 
@@ -44,7 +43,7 @@ class PrayerTimesLocationHeader extends StatelessWidget {
         : 'Prayer times for $dayName';
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -55,7 +54,7 @@ class PrayerTimesLocationHeader extends StatelessWidget {
             onUpdateLocation: onUpdateLocation,
           ),
 
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
 
           // Date Row
           Row(

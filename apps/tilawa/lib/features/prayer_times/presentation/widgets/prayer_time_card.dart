@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -28,7 +27,7 @@ class PrayerTimeCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isNext
               ? activeColor.withValues(alpha: 0.3)
@@ -40,9 +39,9 @@ class PrayerTimeCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {},
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -54,7 +53,7 @@ class PrayerTimeCard extends StatelessWidget {
                       : prayer.type.displayName,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontSize: 18.sp,
+                    fontSize: 18,
                     fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
                     color: isNext
                         ? activeColor
@@ -63,7 +62,7 @@ class PrayerTimeCard extends StatelessWidget {
                           ),
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 8),
 
                 // Prayer time
                 Text(
@@ -72,7 +71,7 @@ class PrayerTimeCard extends StatelessWidget {
                       : prayer.getFormattedTime12Hour(isArabic: isArabic),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontSize: 22.sp,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: isNext
                         ? activeColor
@@ -81,7 +80,7 @@ class PrayerTimeCard extends StatelessWidget {
                           ),
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 8),
 
                 // Iqamah Time
                 _buildIqamahText(theme, isArabic, activeColor),
@@ -138,7 +137,7 @@ class PrayerTimeCard extends StatelessWidget {
       '$prefix$timeStr',
       textAlign: TextAlign.center,
       style: theme.textTheme.bodyMedium?.copyWith(
-        fontSize: 14.sp,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         color: isNext
             ? activeColor.withValues(alpha: 0.8)

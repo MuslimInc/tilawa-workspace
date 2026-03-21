@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:gap/gap.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_ui/theme/color_scheme.dart';
@@ -29,7 +28,7 @@ class LanguageSwitcher extends StatelessWidget {
 
         return PopupMenuButton<Locale>(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
           ),
           offset: const Offset(0, 40),
           elevation: 4,
@@ -53,10 +52,10 @@ class LanguageSwitcher extends StatelessWidget {
             ];
           },
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: backgroundColor ?? Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
@@ -68,23 +67,23 @@ class LanguageSwitcher extends StatelessWidget {
                 Icon(
                   Icons.language_rounded,
                   color: iconColor ?? Colors.white,
-                  size: 20.sp,
+                  size: 20,
                 ),
                 if (showText) ...[
-                  Gap(8.w),
+                  Gap(8),
                   Text(
                     currentLocale.languageCode.toUpperCase(),
                     style: TextStyle(
                       color: textColor ?? Colors.white,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
+                      fontSize: 14,
                     ),
                   ),
-                  Gap(4.w),
+                  Gap(4),
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: (iconColor ?? Colors.white).withValues(alpha: 0.7),
-                    size: 16.sp,
+                    size: 16,
                   ),
                 ],
               ],
@@ -117,7 +116,7 @@ class LanguageSwitcher extends StatelessWidget {
             ),
           ),
           if (isSelected)
-            Icon(Icons.check_rounded, color: context.primaryColor, size: 20.sp),
+            Icon(Icons.check_rounded, color: context.primaryColor, size: 20),
         ],
       ),
     );

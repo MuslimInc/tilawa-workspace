@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
@@ -175,7 +174,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         ),
       ),
       floatingActionButtonLocation: _CustomFloatingActionButtonLocation(
-        offset: 100.h,
+        offset: 100,
       ),
       body: Stack(
         children: [
@@ -247,7 +246,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             builder: (context, state) {
               return RefreshIndicator(
                 onRefresh: _onRefresh,
-                edgeOffset: kToolbarHeight + 64.h,
+                edgeOffset: kToolbarHeight + 64,
                 child: CustomScrollView(
                   controller: _scrollController,
                   keyboardDismissBehavior:
@@ -262,7 +261,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         state.searchQuery.isEmpty)
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.only(top: 8.h, bottom: 4.h),
+                          padding: EdgeInsets.only(top: 8, bottom: 4),
                           child: ReciterHistorySection(
                             historyList: state.listeningHistory,
                             onPlay: (history) =>
@@ -355,14 +354,14 @@ class _SurahHeaderRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           Text(
             '${context.l10n.surahs} ($count)',
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 13.sp,
+              fontSize: 13,
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
           ),
@@ -389,8 +388,8 @@ class _ReciterDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    // Mini player is 88.h + some buffer
-    final double bottomPadding = 120.h + MediaQuery.paddingOf(context).bottom;
+    // Mini player is 88 + some buffer
+    final double bottomPadding = 120 + MediaQuery.paddingOf(context).bottom;
     final currentAudio = context.select(
       (AudioPlayerBloc bloc) => bloc.state.currentAudio,
     );
@@ -403,15 +402,15 @@ class _ReciterDetailsContent extends StatelessWidget {
               children: [
                 Icon(
                   Icons.error_outline_rounded,
-                  size: 64.sp,
+                  size: 64,
                   color: theme.colorScheme.error,
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 16),
                 Text(
                   state.errorMessage ?? context.l10n.anErrorOccurred,
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () {
                     context.read<ReciterDetailsBloc>().add(
@@ -424,12 +423,9 @@ class _ReciterDetailsContent extends StatelessWidget {
                   icon: const Icon(Icons.refresh_rounded),
                   label: Text(context.l10n.retry),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 12.h,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
@@ -444,15 +440,11 @@ class _ReciterDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.music_off_rounded,
-                    size: 64.sp,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 16.h),
+                  Icon(Icons.music_off_rounded, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
                   Text(
                     context.l10n.noSurahsAvailable,
-                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
               ),
@@ -467,15 +459,11 @@ class _ReciterDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.search_off_rounded,
-                    size: 64.sp,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 16.h),
+                  Icon(Icons.search_off_rounded, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
                   Text(
                     context.l10n.noSurahsMatchSearch,
-                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
               ),
@@ -486,16 +474,16 @@ class _ReciterDetailsContent extends StatelessWidget {
         if (state.viewMode == ReciterViewMode.grid) {
           return SliverPadding(
             padding: EdgeInsets.only(
-              top: 4.h,
-              left: 16.w,
-              right: 16.w,
+              top: 4,
+              left: 16,
+              right: 16,
               bottom: bottomPadding,
             ),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 12.h,
-                crossAxisSpacing: 12.w,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
                 childAspectRatio: 0.99,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -520,9 +508,9 @@ class _ReciterDetailsContent extends StatelessWidget {
 
         return SliverPadding(
           padding: EdgeInsets.only(
-            top: 4.h,
-            left: 16.w,
-            right: 16.w,
+            top: 4,
+            left: 16,
+            right: 16,
             bottom: bottomPadding,
           ),
           sliver: SliverList(
@@ -533,7 +521,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                   (currentAudio != null && currentAudio.url == surah.audio.url);
               final key = isPlaying ? playingSurahKey : null;
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: 4.h),
+                padding: EdgeInsets.symmetric(vertical: 4),
                 child: SurahListTile(
                   key: key,
                   surah: surah,
@@ -550,9 +538,9 @@ class _ReciterDetailsContent extends StatelessWidget {
       case ReciterDetailsStatus.loading:
         return SliverPadding(
           padding: EdgeInsets.only(
-            top: 16.h,
-            left: 16.w,
-            right: 16.w,
+            top: 16,
+            left: 16,
+            right: 16,
             bottom: bottomPadding,
           ),
           sliver: SliverSkeletonizer(
@@ -560,14 +548,14 @@ class _ReciterDetailsContent extends StatelessWidget {
                 ? SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      mainAxisSpacing: 12.h,
-                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
                       childAspectRatio: 0.99,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: const SizedBox.expand(),
                       ),
@@ -596,7 +584,7 @@ class _CustomFloatingActionButtonLocation extends FloatingActionButtonLocation {
     final double x =
         scaffoldGeometry.scaffoldSize.width -
         scaffoldGeometry.floatingActionButtonSize.width -
-        16.w;
+        16;
     final double y =
         scaffoldGeometry.scaffoldSize.height -
         scaffoldGeometry.floatingActionButtonSize.height -

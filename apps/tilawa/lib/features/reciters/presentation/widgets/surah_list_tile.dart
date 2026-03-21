@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
@@ -47,21 +46,19 @@ class SurahListTile extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         // Subtle left accent for currently playing
         border: isCurrentItem
-            ? Border(
-                left: BorderSide(color: theme.primaryColor, width: 3.w),
-              )
+            ? Border(left: BorderSide(color: theme.primaryColor, width: 3))
             : null,
       ),
       child: Material(
         color: isCurrentItem
             ? theme.primaryColor.withValues(alpha: 0.06)
             : theme.cardColor,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           onLongPress: () => _showSurahOptionsSheet(context, surah),
           onTap: () {
             if (isCurrentItem) {
@@ -79,19 +76,19 @@ class SurahListTile extends StatelessWidget {
             }
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
                 // Number badge with consistent background
                 Container(
-                  width: 38.w,
-                  height: 38.w,
+                  width: 38,
+                  height: 38,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isCurrentItem
                         ? theme.primaryColor
                         : theme.primaryColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: isCurrentItem
                         ? [
                             BoxShadow(
@@ -106,7 +103,7 @@ class SurahListTile extends StatelessWidget {
                       ? Icon(
                           Icons.graphic_eq_rounded,
                           color: Colors.white,
-                          size: 18.sp,
+                          size: 18,
                         )
                       : Text(
                           surah.formattedId.isNotEmpty
@@ -115,11 +112,11 @@ class SurahListTile extends StatelessWidget {
                           style: TextStyle(
                             color: theme.primaryColor,
                             fontWeight: FontWeight.w700,
-                            fontSize: 13.sp,
+                            fontSize: 13,
                           ),
                         ),
                 ),
-                SizedBox(width: 14.w),
+                SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +125,7 @@ class SurahListTile extends StatelessWidget {
                       Text(
                         surah.name,
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: isCurrentItem
                               ? theme.primaryColor
@@ -137,11 +134,11 @@ class SurahListTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 4),
                       Text(
                         surah.reciterName,
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: theme.textTheme.bodyMedium?.color?.withValues(
                             alpha: 0.5,
@@ -165,12 +162,12 @@ class SurahListTile extends StatelessWidget {
                       initialIsDownloading: surah.isDownloading,
                       initialProgress: surah.downloadProgress,
                     ),
-                    SizedBox(width: 10.w),
+                    SizedBox(width: 10),
                     // Play/Pause button
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      width: 40.w,
-                      height: 40.w,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCurrentItem
@@ -195,7 +192,7 @@ class SurahListTile extends StatelessWidget {
                         color: isCurrentItem
                             ? Colors.white
                             : theme.primaryColor,
-                        size: 22.sp,
+                        size: 22,
                       ),
                     ),
                   ],
@@ -216,27 +213,27 @@ class SurahListTile extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 12.h),
+            SizedBox(height: 12),
             Container(
-              width: 40.w,
-              height: 4.h,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: theme.dividerColor,
-                borderRadius: BorderRadius.circular(2.r),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               surah.name,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 8),
             Divider(height: 1, color: theme.dividerColor),
             ListTile(
               leading: Icon(Icons.menu_book_rounded, color: theme.primaryColor),
@@ -258,7 +255,7 @@ class SurahListTile extends StatelessWidget {
                 const BookmarksRoute().push(context);
               },
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -273,38 +270,38 @@ class SkeletonSurahListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(12),
       child: Row(
         children: [
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: theme.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 120.w,
-                  height: 16.h,
+                  width: 120,
+                  height: 16,
                   decoration: BoxDecoration(
                     color: theme.dividerColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4.r),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 8),
                 Container(
-                  width: 80.w,
-                  height: 12.h,
+                  width: 80,
+                  height: 12,
                   decoration: BoxDecoration(
                     color: theme.dividerColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(4.r),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ],
@@ -314,20 +311,20 @@ class SkeletonSurahListTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 36.w,
-                height: 36.w,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: theme.dividerColor.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 12),
               Container(
-                width: 36.w,
-                height: 36.w,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: theme.dividerColor.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ],

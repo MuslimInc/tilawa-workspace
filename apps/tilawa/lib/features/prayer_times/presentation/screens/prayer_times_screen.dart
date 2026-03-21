@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
@@ -184,7 +183,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(vertical: 8.h).copyWith(bottom: 120.h),
+        padding: EdgeInsets.symmetric(vertical: 8).copyWith(bottom: 120),
         child: Column(
           children: [
             // Location header

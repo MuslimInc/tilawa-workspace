@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/athkar_item.dart';
 import 'item_count_widget.dart';
@@ -67,9 +66,9 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
           },
           child: Padding(
             padding: EdgeInsets.symmetric(
-              vertical: 16.h,
-              horizontal: 16.w,
-            ).copyWith(bottom: 120.h),
+              vertical: 16,
+              horizontal: 16,
+            ).copyWith(bottom: 120),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -87,7 +86,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: 20,
                           height: 2.0,
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.8,
@@ -97,7 +96,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                     ),
                   ),
                 ),
-                SizedBox(height: 32.h),
+                SizedBox(height: 32),
                 ItemCountWidget(
                   item: item,
                   currentCount: currentCount,

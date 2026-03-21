@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -35,11 +34,11 @@ class FastingHoursStrip extends StatelessWidget {
     final Color activeColor = theme.colorScheme.primary;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
           width: 1.0,
@@ -50,8 +49,8 @@ class FastingHoursStrip extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.restaurant_outlined, color: activeColor, size: 20.sp),
-              SizedBox(width: 8.w),
+              Icon(Icons.restaurant_outlined, color: activeColor, size: 20),
+              SizedBox(width: 8),
               Text(
                 label,
                 style: theme.textTheme.titleMedium?.copyWith(

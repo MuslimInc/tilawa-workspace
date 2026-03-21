@@ -1,8 +1,8 @@
+import 'package:tilawa/test_support/screenutil_compat.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';

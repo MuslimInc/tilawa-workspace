@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -35,11 +34,11 @@ class NextPrayerCountdownCard extends StatelessWidget {
         '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
           width: 1.0,
@@ -55,7 +54,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
                 prayerName,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 20.sp,
+                  fontSize: 20,
                 ),
               ),
               Text(
@@ -64,31 +63,31 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     : nextPrayer.getFormattedTime12Hour(isArabic: isArabic),
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 20.sp,
+                  fontSize: 20,
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: 24.h),
+          SizedBox(height: 24),
 
           // Remaining Text
           Text(
             timeRemainingText,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 16.sp,
+              fontSize: 16,
             ),
           ),
 
-          SizedBox(height: 8.h),
+          SizedBox(height: 8),
 
           // Digital Timer
           Text(
             timerText,
             style: theme.textTheme.displayLarge?.copyWith(
               fontWeight: FontWeight.w300,
-              fontSize: 48.sp,
+              fontSize: 48,
               letterSpacing: 2.0,
               color: theme.colorScheme.primary,
             ),

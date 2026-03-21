@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_state.dart';
@@ -19,10 +18,10 @@ class OfflineIndicatorWidget extends StatelessWidget {
         return Container(
           width: double.infinity,
           color: Colors.red,
-          padding: EdgeInsets.symmetric(vertical: 4.h),
+          padding: EdgeInsets.symmetric(vertical: 4),
           child: Text(
             context.l10n.noInternetConnection,
-            style: TextStyle(color: Colors.white, fontSize: 12.sp),
+            style: TextStyle(color: Colors.white, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         );

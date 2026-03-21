@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../quran.dart';
 import 'layout/quran_layout_strategy.dart';
@@ -292,7 +291,7 @@ class _PageContentState extends State<PageContent>
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: header,
             ),
             Expanded(
@@ -414,7 +413,7 @@ class _PageContentState extends State<PageContent>
                     return Container(
                       width: double.infinity,
                       height: lineHeight,
-                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: FittedBox(fit: lineFit, child: richText),
                     );
                   });
@@ -435,10 +434,7 @@ class _PageContentState extends State<PageContent>
                 },
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: footer,
-            ),
+            Padding(padding: const EdgeInsets.only(bottom: 10), child: footer),
           ],
         ),
       ),
@@ -582,7 +578,7 @@ class _SurahHeaderBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: SizedBox(
           height: lineHeight,
           width: double.infinity,
@@ -630,15 +626,19 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF4E342E);
-    const dividerColor = Color(0x1A4E342E);
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color primaryColor = colorScheme.primary;
+    final Color dividerColor = colorScheme.outlineVariant.withValues(
+      alpha: 0.55,
+    );
     final double verseFontSize = MediaQuery.sizeOf(context).width * 0.032;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 4.h),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -668,7 +668,7 @@ class _PageHeader extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(color: dividerColor, height: 1, thickness: 0.5),
+        Divider(color: dividerColor, height: 1, thickness: 0.5),
       ],
     );
   }
@@ -724,7 +724,7 @@ class _PageFooter extends StatelessWidget {
     final String hizbLabel = _getHizbLabel();
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -754,45 +754,184 @@ class _QuranPageIndex extends StatelessWidget {
     ),
   ];
 
+  ({String? fraction, String title, String? index}) _parseHizbLabel() {
+    String trimmedLabel = hizbLabel.trim();
+    String? fraction;
+    const prefixes = ['1/4 ', '1/2 ', '3/4 '];
+    for (final prefix in prefixes) {
+      if (trimmedLabel.startsWith(prefix)) {
+        fraction = prefix.trim();
+        trimmedLabel = trimmedLabel.substring(prefix.length).trim();
+        break;
+      }
+    }
+
+    final RegExpMatch? match = RegExp(
+      r'^(.+?)\s+([\d٠-٩]+)$',
+    ).firstMatch(trimmedLabel);
+
+    if (match == null) {
+      return (fraction: fraction, title: trimmedLabel, index: null);
+    }
+
+    return (
+      fraction: fraction,
+      title: match.group(1)!.trim(),
+      index: match.group(2),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color surfaceColor = colorScheme.surfaceContainerLow;
+    final Color secondaryTextColor = colorScheme.onSurfaceVariant;
+    final Color dividerColor = colorScheme.outlineVariant.withValues(
+      alpha: 0.65,
+    );
+    final Color pageBadgeColor = colorScheme.primaryContainer;
+    final Color hizbBadgeColor = colorScheme.surfaceContainerHighest;
+    final Color quarterBadgeColor = colorScheme.secondaryContainer;
+    final ({String? fraction, String title, String? index}) hizbInfo =
+        _parseHizbLabel();
+    final bool hasHizbInfo =
+        hizbInfo.title.isNotEmpty ||
+        hizbInfo.index != null ||
+        hizbInfo.fraction != null;
+    final TextStyle hizbStyle =
+        (theme.textTheme.labelLarge ?? const TextStyle()).copyWith(
+          color: secondaryTextColor,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+        );
+    final TextStyle hizbIndexStyle =
+        (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
+          color: colorScheme.onSurface,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w800,
+        );
+    final TextStyle quarterStyle =
+        (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+          color: colorScheme.onSecondaryContainer,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+        );
+    final TextStyle pageNumberStyle =
+        (theme.textTheme.titleLarge ?? const TextStyle()).copyWith(
+          color: colorScheme.onPrimaryContainer,
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+        );
+
     return RepaintBoundary(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9F5EF),
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: _shadows,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hizbLabel.isNotEmpty) ...[
-              Text(
-                hizbLabel,
-                style: const TextStyle(
-                  color: Color(0xFF4E342E), // Match header contrast
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+              width: 0.8,
+            ),
+            boxShadow: _shadows,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasHizbInfo) ...[
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 8,
+                    end: 12,
+                    top: 8,
+                    bottom: 8,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (hizbInfo.title.isNotEmpty)
+                        Text(hizbInfo.title, style: hizbStyle),
+                      if (hizbInfo.index != null ||
+                          hizbInfo.fraction != null) ...[
+                        const SizedBox(height: 5),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (hizbInfo.index != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: hizbBadgeColor,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: colorScheme.outlineVariant
+                                        .withValues(alpha: 0.55),
+                                  ),
+                                ),
+                                child: Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Text(
+                                    hizbInfo.index!,
+                                    style: hizbIndexStyle,
+                                  ),
+                                ),
+                              ),
+                            if (hizbInfo.fraction != null) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: quarterBadgeColor,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Text(
+                                    hizbInfo.fraction!,
+                                    style: quarterStyle,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Container(width: 1, height: 34, color: dividerColor),
+              ],
+              Container(
+                constraints: const BoxConstraints(minWidth: 64),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: pageBadgeColor,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    '$pageNumber',
+                    style: pageNumberStyle,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                width: 1,
-                height: 14,
-                color: const Color(0xFF4E342E).withValues(alpha: 0.3),
-              ),
-              const SizedBox(width: 12),
             ],
-            Text(
-              '$pageNumber',
-              style: const TextStyle(
-                color: Color(0xFF4E342E), // Match header contrast
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -804,31 +943,32 @@ class _SurahIndexButton extends StatelessWidget {
 
   final VoidCallback? onShowIndex;
 
-  static final List<BoxShadow> _shadows = [
-    BoxShadow(
-      color: const Color(0xFFA68B67).withValues(alpha: 0.3),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return RepaintBoundary(
       child: InkWell(
         onTap: onShowIndex,
         child: Container(
-          width: 40.h,
-          height: 40.h,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFFA68B67),
+            color: colorScheme.primary,
             shape: BoxShape.circle,
-            boxShadow: _shadows,
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.menu_book_rounded,
             size: 22,
-            color: Colors.white,
+            color: colorScheme.onPrimary,
           ),
         ),
       ),

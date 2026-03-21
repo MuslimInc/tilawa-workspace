@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -119,15 +118,15 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       const Spacer(),
                       Padding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 32.w,
-                          vertical: 24.h,
-                        ).copyWith(bottom: 120.h),
+                          horizontal: 32,
+                          vertical: 24,
+                        ).copyWith(bottom: 120),
                         child: Text(
                           context.l10n.qiblaCompassTip,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colorScheme.onSurface,
-                            fontSize: 16.sp,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -155,43 +154,43 @@ class _QiblaScreenState extends State<QiblaScreen> {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
+      padding: EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
-            size: 80.r,
+            size: 80,
             color: colorScheme.onSurface.withValues(alpha: 0.8),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 24),
           Text(
             title,
             style: theme.textTheme.headlineSmall?.copyWith(
-              fontSize: 24.sp,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 12),
           Text(
             message,
             style: theme.textTheme.bodyMedium?.copyWith(
-              fontSize: 16.sp,
+              fontSize: 16,
               color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 32),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.onSurface,
               foregroundColor: colorScheme.surface,
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.r),
+                borderRadius: BorderRadius.circular(30),
               ),
             ),
             child: Text(context.l10n.tryAgain),

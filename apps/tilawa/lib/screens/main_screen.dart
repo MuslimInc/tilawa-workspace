@@ -2,7 +2,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/presentation/widgets/offline_indicator_widget.dart';
@@ -94,12 +93,12 @@ class _MainScreenState extends State<MainScreen> {
                           audioState.shouldShowBottomPlayer &&
                           audioState.currentAudio != null;
                       final double playerHeight = isVisible && playerShouldShow
-                          ? 100.h
+                          ? 100
                           : 0;
 
                       final double contentBottomPadding = isVisible
-                          ? (80.h + playerHeight + bottomPadding)
-                          : (bottomPadding + 20.h);
+                          ? (80 + playerHeight + bottomPadding)
+                          : (bottomPadding + 20);
 
                       return Stack(
                         children: [
@@ -131,7 +130,7 @@ class _MainScreenState extends State<MainScreen> {
                           Positioned.fill(
                             child: BottomPlayerWidget(
                               bottomNavBarHeight: isVisible
-                                  ? 80.h + bottomPadding
+                                  ? 80 + bottomPadding
                                   : 0,
                               isKeyboardOpen: isKeyboardOpen,
                             ),
@@ -291,7 +290,7 @@ class _BottomNavItem extends StatelessWidget {
       },
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -299,12 +298,12 @@ class _BottomNavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              width: isSelected ? 32.w : 0,
-              height: 3.h,
-              margin: EdgeInsets.only(bottom: 4.h),
+              width: isSelected ? 32 : 0,
+              height: 3,
+              margin: EdgeInsets.only(bottom: 4),
               decoration: BoxDecoration(
                 color: isSelected ? activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(2.r),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
             // Icon with animated color transition
@@ -314,8 +313,8 @@ class _BottomNavItem extends StatelessWidget {
                   ? SvgPicture.asset(
                       svgPath!,
                       key: ValueKey('${svgPath}_$isSelected'),
-                      width: 22.sp,
-                      height: 22.sp,
+                      width: 22,
+                      height: 22,
                       colorFilter: ColorFilter.mode(
                         isSelected ? activeColor : inactiveColor,
                         BlendMode.srcIn,
@@ -324,16 +323,16 @@ class _BottomNavItem extends StatelessWidget {
                   : Icon(
                       isSelected ? activeIcon : icon,
                       key: ValueKey('${icon.hashCode}_$isSelected'),
-                      size: 22.sp,
+                      size: 22,
                       color: isSelected ? activeColor : inactiveColor,
                     ),
             ),
-            SizedBox(height: 3.h),
+            SizedBox(height: 3),
             // Label with consistent size (no jitter)
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: baseLabelStyle.copyWith(
-                fontSize: 10.sp,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? activeColor : inactiveColor,
               ),

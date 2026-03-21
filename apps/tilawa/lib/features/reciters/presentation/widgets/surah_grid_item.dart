@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
@@ -46,7 +45,7 @@ class SurahGridItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
           if (isCurrentItem) {
             if (isPlaying) {
@@ -67,7 +66,7 @@ class SurahGridItem extends StatelessWidget {
             color: isCurrentItem
                 ? theme.primaryColor.withValues(alpha: 0.08)
                 : theme.cardColor,
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isCurrentItem
                   ? theme.primaryColor.withValues(alpha: 0.5)
@@ -89,7 +88,7 @@ class SurahGridItem extends StatelessWidget {
               ),
             ],
           ),
-          padding: EdgeInsets.all(12.w),
+          padding: EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,14 +97,11 @@ class SurahGridItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       surah.formattedId.isNotEmpty
@@ -114,7 +110,7 @@ class SurahGridItem extends StatelessWidget {
                       style: TextStyle(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -124,11 +120,11 @@ class SurahGridItem extends StatelessWidget {
                           ? Icons.pause_circle_filled_rounded
                           : Icons.play_circle_fill_rounded,
                       color: theme.primaryColor,
-                      size: 20.sp,
+                      size: 20,
                     ),
                 ],
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +133,7 @@ class SurahGridItem extends StatelessWidget {
                     Text(
                       surah.name,
                       style: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: isCurrentItem
                             ? theme.primaryColor
@@ -146,12 +142,12 @@ class SurahGridItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     Text(
                       surah.nameAr,
                       // Arabic font handling usually needed here
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: theme.hintColor,
                         fontFamily:
@@ -163,13 +159,13 @@ class SurahGridItem extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   SizedBox(
-                    width: 32.sp,
-                    height: 32.sp,
+                    width: 32,
+                    height: 32,
                     child: FittedBox(
                       child: DownloadButton(
                         url: surah.id,

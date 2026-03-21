@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa_ui/theme/color_scheme.dart';
@@ -17,8 +16,8 @@ class ReciterSearchHeader extends StatelessWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _StickyHeaderDelegate(
-        minHeight: 64.h,
-        maxHeight: 64.h,
+        minHeight: 64,
+        maxHeight: 64,
         child: ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -47,8 +46,8 @@ class ReciterSearchHeader extends StatelessWidget {
                           filled: true,
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 12.h,
+                            horizontal: 16,
+                            vertical: 12,
                           ),
                           prefixIcon: Icon(
                             Icons.search_rounded,
@@ -56,7 +55,7 @@ class ReciterSearchHeader extends StatelessWidget {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
-                              30.r,
+                              30,
                             ), // Pill shape
                             borderSide: BorderSide(
                               color: context.primaryColor.withValues(
@@ -65,7 +64,7 @@ class ReciterSearchHeader extends StatelessWidget {
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.r),
+                            borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(
                               color: context.primaryColor.withValues(
                                 alpha: 0.1,
@@ -73,7 +72,7 @@ class ReciterSearchHeader extends StatelessWidget {
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.r),
+                            borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(color: context.primaryColor),
                           ),
                           suffixIcon: ValueListenableBuilder<TextEditingValue>(
@@ -102,7 +101,7 @@ class ReciterSearchHeader extends StatelessWidget {
                         },
                       ),
                     ),
-                    SizedBox(width: 8.w),
+                    SizedBox(width: 8),
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(

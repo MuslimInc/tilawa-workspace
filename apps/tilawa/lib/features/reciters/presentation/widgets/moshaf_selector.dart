@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -19,25 +18,25 @@ class MoshafSelector extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
           color: context.primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: ButtonTheme(
           alignedDropdown: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<MoshafEntity>(
               isExpanded: true,
               dropdownColor: theme.cardColor,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(16),
               icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
-                size: 24.sp,
+                size: 24,
                 color: theme.primaryColor,
               ),
               value: uniqueMoshaf.contains(selectedMoshaf)
@@ -46,7 +45,7 @@ class MoshafSelector extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              padding: EdgeInsets.symmetric(horizontal: 8),
               items: uniqueMoshaf.map((moshaf) {
                 return DropdownMenuItem<MoshafEntity>(
                   value: moshaf,

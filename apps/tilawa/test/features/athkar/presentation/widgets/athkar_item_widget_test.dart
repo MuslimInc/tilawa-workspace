@@ -1,7 +1,7 @@
+import 'package:tilawa/test_support/screenutil_compat.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
 import 'package:tilawa/features/athkar/presentation/widgets/athkar_item_widget.dart';

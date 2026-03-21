@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_card.dart';
@@ -42,7 +41,7 @@ class PrayerTimesGrid extends StatelessWidget {
     ];
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -50,8 +49,8 @@ class PrayerTimesGrid extends StatelessWidget {
           crossAxisCount: 2,
           childAspectRatio:
               1.2, // Adjusted ratio to provide more vertical space and prevent overflow
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 12.h,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
         ),
         itemCount: gridItems.length,
         padding: EdgeInsets.zero,

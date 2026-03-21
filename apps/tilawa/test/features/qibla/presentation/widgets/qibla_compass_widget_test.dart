@@ -1,5 +1,5 @@
+import 'package:tilawa/test_support/screenutil_compat.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/qibla/domain/entities/qibla_direction_entity.dart';
 import 'package:tilawa/features/qibla/presentation/widgets/qibla_compass_widget.dart';

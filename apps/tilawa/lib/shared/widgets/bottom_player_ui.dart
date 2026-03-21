@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
 import '../models/position_data.dart';
@@ -49,11 +48,11 @@ class BottomPlayerUi extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16.r,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -63,7 +62,7 @@ class BottomPlayerUi extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: GestureDetector(
@@ -80,28 +79,25 @@ class BottomPlayerUi extends StatelessWidget {
                       : 0.0,
                   backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
-                  minHeight: 3.h,
+                  minHeight: 3,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 12.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     children: [
                       // Album Art
                       Material(
                         type: MaterialType.transparency,
                         child: Container(
-                          width: 48.w,
-                          height: 48.w,
+                          width: 48,
+                          height: 48,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(12),
                             color: theme.primaryColor.withValues(alpha: 0.1),
                           ),
                           child: audio.artUri != null
                               ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12.r),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: CachedNetworkImage(
                                     imageUrl: audio.artUri.toString(),
                                     fit: BoxFit.cover,
@@ -115,7 +111,7 @@ class BottomPlayerUi extends StatelessWidget {
                         ),
                       ),
 
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 12),
 
                       // Info
                       Expanded(
@@ -126,18 +122,18 @@ class BottomPlayerUi extends StatelessWidget {
                             Text(
                               audio.title,
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: theme.textTheme.bodyLarge?.color,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 2.h),
+                            SizedBox(height: 2),
                             Text(
                               audio.artist ?? 'Unknown Reciter',
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 12,
                                 color: theme.textTheme.bodyMedium?.color
                                     ?.withValues(alpha: 0.7),
                               ),
@@ -148,7 +144,7 @@ class BottomPlayerUi extends StatelessWidget {
                         ),
                       ),
 
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 8),
 
                       // Controls
                       Directionality(
@@ -158,13 +154,13 @@ class BottomPlayerUi extends StatelessWidget {
                           children: [
                             // Previous
                             SizedBox(
-                              width: 32.w,
-                              height: 32.w,
+                              width: 32,
+                              height: 32,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   FluentIcons.previous_20_filled,
-                                  size: 20.sp,
+                                  size: 20,
                                   color: canGoPrevious
                                       ? theme.iconTheme.color
                                       : Colors.grey.withValues(alpha: 0.3),
@@ -173,12 +169,12 @@ class BottomPlayerUi extends StatelessWidget {
                               ),
                             ),
 
-                            SizedBox(width: 4.w),
+                            SizedBox(width: 4),
 
                             // Play/Pause
                             Container(
-                              width: 36.w,
-                              height: 36.w,
+                              width: 36,
+                              height: 36,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: theme.primaryColor,
@@ -187,7 +183,7 @@ class BottomPlayerUi extends StatelessWidget {
                                     color: theme.primaryColor.withValues(
                                       alpha: 0.3,
                                     ),
-                                    blurRadius: 8.r,
+                                    blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
@@ -199,23 +195,23 @@ class BottomPlayerUi extends StatelessWidget {
                                       ? FluentIcons.pause_16_filled
                                       : FluentIcons.play_16_filled,
                                   color: Colors.white,
-                                  size: 16.sp,
+                                  size: 16,
                                 ),
                                 onPressed: onPlayPause,
                               ),
                             ),
 
-                            SizedBox(width: 4.w),
+                            SizedBox(width: 4),
 
                             // Next
                             SizedBox(
-                              width: 32.w,
-                              height: 32.w,
+                              width: 32,
+                              height: 32,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   FluentIcons.next_20_filled,
-                                  size: 20.sp,
+                                  size: 20,
                                   color: canGoNext
                                       ? theme.iconTheme.color
                                       : Colors.grey.withValues(alpha: 0.3),
@@ -224,20 +220,20 @@ class BottomPlayerUi extends StatelessWidget {
                               ),
                             ),
 
-                            SizedBox(width: 4.w),
+                            SizedBox(width: 4),
 
                             // Sleep Timer
                             if (isSleepTimerEnabled)
                               SizedBox(
-                                width: 32.w,
-                                height: 32.w,
+                                width: 32,
+                                height: 32,
                                 child: IconButton(
                                   padding: EdgeInsets.zero,
                                   icon: Icon(
                                     isSleepTimerActive
                                         ? FluentIcons.timer_20_filled
                                         : FluentIcons.timer_20_regular,
-                                    size: 20.sp,
+                                    size: 20,
                                     color: isSleepTimerActive
                                         ? theme.primaryColor
                                         : Colors.grey.withValues(alpha: 0.3),
@@ -264,7 +260,7 @@ class BottomPlayerUi extends StatelessWidget {
       child: Icon(
         FluentIcons.music_note_2_24_filled,
         color: Theme.of(context).primaryColor,
-        size: 24.sp,
+        size: 24,
       ),
     );
   }

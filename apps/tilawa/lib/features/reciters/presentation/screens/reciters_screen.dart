@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -106,8 +105,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => const QuranLastReadRoute().push(context),
-                backgroundColor: const Color(0xFFA68B67),
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 elevation: 4,
                 child: const Icon(Icons.menu_book_rounded),
               ),
@@ -115,7 +114,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 children: [
                   // Search bar and letter filter
                   Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
                     child: Column(
                       children: [
                         // Letter filter indicator (refined)
@@ -123,14 +122,14 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             state.selectedLetter != null)
                           Container(
                             width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 12.h),
+                            margin: EdgeInsets.only(bottom: 12),
                             padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 10.h,
+                              horizontal: 16,
+                              vertical: 10,
                             ),
                             decoration: BoxDecoration(
                               color: theme.primaryColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(16.r),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: theme.primaryColor.withValues(
                                   alpha: 0.2,
@@ -142,33 +141,33 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 Icon(
                                   FluentIcons.filter_24_filled,
                                   color: theme.primaryColor,
-                                  size: 18.sp,
+                                  size: 18,
                                 ),
-                                SizedBox(width: 10.w),
+                                SizedBox(width: 10),
                                 Text(
                                   l10n.filteredByLetter,
                                   style: TextStyle(
                                     color: theme.primaryColor,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 13.sp,
+                                    fontSize: 13,
                                   ),
                                 ),
-                                SizedBox(width: 6.w),
+                                SizedBox(width: 6),
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-                                    vertical: 2.h,
+                                    horizontal: 10,
+                                    vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
                                     color: theme.primaryColor,
-                                    borderRadius: BorderRadius.circular(20.r),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
                                     state.selectedLetter!,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14.sp,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ),
@@ -176,7 +175,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 GestureDetector(
                                   onTap: _clearLetterFilter,
                                   child: Container(
-                                    padding: EdgeInsets.all(4.r),
+                                    padding: EdgeInsets.all(4),
                                     decoration: BoxDecoration(
                                       color: theme.primaryColor.withValues(
                                         alpha: 0.1,
@@ -186,7 +185,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     child: Icon(
                                       Icons.close_rounded,
                                       color: theme.primaryColor,
-                                      size: 16.sp,
+                                      size: 16,
                                     ),
                                   ),
                                 ),
@@ -204,9 +203,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 focusNode: _focusNode,
                               ),
                             ),
-                            SizedBox(width: 10.w),
+                            SizedBox(width: 10),
                             _FavoritesToggle(state: state),
-                            SizedBox(width: 10.w),
+                            SizedBox(width: 10),
                             const _DownloadsButton(),
                           ],
                         ),
@@ -238,10 +237,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const CircularProgressIndicator(),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       Text(
                                         l10n.loadingReciters,
-                                        style: TextStyle(fontSize: 14.sp),
+                                        style: TextStyle(fontSize: 14),
                                       ),
                                     ],
                                   ),
@@ -253,19 +252,19 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     children: [
                                       Icon(
                                         Icons.error_outline_rounded,
-                                        size: 64.sp,
+                                        size: 64,
                                         color: theme.colorScheme.error,
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       Text(
                                         state.message,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          fontSize: 14.sp,
+                                          fontSize: 14,
                                           color: theme.colorScheme.error,
                                         ),
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       ElevatedButton(
                                         onPressed: () {
                                           context.read<RecitersBloc>().add(
@@ -274,7 +273,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                         },
                                         child: Text(
                                           l10n.retry,
-                                          style: TextStyle(fontSize: 14.sp),
+                                          style: TextStyle(fontSize: 14),
                                         ),
                                       ),
                                     ],
@@ -288,16 +287,16 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                     children: [
                                       Icon(
                                         Icons.search_off_rounded,
-                                        size: 64.sp,
+                                        size: 64,
                                         color: theme.disabledColor,
                                       ),
-                                      SizedBox(height: 16.h),
+                                      SizedBox(height: 16),
                                       Text(
                                         state.searchQuery.isEmpty
                                             ? l10n.noRecitersFound
                                             : l10n.noRecitersMatchSearch,
                                         style: TextStyle(
-                                          fontSize: 16.sp,
+                                          fontSize: 16,
                                           color: theme.disabledColor,
                                         ),
                                       ),
@@ -305,21 +304,27 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                   ),
                                 )
                               : state is RecitersLoaded
-                              ? ResponsiveBuilder(
-                                  xs: (context) => _ReciterListView(
-                                    state: state,
-                                    scrollController: _scrollController,
-                                  ),
-                                  sm: (context) => _ReciterGridView(
-                                    state: state,
-                                    scrollController: _scrollController,
-                                    crossAxisCount: 2,
-                                  ),
-                                  lg: (context) => _ReciterGridView(
-                                    state: state,
-                                    scrollController: _scrollController,
-                                    crossAxisCount: 3,
-                                  ),
+                              ? LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    if (constraints.maxWidth >= 1100) {
+                                      return _ReciterGridView(
+                                        state: state,
+                                        scrollController: _scrollController,
+                                        crossAxisCount: 3,
+                                      );
+                                    }
+                                    if (constraints.maxWidth >= 700) {
+                                      return _ReciterGridView(
+                                        state: state,
+                                        scrollController: _scrollController,
+                                        crossAxisCount: 2,
+                                      );
+                                    }
+                                    return _ReciterListView(
+                                      state: state,
+                                      scrollController: _scrollController,
+                                    );
+                                  },
                                 )
                               : const SizedBox.shrink(),
                         ),
@@ -366,10 +371,10 @@ class _SearchField extends StatelessWidget {
       listenable: focusNode,
       builder: (context, _) {
         return Container(
-          height: 54.r,
+          height: 54,
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
                 color: theme.primaryColor.withValues(alpha: 0.08),
@@ -388,7 +393,7 @@ class _SearchField extends StatelessWidget {
               focusNode: focusNode,
               controller: controller,
               textAlignVertical: TextAlignVertical.center,
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
                 isDense: true,
                 filled: true,
@@ -399,11 +404,11 @@ class _SearchField extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant.withValues(
                     alpha: 0.4,
                   ),
-                  fontSize: 14.sp,
+                  fontSize: 14,
                 ),
                 prefixIcon: Icon(
                   FluentIcons.search_24_regular,
-                  size: 20.sp,
+                  size: 20,
                   color: focusNode.hasFocus
                       ? theme.primaryColor
                       : theme.colorScheme.onSurfaceVariant.withValues(
@@ -414,7 +419,7 @@ class _SearchField extends StatelessWidget {
                     (state is RecitersLoaded &&
                         (state as RecitersLoaded).searchQuery.isNotEmpty)
                     ? IconButton(
-                        icon: Icon(FluentIcons.dismiss_24_regular, size: 18.sp),
+                        icon: Icon(FluentIcons.dismiss_24_regular, size: 18),
                         onPressed: () {
                           controller.clear();
                           context.read<RecitersBloc>().add(const ClearSearch());
@@ -449,11 +454,11 @@ class _FavoritesToggle extends StatelessWidget {
         state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
 
     return Container(
-      height: 54.r,
-      width: 54.r,
+      height: 54,
+      width: 54,
       decoration: BoxDecoration(
         color: isActive ? theme.primaryColor : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: isActive
@@ -472,7 +477,7 @@ class _FavoritesToggle extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             final favoritesState = context.read<FavoritesCubit>().state;
             if (favoritesState is FavoritesLoaded) {
@@ -485,7 +490,7 @@ class _FavoritesToggle extends StatelessWidget {
             child: Icon(
               isActive ? Icons.favorite_rounded : Icons.favorite_border_rounded,
               color: isActive ? Colors.white : theme.primaryColor,
-              size: 22.sp,
+              size: 22,
             ),
           ),
         ),
@@ -501,11 +506,11 @@ class _DownloadsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      height: 54.r,
-      width: 54.r,
+      height: 54,
+      width: 54,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: theme.primaryColor.withValues(alpha: 0.08),
@@ -518,13 +523,13 @@ class _DownloadsButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           onTap: () => const DownloadsRoute().push(context),
           child: Center(
             child: Icon(
               FluentIcons.arrow_download_24_regular,
               color: theme.primaryColor,
-              size: 24.sp,
+              size: 24,
             ),
           ),
         ),
@@ -542,10 +547,10 @@ class _ReciterListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+      separatorBuilder: (_, _) => SizedBox(height: 8),
       controller: scrollController,
       itemCount: state.filteredReciters.length,
-      padding: EdgeInsets.only(left: 8.w, right: 8.w, top: 8.h, bottom: 80.h),
+      padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 80),
       itemBuilder: (context, index) {
         final ReciterEntity reciter = state.filteredReciters[index];
         return ReciterCard(reciter: reciter);
@@ -569,12 +574,12 @@ class _ReciterGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       controller: scrollController,
-      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 8.h, bottom: 80.h),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 80),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 12.h,
-        crossAxisSpacing: 12.w,
-        mainAxisExtent: 120.r,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        mainAxisExtent: 120,
       ),
       itemCount: state.filteredReciters.length,
       itemBuilder: (context, index) {

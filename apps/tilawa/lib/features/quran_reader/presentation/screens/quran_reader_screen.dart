@@ -3,7 +3,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
@@ -35,6 +34,7 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen> {
   late PageController _pageController;
+  late final UiVisibilityCubit _uiVisibilityCubit;
   int _currentPageNumber = 1;
 
   @override
@@ -48,8 +48,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       DeviceOrientation.landscapeRight,
     ]);
 
+    _uiVisibilityCubit = context.read<UiVisibilityCubit>();
+
     // Ensure UI is visible when entering the reader
-    context.read<UiVisibilityCubit>().show();
+    _uiVisibilityCubit.show();
 
     // Pause audio playback for a distraction-free reading experience
     final audioBloc = context.read<AudioPlayerBloc>();
@@ -100,9 +102,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       DeviceOrientation.portraitDown,
     ]);
     // Ensure UI is visible when leaving the reader
-    if (mounted) {
-      context.read<UiVisibilityCubit>().show();
-    }
+    _uiVisibilityCubit.show();
     super.dispose();
   }
 
@@ -110,6 +110,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return BlocListener<QuranReaderBloc, QuranReaderState>(
       listenWhen: (previous, current) =>
           previous.currentPage != current.currentPage &&
@@ -158,9 +161,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error, color: Colors.red, size: 48),
+                    Icon(Icons.error, color: colorScheme.error, size: 48),
                     const SizedBox(height: 16),
-                    Text(state.errorMessage),
+                    Text(
+                      state.errorMessage,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -301,9 +309,16 @@ class _PageNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const totalPages = 604;
-    const primaryColor = Color(0xFF4E342E);
-    const accentColor = Color(0xFFA68B67);
-
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color primaryColor = colorScheme.primary;
+    final Color accentColor = colorScheme.primary;
+    final Color barColor = colorScheme.surface.withValues(alpha: 0.92);
+    final Color borderColor = colorScheme.outlineVariant.withValues(
+      alpha: 0.55,
+    );
+    final Color textColor = colorScheme.onSurface;
+    final Color mutedTextColor = colorScheme.onSurfaceVariant;
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     // Determine surah name(s) for the current page
@@ -325,50 +340,48 @@ class _PageNavigationBar extends StatelessWidget {
           color: Colors.transparent,
           child: Container(
             padding: EdgeInsets.only(
-              left: 16.w,
-              right: 16.w,
-              top: 12.h,
-              bottom: bottomPadding + 8.h,
+              left: 16,
+              right: 16,
+              top: 12,
+              bottom: bottomPadding + 8,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9F5EF).withValues(alpha: 0.92),
-              border: const Border(
-                top: BorderSide(color: Color(0x1A4E342E), width: 0.5),
-              ),
+              color: barColor,
+              border: Border(top: BorderSide(color: borderColor, width: 0.5)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Surah name + page info row
                 Padding(
-                  padding: EdgeInsets.only(bottom: 8.h),
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
                       // Surah index button
                       GestureDetector(
                         onTap: onShowIndex,
                         child: Container(
-                          width: 36.h,
-                          height: 36.h,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.12),
+                            color: primaryColor.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.menu_book_rounded,
-                            size: 18.sp,
-                            color: accentColor,
+                            size: 18,
+                            color: primaryColor,
                           ),
                         ),
                       ),
-                      SizedBox(width: 10.w),
+                      SizedBox(width: 10),
                       // Surah name
                       Expanded(
                         child: Text(
                           surahName,
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 13.sp,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: textColor,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -377,27 +390,27 @@ class _PageNavigationBar extends StatelessWidget {
                       // Juz + page number
                       Text(
                         '${context.l10n.juzPart} $juzNumber',
-                        style: TextStyle(
-                          color: primaryColor.withValues(alpha: 0.5),
-                          fontSize: 11.sp,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: mutedTextColor,
+                          fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 8),
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
+                          horizontal: 10,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8.r),
+                          color: primaryColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '$currentPage',
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 13.sp,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: textColor,
+                            fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -407,7 +420,7 @@ class _PageNavigationBar extends StatelessWidget {
                 ),
                 // Page slider (RTL: page 1 on the right, 604 on the left)
                 SizedBox(
-                  height: 32.h,
+                  height: 32,
                   child: Directionality(
                     textDirection: TextDirection.rtl,
                     child: SliderTheme(
@@ -416,12 +429,12 @@ class _PageNavigationBar extends StatelessWidget {
                         inactiveTrackColor: accentColor.withValues(alpha: 0.15),
                         thumbColor: accentColor,
                         overlayColor: accentColor.withValues(alpha: 0.12),
-                        trackHeight: 3.h,
+                        trackHeight: 3,
                         thumbShape: RoundSliderThumbShape(
-                          enabledThumbRadius: 7.r,
+                          enabledThumbRadius: 7,
                         ),
                         overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 16.r,
+                          overlayRadius: 16,
                         ),
                       ),
                       child: Slider(
@@ -457,29 +470,22 @@ class _PageRange extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF4E342E);
+    final Color rangeColor = Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.8);
 
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        padding: EdgeInsets.symmetric(horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               '$totalPages',
-              style: TextStyle(
-                color: primaryColor.withValues(alpha: 0.35),
-                fontSize: 10.sp,
-              ),
+              style: TextStyle(color: rangeColor, fontSize: 10),
             ),
-            Text(
-              '1',
-              style: TextStyle(
-                color: primaryColor.withValues(alpha: 0.35),
-                fontSize: 10.sp,
-              ),
-            ),
+            Text('1', style: TextStyle(color: rangeColor, fontSize: 10)),
           ],
         ),
       ),

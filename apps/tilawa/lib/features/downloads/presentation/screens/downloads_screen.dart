@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
@@ -225,7 +224,7 @@ class _DownloadsList extends StatelessWidget {
         _DownloadsSizeWidget(formattedSize: formattedSize),
         Expanded(
           child: ListView(
-            padding: EdgeInsets.only(bottom: 120.h),
+            padding: EdgeInsets.only(bottom: 120),
             children: [
               for (int i = 0; i < downloadsByReciter.length; i++)
                 Padding(

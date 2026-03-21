@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -49,7 +48,7 @@ class SplashScreen extends StatelessWidget {
                   Text(
                     context.l10n.appTitle,
                     style: TextStyle(
-                      fontSize: 48.sp,
+                      fontSize: 48,
                       fontWeight: FontWeight.bold,
                       color: context.colorScheme.onPrimary,
                     ),

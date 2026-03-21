@@ -1,6 +1,5 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/athkar_item.dart';
 
@@ -32,22 +31,22 @@ class ItemCountWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 120.w,
-          height: 120.w,
+          width: 120,
+          height: 120,
           child: Stack(
             alignment: Alignment.center,
             children: [
               // Outer decorative glow/shadow
               Container(
-                width: 110.w,
-                height: 110.h,
+                width: 110,
+                height: 110,
                 decoration: BoxDecoration(shape: BoxShape.circle),
               ),
 
               // Animated Progress Ring
               SizedBox(
-                width: 100.w,
-                height: 100.w,
+                width: 100,
+                height: 100,
                 child: TweenAnimationBuilder<double>(
                   tween: Tween(begin: progress, end: progress),
                   duration: const Duration(milliseconds: 500),
@@ -65,8 +64,8 @@ class ItemCountWidget extends StatelessWidget {
               ),
               // Inner Circle Button
               Container(
-                width: 78.w,
-                height: 78.w,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: isDone
@@ -109,7 +108,7 @@ class ItemCountWidget extends StatelessWidget {
                             key: const ValueKey('done'),
                             FluentIcons.checkmark_24_filled,
                             color: Colors.white,
-                            size: 50.sp,
+                            size: 50,
                           )
                         : Text(
                             key: ValueKey(currentCount),
@@ -117,7 +116,7 @@ class ItemCountWidget extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 36.sp,
+                              fontSize: 36,
                               height: 1.0,
                             ),
                           ),
@@ -127,14 +126,14 @@ class ItemCountWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 16),
         // Progress Text
         AnimatedOpacity(
           opacity: isDone ? 0.0 : 1.0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
@@ -143,7 +142,7 @@ class ItemCountWidget extends StatelessWidget {
               '$currentCount / ${item.count}',
               style: TextStyle(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: 14.sp,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
               ),

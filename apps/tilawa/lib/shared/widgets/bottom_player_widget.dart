@@ -6,7 +6,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -59,7 +58,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
   /// inner padding (12+12) + row content (~48) = ~99.
-  double get _miniPlayerHeight => 100.h;
+  double get _miniPlayerHeight => 100;
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;
@@ -305,7 +304,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     PositionData position,
   ) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: BottomPlayerUi(
         audio: audio,
         positionData: position,
@@ -423,27 +422,27 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
                             // Artwork — flexible via ConstrainedBox
                             Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              padding: EdgeInsets.symmetric(vertical: 12),
                               child: Container(
-                                width: 280.w,
+                                width: 280,
                                 height: (constraints.maxHeight * 0.35).clamp(
                                   0.0,
-                                  280.w,
+                                  280,
                                 ),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24.r),
+                                  borderRadius: BorderRadius.circular(24),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(
                                         alpha: 0.3,
                                       ),
-                                      blurRadius: 30.r,
+                                      blurRadius: 30,
                                       offset: const Offset(0, 15),
                                     ),
                                   ],
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24.r),
+                                  borderRadius: BorderRadius.circular(24),
                                   child: audio.artUri != null
                                       ? CachedNetworkImage(
                                           imageUrl: audio.artUri!,
@@ -458,24 +457,24 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
                             // Title & Artist
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              padding: EdgeInsets.symmetric(horizontal: 24),
                               child: Column(
                                 children: [
                                   Text(
                                     audio.title,
                                     style: TextStyle(
-                                      fontSize: 24.sp,
+                                      fontSize: 24,
                                       color: Colors.white,
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 8.h),
+                                  SizedBox(height: 8),
                                   Text(
                                     audio.artist ?? 'Unknown',
                                     style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                       color: Colors.white.withValues(
                                         alpha: 0.7,
                                       ),
@@ -488,17 +487,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                               ),
                             ),
 
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 16),
 
                             // Seek bar
                             _buildProgressBar(context, state),
 
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 16),
 
                             // Controls
                             _buildControls(context, state),
 
-                            SizedBox(height: 24.h),
+                            SizedBox(height: 24),
                           ],
                         ),
                       ),
@@ -515,11 +514,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               right: 0,
               child: Center(
                 child: Container(
-                  width: 40.w,
-                  height: 4.h,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2.r),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
@@ -538,13 +537,13 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         icon: Icon(
           FluentIcons.chevron_down_24_regular,
           color: Colors.white,
-          size: 28.sp,
+          size: 28,
         ),
         onPressed: collapse,
       ),
       title: Text(
         context.l10n.currentPlaying,
-        style: TextStyle(color: Colors.white, fontSize: 16.sp),
+        style: TextStyle(color: Colors.white, fontSize: 16),
       ),
       actions: [
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
@@ -556,7 +555,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               color: state.isSleepTimerActive
                   ? Theme.of(context).primaryColor
                   : Colors.white,
-              size: 24.sp,
+              size: 24,
             ),
             onPressed: () {
               showDialog(
@@ -575,7 +574,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       child: Icon(
         FluentIcons.music_note_1_24_regular,
         color: Colors.white,
-        size: 80.sp,
+        size: 80,
       ),
     );
   }
@@ -590,7 +589,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         );
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
           SeekBar(
@@ -603,7 +602,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               );
             },
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -611,14 +610,14 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 _formatDuration(positionData.position),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12.sp,
+                  fontSize: 12,
                 ),
               ),
               Text(
                 _formatDuration(positionData.duration),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12.sp,
+                  fontSize: 12,
                 ),
               ),
             ],
@@ -632,7 +631,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     final bool isPlaying = state.isPlaying;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
@@ -643,7 +642,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               icon: Icon(
                 FluentIcons.speaker_2_24_regular,
                 color: Colors.white,
-                size: 24.sp,
+                size: 24,
               ),
               onPressed: () {
                 showSliderDialog(
@@ -669,7 +668,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 color: state.canGoPrevious
                     ? Colors.white
                     : Colors.white.withValues(alpha: 0.3),
-                size: 32.sp,
+                size: 32,
               ),
               onPressed: state.canGoPrevious
                   ? () {
@@ -682,15 +681,15 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
             // Play/Pause
             Container(
-              width: 72.w,
-              height: 72.w,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20.r,
+                    blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
@@ -701,7 +700,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                       ? FluentIcons.pause_24_filled
                       : FluentIcons.play_24_filled,
                   color: Colors.black,
-                  size: 32.sp,
+                  size: 32,
                 ),
                 onPressed: () {
                   if (isPlaying) {
@@ -724,7 +723,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 color: state.canGoNext
                     ? Colors.white
                     : Colors.white.withValues(alpha: 0.3),
-                size: 32.sp,
+                size: 32,
               ),
               onPressed: state.canGoNext
                   ? () {
@@ -739,7 +738,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             IconButton(
               icon: Text(
                 '${state.speed.toStringAsFixed(1)}x',
-                style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
               onPressed: () {
                 showSliderDialog(

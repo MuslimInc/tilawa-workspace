@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 
 class LocationRow extends StatelessWidget {
@@ -20,16 +19,16 @@ class LocationRow extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: isLoading ? null : onUpdateLocation,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(10.r),
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer.withValues(
                     alpha: 0.2,
@@ -38,11 +37,11 @@ class LocationRow extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.location_on_rounded,
-                  size: 22.sp,
+                  size: 22,
                   color: theme.colorScheme.primary,
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +53,7 @@ class LocationRow extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 2),
                     Text(
                       (locationName != null && locationName!.isNotEmpty)
                           ? locationName!
@@ -69,11 +68,11 @@ class LocationRow extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 12),
               if (isLoading)
                 SizedBox(
-                  width: 20.w,
-                  height: 20.w,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     color: theme.colorScheme.primary,
@@ -82,7 +81,7 @@ class LocationRow extends StatelessWidget {
               else
                 Icon(
                   Icons.my_location_rounded,
-                  size: 24.sp,
+                  size: 24,
                   color: theme.colorScheme.primary.withValues(alpha: 0.8),
                 ),
             ],

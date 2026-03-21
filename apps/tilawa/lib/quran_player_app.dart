@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui/theme/app_theme.dart';
@@ -118,12 +117,7 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilPlusInit(
-      designSize: const Size(390, 844),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      child: AppProviders.create(child: const _PlayerApp()),
-    );
+    return AppProviders.create(child: const _PlayerApp());
   }
 }
 

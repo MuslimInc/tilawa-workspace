@@ -1,9 +1,9 @@
+import 'package:tilawa/test_support/screenutil_compat.dart';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa/shared/models/position_data.dart';

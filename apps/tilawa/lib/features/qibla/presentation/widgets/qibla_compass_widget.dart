@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
@@ -43,8 +42,8 @@ class QiblaCompassWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: _kCompassOuterSize.r,
-          height: _kCompassOuterSize.r,
+          width: _kCompassOuterSize,
+          height: _kCompassOuterSize,
           child: Semantics(
             label: 'Qibla Compass',
             hint: 'Rotate your device to align the arrow with the Qibla',
@@ -59,17 +58,20 @@ class QiblaCompassWidget extends StatelessWidget {
                     children: [
                       // 1. The Dial Circle and Ticks (Constrained to 300)
                       SizedBox(
-                        width: _kCompassDialSize.r,
-                        height: _kCompassDialSize.r,
+                        width: _kCompassDialSize,
+                        height: _kCompassDialSize,
                         child: CustomPaint(
-                          size: Size(_kCompassDialSize.r, _kCompassDialSize.r),
+                          size: const Size(
+                            _kCompassDialSize,
+                            _kCompassDialSize,
+                          ),
                           painter: _CompassDialPainter(
                             colorScheme: colorScheme,
-                            tickInset: 5.r,
-                            majorTickLength: 12.r,
-                            minorTickLength: 8.r,
-                            smallTickLength: 5.r,
-                            borderWidth: 2.r,
+                            tickInset: 5,
+                            majorTickLength: 12,
+                            minorTickLength: 8,
+                            smallTickLength: 5,
+                            borderWidth: 2,
                           ),
                         ),
                       ),
@@ -100,8 +102,8 @@ class QiblaCompassWidget extends StatelessWidget {
 
                 // Center Indicator (Fixed on Screen) - Acts as the cap
                 Container(
-                  width: 10.r,
-                  height: 10.r,
+                  width: 10,
+                  height: 10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isAligned ? alignedColor : unalignedColor,
@@ -127,11 +129,11 @@ class QiblaCompassWidget extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 24),
         Text(
           '${(qiblaDirection.direction % 360).toStringAsFixed(0)}°',
           style: theme.textTheme.displayLarge?.copyWith(
-            fontSize: 48.sp,
+            fontSize: 48,
             fontWeight: FontWeight.bold,
             color: isAligned ? alignedColor : unalignedColor,
             shadows: [
@@ -145,11 +147,11 @@ class QiblaCompassWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 8),
         Text(
           context.l10n.toQibla,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontSize: 16.sp,
+            fontSize: 16,
             color: unalignedColor.withValues(alpha: 0.7),
           ),
         ),
@@ -177,16 +179,16 @@ class _CompassText extends StatelessWidget {
       angle: angleDeg * (math.pi / 180),
       child: Container(
         alignment: Alignment.topCenter,
-        height: _kCompassOuterSize.r,
+        height: _kCompassOuterSize,
         child: Padding(
-          padding: EdgeInsets.only(top: 10.r),
+          padding: EdgeInsets.only(top: 10),
           child: Transform.rotate(
             angle: (heading - angleDeg) * (math.pi / 180), // Counter-rotate
             child: Text(
               text,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 14.sp,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -210,7 +212,7 @@ class _QiblaPointer extends StatelessWidget {
     final Color unalignedColor = colorScheme.tertiary;
 
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: colorScheme.onSecondary,
@@ -218,7 +220,7 @@ class _QiblaPointer extends StatelessWidget {
       child: Icon(
         Icons.arrow_upward_rounded,
         color: isAligned ? alignedColor : unalignedColor,
-        size: 100.r,
+        size: 100,
         shadows: [
           Shadow(
             color: (isAligned ? alignedColor : unalignedColor).withValues(

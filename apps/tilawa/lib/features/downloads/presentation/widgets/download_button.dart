@@ -1,4 +1,3 @@
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -405,8 +404,8 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
             children: [
               // Pulsing circle
               Container(
-                width: 24.w + (_animation.value * 8),
-                height: 24.h + (_animation.value * 8),
+                width: 24 + (_animation.value * 8),
+                height: 24 + (_animation.value * 8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(

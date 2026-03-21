@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:gap/gap.dart';
 
 import 'onboarding_content.dart';
@@ -11,14 +10,14 @@ class OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(content.imagePath, width: 200.w, fit: BoxFit.fill),
-              Gap(40.h),
+              Image.asset(content.imagePath, width: 200, fit: BoxFit.fill),
+              Gap(40),
               Text(
                 content.title,
                 textAlign: TextAlign.center,
@@ -27,7 +26,7 @@ class OnboardingPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              Gap(16.h),
+              Gap(16),
               Text(
                 content.description,
                 textAlign: TextAlign.center,
