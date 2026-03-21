@@ -12,22 +12,23 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
   // Provide a 1×1 transparent PNG for any asset image that can't be loaded.
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-  binding.defaultBinaryMessenger.setMockMessageHandler(
-    'flutter/assets',
-    (ByteData? message) async {
-      // Try the real asset first; if it fails, return a 1×1 transparent PNG.
-      try {
-        final response = await binding.defaultBinaryMessenger
-            .send('flutter/assets', message);
-        if (response != null && response.lengthInBytes > 0) {
-          return response;
-        }
-      } catch (_) {
-        // Fall through to fake image.
+  binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
+    ByteData? message,
+  ) async {
+    // Try the real asset first; if it fails, return a 1×1 transparent PNG.
+    try {
+      final ByteData? response = await binding.defaultBinaryMessenger.send(
+        'flutter/assets',
+        message,
+      );
+      if (response != null && response.lengthInBytes > 0) {
+        return response;
       }
-      return ByteData.sublistView(_k1x1TransparentPng);
-    },
-  );
+    } catch (_) {
+      // Fall through to fake image.
+    }
+    return ByteData.sublistView(_k1x1TransparentPng);
+  });
 
   await testMain();
 }

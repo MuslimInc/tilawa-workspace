@@ -8,7 +8,7 @@ import 'package:quran/src/page_content.dart';
 void main() {
   setUpAll(() {
     // Resolve asset base relative to the package root, regardless of CWD.
-    final String base = File('assets/quran_fonts/qpc-v4.json').existsSync()
+    final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
         ? 'assets/quran_fonts'
         : 'packages/quran/assets/quran_fonts';
     final String qpcRaw = File('$base/qpc-v4.json').readAsStringSync();

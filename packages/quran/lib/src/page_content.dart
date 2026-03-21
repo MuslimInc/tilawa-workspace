@@ -415,10 +415,7 @@ class _PageContentState extends State<PageContent>
                       width: double.infinity,
                       height: lineHeight,
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
-                      child: FittedBox(
-                        fit: lineFit,
-                        child: richText,
-                      ),
+                      child: FittedBox(fit: lineFit, child: richText),
                     );
                   });
 

@@ -518,91 +518,116 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16.h),
-            Text(
-              context.l10n.choosePrimaryColor,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16.h),
-            ...ThemeCubit.colorOptions.map((option) {
-              final isSelected =
-                  option.color.toARGB32() == currentColor.toARGB32();
-              return ListTile(
-                onTap: () {
-                  context.read<ThemeCubit>().setPrimaryColor(option.color);
-                  Navigator.pop(context);
-                },
-                leading: CircleAvatar(
-                  backgroundColor: option.color,
-                  radius: 12.r,
-                ),
-                title: Text(
-                  _getLocalizedColorName(context, option.name),
-                  style: TextStyle(
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: isSelected ? option.color : null,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final height = MediaQuery.of(sheetContext).size.height;
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: height * 0.85),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 16.h),
+                  Text(
+                    context.l10n.choosePrimaryColor,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                trailing: isSelected
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: option.color,
-                      )
-                    : null,
-              );
-            }),
-            // Custom Color Option
-            ListTile(
-              onTap: () {
-                Navigator.pop(context);
-                _showCustomColorPicker(context, currentColor);
-              },
-              leading: Container(
-                width: 24.r,
-                height: 24.r,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: SweepGradient(
-                    colors: [Colors.red, Colors.blue, Colors.green, Colors.red],
+                  SizedBox(height: 16.h),
+                  ...ThemeCubit.colorOptions.map((option) {
+                    final isSelected =
+                        option.color.toARGB32() == currentColor.toARGB32();
+                    return ListTile(
+                      onTap: () {
+                        context.read<ThemeCubit>().setPrimaryColor(
+                          option.color,
+                        );
+                        Navigator.pop(sheetContext);
+                      },
+                      leading: CircleAvatar(
+                        backgroundColor: option.color,
+                        radius: 12.r,
+                      ),
+                      title: Text(
+                        _getLocalizedColorName(context, option.name),
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isSelected ? option.color : null,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              FluentIcons.checkmark_24_regular,
+                              color: option.color,
+                            )
+                          : null,
+                    );
+                  }),
+                  // Custom Color Option
+                  ListTile(
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      _showCustomColorPicker(context, currentColor);
+                    },
+                    leading: Container(
+                      width: 24.r,
+                      height: 24.r,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: SweepGradient(
+                          colors: [
+                            Colors.red,
+                            Colors.blue,
+                            Colors.green,
+                            Colors.red,
+                          ],
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      context.l10n.custom,
+                      style: TextStyle(
+                        fontWeight:
+                            !ThemeCubit.colorOptions.any(
+                              (opt) =>
+                                  opt.color.toARGB32() ==
+                                  currentColor.toARGB32(),
+                            )
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color:
+                            !ThemeCubit.colorOptions.any(
+                              (opt) =>
+                                  opt.color.toARGB32() ==
+                                  currentColor.toARGB32(),
+                            )
+                            ? currentColor
+                            : null,
+                      ),
+                    ),
+                    trailing:
+                        !ThemeCubit.colorOptions.any(
+                          (opt) =>
+                              opt.color.toARGB32() == currentColor.toARGB32(),
+                        )
+                        ? Icon(
+                            FluentIcons.checkmark_24_regular,
+                            color: currentColor,
+                          )
+                        : null,
                   ),
-                ),
+                  SizedBox(height: 16.h),
+                ],
               ),
-              title: Text(
-                context.l10n.custom,
-                style: TextStyle(
-                  fontWeight:
-                      !ThemeCubit.colorOptions.any(
-                        (opt) =>
-                            opt.color.toARGB32() == currentColor.toARGB32(),
-                      )
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color:
-                      !ThemeCubit.colorOptions.any(
-                        (opt) =>
-                            opt.color.toARGB32() == currentColor.toARGB32(),
-                      )
-                      ? currentColor
-                      : null,
-                ),
-              ),
-              trailing:
-                  !ThemeCubit.colorOptions.any(
-                    (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
-                  )
-                  ? Icon(FluentIcons.checkmark_24_regular, color: currentColor)
-                  : null,
             ),
-            SizedBox(height: 16.h),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

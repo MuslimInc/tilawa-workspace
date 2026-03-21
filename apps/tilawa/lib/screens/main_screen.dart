@@ -282,6 +282,7 @@ class _BottomNavItem extends StatelessWidget {
     final inactiveColor = theme.colorScheme.onSurfaceVariant.withValues(
       alpha: 0.45,
     );
+    final baseLabelStyle = theme.textTheme.labelSmall ?? const TextStyle();
 
     return GestureDetector(
       onTap: () {
@@ -331,7 +332,7 @@ class _BottomNavItem extends StatelessWidget {
             // Label with consistent size (no jitter)
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
-              style: TextStyle(
+              style: baseLabelStyle.copyWith(
                 fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? activeColor : inactiveColor,

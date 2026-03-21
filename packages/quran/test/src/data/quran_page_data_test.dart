@@ -19,12 +19,12 @@ void main() {
         ? 'assets/quran_fonts'
         : 'packages/quran/assets/quran_fonts';
 
-    pageIndex = json.decode(
-      File('$base/quran_page_index.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
-    qpcV4 = json.decode(
-      File('$base/qpc-v4.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
+    pageIndex =
+        json.decode(File('$base/quran_page_index.json').readAsStringSync())
+            as Map<String, dynamic>;
+    qpcV4 =
+        json.decode(File('$base/qpc-v4.json').readAsStringSync())
+            as Map<String, dynamic>;
 
     final String lineMapRaw = File(
       '$base/quran_page_line_map.json',
