@@ -92,7 +92,14 @@ void main() {
         searchQuery: 'test',
         selectedLetter: 'A',
       );
-      expect(state.props, [testReciters, testReciters, 'test', 'A']);
+      expect(state.props, [
+        testReciters,
+        testReciters,
+        'test',
+        'A',
+        false,
+        const <int>[],
+      ]);
     });
 
     test('default searchQuery should be empty string', () {
@@ -109,6 +116,22 @@ void main() {
         filteredReciters: testReciters,
       );
       expect(state.selectedLetter, isNull);
+    });
+
+    test('default showFavoritesOnly should be false', () {
+      final state = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+      );
+      expect(state.showFavoritesOnly, isFalse);
+    });
+
+    test('default favoriteIds should be empty', () {
+      final state = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+      );
+      expect(state.favoriteIds, isEmpty);
     });
 
     test('two instances with same values should be equal', () {
@@ -167,6 +190,33 @@ void main() {
       expect(state1, isNot(equals(state2)));
     });
 
+    test('two instances with different showFavoritesOnly should not be equal', () {
+      final state1 = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+        showFavoritesOnly: true,
+      );
+      final state2 = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+      );
+      expect(state1, isNot(equals(state2)));
+    });
+
+    test('two instances with different favoriteIds should not be equal', () {
+      final state1 = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+        favoriteIds: const [1, 2],
+      );
+      final state2 = RecitersLoaded(
+        reciters: testReciters,
+        filteredReciters: testReciters,
+        favoriteIds: const [1],
+      );
+      expect(state1, isNot(equals(state2)));
+    });
+
     group('copyWith', () {
       test('should return new instance with updated reciters', () {
         final state = RecitersLoaded(
@@ -212,6 +262,26 @@ void main() {
         expect(newState.selectedLetter, 'B');
       });
 
+      test('should return new instance with updated showFavoritesOnly', () {
+        final state = RecitersLoaded(
+          reciters: testReciters,
+          filteredReciters: testReciters,
+        );
+        final RecitersLoaded newState = state.copyWith(showFavoritesOnly: true);
+        expect(newState.showFavoritesOnly, isTrue);
+      });
+
+      test('should return new instance with updated favoriteIds', () {
+        final state = RecitersLoaded(
+          reciters: testReciters,
+          filteredReciters: testReciters,
+        );
+        final RecitersLoaded newState = state.copyWith(
+          favoriteIds: const [1, 3],
+        );
+        expect(newState.favoriteIds, const [1, 3]);
+      });
+
       test('should clear selectedLetter when clearSelectedLetter is true', () {
         final state = RecitersLoaded(
           reciters: testReciters,
@@ -246,12 +316,16 @@ void main() {
           filteredReciters: testReciters,
           searchQuery: 'test',
           selectedLetter: 'A',
+          showFavoritesOnly: true,
+          favoriteIds: const [1, 3],
         );
         final RecitersLoaded newState = state.copyWith();
         expect(newState.reciters, testReciters);
         expect(newState.filteredReciters, testReciters);
         expect(newState.searchQuery, 'test');
         expect(newState.selectedLetter, 'A');
+        expect(newState.showFavoritesOnly, isTrue);
+        expect(newState.favoriteIds, const [1, 3]);
       });
 
       test('should update multiple properties at once', () {
@@ -263,11 +337,15 @@ void main() {
           filteredReciters: [testReciter1],
           searchQuery: 'Abdul',
           selectedLetter: 'A',
+          showFavoritesOnly: true,
+          favoriteIds: const [1],
         );
         expect(newState.reciters, testReciters);
         expect(newState.filteredReciters, [testReciter1]);
         expect(newState.searchQuery, 'Abdul');
         expect(newState.selectedLetter, 'A');
+        expect(newState.showFavoritesOnly, isTrue);
+        expect(newState.favoriteIds, const [1]);
       });
     });
   });
