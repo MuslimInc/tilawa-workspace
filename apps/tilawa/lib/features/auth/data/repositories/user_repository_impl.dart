@@ -42,4 +42,14 @@ class UserRepositoryImpl implements UserRepository {
           'platform': Platform.isAndroid ? 'android' : 'ios',
         });
   }
+
+  @override
+  Future<void> deleteDeviceToken(String userId, String token) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('fcm_tokens')
+        .doc(token)
+        .delete();
+  }
 }

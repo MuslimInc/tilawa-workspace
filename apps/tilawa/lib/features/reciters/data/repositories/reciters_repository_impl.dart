@@ -29,6 +29,65 @@ class RecitersRepositoryImpl implements RecitersRepository {
   final AuthService _authService;
   final SharedPreferencesAsync _prefs;
 
+  Future<void> _saveFavoriteIdsLocally(Iterable<String> ids) async {
+    final List<String> localIds = await _localDataSource
+        .getFavoriteReciterIds();
+    final Set<String> localSet = localIds.toSet();
+
+    for (final id in ids) {
+      final int? parsedId = int.tryParse(id);
+      if (parsedId != null && !localSet.contains(id)) {
+        await _localDataSource.saveFavoriteReciterId(parsedId);
+      }
+    }
+  }
+
+  Future<void> _syncMissingRemoteFavorites(
+    String userId,
+    Iterable<String> missingIds,
+  ) async {
+    final List<ReciterModel> reciters = await _getRecitersData();
+
+    for (final id in missingIds) {
+      final int? reciterId = int.tryParse(id);
+      if (reciterId == null) {
+        continue;
+      }
+
+      final ReciterModel? reciter = reciters
+          .where((r) => r.id == reciterId)
+          .firstOrNull;
+      if (reciter == null) {
+        continue;
+      }
+
+      await _favoritesDataSource.addFavoriteReciter(
+        userId: userId,
+        reciterId: reciterId,
+        reciterName: reciter.name,
+      );
+    }
+  }
+
+  Future<List<String>> _getMergedFavoriteIds(String userId) async {
+    final List<String> remoteIds = await _favoritesDataSource
+        .getFavoriteReciterIds(userId: userId);
+    final List<String> localIds = await _localDataSource
+        .getFavoriteReciterIds();
+
+    final Set<String> mergedIds = {...remoteIds, ...localIds};
+    final List<String> missingRemoteIds = mergedIds
+        .where((id) => !remoteIds.contains(id))
+        .toList();
+
+    if (missingRemoteIds.isNotEmpty) {
+      await _syncMissingRemoteFavorites(userId, missingRemoteIds);
+    }
+
+    await _saveFavoriteIdsLocally(mergedIds);
+    return mergedIds.toList();
+  }
+
   Future<List<ReciterModel>> _getRecitersData() async {
     final String? savedLang = await _prefs.getString(
       LanguageConfig.languageKey,
@@ -181,10 +240,14 @@ class RecitersRepositoryImpl implements RecitersRepository {
       final isAuth = _authService.currentUser != null;
       if (isAuth) {
         final String userId = _authService.currentUser!.uid;
-        // Prioritize Remote favorites if logged in
-        final List<String> ids = await _favoritesDataSource
-            .getFavoriteReciterIds(userId: userId);
-        return Right(ids);
+        try {
+          final List<String> ids = await _getMergedFavoriteIds(userId);
+          return Right(ids);
+        } catch (_) {
+          final List<String> localIds = await _localDataSource
+              .getFavoriteReciterIds();
+          return Right(localIds);
+        }
       }
 
       final List<String> ids = await _localDataSource.getFavoriteReciterIds();

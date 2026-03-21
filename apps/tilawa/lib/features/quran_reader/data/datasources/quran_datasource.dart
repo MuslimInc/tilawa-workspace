@@ -36,42 +36,37 @@ class QuranDataSourceImpl implements QuranDataSource {
     }
 
     try {
-      // Try to load from bundled asset
       final String jsonString = await rootBundle.loadString(
         'assets/data/quran.json',
       );
       final parsed = jsonDecode(jsonString) as Map<String, dynamic>;
 
-      // The API response wraps surahs inside 'data' -> 'surahs'
       if (parsed.containsKey('data') && parsed['data'] is Map) {
         _quranData = parsed;
         _surahList =
             (parsed['data'] as Map<String, dynamic>)['surahs']
                 as List<dynamic>?;
       } else if (parsed.containsKey('surahs')) {
-        // Direct format without API wrapper
         _quranData = parsed;
         _surahList = parsed['surahs'] as List<dynamic>?;
       } else {
         throw const FormatException('Unexpected Quran data format');
       }
     } catch (e) {
-      // If file doesn't exist or parse error, initialize with empty structure
-      _quranData = {
-        'data': {'surahs': []},
-      };
-      _surahList = [];
+      throw StateError('Failed to load Quran data asset: $e');
+    }
+  }
+
+  void _ensureDatasetAvailable() {
+    if (_surahList == null || _surahList!.isEmpty) {
+      throw StateError('Quran data is unavailable');
     }
   }
 
   @override
   Future<SurahContentEntity> getSurahContent(int surahNumber) async {
     await _ensureDataLoaded();
-
-    if (_surahList == null || _surahList!.isEmpty) {
-      // Return mock data for demonstration
-      return _getMockSurahContent(surahNumber);
-    }
+    _ensureDatasetAvailable();
 
     try {
       final surahData =
@@ -81,7 +76,7 @@ class QuranDataSourceImpl implements QuranDataSource {
               as Map<String, dynamic>?;
 
       if (surahData == null) {
-        return _getMockSurahContent(surahNumber);
+        throw StateError('Surah $surahNumber not found in Quran dataset');
       }
 
       final List<AyahEntity> ayahs = (surahData['ayahs'] as List<dynamic>).map((
@@ -132,7 +127,7 @@ class QuranDataSourceImpl implements QuranDataSource {
         startPage: ayahs.isNotEmpty ? ayahs.first.page : null,
       );
     } catch (e) {
-      return _getMockSurahContent(surahNumber);
+      throw StateError('Failed to parse surah $surahNumber: $e');
     }
   }
 
@@ -175,15 +170,7 @@ class QuranDataSourceImpl implements QuranDataSource {
   @override
   Future<QuranPageEntity> getPage(int pageNumber) async {
     await _ensureDataLoaded();
-
-    if (_surahList == null || _surahList!.isEmpty) {
-      return QuranPageEntity(
-        pageNumber: pageNumber,
-        ayahs: [],
-        juz: ((pageNumber - 1) ~/ 20) + 1,
-        hizb: ((pageNumber - 1) ~/ 10) + 1,
-      );
-    }
+    _ensureDatasetAvailable();
 
     // Build page index once (O(total ayahs)), then O(1) lookup per page.
     _buildPageIndex();
@@ -234,12 +221,9 @@ class QuranDataSourceImpl implements QuranDataSource {
   @override
   Future<List<AyahEntity>> getJuz(int juzNumber) async {
     await _ensureDataLoaded();
+    _ensureDatasetAvailable();
 
     final List<AyahEntity> ayahs = [];
-
-    if (_surahList == null || _surahList!.isEmpty) {
-      return ayahs;
-    }
 
     for (final Map<String, dynamic> surah
         in _surahList!.cast<Map<String, dynamic>>()) {
@@ -267,13 +251,10 @@ class QuranDataSourceImpl implements QuranDataSource {
   @override
   Future<List<AyahEntity>> searchAyahs(String query) async {
     await _ensureDataLoaded();
+    _ensureDatasetAvailable();
 
     final List<AyahEntity> results = [];
     final String normalizedQuery = query.toLowerCase();
-
-    if (_surahList == null || _surahList!.isEmpty) {
-      return results;
-    }
 
     for (final Map<String, dynamic> surah
         in _surahList!.cast<Map<String, dynamic>>()) {
@@ -297,34 +278,6 @@ class QuranDataSourceImpl implements QuranDataSource {
     }
 
     return results;
-  }
-
-  /// Generate mock surah content for demonstration
-  SurahContentEntity _getMockSurahContent(int surahNumber) {
-    final _SurahInfo surahInfo = _surahInfoList[surahNumber - 1];
-
-    // Generate sample ayahs
-    final List<AyahEntity> ayahs = List.generate(
-      surahInfo.ayahCount,
-      (index) => AyahEntity(
-        number: index + 1,
-        numberInSurah: index + 1,
-        surahNumber: surahNumber,
-        text: 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ', // Placeholder text
-        juz: 1,
-        page: 1,
-      ),
-    );
-
-    return SurahContentEntity(
-      number: surahNumber,
-      name: surahInfo.nameAr,
-      nameEnglish: surahInfo.nameEn,
-      nameTranslation: surahInfo.meaning,
-      revelationType: surahInfo.type,
-      numberOfAyahs: surahInfo.ayahCount,
-      ayahs: ayahs,
-    );
   }
 }
 

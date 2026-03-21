@@ -24,6 +24,7 @@ abstract interface class IDownloadNotificationService {
     required String downloadId,
     required String title,
     required String reciterName,
+    int? reciterId,
     required int progress,
     required DownloadStatus status,
     String? pendingMessage,

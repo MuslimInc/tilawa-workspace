@@ -448,6 +448,7 @@ class DownloadQueueManager {
         downloadId: progress.id,
         title: metadata.title,
         reciterName: metadata.reciterName,
+        reciterId: metadata.reciterId,
         progress: progressPercent,
         status: progress.status,
         pendingMessage: l10n.notificationWaitingToStart,

@@ -98,7 +98,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
-      return data.containsKey('reciterName');
+      return data.containsKey('reciterId') || data.containsKey('reciterName');
     } catch (_) {
       return false;
     }
@@ -115,6 +115,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required String downloadId,
     required String title,
     required String reciterName,
+    int? reciterId,
     required int progress,
     required DownloadStatus status,
     String? pendingMessage,
@@ -178,7 +179,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
               ? (pendingMessage ?? 'Waiting to start...')
               : (progressMessage ?? 'Downloading: $progress%'),
           notificationDetails: notificationDetails,
-          payload: jsonEncode({'reciterName': reciterName}),
+          payload: _buildNotificationPayload(
+            reciterId: reciterId,
+            reciterName: reciterName,
+          ),
         );
       } else if (isEffectivelyCompleted) {
         // Show completed notification
@@ -186,6 +190,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           notificationId: notificationId,
           title: notificationTitle,
           message: completeMessage ?? 'Download complete',
+          reciterId: reciterId,
           reciterName: reciterName,
         );
       } else if (status == DownloadStatus.failed) {
@@ -327,10 +332,20 @@ class DownloadNotificationService implements IDownloadNotificationService {
 
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
-      final String? reciterName = data['reciterName'];
+      final String? reciterId = switch (data['reciterId']) {
+        final int value => value.toString(),
+        final String value when value.isNotEmpty => value,
+        _ => null,
+      };
+      final String? reciterName = data['reciterName'] as String?;
 
-      if (reciterName != null) {
-        await _navigateToReciter(reciterName);
+      if (reciterId != null) {
+        await _navigateToReciter(
+          reciterId: reciterId,
+          reciterName: reciterName,
+        );
+      } else if (reciterName != null && reciterName.isNotEmpty) {
+        await _navigateToReciter(reciterName: reciterName);
       }
     } on FormatException catch (e) {
       // Not a JSON payload - not a download notification, ignore it
@@ -347,9 +362,28 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Navigate to reciter details screen
-  Future<void> _navigateToReciter(String reciterName) async {
-    // Use injected navigator
+  Future<void> _navigateToReciter({
+    String? reciterId,
+    String? reciterName,
+  }) async {
     try {
+      if (reciterId != null) {
+        final Either<Failure, ReciterEntity?> result = await _recitersRepository
+            .getReciterById(reciterId);
+        final ReciterEntity? reciter = result.fold(
+          (_) => null,
+          (value) => value,
+        );
+        if (reciter != null) {
+          _pushReciterIfNeeded(reciter);
+          return;
+        }
+      }
+
+      if (reciterName == null || reciterName.isEmpty) {
+        return;
+      }
+
       final Either<Failure, List<ReciterEntity>> result =
           await _recitersRepository.getReciters();
 
@@ -362,24 +396,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
             final ReciterEntity reciterEntity = reciters.firstWhere(
               (r) => r.name == reciterName,
             );
-
-            final reciter = reciterEntity;
-            final reciterId = reciter.id.toString();
-            final String location = ReciterDetailsRoute(
-              reciterId: reciterId,
-              $extra: reciter,
-            ).location;
-
-            final String? currentLocation = _navigator.getCurrentLocation();
-            if (currentLocation != null) {
-              final Uri currentUri = Uri.parse(currentLocation);
-              final Uri targetUri = Uri.parse(location);
-              if (currentUri.path == targetUri.path) {
-                return;
-              }
-            }
-
-            _navigator.push(location, extra: reciter);
+            _pushReciterIfNeeded(reciterEntity);
           } catch (e) {
             logger.w(
               'DownloadNotificationService: Reciter not found for name: $reciterName',
@@ -392,6 +409,37 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
   }
 
+  void _pushReciterIfNeeded(ReciterEntity reciter) {
+    final String reciterId = reciter.id.toString();
+    final String location = ReciterDetailsRoute(
+      reciterId: reciterId,
+      $extra: reciter,
+    ).location;
+
+    final String? currentLocation = _navigator.getCurrentLocation();
+    if (currentLocation != null) {
+      final Uri currentUri = Uri.parse(currentLocation);
+      final Uri targetUri = Uri.parse(location);
+      if (currentUri.path == targetUri.path) {
+        return;
+      }
+    }
+
+    _navigator.push(location, extra: reciter);
+  }
+
+  String? _buildNotificationPayload({int? reciterId, String? reciterName}) {
+    if (reciterId == null && (reciterName == null || reciterName.isEmpty)) {
+      return null;
+    }
+
+    return jsonEncode({
+      if (reciterId != null) 'reciterId': reciterId,
+      if (reciterName != null && reciterName.isNotEmpty)
+        'reciterName': reciterName,
+    });
+  }
+
   /// Helper to generate a consistent notification ID from string ID
   int _getNotificationId(String id) {
     return _notificationIds.putIfAbsent(id, () => id.hashCode);
@@ -402,6 +450,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required int notificationId,
     required String title,
     required String message,
+    int? reciterId,
     required String reciterName,
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
@@ -433,7 +482,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
         title: title,
         body: message,
         notificationDetails: notificationDetails,
-        payload: jsonEncode({'reciterName': reciterName}),
+        payload: _buildNotificationPayload(
+          reciterId: reciterId,
+          reciterName: reciterName,
+        ),
       );
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing completion: $e');
