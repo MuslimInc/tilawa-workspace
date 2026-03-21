@@ -190,18 +190,21 @@ void main() {
       expect(state1, isNot(equals(state2)));
     });
 
-    test('two instances with different showFavoritesOnly should not be equal', () {
-      final state1 = RecitersLoaded(
-        reciters: testReciters,
-        filteredReciters: testReciters,
-        showFavoritesOnly: true,
-      );
-      final state2 = RecitersLoaded(
-        reciters: testReciters,
-        filteredReciters: testReciters,
-      );
-      expect(state1, isNot(equals(state2)));
-    });
+    test(
+      'two instances with different showFavoritesOnly should not be equal',
+      () {
+        final state1 = RecitersLoaded(
+          reciters: testReciters,
+          filteredReciters: testReciters,
+          showFavoritesOnly: true,
+        );
+        final state2 = RecitersLoaded(
+          reciters: testReciters,
+          filteredReciters: testReciters,
+        );
+        expect(state1, isNot(equals(state2)));
+      },
+    );
 
     test('two instances with different favoriteIds should not be equal', () {
       final state1 = RecitersLoaded(
