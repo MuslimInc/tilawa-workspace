@@ -13,20 +13,51 @@ class ReciterSearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final InputBorder? themedInputBorder =
+        theme.inputDecorationTheme.focusedBorder ??
+        theme.inputDecorationTheme.enabledBorder ??
+        theme.inputDecorationTheme.border;
+    final BorderRadius inputBorderRadius =
+        themedInputBorder is OutlineInputBorder
+        ? themedInputBorder.borderRadius
+        : BorderRadius.circular(16);
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double textScaleFactor = MediaQuery.textScalerOf(
+      context,
+    ).scale(1).clamp(1.0, 1.3).toDouble();
+    final double widthFactor = ((screenWidth - 320) / 120)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final double headerScale = ((textScaleFactor - 1.0) / 0.3)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final double headerHeight = lerpDouble(64, 72, headerScale)!;
+    final double horizontalPadding = lerpDouble(12, 16, widthFactor)!;
+    final double outerVerticalPadding = ((headerHeight - 48) / 2)
+        .clamp(8.0, 12.0)
+        .toDouble();
+    final double inputHorizontalPadding = lerpDouble(12, 16, widthFactor)!;
+    final double inputVerticalPadding =
+        (lerpDouble(10, 12, widthFactor)! / textScaleFactor)
+            .clamp(8.0, 12.0)
+            .toDouble();
+
     return SliverPersistentHeader(
       pinned: true,
       delegate: _StickyHeaderDelegate(
-        minHeight: 64,
-        maxHeight: 64,
+        minHeight: headerHeight,
+        maxHeight: headerHeight,
         child: ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withValues(
-                alpha: 0.85,
-              ), // Semi-transparent
+              color: theme.scaffoldBackgroundColor.withValues(alpha: 0.85),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: outerVerticalPadding,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -35,28 +66,24 @@ class ReciterSearchHeader extends StatelessWidget {
                         decoration: InputDecoration(
                           hintText: context.l10n.searchSurah,
                           hintStyle: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).hintColor.withValues(alpha: 0.5),
+                            color: theme.hintColor.withValues(alpha: 0.5),
                           ),
                           // Glassy input field
-                          fillColor: Theme.of(
-                            context,
-                          ).scaffoldBackgroundColor.withValues(alpha: 0.5),
+                          fillColor: theme.scaffoldBackgroundColor.withValues(
+                            alpha: 0.5,
+                          ),
                           filled: true,
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                            horizontal: inputHorizontalPadding,
+                            vertical: inputVerticalPadding,
                           ),
                           prefixIcon: Icon(
                             Icons.search_rounded,
                             color: context.primaryColor,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              30,
-                            ), // Pill shape
+                            borderRadius: inputBorderRadius,
                             borderSide: BorderSide(
                               color: context.primaryColor.withValues(
                                 alpha: 0.1,
@@ -64,7 +91,7 @@ class ReciterSearchHeader extends StatelessWidget {
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: inputBorderRadius,
                             borderSide: BorderSide(
                               color: context.primaryColor.withValues(
                                 alpha: 0.1,
@@ -72,7 +99,7 @@ class ReciterSearchHeader extends StatelessWidget {
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: inputBorderRadius,
                             borderSide: BorderSide(color: context.primaryColor),
                           ),
                           suffixIcon: ValueListenableBuilder<TextEditingValue>(
@@ -83,7 +110,7 @@ class ReciterSearchHeader extends StatelessWidget {
                               }
                               return IconButton(
                                 icon: const Icon(Icons.clear_rounded),
-                                color: Theme.of(context).hintColor,
+                                color: theme.hintColor,
                                 onPressed: () {
                                   controller.clear();
                                   context.read<ReciterDetailsBloc>().add(
@@ -104,9 +131,9 @@ class ReciterSearchHeader extends StatelessWidget {
                     SizedBox(width: 8),
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).scaffoldBackgroundColor.withValues(alpha: 0.5),
+                        color: theme.scaffoldBackgroundColor.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: context.primaryColor.withValues(alpha: 0.1),

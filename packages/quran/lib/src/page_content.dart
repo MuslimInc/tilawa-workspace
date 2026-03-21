@@ -746,14 +746,6 @@ class _QuranPageIndex extends StatelessWidget {
   final String hizbLabel;
   final int pageNumber;
 
-  static final List<BoxShadow> _shadows = [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.05),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
-
   ({String? fraction, String title, String? index}) _parseHizbLabel() {
     String trimmedLabel = hizbLabel.trim();
     String? fraction;
@@ -785,151 +777,76 @@ class _QuranPageIndex extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color surfaceColor = colorScheme.surfaceContainerLow;
-    final Color secondaryTextColor = colorScheme.onSurfaceVariant;
-    final Color dividerColor = colorScheme.outlineVariant.withValues(
-      alpha: 0.65,
-    );
-    final Color pageBadgeColor = colorScheme.primaryContainer;
-    final Color hizbBadgeColor = colorScheme.surfaceContainerHighest;
-    final Color quarterBadgeColor = colorScheme.secondaryContainer;
     final ({String? fraction, String title, String? index}) hizbInfo =
         _parseHizbLabel();
     final bool hasHizbInfo =
         hizbInfo.title.isNotEmpty ||
         hizbInfo.index != null ||
         hizbInfo.fraction != null;
-    final TextStyle hizbStyle =
-        (theme.textTheme.labelLarge ?? const TextStyle()).copyWith(
-          color: secondaryTextColor,
-          fontSize: 11.5,
-          fontWeight: FontWeight.w700,
-        );
-    final TextStyle hizbIndexStyle =
-        (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
-          color: colorScheme.onSurface,
-          fontSize: 12.5,
-          fontWeight: FontWeight.w800,
-        );
-    final TextStyle quarterStyle =
-        (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
-          color: colorScheme.onSecondaryContainer,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w800,
-        );
-    final TextStyle pageNumberStyle =
-        (theme.textTheme.titleLarge ?? const TextStyle()).copyWith(
-          color: colorScheme.onPrimaryContainer,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        );
 
     return RepaintBoundary(
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Container(
-          padding: const EdgeInsets.all(4),
+          height: 32,
           decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(20),
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-              width: 0.8,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+              width: 0.5,
             ),
-            boxShadow: _shadows,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hasHizbInfo) ...[
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: 8,
-                    end: 12,
-                    top: 8,
-                    bottom: 8,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (hizbInfo.title.isNotEmpty)
-                        Text(hizbInfo.title, style: hizbStyle),
-                      if (hizbInfo.index != null ||
-                          hizbInfo.fraction != null) ...[
-                        const SizedBox(height: 5),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (hizbInfo.index != null)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: hizbBadgeColor,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: colorScheme.outlineVariant
-                                        .withValues(alpha: 0.55),
-                                  ),
-                                ),
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Text(
-                                    hizbInfo.index!,
-                                    style: hizbIndexStyle,
-                                  ),
-                                ),
-                              ),
-                            if (hizbInfo.fraction != null) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: quarterBadgeColor,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Text(
-                                    hizbInfo.fraction!,
-                                    style: quarterStyle,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Container(width: 1, height: 34, color: dividerColor),
-              ],
+              // Page number pill (primary emphasis)
               Container(
-                constraints: const BoxConstraints(minWidth: 64),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 12,
-                ),
+                height: 32,
+                constraints: const BoxConstraints(minWidth: 40),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: pageBadgeColor,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Directionality(
                   textDirection: TextDirection.ltr,
                   child: Text(
                     '$pageNumber',
-                    style: pageNumberStyle,
-                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
+              if (hasHizbInfo) ...[
+                Container(
+                  width: 0.5,
+                  height: 16,
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      [
+                        if (hizbInfo.title.isNotEmpty) hizbInfo.title,
+                        if (hizbInfo.index != null) hizbInfo.index!,
+                        if (hizbInfo.fraction != null) '(${hizbInfo.fraction!})',
+                      ].join(' '),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
