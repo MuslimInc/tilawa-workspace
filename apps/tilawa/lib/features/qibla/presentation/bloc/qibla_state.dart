@@ -26,12 +26,16 @@ class QiblaState extends Equatable {
   QiblaState copyWith({
     QiblaStatus? status,
     QiblaDirectionEntity? direction,
-    String? errorMessage,
+    Object? errorMessage = _sentinel,
   }) {
     return QiblaState(
       status: status ?? this.status,
       direction: direction ?? this.direction,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: errorMessage == _sentinel
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
+
+  static const Object _sentinel = Object();
 }

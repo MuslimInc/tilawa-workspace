@@ -48,6 +48,9 @@ abstract interface class IDownloadNotificationService {
     required int completedCount,
     required int totalCount,
     required DownloadStatus status,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
   });
 
   /// Cancel a download notification

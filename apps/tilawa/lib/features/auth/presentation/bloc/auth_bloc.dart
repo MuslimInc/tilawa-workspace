@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -40,7 +42,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
     result.when(
       success: (user) {
-        _syncDeviceToken(user.id);
+        unawaited(_syncDeviceToken(user.id).catchError((_) {}));
         emit(AuthState.authenticated(user: user));
       },
       failure: (message, code) => emit(AuthState.error(message: message)),
@@ -56,7 +58,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   void _onCheckAuthStatus(CheckAuthStatusEvent event, Emitter<AuthState> emit) {
     final UserEntity? user = _getCurrentUser();
     if (user != null) {
-      _syncDeviceToken(user.id);
+      unawaited(_syncDeviceToken(user.id).catchError((_) {}));
       emit(AuthState.authenticated(user: user));
     } else {
       emit(const AuthState.unauthenticated());

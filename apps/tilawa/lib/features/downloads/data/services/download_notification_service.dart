@@ -219,6 +219,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required int completedCount,
     required int totalCount,
     required DownloadStatus status,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -265,21 +268,23 @@ class DownloadNotificationService implements IDownloadNotificationService {
         await _notifications.show(
           id: notificationId,
           title: title,
-          body: 'Progress: $completedCount/$totalCount ($progress%)',
+          body: progressMessage ??
+              'Progress: $completedCount/$totalCount ($progress%)',
           notificationDetails: notificationDetails,
         );
       } else if (status == DownloadStatus.completed) {
         await _showCompletedNotification(
           notificationId: notificationId,
           title: title,
-          message: 'All $totalCount files downloaded successfully',
+          message: completeMessage ??
+              'All $totalCount files downloaded successfully',
           reciterName: '', // Opens default screen or handled differently
         );
       } else if (status == DownloadStatus.failed) {
         await _showFailedNotification(
           notificationId: notificationId,
           title: title,
-          message: 'Batch download failed',
+          message: failedMessage ?? 'Batch download failed',
         );
       } else if (status == DownloadStatus.cancelled ||
           status == DownloadStatus.paused) {
@@ -307,13 +312,20 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Cancel all download notifications
+  ///
+  /// Only cancels notifications owned by this service (tracked in
+  /// [_notificationIds]). Does NOT call `cancelAll()` on the shared
+  /// notification plugin to avoid removing notifications from other
+  /// services (e.g., athkar reminders).
   @override
   Future<void> cancelAllNotifications() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
     }
 
-    await _notifications.cancelAll();
+    for (final int id in _notificationIds.values) {
+      await _notifications.cancel(id: id);
+    }
     _notificationIds.clear();
   }
 
@@ -441,8 +453,12 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Helper to generate a consistent notification ID from string ID
+  /// Offset to avoid collision with notification IDs used by other services.
+  static const int _idOffset = 100000;
+  int _nextId = _idOffset;
+
   int _getNotificationId(String id) {
-    return _notificationIds.putIfAbsent(id, () => id.hashCode);
+    return _notificationIds.putIfAbsent(id, () => _nextId++);
   }
 
   /// Helper to show completed notification

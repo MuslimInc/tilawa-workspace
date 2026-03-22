@@ -25,13 +25,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
   }
 
   @override
-  void dispose() {
-    // Stop the stream when leaving the screen
-    context.read<QiblaBloc>().add(const StopQiblaStream());
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;

@@ -9,11 +9,15 @@ void main() {
   late MockDownloadsRepository mockRepository;
   late MockDownloadNotificationService mockNotificationService;
   late MockBatchDownloadManager mockBatchDownloadManager;
+  late MockDownloadQueueManager mockDownloadQueueManager;
+  late MockSharedPreferencesAsync mockPrefs;
 
   setUp(() {
     mockRepository = MockDownloadsRepository();
     mockNotificationService = MockDownloadNotificationService();
     mockBatchDownloadManager = MockBatchDownloadManager();
+    mockDownloadQueueManager = MockDownloadQueueManager();
+    mockPrefs = MockSharedPreferencesAsync();
 
     // Stub initialize to do nothing
     when(mockNotificationService.initialize()).thenAnswer((_) async {
@@ -24,6 +28,8 @@ void main() {
       mockRepository,
       mockNotificationService,
       mockBatchDownloadManager,
+      mockDownloadQueueManager,
+      mockPrefs,
     );
   });
 

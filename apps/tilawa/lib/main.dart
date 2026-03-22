@@ -80,8 +80,9 @@ Future<void> bootstrap({
     } catch (e, stackTrace) {
       logger.d('CRITICAL: DI initialization failed: $e');
       logger.d('Stack trace: $stackTrace');
-      // This is critical - without DI, services can't be resolved
-      // But we'll try to continue for better error reporting
+      // Without DI, no service can be resolved — rethrow so the outer
+      // catastrophic catch block shows a minimal error screen.
+      rethrow;
     }
 
     // Initialize HydratedStorage (needed for BLoC state persistence)
@@ -132,18 +133,27 @@ Future<void> bootstrap({
     // ========================================================================
     initializeNonCriticalServices();
   } catch (e, stackTrace) {
-    // Catastrophic failure - log and try to start app anyway
+    // Catastrophic failure - log and show minimal error screen
     logger.d('CATASTROPHIC ERROR in bootstrap(): $e');
     logger.d('Stack trace: $stackTrace');
 
-    // Last resort: try to start the app with minimal initialization
-    try {
-      run(const QuranPlayerApp());
-    } catch (appError) {
-      logger.d('Failed to start app: $appError');
-      // At this point, nothing we can do
-      rethrow;
-    }
+    // Show a minimal error screen that doesn't depend on DI
+    run(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                'Something went wrong.\nPlease restart the app.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -227,7 +237,9 @@ Future<void> initializeHydratedStorage() async {
     HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: kIsWeb
           ? HydratedStorageDirectory.web
-          : HydratedStorageDirectory((await getTemporaryDirectory()).path),
+          : HydratedStorageDirectory(
+              (await getApplicationDocumentsDirectory()).path,
+            ),
     );
 
     logger.d('HydratedStorage initialized successfully');
@@ -371,7 +383,8 @@ Future<void> initializeAthkarNotifications() async {
   try {
     final IAthkarNotificationService athkarService =
         getIt<IAthkarNotificationService>();
-    await athkarService.initialize();
+    // Note: initialize() is already called in initializeNotificationDispatcher()
+    // so we only schedule here to avoid double handler registration.
     await athkarService.scheduleAthkarNotifications();
     logger.d('Athkar notifications scheduled successfully');
   } catch (e) {

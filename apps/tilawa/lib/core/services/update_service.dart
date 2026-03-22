@@ -9,10 +9,22 @@ import 'package:logger/logger.dart';
 class UpdateService {
   final Logger _logger = Logger();
 
+  /// Minimum interval between update checks to avoid interrupting the user
+  /// on every app resume.
+  static const Duration _minCheckInterval = Duration(hours: 6);
+  DateTime? _lastCheckTime;
+
   /// Checks for an update and performs it if available.
   ///
-  /// [context] is required to show snackbars or dialogs if needed (though in_app_update handles most UI).
+  /// Throttled to at most once per [_minCheckInterval] to avoid repeatedly
+  /// prompting the user with an immediate update dialog on every resume.
   Future<void> checkForUpdate() async {
+    final DateTime now = DateTime.now();
+    if (_lastCheckTime != null &&
+        now.difference(_lastCheckTime!) < _minCheckInterval) {
+      return;
+    }
+    _lastCheckTime = now;
     if (!Platform.isAndroid) {
       _logger.i(
         '[UpdateService] In-app updates are only supported on Android.',
@@ -31,10 +43,21 @@ class UpdateService {
           await InAppUpdate.performImmediateUpdate();
         } else if (updateInfo.flexibleUpdateAllowed) {
           _logger.i(
-            '[UpdateService] Flexible update available. Performing update.',
+            '[UpdateService] Flexible update available. Starting download.',
           );
-          await InAppUpdate.startFlexibleUpdate();
-          await InAppUpdate.completeFlexibleUpdate();
+          final AppUpdateResult result =
+              await InAppUpdate.startFlexibleUpdate();
+          if (result == AppUpdateResult.success) {
+            _logger.i(
+              '[UpdateService] Flexible update downloaded. '
+              'Completing install.',
+            );
+            await InAppUpdate.completeFlexibleUpdate();
+          } else {
+            _logger.w(
+              '[UpdateService] Flexible update result: $result',
+            );
+          }
         }
       } else {
         _logger.i('[UpdateService] No update available.');

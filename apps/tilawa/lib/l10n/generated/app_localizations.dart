@@ -992,6 +992,30 @@ abstract class AppLocalizations {
   /// **'Download failed'**
   String get notificationDownloadFailed;
 
+  /// Notification title for batch download
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {count} files'**
+  String notificationBatchDownloadingTitle(int count);
+
+  /// Notification body for batch download progress
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {completed}/{total} ({progress}%)'**
+  String notificationBatchProgress(int completed, int total, int progress);
+
+  /// Notification message when batch download completes
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} files downloaded successfully'**
+  String notificationBatchComplete(int count);
+
+  /// Notification message when batch download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Batch download failed'**
+  String get notificationBatchFailed;
+
   /// Resume button text
   ///
   /// In en, this message translates to:

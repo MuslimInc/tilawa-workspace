@@ -115,63 +115,100 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final Set<String> _completedAudioIds = {};
   Timer? _sleepTimer;
 
+  /// Maximum number of cached entries before eviction.
+  static const int _maxCacheSize = 50;
+
+  /// Evicts oldest entries when the cache exceeds [_maxCacheSize].
+  void _evictCacheIfNeeded() {
+    if (_lastKnownPositions.length > _maxCacheSize) {
+      final keysToRemove = _lastKnownPositions.keys
+          .take(_lastKnownPositions.length - _maxCacheSize)
+          .toList();
+      keysToRemove.forEach(_lastKnownPositions.remove);
+    }
+    if (_lastKnownDurations.length > _maxCacheSize) {
+      final keysToRemove = _lastKnownDurations.keys
+          .take(_lastKnownDurations.length - _maxCacheSize)
+          .toList();
+      keysToRemove.forEach(_lastKnownDurations.remove);
+    }
+  }
+
   void _setupAudioStreams() {
+    void onStreamError(Object error, StackTrace stackTrace) {
+      // Swallow stream errors to prevent unhandled exceptions in release mode.
+      // The audio service can emit errors on codec failures, OS kills, etc.
+    }
+
     _subscriptions.add(
-      _getAudioStreams.currentAudio.listen((audio) {
-        add(AudioPlayerEvent.updateAudio(audio));
-      }),
+      _getAudioStreams.currentAudio.listen(
+        (audio) => add(AudioPlayerEvent.updateAudio(audio)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.playbackState.listen((playbackState) {
-        add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState));
-      }),
+      _getAudioStreams.playbackState.listen(
+        (playbackState) =>
+            add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.volume.listen((volume) {
-        add(AudioPlayerEvent.updateVolume(volume));
-      }),
+      _getAudioStreams.volume.listen(
+        (volume) => add(AudioPlayerEvent.updateVolume(volume)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.speed.listen((speed) {
-        add(AudioPlayerEvent.updateSpeed(speed));
-      }),
+      _getAudioStreams.speed.listen(
+        (speed) => add(AudioPlayerEvent.updateSpeed(speed)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.position.listen((position) {
-        final AudioEntity? currentAudio = state.currentAudio;
-        final PlaybackStateEntity? playbackState = state.playbackState;
+      _getAudioStreams.position.listen(
+        (position) {
+          final AudioEntity? currentAudio = state.currentAudio;
+          final PlaybackStateEntity? playbackState = state.playbackState;
 
-        final Duration duration = currentAudio != null
-            ? currentAudio.duration
-            : Duration.zero;
-        final Duration buffered = playbackState != null
-            ? playbackState.bufferedPosition
-            : Duration.zero;
+          final Duration duration = currentAudio != null
+              ? currentAudio.duration
+              : Duration.zero;
+          final Duration buffered = playbackState != null
+              ? playbackState.bufferedPosition
+              : Duration.zero;
 
-        add(
-          AudioPlayerEvent.updatePositionData(
-            PositionData(
-              position: position,
-              bufferedPosition: buffered,
-              duration: duration,
+          add(
+            AudioPlayerEvent.updatePositionData(
+              PositionData(
+                position: position,
+                bufferedPosition: buffered,
+                duration: duration,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+        onError: onStreamError,
+      ),
     );
   }
 
   void _setupSettingsSubscription() {
     _subscriptions.add(
-      _settingsCubit.stream.listen((settingsState) {
-        if (!settingsState.isSleepTimerEnabled) {
-          add(const AudioPlayerEvent.cancelSleepTimer());
-        }
-      }),
+      _settingsCubit.stream.listen(
+        (settingsState) {
+          if (!settingsState.isSleepTimerEnabled) {
+            add(const AudioPlayerEvent.cancelSleepTimer());
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          // Swallow settings stream errors to prevent crashes.
+        },
+      ),
     );
   }
 
@@ -342,12 +379,22 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   ) async {
     // Optimistically un-dismiss when play is requested
     emit(state.copyWith(dismissedAudioId: null));
-    await _playAudio();
-    // Start sleep timer if a duration was previously selected and feature is enabled
-    if (_settingsCubit.state.isSleepTimerEnabled &&
-        state.lastSleepTimerDuration != null) {
-      add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
-    }
+    final result = await _playAudio();
+    result.fold(
+      (failure) {
+        // Revert the optimistic un-dismiss on failure
+        emit(state.copyWith(dismissedAudioId: state.currentAudio?.id));
+      },
+      (_) {
+        // Only restart sleep timer if one was actively running before pause
+        // (sleepTimerTargetTime is cleared on stop/expiry but kept on pause)
+        if (_settingsCubit.state.isSleepTimerEnabled &&
+            state.lastSleepTimerDuration != null &&
+            state.sleepTimerTargetTime != null) {
+          add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
+        }
+      },
+    );
   }
 
   Future<void> _onPauseAudio(
@@ -370,7 +417,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final Either<Failure, void> result = await _stopAudio();
     await result.fold(
       (failure) async {
-        emit(state.copyWith());
+        // Stop failed — force-pause as fallback so the user isn't stuck
+        await _pauseAudio();
       },
       (success) async {
         if (state.currentAudio != null) {
@@ -538,7 +586,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         final Duration remaining = state.sleepTimerTargetTime!.difference(now);
         _sleepTimer?.cancel();
         _sleepTimer = Timer(remaining, () {
-          add(const AudioPlayerEvent.audioTimerExpired());
+          if (!isClosed) add(const AudioPlayerEvent.audioTimerExpired());
         });
       } else {
         // Timer already expired while app was closed
@@ -559,7 +607,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   void _onSetSleepTimer(SetSleepTimer event, Emitter<AudioPlayerState> emit) {
     _sleepTimer?.cancel();
     _sleepTimer = Timer(event.duration, () {
-      add(const AudioPlayerEvent.audioTimerExpired());
+      if (!isClosed) add(const AudioPlayerEvent.audioTimerExpired());
     });
     emit(
       state.copyWith(
@@ -703,6 +751,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         );
       }
     }
+
+    _evictCacheIfNeeded();
   }
 
   Duration _resolveDuration(

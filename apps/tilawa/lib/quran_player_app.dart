@@ -10,6 +10,7 @@ import 'package:tilawa_ui/theme/app_theme.dart';
 import 'core/di/injection.dart';
 import 'core/providers/app_providers.dart';
 import 'core/services/update_service.dart';
+import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
@@ -29,6 +30,7 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
   bool _hasProcessedLaunchNotification = false;
   Timer? _resumeDebounceTimer;
   bool _isCheckingNotification = false;
+  int? _lastProcessedNotificationId;
 
   @override
   void initState() {
@@ -86,8 +88,21 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
     try {
       final INotificationDispatcher dispatcher =
           getIt<INotificationDispatcher>();
+
+      // Check if the launch notification is the same one we already handled.
+      // getNotificationAppLaunchDetails() returns the SAME data on every call,
+      // so we compare the notification ID to avoid re-processing.
+      final launchDetails =
+          await dispatcher.getNotificationAppLaunchDetails();
+      final int? currentId = launchDetails?.notificationResponse?.id;
+      if (currentId == null ||
+          currentId == _lastProcessedNotificationId) {
+        return;
+      }
+
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
+        _lastProcessedNotificationId = currentId;
         logger.d('[QuranPlayerApp] Launch notification processed on resume');
       }
     } catch (e) {
@@ -130,12 +145,10 @@ class _PlayerApp extends StatelessWidget {
       listener: (context, state) {
         // Update download notification locale when app locale changes
         getIt<DownloadQueueManager>().locale = state.locale;
+        getIt<BatchDownloadManager>().locale = state.locale;
       },
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, locState) {
-          // Set initial locale for download notifications
-          getIt<DownloadQueueManager>().locale = locState.locale;
-
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               return MaterialApp.router(

@@ -481,6 +481,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationDownloadFailed => 'Download failed';
 
   @override
+  String notificationBatchDownloadingTitle(int count) {
+    return 'Downloading $count files';
+  }
+
+  @override
+  String notificationBatchProgress(int completed, int total, int progress) {
+    return 'Progress: $completed/$total ($progress%)';
+  }
+
+  @override
+  String notificationBatchComplete(int count) {
+    return 'All $count files downloaded successfully';
+  }
+
+  @override
+  String get notificationBatchFailed => 'Batch download failed';
+
+  @override
   String get resume => 'Resume';
 
   @override

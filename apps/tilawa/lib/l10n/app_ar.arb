@@ -646,6 +646,48 @@
     "@notificationDownloadFailed": {
         "description": "Notification message when download fails"
     },
+    "notificationBatchDownloadingTitle": "جاري تحميل {count} ملفات",
+    "@notificationBatchDownloadingTitle": {
+        "description": "Notification title for batch download",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of files in batch"
+            }
+        }
+    },
+    "notificationBatchProgress": "التقدم: {completed}/{total} ({progress}%)",
+    "@notificationBatchProgress": {
+        "description": "Notification body for batch download progress",
+        "placeholders": {
+            "completed": {
+                "type": "int",
+                "description": "Number of completed downloads"
+            },
+            "total": {
+                "type": "int",
+                "description": "Total number of downloads"
+            },
+            "progress": {
+                "type": "int",
+                "description": "Overall progress percentage"
+            }
+        }
+    },
+    "notificationBatchComplete": "تم تحميل جميع الملفات بنجاح ({count} ملفات)",
+    "@notificationBatchComplete": {
+        "description": "Notification message when batch download completes",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of files downloaded"
+            }
+        }
+    },
+    "notificationBatchFailed": "فشل تحميل الملفات",
+    "@notificationBatchFailed": {
+        "description": "Notification message when batch download fails"
+    },
     "resume": "استئناف",
     "@resume": {
         "description": "Resume button text"

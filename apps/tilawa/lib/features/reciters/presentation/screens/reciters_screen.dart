@@ -88,6 +88,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
         child: BlocBuilder<RecitersBloc, RecitersState>(
           builder: (context, state) {
             return Scaffold(
+              resizeToAvoidBottomInset: false,
               appBar: AppBar(
                 title: Text(l10n.reciters),
                 actions: [

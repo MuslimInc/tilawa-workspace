@@ -479,6 +479,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationDownloadFailed => 'فشل التحميل';
 
   @override
+  String notificationBatchDownloadingTitle(int count) {
+    return 'جاري تحميل $count ملفات';
+  }
+
+  @override
+  String notificationBatchProgress(int completed, int total, int progress) {
+    return 'التقدم: $completed/$total ($progress%)';
+  }
+
+  @override
+  String notificationBatchComplete(int count) {
+    return 'تم تحميل جميع الملفات بنجاح ($count ملفات)';
+  }
+
+  @override
+  String get notificationBatchFailed => 'فشل تحميل الملفات';
+
+  @override
   String get resume => 'استئناف';
 
   @override

@@ -20,19 +20,28 @@ class SplashCubit extends Cubit<SplashState> {
     // Artificial delay to display branding
     await Future.delayed(const Duration(seconds: 2));
 
-    final SplashDestination destination = await _getSplashNextRoute();
+    try {
+      final SplashDestination destination = await _getSplashNextRoute();
 
-    switch (destination) {
-      case SplashDestination.home:
-        emit(const SplashNavigateToHome());
-      case SplashDestination.login:
-        emit(const SplashNavigateToLogin());
-      case SplashDestination.onboarding:
-        emit(const SplashNavigateToOnboarding());
-      case SplashDestination.notificationLaunch:
-        // Do nothing - let the notification service handle navigation
-        // This prevents the splash screen from overriding the notification navigation
-        break;
+      switch (destination) {
+        case SplashDestination.home:
+          emit(const SplashNavigateToHome());
+        case SplashDestination.login:
+          emit(const SplashNavigateToLogin());
+        case SplashDestination.onboarding:
+          emit(const SplashNavigateToOnboarding());
+        case SplashDestination.notificationLaunch:
+          // Let the notification service handle navigation, but fall back to
+          // home after a timeout to avoid leaving the user stuck on splash.
+          Future.delayed(const Duration(seconds: 5), () {
+            if (!isClosed && state is SplashInitial) {
+              emit(const SplashNavigateToHome());
+            }
+          });
+      }
+    } catch (_) {
+      // Fallback to home on any unexpected error to avoid a frozen splash
+      emit(const SplashNavigateToHome());
     }
   }
 }

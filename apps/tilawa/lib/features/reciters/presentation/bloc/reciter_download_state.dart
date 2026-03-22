@@ -49,13 +49,15 @@ class ReciterDownloadState extends Equatable {
     errorMessage,
   ];
 
+  static const Object _sentinel = Object();
+
   ReciterDownloadState copyWith({
     double? progress,
     bool? isDownloadingAll,
     bool? isPending,
     int? downloadedCount,
     int? totalCount,
-    String? errorMessage,
+    Object? errorMessage = _sentinel,
   }) {
     return ReciterDownloadState(
       progress: progress ?? this.progress,
@@ -63,7 +65,9 @@ class ReciterDownloadState extends Equatable {
       isPending: isPending ?? this.isPending,
       downloadedCount: downloadedCount ?? this.downloadedCount,
       totalCount: totalCount ?? this.totalCount,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: errorMessage == _sentinel
+          ? this.errorMessage
+          : errorMessage as String?,
     );
   }
 }

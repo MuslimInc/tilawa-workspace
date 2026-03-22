@@ -44,6 +44,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     _searchController = TextEditingController(
       text: context.read<ReciterDetailsBloc>().state.searchQuery,
     );
+    if (widget.reciter.moshaf.isEmpty) return;
     final MoshafEntity selectedMoshaf = widget.reciter.moshaf.first;
     context.read<ReciterDetailsBloc>().add(
       LoadSurahList(reciter: widget.reciter, moshaf: selectedMoshaf),
@@ -85,7 +86,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   Future<void> _onRefresh() async {
     final bloc = context.read<ReciterDetailsBloc>();
-    final moshaf = bloc.state.selectedMoshaf ?? widget.reciter.moshaf.first;
+    final moshaf = bloc.state.selectedMoshaf ??
+        (widget.reciter.moshaf.isNotEmpty ? widget.reciter.moshaf.first : null);
+    if (moshaf == null) return;
     bloc.add(LoadSurahList(reciter: widget.reciter, moshaf: moshaf));
     bloc.add(LoadReciterHistory(widget.reciter.id.toString()));
     await Future<void>.delayed(const Duration(milliseconds: 800));
@@ -421,12 +424,14 @@ class _ReciterDetailsContent extends StatelessWidget {
                 SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () {
-                    context.read<ReciterDetailsBloc>().add(
-                      LoadSurahList(
-                        reciter: reciter,
-                        moshaf: reciter.moshaf.first,
-                      ),
-                    );
+                    if (reciter.moshaf.isNotEmpty) {
+                      context.read<ReciterDetailsBloc>().add(
+                        LoadSurahList(
+                          reciter: reciter,
+                          moshaf: reciter.moshaf.first,
+                        ),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.refresh_rounded),
                   label: Text(context.l10n.retry),
