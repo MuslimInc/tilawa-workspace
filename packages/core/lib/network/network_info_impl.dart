@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -29,12 +30,14 @@ class NetworkInfoImpl implements NetworkInfo {
       if (result.contains(ConnectivityResult.none)) {
         return false;
       }
-      // Double check with actual internet lookup
+      // Double check with actual internet lookup (with timeout to avoid long waits)
       final List<InternetAddress> lookupResult = await internetLookup(
         'google.com',
-      );
+      ).timeout(const Duration(seconds: 5));
       return lookupResult.isNotEmpty && lookupResult[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
       return false;
     }
   }

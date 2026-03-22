@@ -6,7 +6,6 @@ import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
 import '../../data/services/downloads_initialization_service.dart';
-import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
 
@@ -37,25 +36,18 @@ class DownloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
+      key: ValueKey(url),
       create: (context) {
-        // Try provider first, fall back to GetIt if provider isn't available
-        DownloadsRepository repo;
-        try {
-          repo = context.read<DownloadsRepository>();
-        } catch (e) {
-          repo = getIt<DownloadsRepository>();
-        }
-
         final bloc = DownloadButtonBloc(
           url: url,
           reciterName: reciterName,
           reciterId: reciterId,
           checkSurahDownloaded: getIt<CheckSurahDownloadedUseCase>(),
           downloadSurah: getIt<DownloadSurahUseCase>(),
-          cancelDownload: CancelDownloadUseCase(repo),
-          pauseDownload: PauseDownloadUseCase(repo),
-          resumeDownload: ResumeDownloadUseCase(repo),
-          observeDownloadProgress: ObserveDownloadProgressUseCase(repo),
+          cancelDownload: getIt<CancelDownloadUseCase>(),
+          pauseDownload: getIt<PauseDownloadUseCase>(),
+          resumeDownload: getIt<ResumeDownloadUseCase>(),
+          observeDownloadProgress: getIt<ObserveDownloadProgressUseCase>(),
           networkInfo: getIt<NetworkInfo>(),
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,

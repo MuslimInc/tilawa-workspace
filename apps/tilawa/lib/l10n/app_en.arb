@@ -1136,6 +1136,14 @@
     "@offlinePlaybackError": {
         "description": "Error shown when user tries to play undownloaded content while offline"
     },
+    "offlineFileMissingError": "Downloaded file is missing. Please re-download this content.",
+    "@offlineFileMissingError": {
+        "description": "Error shown when downloaded file no longer exists on disk"
+    },
+    "offlineDownloadIncompleteError": "This content is not fully downloaded. Please complete the download first.",
+    "@offlineDownloadIncompleteError": {
+        "description": "Error shown when download exists but is not completed"
+    },
     "bookmarks": "Bookmarks",
     "@bookmarks": {
         "description": "Bookmarks screen title"

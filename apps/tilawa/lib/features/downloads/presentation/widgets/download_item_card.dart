@@ -7,7 +7,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../../data/services/download_queue_manager.dart';
+import '../../domain/services/download_queue_service_interface.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import '../extensions/download_item_extensions.dart';
@@ -269,7 +269,7 @@ class DownloadItemCard extends StatelessWidget {
     final downloading = '${context.l10n.downloading} $progress%';
 
     if (download.status == DownloadStatus.pending) {
-      final int queuePosition = getIt<DownloadQueueManager>().getQueuePosition(
+      final int queuePosition = getIt<IDownloadQueueService>().getQueuePosition(
         download.id,
       );
       if (queuePosition > 0) {

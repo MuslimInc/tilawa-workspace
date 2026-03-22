@@ -1,5 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import '../../domain/entities/download_item.dart';
 
 /// Interface for the download notification service
@@ -59,6 +57,6 @@ abstract interface class IDownloadNotificationService {
   /// Cancel all download notifications
   Future<void> cancelAllNotifications();
 
-  /// Handle notification tap
-  Future<void> handleNotificationResponse(NotificationResponse response);
+  /// Handle notification tap from payload string
+  Future<void> handleNotificationTap(String? payload);
 }

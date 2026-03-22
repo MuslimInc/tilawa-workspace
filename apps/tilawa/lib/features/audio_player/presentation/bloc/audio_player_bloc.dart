@@ -5,6 +5,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -12,7 +14,7 @@ import 'package:tilawa_core/services/analytics_service.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
 import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
-import '../../../settings/presentation/cubit/settings_cubit.dart';
+import '../../../settings/domain/services/sleep_timer_settings.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/check_audio_playability_use_case.dart';
@@ -45,7 +47,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._moveQueueItem,
     this._loadAudioPlayerData,
     this._checkAudioPlayability,
-    this._settingsCubit,
+    this._sleepTimerSettings,
     this._addOrUpdateHistory,
     this._analyticsService,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
@@ -104,7 +106,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final MoveQueueItemUseCase _moveQueueItem;
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
   final CheckAudioPlayabilityUseCase _checkAudioPlayability;
-  final SettingsCubit _settingsCubit;
+  final SleepTimerSettings _sleepTimerSettings;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
   final AnalyticsService _analyticsService;
 
@@ -114,6 +116,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final Map<String, Duration> _lastKnownDurations = {};
   final Set<String> _completedAudioIds = {};
   Timer? _sleepTimer;
+  bool _isSleepTimerEnabled = true;
 
   /// Maximum number of cached entries before eviction.
   static const int _maxCacheSize = 50;
@@ -170,38 +173,36 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     );
 
     _subscriptions.add(
-      _getAudioStreams.position.listen(
-        (position) {
-          final AudioEntity? currentAudio = state.currentAudio;
-          final PlaybackStateEntity? playbackState = state.playbackState;
+      _getAudioStreams.position.listen((position) {
+        final AudioEntity? currentAudio = state.currentAudio;
+        final PlaybackStateEntity? playbackState = state.playbackState;
 
-          final Duration duration = currentAudio != null
-              ? currentAudio.duration
-              : Duration.zero;
-          final Duration buffered = playbackState != null
-              ? playbackState.bufferedPosition
-              : Duration.zero;
+        final Duration duration = currentAudio != null
+            ? currentAudio.duration
+            : Duration.zero;
+        final Duration buffered = playbackState != null
+            ? playbackState.bufferedPosition
+            : Duration.zero;
 
-          add(
-            AudioPlayerEvent.updatePositionData(
-              PositionData(
-                position: position,
-                bufferedPosition: buffered,
-                duration: duration,
-              ),
+        add(
+          AudioPlayerEvent.updatePositionData(
+            PositionData(
+              position: position,
+              bufferedPosition: buffered,
+              duration: duration,
             ),
-          );
-        },
-        onError: onStreamError,
-      ),
+          ),
+        );
+      }, onError: onStreamError),
     );
   }
 
   void _setupSettingsSubscription() {
     _subscriptions.add(
-      _settingsCubit.stream.listen(
-        (settingsState) {
-          if (!settingsState.isSleepTimerEnabled) {
+      _sleepTimerSettings.isSleepTimerEnabledStream.listen(
+        (isEnabled) {
+          _isSleepTimerEnabled = isEnabled;
+          if (!isEnabled) {
             add(const AudioPlayerEvent.cancelSleepTimer());
           }
         },
@@ -388,7 +389,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       (_) {
         // Only restart sleep timer if one was actively running before pause
         // (sleepTimerTargetTime is cleared on stop/expiry but kept on pause)
-        if (_settingsCubit.state.isSleepTimerEnabled &&
+        if (_isSleepTimerEnabled &&
             state.lastSleepTimerDuration != null &&
             state.sleepTimerTargetTime != null) {
           add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
@@ -509,12 +510,23 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     await playabilityResult.fold(
       (failure) {
-        // Playback not allowed - show user-friendly toast
-        if (failure is OfflinePlaybackFailure || failure is NetworkFailure) {
-          ToastUtils.showErrorToast(
-            failure.message ??
-                'This content is not available offline. Please download it first.',
-          );
+        // Playback not allowed - show localized toast
+        if (failure is OfflinePlaybackFailure) {
+          final context = AppRouter.navigatorKey.currentContext;
+          final l10n = context != null
+              ? AppLocalizations.of(context)
+              : null;
+          final String message = switch (failure.reason) {
+            OfflinePlaybackReason.notDownloaded =>
+              l10n?.offlinePlaybackError ?? failure.message ?? '',
+            OfflinePlaybackReason.fileMissing =>
+              l10n?.offlineFileMissingError ?? failure.message ?? '',
+            OfflinePlaybackReason.downloadIncomplete =>
+              l10n?.offlineDownloadIncompleteError ?? failure.message ?? '',
+          };
+          ToastUtils.showErrorToast(message);
+        } else if (failure is NetworkFailure) {
+          ToastUtils.showErrorToast(failure.message ?? '');
         }
         // Don't proceed with playback
       },

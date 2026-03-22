@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,15 +19,14 @@ import 'l10n/generated/app_localizations.dart';
 import 'main.dart';
 import 'router/app_router.dart';
 
-class QuranPlayerApp extends StatefulWidget {
-  const QuranPlayerApp({super.key});
+class TilawaApp extends StatefulWidget {
+  const TilawaApp({super.key});
 
   @override
-  State<QuranPlayerApp> createState() => _QuranPlayerAppState();
+  State<TilawaApp> createState() => _TilawaAppState();
 }
 
-class _QuranPlayerAppState extends State<QuranPlayerApp>
-    with WidgetsBindingObserver {
+class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   bool _hasProcessedLaunchNotification = false;
   Timer? _resumeDebounceTimer;
   bool _isCheckingNotification = false;
@@ -92,11 +92,9 @@ class _QuranPlayerAppState extends State<QuranPlayerApp>
       // Check if the launch notification is the same one we already handled.
       // getNotificationAppLaunchDetails() returns the SAME data on every call,
       // so we compare the notification ID to avoid re-processing.
-      final launchDetails =
-          await dispatcher.getNotificationAppLaunchDetails();
+      final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
       final int? currentId = launchDetails?.notificationResponse?.id;
-      if (currentId == null ||
-          currentId == _lastProcessedNotificationId) {
+      if (currentId == null || currentId == _lastProcessedNotificationId) {
         return;
       }
 
@@ -154,6 +152,7 @@ class _PlayerApp extends StatelessWidget {
               return MaterialApp.router(
                 title: AppStrings.appName,
                 debugShowCheckedModeBanner: false,
+                builder: DevicePreview.appBuilder,
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
                 ),

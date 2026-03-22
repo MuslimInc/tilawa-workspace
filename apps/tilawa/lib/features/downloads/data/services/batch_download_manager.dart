@@ -9,13 +9,14 @@ import 'package:tilawa_core/config/language_config.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/services/batch_download_service_interface.dart';
 import '../../domain/services/download_notification_service_interface.dart';
 import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages batch downloads and their notifications
 @lazySingleton
-class BatchDownloadManager {
+class BatchDownloadManager implements IBatchDownloadService {
   BatchDownloadManager(
     this._downloadService,
     this._notificationService,
@@ -160,6 +161,7 @@ class BatchDownloadManager {
 
   /// Cancel all active batches for a specific reciter
   /// Used when user pauses/cancels downloads for a specific reciter
+  @override
   Future<void> cancelBatchesForReciter(String reciterName) async {
     if (_activeBatches.isEmpty) {
       return;

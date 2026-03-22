@@ -10,12 +10,13 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/download_notification_service_interface.dart';
+import '../../domain/services/download_queue_service_interface.dart';
 import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
 @LazySingleton()
-class DownloadQueueManager {
+class DownloadQueueManager implements IDownloadQueueService {
   DownloadQueueManager(this._downloadService, this._notificationService);
 
   final DownloadServiceInterface _downloadService;
@@ -25,6 +26,7 @@ class DownloadQueueManager {
   int _maxConcurrentDownloads = 2; // Default to 2
 
   /// Set the maximum number of concurrent downloads
+  @override
   set maxConcurrentDownloads(int count) {
     if (count < 1) {
       return;
@@ -40,6 +42,7 @@ class DownloadQueueManager {
   }
 
   /// Get the maximum number of concurrent downloads
+  @override
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
   // Current locale for localized notification messages
@@ -221,6 +224,7 @@ class DownloadQueueManager {
   }
 
   /// Remove a download from the queue
+  @override
   void removeFromQueue(String id) {
     _queue.removeWhere((download) => download.id == id);
     _downloadMetadata.remove(id);
@@ -233,7 +237,8 @@ class DownloadQueueManager {
     return _queue.any((download) => download.id == id);
   }
 
-  /// Get queue position for a download (0-based, -1 if not in queue)
+  /// Get queue position for a download (1-based, -1 if not in queue)
+  @override
   int getQueuePosition(String id) {
     final int index = _queue.indexWhere((download) => download.id == id);
     return index >= 0 ? index + 1 : -1;
@@ -592,6 +597,7 @@ class DownloadQueueManager {
   /// [_processQueue] — which is triggered by completed/cancelled events —
   /// cannot pick up new items for this reciter while the cancel loop is
   /// running.
+  @override
   void dequeueForReciter(String reciterName) {
     final String normalizedName = reciterName.toLowerCase();
     final List<String> removedIds = _queue

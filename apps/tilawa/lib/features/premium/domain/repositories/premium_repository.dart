@@ -19,6 +19,9 @@ abstract class PremiumRepository {
   Future<bool> startTrial();
   Future<bool> isTrialEligible();
 
+  // Clear local premium data (e.g. on sign-out)
+  Future<void> clearPremiumStatus();
+
   // Feature access
   Future<bool> canAccessFeature(String featureName);
   Future<bool> canDownload();

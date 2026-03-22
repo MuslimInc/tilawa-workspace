@@ -1,23 +1,20 @@
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
 
 import '../repositories/user_repository.dart';
+import '../services/token_sync_cache.dart';
 
 @injectable
 class SyncDeviceTokenUseCase {
   SyncDeviceTokenUseCase(
     this._userRepository,
     this._deviceTokenService,
-    this._prefs,
+    this._tokenSyncCache,
   );
-
-  static const String _lastSyncedTokenKey = 'last_synced_fcm_token';
-  static const String _lastSyncedUserIdKey = 'last_synced_fcm_user_id';
 
   final UserRepository _userRepository;
   final DeviceTokenService _deviceTokenService;
-  final SharedPreferencesAsync _prefs;
+  final TokenSyncCache _tokenSyncCache;
 
   Future<void> call(String userId) async {
     try {
@@ -26,10 +23,9 @@ class SyncDeviceTokenUseCase {
         return;
       }
 
-      final String? previousToken = await _prefs.getString(_lastSyncedTokenKey);
-      final String? previousUserId = await _prefs.getString(
-        _lastSyncedUserIdKey,
-      );
+      final String? previousToken = await _tokenSyncCache.getLastSyncedToken();
+      final String? previousUserId =
+          await _tokenSyncCache.getLastSyncedUserId();
 
       if (previousToken != null &&
           previousToken.isNotEmpty &&
@@ -40,8 +36,7 @@ class SyncDeviceTokenUseCase {
       }
 
       await _userRepository.saveDeviceToken(userId, token);
-      await _prefs.setString(_lastSyncedTokenKey, token);
-      await _prefs.setString(_lastSyncedUserIdKey, userId);
+      await _tokenSyncCache.saveSync(token, userId);
     } catch (e) {
       // Fail silently for token sync, don't block auth flow
     }
@@ -50,10 +45,9 @@ class SyncDeviceTokenUseCase {
   Future<void> removeCurrentTokenForUser(String userId) async {
     try {
       final String? currentToken = await _deviceTokenService.getToken();
-      final String? previousToken = await _prefs.getString(_lastSyncedTokenKey);
-      final String? previousUserId = await _prefs.getString(
-        _lastSyncedUserIdKey,
-      );
+      final String? previousToken = await _tokenSyncCache.getLastSyncedToken();
+      final String? previousUserId =
+          await _tokenSyncCache.getLastSyncedUserId();
 
       if (currentToken != null && currentToken.isNotEmpty) {
         await _deleteTokenQuietly(userId, currentToken);
@@ -67,8 +61,7 @@ class SyncDeviceTokenUseCase {
         await _deleteTokenQuietly(previousUserId, previousToken);
       }
     } finally {
-      await _prefs.remove(_lastSyncedTokenKey);
-      await _prefs.remove(_lastSyncedUserIdKey);
+      await _tokenSyncCache.clearSync();
     }
   }
 

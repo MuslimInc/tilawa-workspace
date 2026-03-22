@@ -835,6 +835,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This content is not available offline. Please download it first.';
 
   @override
+  String get offlineFileMissingError =>
+      'Downloaded file is missing. Please re-download this content.';
+
+  @override
+  String get offlineDownloadIncompleteError =>
+      'This content is not fully downloaded. Please complete the download first.';
+
+  @override
   String get bookmarks => 'Bookmarks';
 
   @override

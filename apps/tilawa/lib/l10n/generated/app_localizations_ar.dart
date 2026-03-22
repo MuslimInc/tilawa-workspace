@@ -828,6 +828,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذا المحتوى غير متاح بدون اتصال. يرجى تنزيله أولاً.';
 
   @override
+  String get offlineFileMissingError =>
+      'ملف التنزيل مفقود. يرجى إعادة تنزيل هذا المحتوى.';
+
+  @override
+  String get offlineDownloadIncompleteError =>
+      'لم يكتمل تنزيل هذا المحتوى. يرجى إكمال التنزيل أولاً.';
+
+  @override
   String get bookmarks => 'العلامات المرجعية';
 
   @override

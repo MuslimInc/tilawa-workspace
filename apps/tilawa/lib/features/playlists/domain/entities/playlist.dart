@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 
 class Playlist extends Equatable {
@@ -104,11 +103,6 @@ class Playlist extends Equatable {
 
   /// Check if playlist has items
   bool get isNotEmpty => items.isNotEmpty;
-
-  /// Get MediaItems for audio service
-  List<MediaItem> get mediaItems {
-    return items.map((item) => item.toMediaItem()).toList();
-  }
 }
 
 class PlaylistItem extends Equatable {
@@ -141,23 +135,6 @@ class PlaylistItem extends Equatable {
       genre: json['genre'] as String?,
       filePath: json['filePath'] as String?,
       isDownloaded: json['isDownloaded'] as bool? ?? false,
-    );
-  }
-
-  /// Create from MediaItem
-  factory PlaylistItem.fromMediaItem(MediaItem mediaItem) {
-    return PlaylistItem(
-      id: mediaItem.id,
-      title: mediaItem.title,
-      artist: mediaItem.artist ?? 'Unknown Artist',
-      url: mediaItem.id, // Use ID as URL for now
-      duration: mediaItem.duration ?? Duration.zero,
-      addedAt: DateTime.now(),
-      artUri: mediaItem.artUri,
-      album: mediaItem.album,
-      filePath: mediaItem.extras?['filePath'] as String?,
-      isDownloaded: mediaItem.extras?['isDownloaded'] as bool? ?? false,
-      genre: mediaItem.extras?['genre'] as String?,
     );
   }
 
@@ -230,23 +207,5 @@ class PlaylistItem extends Equatable {
       'filePath': filePath,
       'isDownloaded': isDownloaded,
     };
-  }
-
-  /// Convert to MediaItem for audio service
-  MediaItem toMediaItem() {
-    return MediaItem(
-      id: id,
-      title: title,
-      artist: artist,
-      album: album,
-      duration: duration,
-      artUri: artUri,
-      extras: {
-        'filePath': filePath,
-        'isDownloaded': isDownloaded,
-        'genre': genre,
-        'addedAt': addedAt.toIso8601String(),
-      },
-    );
   }
 }

@@ -1136,6 +1136,14 @@
     "@offlinePlaybackError": {
         "description": "Error shown when user tries to play undownloaded content while offline"
     },
+    "offlineFileMissingError": "ملف التنزيل مفقود. يرجى إعادة تنزيل هذا المحتوى.",
+    "@offlineFileMissingError": {
+        "description": "Error shown when downloaded file no longer exists on disk"
+    },
+    "offlineDownloadIncompleteError": "لم يكتمل تنزيل هذا المحتوى. يرجى إكمال التنزيل أولاً.",
+    "@offlineDownloadIncompleteError": {
+        "description": "Error shown when download exists but is not completed"
+    },
     "bookmarks": "العلامات المرجعية",
     "@bookmarks": {
         "description": "Bookmarks screen title"

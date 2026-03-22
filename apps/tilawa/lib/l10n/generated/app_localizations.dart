@@ -1574,6 +1574,18 @@ abstract class AppLocalizations {
   /// **'This content is not available offline. Please download it first.'**
   String get offlinePlaybackError;
 
+  /// Error shown when downloaded file no longer exists on disk
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded file is missing. Please re-download this content.'**
+  String get offlineFileMissingError;
+
+  /// Error shown when download exists but is not completed
+  ///
+  /// In en, this message translates to:
+  /// **'This content is not fully downloaded. Please complete the download first.'**
+  String get offlineDownloadIncompleteError;
+
   /// Bookmarks screen title
   ///
   /// In en, this message translates to:

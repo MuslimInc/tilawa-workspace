@@ -4,7 +4,8 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 
-import '../../../downloads/data/services/download_queue_manager.dart';
+import '../../../downloads/domain/services/download_queue_service_interface.dart';
+import '../../domain/services/sleep_timer_settings.dart';
 
 class SettingsState extends Equatable {
   const SettingsState({
@@ -43,16 +44,17 @@ class SettingsState extends Equatable {
   ];
 }
 
-@injectable
-class SettingsCubit extends HydratedCubit<SettingsState> {
-  SettingsCubit(this._downloadQueueManager, this._getAppInfo)
+@lazySingleton
+class SettingsCubit extends HydratedCubit<SettingsState>
+    implements SleepTimerSettings {
+  SettingsCubit(this._downloadQueueService, this._getAppInfo)
     : super(const SettingsState()) {
     // Initialize DownloadQueueManager with persisted value
     _updateQueueManager();
     _fetchAppInfo();
   }
 
-  final DownloadQueueManager _downloadQueueManager;
+  final IDownloadQueueService _downloadQueueService;
   final GetAppInfo _getAppInfo;
 
   Future<void> _fetchAppInfo() async {
@@ -100,6 +102,10 @@ class SettingsCubit extends HydratedCubit<SettingsState> {
   }
 
   void _updateQueueManager() {
-    _downloadQueueManager.maxConcurrentDownloads = state.maxConcurrentDownloads;
+    _downloadQueueService.maxConcurrentDownloads = state.maxConcurrentDownloads;
   }
+
+  @override
+  Stream<bool> get isSleepTimerEnabledStream =>
+      stream.map((s) => s.isSleepTimerEnabled).distinct();
 }

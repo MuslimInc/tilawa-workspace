@@ -8,16 +8,16 @@ void main() {
   late SyncDeviceTokenUseCase useCase;
   late MockUserRepository mockUserRepository;
   late MockDeviceTokenService mockDeviceTokenService;
-  late MockSharedPreferencesAsync mockPrefs;
+  late MockTokenSyncCache mockTokenSyncCache;
 
   setUp(() {
     mockUserRepository = MockUserRepository();
     mockDeviceTokenService = MockDeviceTokenService();
-    mockPrefs = MockSharedPreferencesAsync();
+    mockTokenSyncCache = MockTokenSyncCache();
     useCase = SyncDeviceTokenUseCase(
       mockUserRepository,
       mockDeviceTokenService,
-      mockPrefs,
+      mockTokenSyncCache,
     );
   });
 
@@ -29,11 +29,15 @@ void main() {
     () async {
       // Arrange
       when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
-      when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+      when(mockTokenSyncCache.getLastSyncedToken())
+          .thenAnswer((_) async => null);
+      when(mockTokenSyncCache.getLastSyncedUserId())
+          .thenAnswer((_) async => null);
       when(
         mockUserRepository.saveDeviceToken(any, any),
       ).thenAnswer((_) async => Future.value());
-      when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
+      when(mockTokenSyncCache.saveSync(any, any))
+          .thenAnswer((_) async {});
 
       // Act
       await useCase(tUserId);
@@ -41,7 +45,7 @@ void main() {
       // Assert
       verify(mockDeviceTokenService.getToken()).called(1);
       verify(mockUserRepository.saveDeviceToken(tUserId, tToken)).called(1);
-      verify(mockPrefs.setString(any, any)).called(2);
+      verify(mockTokenSyncCache.saveSync(tToken, tUserId)).called(1);
     },
   );
 
@@ -61,23 +65,18 @@ void main() {
     'should remove previous synced token when token ownership changes',
     () async {
       when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
-      when(mockPrefs.getString(any)).thenAnswer((invocation) async {
-        final String key = invocation.positionalArguments.first as String;
-        if (key.contains('fcm_token')) {
-          return 'old_token';
-        }
-        if (key.contains('fcm_user_id')) {
-          return 'old_user';
-        }
-        return null;
-      });
+      when(mockTokenSyncCache.getLastSyncedToken())
+          .thenAnswer((_) async => 'old_token');
+      when(mockTokenSyncCache.getLastSyncedUserId())
+          .thenAnswer((_) async => 'old_user');
       when(
         mockUserRepository.deleteDeviceToken(any, any),
       ).thenAnswer((_) async {});
       when(
         mockUserRepository.saveDeviceToken(any, any),
       ).thenAnswer((_) async {});
-      when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
+      when(mockTokenSyncCache.saveSync(any, any))
+          .thenAnswer((_) async {});
 
       await useCase(tUserId);
 

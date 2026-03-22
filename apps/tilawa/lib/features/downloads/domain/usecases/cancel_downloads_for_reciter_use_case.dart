@@ -5,24 +5,24 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../../../reciters/domain/repositories/reciters_repository.dart';
-import '../../data/services/batch_download_manager.dart';
-import '../../data/services/download_queue_manager.dart';
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
+import '../services/batch_download_service_interface.dart';
+import '../services/download_queue_service_interface.dart';
 
 @injectable
 class CancelDownloadsForReciterUseCase implements UseCase<void, String> {
   CancelDownloadsForReciterUseCase(
     this._repository,
     this._recitersRepository,
-    this._batchDownloadManager,
-    this._queueManager,
+    this._batchDownloadService,
+    this._queueService,
   );
 
   final DownloadsRepository _repository;
   final RecitersRepository _recitersRepository;
-  final BatchDownloadManager _batchDownloadManager;
-  final DownloadQueueManager _queueManager;
+  final IBatchDownloadService _batchDownloadService;
+  final IDownloadQueueService _queueService;
 
   @override
   Future<Either<Failure, void>> call(String reciterName) async {
@@ -32,12 +32,12 @@ class CancelDownloadsForReciterUseCase implements UseCase<void, String> {
       // finishes/is cancelled, which can pick up the next queued item for the
       // same reciter before the loop below has had a chance to remove it.
       // Clearing the queue here prevents those items from ever starting.
-      _queueManager.dequeueForReciter(reciterName);
+      _queueService.dequeueForReciter(reciterName);
 
       // Cancel batch notifications for this reciter immediately
       // This ensures notifications are cancelled even if individual download
       // cancellation takes time
-      await _batchDownloadManager.cancelBatchesForReciter(reciterName);
+      await _batchDownloadService.cancelBatchesForReciter(reciterName);
 
       // 1. Get all downloads
       final List<DownloadItem> allDownloads = await _repository

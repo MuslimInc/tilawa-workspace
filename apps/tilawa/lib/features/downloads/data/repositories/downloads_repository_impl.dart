@@ -755,7 +755,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
   }
 
-  @override
   MediaItem createMediaItemFromDownload(DownloadItem download) {
     // Convert file path to proper file:// URI
     final fileUri = Uri.file(download.filePath).toString();
@@ -778,7 +777,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     return validator.verifyFileExists(download.filePath);
   }
 
-  @override
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads) {
     return downloads.map(createMediaItemFromDownload).toList();
   }

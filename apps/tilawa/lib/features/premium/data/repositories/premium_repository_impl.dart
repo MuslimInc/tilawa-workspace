@@ -168,6 +168,11 @@ class PremiumRepositoryImpl implements PremiumRepository {
   }
 
   @override
+  Future<void> clearPremiumStatus() async {
+    await _localDataSource.clearPremiumStatus();
+  }
+
+  @override
   Future<bool> canAccessFeature(String featureName) async {
     final PremiumStatus status = await getPremiumStatus();
 

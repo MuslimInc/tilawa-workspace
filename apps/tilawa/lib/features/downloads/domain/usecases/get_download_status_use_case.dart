@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 
-import '../../data/services/download_service_interface.dart';
-import '../../domain/entities/download_item.dart';
+import '../entities/download_item.dart';
+import '../services/download_service_interface.dart';
 
 @Singleton()
 class GetDownloadStatusUseCase {

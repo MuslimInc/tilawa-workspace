@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:credential_manager/credential_manager.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -27,8 +28,8 @@ import 'features/downloads/domain/services/download_notification_service_interfa
 import 'features/notifications/domain/repositories/notifications_repository.dart';
 import 'features/notifications/presentation/services/fcm_service.dart';
 import 'firebase_options.dart';
-import 'quran_player_app.dart';
 import 'router/app_router.dart';
+import 'tilawa_app.dart';
 
 final logger = Logger();
 
@@ -126,7 +127,12 @@ Future<void> bootstrap({
     // ========================================================================
     // APP STARTS HERE - User sees UI immediately!
     // ========================================================================
-    run(const QuranPlayerApp());
+    run(
+      DevicePreview(
+        enabled: !kReleaseMode,
+        builder: (context) => const TilawaApp(),
+      ),
+    );
 
     // ========================================================================
     // NON-CRITICAL: Initialize in background after app is visible

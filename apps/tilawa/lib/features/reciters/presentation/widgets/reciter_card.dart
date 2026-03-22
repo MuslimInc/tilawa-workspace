@@ -41,9 +41,9 @@ class ReciterCard extends StatelessWidget {
             ),
             padding: EdgeInsets.all(12),
             child: Row(
+              spacing: 12,
               children: [
                 _ReciterAvatar(reciter: reciter),
-                SizedBox(width: 14),
                 Expanded(child: _ReciterInfo(reciter: reciter)),
                 _FavoriteButton(reciter: reciter),
               ],
