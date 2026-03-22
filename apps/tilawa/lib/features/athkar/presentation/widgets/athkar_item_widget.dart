@@ -65,10 +65,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             onTap();
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 16,
-            ).copyWith(bottom: 120),
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

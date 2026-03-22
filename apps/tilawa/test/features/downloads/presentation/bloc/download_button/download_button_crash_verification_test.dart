@@ -101,6 +101,7 @@ void main() {
   setUpAll(() {
     provideDummy<Either<Failure, bool>>(const Right(false));
     provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, DownloadItem?>>(const Right(null));
   });
 
   group('Crash Verification - Prove Firebase Report is Accurate', () {
@@ -385,6 +386,7 @@ void main() {
     late MockPauseDownloadUseCase mockPauseDownload;
     late MockResumeDownloadUseCase mockResumeDownload;
     late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+    late MockGetDownloadItemUseCase mockGetDownloadItem;
     late MockNetworkInfo mockNetworkInfo;
 
     const testUrl = 'https://example.com/001.mp3';
@@ -401,6 +403,10 @@ void main() {
       mockObserveDownloadProgress = MockObserveDownloadProgressUseCase();
       mockNetworkInfo = MockNetworkInfo();
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+
+      mockGetDownloadItem = MockGetDownloadItemUseCase();
+      when(mockGetDownloadItem.call(any))
+          .thenAnswer((_) async => const Right(null));
 
       when(
         mockCheckSurahDownloaded.call(
@@ -438,6 +444,7 @@ void main() {
           pauseDownload: mockPauseDownload,
           resumeDownload: mockResumeDownload,
           observeDownloadProgress: mockObserveDownloadProgress,
+          getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
         );
 

@@ -127,12 +127,7 @@ Future<void> bootstrap({
     // ========================================================================
     // APP STARTS HERE - User sees UI immediately!
     // ========================================================================
-    run(
-      DevicePreview(
-        enabled: !kReleaseMode,
-        builder: (context) => const TilawaApp(),
-      ),
-    );
+    run(DevicePreview(enabled: false, builder: (context) => const TilawaApp()));
 
     // ========================================================================
     // NON-CRITICAL: Initialize in background after app is visible

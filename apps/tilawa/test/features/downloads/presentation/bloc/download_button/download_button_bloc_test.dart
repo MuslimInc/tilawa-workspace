@@ -14,6 +14,7 @@ void main() {
   setUpAll(() {
     provideDummy<Either<Failure, bool>>(const Right(false));
     provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, DownloadItem?>>(const Right(null));
   });
 
   late MockCheckSurahDownloadedUseCase mockCheckSurahDownloaded;
@@ -22,6 +23,7 @@ void main() {
   late MockPauseDownloadUseCase mockPauseDownload;
   late MockResumeDownloadUseCase mockResumeDownload;
   late MockObserveDownloadProgressUseCase mockObserveDownloadProgress;
+  late MockGetDownloadItemUseCase mockGetDownloadItem;
   late MockNetworkInfo mockNetworkInfo;
   DownloadButtonBloc? downloadButtonBloc;
 
@@ -55,6 +57,11 @@ void main() {
     // Default: Online
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
+    mockGetDownloadItem = MockGetDownloadItemUseCase();
+    // Default: No active download item found
+    when(mockGetDownloadItem.call(any))
+        .thenAnswer((_) async => const Right(null));
+
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
       reciterName: testReciterName,
@@ -65,6 +72,7 @@ void main() {
       pauseDownload: mockPauseDownload,
       resumeDownload: mockResumeDownload,
       observeDownloadProgress: mockObserveDownloadProgress,
+      getDownloadItem: mockGetDownloadItem,
       networkInfo: mockNetworkInfo,
     );
   });
@@ -161,6 +169,7 @@ void main() {
             downloadSurah: mockDownloadSurah,
             cancelDownload: mockCancelDownload,
             observeDownloadProgress: mockObserveDownloadProgress,
+            getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
             initialIsDownloading: true,
             initialProgress: 0.1,
@@ -183,6 +192,7 @@ void main() {
             downloadSurah: mockDownloadSurah,
             cancelDownload: mockCancelDownload,
             observeDownloadProgress: mockObserveDownloadProgress,
+            getDownloadItem: mockGetDownloadItem,
             networkInfo: mockNetworkInfo,
             initialIsDownloaded: true,
             pauseDownload: mockPauseDownload,
@@ -406,6 +416,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
@@ -647,6 +658,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,
@@ -705,6 +717,7 @@ void main() {
           downloadSurah: mockDownloadSurah,
           cancelDownload: mockCancelDownload,
           observeDownloadProgress: mockObserveDownloadProgress,
+          getDownloadItem: mockGetDownloadItem,
           networkInfo: mockNetworkInfo,
           pauseDownload: mockPauseDownload,
           resumeDownload: mockResumeDownload,
@@ -793,6 +806,7 @@ void main() {
         downloadSurah: mockDownloadSurah,
         cancelDownload: mockCancelDownload,
         observeDownloadProgress: mockObserveDownloadProgress,
+        getDownloadItem: mockGetDownloadItem,
         networkInfo: mockNetworkInfo,
         pauseDownload: mockPauseDownload,
         resumeDownload: mockResumeDownload,

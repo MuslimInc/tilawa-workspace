@@ -2,6 +2,7 @@
   "dart.flutterSdkPath": ".fvm/versions/3.41.4",
   "cSpell.words": [
     "Athkar",
+    "Firestore",
     "tilawa",
     "usecases"
   ],

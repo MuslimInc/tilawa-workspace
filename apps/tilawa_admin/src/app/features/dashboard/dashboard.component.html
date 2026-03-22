@@ -1,0 +1,160 @@
+<div class="space-y-6">
+  
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">Dashboard Overview</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        Export
+      </button>
+      <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        New Entry
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    
+    <!-- Total Reciters -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 relative group">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
+            <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Reciters</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">124</div>
+                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600 dark:text-green-400">
+                  <svg class="self-center flex-shrink-0 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                  <span class="sr-only">Increased by</span>
+                  12%
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+    </div>
+
+    <!-- Total Surahs -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 relative group">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-lg group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
+            <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Surahs (Mapped)</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">114</div>
+                <div class="ml-2 flex items-baseline text-sm font-semibold text-gray-500 dark:text-gray-400">
+                  <span class="sr-only">Maintained</span>
+                  -
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+    </div>
+
+    <!-- Active Users -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 relative group">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-violet-50 dark:bg-violet-900/30 p-3 rounded-lg group-hover:bg-violet-100 dark:group-hover:bg-violet-900/50 transition-colors">
+            <svg class="h-6 w-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total App Users</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                  @if (usersCount$ | async; as count) {
+                    {{ count | number }}
+                  } @else {
+                    <span class="animate-pulse bg-gray-200 dark:bg-gray-700 h-6 w-16 block rounded"></span>
+                  }
+                </div>
+                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600 dark:text-green-400">
+                  <svg class="self-center flex-shrink-0 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                  <span class="sr-only">Increased by</span>
+                  5.4%
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+    </div>
+
+    <!-- Downloads -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 relative group">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-amber-50 dark:bg-amber-900/30 p-3 rounded-lg group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors">
+            <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Content Downloads</dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">845k</div>
+                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600 dark:text-green-400">
+                  <svg class="self-center flex-shrink-0 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                  <span class="sr-only">Increased by</span>
+                  2.1%
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-100 dark:border-gray-700">
+    <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+      <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Recent Activity</h3>
+    </div>
+    <div class="p-6">
+      <div class="flex items-center justify-center h-48 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+        <div class="text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-300">No recent activity</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Activity logs will appear here once data starts flowing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -5,7 +5,6 @@ import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
-import '../../data/services/downloads_initialization_service.dart';
 import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
 
@@ -48,6 +47,7 @@ class DownloadButton extends StatelessWidget {
           pauseDownload: getIt<PauseDownloadUseCase>(),
           resumeDownload: getIt<ResumeDownloadUseCase>(),
           observeDownloadProgress: getIt<ObserveDownloadProgressUseCase>(),
+          getDownloadItem: getIt<GetDownloadItemUseCase>(),
           networkInfo: getIt<NetworkInfo>(),
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,
@@ -77,9 +77,6 @@ class DownloadButton extends StatelessWidget {
                 initial: () => const _LoadingDownloadButton(),
                 readyToDownload: () => _DefaultDownloadButton(
                   onDownload: () {
-                    logger.i(
-                      '[DownloadButton] Tapped onDownload for $surahTitle',
-                    );
                     context.read<DownloadButtonBloc>().add(
                       DownloadButtonEvent.startDownload(surahTitle: surahTitle),
                     );
