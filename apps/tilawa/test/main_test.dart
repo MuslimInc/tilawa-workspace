@@ -273,14 +273,15 @@ void main() {
 
     test('initializeAthkarNotifications success', () async {
       await initializeAthkarNotifications();
-      verify(() => mockAthkarService.initialize()).called(1);
       verify(() => mockAthkarService.scheduleAthkarNotifications()).called(1);
     });
 
     test('initializeAthkarNotifications failure', () async {
-      when(() => mockAthkarService.initialize()).thenThrow(Exception('Fail'));
+      when(
+        () => mockAthkarService.scheduleAthkarNotifications(),
+      ).thenThrow(Exception('Fail'));
       await initializeAthkarNotifications();
-      verify(() => mockAthkarService.initialize()).called(1);
+      verify(() => mockAthkarService.scheduleAthkarNotifications()).called(1);
     });
 
     // Test initializeNonCriticalServices

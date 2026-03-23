@@ -37,6 +37,9 @@ void main() {
         completedCount: anyNamed('completedCount'),
         totalCount: anyNamed('totalCount'),
         status: anyNamed('status'),
+        progressMessage: anyNamed('progressMessage'),
+        completeMessage: anyNamed('completeMessage'),
+        failedMessage: anyNamed('failedMessage'),
       ),
     ).thenAnswer((_) async => Future.value());
     when(
@@ -81,6 +84,9 @@ void main() {
           completedCount: 0,
           totalCount: 3,
           status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -98,6 +104,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       );
     });
@@ -176,6 +185,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1); // Only initial, no updates
     });
@@ -311,6 +323,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1); // Only initial, no updates
     });
@@ -352,6 +367,9 @@ void main() {
           completedCount: 0,
           totalCount: 2,
           status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -389,6 +407,9 @@ void main() {
           completedCount: 1,
           totalCount: 2,
           status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -422,6 +443,9 @@ void main() {
           completedCount: 0,
           totalCount: 1,
           status: DownloadStatus.failed,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -459,6 +483,9 @@ void main() {
           completedCount: 0,
           totalCount: 2,
           status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -509,6 +536,9 @@ void main() {
           completedCount: 2,
           totalCount: 2,
           status: DownloadStatus.completed,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
 
@@ -534,6 +564,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       );
     });
@@ -570,6 +603,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       );
     });
@@ -611,6 +647,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
 
@@ -622,6 +661,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       );
     });
@@ -664,6 +706,9 @@ void main() {
           completedCount: anyNamed('completedCount'),
           totalCount: anyNamed('totalCount'),
           status: anyNamed('status'),
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
@@ -718,6 +763,9 @@ void main() {
           completedCount: 1,
           totalCount: 2,
           status: DownloadStatus.downloading,
+          progressMessage: anyNamed('progressMessage'),
+          completeMessage: anyNamed('completeMessage'),
+          failedMessage: anyNamed('failedMessage'),
         ),
       ).called(1);
     });
