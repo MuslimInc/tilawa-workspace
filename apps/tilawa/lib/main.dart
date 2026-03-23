@@ -362,11 +362,15 @@ Future<void> initializeNotificationDispatcher() async {
     // If so, disable state restoration so the splash screen shows and handles it
     final NotificationAppLaunchDetails? launchDetails = await dispatcher
         .getNotificationAppLaunchDetails();
+    print('[FCM Route] main: local launchDetails=$launchDetails');
+    print('[FCM Route] main: didNotificationLaunchApp=${launchDetails?.didNotificationLaunchApp}');
+    // NOTE: Do NOT call getInitialMessage() here — it can only be consumed once.
+    // The splash screen will handle FCM initial message.
+
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      logger.d('App launched from notification - disabling state restoration');
-      // Import is needed - add to imports
+      print('[FCM Route] main: disabling state restoration (local notification)');
       AppRouter.disableStateRestoration = true;
     }
 

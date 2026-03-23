@@ -32,13 +32,18 @@ class SplashScreen extends StatelessWidget {
         },
         child: BlocListener<SplashCubit, SplashState>(
           listener: (context, state) {
+            print('[FCM Route] SplashScreen listener state: $state');
             if (state is SplashNavigateToHome) {
+              print('[FCM Route] SplashScreen => go(home)');
               const HomeRoute().go(context);
             } else if (state is SplashNavigateToLogin) {
+              print('[FCM Route] SplashScreen => go(login)');
               const LoginRoute().go(context);
             } else if (state is SplashNavigateToOnboarding) {
+              print('[FCM Route] SplashScreen => go(onboarding)');
               const OnboardingRoute().go(context);
             } else if (state is SplashNavigateToNotification) {
+              print('[FCM Route] SplashScreen => go(home) + push(${state.location})');
               const HomeRoute().go(context);
               GoRouter.of(context).push(state.location);
             }

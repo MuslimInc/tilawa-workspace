@@ -4,20 +4,17 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/features/splash/presentation/cubit/splash_cubit.dart';
-import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import 'splash_cubit_test.mocks.dart';
 
-@GenerateMocks([GetSplashNextRouteUseCase, INotificationDispatcher])
+@GenerateMocks([GetSplashNextRouteUseCase])
 void main() {
   late SplashCubit cubit;
   late MockGetSplashNextRouteUseCase mockGetSplashNextRouteUseCase;
-  late MockINotificationDispatcher mockDispatcher;
 
   setUp(() {
     mockGetSplashNextRouteUseCase = MockGetSplashNextRouteUseCase();
-    mockDispatcher = MockINotificationDispatcher();
-    cubit = SplashCubit(mockGetSplashNextRouteUseCase, mockDispatcher);
+    cubit = SplashCubit(mockGetSplashNextRouteUseCase);
   });
 
   tearDown(() {
@@ -34,7 +31,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashDestination.home);
+        ).thenAnswer(
+          (_) async => SplashRouteResult(SplashDestination.home),
+        );
         return cubit;
       },
       act: (cubit) => cubit.init(),
@@ -46,7 +45,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashDestination.login);
+        ).thenAnswer(
+          (_) async => SplashRouteResult(SplashDestination.login),
+        );
         return cubit;
       },
       act: (cubit) => cubit.init(),
@@ -58,7 +59,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashDestination.onboarding);
+        ).thenAnswer(
+          (_) async => SplashRouteResult(SplashDestination.onboarding),
+        );
         return cubit;
       },
       act: (cubit) => cubit.init(),

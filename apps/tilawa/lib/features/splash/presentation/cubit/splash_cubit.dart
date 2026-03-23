@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../../../notifications/presentation/services/fcm_notification_handler_service.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
@@ -17,47 +14,44 @@ part 'splash_state.dart';
 /// - User authentication status
 @injectable
 class SplashCubit extends Cubit<SplashState> {
-  SplashCubit(this._getSplashNextRoute, this._dispatcher)
-    : super(const SplashInitial());
+  SplashCubit(this._getSplashNextRoute) : super(const SplashInitial());
 
   final GetSplashNextRouteUseCase _getSplashNextRoute;
-  final INotificationDispatcher _dispatcher;
 
   Future<void> init() async {
+    print('[FCM Route] SplashCubit.init() started');
     // Artificial delay to display branding
     await Future.delayed(const Duration(seconds: 2));
 
     try {
-      final SplashDestination destination = await _getSplashNextRoute();
+      final SplashRouteResult result = await _getSplashNextRoute();
+      print('[FCM Route] SplashCubit destination: ${result.destination}');
+      print('[FCM Route] SplashCubit notificationData: ${result.notificationData}');
 
-      final location = destination == SplashDestination.notificationLaunch
-          ? await _resolveNotificationRoute()
-          : null;
+      String? location;
+      if (result.destination == SplashDestination.notificationLaunch &&
+          result.notificationData != null) {
+        location = FCMNotificationHandlerService.resolveLocation(
+          result.notificationData!,
+        );
+      }
+      print('[FCM Route] SplashCubit resolved location: $location');
 
-      emit(switch (destination) {
+      final state = switch (result.destination) {
         SplashDestination.home => const SplashNavigateToHome(),
         SplashDestination.login => const SplashNavigateToLogin(),
         SplashDestination.onboarding => const SplashNavigateToOnboarding(),
         SplashDestination.notificationLaunch when location != null =>
           SplashNavigateToNotification(location),
         SplashDestination.notificationLaunch => const SplashNavigateToHome(),
-      });
-    } catch (_) {
+      };
+      print('[FCM Route] SplashCubit emitting state: $state');
+      emit(state);
+    } catch (e, stackTrace) {
       // Fallback to home on any unexpected error to avoid a frozen splash
+      print('[FCM Route] SplashCubit ERROR: $e');
+      print('[FCM Route] SplashCubit STACK: $stackTrace');
       emit(const SplashNavigateToHome());
-    }
-  }
-
-  Future<String?> _resolveNotificationRoute() async {
-    final details = await _dispatcher.getNotificationAppLaunchDetails();
-    final payload = details?.notificationResponse?.payload;
-    if (payload == null) return null;
-
-    try {
-      final data = Map<String, dynamic>.from(jsonDecode(payload) as Map);
-      return FCMNotificationHandlerService.resolveLocation(data);
-    } catch (_) {
-      return null;
     }
   }
 }
