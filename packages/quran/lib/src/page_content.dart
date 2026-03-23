@@ -370,21 +370,9 @@ class _PageContentState extends State<PageContent>
                     }
 
                     if (isBismillah) {
-                      final int surahNum = _getSurahAtLine(
-                        widget.pageNumber,
-                        lineIndex + 1,
-                      );
-                      final useAlternateBismillahGlyph = surahNum == 97;
-                      final bismillahText = useAlternateBismillahGlyph
-                          ? '齃𧻓𥳐龎'
-                          : 'ﱁ  ﱂﱃﱄ';
-                      final bismillahFont = useAlternateBismillahGlyph
-                          ? 'QCF_BSML'
-                          : 'QCF_P001';
-                      final double bismillahFontSize =
-                          useAlternateBismillahGlyph
-                          ? metrics.fontSize * 0.75
-                          : metrics.fontSize;
+                      const bismillahText = '齃𧻓𥳐龎';
+                      const bismillahFont = 'QCF_BSML';
+                      final double bismillahFontSize = metrics.fontSize * 0.75;
 
                       return SizedBox(
                         width: double.infinity,
@@ -398,6 +386,7 @@ class _PageContentState extends State<PageContent>
                               textDirection: TextDirection.rtl,
                               style: TextStyle(
                                 fontFamily: bismillahFont,
+                                package: 'quran',
                                 fontSize: bismillahFontSize,
                                 color: widget.textColor,
                                 height: 1.0,

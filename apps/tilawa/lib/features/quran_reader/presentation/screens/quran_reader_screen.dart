@@ -331,8 +331,37 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   }
 }
 
+class _PagePreviewInfo {
+  const _PagePreviewInfo({required this.surahName, required this.juzNumber});
+
+  final String surahName;
+  final int juzNumber;
+
+  static _PagePreviewInfo fromPage(BuildContext context, int pageNumber) {
+    final pageData = getPageData(pageNumber);
+    final bool isArabic = context.l10n.localeName == 'ar';
+    final Set<int> uniqueSurahNumbers = pageData
+        .map((entry) => entry['surah']!)
+        .toSet();
+
+    return _PagePreviewInfo(
+      surahName: uniqueSurahNumbers
+          .map(
+            (surahNumber) => isArabic
+                ? getSurahNameArabic(surahNumber)
+                : getSurahNameEnglish(surahNumber),
+          )
+          .join(' · '),
+      juzNumber: getJuzNumber(
+        pageData.first['surah']!,
+        pageData.first['start']!,
+      ),
+    );
+  }
+}
+
 /// A bottom bar with a slider for quick page navigation and a surah index button.
-class _PageNavigationBar extends StatelessWidget {
+class _PageNavigationBar extends StatefulWidget {
   const _PageNavigationBar({
     required this.currentPage,
     required this.onPageChanged,
@@ -344,8 +373,79 @@ class _PageNavigationBar extends StatelessWidget {
   final VoidCallback onShowIndex;
 
   @override
+  State<_PageNavigationBar> createState() => _PageNavigationBarState();
+}
+
+class _PageNavigationBarState extends State<_PageNavigationBar> {
+  static const int _totalPages = 604;
+  static const double _sliderHeight = 32;
+  static const double _sliderPreviewHeight = 76;
+  static const double _sliderThumbRadius = 7;
+  static const double _sliderOverlayRadius = 16;
+  static const Duration _animationDuration = Duration(milliseconds: 180);
+
+  double? _sliderValueOverride;
+  int? _lastPreviewPage;
+  bool _showPreviewPill = false;
+
+  bool get _isDragging => _showPreviewPill;
+
+  double get _sliderValue =>
+      _sliderValueOverride ?? widget.currentPage.toDouble();
+
+  int get _previewPage => _sliderValue.round().clamp(1, _totalPages);
+
+  @override
+  void didUpdateWidget(covariant _PageNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!_showPreviewPill &&
+        _sliderValueOverride != null &&
+        widget.currentPage != oldWidget.currentPage) {
+      setState(() {
+        _sliderValueOverride = null;
+      });
+    }
+  }
+
+  void _handleSliderChangeStart(double value) {
+    setState(() {
+      _showPreviewPill = true;
+      _sliderValueOverride = value;
+      _lastPreviewPage = value.round().clamp(1, _totalPages);
+    });
+  }
+
+  void _handleSliderChanged(double value) {
+    final int previewPage = value.round().clamp(1, _totalPages);
+
+    if (previewPage != _lastPreviewPage) {
+      HapticFeedback.selectionClick();
+    }
+
+    setState(() {
+      _sliderValueOverride = value;
+      _lastPreviewPage = previewPage;
+    });
+  }
+
+  void _handleSliderChangeEnd(double value) {
+    final int targetPage = value.round().clamp(1, _totalPages);
+    final bool shouldNavigate = targetPage != widget.currentPage;
+
+    setState(() {
+      _showPreviewPill = false;
+      _sliderValueOverride = shouldNavigate ? targetPage.toDouble() : null;
+      _lastPreviewPage = null;
+    });
+
+    if (shouldNavigate) {
+      widget.onPageChanged(targetPage);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const totalPages = 604;
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final Color primaryColor = colorScheme.primary;
@@ -356,19 +456,14 @@ class _PageNavigationBar extends StatelessWidget {
     );
     final Color textColor = colorScheme.onSurface;
     final Color mutedTextColor = colorScheme.onSurfaceVariant;
-    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
-
-    // Determine surah name(s) for the current page
-    final pageData = getPageData(currentPage);
-    final isArabic = context.l10n.localeName == 'ar';
-    final uniqueSurahNumbers = pageData.map((e) => e['surah']!).toSet();
-    final surahName = uniqueSurahNumbers
-        .map((s) => isArabic ? getSurahNameArabic(s) : getSurahNameEnglish(s))
-        .join(' · ');
-    final juzNumber = getJuzNumber(
-      pageData.first['surah']!,
-      pageData.first['start']!,
+    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final _PagePreviewInfo currentInfo = _PagePreviewInfo.fromPage(
+      context,
+      widget.currentPage,
     );
+    final _PagePreviewInfo previewInfo = _isDragging
+        ? _PagePreviewInfo.fromPage(context, _previewPage)
+        : currentInfo;
 
     return ClipRRect(
       child: BackdropFilter(
@@ -396,7 +491,7 @@ class _PageNavigationBar extends StatelessWidget {
                     children: [
                       // Surah index button
                       GestureDetector(
-                        onTap: onShowIndex,
+                        onTap: widget.onShowIndex,
                         child: Container(
                           width: 36,
                           height: 36,
@@ -415,7 +510,7 @@ class _PageNavigationBar extends StatelessWidget {
                       // Surah name
                       Expanded(
                         child: Text(
-                          surahName,
+                          currentInfo.surahName,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: textColor,
                             fontSize: 13,
@@ -426,7 +521,7 @@ class _PageNavigationBar extends StatelessWidget {
                       ),
                       // Juz + page number
                       Text(
-                        '${context.l10n.juzPart} $juzNumber',
+                        '${context.l10n.juzPart} ${currentInfo.juzNumber}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: mutedTextColor,
                           fontSize: 11,
@@ -444,7 +539,7 @@ class _PageNavigationBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '$currentPage',
+                          '${widget.currentPage}',
                           style: theme.textTheme.labelLarge?.copyWith(
                             color: textColor,
                             fontSize: 13,
@@ -456,45 +551,164 @@ class _PageNavigationBar extends StatelessWidget {
                   ),
                 ),
                 // Page slider (RTL: page 1 on the right, 604 on the left)
-                SizedBox(
-                  height: 32,
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: accentColor,
-                        inactiveTrackColor: accentColor.withValues(alpha: 0.15),
-                        thumbColor: accentColor,
-                        overlayColor: accentColor.withValues(alpha: 0.12),
-                        trackHeight: 3,
-                        thumbShape: RoundSliderThumbShape(
-                          enabledThumbRadius: 7,
-                        ),
-                        overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 16,
-                        ),
-                      ),
-                      child: Slider(
-                        value: currentPage.toDouble(),
-                        min: 1,
-                        max: totalPages.toDouble(),
-                        onChanged: (value) {
-                          final page = value.round();
-                          if (page != currentPage) {
-                            HapticFeedback.selectionClick();
-                            onPageChanged(page);
-                          }
-                        },
-                      ),
-                    ),
+                AnimatedContainer(
+                  duration: _animationDuration,
+                  curve: Curves.easeOutCubic,
+                  height: _isDragging ? _sliderPreviewHeight : _sliderHeight,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double pillWidth = (constraints.maxWidth * 0.48)
+                          .clamp(160.0, 220.0);
+                      final double trackInset =
+                          _sliderOverlayRadius > _sliderThumbRadius
+                          ? _sliderOverlayRadius
+                          : _sliderThumbRadius;
+                      final double usableTrackWidth =
+                          (constraints.maxWidth - (trackInset * 2)).clamp(
+                            0.0,
+                            constraints.maxWidth,
+                          );
+                      final double normalizedValue =
+                          (_previewPage - 1) / (_totalPages - 1);
+                      final double thumbCenterX =
+                          trackInset +
+                          ((1 - normalizedValue) * usableTrackWidth);
+                      final double pillLeft = (thumbCenterX - (pillWidth / 2))
+                          .clamp(0.0, constraints.maxWidth - pillWidth);
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: SliderTheme(
+                                data: SliderThemeData(
+                                  activeTrackColor: accentColor,
+                                  inactiveTrackColor: accentColor.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  thumbColor: accentColor,
+                                  overlayColor: accentColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  trackHeight: 3,
+                                  thumbShape: RoundSliderThumbShape(
+                                    enabledThumbRadius: _sliderThumbRadius,
+                                  ),
+                                  overlayShape: RoundSliderOverlayShape(
+                                    overlayRadius: _sliderOverlayRadius,
+                                  ),
+                                ),
+                                child: Slider(
+                                  value: _sliderValue,
+                                  min: 1,
+                                  max: _totalPages.toDouble(),
+                                  onChangeStart: _handleSliderChangeStart,
+                                  onChanged: _handleSliderChanged,
+                                  onChangeEnd: _handleSliderChangeEnd,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_isDragging)
+                            Positioned(
+                              top: 0,
+                              left: pillLeft,
+                              child: IgnorePointer(
+                                child: _SliderPreviewPill(
+                                  width: pillWidth,
+                                  surahName: previewInfo.surahName,
+                                  pageNumber: _previewPage,
+                                  primaryColor: primaryColor,
+                                  backgroundColor: colorScheme.surface,
+                                  textColor: textColor,
+                                  mutedTextColor: mutedTextColor,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 // Page range labels (RTL: 604 on the left, 1 on the right)
-                _PageRange(totalPages: totalPages),
+                const _PageRange(totalPages: _totalPages),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SliderPreviewPill extends StatelessWidget {
+  const _SliderPreviewPill({
+    required this.width,
+    required this.surahName,
+    required this.pageNumber,
+    required this.primaryColor,
+    required this.backgroundColor,
+    required this.textColor,
+    required this.mutedTextColor,
+  });
+
+  final double width;
+  final String surahName;
+  final int pageNumber;
+  final Color primaryColor;
+  final Color backgroundColor;
+  final Color textColor;
+  final Color mutedTextColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: backgroundColor.withValues(alpha: 0.98),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            surahName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${context.l10n.page} $pageNumber',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: mutedTextColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
