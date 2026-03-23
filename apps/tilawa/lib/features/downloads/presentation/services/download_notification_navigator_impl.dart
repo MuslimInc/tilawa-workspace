@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -71,6 +72,11 @@ class DownloadNotificationNavigatorImpl
       reciterId: reciterId,
       $extra: reciter,
     ).location;
+
+    if (AppRouter.disableStateRestoration) {
+      AppRouter.navigateFromNotificationLaunch(location, extra: reciter);
+      return;
+    }
 
     final String? currentLocation = _navigator.getCurrentLocation();
     if (currentLocation != null) {

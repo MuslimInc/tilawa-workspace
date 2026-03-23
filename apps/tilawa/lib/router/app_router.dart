@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -18,6 +19,22 @@ class AppRouter {
   /// This is set before the router is created and prevents restoration
   /// from overriding the notification navigation.
   static bool disableStateRestoration = false;
+
+  /// Holds the FCM initial message consumed during bootstrap.
+  /// [getInitialMessage] can only be called once, so we capture it early
+  /// and let the splash use case read it from here.
+  static RemoteMessage? pendingFcmMessage;
+
+  /// Indicates that the app cold-started from a notification and splash
+  /// should be the only place that consumes that startup navigation.
+  static bool pendingStartupNotificationLaunch = false;
+
+  /// Route a cold-start notification directly to its destination.
+  static void navigateFromNotificationLaunch(String location, {Object? extra}) {
+    disableStateRestoration = false;
+    pendingStartupNotificationLaunch = false;
+    router.go(location, extra: extra);
+  }
 
   static String? redirect(BuildContext context, GoRouterState state) {
     // For now, we'll handle auth redirects in the UI
@@ -43,21 +60,27 @@ class AppRouter {
         ),
       );
 
-  static final GoRouter router = GoRouter(
-    navigatorKey: navigatorKey,
-    initialLocation: const SplashRoute().location,
-    debugLogDiagnostics: true,
-    // Disable restoration when launched from notification to prevent
-    // the restored state from overriding notification navigation
-    restorationScopeId: disableStateRestoration
-        ? null
-        : AppStrings.routerRestorationScopeId,
-    redirect: redirect,
-    routes: $appRoutes,
-    errorBuilder: errorBuilder,
-    extraCodec: const AppRouterExtraCodec(),
-    observers: _getObservers(),
-  );
+  static GoRouter? _router;
+
+  static GoRouter get router {
+    _router ??= GoRouter(
+      navigatorKey: navigatorKey,
+      initialLocation: const SplashRoute().location,
+      overridePlatformDefaultLocation: true,
+      debugLogDiagnostics: true,
+      // Disable restoration when launched from notification to prevent
+      // the restored state from overriding notification navigation
+      restorationScopeId: disableStateRestoration
+          ? null
+          : AppStrings.routerRestorationScopeId,
+      redirect: redirect,
+      routes: $appRoutes,
+      errorBuilder: errorBuilder,
+      extraCodec: const AppRouterExtraCodec(),
+      observers: _getObservers(),
+    );
+    return _router!;
+  }
 
   static List<NavigatorObserver> _getObservers() {
     try {

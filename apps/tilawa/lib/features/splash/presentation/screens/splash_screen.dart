@@ -1,22 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
-import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/main.dart';
+import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_ui/theme/color_scheme.dart';
+
 import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../cubit/splash_cubit.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  late final SplashCubit _splashCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    logger.d('[FCM Issue] SplashScreen.initState() called');
+    _splashCubit = getIt<SplashCubit>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Start splash routing after the listeners in this widget tree are active.
+      if (!_splashCubit.isClosed) {
+        _splashCubit.init();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _splashCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<SplashCubit>()..init(),
+    logger.d('[FCM Issue] SplashScreen.build() called');
+    return BlocProvider.value(
+      value: _splashCubit,
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           state.when(
@@ -26,26 +55,33 @@ class SplashScreen extends StatelessWidget {
             unauthenticated: () {},
             error: (message) {
               ToastUtils.showErrorToast(message);
-              const LoginRoute().go(context);
+              AppRouter.disableStateRestoration = false;
+              AppRouter.pendingStartupNotificationLaunch = false;
+              AppRouter.router.go(const LoginRoute().location);
             },
           );
         },
         child: BlocListener<SplashCubit, SplashState>(
           listener: (context, state) {
-            print('[FCM Route] SplashScreen listener state: $state');
+            logger.d('[FCM Issue] SplashScreen listener state: $state');
             if (state is SplashNavigateToHome) {
-              print('[FCM Route] SplashScreen => go(home)');
-              const HomeRoute().go(context);
+              logger.d('[FCM Issue] SplashScreen => go(home)');
+              AppRouter.disableStateRestoration = false;
+              AppRouter.pendingStartupNotificationLaunch = false;
+              AppRouter.router.go(const HomeRoute().location);
             } else if (state is SplashNavigateToLogin) {
-              print('[FCM Route] SplashScreen => go(login)');
-              const LoginRoute().go(context);
+              logger.d('[FCM Issue] SplashScreen => go(login)');
+              AppRouter.disableStateRestoration = false;
+              AppRouter.pendingStartupNotificationLaunch = false;
+              AppRouter.router.go(const LoginRoute().location);
             } else if (state is SplashNavigateToOnboarding) {
-              print('[FCM Route] SplashScreen => go(onboarding)');
-              const OnboardingRoute().go(context);
+              logger.d('[FCM Issue] SplashScreen => go(onboarding)');
+              AppRouter.disableStateRestoration = false;
+              AppRouter.pendingStartupNotificationLaunch = false;
+              AppRouter.router.go(const OnboardingRoute().location);
             } else if (state is SplashNavigateToNotification) {
-              print('[FCM Route] SplashScreen => go(home) + push(${state.location})');
-              const HomeRoute().go(context);
-              GoRouter.of(context).push(state.location);
+              logger.d('[FCM Issue] SplashScreen => go(${state.location})');
+              AppRouter.navigateFromNotificationLaunch(state.location);
             }
           },
           child: Scaffold(

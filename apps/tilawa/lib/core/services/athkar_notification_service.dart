@@ -618,22 +618,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Navigate to a route, catching errors in test environments
   void _navigateToRoute(String location) {
     try {
-      if (AppRouter.disableStateRestoration) {
-        // If we disabled state restoration, it means we launched from notification
-        // so we want to establish a clean back stack: Home -> Details
-
-        // Reset the flag so future navigations work normally
-        AppRouter.disableStateRestoration = false;
-
-        // Go to home first (replaces Splash)
-        AppRouter.router.go(const HomeRoute().location);
-
-        // Then push the details on top of Home
-        AppRouter.router.push(location);
-      } else {
-        AppRouter.router.go(const HomeRoute().location);
-        AppRouter.router.push(location);
-      }
+      AppRouter.navigateFromNotificationLaunch(location);
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }

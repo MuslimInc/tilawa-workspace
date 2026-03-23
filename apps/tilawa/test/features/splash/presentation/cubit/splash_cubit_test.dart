@@ -31,9 +31,7 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer(
-          (_) async => SplashRouteResult(SplashDestination.home),
-        );
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
         return cubit;
       },
       act: (cubit) => cubit.init(),
@@ -45,9 +43,7 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer(
-          (_) async => SplashRouteResult(SplashDestination.login),
-        );
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.login));
         return cubit;
       },
       act: (cubit) => cubit.init(),
@@ -57,15 +53,34 @@ void main() {
     blocTest<SplashCubit, SplashState>(
       'emits [SplashNavigateToOnboarding] when destination is onboarding',
       build: () {
-        when(
-          mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer(
+        when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
           (_) async => SplashRouteResult(SplashDestination.onboarding),
         );
         return cubit;
       },
       act: (cubit) => cubit.init(),
       expect: () => [const SplashNavigateToOnboarding()],
+    );
+
+    blocTest<SplashCubit, SplashState>(
+      'emits [SplashNavigateToNotification] when destination is notification launch',
+      build: () {
+        when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
+          (_) async => const SplashRouteResult(
+            SplashDestination.notificationLaunch,
+            notificationData: {'type': 'settings'},
+          ),
+        );
+        return cubit;
+      },
+      act: (cubit) => cubit.init(),
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          '/settings',
+        ),
+      ],
     );
   });
 }

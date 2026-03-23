@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -50,14 +49,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
     // 2. Listen for app opens from background state
     _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handler.handleNotificationResponse(
-        NotificationResponse(
-          id: message.hashCode,
-          notificationResponseType:
-              NotificationResponseType.selectedNotification,
-          payload: jsonEncode(message.data),
-        ),
-      );
+      _handler.handleRemoteMessageTap(message);
     });
 
     // 4. Register for global notification actions via Dispatcher

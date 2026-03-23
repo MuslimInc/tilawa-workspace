@@ -16,6 +16,20 @@ class FCMNotificationHandlerService {
 
   FCMNotificationHandlerService(this._dispatcher, this._logger);
 
+  /// Handle a tapped remote message using the same path for background and
+  /// terminated launches.
+  Future<void> handleRemoteMessageTap(RemoteMessage message) async {
+    final Map<String, dynamic> payload = _normalizePayloadData(message.data);
+    await handleNotificationResponse(
+      NotificationResponse(
+        id: message.hashCode,
+        notificationResponseType:
+            NotificationResponseType.selectedNotification,
+        payload: jsonEncode(payload),
+      ),
+    );
+  }
+
   /// Handle notification response (tap)
   Future<void> handleNotificationResponse(NotificationResponse response) async {
     final payload = response.payload;
@@ -28,11 +42,7 @@ class FCMNotificationHandlerService {
         Map<String, dynamic>.from(jsonDecode(payload) as Map),
       );
       final String location = resolveLocation(data);
-      final String homeLocation = const HomeRoute().location;
-      AppRouter.router.go(homeLocation);
-      if (location != homeLocation) {
-        AppRouter.router.push(location);
-      }
+      AppRouter.navigateFromNotificationLaunch(location);
     } catch (e) {
       _logger.e('Error parsing notification payload: $e');
     }

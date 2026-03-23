@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -13,6 +14,7 @@ import 'core/providers/app_providers.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
+import 'features/notifications/presentation/services/fcm_notification_handler_service.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -116,12 +118,31 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     }
     _hasProcessedLaunchNotification = true;
 
+    if (AppRouter.pendingStartupNotificationLaunch) {
+      logger.d(
+        'Skipping launch-notification processing because splash will handle the startup notification launch',
+      );
+      AppRouter.pendingStartupNotificationLaunch = false;
+      return;
+    }
+
     try {
       final INotificationDispatcher dispatcher =
           getIt<INotificationDispatcher>();
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
         logger.d('Launch notification processed after app ready');
+        return;
+      }
+
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance
+          .getInitialMessage()
+          .timeout(const Duration(seconds: 3), onTimeout: () => null);
+      if (initialMessage != null) {
+        await getIt<FCMNotificationHandlerService>().handleRemoteMessageTap(
+          initialMessage,
+        );
+        logger.d('Initial FCM message processed after app ready');
       }
     } catch (e) {
       logger.d('Error processing launch notification: $e');

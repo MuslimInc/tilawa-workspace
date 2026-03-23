@@ -31,7 +31,17 @@ import 'firebase_options.dart';
 import 'router/app_router.dart';
 import 'tilawa_app.dart';
 
-final logger = Logger();
+final logger = Logger(
+  filter: ProductionFilter(),
+  printer: PrettyPrinter(
+    methodCount: 0,
+    errorMethodCount: 5,
+    lineLength: 80,
+    colors: false,
+    printEmojis: true,
+    printTime: true,
+  ),
+);
 
 @visibleForTesting
 Future<void> bootstrap({
@@ -45,17 +55,7 @@ Future<void> bootstrap({
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize AppRouter (registers JSON types)
-    AppRouter.init();
-
-    // Enable edge-to-edge display (Flutter recommended approach)
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-    // Lock global orientation to portrait by default
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    // SystemChrome calls moved later to avoid platform-channel hangs during boot
 
     // ========================================================================
     // CRITICAL: Must complete before app starts (blocking)
@@ -67,7 +67,10 @@ Future<void> bootstrap({
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      // Configure foreground notification presentation options
+      // Initialize AppRouter (registers JSON types) after Firebase
+      // to ensure dependencies and timing are correct.
+      AppRouter.init();
+
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
             alert: true,
@@ -76,21 +79,16 @@ Future<void> bootstrap({
           );
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-      logger.d('Firebase initialized successfully');
     } catch (e, stackTrace) {
-      logger.d('CRITICAL: Firebase initialization failed: $e');
-      logger.d('Stack trace: $stackTrace');
+      logger.e('Firebase initialization failed: $e', stackTrace: stackTrace);
       // Continue anyway - app can work without Firebase
     }
 
     // Initialize DI container
     try {
       await configureDI();
-      logger.d('DI container initialized successfully');
     } catch (e, stackTrace) {
-      logger.d('CRITICAL: DI initialization failed: $e');
-      logger.d('Stack trace: $stackTrace');
+      logger.e('DI initialization failed: $e', stackTrace: stackTrace);
       // Without DI, no service can be resolved — rethrow so the outer
       // catastrophic catch block shows a minimal error screen.
       rethrow;
@@ -135,6 +133,21 @@ Future<void> bootstrap({
     }
 
     // ========================================================================
+    // Non-critical UI configuration - moved late to avoid boot hangs
+    // ========================================================================
+    try {
+      await Future.wait([
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]),
+      ]).timeout(const Duration(milliseconds: 1000));
+    } catch (e) {
+      logger.w('SystemUI configuration timed out or failed: $e');
+    }
+
+    // ========================================================================
     // APP STARTS HERE - User sees UI immediately!
     // ========================================================================
     run(DevicePreview(enabled: false, builder: (context) => const TilawaApp()));
@@ -145,8 +158,7 @@ Future<void> bootstrap({
     initializeNonCriticalServices();
   } catch (e, stackTrace) {
     // Catastrophic failure - log and show minimal error screen
-    logger.d('CATASTROPHIC ERROR in bootstrap(): $e');
-    logger.d('Stack trace: $stackTrace');
+    logger.f('CATASTROPHIC ERROR in bootstrap(): $e', stackTrace: stackTrace);
 
     // Show a minimal error screen that doesn't depend on DI
     run(
@@ -361,17 +373,37 @@ Future<void> initializeNotificationDispatcher() async {
     // Check if there's a pending launch notification BEFORE registering handlers
     // If so, disable state restoration so the splash screen shows and handles it
     final NotificationAppLaunchDetails? launchDetails = await dispatcher
-        .getNotificationAppLaunchDetails();
-    print('[FCM Route] main: local launchDetails=$launchDetails');
-    print('[FCM Route] main: didNotificationLaunchApp=${launchDetails?.didNotificationLaunchApp}');
-    // NOTE: Do NOT call getInitialMessage() here — it can only be consumed once.
-    // The splash screen will handle FCM initial message.
+        .getNotificationAppLaunchDetails()
+        .timeout(
+          const Duration(milliseconds: 1000),
+          onTimeout: () => null,
+        );
+    logger.d('main: local launchDetails=$launchDetails');
 
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      print('[FCM Route] main: disabling state restoration (local notification)');
+      logger.d('main: disabling state restoration (local notification)');
       AppRouter.disableStateRestoration = true;
+      AppRouter.pendingStartupNotificationLaunch = true;
+    }
+
+    // Consume FCM initial message early and store it.
+    // getInitialMessage() can only be called ONCE — if we don't consume it
+    // here, state restoration may prevent the splash screen from ever
+    // reading it (the splash screen never gets created).
+    final RemoteMessage? fcmInitialMessage = await FirebaseMessaging.instance
+        .getInitialMessage()
+        .timeout(
+          const Duration(milliseconds: 1000),
+          onTimeout: () => null,
+        );
+    logger.d('main: fcmInitialMessage=${fcmInitialMessage?.data}');
+    if (fcmInitialMessage != null) {
+      logger.d('main: disabling state restoration (FCM notification)');
+      AppRouter.disableStateRestoration = true;
+      AppRouter.pendingStartupNotificationLaunch = true;
+      AppRouter.pendingFcmMessage = fcmInitialMessage;
     }
 
     // Initialize athkar service (registers its handler with the dispatcher)
