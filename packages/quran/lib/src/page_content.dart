@@ -69,6 +69,10 @@ void clearPageContentCache() {
 
 class _PageContentState extends State<PageContent>
     with AutomaticKeepAliveClientMixin {
+  static const Color _mushafAccent = Color(0xFFB78A55);
+  static const Color _mushafAccentSoft = Color(0xFFE7D7C0);
+  static const Color _mushafAccentMuted = Color(0xFF8D6C45);
+
   /// Word glyph data keyed by "surah:ayah:wordPos" -> { text, surah, ayah, ... }
   static Map<String, dynamic>? _qpcV4Data;
 
@@ -105,13 +109,17 @@ class _PageContentState extends State<PageContent>
 
   Future<void> _initQuranData() async {
     if (_qpcV4Data != null && _processedPageIndex != null) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       return;
     }
 
     if (_loadCompleter != null) {
       await _loadCompleter!.future;
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       return;
     }
 
@@ -194,7 +202,9 @@ class _PageContentState extends State<PageContent>
       return [];
     }
     final List<Map<String, dynamic>> lineWords = lines[lineIndex];
-    if (lineWords.isEmpty) return [];
+    if (lineWords.isEmpty) {
+      return [];
+    }
 
     final hasVerseColorCallback = widget.verseBackgroundColor != null;
 
@@ -392,7 +402,9 @@ class _PageContentState extends State<PageContent>
                       );
                     }
 
-                    if (spans.isEmpty) return const SizedBox();
+                    if (spans.isEmpty) {
+                      return const SizedBox();
+                    }
 
                     final richText = RichText(
                       textDirection: TextDirection.rtl,
@@ -403,18 +415,23 @@ class _PageContentState extends State<PageContent>
                       text: TextSpan(children: spans),
                     );
 
-                    // Pages 1-2: contain to keep text compact.
-                    // All other pages: fill for edge-to-edge Mushaf layout
-                    // (QCF fonts are designed to fill width).
+                    // Pages 1-2 remain centered/contained because they have
+                    // fewer text lines. Standard pages use fitWidth instead of
+                    // fill to preserve the QCF glyph proportions and avoid the
+                    // stretched look that differs from Mushaf apps like Ayah.
                     final BoxFit lineFit = isSpecialPage
                         ? BoxFit.contain
-                        : BoxFit.fill;
+                        : BoxFit.fitWidth;
 
                     return Container(
                       width: double.infinity,
                       height: lineHeight,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: FittedBox(fit: lineFit, child: richText),
+                      child: FittedBox(
+                        fit: lineFit,
+                        alignment: Alignment.centerRight,
+                        child: richText,
+                      ),
                     );
                   });
 
@@ -446,7 +463,9 @@ class _PageContentState extends State<PageContent>
   /// from pre-fetched [lines]. Avoids a redundant `_getWordsGroupedByLine` call.
   int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
     for (var i = 0; i < lines.length; i++) {
-      if (lines[i].isNotEmpty) return i;
+      if (lines[i].isNotEmpty) {
+        return i;
+      }
     }
     return 0;
   }
@@ -626,12 +645,6 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final Color primaryColor = colorScheme.primary;
-    final Color dividerColor = colorScheme.outlineVariant.withValues(
-      alpha: 0.55,
-    );
     final double verseFontSize = MediaQuery.sizeOf(context).width * 0.032;
 
     return Column(
@@ -646,7 +659,7 @@ class _PageHeader extends StatelessWidget {
                 child: Text(
                   surahName,
                   style: TextStyle(
-                    color: primaryColor,
+                    color: _PageContentState._mushafAccent,
                     fontSize: verseFontSize,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
@@ -658,9 +671,9 @@ class _PageHeader extends StatelessWidget {
                 child: Text(
                   '$juzLabel $juzNumber',
                   style: TextStyle(
-                    color: primaryColor.withValues(alpha: 0.6),
+                    color: _PageContentState._mushafAccentMuted,
                     fontSize: verseFontSize * 0.9,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -668,7 +681,11 @@ class _PageHeader extends StatelessWidget {
             ],
           ),
         ),
-        Divider(color: dividerColor, height: 1, thickness: 0.5),
+        Divider(
+          color: _PageContentState._mushafAccentSoft.withValues(alpha: 0.9),
+          height: 1,
+          thickness: 0.8,
+        ),
       ],
     );
   }
@@ -776,7 +793,6 @@ class _QuranPageIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final ({String? fraction, String title, String? index}) hizbInfo =
         _parseHizbLabel();
     final bool hasHizbInfo =
@@ -790,11 +806,11 @@ class _QuranPageIndex extends StatelessWidget {
         child: Container(
           height: 32,
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
+            color: Colors.white.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-              width: 0.5,
+              color: _PageContentState._mushafAccentSoft,
+              width: 0.8,
             ),
           ),
           child: Row(
@@ -807,7 +823,7 @@ class _QuranPageIndex extends StatelessWidget {
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
+                  color: _PageContentState._mushafAccentSoft,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Directionality(
@@ -815,7 +831,7 @@ class _QuranPageIndex extends StatelessWidget {
                   child: Text(
                     '$pageNumber',
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
+                      color: _PageContentState._mushafAccentMuted,
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                     ),
@@ -826,7 +842,7 @@ class _QuranPageIndex extends StatelessWidget {
                 Container(
                   width: 0.5,
                   height: 16,
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  color: _PageContentState._mushafAccentSoft,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -840,7 +856,7 @@ class _QuranPageIndex extends StatelessWidget {
                           '(${hizbInfo.fraction!})',
                       ].join(' '),
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: _PageContentState._mushafAccentMuted,
                         fontWeight: FontWeight.w600,
                         fontSize: 11,
                       ),
@@ -863,9 +879,6 @@ class _SurahIndexButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
     return RepaintBoundary(
       child: InkWell(
         onTap: onShowIndex,
@@ -873,20 +886,20 @@ class _SurahIndexButton extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: colorScheme.primary,
+            color: _PageContentState._mushafAccent,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.3),
+                color: _PageContentState._mushafAccent.withValues(alpha: 0.25),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Icon(
+          child: const Icon(
             Icons.menu_book_rounded,
             size: 22,
-            color: colorScheme.onPrimary,
+            color: Colors.white,
           ),
         ),
       ),
