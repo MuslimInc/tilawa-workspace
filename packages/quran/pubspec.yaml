@@ -3,7 +3,7 @@ description: "Quran Reader"
 version: 0.0.1
 
 environment:
-  sdk: ^3.10.7
+  sdk: ^3.11.3
 
 dependencies:
   archive: ^4.0.9
