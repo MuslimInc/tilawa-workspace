@@ -408,6 +408,9 @@ class _PageContentState extends State<PageContent>
 
                     final richText = RichText(
                       textDirection: TextDirection.rtl,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      maxLines: 1,
                       textHeightBehavior: const TextHeightBehavior(
                         applyHeightToFirstAscent: false,
                         applyHeightToLastDescent: false,
@@ -415,23 +418,15 @@ class _PageContentState extends State<PageContent>
                       text: TextSpan(children: spans),
                     );
 
-                    // Pages 1-2 remain centered/contained because they have
-                    // fewer text lines. Standard pages use fitWidth instead of
-                    // fill to preserve the QCF glyph proportions and avoid the
-                    // stretched look that differs from Mushaf apps like Ayah.
-                    final BoxFit lineFit = isSpecialPage
-                        ? BoxFit.contain
-                        : BoxFit.fitWidth;
+                    // Keep the QCF glyphs at their natural proportions and
+                    // prevent Flutter from wrapping a single Mushaf line into a
+                    // second visual line.
 
                     return Container(
                       width: double.infinity,
                       height: lineHeight,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: FittedBox(
-                        fit: lineFit,
-                        alignment: Alignment.centerRight,
-                        child: richText,
-                      ),
+                      child: Align(child: richText),
                     );
                   });
 
@@ -607,7 +602,7 @@ class _SurahHeaderBanner extends StatelessWidget {
               const Positioned.fill(
                 child: Image(
                   image: _bannerImage,
-                  fit: BoxFit.contain,
+                  fit: BoxFit.fill,
                   filterQuality: FilterQuality.low,
                 ),
               ),
