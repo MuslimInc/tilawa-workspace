@@ -947,6 +947,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get isha => 'Isha';
 
   @override
+  String get midnight => 'Midnight';
+
+  @override
+  String get lastThird => 'Last Third';
+
+  @override
   String get nextPrayer => 'Next Prayer';
 
   @override
@@ -979,6 +985,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currentLocation => 'Current Location';
+
+  @override
+  String get prayerTimesTodaySchedule => 'Today\'s schedule';
+
+  @override
+  String get prayerTimesTodayScheduleSubtitle =>
+      'Prayer times and nightly markers';
+
+  @override
+  String get prayerTimesRefreshingLocation => 'Refreshing location...';
+
+  @override
+  String get prayerTimesTapToRefreshLocation => 'Tap to refresh location';
+
+  @override
+  String prayerTimesTimeRemainingUntil(String prayerName) {
+    return 'Time remaining until $prayerName';
+  }
+
+  @override
+  String get prayerTimesScheduled => 'Scheduled';
+
+  @override
+  String get prayerTimesUpcoming => 'Upcoming';
+
+  @override
+  String get prayerTimesPassed => 'Passed';
+
+  @override
+  String prayerTimesIqamahAt(String time) {
+    return 'Iqamah: $time';
+  }
+
+  @override
+  String prayerTimesIshraqAt(String time) {
+    return 'Ishraq: $time';
+  }
+
+  @override
+  String get prayerTimesNightMidpointMarker => 'Night midpoint marker';
+
+  @override
+  String get prayerTimesLastThirdBegins => 'Last third begins';
 
   @override
   String get hours => 'hours';

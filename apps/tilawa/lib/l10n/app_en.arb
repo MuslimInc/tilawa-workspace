@@ -1273,6 +1273,14 @@
     "@isha": {
         "description": "Isha prayer name"
     },
+    "midnight": "Midnight",
+    "@midnight": {
+        "description": "Midnight marker label"
+    },
+    "lastThird": "Last Third",
+    "@lastThird": {
+        "description": "Last third of night label"
+    },
     "nextPrayer": "Next Prayer",
     "@nextPrayer": {
         "description": "Next prayer label"
@@ -1316,6 +1324,69 @@
     "currentLocation": "Current Location",
     "@currentLocation": {
         "description": "Current location label"
+    },
+    "prayerTimesTodaySchedule": "Today's schedule",
+    "@prayerTimesTodaySchedule": {
+        "description": "Title for today's prayer times schedule section"
+    },
+    "prayerTimesTodayScheduleSubtitle": "Prayer times and nightly markers",
+    "@prayerTimesTodayScheduleSubtitle": {
+        "description": "Subtitle for today's prayer times schedule section"
+    },
+    "prayerTimesRefreshingLocation": "Refreshing location...",
+    "@prayerTimesRefreshingLocation": {
+        "description": "Helper text shown while refreshing prayer times location"
+    },
+    "prayerTimesTapToRefreshLocation": "Tap to refresh location",
+    "@prayerTimesTapToRefreshLocation": {
+        "description": "Helper text inviting the user to refresh prayer times location"
+    },
+    "prayerTimesTimeRemainingUntil": "Time remaining until {prayerName}",
+    "@prayerTimesTimeRemainingUntil": {
+        "description": "Countdown label until the next prayer",
+        "placeholders": {
+            "prayerName": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesScheduled": "Scheduled",
+    "@prayerTimesScheduled": {
+        "description": "Label for the scheduled time of the next prayer"
+    },
+    "prayerTimesUpcoming": "Upcoming",
+    "@prayerTimesUpcoming": {
+        "description": "Status label for an upcoming prayer"
+    },
+    "prayerTimesPassed": "Passed",
+    "@prayerTimesPassed": {
+        "description": "Status label for a prayer that has passed"
+    },
+    "prayerTimesIqamahAt": "Iqamah: {time}",
+    "@prayerTimesIqamahAt": {
+        "description": "Label for iqamah time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesIshraqAt": "Ishraq: {time}",
+    "@prayerTimesIshraqAt": {
+        "description": "Label for ishraq time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesNightMidpointMarker": "Night midpoint marker",
+    "@prayerTimesNightMidpointMarker": {
+        "description": "Description for the midnight marker card"
+    },
+    "prayerTimesLastThirdBegins": "Last third begins",
+    "@prayerTimesLastThirdBegins": {
+        "description": "Description for the last third of night marker card"
     },
     "hours": "hours",
     "@hours": {

@@ -939,6 +939,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get isha => 'العشاء';
 
   @override
+  String get midnight => 'منتصف الليل';
+
+  @override
+  String get lastThird => 'الثلث الأخير';
+
+  @override
   String get nextPrayer => 'الصلاة القادمة';
 
   @override
@@ -971,6 +977,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get currentLocation => 'الموقع الحالي';
+
+  @override
+  String get prayerTimesTodaySchedule => 'جدول اليوم';
+
+  @override
+  String get prayerTimesTodayScheduleSubtitle =>
+      'الأوقات الأساسية والمؤشرات الليلية';
+
+  @override
+  String get prayerTimesRefreshingLocation => 'جارٍ تحديث الموقع...';
+
+  @override
+  String get prayerTimesTapToRefreshLocation => 'اضغط لتحديث الموقع';
+
+  @override
+  String prayerTimesTimeRemainingUntil(String prayerName) {
+    return 'الوقت المتبقي حتى صلاة $prayerName';
+  }
+
+  @override
+  String get prayerTimesScheduled => 'الموعد';
+
+  @override
+  String get prayerTimesUpcoming => 'قادمة';
+
+  @override
+  String get prayerTimesPassed => 'انتهت';
+
+  @override
+  String prayerTimesIqamahAt(String time) {
+    return 'الإقامة: $time';
+  }
+
+  @override
+  String prayerTimesIshraqAt(String time) {
+    return 'الإشراق: $time';
+  }
+
+  @override
+  String get prayerTimesNightMidpointMarker => 'علامة منتصف الليل';
+
+  @override
+  String get prayerTimesLastThirdBegins => 'بداية الثلث الأخير';
 
   @override
   String get hours => 'ساعات';

@@ -1772,6 +1772,18 @@ abstract class AppLocalizations {
   /// **'Isha'**
   String get isha;
 
+  /// Midnight marker label
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get midnight;
+
+  /// Last third of night label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Third'**
+  String get lastThird;
+
   /// Next prayer label
   ///
   /// In en, this message translates to:
@@ -1837,6 +1849,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current Location'**
   String get currentLocation;
+
+  /// Title for today's prayer times schedule section
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s schedule'**
+  String get prayerTimesTodaySchedule;
+
+  /// Subtitle for today's prayer times schedule section
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times and nightly markers'**
+  String get prayerTimesTodayScheduleSubtitle;
+
+  /// Helper text shown while refreshing prayer times location
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing location...'**
+  String get prayerTimesRefreshingLocation;
+
+  /// Helper text inviting the user to refresh prayer times location
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to refresh location'**
+  String get prayerTimesTapToRefreshLocation;
+
+  /// Countdown label until the next prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining until {prayerName}'**
+  String prayerTimesTimeRemainingUntil(String prayerName);
+
+  /// Label for the scheduled time of the next prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get prayerTimesScheduled;
+
+  /// Status label for an upcoming prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get prayerTimesUpcoming;
+
+  /// Status label for a prayer that has passed
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get prayerTimesPassed;
+
+  /// Label for iqamah time
+  ///
+  /// In en, this message translates to:
+  /// **'Iqamah: {time}'**
+  String prayerTimesIqamahAt(String time);
+
+  /// Label for ishraq time
+  ///
+  /// In en, this message translates to:
+  /// **'Ishraq: {time}'**
+  String prayerTimesIshraqAt(String time);
+
+  /// Description for the midnight marker card
+  ///
+  /// In en, this message translates to:
+  /// **'Night midpoint marker'**
+  String get prayerTimesNightMidpointMarker;
+
+  /// Description for the last third of night marker card
+  ///
+  /// In en, this message translates to:
+  /// **'Last third begins'**
+  String get prayerTimesLastThirdBegins;
 
   /// Hours label
   ///
