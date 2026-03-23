@@ -14,19 +14,20 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   NotificationsRepositoryImpl(
     this._remoteDataSource,
     this._dispatcher,
-    this._fcmHandlerService,
+    this._handler,
+    this._logger,
   );
 
   final NotificationsRemoteDataSource _remoteDataSource;
   final INotificationDispatcher _dispatcher;
-  final FCMNotificationHandlerService _fcmHandlerService;
-  final Logger _logger = Logger();
+  final FCMNotificationHandlerService _handler;
+  final Logger _logger;
 
   @override
   Future<void> requestPermission() async {
-    final NotificationSettings settings =
-        await _remoteDataSource.requestPermission();
-    _logger.d('Notification Status: ${settings.authorizationStatus}');
+    final NotificationSettings settings = await _remoteDataSource
+        .requestPermission();
+    _logger.d('Notification permission: ${settings.authorizationStatus}');
   }
 
   @override
@@ -42,31 +43,28 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   @override
   Future<void> initializeListeners() async {
-    // Register tap handler with the central dispatcher
-    _dispatcher.registerPayloadHandler(
-      serviceId: 'fcm_service',
-      matcher: (payload) {
-        if (payload == null) return false;
-        try {
-          final data = jsonDecode(payload);
-          return data['type'] != null; // Basic heuristic for FCM deep-links
-        } catch (_) {
-          return false;
-        }
-      },
-      handler: _fcmHandlerService.handleNotificationResponse,
-    );
-
-    // Handle Foreground Messages
+    // 1. Listen for dynamic FCM events from RemoteDataSource
     _remoteDataSource.onMessage.listen((RemoteMessage message) {
-      _logger.d('Foreground Message: ${message.messageId}');
-      _fcmHandlerService.showForegroundNotification(message);
+      _handler.showForegroundNotification(message);
     });
 
-    // Handle Background/Terminated Taps
+    // 2. Listen for app opens from terminated state
+    _remoteDataSource.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        _handler.handleNotificationResponse(
+          NotificationResponse(
+            id: message.hashCode,
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            payload: jsonEncode(message.data),
+          ),
+        );
+      }
+    });
+
+    // 3. Listen for app opens from background state
     _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
-      _logger.d('Background Message Tap: ${message.messageId}');
-      _fcmHandlerService.handleNotificationResponse(
+      _handler.handleNotificationResponse(
         NotificationResponse(
           id: message.hashCode,
           notificationResponseType:
@@ -75,5 +73,20 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
         ),
       );
     });
+
+    // 4. Register for global notification actions via Dispatcher
+    _dispatcher.registerPayloadHandler(
+      serviceId: 'fcm_service',
+      matcher: (payload) {
+        if (payload == null) return false;
+        try {
+          final data = jsonDecode(payload);
+          return data['type'] != null || data['actionType'] != null;
+        } catch (_) {
+          return false;
+        }
+      },
+      handler: (response) => _handler.handleNotificationResponse(response),
+    );
   }
 }

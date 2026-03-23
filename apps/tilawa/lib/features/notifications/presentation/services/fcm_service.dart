@@ -19,18 +19,21 @@ class FCMService {
   final DeviceTokenService _deviceTokenService;
 
   StreamSubscription? _authSubscription;
-  StreamSubscription? _tokenSubscription;
+  StreamSubscription? _tokenRefreshSubscription;
 
   void initialize() {
+    final currentUser = _authRepository.currentUser;
+    if (currentUser != null) {
+      _syncDeviceTokenUseCase(currentUser.id);
+    }
+
     _authSubscription = _authRepository.authStateChanges.listen((user) async {
       if (user != null) {
         await _syncDeviceTokenUseCase(user.id);
       }
     });
 
-    _tokenSubscription = _deviceTokenService.onTokenRefresh.listen((
-      token,
-    ) async {
+    _tokenRefreshSubscription = _deviceTokenService.onTokenRefresh.listen((token) async {
       final user = _authRepository.currentUser;
       if (user != null) {
         await _syncDeviceTokenUseCase(user.id);
@@ -38,8 +41,8 @@ class FCMService {
     });
   }
 
-  void dispose() {
-    _authSubscription?.cancel();
-    _tokenSubscription?.cancel();
+  Future<void> dispose() async {
+    await _authSubscription?.cancel();
+    await _tokenRefreshSubscription?.cancel();
   }
 }

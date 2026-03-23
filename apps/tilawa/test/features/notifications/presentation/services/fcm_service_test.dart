@@ -31,12 +31,10 @@ void main() {
     mockDeviceTokenService = MockDeviceTokenService();
 
     // Default stubs
-    when(
-      mockAuthRepository.authStateChanges,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      mockDeviceTokenService.onTokenRefresh,
-    ).thenAnswer((_) => const Stream.empty());
+    when(mockAuthRepository.authStateChanges)
+        .thenAnswer((_) => const Stream.empty());
+    when(mockDeviceTokenService.onTokenRefresh)
+        .thenAnswer((_) => const Stream.empty());
     when(mockAuthRepository.currentUser).thenReturn(null);
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
 
@@ -83,8 +81,9 @@ void main() {
         tokenController.add('new_token');
         await Future.delayed(Duration.zero);
 
-        // Assert
-        verify(mockSyncDeviceTokenUseCase('user123')).called(1);
+        // Assert: called twice — once during initialize() for current user,
+        // once for the token refresh
+        verify(mockSyncDeviceTokenUseCase('user123')).called(2);
 
         await tokenController.close();
       },

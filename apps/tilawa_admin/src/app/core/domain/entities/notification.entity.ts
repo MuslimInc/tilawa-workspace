@@ -7,7 +7,9 @@ export class NotificationEntity {
     public readonly body: string,
     public readonly targetType: NotificationTargetType,
     public readonly targetUserIds: string[],
-    public readonly createdAt: Date
+    public readonly createdAt: Date,
+    public readonly actionType: string = 'home',
+    public readonly actionData?: string
   ) {}
 
   // Domain logic validation

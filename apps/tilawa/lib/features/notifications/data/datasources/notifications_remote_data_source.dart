@@ -10,6 +10,7 @@ abstract class NotificationsRemoteDataSource {
   Future<void> saveToken(String userId, String token);
   Stream<RemoteMessage> get onMessage;
   Stream<RemoteMessage> get onMessageOpenedApp;
+  Future<RemoteMessage?> getInitialMessage();
 }
 
 @LazySingleton(as: NotificationsRemoteDataSource)
@@ -49,4 +50,8 @@ class NotificationsRemoteDataSourceImpl
   @override
   Stream<RemoteMessage> get onMessageOpenedApp =>
       FirebaseMessaging.onMessageOpenedApp;
+
+  @override
+  Future<RemoteMessage?> getInitialMessage() =>
+      _firebaseMessaging.getInitialMessage();
 }

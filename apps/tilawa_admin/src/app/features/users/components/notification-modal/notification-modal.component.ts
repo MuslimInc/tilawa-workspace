@@ -40,6 +40,28 @@ import { FormsModule } from '@angular/forms';
               </div>
 
               <div>
+                <label for="action" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deep Link Action</label>
+                <select id="action" [(ngModel)]="actionType" class="mt-1 p-3 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <option value="home">Home Screen</option>
+                  <option value="reciter">Reciter Details</option>
+                  <option value="athkar">Athkar Screen</option>
+                  <option value="quran">Quran Reader</option>
+                  <option value="settings">Settings</option>
+                </select>
+              </div>
+
+              @if (actionType === 'reciter' || actionType === 'quran') {
+                <div>
+                  <label for="actionData" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ actionType === 'reciter' ? 'Reciter ID' : 'Surah Number' }}
+                  </label>
+                  <div class="mt-1">
+                    <input type="text" id="actionData" [(ngModel)]="actionData" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" [placeholder]="actionType === 'reciter' ? 'e.g., 7' : 'e.g., 2'">
+                  </div>
+                </div>
+              }
+
+              <div>
                 <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message Body</label>
                 <div class="mt-1">
                   <textarea id="body" rows="3" [(ngModel)]="notificationBody" class="p-3 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" placeholder="Describe the notification..."></textarea>
@@ -50,7 +72,7 @@ import { FormsModule } from '@angular/forms';
             <div class="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
               <button type="button" 
                 (click)="onSend()"
-                [disabled]="!notificationTitle.trim() || !notificationBody.trim()"
+                [disabled]="!notificationTitle.trim() || !notificationBody.trim() || ((actionType === 'reciter' || actionType === 'quran') && !actionData.trim())"
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                 Send Notification
               </button>
@@ -68,17 +90,31 @@ export class NotificationModalComponent {
   @Input() isOpen = false;
   @Input() targetSummary = '';
   
-  @Output() send = new EventEmitter<{ title: string; body: string }>();
+  @Output() send = new EventEmitter<{ title: string; body: string; type: string; data?: string }>();
   @Output() close = new EventEmitter<void>();
 
   notificationTitle = '';
   notificationBody = '';
+  actionType = 'home';
+  actionData = '';
 
   onSend() {
     if (this.notificationTitle.trim() && this.notificationBody.trim()) {
-      this.send.emit({ title: this.notificationTitle, body: this.notificationBody });
+      const payload: { title: string; body: string; type: string; data?: string } = {
+        title: this.notificationTitle,
+        body: this.notificationBody,
+        type: this.actionType
+      };
+      
+      if (this.actionData.trim()) {
+        payload.data = this.actionData.trim();
+      }
+
+      this.send.emit(payload);
       this.notificationTitle = '';
       this.notificationBody = '';
+      this.actionType = 'home';
+      this.actionData = '';
     }
   }
 }

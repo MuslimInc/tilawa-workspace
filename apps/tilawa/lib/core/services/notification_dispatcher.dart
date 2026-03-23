@@ -78,6 +78,23 @@ class NotificationDispatcher implements INotificationDispatcher {
         onDidReceiveNotificationResponse: _handleNotificationResponse,
       );
 
+      // Create High Importance Channel for Android
+      if (Platform.isAndroid) {
+        const AndroidNotificationChannel channel = AndroidNotificationChannel(
+          'high_importance_channel',
+          'High Importance Notifications',
+          description: 'This channel is used for important notifications.',
+          importance: Importance.max,
+        );
+
+        await _notifications
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(channel);
+        
+        logger.d('[NotificationDispatcher] High importance channel created');
+      }
+
       _initialized = true;
       logger.d('[NotificationDispatcher] Initialized successfully');
     } catch (e, stackTrace) {

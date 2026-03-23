@@ -66,7 +66,16 @@ Future<void> bootstrap({
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      
+      // Configure foreground notification presentation options
+      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
       logger.d('Firebase initialized successfully');
     } catch (e, stackTrace) {
       logger.d('CRITICAL: Firebase initialization failed: $e');
@@ -223,9 +232,7 @@ Future<void> initializeNotificationService() async {
     final FCMService fcmService = getIt<FCMService>();
     fcmService.initialize();
 
-    logger.d(
-      'Notification Repository and FCM Service initialized successfully',
-    );
+    logger.d('Notification services initialized successfully');
   } catch (e) {
     logger.d('Warning: Could not initialize Notification services: $e');
   }

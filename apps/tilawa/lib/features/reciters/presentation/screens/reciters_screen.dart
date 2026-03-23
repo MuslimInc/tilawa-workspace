@@ -26,7 +26,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-
   @override
   void initState() {
     super.initState();

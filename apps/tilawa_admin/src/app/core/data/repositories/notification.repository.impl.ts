@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { NotificationEntity } from '../../domain/entities/notification.entity';
 import { NotificationRepository } from '../../domain/repositories/notification.repository';
 import { NotificationModelMapper } from '../models/notification.model';

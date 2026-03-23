@@ -66,7 +66,7 @@ export class UsersComponent {
     this.isModalOpen = true;
   }
 
-  async onSendNotification(payload: { title: string; body: string }) {
+  async onSendNotification(payload: { title: string; body: string; type: string; data?: string }) {
     try {
       const entity = new NotificationEntity(
         null,
@@ -74,7 +74,9 @@ export class UsersComponent {
         payload.body,
         this.notificationTargetType,
         Array.from(this.selectedUserIds),
-        new Date()
+        new Date(),
+        payload.type,
+        payload.data
       );
       
       await this.sendNotificationUseCase.execute(entity);
