@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa/main.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui/theme/color_scheme.dart';
@@ -24,11 +23,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    logger.d('[FCM Issue] SplashScreen.initState() called');
     _splashCubit = getIt<SplashCubit>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Start splash routing after the listeners in this widget tree are active.
       if (!_splashCubit.isClosed) {
         _splashCubit.init();
       }
@@ -43,7 +40,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    logger.d('[FCM Issue] SplashScreen.build() called');
     return BlocProvider.value(
       value: _splashCubit,
       child: BlocListener<AuthBloc, AuthState>(
@@ -63,24 +59,19 @@ class _SplashScreenState extends State<SplashScreen> {
         },
         child: BlocListener<SplashCubit, SplashState>(
           listener: (context, state) {
-            logger.d('[FCM Issue] SplashScreen listener state: $state');
             if (state is SplashNavigateToHome) {
-              logger.d('[FCM Issue] SplashScreen => go(home)');
               AppRouter.disableStateRestoration = false;
               AppRouter.pendingStartupNotificationLaunch = false;
               AppRouter.router.go(const HomeRoute().location);
             } else if (state is SplashNavigateToLogin) {
-              logger.d('[FCM Issue] SplashScreen => go(login)');
               AppRouter.disableStateRestoration = false;
               AppRouter.pendingStartupNotificationLaunch = false;
               AppRouter.router.go(const LoginRoute().location);
             } else if (state is SplashNavigateToOnboarding) {
-              logger.d('[FCM Issue] SplashScreen => go(onboarding)');
               AppRouter.disableStateRestoration = false;
               AppRouter.pendingStartupNotificationLaunch = false;
               AppRouter.router.go(const OnboardingRoute().location);
             } else if (state is SplashNavigateToNotification) {
-              logger.d('[FCM Issue] SplashScreen => go(${state.location})');
               AppRouter.navigateFromNotificationLaunch(state.location);
             }
           },

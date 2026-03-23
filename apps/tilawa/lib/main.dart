@@ -378,12 +378,10 @@ Future<void> initializeNotificationDispatcher() async {
           const Duration(milliseconds: 1000),
           onTimeout: () => null,
         );
-    logger.d('main: local launchDetails=$launchDetails');
 
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      logger.d('main: disabling state restoration (local notification)');
       AppRouter.disableStateRestoration = true;
       AppRouter.pendingStartupNotificationLaunch = true;
     }
@@ -398,9 +396,7 @@ Future<void> initializeNotificationDispatcher() async {
           const Duration(milliseconds: 1000),
           onTimeout: () => null,
         );
-    logger.d('main: fcmInitialMessage=${fcmInitialMessage?.data}');
     if (fcmInitialMessage != null) {
-      logger.d('main: disabling state restoration (FCM notification)');
       AppRouter.disableStateRestoration = true;
       AppRouter.pendingStartupNotificationLaunch = true;
       AppRouter.pendingFcmMessage = fcmInitialMessage;

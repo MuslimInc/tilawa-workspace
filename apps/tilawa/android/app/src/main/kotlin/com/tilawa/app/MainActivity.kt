@@ -2,7 +2,6 @@ package com.tilawa.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.android.RenderMode

@@ -119,9 +119,6 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     _hasProcessedLaunchNotification = true;
 
     if (AppRouter.pendingStartupNotificationLaunch) {
-      logger.d(
-        'Skipping launch-notification processing because splash will handle the startup notification launch',
-      );
       AppRouter.pendingStartupNotificationLaunch = false;
       return;
     }

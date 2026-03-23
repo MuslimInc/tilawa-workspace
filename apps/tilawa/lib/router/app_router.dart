@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -67,7 +68,7 @@ class AppRouter {
       navigatorKey: navigatorKey,
       initialLocation: const SplashRoute().location,
       overridePlatformDefaultLocation: true,
-      debugLogDiagnostics: true,
+      debugLogDiagnostics: kDebugMode,
       // Disable restoration when launched from notification to prevent
       // the restored state from overriding notification navigation
       restorationScopeId: disableStateRestoration
