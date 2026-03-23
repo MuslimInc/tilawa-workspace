@@ -46,6 +46,21 @@ class BottomPlayerUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final TextStyle titleStyle =
+        (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: theme.textTheme.bodyLarge?.color,
+          decoration: TextDecoration.none,
+          decorationColor: Colors.transparent,
+        );
+    final TextStyle subtitleStyle =
+        (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
+          fontSize: 12,
+          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          decoration: TextDecoration.none,
+          decorationColor: Colors.transparent,
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -128,22 +143,14 @@ class BottomPlayerUi extends StatelessWidget {
                           children: [
                             Text(
                               audio.title,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: theme.textTheme.bodyLarge?.color,
-                              ),
+                              style: titleStyle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 2),
                             Text(
                               audio.artist ?? 'Unknown Reciter',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.textTheme.bodyMedium?.color
-                                    ?.withValues(alpha: 0.7),
-                              ),
+                              style: subtitleStyle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

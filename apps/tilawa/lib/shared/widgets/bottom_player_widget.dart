@@ -28,6 +28,8 @@ class BottomPlayerWidget extends StatefulWidget {
     this.isKeyboardOpen = false,
   });
 
+  static const double collapsedHeight = 100;
+
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
@@ -52,7 +54,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
   /// inner padding (12+12) + row content (~48) = ~99.
-  double get _miniPlayerHeight => 100;
+  double get _miniPlayerHeight => BottomPlayerWidget.collapsedHeight;
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;
@@ -228,11 +230,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                   if (progress > 0.01)
                     Opacity(
                       opacity: progress.clamp(0.0, 1.0),
-                      child: _buildExpandedPlayer(
-                        context,
-                        state,
-                        audio,
-                      ),
+                      child: _buildExpandedPlayer(context, state, audio),
                     ),
 
                   // Mini player (in front, fades out quickly)
@@ -254,11 +252,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                   .clamp(0.0, 1.0),
                           child: IgnorePointer(
                             ignoring: progress > 0.4,
-                            child: _buildMiniPlayer(
-                              context,
-                              state,
-                              audio,
-                            ),
+                            child: _buildMiniPlayer(context, state, audio),
                           ),
                         ),
                       ),
@@ -695,7 +689,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       ),
     );
   }
-
 }
 
 class _MiniPlayerProgressBar extends StatelessWidget {
@@ -706,7 +699,8 @@ class _MiniPlayerProgressBar extends StatelessWidget {
     final Color primaryColor = Theme.of(context).primaryColor;
     return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
       selector: (state) {
-        final PositionData pos = state.positionData ??
+        final PositionData pos =
+            state.positionData ??
             const PositionData(
               position: Duration.zero,
               bufferedPosition: Duration.zero,

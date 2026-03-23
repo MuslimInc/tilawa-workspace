@@ -44,6 +44,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
     final int currentCount = widget.currentCount;
     final VoidCallback onTap = widget.onTap;
     final VoidCallback onReset = widget.onReset;
+    final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     final isDone = currentCount == 0;
     final ThemeData theme = Theme.of(context);
@@ -65,7 +66,12 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             onTap();
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            padding: EdgeInsets.only(
+              left: 16,
+              top: 16,
+              right: 16,
+              bottom: 16 + bottomInset,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

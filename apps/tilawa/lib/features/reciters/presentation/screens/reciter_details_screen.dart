@@ -154,6 +154,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPlayerOffset = MediaQuery.viewPaddingOf(context).bottom;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -183,7 +184,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         ),
       ),
       floatingActionButtonLocation: showBottomPlayer
-          ? const _CustomFloatingActionButtonLocation(offset: 100)
+          ? _CustomFloatingActionButtonLocation(
+              offset:
+                  BottomPlayerWidget.collapsedHeight + bottomPlayerOffset + 16,
+            )
           : FloatingActionButtonLocation.miniEndFloat,
       body: Stack(
         children: [
@@ -305,6 +309,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                     _ReciterDetailsContent(
                       reciter: widget.reciter,
                       state: state,
+                      bottomPlayerOffset: bottomPlayerOffset,
                       showBottomPlayer: showBottomPlayer,
                       playingSurahKey: _playingSurahKey,
                       onPlaySurah: (surah) {
@@ -319,7 +324,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               );
             },
           ),
-          const Positioned.fill(child: BottomPlayerWidget()),
+          Positioned.fill(
+            child: BottomPlayerWidget(bottomNavBarHeight: bottomPlayerOffset),
+          ),
         ],
       ),
     );
@@ -387,12 +394,14 @@ class _ReciterDetailsContent extends StatelessWidget {
   const _ReciterDetailsContent({
     required this.reciter,
     required this.state,
+    required this.bottomPlayerOffset,
     required this.showBottomPlayer,
     required this.onPlaySurah,
     required this.playingSurahKey,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
+  final double bottomPlayerOffset;
   final bool showBottomPlayer;
   final Function(SurahEntity) onPlaySurah;
   final GlobalKey playingSurahKey;
@@ -401,7 +410,8 @@ class _ReciterDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final double bottomPadding =
-        MediaQuery.paddingOf(context).bottom + (showBottomPlayer ? 120 : 24);
+        bottomPlayerOffset +
+        (showBottomPlayer ? BottomPlayerWidget.collapsedHeight + 24 : 24);
     final currentAudio = context.select(
       (AudioPlayerBloc bloc) => bloc.state.currentAudio,
     );
