@@ -109,7 +109,9 @@ void main() {
       const meccaLatitude = 21.4225;
       const meccaLongitude = 39.8262;
 
-      const ummAlQuraSettings = PrayerSettingsEntity();
+      const ummAlQuraSettings = PrayerSettingsEntity(
+        calculationMethod: CalculationMethod.ummAlQura,
+      );
 
       test('Isha is 90 minutes after Maghrib for Umm Al-Qura method', () {
         final date = DateTime(2026, 1, 8);

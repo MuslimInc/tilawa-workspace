@@ -39,8 +39,7 @@ class GetSplashNextRouteUseCase {
         details.notificationResponse != null) {
       // Record the ID so the resume handler in TilawaApp does not
       // re-process this same launch notification on the first resume.
-      AppRouter.lastProcessedNotificationId =
-          details.notificationResponse!.id;
+      AppRouter.lastProcessedNotificationId = details.notificationResponse!.id;
 
       final payload = details.notificationResponse!.payload;
       Map<String, dynamic>? data;

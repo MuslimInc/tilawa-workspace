@@ -817,8 +817,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
     _lastPersistedStateJson = jsonEncode(json);
-    return AudioPlayerState.fromJson(json)
-        .copyWith(playbackState: null, positionData: null);
+    return AudioPlayerState.fromJson(
+      json,
+    ).copyWith(playbackState: null, positionData: null);
   }
 
   @override

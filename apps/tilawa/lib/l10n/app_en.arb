@@ -1289,9 +1289,61 @@
     "@calculationMethod": {
         "description": "Prayer calculation method label"
     },
+    "calculationMethodMuslimWorldLeague": "Muslim World League",
+    "@calculationMethodMuslimWorldLeague": {
+        "description": "Muslim World League calculation method"
+    },
+    "calculationMethodEgyptian": "Egyptian General Authority",
+    "@calculationMethodEgyptian": {
+        "description": "Egyptian General Authority of Survey calculation method"
+    },
+    "calculationMethodKarachi": "University of Karachi",
+    "@calculationMethodKarachi": {
+        "description": "University of Islamic Sciences, Karachi calculation method"
+    },
+    "calculationMethodUmmAlQura": "Umm Al-Qura, Makkah",
+    "@calculationMethodUmmAlQura": {
+        "description": "Umm al-Qura University, Makkah calculation method"
+    },
+    "calculationMethodIsna": "ISNA (North America)",
+    "@calculationMethodIsna": {
+        "description": "Islamic Society of North America calculation method"
+    },
+    "calculationMethodTehran": "Tehran",
+    "@calculationMethodTehran": {
+        "description": "Tehran, Institute of Geophysics calculation method"
+    },
+    "calculationMethodGulf": "Gulf Region",
+    "@calculationMethodGulf": {
+        "description": "Gulf Region calculation method"
+    },
+    "calculationMethodKuwait": "Kuwait",
+    "@calculationMethodKuwait": {
+        "description": "Kuwait calculation method"
+    },
+    "calculationMethodQatar": "Qatar",
+    "@calculationMethodQatar": {
+        "description": "Qatar calculation method"
+    },
+    "calculationMethodSingapore": "Singapore (MUIS)",
+    "@calculationMethodSingapore": {
+        "description": "Singapore, MUIS calculation method"
+    },
+    "calculationMethodTurkey": "Turkey (Diyanet)",
+    "@calculationMethodTurkey": {
+        "description": "Turkey, Diyanet calculation method"
+    },
     "asrCalculation": "Asr Calculation",
     "@asrCalculation": {
         "description": "Asr calculation method label"
+    },
+    "asrCalculationShafii": "Shafi'i, Maliki, Hanbali",
+    "@asrCalculationShafii": {
+        "description": "Standard Asr calculation method (Shafi'i, Maliki, Hanbali)"
+    },
+    "asrCalculationHanafi": "Hanafi",
+    "@asrCalculationHanafi": {
+        "description": "Hanafi Asr calculation method"
     },
     "displayOptions": "Display Options",
     "@displayOptions": {
@@ -1395,6 +1447,10 @@
     "minutes": "minutes",
     "@minutes": {
         "description": "Minutes label"
+    },
+    "minutesShort": "min",
+    "@minutesShort": {
+        "description": "Minutes short label"
     },
     "seconds": "seconds",
     "@seconds": {

@@ -959,7 +959,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calculationMethod => 'Calculation Method';
 
   @override
+  String get calculationMethodMuslimWorldLeague => 'Muslim World League';
+
+  @override
+  String get calculationMethodEgyptian => 'Egyptian General Authority';
+
+  @override
+  String get calculationMethodKarachi => 'University of Karachi';
+
+  @override
+  String get calculationMethodUmmAlQura => 'Umm Al-Qura, Makkah';
+
+  @override
+  String get calculationMethodIsna => 'ISNA (North America)';
+
+  @override
+  String get calculationMethodTehran => 'Tehran';
+
+  @override
+  String get calculationMethodGulf => 'Gulf Region';
+
+  @override
+  String get calculationMethodKuwait => 'Kuwait';
+
+  @override
+  String get calculationMethodQatar => 'Qatar';
+
+  @override
+  String get calculationMethodSingapore => 'Singapore (MUIS)';
+
+  @override
+  String get calculationMethodTurkey => 'Turkey (Diyanet)';
+
+  @override
   String get asrCalculation => 'Asr Calculation';
+
+  @override
+  String get asrCalculationShafii => 'Shafi\'i, Maliki, Hanbali';
+
+  @override
+  String get asrCalculationHanafi => 'Hanafi';
 
   @override
   String get displayOptions => 'Display Options';
@@ -1034,6 +1073,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get minutes => 'minutes';
+
+  @override
+  String get minutesShort => 'min';
 
   @override
   String get seconds => 'seconds';

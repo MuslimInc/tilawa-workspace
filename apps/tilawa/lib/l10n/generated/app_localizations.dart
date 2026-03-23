@@ -1796,11 +1796,89 @@ abstract class AppLocalizations {
   /// **'Calculation Method'**
   String get calculationMethod;
 
+  /// Muslim World League calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim World League'**
+  String get calculationMethodMuslimWorldLeague;
+
+  /// Egyptian General Authority of Survey calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian General Authority'**
+  String get calculationMethodEgyptian;
+
+  /// University of Islamic Sciences, Karachi calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'University of Karachi'**
+  String get calculationMethodKarachi;
+
+  /// Umm al-Qura University, Makkah calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Umm Al-Qura, Makkah'**
+  String get calculationMethodUmmAlQura;
+
+  /// Islamic Society of North America calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'ISNA (North America)'**
+  String get calculationMethodIsna;
+
+  /// Tehran, Institute of Geophysics calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Tehran'**
+  String get calculationMethodTehran;
+
+  /// Gulf Region calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Gulf Region'**
+  String get calculationMethodGulf;
+
+  /// Kuwait calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwait'**
+  String get calculationMethodKuwait;
+
+  /// Qatar calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Qatar'**
+  String get calculationMethodQatar;
+
+  /// Singapore, MUIS calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore (MUIS)'**
+  String get calculationMethodSingapore;
+
+  /// Turkey, Diyanet calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey (Diyanet)'**
+  String get calculationMethodTurkey;
+
   /// Asr calculation method label
   ///
   /// In en, this message translates to:
   /// **'Asr Calculation'**
   String get asrCalculation;
+
+  /// Standard Asr calculation method (Shafi'i, Maliki, Hanbali)
+  ///
+  /// In en, this message translates to:
+  /// **'Shafi\'i, Maliki, Hanbali'**
+  String get asrCalculationShafii;
+
+  /// Hanafi Asr calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Hanafi'**
+  String get asrCalculationHanafi;
 
   /// Display options section title
   ///
@@ -1933,6 +2011,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'minutes'**
   String get minutes;
+
+  /// Minutes short label
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesShort;
 
   /// Seconds label
   ///

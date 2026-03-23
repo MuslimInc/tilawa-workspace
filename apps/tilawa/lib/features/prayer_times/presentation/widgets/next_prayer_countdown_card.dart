@@ -105,7 +105,6 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         scheduledLabel,

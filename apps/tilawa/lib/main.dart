@@ -374,10 +374,7 @@ Future<void> initializeNotificationDispatcher() async {
     // If so, disable state restoration so the splash screen shows and handles it
     final NotificationAppLaunchDetails? launchDetails = await dispatcher
         .getNotificationAppLaunchDetails()
-        .timeout(
-          const Duration(milliseconds: 1000),
-          onTimeout: () => null,
-        );
+        .timeout(const Duration(milliseconds: 1000), onTimeout: () => null);
 
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
@@ -392,10 +389,7 @@ Future<void> initializeNotificationDispatcher() async {
     // reading it (the splash screen never gets created).
     final RemoteMessage? fcmInitialMessage = await FirebaseMessaging.instance
         .getInitialMessage()
-        .timeout(
-          const Duration(milliseconds: 1000),
-          onTimeout: () => null,
-        );
+        .timeout(const Duration(milliseconds: 1000), onTimeout: () => null);
     if (fcmInitialMessage != null) {
       AppRouter.disableStateRestoration = true;
       AppRouter.pendingStartupNotificationLaunch = true;

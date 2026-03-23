@@ -23,8 +23,7 @@ class FCMNotificationHandlerService {
     await handleNotificationResponse(
       NotificationResponse(
         id: message.hashCode,
-        notificationResponseType:
-            NotificationResponseType.selectedNotification,
+        notificationResponseType: NotificationResponseType.selectedNotification,
         payload: jsonEncode(payload),
       ),
     );

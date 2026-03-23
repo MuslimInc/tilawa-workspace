@@ -951,7 +951,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get calculationMethod => 'طريقة الحساب';
 
   @override
+  String get calculationMethodMuslimWorldLeague => 'رابطة العالم الإسلامي';
+
+  @override
+  String get calculationMethodEgyptian => 'الهيئة المصرية العامة للمساحة';
+
+  @override
+  String get calculationMethodKarachi => 'جامعة العلوم الإسلامية بكراتشي';
+
+  @override
+  String get calculationMethodUmmAlQura => 'جامعة أم القرى، مكة المكرمة';
+
+  @override
+  String get calculationMethodIsna =>
+      ' الجمعية الإسلامية لأمريكا الشمالية (ISNA)';
+
+  @override
+  String get calculationMethodTehran => 'معهد الجيوفيزياء بجامعة طهران';
+
+  @override
+  String get calculationMethodGulf => 'منطقة الخليج العربي';
+
+  @override
+  String get calculationMethodKuwait => 'دولة الكويت';
+
+  @override
+  String get calculationMethodQatar => 'دولة قطر';
+
+  @override
+  String get calculationMethodSingapore => 'سنغافورة (MUIS)';
+
+  @override
+  String get calculationMethodTurkey => 'رئاسة الشؤون الدينية التركية';
+
+  @override
   String get asrCalculation => 'حساب العصر';
+
+  @override
+  String get asrCalculationShafii => 'شافعي، مالكي، حنبلي';
+
+  @override
+  String get asrCalculationHanafi => 'حنفي';
 
   @override
   String get displayOptions => 'خيارات العرض';
@@ -1026,6 +1066,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get minutes => 'دقائق';
+
+  @override
+  String get minutesShort => 'دقيقة';
 
   @override
   String get seconds => 'ثواني';

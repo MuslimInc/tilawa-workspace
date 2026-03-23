@@ -10,22 +10,33 @@ import 'package:tilawa_ui/theme/app_colors.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
+import '../../features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import '../../main.dart';
 import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
+import '../di/injection.dart';
 
 /// Service for scheduling daily athkar (remembrance) notifications
 ///
-/// Schedules two daily notifications:
-/// - 7:00 AM: Morning athkar (أذكار الصباح)
-/// - 5:00 PM: Evening athkar (أذكار المساء)
+/// Schedules athkar notifications dynamically from prayer times:
+/// - Morning athkar after Fajr
+/// - Evening athkar after Asr
+///
+/// When prayer-time context is unavailable, it falls back to fixed daily times.
 @LazySingleton(as: IAthkarNotificationService)
 class AthkarNotificationService implements IAthkarNotificationService {
-  AthkarNotificationService(this._prefs, this._dispatcher);
+  AthkarNotificationService(
+    this._prefs,
+    this._dispatcher, {
+    PrayerTimesRepository? prayerTimesRepository,
+  }) : _prayerTimesRepository = prayerTimesRepository;
 
   final SharedPreferencesAsync _prefs;
   final INotificationDispatcher _dispatcher;
+  final PrayerTimesRepository? _prayerTimesRepository;
   static const String _lastHandledPayloadKey =
       'last_handled_notification_payload';
   static const String _lastHandledTimestampKey =
@@ -44,6 +55,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Notification IDs
   static const int _morningAthkarNotificationId = 1001;
   static const int _eveningAthkarNotificationId = 1002;
+  static const int _dynamicMorningNotificationBaseId = 11000000;
+  static const int _dynamicEveningNotificationBaseId = 12000000;
+  static const int _dynamicScheduleWindowDays = 14;
+  static const String _morningAthkarPayloadPrefix = 'morning_athkar_';
+  static const String _eveningAthkarPayloadPrefix = 'evening_athkar_';
 
   /// Get notification IDs for external use (e.g., dispatcher registration)
   static Set<int> get notificationIds => {
@@ -53,6 +69,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
 
   FlutterLocalNotificationsPlugin get _notifications =>
       _dispatcher.notificationsPlugin;
+  PrayerTimesRepository get _resolvedPrayerTimesRepository =>
+      _prayerTimesRepository ?? getIt<PrayerTimesRepository>();
 
   bool _initialized = false;
 
@@ -99,6 +117,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
       _dispatcher.registerHandler(
         serviceId: 'athkar',
         notificationIds: notificationIds,
+        handler: handleNotificationResponse,
+      );
+      _dispatcher.registerPayloadHandler(
+        serviceId: 'athkar',
+        matcher: _isAthkarPayload,
         handler: handleNotificationResponse,
       );
 
@@ -192,8 +215,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
           DateTime.now().millisecondsSinceEpoch,
         );
 
-        if (id == _morningAthkarNotificationId ||
-            id == _eveningAthkarNotificationId) {
+        if (_isAthkarNotification(id: id, payload: payload)) {
           logger.d(
             '[AthkarNotificationService] Valid notification tap detected: $payload',
           );
@@ -284,8 +306,28 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
 
     try {
-      await _scheduleMorningAthkar();
-      await _scheduleEveningAthkar();
+      await cancelAllAthkarNotifications();
+
+      final List<_ScheduledAthkarNotification>? dynamicNotifications =
+          await _buildDynamicAthkarNotifications();
+
+      if (dynamicNotifications == null || dynamicNotifications.isEmpty) {
+        logger.w(
+          '[AthkarNotificationService] Prayer-time context unavailable, using fixed fallback times',
+        );
+        await _scheduleMorningAthkarFallback();
+        await _scheduleEveningAthkarFallback();
+      } else {
+        for (final _ScheduledAthkarNotification notification
+            in dynamicNotifications) {
+          await _scheduleAthkarNotification(notification);
+        }
+
+        logger.d(
+          '[AthkarNotificationService] Scheduled ${dynamicNotifications.length} dynamic athkar notifications',
+        );
+      }
+
       logger.d(
         '[AthkarNotificationService] Scheduled all athkar notifications',
       );
@@ -296,42 +338,21 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
-  /// Schedule morning athkar notification at 7:00 AM daily
-  Future<void> _scheduleMorningAthkar() async {
+  /// Schedule morning athkar notification at a fixed fallback time.
+  Future<void> _scheduleMorningAthkarFallback() async {
     try {
       final tz.TZDateTime scheduledDate = _nextInstanceOfTime(7, 0);
 
-      const androidDetails = AndroidNotificationDetails(
-        _athkarChannelId,
-        _athkarChannelName,
-        channelDescription: _athkarChannelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
-        color: AppColors.notificationAccent,
-      );
-
-      const iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-      );
-
-      const notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
       await _notifications.zonedSchedule(
         id: _morningAthkarNotificationId,
-        title: 'أذكار الصباح',
-        body: 'حان وقت أذكار الصباح 🌅',
+        title: _morningAthkarTitle,
+        body: _morningAthkarBody,
         scheduledDate: scheduledDate,
-        notificationDetails: notificationDetails,
+        notificationDetails: _athkarNotificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'morning_athkar_${scheduledDate.millisecondsSinceEpoch}',
+        payload:
+            '$_morningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}',
       );
 
       logger.d(
@@ -344,42 +365,21 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
-  /// Schedule evening athkar notification at 5:00 PM daily
-  Future<void> _scheduleEveningAthkar() async {
+  /// Schedule evening athkar notification at a fixed fallback time.
+  Future<void> _scheduleEveningAthkarFallback() async {
     try {
       final tz.TZDateTime scheduledDate = _nextInstanceOfTime(17, 0);
 
-      const androidDetails = AndroidNotificationDetails(
-        _athkarChannelId,
-        _athkarChannelName,
-        channelDescription: _athkarChannelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
-        color: AppColors.notificationAccent,
-      );
-
-      const iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-      );
-
-      const notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
       await _notifications.zonedSchedule(
         id: _eveningAthkarNotificationId,
-        title: 'أذكار المساء',
-        body: 'حان وقت أذكار المساء 🌙',
+        title: _eveningAthkarTitle,
+        body: _eveningAthkarBody,
         scheduledDate: scheduledDate,
-        notificationDetails: notificationDetails,
+        notificationDetails: _athkarNotificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}',
+        payload:
+            '$_eveningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}',
       );
 
       logger.d(
@@ -410,6 +410,177 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
 
     return scheduledDate;
+  }
+
+  Future<List<_ScheduledAthkarNotification>?>
+  _buildDynamicAthkarNotifications() async {
+    try {
+      final _AthkarScheduleContext? context = await _resolveScheduleContext();
+      if (context == null) {
+        return null;
+      }
+
+      final DateTime now = DateTime.now();
+      final DateTime startDate = DateTime(now.year, now.month, now.day);
+      final DateTime endDate = startDate.add(
+        const Duration(days: _dynamicScheduleWindowDays - 1),
+      );
+
+      final List<PrayerTimeEntity> prayerTimes =
+          await _resolvedPrayerTimesRepository.getPrayerTimesForRange(
+            latitude: context.latitude,
+            longitude: context.longitude,
+            startDate: startDate,
+            endDate: endDate,
+            settings: context.settings,
+          );
+
+      if (prayerTimes.isEmpty) {
+        return null;
+      }
+
+      prayerTimes.sort((a, b) => a.date.compareTo(b.date));
+
+      final List<_ScheduledAthkarNotification> notifications =
+          <_ScheduledAthkarNotification>[];
+
+      for (final PrayerTimeEntity prayerTime in prayerTimes) {
+        final _ScheduledAthkarNotification? morningNotification =
+            _createDynamicNotification(
+              date: prayerTime.date,
+              prayerTime: prayerTime.fajr,
+              isMorning: true,
+            );
+        final _ScheduledAthkarNotification? eveningNotification =
+            _createDynamicNotification(
+              date: prayerTime.date,
+              prayerTime: prayerTime.asr,
+              isMorning: false,
+            );
+
+        if (morningNotification != null) {
+          notifications.add(morningNotification);
+        }
+        if (eveningNotification != null) {
+          notifications.add(eveningNotification);
+        }
+      }
+
+      return notifications;
+    } catch (e, stackTrace) {
+      logger.w(
+        '[AthkarNotificationService] Failed to build dynamic athkar schedule: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<_AthkarScheduleContext?> _resolveScheduleContext() async {
+    try {
+      var settings = await _resolvedPrayerTimesRepository.loadSettings();
+      double? latitude = settings.savedLatitude;
+      double? longitude = settings.savedLongitude;
+      String? countryCode;
+
+      if (latitude == null || longitude == null) {
+        final bool hasPermission = await _resolvedPrayerTimesRepository
+            .hasLocationPermission();
+        if (!hasPermission) {
+          return null;
+        }
+
+        final LocationResult location = await _resolvedPrayerTimesRepository
+            .getCurrentLocation();
+        if (location.hasError) {
+          return null;
+        }
+
+        latitude = location.latitude;
+        longitude = location.longitude;
+        countryCode = location.countryCode;
+      } else if (settings.calculationMethod == CalculationMethod.ummAlQura) {
+        countryCode = await _resolvedPrayerTimesRepository.getCountryCode(
+          latitude: latitude,
+          longitude: longitude,
+        );
+      }
+
+      if (countryCode != null &&
+          settings.calculationMethod == CalculationMethod.ummAlQura) {
+        final CalculationMethod? recommendedMethod =
+            PrayerSettingsEntity.defaultForCountry(countryCode);
+        if (recommendedMethod != null &&
+            recommendedMethod != settings.calculationMethod) {
+          settings = settings.copyWith(calculationMethod: recommendedMethod);
+        }
+      }
+
+      return _AthkarScheduleContext(
+        latitude: latitude,
+        longitude: longitude,
+        settings: settings,
+      );
+    } catch (e, stackTrace) {
+      logger.w(
+        '[AthkarNotificationService] Failed to resolve prayer-time context: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  _ScheduledAthkarNotification? _createDynamicNotification({
+    required DateTime date,
+    required DateTime prayerTime,
+    required bool isMorning,
+  }) {
+    final tz.TZDateTime scheduledDate = tz.TZDateTime.from(
+      prayerTime,
+      tz.local,
+    );
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+
+    if (!scheduledDate.isAfter(now)) {
+      return null;
+    }
+
+    return _ScheduledAthkarNotification(
+      id: _buildDynamicNotificationId(date: date, isMorning: isMorning),
+      title: isMorning ? _morningAthkarTitle : _eveningAthkarTitle,
+      body: isMorning ? _morningAthkarBody : _eveningAthkarBody,
+      scheduledDate: scheduledDate,
+      payload:
+          '${isMorning ? _morningAthkarPayloadPrefix : _eveningAthkarPayloadPrefix}${scheduledDate.millisecondsSinceEpoch}',
+    );
+  }
+
+  Future<void> _scheduleAthkarNotification(
+    _ScheduledAthkarNotification notification,
+  ) async {
+    await _notifications.zonedSchedule(
+      id: notification.id,
+      title: notification.title,
+      body: notification.body,
+      scheduledDate: notification.scheduledDate,
+      notificationDetails: _athkarNotificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: null,
+      payload: notification.payload,
+    );
+  }
+
+  int _buildDynamicNotificationId({
+    required DateTime date,
+    required bool isMorning,
+  }) {
+    final int dateKey = (date.year * 10000) + (date.month * 100) + date.day;
+    return (isMorning
+            ? _dynamicMorningNotificationBaseId
+            : _dynamicEveningNotificationBaseId) +
+        dateKey;
   }
 
   /// Schedule a test notification (for testing purposes)
@@ -520,8 +691,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
 
       final athkarPayload = isMorning
-          ? 'morning_athkar_${scheduledDate.millisecondsSinceEpoch}'
-          : 'evening_athkar_${scheduledDate.millisecondsSinceEpoch}';
+          ? '$_morningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}'
+          : '$_eveningAthkarPayloadPrefix${scheduledDate.millisecondsSinceEpoch}';
 
       await _notifications.zonedSchedule(
         id: id,
@@ -530,6 +701,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
         payload: athkarPayload,
       );
 
@@ -549,6 +721,16 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
 
     try {
+      final List<PendingNotificationRequest> pendingNotifications =
+          await _notifications.pendingNotificationRequests();
+
+      for (final PendingNotificationRequest pendingNotification
+          in pendingNotifications) {
+        if (_isAthkarPayload(pendingNotification.payload)) {
+          await _notifications.cancel(id: pendingNotification.id);
+        }
+      }
+
       await _notifications.cancel(id: _morningAthkarNotificationId);
       await _notifications.cancel(id: _eveningAthkarNotificationId);
       logger.d(
@@ -592,7 +774,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
     }
 
-    if (response.id == _morningAthkarNotificationId) {
+    if (_isMorningAthkarNotification(id: response.id, payload: payload)) {
       logger.d(
         '[AthkarNotificationService] Morning athkar notification tapped - navigating',
       );
@@ -602,7 +784,10 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
       // Use go to ensure clean navigation from any state
       _navigateToRoute(route.location);
-    } else if (response.id == _eveningAthkarNotificationId) {
+    } else if (_isEveningAthkarNotification(
+      id: response.id,
+      payload: payload,
+    )) {
       logger.d(
         '[AthkarNotificationService] Evening athkar notification tapped - navigating',
       );
@@ -626,4 +811,105 @@ class AthkarNotificationService implements IAthkarNotificationService {
 
   @visibleForTesting
   bool get isAndroid => Platform.isAndroid;
+
+  @visibleForTesting
+  String get morningAthkarPayloadPrefix => _morningAthkarPayloadPrefix;
+
+  @visibleForTesting
+  String get eveningAthkarPayloadPrefix => _eveningAthkarPayloadPrefix;
+
+  bool _isAthkarPayload(String? payload) {
+    return _isMorningAthkarPayload(payload) || _isEveningAthkarPayload(payload);
+  }
+
+  bool _isMorningAthkarPayload(String? payload) {
+    return payload?.startsWith(_morningAthkarPayloadPrefix) ?? false;
+  }
+
+  bool _isEveningAthkarPayload(String? payload) {
+    return payload?.startsWith(_eveningAthkarPayloadPrefix) ?? false;
+  }
+
+  bool _isAthkarNotification({required int? id, required String? payload}) {
+    return _isAthkarPayload(payload) ||
+        (id != null && notificationIds.contains(id));
+  }
+
+  bool _isMorningAthkarNotification({
+    required int? id,
+    required String? payload,
+  }) {
+    if (_isMorningAthkarPayload(payload)) {
+      return true;
+    }
+    if (_isEveningAthkarPayload(payload)) {
+      return false;
+    }
+    return id == _morningAthkarNotificationId;
+  }
+
+  bool _isEveningAthkarNotification({
+    required int? id,
+    required String? payload,
+  }) {
+    if (_isEveningAthkarPayload(payload)) {
+      return true;
+    }
+    if (_isMorningAthkarPayload(payload)) {
+      return false;
+    }
+    return id == _eveningAthkarNotificationId;
+  }
+
+  NotificationDetails get _athkarNotificationDetails =>
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _athkarChannelId,
+          _athkarChannelName,
+          channelDescription: _athkarChannelDescription,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: 'ic_launcher_monochrome',
+          color: AppColors.notificationAccent,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: 'default',
+        ),
+      );
+
+  static const String _morningAthkarTitle = 'أذكار الصباح';
+  static const String _morningAthkarBody = 'حان وقت أذكار الصباح 🌅';
+  static const String _eveningAthkarTitle = 'أذكار المساء';
+  static const String _eveningAthkarBody = 'حان وقت أذكار المساء 🌙';
+}
+
+class _AthkarScheduleContext {
+  const _AthkarScheduleContext({
+    required this.latitude,
+    required this.longitude,
+    required this.settings,
+  });
+
+  final double latitude;
+  final double longitude;
+  final PrayerSettingsEntity settings;
+}
+
+class _ScheduledAthkarNotification {
+  const _ScheduledAthkarNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.scheduledDate,
+    required this.payload,
+  });
+
+  final int id;
+  final String title;
+  final String body;
+  final tz.TZDateTime scheduledDate;
+  final String payload;
 }

@@ -1289,9 +1289,61 @@
     "@calculationMethod": {
         "description": "Prayer calculation method label"
     },
+    "calculationMethodMuslimWorldLeague": "رابطة العالم الإسلامي",
+    "@calculationMethodMuslimWorldLeague": {
+        "description": "Muslim World League calculation method"
+    },
+    "calculationMethodEgyptian": "الهيئة المصرية العامة للمساحة",
+    "@calculationMethodEgyptian": {
+        "description": "Egyptian General Authority of Survey calculation method"
+    },
+    "calculationMethodKarachi": "جامعة العلوم الإسلامية بكراتشي",
+    "@calculationMethodKarachi": {
+        "description": "University of Islamic Sciences, Karachi calculation method"
+    },
+    "calculationMethodUmmAlQura": "جامعة أم القرى، مكة المكرمة",
+    "@calculationMethodUmmAlQura": {
+        "description": "Umm al-Qura University, Makkah calculation method"
+    },
+    "calculationMethodIsna": " الجمعية الإسلامية لأمريكا الشمالية (ISNA)",
+    "@calculationMethodIsna": {
+        "description": "Islamic Society of North America calculation method"
+    },
+    "calculationMethodTehran": "معهد الجيوفيزياء بجامعة طهران",
+    "@calculationMethodTehran": {
+        "description": "Tehran, Institute of Geophysics calculation method"
+    },
+    "calculationMethodGulf": "منطقة الخليج العربي",
+    "@calculationMethodGulf": {
+        "description": "Gulf Region calculation method"
+    },
+    "calculationMethodKuwait": "دولة الكويت",
+    "@calculationMethodKuwait": {
+        "description": "Kuwait calculation method"
+    },
+    "calculationMethodQatar": "دولة قطر",
+    "@calculationMethodQatar": {
+        "description": "Qatar calculation method"
+    },
+    "calculationMethodSingapore": "سنغافورة (MUIS)",
+    "@calculationMethodSingapore": {
+        "description": "Singapore, MUIS calculation method"
+    },
+    "calculationMethodTurkey": "رئاسة الشؤون الدينية التركية",
+    "@calculationMethodTurkey": {
+        "description": "Turkey, Diyanet calculation method"
+    },
     "asrCalculation": "حساب العصر",
     "@asrCalculation": {
         "description": "Asr calculation method label"
+    },
+    "asrCalculationShafii": "شافعي، مالكي، حنبلي",
+    "@asrCalculationShafii": {
+        "description": "Standard Asr calculation method (Shafi'i, Maliki, Hanbali)"
+    },
+    "asrCalculationHanafi": "حنفي",
+    "@asrCalculationHanafi": {
+        "description": "Hanafi Asr calculation method"
     },
     "displayOptions": "خيارات العرض",
     "@displayOptions": {
@@ -1395,6 +1447,10 @@
     "minutes": "دقائق",
     "@minutes": {
         "description": "Minutes label"
+    },
+    "minutesShort": "دقيقة",
+    "@minutesShort": {
+        "description": "Minutes short label"
     },
     "seconds": "ثواني",
     "@seconds": {

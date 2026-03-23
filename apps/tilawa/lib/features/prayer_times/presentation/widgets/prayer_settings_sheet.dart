@@ -106,7 +106,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _buildDropdown<CalculationMethod>(
                         value: _settings.calculationMethod,
                         items: CalculationMethod.values,
-                        labelBuilder: (method) => method.displayName,
+                        labelBuilder: (method) => method.localize(context.l10n),
                         onChanged: (method) {
                           if (method != null) {
                             _updateSettings(
@@ -123,10 +123,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _buildDropdown<AsrJuristicMethod>(
                         value: _settings.asrJuristicMethod,
                         items: AsrJuristicMethod.values,
-                        labelBuilder: (method) =>
-                            method == AsrJuristicMethod.shafii
-                            ? "Shafi'i, Maliki, Hanbali"
-                            : 'Hanafi',
+                        labelBuilder: (method) => method.localize(context.l10n),
                         onChanged: (method) {
                           if (method != null) {
                             _updateSettings(
@@ -270,14 +267,14 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
             min: -30,
             max: 30,
             divisions: 60,
-            label: '$value min',
+            label: '$value ${context.l10n.minutesShort}',
             onChanged: onChanged,
           ),
         ),
         SizedBox(
           width: 50,
           child: Text(
-            '$value min',
+            '$value ${context.l10n.minutesShort}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
