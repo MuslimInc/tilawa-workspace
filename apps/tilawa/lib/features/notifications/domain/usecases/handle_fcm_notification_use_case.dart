@@ -11,9 +11,6 @@ class HandleFcmNotificationUseCase {
     final String? typeStr = data['type'] as String?;
     final type = NotificationActionType.fromString(typeStr);
 
-    return NotificationAction(
-      type: type,
-      data: data,
-    );
+    return NotificationAction(type: type, data: data);
   }
 }

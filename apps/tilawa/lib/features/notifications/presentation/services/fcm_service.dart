@@ -33,7 +33,9 @@ class FCMService {
       }
     });
 
-    _tokenRefreshSubscription = _deviceTokenService.onTokenRefresh.listen((token) async {
+    _tokenRefreshSubscription = _deviceTokenService.onTokenRefresh.listen((
+      token,
+    ) async {
       final user = _authRepository.currentUser;
       if (user != null) {
         await _syncDeviceTokenUseCase(user.id);

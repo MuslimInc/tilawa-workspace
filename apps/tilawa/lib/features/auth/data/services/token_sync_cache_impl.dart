@@ -13,8 +13,7 @@ class TokenSyncCacheImpl implements TokenSyncCache {
   final SharedPreferencesAsync _prefs;
 
   @override
-  Future<String?> getLastSyncedToken() =>
-      _prefs.getString(_lastSyncedTokenKey);
+  Future<String?> getLastSyncedToken() => _prefs.getString(_lastSyncedTokenKey);
 
   @override
   Future<String?> getLastSyncedUserId() =>

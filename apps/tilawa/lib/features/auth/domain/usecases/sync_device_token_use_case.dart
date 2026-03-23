@@ -24,8 +24,8 @@ class SyncDeviceTokenUseCase {
       }
 
       final String? previousToken = await _tokenSyncCache.getLastSyncedToken();
-      final String? previousUserId =
-          await _tokenSyncCache.getLastSyncedUserId();
+      final String? previousUserId = await _tokenSyncCache
+          .getLastSyncedUserId();
 
       if (previousToken != null &&
           previousToken.isNotEmpty &&
@@ -46,8 +46,8 @@ class SyncDeviceTokenUseCase {
     try {
       final String? currentToken = await _deviceTokenService.getToken();
       final String? previousToken = await _tokenSyncCache.getLastSyncedToken();
-      final String? previousUserId =
-          await _tokenSyncCache.getLastSyncedUserId();
+      final String? previousUserId = await _tokenSyncCache
+          .getLastSyncedUserId();
 
       if (currentToken != null && currentToken.isNotEmpty) {
         await _deleteTokenQuietly(userId, currentToken);

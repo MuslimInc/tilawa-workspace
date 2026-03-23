@@ -49,17 +49,16 @@ class DownloadsInitializationService {
   /// both download managers so notifications use the correct locale.
   Future<void> _syncLocaleFromPreferences() async {
     try {
-      final String? savedLanguage =
-          await _prefs.getString(LanguageConfig.languageKey);
+      final String? savedLanguage = await _prefs.getString(
+        LanguageConfig.languageKey,
+      );
       if (savedLanguage != null && savedLanguage.isNotEmpty) {
         final Locale locale = Locale(savedLanguage);
         _downloadQueueManager.locale = locale;
         _batchDownloadManager.locale = locale;
       }
     } catch (e) {
-      logger.d(
-        'DownloadsInitializationService: Could not sync locale: $e',
-      );
+      logger.d('DownloadsInitializationService: Could not sync locale: $e');
     }
   }
 }

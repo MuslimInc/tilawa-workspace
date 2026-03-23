@@ -24,8 +24,8 @@ class DownloadNotificationNavigatorImpl
   }) async {
     try {
       if (reciterId != null) {
-        final Either<Failure, ReciterEntity?> result =
-            await _recitersRepository.getReciterById(reciterId);
+        final Either<Failure, ReciterEntity?> result = await _recitersRepository
+            .getReciterById(reciterId);
         final ReciterEntity? reciter = result.fold(
           (_) => null,
           (value) => value,

@@ -53,8 +53,9 @@ void main() {
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     mockGetDownloadItem = MockGetDownloadItemUseCase();
-    when(mockGetDownloadItem.call(any))
-        .thenAnswer((_) async => const Right(null));
+    when(
+      mockGetDownloadItem.call(any),
+    ).thenAnswer((_) async => const Right(null));
 
     when(
       mockCheckSurahDownloaded.call(

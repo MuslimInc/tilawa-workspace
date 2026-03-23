@@ -89,9 +89,10 @@ class NotificationDispatcher implements INotificationDispatcher {
 
         await _notifications
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.createNotificationChannel(channel);
-        
+
         logger.d('[NotificationDispatcher] High importance channel created');
       }
 

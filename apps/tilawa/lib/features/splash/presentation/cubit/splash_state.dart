@@ -26,3 +26,9 @@ class SplashNavigateToLogin extends SplashState {
 class SplashNavigateToOnboarding extends SplashState {
   const SplashNavigateToOnboarding();
 }
+
+/// Navigate to a deep link from a notification launch.
+class SplashNavigateToNotification extends SplashState {
+  const SplashNavigateToNotification(this.location);
+  final String location;
+}

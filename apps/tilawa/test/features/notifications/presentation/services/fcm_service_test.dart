@@ -31,10 +31,12 @@ void main() {
     mockDeviceTokenService = MockDeviceTokenService();
 
     // Default stubs
-    when(mockAuthRepository.authStateChanges)
-        .thenAnswer((_) => const Stream.empty());
-    when(mockDeviceTokenService.onTokenRefresh)
-        .thenAnswer((_) => const Stream.empty());
+    when(
+      mockAuthRepository.authStateChanges,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      mockDeviceTokenService.onTokenRefresh,
+    ).thenAnswer((_) => const Stream.empty());
     when(mockAuthRepository.currentUser).thenReturn(null);
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
 

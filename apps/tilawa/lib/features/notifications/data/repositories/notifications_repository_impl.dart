@@ -48,21 +48,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       _handler.showForegroundNotification(message);
     });
 
-    // 2. Listen for app opens from terminated state
-    _remoteDataSource.getInitialMessage().then((RemoteMessage? message) {
-      if (message != null) {
-        _handler.handleNotificationResponse(
-          NotificationResponse(
-            id: message.hashCode,
-            notificationResponseType:
-                NotificationResponseType.selectedNotification,
-            payload: jsonEncode(message.data),
-          ),
-        );
-      }
-    });
-
-    // 3. Listen for app opens from background state
+    // 2. Listen for app opens from background state
     _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
       _handler.handleNotificationResponse(
         NotificationResponse(

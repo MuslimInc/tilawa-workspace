@@ -437,9 +437,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
       // Notify batch manager
       final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';
-      final AppLocalizations l10n = lookupAppLocalizations(
-        queueManager.locale,
-      );
+      final AppLocalizations l10n = lookupAppLocalizations(queueManager.locale);
       batchDownloadManager.startBatch(
         batchId: batchId,
         title: l10n.notificationBatchDownloadingTitle(queueItems.length),

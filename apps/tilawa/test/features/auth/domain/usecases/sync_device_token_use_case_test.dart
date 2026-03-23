@@ -29,15 +29,16 @@ void main() {
     () async {
       // Arrange
       when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
-      when(mockTokenSyncCache.getLastSyncedToken())
-          .thenAnswer((_) async => null);
-      when(mockTokenSyncCache.getLastSyncedUserId())
-          .thenAnswer((_) async => null);
+      when(
+        mockTokenSyncCache.getLastSyncedToken(),
+      ).thenAnswer((_) async => null);
+      when(
+        mockTokenSyncCache.getLastSyncedUserId(),
+      ).thenAnswer((_) async => null);
       when(
         mockUserRepository.saveDeviceToken(any, any),
       ).thenAnswer((_) async => Future.value());
-      when(mockTokenSyncCache.saveSync(any, any))
-          .thenAnswer((_) async {});
+      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
 
       // Act
       await useCase(tUserId);
@@ -65,18 +66,19 @@ void main() {
     'should remove previous synced token when token ownership changes',
     () async {
       when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
-      when(mockTokenSyncCache.getLastSyncedToken())
-          .thenAnswer((_) async => 'old_token');
-      when(mockTokenSyncCache.getLastSyncedUserId())
-          .thenAnswer((_) async => 'old_user');
+      when(
+        mockTokenSyncCache.getLastSyncedToken(),
+      ).thenAnswer((_) async => 'old_token');
+      when(
+        mockTokenSyncCache.getLastSyncedUserId(),
+      ).thenAnswer((_) async => 'old_user');
       when(
         mockUserRepository.deleteDeviceToken(any, any),
       ).thenAnswer((_) async {});
       when(
         mockUserRepository.saveDeviceToken(any, any),
       ).thenAnswer((_) async {});
-      when(mockTokenSyncCache.saveSync(any, any))
-          .thenAnswer((_) async {});
+      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
 
       await useCase(tUserId);
 

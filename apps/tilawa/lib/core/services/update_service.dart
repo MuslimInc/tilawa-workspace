@@ -54,9 +54,7 @@ class UpdateService {
             );
             await InAppUpdate.completeFlexibleUpdate();
           } else {
-            _logger.w(
-              '[UpdateService] Flexible update result: $result',
-            );
+            _logger.w('[UpdateService] Flexible update result: $result');
           }
         }
       } else {

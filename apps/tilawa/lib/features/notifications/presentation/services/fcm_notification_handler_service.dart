@@ -67,7 +67,6 @@ class FCMNotificationHandlerService {
     );
   }
 
-  @visibleForTesting
   static String resolveLocation(Map<String, dynamic> payload) {
     final Map<String, dynamic> data = _normalizePayloadData(payload);
     final String type = data['type']?.toString() ?? 'home';

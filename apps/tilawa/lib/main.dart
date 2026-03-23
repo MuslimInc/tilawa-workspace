@@ -66,13 +66,14 @@ Future<void> bootstrap({
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      
+
       // Configure foreground notification presentation options
-      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 

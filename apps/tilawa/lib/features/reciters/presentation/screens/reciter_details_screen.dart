@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -87,7 +86,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   Future<void> _onRefresh() async {
     final bloc = context.read<ReciterDetailsBloc>();
-    final moshaf = bloc.state.selectedMoshaf ??
+    final moshaf =
+        bloc.state.selectedMoshaf ??
         (widget.reciter.moshaf.isNotEmpty ? widget.reciter.moshaf.first : null);
     if (moshaf == null) return;
     bloc.add(LoadSurahList(reciter: widget.reciter, moshaf: moshaf));

@@ -82,7 +82,6 @@ class ReciterDetailsBloc
           audioEntities,
         );
 
-
         emit(
           state.copyWith(
             status: ReciterDetailsStatus.loaded,
@@ -135,7 +134,6 @@ class ReciterDetailsBloc
       return;
     }
 
-
     try {
       final List<SurahEntity> updatedSurahList =
           await _refreshSurahDownloadStatusUseCase.call(
@@ -143,7 +141,6 @@ class ReciterDetailsBloc
             surahId: event.surahId,
             reciterName: event.reciterName,
           );
-
 
       emit(state.copyWith(surahList: updatedSurahList));
     } catch (e) {

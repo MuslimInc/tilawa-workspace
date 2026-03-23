@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -37,6 +38,9 @@ class SplashScreen extends StatelessWidget {
               const LoginRoute().go(context);
             } else if (state is SplashNavigateToOnboarding) {
               const OnboardingRoute().go(context);
+            } else if (state is SplashNavigateToNotification) {
+              const HomeRoute().go(context);
+              GoRouter.of(context).push(state.location);
             }
           },
           child: Scaffold(

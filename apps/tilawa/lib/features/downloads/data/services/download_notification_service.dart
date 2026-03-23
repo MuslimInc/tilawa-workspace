@@ -15,10 +15,7 @@ import '../../domain/services/download_notification_service_interface.dart';
 /// Service for showing custom download notifications with proper title formatting
 @LazySingleton(as: IDownloadNotificationService)
 class DownloadNotificationService implements IDownloadNotificationService {
-  DownloadNotificationService(
-    this._notificationNavigator,
-    this._dispatcher,
-  );
+  DownloadNotificationService(this._notificationNavigator, this._dispatcher);
 
   final DownloadNotificationNavigator _notificationNavigator;
   final INotificationDispatcher _dispatcher;
@@ -260,7 +257,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
         await _notifications.show(
           id: notificationId,
           title: title,
-          body: progressMessage ??
+          body:
+              progressMessage ??
               'Progress: $completedCount/$totalCount ($progress%)',
           notificationDetails: notificationDetails,
         );
@@ -268,7 +266,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
         await _showCompletedNotification(
           notificationId: notificationId,
           title: title,
-          message: completeMessage ??
+          message:
+              completeMessage ??
               'All $totalCount files downloaded successfully',
           reciterName: '', // Opens default screen or handled differently
         );
@@ -342,7 +341,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
       };
       final String? reciterName = data['reciterName'] as String?;
 
-      if (reciterId != null || (reciterName != null && reciterName.isNotEmpty)) {
+      if (reciterId != null ||
+          (reciterName != null && reciterName.isNotEmpty)) {
         await _notificationNavigator.navigateToReciter(
           reciterId: reciterId,
           reciterName: reciterName,

@@ -513,9 +513,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         // Playback not allowed - show localized toast
         if (failure is OfflinePlaybackFailure) {
           final context = AppRouter.navigatorKey.currentContext;
-          final l10n = context != null
-              ? AppLocalizations.of(context)
-              : null;
+          final l10n = context != null ? AppLocalizations.of(context) : null;
           final String message = switch (failure.reason) {
             OfflinePlaybackReason.notDownloaded =>
               l10n?.offlinePlaybackError ?? failure.message ?? '',

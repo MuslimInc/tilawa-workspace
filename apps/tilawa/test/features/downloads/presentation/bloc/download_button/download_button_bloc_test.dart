@@ -59,8 +59,9 @@ void main() {
 
     mockGetDownloadItem = MockGetDownloadItemUseCase();
     // Default: No active download item found
-    when(mockGetDownloadItem.call(any))
-        .thenAnswer((_) async => const Right(null));
+    when(
+      mockGetDownloadItem.call(any),
+    ).thenAnswer((_) async => const Right(null));
 
     downloadButtonBloc = DownloadButtonBloc(
       url: testUrl,
