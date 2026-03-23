@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
               AppRouter.pendingStartupNotificationLaunch = false;
               AppRouter.router.go(const OnboardingRoute().location);
             } else if (state is SplashNavigateToNotification) {
-              AppRouter.navigateFromNotificationLaunch(state.location);
+              AppRouter.navigateFromColdStart(state.location);
             }
           },
           child: Scaffold(

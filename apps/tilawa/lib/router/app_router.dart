@@ -30,11 +30,31 @@ class AppRouter {
   /// should be the only place that consumes that startup navigation.
   static bool pendingStartupNotificationLaunch = false;
 
-  /// Route a cold-start notification directly to its destination.
-  static void navigateFromNotificationLaunch(String location, {Object? extra}) {
+  /// The ID of the last local notification that was processed (cold-start or
+  /// resume). Used to prevent the resume handler from re-processing the same
+  /// launch notification that the splash screen already handled.
+  static int? lastProcessedNotificationId;
+
+  /// Navigate to a notification destination from a cold start.
+  /// Goes to Home first, then pushes the target so back button works.
+  static void navigateFromColdStart(String location, {Object? extra}) {
     disableStateRestoration = false;
     pendingStartupNotificationLaunch = false;
-    router.go(location, extra: extra);
+    final String homeLocation = const HomeRoute().location;
+    router.go(homeLocation);
+    if (location != homeLocation) {
+      router.push(location, extra: extra);
+    }
+  }
+
+  /// Navigate to a notification destination while the app is already running
+  /// (foreground or background tap). Goes to Home first, then pushes the target.
+  static void navigateToNotification(String location, {Object? extra}) {
+    final String homeLocation = const HomeRoute().location;
+    router.go(homeLocation);
+    if (location != homeLocation) {
+      router.push(location, extra: extra);
+    }
   }
 
   static String? redirect(BuildContext context, GoRouterState state) {

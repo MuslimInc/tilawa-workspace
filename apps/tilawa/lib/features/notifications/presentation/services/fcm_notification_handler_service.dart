@@ -42,7 +42,7 @@ class FCMNotificationHandlerService {
         Map<String, dynamic>.from(jsonDecode(payload) as Map),
       );
       final String location = resolveLocation(data);
-      AppRouter.navigateFromNotificationLaunch(location);
+      AppRouter.navigateToNotification(location);
     } catch (e) {
       _logger.e('Error parsing notification payload: $e');
     }

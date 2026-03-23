@@ -74,7 +74,7 @@ class DownloadNotificationNavigatorImpl
     ).location;
 
     if (AppRouter.disableStateRestoration) {
-      AppRouter.navigateFromNotificationLaunch(location, extra: reciter);
+      AppRouter.navigateFromColdStart(location, extra: reciter);
       return;
     }
 

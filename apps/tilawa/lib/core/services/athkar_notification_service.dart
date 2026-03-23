@@ -618,7 +618,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Navigate to a route, catching errors in test environments
   void _navigateToRoute(String location) {
     try {
-      AppRouter.navigateFromNotificationLaunch(location);
+      AppRouter.navigateToNotification(location);
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }

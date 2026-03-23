@@ -21,6 +21,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   final INotificationDispatcher _dispatcher;
   final FCMNotificationHandlerService _handler;
   final Logger _logger;
+  bool _listenersInitialized = false;
 
   @override
   Future<void> requestPermission() async {
@@ -42,6 +43,9 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   @override
   Future<void> initializeListeners() async {
+    if (_listenersInitialized) return;
+    _listenersInitialized = true;
+
     // 1. Listen for dynamic FCM events from RemoteDataSource
     _remoteDataSource.onMessage.listen((RemoteMessage message) {
       _handler.showForegroundNotification(message);

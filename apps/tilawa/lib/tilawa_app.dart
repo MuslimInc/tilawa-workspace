@@ -32,7 +32,6 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   bool _hasProcessedLaunchNotification = false;
   Timer? _resumeDebounceTimer;
   bool _isCheckingNotification = false;
-  int? _lastProcessedNotificationId;
 
   @override
   void initState() {
@@ -96,13 +95,14 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       // so we compare the notification ID to avoid re-processing.
       final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
       final int? currentId = launchDetails?.notificationResponse?.id;
-      if (currentId == null || currentId == _lastProcessedNotificationId) {
+      if (currentId == null ||
+          currentId == AppRouter.lastProcessedNotificationId) {
         return;
       }
 
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
-        _lastProcessedNotificationId = currentId;
+        AppRouter.lastProcessedNotificationId = currentId;
         logger.d('[QuranPlayerApp] Launch notification processed on resume');
       }
     } catch (e) {
