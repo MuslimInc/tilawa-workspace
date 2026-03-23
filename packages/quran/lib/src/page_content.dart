@@ -370,17 +370,38 @@ class _PageContentState extends State<PageContent>
                     }
 
                     if (isBismillah) {
+                      final int surahNum = _getSurahAtLine(
+                        widget.pageNumber,
+                        lineIndex + 1,
+                      );
+                      final useAlternateBismillahGlyph = surahNum == 97;
+                      final bismillahText = useAlternateBismillahGlyph
+                          ? '齃𧻓𥳐龎'
+                          : 'ﱁ  ﱂﱃﱄ';
+                      final bismillahFont = useAlternateBismillahGlyph
+                          ? 'QCF_BSML'
+                          : 'QCF_P001';
+                      final double bismillahFontSize =
+                          useAlternateBismillahGlyph
+                          ? metrics.fontSize * 0.75
+                          : metrics.fontSize;
+
                       return SizedBox(
                         width: double.infinity,
                         height: lineHeight,
-                        child: Center(
-                          child: Text(
-                            _getVerseQCF(1, 1, spaceChar: '\u200A'),
-                            style: TextStyle(
-                              fontFamily: 'QCF_P001',
-                              // fontSize: metrics.fontSize * 1.1,
-                              color: widget.textColor,
-                              height: 1.0,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              bismillahText,
+                              textDirection: TextDirection.rtl,
+                              style: TextStyle(
+                                fontFamily: bismillahFont,
+                                fontSize: bismillahFontSize,
+                                color: widget.textColor,
+                                height: 1.0,
+                              ),
                             ),
                           ),
                         ),
@@ -546,33 +567,6 @@ class _PageContentState extends State<PageContent>
     }
     return special;
   }
-
-  String _getVerseQCF(
-    int surah,
-    int ayah, {
-    bool addSpace = true,
-    String spaceChar = ' ',
-  }) {
-    if (_qpcV4Data == null) {
-      return '';
-    }
-    final buffer = StringBuffer();
-    var wordIndex = 1;
-    while (true) {
-      final key = '$surah:$ayah:$wordIndex';
-      final wordData = _qpcV4Data![key] as Map<String, dynamic>?;
-      if (wordData != null) {
-        buffer.write(wordData['text']);
-        if (addSpace) {
-          buffer.write(spaceChar);
-        }
-        wordIndex++;
-      } else {
-        break;
-      }
-    }
-    return buffer.toString();
-  }
 }
 
 class _SurahHeaderBanner extends StatelessWidget {
@@ -582,6 +576,7 @@ class _SurahHeaderBanner extends StatelessWidget {
   });
   final int surahNumber;
   final double lineHeight;
+  static const double _visualHeightRatio = 40 / 47;
 
   static const AssetImage _bannerImage = AssetImage(
     'assets/mainframe.png',
@@ -590,34 +585,42 @@ class _SurahHeaderBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bannerHeight = lineHeight * _visualHeightRatio;
+
     return RepaintBoundary(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: SizedBox(
           height: lineHeight,
           width: double.infinity,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Positioned.fill(
-                child: Image(
-                  image: _bannerImage,
-                  fit: BoxFit.fill,
-                  filterQuality: FilterQuality.low,
-                ),
+          child: Center(
+            child: SizedBox(
+              height: bannerHeight,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Positioned.fill(
+                    child: Image(
+                      image: _bannerImage,
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.low,
+                    ),
+                  ),
+                  Text(
+                    String.fromCharCode(0xF100 + surahNumber - 1),
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: 'QCF_BSML',
+                      package: 'quran',
+                      fontSize: bannerHeight * 0.45,
+                      color: const Color(0xFF000000),
+                      height: 1.0,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                String.fromCharCode(0xF100 + surahNumber - 1),
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  fontFamily: 'QCF_BSML',
-                  package: 'quran',
-                  fontSize: lineHeight * 0.45,
-                  color: const Color(0xFF000000),
-                  height: 1.0,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
