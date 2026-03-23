@@ -111,6 +111,7 @@ export class NotificationModalComponent {
       }
 
       this.send.emit(payload);
+      this.close.emit();
       this.notificationTitle = '';
       this.notificationBody = '';
       this.actionType = 'home';
