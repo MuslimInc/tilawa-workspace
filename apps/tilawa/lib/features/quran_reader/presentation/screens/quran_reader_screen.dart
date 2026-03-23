@@ -32,7 +32,10 @@ class QuranReaderScreen extends StatefulWidget {
   State<QuranReaderScreen> createState() => _QuranReaderScreenState();
 }
 
-class _QuranReaderScreenState extends State<QuranReaderScreen> {
+class _QuranReaderScreenState extends State<QuranReaderScreen>
+    with WidgetsBindingObserver {
+  static const Color _readerSystemBarColor = Color(0xFFF9F5EF);
+
   late PageController _pageController;
   late final UiVisibilityCubit _uiVisibilityCubit;
   int _currentPageNumber = 1;
@@ -40,6 +43,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Enable landscape and portrait for this screen only
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -47,6 +51,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    _enterReaderImmersiveMode();
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
 
@@ -95,15 +100,47 @@ class _QuranReaderScreenState extends State<QuranReaderScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     // Revert to portrait only when leaving this screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    _restoreAppSystemUiMode();
     // Ensure UI is visible when leaving the reader
     _uiVisibilityCubit.show();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _enterReaderImmersiveMode();
+    }
+  }
+
+  void _enterReaderImmersiveMode() {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: const [SystemUiOverlay.top],
+    );
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: _readerSystemBarColor,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemStatusBarContrastEnforced: false,
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
+  }
+
+  void _restoreAppSystemUiMode() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle());
   }
 
   bool _isInitialPageJumpDone = false;

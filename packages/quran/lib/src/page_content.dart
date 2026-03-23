@@ -451,7 +451,7 @@ class _PageContentState extends State<PageContent>
                 },
               ),
             ),
-            Padding(padding: const EdgeInsets.only(bottom: 10), child: footer),
+            Padding(padding: const EdgeInsets.only(bottom: 4), child: footer),
           ],
         ),
       ),
@@ -804,7 +804,7 @@ class _QuranPageIndex extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Container(
-          height: 32,
+          height: 28,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(16),
@@ -818,10 +818,10 @@ class _QuranPageIndex extends StatelessWidget {
             children: [
               // Page number pill (primary emphasis)
               Container(
-                height: 32,
-                constraints: const BoxConstraints(minWidth: 40),
+                height: 28,
+                constraints: const BoxConstraints(minWidth: 36),
                 alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   color: _PageContentState._mushafAccentSoft,
                   borderRadius: BorderRadius.circular(16),
@@ -833,7 +833,7 @@ class _QuranPageIndex extends StatelessWidget {
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: _PageContentState._mushafAccentMuted,
                       fontWeight: FontWeight.w800,
-                      fontSize: 13,
+                      fontSize: 12,
                     ),
                   ),
                 ),
@@ -858,7 +858,7 @@ class _QuranPageIndex extends StatelessWidget {
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: _PageContentState._mushafAccentMuted,
                         fontWeight: FontWeight.w600,
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ),
@@ -883,8 +883,8 @@ class _SurahIndexButton extends StatelessWidget {
       child: InkWell(
         onTap: onShowIndex,
         child: Container(
-          width: 40,
-          height: 40,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
             color: _PageContentState._mushafAccent,
             shape: BoxShape.circle,
@@ -898,7 +898,7 @@ class _SurahIndexButton extends StatelessWidget {
           ),
           child: const Icon(
             Icons.menu_book_rounded,
-            size: 22,
+            size: 19,
             color: Colors.white,
           ),
         ),
