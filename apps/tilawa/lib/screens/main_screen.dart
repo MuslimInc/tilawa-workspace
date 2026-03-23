@@ -55,6 +55,10 @@ class _MainScreenState extends State<MainScreen> {
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
     final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardOpen = keyboardHeight > 0;
+    final bool playerShouldShow = context.select((AudioPlayerBloc bloc) {
+      final AudioPlayerState state = bloc.state;
+      return state.shouldShowBottomPlayer && state.currentAudio != null;
+    });
 
     return MultiBlocProvider(
       providers: [
@@ -66,8 +70,8 @@ class _MainScreenState extends State<MainScreen> {
             ..setCountdownActive(_currentIndex == 1),
         ),
       ],
-      child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-        builder: (context, state) {
+      child: Builder(
+        builder: (context) {
           final theme = Theme.of(context);
           return PopScope(
             canPop: _currentIndex == 0,
@@ -86,61 +90,44 @@ class _MainScreenState extends State<MainScreen> {
               resizeToAvoidBottomInset: false,
               body: BlocBuilder<UiVisibilityCubit, bool>(
                 builder: (context, isVisible) {
-                  return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                    builder: (context, audioState) {
-                      final double bottomNavBarHeight = isVisible
-                          ? (_bottomNavBarBaseHeight + bottomPadding)
-                          : 0;
+                  final double bottomNavBarHeight = isVisible
+                      ? (_bottomNavBarBaseHeight + bottomPadding)
+                      : 0;
+                  final double playerHeight = isVisible && playerShouldShow
+                      ? 100
+                      : 0;
+                  final double contentBottomPadding = isVisible
+                      ? (bottomNavBarHeight + playerHeight)
+                      : (bottomPadding + 20);
 
-                      // We always reserve space if the player should be shown,
-                      // even if it's currently animating.
-                      final bool playerShouldShow =
-                          audioState.shouldShowBottomPlayer &&
-                          audioState.currentAudio != null;
-                      final double playerHeight = isVisible && playerShouldShow
-                          ? 100
-                          : 0;
-
-                      final double contentBottomPadding = isVisible
-                          ? (bottomNavBarHeight + playerHeight)
-                          : (bottomPadding + 20);
-
-                      return Stack(
-                        children: [
-                          // Main content layer
-                          Positioned.fill(
-                            child: AnimatedPadding(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              padding: EdgeInsets.only(
-                                bottom: contentBottomPadding,
-                              ),
-                              child: IndexedStack(
-                                index: _currentIndex,
-                                children: _screens,
-                              ),
-                            ),
+                  return Stack(
+                    children: [
+                      Positioned.fill(
+                        child: AnimatedPadding(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          padding: EdgeInsets.only(
+                            bottom: contentBottomPadding,
                           ),
-
-                          // Offline indicator overlay at the top
-                          const Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: OfflineIndicatorWidget(),
+                          child: IndexedStack(
+                            index: _currentIndex,
+                            children: _screens,
                           ),
-
-                          // Bottom Player overlay — Positioned.fill allows
-                          // the player to expand to full-screen (YouTube/Spotify UX).
-                          Positioned.fill(
-                            child: BottomPlayerWidget(
-                              bottomNavBarHeight: bottomNavBarHeight,
-                              isKeyboardOpen: isKeyboardOpen,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: OfflineIndicatorWidget(),
+                      ),
+                      Positioned.fill(
+                        child: BottomPlayerWidget(
+                          bottomNavBarHeight: bottomNavBarHeight,
+                          isKeyboardOpen: isKeyboardOpen,
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),

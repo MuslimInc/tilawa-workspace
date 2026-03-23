@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
+import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -59,6 +60,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         ),
       ),
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+        buildWhen: (previous, current) {
+          return previous.status != current.status ||
+              previous.todayPrayerTimes != current.todayPrayerTimes ||
+              previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
+              previous.settings != current.settings ||
+              previous.latitude != current.latitude ||
+              previous.longitude != current.longitude ||
+              previous.locationName != current.locationName ||
+              previous.errorMessage != current.errorMessage ||
+              previous.isLoadingLocation != current.isLoadingLocation ||
+              previous.currentOrNextPrayer?.type !=
+                  current.currentOrNextPrayer?.type;
+        },
         builder: (context, state) {
           switch (state.status) {
             case PrayerTimesStatus.initial:
@@ -198,13 +212,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             ),
 
             // Next prayer countdown
-            if (state.currentOrNextPrayer != null &&
-                state.timeUntilNextPrayer != null)
-              NextPrayerCountdownCard(
-                nextPrayer: state.currentOrNextPrayer!,
-                timeUntil: state.timeUntilNextPrayer!,
-                use24HourFormat: state.settings.use24HourFormat,
-              ),
+            const _CountdownCardSection(),
 
             // Prayer times grid
             PrayerTimesGrid(
@@ -243,6 +251,43 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       isScrollControlled: true,
       builder: (modalContext) =>
           BlocProvider.value(value: bloc, child: const PrayerSettingsSheet()),
+    );
+  }
+}
+
+class _CountdownCardSection extends StatelessWidget {
+  const _CountdownCardSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      PrayerTimesBloc,
+      PrayerTimesState,
+      ({
+        PrayerTimeItem? nextPrayer,
+        Duration? timeUntilNextPrayer,
+        bool use24HourFormat,
+      })
+    >(
+      selector: (state) => (
+        nextPrayer: state.currentOrNextPrayer,
+        timeUntilNextPrayer: state.timeUntilNextPrayer,
+        use24HourFormat: state.settings.use24HourFormat,
+      ),
+      builder: (context, countdown) {
+        final PrayerTimeItem? nextPrayer = countdown.nextPrayer;
+        final Duration? timeUntilNextPrayer = countdown.timeUntilNextPrayer;
+
+        if (nextPrayer == null || timeUntilNextPrayer == null) {
+          return const SizedBox.shrink();
+        }
+
+        return NextPrayerCountdownCard(
+          nextPrayer: nextPrayer,
+          timeUntil: timeUntilNextPrayer,
+          use24HourFormat: countdown.use24HourFormat,
+        );
+      },
     );
   }
 }

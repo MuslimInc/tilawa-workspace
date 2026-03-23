@@ -33,7 +33,7 @@ class NetworkInfoImpl implements NetworkInfo {
       // Double check with actual internet lookup (with timeout to avoid long waits)
       final List<InternetAddress> lookupResult = await internetLookup(
         'google.com',
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 10));
       return lookupResult.isNotEmpty && lookupResult[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
       return false;

@@ -117,6 +117,8 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
         // Prayer times list
         Expanded(
           child: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+            buildWhen: (previous, current) =>
+                previous.monthlyPrayerTimes != current.monthlyPrayerTimes,
             builder: (context, state) {
               if (state.monthlyPrayerTimes.isEmpty) {
                 return const Center(child: CircularProgressIndicator());

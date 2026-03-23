@@ -212,13 +212,19 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     bool showFavoritesOnly,
     List<int> favoriteIds,
   ) {
+    final String normalizedQuery = searchQuery.trim().toLowerCase();
+    final Set<int> favoriteIdsLookup = showFavoritesOnly
+        ? favoriteIds.toSet()
+        : const <int>{};
     var filtered = reciters;
 
     // Filter by search query
-    if (searchQuery.isNotEmpty) {
+    if (normalizedQuery.isNotEmpty) {
       filtered = filtered.where((reciter) {
-        return reciter.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            reciter.letter.toLowerCase().contains(searchQuery.toLowerCase());
+        final String reciterName = reciter.name.toLowerCase();
+        final String reciterLetter = reciter.letter.toLowerCase();
+        return reciterName.contains(normalizedQuery) ||
+            reciterLetter.contains(normalizedQuery);
       }).toList();
     }
 
@@ -232,7 +238,7 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     // Filter by favorites
     if (showFavoritesOnly) {
       filtered = filtered.where((reciter) {
-        return favoriteIds.contains(reciter.id);
+        return favoriteIdsLookup.contains(reciter.id);
       }).toList();
     }
 

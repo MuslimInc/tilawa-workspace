@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,9 +25,12 @@ class RecitersScreen extends StatefulWidget {
 }
 
 class _RecitersScreenState extends State<RecitersScreen> {
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 200);
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  Timer? _searchDebounceTimer;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +41,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
   @override
   void dispose() {
+    _searchDebounceTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -54,6 +60,21 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void _clearLetterFilter() {
     context.read<RecitersBloc>().add(const ClearLetterFilter());
     context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounceTimer?.cancel();
+    context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+
+    if (value.isEmpty) {
+      context.read<RecitersBloc>().add(const ClearSearch());
+      return;
+    }
+
+    _searchDebounceTimer = Timer(_searchDebounceDuration, () {
+      if (!mounted) return;
+      context.read<RecitersBloc>().add(SearchRecitersEvent(value));
+    });
   }
 
   @override
@@ -201,6 +222,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                                 state: state,
                                 controller: _searchController,
                                 focusNode: _focusNode,
+                                onChanged: _onSearchChanged,
                               ),
                             ),
                             SizedBox(width: 10),
@@ -357,11 +379,13 @@ class _SearchField extends StatelessWidget {
     required this.state,
     required this.controller,
     required this.focusNode,
+    required this.onChanged,
   });
 
   final RecitersState state;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -430,9 +454,7 @@ class _SearchField extends StatelessWidget {
                       )
                     : null,
               ),
-              onChanged: (value) {
-                context.read<RecitersBloc>().add(SearchRecitersEvent(value));
-              },
+              onChanged: onChanged,
               onTapOutside: (event) => focusNode.unfocus(),
             ),
           ),

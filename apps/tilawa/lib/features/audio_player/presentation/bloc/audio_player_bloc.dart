@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -117,6 +118,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final Set<String> _completedAudioIds = {};
   Timer? _sleepTimer;
   bool _isSleepTimerEnabled = true;
+  String? _lastPersistedStateJson;
 
   /// Maximum number of cached entries before eviction.
   static const int _maxCacheSize = 50;
@@ -814,11 +816,23 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
-    return AudioPlayerState.fromJson(json);
+    _lastPersistedStateJson = jsonEncode(json);
+    return AudioPlayerState.fromJson(json)
+        .copyWith(playbackState: null, positionData: null);
   }
 
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
-    return state.toJson();
+    final Map<String, dynamic> persistedStateJson = state
+        .copyWith(playbackState: null, positionData: null)
+        .toJson();
+    final String serializedState = jsonEncode(persistedStateJson);
+
+    if (_lastPersistedStateJson == serializedState) {
+      return null;
+    }
+
+    _lastPersistedStateJson = serializedState;
+    return persistedStateJson;
   }
 }

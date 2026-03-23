@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,17 +5,14 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
-import '../../helpers/reciter_helper.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import '../models/reciter_model.dart';
 import 'bottom_player_ui.dart';
 import 'seek_bar.dart';
 
@@ -44,8 +40,6 @@ class BottomPlayerWidget extends StatefulWidget {
 
 class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     with TickerProviderStateMixin {
-  int? _currentReciterId;
-  String? _currentReciterName;
   bool _isDismissed = false;
 
   late AnimationController _expandController;
@@ -209,19 +203,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        // Load reciter ID if not cached or if the reciter name changed
-        if (_currentReciterId == null || _currentReciterName != audio.artist) {
-          _loadReciterId(audio);
-        }
-
-        final PositionData position =
-            state.positionData ??
-            const PositionData(
-              position: Duration.zero,
-              bufferedPosition: Duration.zero,
-              duration: Duration.zero,
-            );
-
         final double progress = _expandController.value;
         final double screenHeight = MediaQuery.of(context).size.height;
         // When collapsed (progress=0), the height must be
@@ -251,7 +232,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                         context,
                         state,
                         audio,
-                        position,
                       ),
                     ),
 
@@ -278,7 +258,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                               context,
                               state,
                               audio,
-                              position,
                             ),
                           ),
                         ),
@@ -301,13 +280,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     BuildContext context,
     AudioPlayerState state,
     AudioEntity audio,
-    PositionData position,
   ) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: BottomPlayerUi(
         audio: audio,
-        positionData: position,
+        positionData: const PositionData(
+          position: Duration.zero,
+          bufferedPosition: Duration.zero,
+          duration: Duration.zero,
+        ),
+        progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,
         canGoNext: state.canGoNext,
@@ -365,7 +348,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     BuildContext context,
     AudioPlayerState state,
     AudioEntity audio,
-    PositionData position,
   ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -490,7 +472,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                             SizedBox(height: 16),
 
                             // Seek bar
-                            _buildProgressBar(context, state),
+                            const _ExpandedProgressBar(),
 
                             SizedBox(height: 16),
 
@@ -575,54 +557,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         FluentIcons.music_note_1_24_regular,
         color: Colors.white,
         size: 80,
-      ),
-    );
-  }
-
-  Widget _buildProgressBar(BuildContext context, AudioPlayerState state) {
-    final PositionData positionData =
-        state.positionData ??
-        const PositionData(
-          position: Duration.zero,
-          bufferedPosition: Duration.zero,
-          duration: Duration.zero,
-        );
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          SeekBar(
-            duration: positionData.duration,
-            position: positionData.position,
-            bufferedPosition: positionData.bufferedPosition,
-            onChangeEnd: (newPosition) {
-              context.read<AudioPlayerBloc>().add(
-                AudioPlayerEvent.seekTo(newPosition),
-              );
-            },
-          ),
-          SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatDuration(positionData.position),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                ),
-              ),
-              Text(
-                _formatDuration(positionData.duration),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -762,57 +696,101 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     );
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    if (duration.inHours > 0) {
-      return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
-    } else {
-      return '$twoDigitMinutes:$twoDigitSeconds';
-    }
+}
+
+class _MiniPlayerProgressBar extends StatelessWidget {
+  const _MiniPlayerProgressBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final Color primaryColor = Theme.of(context).primaryColor;
+    return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
+      selector: (state) {
+        final PositionData pos = state.positionData ??
+            const PositionData(
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration.zero,
+            );
+        if (pos.duration.inMilliseconds <= 0) return 0.0;
+        return (pos.position.inMilliseconds / pos.duration.inMilliseconds)
+            .clamp(0.0, 1.0);
+      },
+      builder: (context, progress) {
+        return LinearProgressIndicator(
+          value: progress,
+          backgroundColor: primaryColor.withValues(alpha: 0.1),
+          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+          minHeight: 3,
+        );
+      },
+    );
   }
+}
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
+class _ExpandedProgressBar extends StatelessWidget {
+  const _ExpandedProgressBar();
 
-  void _loadReciterId(AudioEntity audio) {
-    if (audio.artist == null) return;
-    _currentReciterName = audio.artist;
-    ReciterHelper.getReciterFromAudioEntity(audio)
-        .then((reciter) {
-          if (mounted && reciter != null) {
-            setState(() {
-              _currentReciterId = reciter.id;
-            });
-          }
-        })
-        .catchError((_) {});
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<AudioPlayerBloc, AudioPlayerState, PositionData>(
+      selector: (state) =>
+          state.positionData ??
+          const PositionData(
+            position: Duration.zero,
+            bufferedPosition: Duration.zero,
+            duration: Duration.zero,
+          ),
+      builder: (context, positionData) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              SeekBar(
+                duration: positionData.duration,
+                position: positionData.position,
+                bufferedPosition: positionData.bufferedPosition,
+                onChangeEnd: (newPosition) {
+                  context.read<AudioPlayerBloc>().add(
+                    AudioPlayerEvent.seekTo(newPosition),
+                  );
+                },
+              ),
+              SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatDuration(positionData.position),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    _formatDuration(positionData.duration),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
+}
 
-  bool isCurrentRouteAlreadyViewing(BuildContext context) {
-    try {
-      final GoRouterState routerState = GoRouterState.of(context);
-      final String? currentReciterId = routerState.pathParameters['reciterId'];
-      if (currentReciterId == null) return false;
-      if (_currentReciterId != null) {
-        return currentReciterId == _currentReciterId.toString();
-      }
-      final String? reciterJson = routerState.uri.queryParameters['reciter'];
-      if (reciterJson != null) {
-        try {
-          final reciter = Reciter.fromJson(
-            jsonDecode(reciterJson) as Map<String, dynamic>,
-          );
-          return reciter.name == _currentReciterName;
-        } catch (_) {
-          return false;
-        }
-      }
-      return false;
-    } catch (_) {
-      return false;
-    }
+String _formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+  if (duration.inHours > 0) {
+    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
+  } else {
+    return '$twoDigitMinutes:$twoDigitSeconds';
   }
 }

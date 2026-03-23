@@ -14,6 +14,7 @@ class BottomPlayerUi extends StatelessWidget {
     super.key,
     required this.audio,
     required this.positionData,
+    this.progressBarOverride,
     required this.isPlaying,
     required this.canGoPrevious,
     required this.canGoNext,
@@ -29,6 +30,7 @@ class BottomPlayerUi extends StatelessWidget {
 
   final AudioEntity audio;
   final PositionData positionData;
+  final Widget? progressBarOverride;
   final bool isPlaying;
   final bool canGoPrevious;
   final bool canGoNext;
@@ -72,15 +74,20 @@ class BottomPlayerUi extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Progress Bar (Slim at top)
-                LinearProgressIndicator(
-                  value: positionData.duration.inMilliseconds > 0
-                      ? positionData.position.inMilliseconds /
-                            positionData.duration.inMilliseconds
-                      : 0.0,
-                  backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
-                  minHeight: 3,
-                ),
+                progressBarOverride ??
+                    LinearProgressIndicator(
+                      value: positionData.duration.inMilliseconds > 0
+                          ? positionData.position.inMilliseconds /
+                                positionData.duration.inMilliseconds
+                          : 0.0,
+                      backgroundColor: theme.primaryColor.withValues(
+                        alpha: 0.1,
+                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.primaryColor,
+                      ),
+                      minHeight: 3,
+                    ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(

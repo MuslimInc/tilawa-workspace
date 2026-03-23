@@ -196,6 +196,15 @@ class _FavoriteButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          buildWhen: (previous, current) {
+            final bool wasFavorite =
+                previous is FavoritesLoaded &&
+                previous.favoriteIds.contains(reciter.id);
+            final bool isFavorite =
+                current is FavoritesLoaded &&
+                current.favoriteIds.contains(reciter.id);
+            return wasFavorite != isFavorite;
+          },
           builder: (context, state) {
             final bool isFavorite =
                 state is FavoritesLoaded &&
