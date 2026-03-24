@@ -331,7 +331,7 @@ const List<_SurahInfo> _surahInfoList = [
   _SurahInfo('لقمان', 'Luqman', 'Luqman', 'Meccan', 34),
   _SurahInfo('السجدة', 'As-Sajda', 'The Prostration', 'Meccan', 30),
   _SurahInfo('الأحزاب', 'Al-Ahzab', 'The Combined Forces', 'Medinan', 73),
-  _SurahInfo('سبأ', 'Saba', 'Sheba', 'Meccan', 54),
+  _SurahInfo('سبإ', 'Saba', 'Sheba', 'Meccan', 54),
   _SurahInfo('فاطر', 'Fatir', 'Originator', 'Meccan', 45),
   _SurahInfo('يس', 'Ya-Sin', 'Ya Sin', 'Meccan', 83),
   _SurahInfo('الصافات', 'As-Saffat', 'Those Who Set The Ranks', 'Meccan', 182),

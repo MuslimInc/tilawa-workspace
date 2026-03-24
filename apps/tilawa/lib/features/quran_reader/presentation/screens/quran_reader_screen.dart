@@ -332,10 +332,15 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 }
 
 class _PagePreviewInfo {
-  const _PagePreviewInfo({required this.surahName, required this.juzNumber});
+  const _PagePreviewInfo({
+    required this.surahName,
+    required this.juzNumber,
+    required this.hizbLabel,
+  });
 
   final String surahName;
   final int juzNumber;
+  final String hizbLabel;
 
   static _PagePreviewInfo fromPage(BuildContext context, int pageNumber) {
     final pageData = getPageData(pageNumber);
@@ -344,18 +349,52 @@ class _PagePreviewInfo {
         .map((entry) => entry['surah']!)
         .toSet();
 
+    final int juzNumber = getJuzNumber(
+      pageData.first['surah']!,
+      pageData.first['start']!,
+    );
+
+    final int? quarterNumber =
+        pageNumber == 1 || pageNumber == 2
+            ? null
+            : getQuarterNumber(
+              pageData.first['surah']!,
+              pageData.first['start']!,
+            );
+
+    String hizbLabelStr = '';
+    if (quarterNumber != null) {
+      final int hizbIndex = (quarterNumber - 1) ~/ 4 + 1;
+      final int quarterInHizb = (quarterNumber - 1) % 4;
+
+      final String prefix;
+      switch (quarterInHizb) {
+        case 0:
+          prefix = '';
+        case 1:
+          prefix = '1/4 ';
+        case 2:
+          prefix = '1/2 ';
+        case 3:
+          prefix = '3/4 ';
+        default:
+          prefix = '';
+      }
+      hizbLabelStr = '$prefix${context.l10n.hizb} $hizbIndex';
+    }
+
     return _PagePreviewInfo(
-      surahName: uniqueSurahNumbers
-          .map(
-            (surahNumber) => isArabic
-                ? getSurahNameArabic(surahNumber)
-                : getSurahNameEnglish(surahNumber),
-          )
-          .join(' · '),
-      juzNumber: getJuzNumber(
-        pageData.first['surah']!,
-        pageData.first['start']!,
-      ),
+      surahName:
+          uniqueSurahNumbers
+              .map(
+                (surahNumber) =>
+                    isArabic
+                        ? getSurahNameArabic(surahNumber)
+                        : getSurahNameEnglish(surahNumber),
+              )
+              .join(' · '),
+      juzNumber: juzNumber,
+      hizbLabel: hizbLabelStr,
     );
   }
 }
@@ -519,14 +558,28 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Juz + page number
-                      Text(
-                        '${context.l10n.juzPart} ${currentInfo.juzNumber}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: mutedTextColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      // Juz + Hizb info
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${context.l10n.juzPart} ${currentInfo.juzNumber}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: textColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (currentInfo.hizbLabel.isNotEmpty)
+                            Text(
+                              currentInfo.hizbLabel,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: mutedTextColor,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
                       ),
                       SizedBox(width: 8),
                       Container(

@@ -31,16 +31,18 @@ class QuranLayoutMetrics {
 /// The standard implementation of Quran layout logic.
 ///
 /// - **Portrait**: Fits exactly 15 lines into the available vertical space (minus safe areas).
-/// - **Landscape**: Uses a natural proportional line height and enables scrolling.
+/// - **Landscape**: Uses a compact scrollable layout closer to printed mushaf apps.
 class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
-  // Tuning factor for height calculation to ensure perfect fit.
-  // Proportional factor for natural Arabic text spacing.
-  static const double _naturalLineHeightRatio = 0.40;
+  // Compact line height for landscape scrolling pages.
+  static const double _landscapeFontHeight = 1.75;
   // Width divisor to determine base font size relative to screen width.
   // Higher values produce a smaller font to prevent horizontal wrapping.
-  static const double _widthDivisor = 16.35;
+  static const double _widthDivisor = 16.50;
   // Standard horizontal padding for the Mushaf lines.
   static const double _horizontalPaddingRatio = 0.025;
+  // Small top padding to prevent the first line's diacritical marks from
+  // being clipped by the viewport boundary.
+  static const double _topPadding = 4.0;
 
   @override
   QuranLayoutMetrics calculateMetrics(
@@ -52,34 +54,22 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     final Orientation orientation = MediaQuery.orientationOf(context);
 
     if (orientation == Orientation.landscape) {
-      final EdgeInsets padding = MediaQuery.paddingOf(context);
       // Common Base Font Size based on AVAILABLE width (after padding)
       final double availableWidth =
           constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
       final double adaptiveFontSize = availableWidth / _widthDivisor;
-      return _calculateLandscapeMetrics(adaptiveFontSize, padding);
+      return _calculateLandscapeMetrics(adaptiveFontSize);
     } else {
       // Use actual constraints provided by the parent (e.g. SafeArea)
       return _calculatePortraitMetrics(constraints);
     }
   }
 
-  QuranLayoutMetrics _calculateLandscapeMetrics(
-    double fontSize,
-    EdgeInsets padding,
-  ) {
-    // In landscape, prioritize readability with natural spacing.
-    // Height ~= 2.12x font size
-    const double fontHeight = 1 / _naturalLineHeightRatio;
-
+  QuranLayoutMetrics _calculateLandscapeMetrics(double fontSize) {
     return QuranLayoutMetrics(
       fontSize: fontSize,
-      fontHeight: fontHeight,
+      fontHeight: _landscapeFontHeight,
       isScrollable: true,
-      padding: EdgeInsets.only(
-        top: padding.top + 16,
-        bottom: padding.bottom + 16,
-      ),
     );
   }
 
@@ -88,14 +78,16 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
     final double fontSize = availableWidth / _widthDivisor;
 
-    // constraints.maxHeight already excludes header/footer since the
-    // LayoutBuilder sits inside an Expanded sibling of header and footer.
-    final double fontHeight = (constraints.maxHeight / 15.0) / fontSize;
+    // Reserve a small top margin so diacritical marks on the first line
+    // are not clipped by the viewport boundary.
+    final double availableHeight = constraints.maxHeight - _topPadding;
+    final double fontHeight = (availableHeight / 17.0) / fontSize;
 
     return QuranLayoutMetrics(
       fontSize: fontSize,
       fontHeight: fontHeight,
       isScrollable: false,
+      padding: const EdgeInsets.only(top: _topPadding),
     );
   }
 }
