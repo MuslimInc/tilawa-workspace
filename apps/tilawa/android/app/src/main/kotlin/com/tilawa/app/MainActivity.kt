@@ -2,14 +2,26 @@ package com.tilawa.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.android.RenderMode
 
 class MainActivity : AudioServiceActivity() {
+    companion object {
+        // Temporary preview delay for checking the native Android splash.
+        // Set to 0L to disable.
+        private const val nativeSplashPreviewDelayMs = 0L
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition.
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
+        if (nativeSplashPreviewDelayMs > 0L) {
+            val splashStartedAt = SystemClock.uptimeMillis()
+            splashScreen.setKeepOnScreenCondition {
+                SystemClock.uptimeMillis() - splashStartedAt < nativeSplashPreviewDelayMs
+            }
+        }
         super.onCreate(savedInstanceState)
     }
 

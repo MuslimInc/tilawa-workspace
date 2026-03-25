@@ -190,6 +190,8 @@ class AppBootstrapper {
       await Future.wait([crashFuture, notificationFuture, chromeFuture]);
       timeline.log('Phase2 parallel (crash+notif+chrome)');
 
+      await _startupTasks.warmUpSplashWordmark();
+
       timeline.logTotal('=== TOTAL before runApp');
       run(_startupTasks.buildRootApp());
       timeline.logTotal('runApp called at');
@@ -204,6 +206,10 @@ class AppBootstrapper {
 
 class AppStartupTasks {
   const AppStartupTasks();
+
+  static const AssetImage _launchWordmarkImage = AssetImage(
+    'assets/images/launch_wordmark.png',
+  );
 
   void resetLaunchState() {
     AppRouter.disableStateRestoration = false;
@@ -253,6 +259,38 @@ class AppStartupTasks {
     return DevicePreview(
       enabled: false,
       builder: (context) => const TilawaApp(),
+    );
+  }
+
+  Future<void> warmUpSplashWordmark() async {
+    final ImageStream stream = _launchWordmarkImage.resolve(
+      const ImageConfiguration(),
+    );
+    final Completer<void> completer = Completer<void>();
+
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo _, bool synchronousCall) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+        stream.removeListener(listener);
+      },
+      onError: (Object error, StackTrace? stackTrace) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+        stream.removeListener(listener);
+        logger.d('Warning: Could not warm splash wordmark: $error');
+      },
+    );
+
+    stream.addListener(listener);
+    await completer.future.timeout(
+      const Duration(milliseconds: 750),
+      onTimeout: () {
+        stream.removeListener(listener);
+      },
     );
   }
 

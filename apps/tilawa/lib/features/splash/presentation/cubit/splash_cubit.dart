@@ -14,13 +14,21 @@ part 'splash_state.dart';
 /// - User authentication status
 @injectable
 class SplashCubit extends Cubit<SplashState> {
+  // Temporary preview delay for checking the Flutter splash.
+  // Set to Duration.zero to disable.
+  static const Duration flutterSplashPreviewDelay = Duration.zero;
+
   SplashCubit(this._getSplashNextRoute) : super(const SplashInitial());
 
   final GetSplashNextRouteUseCase _getSplashNextRoute;
 
   Future<void> init() async {
     try {
-      final SplashRouteResult result = await _getSplashNextRoute();
+      final Future<SplashRouteResult> routeFuture = _getSplashNextRoute();
+      if (flutterSplashPreviewDelay > Duration.zero) {
+        await Future<void>.delayed(flutterSplashPreviewDelay);
+      }
+      final SplashRouteResult result = await routeFuture;
 
       String? location;
       if (result.destination == SplashDestination.notificationLaunch &&

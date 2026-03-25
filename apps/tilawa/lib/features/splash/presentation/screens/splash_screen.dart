@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/di/injection.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -18,6 +17,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  static const Color _launchBackgroundColor = Color(0xFF1AADC5);
+  static const String _launchWordmarkAsset =
+      'assets/images/launch_wordmark.png';
+  static const double _androidSplashWordmarkBoxSize = 288;
+  static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: _launchBackgroundColor,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: _launchBackgroundColor,
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+
   late final SplashCubit _splashCubit;
 
   @override
@@ -75,21 +89,21 @@ class _SplashScreenState extends State<SplashScreen> {
               AppRouter.navigateFromColdStart(state.location);
             }
           },
-          child: Scaffold(
-            backgroundColor: context.colorScheme.primary,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    context.l10n.appTitle,
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onPrimary,
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: _launchOverlayStyle,
+            child: ColoredBox(
+              color: _launchBackgroundColor,
+              child: SizedBox.expand(
+                child: Center(
+                  child: SizedBox.square(
+                    dimension: _androidSplashWordmarkBoxSize,
+                    child: Image.asset(
+                      _launchWordmarkAsset,
+                      filterQuality: FilterQuality.high,
+                      fit: BoxFit.fill,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
