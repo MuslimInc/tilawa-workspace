@@ -43,6 +43,14 @@ class ToggleFavoritesFilter extends RecitersEvent {
   List<Object?> get props => [favoriteIds];
 }
 
+class SyncFavoriteIds extends RecitersEvent {
+  const SyncFavoriteIds(this.favoriteIds);
+  final List<int> favoriteIds;
+
+  @override
+  List<Object?> get props => [favoriteIds];
+}
+
 class ClearFavoritesFilter extends RecitersEvent {
   const ClearFavoritesFilter();
 }

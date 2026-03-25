@@ -1,0 +1,66 @@
+Resolving dependencies in `/Users/mohammadkamel/flutter_projects/tilawa_workspace`...
+Downloading packages...
+  _fe_analyzer_shared 92.0.0 (98.0.0 available)
+  _flutterfire_internals 1.3.67 (1.3.68 available)
+  analyzer 9.0.0 (12.0.0 available)
+  bloc_lint 0.3.6 (0.4.0 available)
+  cloud_firestore 6.1.3 (6.2.0 available)
+  cloud_firestore_platform_interface 7.0.7 (7.1.0 available)
+  cloud_firestore_web 5.1.3 (5.2.0 available)
+  dart_style 3.1.3 (3.1.8 available)
+  fake_cloud_firestore 4.0.2+1 (4.1.0+1 available)
+  firebase_analytics 12.1.3 (12.2.0 available)
+  firebase_analytics_platform_interface 5.0.7 (5.1.0 available)
+  firebase_analytics_web 0.6.1+3 (0.6.1+4 available)
+  firebase_auth 6.2.0 (6.3.0 available)
+  firebase_auth_platform_interface 8.1.7 (8.1.8 available)
+  firebase_auth_web 6.1.3 (6.1.4 available)
+  firebase_core 4.5.0 (4.6.0 available)
+  firebase_core_platform_interface 6.0.2 (6.0.3 available)
+  firebase_core_web 3.5.0 (3.5.1 available)
+  firebase_crashlytics 5.0.8 (5.1.0 available)
+  firebase_crashlytics_platform_interface 3.8.18 (3.8.19 available)
+  firebase_messaging 16.1.2 (16.1.3 available)
+  firebase_messaging_platform_interface 4.7.7 (4.7.8 available)
+  firebase_messaging_web 4.1.3 (4.1.4 available)
+  geocoding_android 4.0.1 (5.0.1 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  json_serializable 6.13.0 (6.13.1 available)
+  lean_builder 0.1.6 (0.1.7 available)
+  melos 7.4.1 (7.5.0 available)
+  meta 1.17.0 (1.18.2 available)
+  mockito 5.6.3 (5.6.4 available)
+  rx 0.4.0 (0.5.0 available)
+! test_api 0.7.7 (overridden) (0.7.11 available)
+  vector_math 2.2.0 (2.3.0 available)
+  watcher 1.1.4 (1.2.1 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies in `/Users/mohammadkamel/flutter_projects/tilawa_workspace`!
+35 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing tilawa...                                             
+
+   info • The import of 'package:tilawa/features/prayer_times/domain/usecases/get_current_location_use_case.dart' is unnecessary because all of the used elements are also provided by the import of 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart' • lib/core/di/injection.config.dart:320:8 • unnecessary_import
+   info • Uses 'await' on an instance of 'GetIt', which is not a subtype of 'Future' • lib/core/di/injection.dart:12:3 • await_only_futures
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:26:62 • unnecessary_null_in_if_null_operators
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:27:60 • unnecessary_null_in_if_null_operators
+   info • Unnecessary use of '??' with 'null' • lib/features/quran_reader/domain/entities/reader_settings_entity.g.dart:28:60 • unnecessary_null_in_if_null_operators
+   info • Don't invoke 'print' in production code • parse_json.dart:8:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:10:5 • avoid_print
+warning • The value of the local variable 'wordText' isn't used • parse_json.dart:19:13 • unused_local_variable
+   info • Don't invoke 'print' in production code • parse_json.dart:28:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:36:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:63:5 • avoid_print
+   info • Don't invoke 'print' in production code • parse_json.dart:65:5 • avoid_print
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/core/services/athkar_notification_service_test.mocks.dart:597:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/core/services/user_email_service_test.mocks.dart:385:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/auth/data/providers/google_auth_provider_impl_test.mocks.dart:679:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/auth/data/providers/google_auth_provider_impl_test.mocks.dart:731:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/downloads/helpers/mock_helper.mocks.dart:2736:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/localization/data/datasources/localization_local_datasource_test.mocks.dart:29:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/onboarding/data/repositories/onboarding_repository_impl_test.mocks.dart:29:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/prayer_times/data/datasources/prayer_settings_datasource_test.mocks.dart:29:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/router/router_mock_helper.mocks.dart:1099:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/shared/audio/audio_player_handler_impl_test.mocks.dart:296:12 • duplicate_ignore
+warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/shared/audio/audio_source_error_test.mocks.dart:296:12 • duplicate_ignore
+

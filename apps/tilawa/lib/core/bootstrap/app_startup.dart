@@ -407,7 +407,8 @@ class AppStartupTasks {
 
       logger.d('HydratedStorage initialized successfully');
     } catch (e) {
-      logger.d('Warning: Could not initialize HydratedStorage: $e');
+      logger.d('Warning: Could not initialize HydratedStorage, using in-memory fallback: $e');
+      HydratedBloc.storage = _InMemoryStorage();
     }
   }
 
@@ -554,7 +555,7 @@ class AppStartupTasks {
       await AudioService.init(
         builder: () => handler as AudioHandler,
         config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
+          androidNotificationChannelId: 'com.tilawa.app.channel.audio',
           androidNotificationChannelName: 'Audio playback',
           androidNotificationOngoing: true,
         ),
@@ -602,4 +603,32 @@ class LaunchTimeline {
   void logTotal(String label) {
     logger.d('[LaunchApp] $label: ${total.elapsedMilliseconds}ms');
   }
+}
+
+/// In-memory fallback for [HydratedBloc.storage] when persistent storage
+/// fails to initialize. State will not survive app restarts but the app
+/// will not crash.
+class _InMemoryStorage implements Storage {
+  final Map<String, dynamic> _data = {};
+
+  @override
+  dynamic read(String key) => _data[key];
+
+  @override
+  Future<void> write(String key, dynamic value) async {
+    _data[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    _data.remove(key);
+  }
+
+  @override
+  Future<void> clear() async {
+    _data.clear();
+  }
+
+  @override
+  Future<void> close() async {}
 }

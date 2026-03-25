@@ -110,7 +110,7 @@ class FCMNotificationHandlerService {
               ? actionData!.trim()
               : data['surahNumber']?.toString() ?? '',
         );
-        if (surahNumber != null) {
+        if (surahNumber != null && surahNumber >= 1 && surahNumber <= 114) {
           return QuranReaderRoute(surahNumber: surahNumber).location;
         }
         return const QuranLastReadRoute().location;

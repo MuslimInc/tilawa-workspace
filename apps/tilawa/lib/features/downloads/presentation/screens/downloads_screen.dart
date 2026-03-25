@@ -67,11 +67,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Reload downloads each time the screen becomes visible
-    // This happens when user switches to downloads tab from bottom navigation
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadDownloads();
-    });
   }
 
   void _loadDownloads() {
@@ -172,7 +167,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverFillRemaining(
+    return SizedBox.expand(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

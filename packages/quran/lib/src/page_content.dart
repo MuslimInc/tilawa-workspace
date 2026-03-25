@@ -580,7 +580,7 @@ class _SurahHeaderBanner extends StatelessWidget {
                       fontFamily: 'QCF_BSML',
                       package: 'quran',
                       fontSize: bannerHeight * 0.45,
-                      color: const Color(0xFF000000),
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.0,
                     ),
                   ),

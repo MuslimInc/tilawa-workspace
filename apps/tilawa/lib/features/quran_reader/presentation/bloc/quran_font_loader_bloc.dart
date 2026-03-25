@@ -60,6 +60,7 @@ class QuranFontLoaderBloc
         var lastEmittedProgress = 0.0;
         await _downloadQuranFontsUseCase(
           onProgress: (progress) {
+            if (isClosed) return;
             final currentPercent = (progress * 100).floor();
             final lastPercent = (lastEmittedProgress * 100).floor();
             if (currentPercent > lastPercent || progress >= 1.0) {

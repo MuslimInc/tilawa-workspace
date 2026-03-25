@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../notifications/presentation/services/fcm_notification_handler_service.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
@@ -48,8 +49,8 @@ class SplashCubit extends Cubit<SplashState> {
           SplashNavigateToNotification(location),
         SplashDestination.notificationLaunch => const SplashNavigateToHome(),
       });
-    } catch (_) {
-      // Fallback to home on any unexpected error to avoid a frozen splash
+    } catch (e, stackTrace) {
+      logger.e('Splash init failed, falling back to home', error: e, stackTrace: stackTrace);
       emit(const SplashNavigateToHome());
     }
   }

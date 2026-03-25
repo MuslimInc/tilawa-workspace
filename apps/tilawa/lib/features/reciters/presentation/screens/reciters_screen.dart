@@ -8,7 +8,6 @@ import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart'
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
-import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -26,6 +25,7 @@ class RecitersScreen extends StatefulWidget {
 
 class _RecitersScreenState extends State<RecitersScreen> {
   static const Duration _searchDebounceDuration = Duration(milliseconds: 200);
+
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
@@ -48,13 +48,29 @@ class _RecitersScreenState extends State<RecitersScreen> {
     super.dispose();
   }
 
+  void _scrollToTop() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   void _onLetterSelected(String? letter) {
     if (letter == null || letter.isEmpty) {
       _clearLetterFilter();
       return;
     }
-    context.read<RecitersBloc>().add(FilterByLetter(letter));
+
+    _focusNode.unfocus();
+    _searchDebounceTimer?.cancel();
     _searchController.clear();
+    context.read<RecitersBloc>().add(FilterByLetter(letter));
+    _scrollToTop();
   }
 
   void _clearLetterFilter() {
@@ -72,391 +88,371 @@ class _RecitersScreenState extends State<RecitersScreen> {
     }
 
     _searchDebounceTimer = Timer(_searchDebounceDuration, () {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+
       context.read<RecitersBloc>().add(SearchRecitersEvent(value));
+      _scrollToTop();
     });
+  }
+
+  void _clearSearch() {
+    _searchDebounceTimer?.cancel();
+    _searchController.clear();
+    context.read<RecitersBloc>().add(const ClearSearch());
+  }
+
+  void _toggleFavoritesFilter(BuildContext context) {
+    final favoritesState = context.read<FavoritesCubit>().state;
+    if (favoritesState is FavoritesLoaded) {
+      context.read<RecitersBloc>().add(
+        ToggleFavoritesFilter(favoritesState.favoriteIds.toList()),
+      );
+      _scrollToTop();
+    }
+  }
+
+  void _clearAllFilters() {
+    _focusNode.unfocus();
+    _searchDebounceTimer?.cancel();
+    _searchController.clear();
+    context.read<RecitersBloc>().add(const ClearSearch());
+    context.read<RecitersBloc>().add(const ClearLetterFilter());
+    context.read<RecitersBloc>().add(const ClearFavoritesFilter());
+    context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+    _scrollToTop();
+  }
+
+  Future<void> _refreshReciters() async {
+    context.read<RecitersBloc>().add(const LoadReciters());
   }
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
-    final ThemeData theme = Theme.of(context);
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<LocalizationBloc, LocalizationState>(
-          listener: (context, state) {
-            context.read<RecitersBloc>().add(const LanguageChanged());
-          },
-        ),
-        BlocListener<RecitersBloc, RecitersState>(
-          listenWhen: (previous, current) =>
-              previous is! RecitersLoaded && current is RecitersLoaded,
-          listener: (context, state) {
-            // Restore selected letter filter when reciters are loaded
-            final String? selectedLetter = context
-                .read<AlphabetScrollbarBloc>()
-                .state
-                .selectedLetter;
-            if (selectedLetter != null) {
-              context.read<RecitersBloc>().add(FilterByLetter(selectedLetter));
-            }
-          },
-        ),
-      ],
-      child: BlocProvider(
-        create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
-        child: BlocBuilder<RecitersBloc, RecitersState>(
-          builder: (context, state) {
-            return Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: AppBar(
-                title: Text(l10n.reciters),
-                actions: [
-                  IconButton(
-                    icon: const Icon(FluentIcons.bookmark_24_regular),
-                    tooltip: l10n.bookmarks,
-                    onPressed: () => const BookmarksRoute().push(context),
-                  ),
-                  IconButton(
-                    icon: const Icon(FluentIcons.history_24_regular),
-                    tooltip: l10n.listeningHistory,
-                    onPressed: () => const HistoryRoute().push(context),
-                  ),
-                ],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => const QuranLastReadRoute().push(context),
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                elevation: 4,
-                child: const Icon(Icons.menu_book_rounded),
-              ),
-              body: Column(
-                children: [
-                  // Search bar and letter filter
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: Column(
-                      children: [
-                        // Letter filter indicator (refined)
-                        if (state is RecitersLoaded &&
-                            state.selectedLetter != null)
-                          Container(
-                            width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 12),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: theme.primaryColor.withValues(
-                                  alpha: 0.2,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  FluentIcons.filter_24_filled,
-                                  color: theme.primaryColor,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  l10n.filteredByLetter,
-                                  style: TextStyle(
-                                    color: theme.primaryColor,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                SizedBox(width: 6),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    state.selectedLetter!,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: _clearLetterFilter,
-                                  child: Container(
-                                    padding: EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: theme.primaryColor.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      color: theme.primaryColor,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        // Search field
-                        // Search and Filters
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _SearchField(
-                                state: state,
-                                controller: _searchController,
-                                focusNode: _focusNode,
-                                onChanged: _onSearchChanged,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            _FavoritesToggle(state: state),
-                            SizedBox(width: 10),
-                            const _DownloadsButton(),
-                          ],
-                        ),
-                      ],
+    return BlocProvider(
+      create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
+      child: Builder(
+        builder: (innerContext) => MultiBlocListener(
+          listeners: [
+            BlocListener<LocalizationBloc, LocalizationState>(
+              listener: (context, state) {
+                context.read<RecitersBloc>().add(const LanguageChanged());
+              },
+            ),
+            BlocListener<RecitersBloc, RecitersState>(
+              listenWhen: (previous, current) =>
+                  previous is! RecitersLoaded && current is RecitersLoaded,
+              listener: (context, state) {
+                final String? selectedLetter = context
+                    .read<AlphabetScrollbarBloc>()
+                    .state
+                    .selectedLetter;
+                final FavoritesState favoritesState = context
+                    .read<FavoritesCubit>()
+                    .state;
+
+                if (favoritesState is FavoritesLoaded) {
+                  context.read<RecitersBloc>().add(
+                    SyncFavoriteIds(favoritesState.favoriteIds.toList()),
+                  );
+                }
+
+                if (selectedLetter != null) {
+                  context.read<RecitersBloc>().add(
+                    FilterByLetter(selectedLetter),
+                  );
+                }
+              },
+            ),
+            BlocListener<FavoritesCubit, FavoritesState>(
+              listenWhen: (_, current) => current is FavoritesLoaded,
+              listener: (context, state) {
+                if (state is FavoritesLoaded) {
+                  context.read<RecitersBloc>().add(
+                    SyncFavoriteIds(state.favoriteIds.toList()),
+                  );
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<RecitersBloc, RecitersState>(
+            builder: (context, state) {
+              final l10n = context.l10n;
+
+              return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: AppBar(
+                  title: Text(l10n.reciters),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(FluentIcons.bookmark_24_regular),
+                      tooltip: l10n.bookmarks,
+                      onPressed: () => const BookmarksRoute().push(context),
                     ),
-                  ),
-
-                  // Content
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Scrollbar (Right side for RTL)
-                        if (Directionality.of(context) == TextDirection.rtl &&
-                            state is RecitersLoaded &&
-                            state.reciters.isNotEmpty &&
-                            state.searchQuery.isEmpty)
-                          ReciterAlphabetScrollbar(
-                            reciters: state.filteredReciters,
-                            scrollController: _scrollController,
-                            onLetterSelected: _onLetterSelected,
-                          ),
-
-                        // Main content
-                        Expanded(
-                          child: state is RecitersLoading
-                              ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const CircularProgressIndicator(),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        l10n.loadingReciters,
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : state is RecitersError
-                              ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.error_outline_rounded,
-                                        size: 64,
-                                        color: theme.colorScheme.error,
-                                      ),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        state.message,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: theme.colorScheme.error,
-                                        ),
-                                      ),
-                                      SizedBox(height: 16),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          context.read<RecitersBloc>().add(
-                                            const LoadReciters(),
-                                          );
-                                        },
-                                        child: Text(
-                                          l10n.retry,
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : state is RecitersLoaded &&
-                                    state.filteredReciters.isEmpty
-                              ? Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.search_off_rounded,
-                                        size: 64,
-                                        color: theme.disabledColor,
-                                      ),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        state.searchQuery.isEmpty
-                                            ? l10n.noRecitersFound
-                                            : l10n.noRecitersMatchSearch,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: theme.disabledColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : state is RecitersLoaded
-                              ? LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    if (constraints.maxWidth >= 1100) {
-                                      return _ReciterGridView(
-                                        state: state,
-                                        scrollController: _scrollController,
-                                        crossAxisCount: 3,
-                                      );
-                                    }
-                                    if (constraints.maxWidth >= 700) {
-                                      return _ReciterGridView(
-                                        state: state,
-                                        scrollController: _scrollController,
-                                        crossAxisCount: 2,
-                                      );
-                                    }
-                                    return _ReciterListView(
-                                      state: state,
-                                      scrollController: _scrollController,
-                                    );
-                                  },
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-
-                        // Scrollbar (Right side for LTR)
-                        if (Directionality.of(context) != TextDirection.rtl &&
-                            state is RecitersLoaded &&
-                            state.reciters.isNotEmpty &&
-                            state.searchQuery.isEmpty)
-                          ReciterAlphabetScrollbar(
-                            reciters: state.filteredReciters,
-                            scrollController: _scrollController,
-                            onLetterSelected: _onLetterSelected,
-                          ),
-                      ],
+                    IconButton(
+                      icon: const Icon(FluentIcons.history_24_regular),
+                      tooltip: l10n.listeningHistory,
+                      onPressed: () => const HistoryRoute().push(context),
                     ),
+                  ],
+                ),
+                body: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                  child: _RecitersSurface(
+                    state: state,
+                    searchController: _searchController,
+                    focusNode: _focusNode,
+                    scrollController: _scrollController,
+                    onSearchChanged: _onSearchChanged,
+                    onClearSearch: _clearSearch,
+                    onToggleFavorites: () =>
+                        _toggleFavoritesFilter(innerContext),
+                    onClearLetter: _clearLetterFilter,
+                    onClearFavorites: () {
+                      context.read<RecitersBloc>().add(
+                        const ClearFavoritesFilter(),
+                      );
+                    },
+                    onClearAll: _clearAllFilters,
+                    onLetterSelected: _onLetterSelected,
+                    onRetry: _refreshReciters,
                   ),
-                ],
-              ),
-            );
-          },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-class _SearchField extends StatelessWidget {
-  const _SearchField({
+class _RecitersSurface extends StatelessWidget {
+  const _RecitersSurface({
     required this.state,
-    required this.controller,
+    required this.searchController,
     required this.focusNode,
-    required this.onChanged,
+    required this.scrollController,
+    required this.onSearchChanged,
+    required this.onClearSearch,
+    required this.onToggleFavorites,
+    required this.onClearLetter,
+    required this.onClearFavorites,
+    required this.onClearAll,
+    required this.onLetterSelected,
+    required this.onRetry,
   });
 
   final RecitersState state;
-  final TextEditingController controller;
+  final TextEditingController searchController;
   final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
+  final ScrollController scrollController;
+  final ValueChanged<String> onSearchChanged;
+  final VoidCallback onClearSearch;
+  final VoidCallback onToggleFavorites;
+  final VoidCallback onClearLetter;
+  final VoidCallback onClearFavorites;
+  final VoidCallback onClearAll;
+  final ValueChanged<String?> onLetterSelected;
+  final Future<void> Function() onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
+    final ThemeData theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primaryColor.withValues(alpha: 0.04),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SearchField(
+                          controller: searchController,
+                          focusNode: focusNode,
+                          onChanged: onSearchChanged,
+                          onClear: onClearSearch,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _FavoritesToggle(state: state, onTap: onToggleFavorites),
+                      const SizedBox(width: 8),
+                      const _DownloadsButton(),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _ResultsSummary(state: state),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: switch (state) {
+                      final RecitersLoaded loadedState
+                          when _hasActiveFilters(loadedState) =>
+                        Padding(
+                          key: const ValueKey('active_filters'),
+                          padding: const EdgeInsets.only(top: 10),
+                          child: _ActiveFiltersBar(
+                            state: loadedState,
+                            onClearSearch: onClearSearch,
+                            onClearLetter: onClearLetter,
+                            onClearFavorites: onClearFavorites,
+                            onClearAll: onClearAll,
+                          ),
+                        ),
+                      _ => const SizedBox.shrink(
+                        key: ValueKey('inactive_filters'),
+                      ),
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              height: 1,
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+            ),
+            Expanded(
+              child: _ResultsPane(
+                state: state,
+                scrollController: scrollController,
+                onLetterSelected: onLetterSelected,
+                onRetry: onRetry,
+                onClearFilters: onClearAll,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultsSummary extends StatelessWidget {
+  const _ResultsSummary({required this.state});
+
+  final RecitersState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final String title = switch (state) {
+      RecitersLoaded loadedState =>
+        loadedState.filteredReciters.length == loadedState.reciters.length
+            ? '${loadedState.reciters.length} ${context.l10n.reciters}'
+            : '${loadedState.filteredReciters.length} / ${loadedState.reciters.length} ${context.l10n.reciters}',
+      RecitersLoading() => context.l10n.loadingReciters,
+      RecitersError() => context.l10n.reciters,
+      _ => context.l10n.reciters,
+    };
+
+    return Text(
+      title,
+      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return ListenableBuilder(
-      listenable: focusNode,
+      listenable: Listenable.merge([controller, focusNode]),
       builder: (context, _) {
+        final bool hasText = controller.text.isNotEmpty;
+        final bool isFocused = focusNode.hasFocus;
+
         return Container(
-          height: 54,
+          height: 48,
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isFocused
+                  ? theme.primaryColor.withValues(alpha: 0.28)
+                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
+            ),
             boxShadow: [
               BoxShadow(
-                color: theme.primaryColor.withValues(alpha: 0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: theme.primaryColor.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(
-              color: focusNode.hasFocus
-                  ? theme.primaryColor.withValues(alpha: 0.3)
-                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-            ),
           ),
-          child: Center(
-            child: TextField(
-              focusNode: focusNode,
-              controller: controller,
-              textAlignVertical: TextAlignVertical.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              decoration: InputDecoration(
-                isDense: true,
-                filled: true,
-                fillColor: Colors.transparent,
-                border: InputBorder.none,
-                hintText: l10n.searchReciters,
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.4,
-                  ),
-                  fontSize: 14,
-                ),
-                prefixIcon: Icon(
-                  FluentIcons.search_24_regular,
-                  size: 20,
-                  color: focusNode.hasFocus
-                      ? theme.primaryColor
-                      : theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.6,
-                        ),
-                ),
-                suffixIcon:
-                    (state is RecitersLoaded &&
-                        (state as RecitersLoaded).searchQuery.isNotEmpty)
-                    ? IconButton(
-                        icon: Icon(FluentIcons.dismiss_24_regular, size: 18),
-                        onPressed: () {
-                          controller.clear();
-                          context.read<RecitersBloc>().add(const ClearSearch());
-                          context.read<AlphabetScrollbarBloc>().add(
-                            const ClearSelection(),
-                          );
-                        },
-                      )
-                    : null,
-              ),
-              onChanged: onChanged,
-              onTapOutside: (event) => focusNode.unfocus(),
+          child: TextField(
+            focusNode: focusNode,
+            controller: controller,
+            textAlignVertical: TextAlignVertical.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
+            decoration: InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              hintText: context.l10n.searchReciters,
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.58,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              prefixIcon: Icon(
+                FluentIcons.search_24_regular,
+                size: 18,
+                color: isFocused
+                    ? theme.primaryColor
+                    : theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.72,
+                      ),
+              ),
+              suffixIcon: hasText
+                  ? IconButton(
+                      icon: const Icon(
+                        FluentIcons.dismiss_24_regular,
+                        size: 18,
+                      ),
+                      onPressed: onClear,
+                    )
+                  : null,
+            ),
+            onChanged: onChanged,
+            onTapOutside: (_) => focusNode.unfocus(),
           ),
         );
       },
@@ -465,58 +461,64 @@ class _SearchField extends StatelessWidget {
 }
 
 class _FavoritesToggle extends StatelessWidget {
-  const _FavoritesToggle({required this.state});
+  const _FavoritesToggle({required this.state, required this.onTap});
 
   final RecitersState state;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final bool isActive =
         state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
 
-    return Container(
-      height: 54,
-      width: 54,
-      decoration: BoxDecoration(
-        color: isActive ? theme.primaryColor : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isActive
-                ? theme.primaryColor.withValues(alpha: 0.2)
-                : theme.primaryColor.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(
-          color: isActive
-              ? theme.primaryColor
-              : theme.primaryColor.withValues(alpha: 0.12),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _SquareActionButton(
+          icon: isActive
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
+          isActive: isActive,
+          onTap: onTap,
         ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            final favoritesState = context.read<FavoritesCubit>().state;
-            if (favoritesState is FavoritesLoaded) {
-              context.read<RecitersBloc>().add(
-                ToggleFavoritesFilter(favoritesState.favoriteIds.toList()),
+        PositionedDirectional(
+          top: -4,
+          end: -4,
+          child: BlocBuilder<FavoritesCubit, FavoritesState>(
+            builder: (context, favoritesState) {
+              final int count = favoritesState is FavoritesLoaded
+                  ? favoritesState.favoriteIds.length
+                  : 0;
+              if (count == 0) {
+                return const SizedBox.shrink();
+              }
+
+              return Container(
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                decoration: BoxDecoration(
+                  color: isActive ? Colors.white : theme.primaryColor,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: isActive ? theme.primaryColor : Colors.white,
+                    width: 1.2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$count',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: isActive ? theme.primaryColor : Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               );
-            }
-          },
-          child: Center(
-            child: Icon(
-              isActive ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              color: isActive ? Colors.white : theme.primaryColor,
-              size: 22,
-            ),
+            },
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -526,32 +528,56 @@ class _DownloadsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: 54,
-      width: 54,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primaryColor.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: theme.primaryColor.withValues(alpha: 0.12)),
-      ),
+    return _SquareActionButton(
+      icon: FluentIcons.arrow_download_24_regular,
+      onTap: () => const DownloadsRoute().push(context),
+    );
+  }
+}
+
+class _SquareActionButton extends StatelessWidget {
+  const _SquareActionButton({
+    required this.icon,
+    required this.onTap,
+    this.isActive = false,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return SizedBox(
+      width: 48,
+      height: 48,
       child: Material(
-        color: Colors.transparent,
+        color: isActive
+            ? theme.primaryColor.withValues(alpha: 0.12)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => const DownloadsRoute().push(context),
-          child: Center(
-            child: Icon(
-              FluentIcons.arrow_download_24_regular,
-              color: theme.primaryColor,
-              size: 24,
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isActive
+                    ? theme.primaryColor.withValues(alpha: 0.35)
+                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
+              ),
+            ),
+            child: Center(
+              child: Icon(
+                icon,
+                size: 20,
+                color: isActive
+                    ? theme.primaryColor
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
@@ -560,23 +586,341 @@ class _DownloadsButton extends StatelessWidget {
   }
 }
 
-class _ReciterListView extends StatelessWidget {
-  const _ReciterListView({required this.state, required this.scrollController});
+class _ActiveFiltersBar extends StatelessWidget {
+  const _ActiveFiltersBar({
+    required this.state,
+    required this.onClearSearch,
+    required this.onClearLetter,
+    required this.onClearFavorites,
+    required this.onClearAll,
+  });
 
   final RecitersLoaded state;
-  final ScrollController scrollController;
+  final VoidCallback onClearSearch;
+  final VoidCallback onClearLetter;
+  final VoidCallback onClearFavorites;
+  final VoidCallback onClearAll;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      separatorBuilder: (_, _) => SizedBox(height: 8),
-      controller: scrollController,
-      itemCount: state.filteredReciters.length,
-      padding: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 80),
-      itemBuilder: (context, index) {
-        final ReciterEntity reciter = state.filteredReciters[index];
-        return ReciterCard(reciter: reciter);
-      },
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          if (state.searchQuery.isNotEmpty)
+            _FilterChip(
+              icon: Icons.search_rounded,
+              label: state.searchQuery,
+              onClear: onClearSearch,
+            ),
+          if (state.selectedLetter != null)
+            _FilterChip(
+              icon: Icons.filter_alt_rounded,
+              label: state.selectedLetter!,
+              onClear: onClearLetter,
+            ),
+          if (state.showFavoritesOnly)
+            _FilterChip(
+              icon: Icons.favorite_rounded,
+              label: context.l10n.favorites,
+              onClear: onClearFavorites,
+            ),
+          ActionChip(label: Text(context.l10n.clearAll), onPressed: onClearAll),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.icon,
+    required this.label,
+    required this.onClear,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return InputChip(
+      avatar: Icon(icon, size: 16),
+      label: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 140),
+        child: Text(label, overflow: TextOverflow.ellipsis),
+      ),
+      onDeleted: onClear,
+    );
+  }
+}
+
+class _ResultsPane extends StatelessWidget {
+  const _ResultsPane({
+    required this.state,
+    required this.scrollController,
+    required this.onLetterSelected,
+    required this.onRetry,
+    required this.onClearFilters,
+  });
+
+  final RecitersState state;
+  final ScrollController scrollController;
+  final ValueChanged<String?> onLetterSelected;
+  final Future<void> Function() onRetry;
+  final VoidCallback onClearFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: _buildChild(context),
+    );
+  }
+
+  Widget _buildChild(BuildContext context) {
+    if (state is RecitersLoading) {
+      return _StatePanel(
+        key: const ValueKey('loading_state'),
+        icon: Icons.hourglass_top_rounded,
+        title: context.l10n.loadingReciters,
+        isLoading: true,
+      );
+    }
+
+    if (state is RecitersError) {
+      return _StatePanel(
+        key: const ValueKey('error_state'),
+        icon: Icons.error_outline_rounded,
+        title: (state as RecitersError).message,
+        actionLabel: context.l10n.retry,
+        onAction: () {
+          onRetry();
+        },
+        isError: true,
+      );
+    }
+
+    if (state is RecitersLoaded) {
+      final RecitersLoaded loadedState = state as RecitersLoaded;
+
+      if (loadedState.filteredReciters.isEmpty) {
+        final bool isSearchState = loadedState.searchQuery.isNotEmpty;
+        final bool isFavoritesState = loadedState.showFavoritesOnly;
+
+        return _StatePanel(
+          key: const ValueKey('empty_state'),
+          icon: isFavoritesState
+              ? Icons.favorite_border_rounded
+              : Icons.search_off_rounded,
+          title: isFavoritesState
+              ? context.l10n.noFavorites
+              : isSearchState
+              ? context.l10n.noSearchResults
+              : context.l10n.noRecitersFound,
+          subtitle: isSearchState ? context.l10n.tryDifferentSearch : null,
+          actionLabel: _hasActiveFilters(loadedState)
+              ? context.l10n.clearAll
+              : null,
+          onAction: _hasActiveFilters(loadedState) ? onClearFilters : null,
+        );
+      }
+
+      return _LoadedResults(
+        key: const ValueKey('loaded_state'),
+        state: loadedState,
+        scrollController: scrollController,
+        onLetterSelected: onLetterSelected,
+        onRefresh: onRetry,
+      );
+    }
+
+    return const SizedBox.shrink(key: ValueKey('fallback_state'));
+  }
+}
+
+class _LoadedResults extends StatelessWidget {
+  const _LoadedResults({
+    super.key,
+    required this.state,
+    required this.scrollController,
+    required this.onLetterSelected,
+    required this.onRefresh,
+  });
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+  final ValueChanged<String?> onLetterSelected;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool showScrollbar =
+        state.filteredReciters.isNotEmpty && state.searchQuery.isEmpty;
+    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isRtl && showScrollbar)
+          ReciterAlphabetScrollbar(
+            reciters: state.filteredReciters,
+            scrollController: scrollController,
+            onLetterSelected: onLetterSelected,
+          ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 980) {
+                return _ReciterGridView(
+                  state: state,
+                  scrollController: scrollController,
+                  crossAxisCount: 3,
+                  onRefresh: onRefresh,
+                );
+              }
+              if (constraints.maxWidth >= 680) {
+                return _ReciterGridView(
+                  state: state,
+                  scrollController: scrollController,
+                  crossAxisCount: 2,
+                  onRefresh: onRefresh,
+                );
+              }
+              return _ReciterListView(
+                state: state,
+                scrollController: scrollController,
+                onRefresh: onRefresh,
+              );
+            },
+          ),
+        ),
+        if (!isRtl && showScrollbar)
+          ReciterAlphabetScrollbar(
+            reciters: state.filteredReciters,
+            scrollController: scrollController,
+            onLetterSelected: onLetterSelected,
+          ),
+      ],
+    );
+  }
+}
+
+class _StatePanel extends StatelessWidget {
+  const _StatePanel({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onAction,
+    this.isLoading = false,
+    this.isError = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool isLoading;
+  final bool isError;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color accent = isError
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accent.withValues(alpha: 0.1),
+              ),
+              child: isLoading
+                  ? Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: accent,
+                      ),
+                    )
+                  : Icon(icon, size: 32, color: accent),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: isError ? accent : theme.colorScheme.onSurface,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 16),
+              FilledButton.tonalIcon(
+                onPressed: onAction,
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(actionLabel!),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReciterListView extends StatelessWidget {
+  const _ReciterListView({
+    required this.state,
+    required this.scrollController,
+    required this.onRefresh,
+  });
+
+  final RecitersLoaded state;
+  final ScrollController scrollController;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator.adaptive(
+      onRefresh: onRefresh,
+      child: ListView.separated(
+        controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        itemCount: state.filteredReciters.length,
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final ReciterEntity reciter = state.filteredReciters[index];
+          return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+        },
+      ),
     );
   }
 }
@@ -586,28 +930,42 @@ class _ReciterGridView extends StatelessWidget {
     required this.state,
     required this.scrollController,
     required this.crossAxisCount,
+    required this.onRefresh,
   });
 
   final RecitersLoaded state;
   final ScrollController scrollController;
   final int crossAxisCount;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      controller: scrollController,
-      padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 80),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        mainAxisExtent: 120,
+    return RefreshIndicator.adaptive(
+      onRefresh: onRefresh,
+      child: GridView.builder(
+        controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          mainAxisExtent: 104,
+        ),
+        itemCount: state.filteredReciters.length,
+        itemBuilder: (context, index) {
+          final ReciterEntity reciter = state.filteredReciters[index];
+          return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+        },
       ),
-      itemCount: state.filteredReciters.length,
-      itemBuilder: (context, index) {
-        final ReciterEntity reciter = state.filteredReciters[index];
-        return ReciterCard(reciter: reciter);
-      },
     );
   }
+}
+
+bool _hasActiveFilters(RecitersLoaded state) {
+  return state.searchQuery.isNotEmpty ||
+      state.selectedLetter != null ||
+      state.showFavoritesOnly;
 }

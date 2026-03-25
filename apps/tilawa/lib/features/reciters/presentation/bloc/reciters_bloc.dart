@@ -19,6 +19,7 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     on<ClearLetterFilter>(_onClearLetterFilter);
     on<ClearSearch>(_onClearSearch);
     on<ToggleFavoritesFilter>(_onToggleFavoritesFilter);
+    on<SyncFavoriteIds>(_onSyncFavoriteIds);
     on<ClearFavoritesFilter>(_onClearFavoritesFilter);
     on<LanguageChanged>(_onLanguageChanged);
   }
@@ -28,6 +29,19 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     LoadReciters event,
     Emitter<RecitersState> emit,
   ) async {
+    final String searchQuery = state is RecitersLoaded
+        ? (state as RecitersLoaded).searchQuery
+        : '';
+    final String? selectedLetter = state is RecitersLoaded
+        ? (state as RecitersLoaded).selectedLetter
+        : null;
+    final bool showFavoritesOnly = state is RecitersLoaded
+        ? (state as RecitersLoaded).showFavoritesOnly
+        : false;
+    final List<int> favoriteIds = state is RecitersLoaded
+        ? (state as RecitersLoaded).favoriteIds
+        : const [];
+
     emit(const RecitersLoading());
 
     try {
@@ -41,10 +55,22 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
           );
 
       if (recitersData != null) {
+        final List<entity.ReciterEntity> filteredReciters = _filterReciters(
+          recitersData,
+          searchQuery,
+          selectedLetter,
+          showFavoritesOnly,
+          favoriteIds,
+        );
+
         emit(
           RecitersLoaded(
             reciters: recitersData,
-            filteredReciters: recitersData,
+            filteredReciters: filteredReciters,
+            searchQuery: searchQuery,
+            selectedLetter: selectedLetter,
+            showFavoritesOnly: showFavoritesOnly,
+            favoriteIds: favoriteIds,
           ),
         );
       } else {
@@ -179,6 +205,28 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     );
   }
 
+  void _onSyncFavoriteIds(SyncFavoriteIds event, Emitter<RecitersState> emit) {
+    if (state is! RecitersLoaded) {
+      return;
+    }
+
+    final currentState = state as RecitersLoaded;
+    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
+      currentState.reciters,
+      currentState.searchQuery,
+      currentState.selectedLetter,
+      currentState.showFavoritesOnly,
+      event.favoriteIds,
+    );
+
+    emit(
+      currentState.copyWith(
+        favoriteIds: event.favoriteIds,
+        filteredReciters: filteredReciters,
+      ),
+    );
+  }
+
   void _onClearFavoritesFilter(
     ClearFavoritesFilter event,
     Emitter<RecitersState> emit,
@@ -213,9 +261,7 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     List<int> favoriteIds,
   ) {
     final String normalizedQuery = searchQuery.trim().toLowerCase();
-    final Set<int> favoriteIdsLookup = showFavoritesOnly
-        ? favoriteIds.toSet()
-        : const <int>{};
+    final Set<int> favoriteIdsLookup = favoriteIds.toSet();
     var filtered = reciters;
 
     // Filter by search query
@@ -242,7 +288,22 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       }).toList();
     }
 
-    return filtered;
+    if (favoriteIdsLookup.isEmpty) {
+      return filtered;
+    }
+
+    final List<entity.ReciterEntity> favorites = [];
+    final List<entity.ReciterEntity> others = [];
+
+    for (final entity.ReciterEntity reciter in filtered) {
+      if (favoriteIdsLookup.contains(reciter.id)) {
+        favorites.add(reciter);
+      } else {
+        others.add(reciter);
+      }
+    }
+
+    return [...favorites, ...others];
   }
 
   Future<void> _onLanguageChanged(

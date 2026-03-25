@@ -8,43 +8,36 @@ import '../../firebase_options.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../services/firebase_initialization_service.dart';
 
-/// Command-line tool to initialize Firebase data
+/// Command-line tool to verify Firebase data (read-only).
+///
+/// Catalog seeding should be done via an admin backend or migration script,
+/// NOT from the client app.
+///
 /// Run this with: dart lib/core/utils/firebase_data_initializer.dart
 Future<void> main() async {
-  logger.d('🔥 Firebase Data Initializer');
+  logger.d('Firebase Data Initializer (read-only)');
   logger.d('============================');
 
   try {
-    // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    logger.d('✅ Firebase initialized');
+    logger.d('Firebase initialized');
 
-    // Create services
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final subscriptionPlansService = SubscriptionPlansService(
       firestore: firestore,
     );
     final initializationService = FirebaseInitializationService(
-      firestore: firestore,
       subscriptionPlansService: subscriptionPlansService,
     );
 
-    // Initialize data
+    // Pre-fetch subscription plans (read-only)
     await initializationService.initializeFirebaseData();
 
-    // Show statistics
-    final Map<String, int> stats = await initializationService
-        .getFirebaseDataStats();
-    logger.d('\n📊 Firebase Data Statistics:');
-    logger.d('Subscription Plans: ${stats['subscription_plans']}');
-    logger.d('Users: ${stats['users']}');
-
-    logger.d('\n✅ Firebase data initialization completed successfully!');
-    logger.d('You can now view your data in the Firebase Console.');
+    logger.d('Firebase data read completed successfully.');
   } catch (e) {
-    logger.d('❌ Error initializing Firebase data: $e');
+    logger.d('Error initializing Firebase data: $e');
     exit(1);
   }
 }
