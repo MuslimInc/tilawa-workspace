@@ -364,6 +364,14 @@
     "@favorites": {
         "description": "Favorites section title"
     },
+    "clearFavorites": "Clear Favorites",
+    "@clearFavorites": {
+        "description": "Clear all favorite reciters action label"
+    },
+    "clearFavoritesConfirmation": "Are you sure you want to remove all reciters from favorites?",
+    "@clearFavoritesConfirmation": {
+        "description": "Clear all favorite reciters confirmation message"
+    },
     "noFavorites": "No favorites",
     "@noFavorites": {
         "description": "No favorites message"

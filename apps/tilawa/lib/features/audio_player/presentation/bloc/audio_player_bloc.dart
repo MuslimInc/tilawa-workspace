@@ -179,12 +179,16 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         final AudioEntity? currentAudio = state.currentAudio;
         final PlaybackStateEntity? playbackState = state.playbackState;
 
-        final Duration duration = currentAudio != null
-            ? currentAudio.duration
-            : Duration.zero;
-        final Duration buffered = playbackState != null
-            ? playbackState.bufferedPosition
-            : Duration.zero;
+        Duration duration = currentAudio?.duration ?? Duration.zero;
+
+        // If metadata duration is zero, try to use playback state duration
+        if (duration <= Duration.zero &&
+            playbackState != null &&
+            playbackState.duration > Duration.zero) {
+          duration = playbackState.duration;
+        }
+
+        final Duration buffered = playbackState?.bufferedPosition ?? Duration.zero;
 
         add(
           AudioPlayerEvent.updatePositionData(
@@ -279,10 +283,11 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       state.copyWith(
         status: AudioPlayerStatus.success,
         currentAudio: event.audio,
-        // Preserve dismissedAudioId.
-        // Logic: specific ID is dismissed until explicitly played or cleared.
       ),
     );
+
+    // Immediately trigger a position data update for the new track
+    _emitPositionDataUpdate();
     // Note: We intentionally do NOT save history for the new audio here.
     // History will be saved when:
     // 1. The user pauses/stops playback
@@ -321,6 +326,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         dismissedAudioId: isPlaying ? null : state.dismissedAudioId,
       ),
     );
+
+    // Immediately trigger a position data update to pick up duration/position changes
+    _emitPositionDataUpdate();
   }
 
   void _onUpdatePositionData(
@@ -361,6 +369,31 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       state.copyWith(
         status: AudioPlayerStatus.success,
         positionData: event.positionData,
+      ),
+    );
+  }
+
+  /// Resolves the current position, buffered position, and duration from the
+  /// current state and emits an [UpdatePositionData] event.
+  ///
+  /// This ensures that [PositionData] is kept in sync with [currentAudio] and
+  /// [playbackState] updates, even between position stream ticks.
+  void _emitPositionDataUpdate() {
+    final AudioEntity? audio = state.currentAudio;
+    final PlaybackStateEntity? playbackState = state.playbackState;
+    if (audio == null) return;
+
+    final Duration position = playbackState?.position ?? Duration.zero;
+    final Duration buffered = playbackState?.bufferedPosition ?? Duration.zero;
+    final Duration duration = _resolveDuration(audio, playbackState, true);
+
+    add(
+      AudioPlayerEvent.updatePositionData(
+        PositionData(
+          position: position,
+          bufferedPosition: buffered,
+          duration: duration,
+        ),
       ),
     );
   }

@@ -67,11 +67,11 @@ void main() {
               );
 
               // availableWidth = 392.7 * (1.0 - 0.05) = 373.065
-              // fontSize = 373.065 / 16.35
-              const double expectedFontSize = 373.065 / 16.35;
-              // fontHeight = ((803.6 - 4.0) / 15.0) / fontSize
+              // fontSize = 373.065 / 16.50
+              const double expectedFontSize = 373.065 / 16.50;
+              // fontHeight = ((803.6 - 4.0) / 17.0) / fontSize
               const double expectedFontHeight =
-                  ((803.6 - 4.0) / 15.0) / expectedFontSize;
+                  ((803.6 - 4.0) / 17.0) / expectedFontSize;
 
               expect(metrics.isScrollable, false);
               expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
@@ -100,8 +100,8 @@ void main() {
               );
 
               // availableWidth = 803.6 * (1.0 - 0.05) = 763.42
-              // adaptiveFontSize = 763.42 / 16.35
-              const double expectedFontSize = 763.42 / 16.35;
+              // adaptiveFontSize = 763.42 / 16.50
+              const double expectedFontSize = 763.42 / 16.50;
 
               const expectedFontHeight = 1.75;
 

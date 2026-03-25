@@ -284,6 +284,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get favorites => 'المفضلة';
 
   @override
+  String get clearFavorites => 'مسح المفضلة';
+
+  @override
+  String get clearFavoritesConfirmation =>
+      'هل أنت متأكد من إزالة جميع القراء من المفضلة؟';
+
+  @override
   String get noFavorites => 'لا توجد مفضلة';
 
   @override

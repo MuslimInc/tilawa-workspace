@@ -235,6 +235,24 @@ class RecitersRepositoryImpl implements RecitersRepository {
   }
 
   @override
+  ResultFuture<void> clearFavoriteReciters() async {
+    try {
+      final bool isAuth = _authService.currentUser != null;
+
+      if (isAuth) {
+        await _favoritesDataSource.clearFavoriteReciters(
+          userId: _authService.currentUser!.uid,
+        );
+      }
+
+      await _localDataSource.clearFavoriteReciterIds();
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   ResultFuture<List<String>> getFavoriteReciterIds() async {
     try {
       final isAuth = _authService.currentUser != null;

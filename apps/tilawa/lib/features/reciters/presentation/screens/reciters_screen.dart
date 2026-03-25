@@ -16,6 +16,8 @@ import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 
+enum _RecitersMenuAction { clearFavorites }
+
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
 
@@ -128,6 +130,52 @@ class _RecitersScreenState extends State<RecitersScreen> {
     context.read<RecitersBloc>().add(const LoadReciters());
   }
 
+  Future<void> _showClearFavoritesDialog(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.clearFavorites),
+        content: Text(context.l10n.clearFavoritesConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              context.l10n.clearAll,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!context.mounted || !(confirmed ?? false)) {
+      return;
+    }
+
+    final bool cleared = await context
+        .read<FavoritesCubit>()
+        .clearAllFavorites();
+    if (!context.mounted) {
+      return;
+    }
+
+    if (!cleared) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.anErrorOccurred)));
+      return;
+    }
+
+    final RecitersState recitersState = context.read<RecitersBloc>().state;
+    if (recitersState is RecitersLoaded && recitersState.showFavoritesOnly) {
+      context.read<RecitersBloc>().add(const ClearFavoritesFilter());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -194,6 +242,40 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       icon: const Icon(FluentIcons.history_24_regular),
                       tooltip: l10n.listeningHistory,
                       onPressed: () => const HistoryRoute().push(context),
+                    ),
+                    BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, favoritesState) {
+                        final bool hasFavorites =
+                            favoritesState is FavoritesLoaded &&
+                            favoritesState.favoriteIds.isNotEmpty;
+                        if (!hasFavorites) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return PopupMenuButton<_RecitersMenuAction>(
+                          tooltip: l10n.clearFavorites,
+                          onSelected: (action) {
+                            if (action == _RecitersMenuAction.clearFavorites) {
+                              _showClearFavoritesDialog(innerContext);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem<_RecitersMenuAction>(
+                              value: _RecitersMenuAction.clearFavorites,
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.delete_sweep_rounded,
+                                    color: Colors.red,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(l10n.clearFavorites),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),

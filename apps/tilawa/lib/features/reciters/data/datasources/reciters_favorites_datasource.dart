@@ -11,6 +11,7 @@ abstract class RecitersFavoritesDataSource {
     required String userId,
     required int reciterId,
   });
+  Future<void> clearFavoriteReciters({required String userId});
   Future<List<String>> getFavoriteReciterIds({required String userId});
 }
 
@@ -61,6 +62,27 @@ class RecitersFavoritesDataSourceImpl implements RecitersFavoritesDataSource {
         .doc(reciterId.toString());
 
     await reciterDoc.delete();
+  }
+
+  @override
+  Future<void> clearFavoriteReciters({required String userId}) async {
+    final CollectionReference itemsCollection = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .doc('reciters')
+        .collection('items');
+
+    final QuerySnapshot snapshot = await itemsCollection.get();
+    if (snapshot.docs.isEmpty) {
+      return;
+    }
+
+    final WriteBatch batch = _firestore.batch();
+    for (final QueryDocumentSnapshot doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
   }
 
   @override

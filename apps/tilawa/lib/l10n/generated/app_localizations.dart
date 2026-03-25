@@ -644,6 +644,18 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get favorites;
 
+  /// Clear all favorite reciters action label
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Favorites'**
+  String get clearFavorites;
+
+  /// Clear all favorite reciters confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove all reciters from favorites?'**
+  String get clearFavoritesConfirmation;
+
   /// No favorites message
   ///
   /// In en, this message translates to:

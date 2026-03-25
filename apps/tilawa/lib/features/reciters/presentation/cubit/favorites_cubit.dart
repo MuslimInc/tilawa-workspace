@@ -5,16 +5,21 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+import '../../domain/usecases/clear_favorite_reciters_use_case.dart';
 import '../../domain/usecases/get_favorite_reciters_use_case.dart';
 import '../../domain/usecases/toggle_favorite_reciter_use_case.dart';
 import 'favorites_state.dart';
 
 @injectable
 class FavoritesCubit extends Cubit<FavoritesState> {
-  FavoritesCubit(this._getFavorites, this._toggleFavorite)
-    : super(FavoritesInitial());
+  FavoritesCubit(
+    this._getFavorites,
+    this._toggleFavorite,
+    this._clearFavoriteReciters,
+  ) : super(FavoritesInitial());
   final GetFavoriteRecitersUseCase _getFavorites;
   final ToggleFavoriteReciterUseCase _toggleFavorite;
+  final ClearFavoriteRecitersUseCase _clearFavoriteReciters;
 
   Set<int> _currentFavoriteIds = {};
   final Set<int> _pendingReciterIds = {};
@@ -96,6 +101,41 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     } finally {
       _pendingReciterIds.remove(reciter.id);
     }
+  }
+
+  Future<bool> clearAllFavorites() async {
+    if (_pendingReciterIds.isNotEmpty) {
+      return false;
+    }
+
+    final FavoritesLoaded? currentState =
+        state is FavoritesLoaded ? state as FavoritesLoaded : null;
+    if (currentState == null || currentState.favoriteIds.isEmpty) {
+      return true;
+    }
+
+    final List<ReciterEntity> previousFavorites = List<ReciterEntity>.from(
+      currentState.favorites,
+    );
+    final Set<int> previousFavoriteIds = Set<int>.from(currentState.favoriteIds);
+
+    _currentFavoriteIds = {};
+    emit(
+      const FavoritesLoaded(favorites: <ReciterEntity>[], favoriteIds: <int>{}),
+    );
+
+    final Either<Failure, void> result = await _clearFavoriteReciters();
+
+    return result.fold((_) {
+      _currentFavoriteIds = previousFavoriteIds;
+      emit(
+        FavoritesLoaded(
+          favorites: previousFavorites,
+          favoriteIds: previousFavoriteIds,
+        ),
+      );
+      return false;
+    }, (_) => true);
   }
 
   bool _isFavorite(int id) {

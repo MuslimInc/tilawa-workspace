@@ -10,5 +10,6 @@ abstract class RecitersRepository {
   // Favorites
   ResultFuture<List<ReciterEntity>> getFavoriteReciters();
   ResultFuture<void> toggleFavoriteReciter(int id);
+  ResultFuture<void> clearFavoriteReciters();
   ResultFuture<List<String>> getFavoriteReciterIds();
 }

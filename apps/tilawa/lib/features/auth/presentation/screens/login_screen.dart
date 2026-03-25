@@ -10,8 +10,29 @@ import 'package:tilawa_ui/theme/text_theme.dart';
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Automatically trigger sign in when screen opens to improve UX
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authBloc = context.read<AuthBloc>();
+        if (authBloc.state is AuthInitial ||
+            authBloc.state is AuthUnauthenticated ||
+            authBloc.state is AuthError) {
+          authBloc.add(const SignInWithGoogleEvent());
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

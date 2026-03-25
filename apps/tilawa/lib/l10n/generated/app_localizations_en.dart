@@ -284,6 +284,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favorites => 'Favorites';
 
   @override
+  String get clearFavorites => 'Clear Favorites';
+
+  @override
+  String get clearFavoritesConfirmation =>
+      'Are you sure you want to remove all reciters from favorites?';
+
+  @override
   String get noFavorites => 'No favorites';
 
   @override

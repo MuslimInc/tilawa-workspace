@@ -245,6 +245,114 @@ void main() {
   // I will append the History Saving tests.
 
   group('AudioPlayerBloc - History Saving', () {
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should emit PositionData immediately when currentAudio changes (initial sync)',
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const audio = AudioEntity(
+          id: 'initial-sync',
+          title: 'Initial Sync',
+          url: 'url',
+          duration: Duration(minutes: 3),
+        );
+        // We add the audio
+        bloc.add(const AudioPlayerEvent.updateAudio(audio));
+        await Future.delayed(Duration.zero);
+      },
+      expect: () => [
+        // 1. UpdateAudio state
+        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', 'initial-sync'),
+        // 2. IMMEDIATE UpdatePositionData state (triggered by _emitPositionDataUpdate)
+        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialDuration', const Duration(minutes: 3)),
+      ],
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'should emit PositionData immediately when playbackState duration is discovered',
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const zeroAudio = AudioEntity(
+          id: 'discovery',
+          title: 'Discovery',
+          url: 'url',
+          duration: Duration.zero,
+        );
+        bloc.add(const AudioPlayerEvent.updateAudio(zeroAudio));
+        await Future.delayed(Duration.zero);
+
+        final discoveredState = PlaybackStateEntity(
+          isPlaying: true,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          bufferedPosition: Duration.zero,
+          duration: const Duration(seconds: 45),
+          currentIndex: 0,
+          queue: const [zeroAudio],
+        );
+        
+        // This should trigger immediate PositionData update with the new duration
+        bloc.add(AudioPlayerEvent.updatePlaybackStateEntity(discoveredState));
+        await Future.delayed(Duration.zero);
+      },
+      expect: () => [
+        // From updateAudio
+        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', 'discovery'),
+        // From _emitPositionDataUpdate after updateAudio (duration 0)
+        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialZeroDuration', Duration.zero),
+        // From updatePlaybackStateEntity
+        isA<AudioPlayerState>().having((s) => s.playbackState?.duration, 'discoveredDuration', const Duration(seconds: 45)),
+        // From _emitPositionDataUpdate after updatePlaybackStateEntity (duration 45s!)
+        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'syncedDuration', const Duration(seconds: 45)),
+      ],
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'positionData duration should use playbackState duration if currentAudio duration is zero',
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const zeroDurationAudio = AudioEntity(
+          id: '1',
+          title: 'Test',
+          url: 'url',
+          duration: Duration.zero,
+        );
+        final playbackState = PlaybackStateEntity(
+          isPlaying: true,
+          processingState: AudioProcessingStateStatus.ready,
+          position: Duration.zero,
+          bufferedPosition: Duration.zero,
+          duration: const Duration(minutes: 5),
+          currentIndex: 0,
+          queue: const [zeroDurationAudio],
+        );
+
+        // 1. Set current audio (duration 0)
+        bloc.add(const AudioPlayerEvent.updateAudio(zeroDurationAudio));
+        await Future.delayed(Duration.zero);
+
+        // 2. Set playback state (duration 5 min)
+        bloc.add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState));
+        await Future.delayed(Duration.zero);
+
+        // 3. Trigger position update (this used to use currentAudio.duration)
+        // In the bloc, we now check playbackState.duration if audio.duration is zero.
+        positionSubject.add(const Duration(seconds: 10));
+        await Future.delayed(Duration.zero);
+      },
+      expect: () => [
+        // 1. UpdateAudio
+        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', '1'),
+        // 2. IMMEDIATE UpdatePositionData after UpdateAudio
+        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialDuration', Duration.zero),
+        // 3. UpdatePlaybackState
+        isA<AudioPlayerState>().having((s) => s.playbackState?.duration, 'playbackDuration', const Duration(minutes: 5)),
+        // 4. IMMEDIATE UpdatePositionData after UpdatePlaybackState (fixed duration!)
+        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'syncedDuration', const Duration(minutes: 5)),
+        // 5. UpdatePositionData from positionSubject
+        isA<AudioPlayerState>().having((s) => s.positionData?.position, 'position', const Duration(seconds: 10)),
+      ],
+    );
+
     const historyAudio = AudioEntity(
       id: 'history-audio-1',
       title: 'History Test',

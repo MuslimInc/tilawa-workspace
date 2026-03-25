@@ -241,13 +241,12 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       currentState.searchQuery,
       currentState.selectedLetter,
       false,
-      const [],
+      currentState.favoriteIds,
     );
 
     emit(
       currentState.copyWith(
         showFavoritesOnly: false,
-        favoriteIds: const [],
         filteredReciters: filteredReciters,
       ),
     );

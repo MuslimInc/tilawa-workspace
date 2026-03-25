@@ -11,6 +11,7 @@ abstract class RecitersLocalDataSource {
   Future<List<String>> getFavoriteReciterIds();
   Future<void> saveFavoriteReciterId(int id);
   Future<void> removeFavoriteReciterId(int id);
+  Future<void> clearFavoriteReciterIds();
 }
 
 @LazySingleton(as: RecitersLocalDataSource)
@@ -67,5 +68,10 @@ class RecitersLocalDataSourceImpl implements RecitersLocalDataSource {
           .toList();
       await _prefs.setStringList(_favoritesKey, newIds);
     }
+  }
+
+  @override
+  Future<void> clearFavoriteReciterIds() async {
+    await _prefs.remove(_favoritesKey);
   }
 }

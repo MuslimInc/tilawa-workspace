@@ -34,8 +34,12 @@ class SeekBarState extends State<SeekBar> {
 
     _sliderThemeData = SliderTheme.of(context).copyWith(
       trackHeight: 8.0,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
-      overlayShape: const RoundSliderOverlayShape(),
+      thumbShape: widget.duration.inMilliseconds > 0
+          ? const RoundSliderThumbShape(enabledThumbRadius: 12.0)
+          : HiddenThumbComponentShape(),
+      overlayShape: widget.duration.inMilliseconds > 0
+          ? const RoundSliderOverlayShape()
+          : SliderComponentShape.noOverlay,
       trackShape: const RoundedRectSliderTrackShape(),
     );
   }
@@ -88,7 +92,7 @@ class SeekBarState extends State<SeekBar> {
                 child: Slider(
                   max: widget.duration.inMilliseconds.toDouble(),
                   value: value,
-                  onChanged: (value) {
+                  onChanged: widget.duration.inMilliseconds > 0 ? (value) {
                     if (!_dragging) {
                       _dragging = true;
                     }
@@ -98,7 +102,7 @@ class SeekBarState extends State<SeekBar> {
                     if (widget.onChanged != null) {
                       widget.onChanged!(Duration(milliseconds: value.round()));
                     }
-                  },
+                  } : null,
                   onChangeEnd: (value) {
                     if (widget.onChangeEnd != null) {
                       widget.onChangeEnd!(
