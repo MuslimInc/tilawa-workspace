@@ -1,5 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import '../../domain/entities/download_item.dart';
 
 /// Interface for the download notification service
@@ -24,6 +22,7 @@ abstract interface class IDownloadNotificationService {
     required String downloadId,
     required String title,
     required String reciterName,
+    int? reciterId,
     required int progress,
     required DownloadStatus status,
     String? pendingMessage,
@@ -47,6 +46,9 @@ abstract interface class IDownloadNotificationService {
     required int completedCount,
     required int totalCount,
     required DownloadStatus status,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
   });
 
   /// Cancel a download notification
@@ -55,6 +57,6 @@ abstract interface class IDownloadNotificationService {
   /// Cancel all download notifications
   Future<void> cancelAllNotifications();
 
-  /// Handle notification tap
-  Future<void> handleNotificationResponse(NotificationResponse response);
+  /// Handle notification tap from payload string
+  Future<void> handleNotificationTap(String? payload);
 }

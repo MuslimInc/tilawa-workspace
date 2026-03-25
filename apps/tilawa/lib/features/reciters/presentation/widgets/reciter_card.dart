@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
@@ -20,9 +19,9 @@ class ReciterCard extends StatelessWidget {
     return RepaintBoundary(
       child: Material(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {
             ReciterDetailsRoute(
               reciterId: reciter.id.toString(),
@@ -31,7 +30,7 @@ class ReciterCard extends StatelessWidget {
           },
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: theme.primaryColor.withValues(alpha: 0.03),
@@ -40,11 +39,11 @@ class ReciterCard extends StatelessWidget {
                 ),
               ],
             ),
-            padding: EdgeInsets.all(12.r),
+            padding: EdgeInsets.all(12),
             child: Row(
+              spacing: 12,
               children: [
                 _ReciterAvatar(reciter: reciter),
-                SizedBox(width: 14.w),
                 Expanded(child: _ReciterInfo(reciter: reciter)),
                 _FavoriteButton(reciter: reciter),
               ],
@@ -65,10 +64,10 @@ class _ReciterAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      width: 60.r,
-      height: 60.r,
+      width: 60,
+      height: 60,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: theme.primaryColor.withValues(alpha: 0.25),
@@ -91,7 +90,7 @@ class _ReciterAvatar extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 26.sp,
+            fontSize: 26,
             letterSpacing: 1.2,
           ),
         ),
@@ -115,21 +114,21 @@ class _ReciterInfo extends StatelessWidget {
         Text(
           reciter.name,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontSize: 16.sp,
+            fontSize: 16,
             letterSpacing: 0.3,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        SizedBox(height: 6.h),
+        SizedBox(height: 6),
         Row(
           children: [
             Flexible(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: theme.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -139,7 +138,7 @@ class _ReciterInfo extends StatelessWidget {
                       size: 12,
                       color: theme.primaryColor,
                     ),
-                    SizedBox(width: 4.w),
+                    SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         AppLocalizations.of(
@@ -148,7 +147,7 @@ class _ReciterInfo extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.primaryColor,
                           fontWeight: FontWeight.w600,
-                          fontSize: 11.sp,
+                          fontSize: 11,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -161,11 +160,11 @@ class _ReciterInfo extends StatelessWidget {
           ],
         ),
         if (reciter.moshaf.isNotEmpty) ...[
-          SizedBox(height: 6.h),
+          SizedBox(height: 6),
           Text(
             reciter.moshaf.first.name,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontSize: 11.sp,
+              fontSize: 11,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             maxLines: 1,
@@ -186,17 +185,26 @@ class _FavoriteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius: BorderRadius.circular(20),
       onTap: () {
         context.read<FavoritesCubit>().toggleFavorite(reciter);
       },
       child: Container(
-        padding: EdgeInsets.all(8.r),
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: theme.primaryColor.withValues(alpha: 0.05),
           shape: BoxShape.circle,
         ),
         child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          buildWhen: (previous, current) {
+            final bool wasFavorite =
+                previous is FavoritesLoaded &&
+                previous.favoriteIds.contains(reciter.id);
+            final bool isFavorite =
+                current is FavoritesLoaded &&
+                current.favoriteIds.contains(reciter.id);
+            return wasFavorite != isFavorite;
+          },
           builder: (context, state) {
             final bool isFavorite =
                 state is FavoritesLoaded &&
@@ -205,7 +213,7 @@ class _FavoriteButton extends StatelessWidget {
               isFavorite
                   ? Icons.favorite_rounded
                   : Icons.favorite_outline_rounded,
-              size: 22.sp,
+              size: 22,
               color: isFavorite
                   ? Colors.redAccent
                   : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),

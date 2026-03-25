@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
+import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -38,28 +38,95 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.prayerTimes),
+        toolbarHeight: 80,
+        titleSpacing: 20,
+        title: Text(
+          context.l10n.prayerTimes,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.only(right: 12),
         actions: [
           IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
+              foregroundColor: colorScheme.onPrimary,
+            ),
             icon: const Icon(Icons.explore_outlined),
             onPressed: () => context.push('/qibla'),
           ),
+          const SizedBox(width: 8),
           IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
+              foregroundColor: colorScheme.onPrimary,
+            ),
             icon: const Icon(Icons.settings),
             onPressed: () => _showSettingsDialog(context),
           ),
+          const SizedBox(width: 4),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: context.l10n.today),
-            Tab(text: context.l10n.monthly),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(72),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.surface.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: colorScheme.surface.withValues(alpha: 0.34),
+                ),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorPadding: const EdgeInsets.all(6),
+                indicator: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                labelColor: colorScheme.onSurface,
+                unselectedLabelColor: colorScheme.onPrimary.withValues(
+                  alpha: 0.82,
+                ),
+                labelStyle: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                splashBorderRadius: BorderRadius.circular(16),
+                tabs: [
+                  Tab(text: context.l10n.today),
+                  Tab(text: context.l10n.monthly),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+        buildWhen: (previous, current) {
+          return previous.status != current.status ||
+              previous.todayPrayerTimes != current.todayPrayerTimes ||
+              previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
+              previous.settings != current.settings ||
+              previous.latitude != current.latitude ||
+              previous.longitude != current.longitude ||
+              previous.locationName != current.locationName ||
+              previous.errorMessage != current.errorMessage ||
+              previous.isLoadingLocation != current.isLoadingLocation ||
+              previous.currentOrNextPrayer?.type !=
+                  current.currentOrNextPrayer?.type;
+        },
         builder: (context, state) {
           switch (state.status) {
             case PrayerTimesStatus.initial:
@@ -85,7 +152,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                           const PrayerTimesEvent.loadPrayerTimes(),
                         );
                       },
-                      child: const Text('Retry'),
+                      child: Text(context.l10n.retry),
                     ),
                   ],
                 ),
@@ -182,42 +249,32 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           const PrayerTimesEvent.loadPrayerTimes(),
         );
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(vertical: 8.h).copyWith(bottom: 120.h),
-        child: Column(
-          children: [
-            // Location header
-            PrayerTimesLocationHeader(
-              locationName: state.locationName,
-              onUpdateLocation: () {
-                context.read<PrayerTimesBloc>().add(
-                  const PrayerTimesEvent.updateLocation(),
-                );
-              },
-              isLoading: state.isLoadingLocation,
-            ),
-
-            // Next prayer countdown
-            if (state.currentOrNextPrayer != null &&
-                state.timeUntilNextPrayer != null)
-              NextPrayerCountdownCard(
-                nextPrayer: state.currentOrNextPrayer!,
-                timeUntil: state.timeUntilNextPrayer!,
-                use24HourFormat: state.settings.use24HourFormat,
-              ),
-
-            // Prayer times grid
-            PrayerTimesGrid(
-              prayerTimes: state.todayPrayerTimes!,
-              currentPrayer: state.currentOrNextPrayer,
-              use24HourFormat: state.settings.use24HourFormat,
-            ),
-
-            // Fasting hours summary
-            FastingHoursStrip(prayerTimes: state.todayPrayerTimes!),
-          ],
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
+        padding: EdgeInsets.only(
+          top: 12,
+          bottom: 24 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        children: [
+          PrayerTimesLocationHeader(
+            locationName: state.locationName,
+            onUpdateLocation: () {
+              context.read<PrayerTimesBloc>().add(
+                const PrayerTimesEvent.updateLocation(),
+              );
+            },
+            isLoading: state.isLoadingLocation,
+          ),
+          const _CountdownCardSection(),
+          const _TodaySectionHeader(),
+          PrayerTimesGrid(
+            prayerTimes: state.todayPrayerTimes!,
+            currentPrayer: state.currentOrNextPrayer,
+            use24HourFormat: state.settings.use24HourFormat,
+          ),
+        ],
       ),
     );
   }
@@ -244,6 +301,94 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       isScrollControlled: true,
       builder: (modalContext) =>
           BlocProvider.value(value: bloc, child: const PrayerSettingsSheet()),
+    );
+  }
+}
+
+class _CountdownCardSection extends StatelessWidget {
+  const _CountdownCardSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      PrayerTimesBloc,
+      PrayerTimesState,
+      ({
+        PrayerTimeItem? nextPrayer,
+        Duration? timeUntilNextPrayer,
+        bool use24HourFormat,
+      })
+    >(
+      selector: (state) => (
+        nextPrayer: state.currentOrNextPrayer,
+        timeUntilNextPrayer: state.timeUntilNextPrayer,
+        use24HourFormat: state.settings.use24HourFormat,
+      ),
+      builder: (context, countdown) {
+        final PrayerTimeItem? nextPrayer = countdown.nextPrayer;
+        final Duration? timeUntilNextPrayer = countdown.timeUntilNextPrayer;
+
+        if (nextPrayer == null || timeUntilNextPrayer == null) {
+          return const SizedBox.shrink();
+        }
+
+        return NextPrayerCountdownCard(
+          nextPrayer: nextPrayer,
+          timeUntil: timeUntilNextPrayer,
+          use24HourFormat: countdown.use24HourFormat,
+        );
+      },
+    );
+  }
+}
+
+class _TodaySectionHeader extends StatelessWidget {
+  const _TodaySectionHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.schedule_rounded,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.prayerTimesTodaySchedule,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.prayerTimesTodayScheduleSubtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

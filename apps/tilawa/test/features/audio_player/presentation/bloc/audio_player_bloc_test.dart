@@ -164,6 +164,9 @@ void main() {
     // Setup default SettingsCubit state
     when(mockSettingsCubit.state).thenReturn(const SettingsState());
     when(mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      mockSettingsCubit.isSleepTimerEnabledStream,
+    ).thenAnswer((_) => const Stream<bool>.empty());
 
     // Default mock return for AddOrUpdateHistory
     when(

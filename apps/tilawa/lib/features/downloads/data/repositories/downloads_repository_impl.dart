@@ -7,6 +7,7 @@ import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
@@ -75,6 +76,7 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<void> dispose() async {
     await _progressSubscription?.cancel();
     _progressSubscription = null;
+    await _downloadUpdatesController.close();
   }
 
   @override
@@ -435,9 +437,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
       // Notify batch manager
       final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}';
+      final AppLocalizations l10n = lookupAppLocalizations(queueManager.locale);
       batchDownloadManager.startBatch(
         batchId: batchId,
-        title: 'Downloading ${queueItems.length} files',
+        title: l10n.notificationBatchDownloadingTitle(queueItems.length),
         downloadIds: queueItems.map((e) => e.id).toList(),
         reciterName: reciterName,
       );
@@ -750,7 +753,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     }
   }
 
-  @override
   MediaItem createMediaItemFromDownload(DownloadItem download) {
     // Convert file path to proper file:// URI
     final fileUri = Uri.file(download.filePath).toString();
@@ -773,7 +775,6 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     return validator.verifyFileExists(download.filePath);
   }
 
-  @override
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads) {
     return downloads.map(createMediaItemFromDownload).toList();
   }

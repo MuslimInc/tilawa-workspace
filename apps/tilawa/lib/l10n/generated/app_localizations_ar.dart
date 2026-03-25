@@ -479,6 +479,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationDownloadFailed => 'فشل التحميل';
 
   @override
+  String notificationBatchDownloadingTitle(int count) {
+    return 'جاري تحميل $count ملفات';
+  }
+
+  @override
+  String notificationBatchProgress(int completed, int total, int progress) {
+    return 'التقدم: $completed/$total ($progress%)';
+  }
+
+  @override
+  String notificationBatchComplete(int count) {
+    return 'تم تحميل جميع الملفات بنجاح ($count ملفات)';
+  }
+
+  @override
+  String get notificationBatchFailed => 'فشل تحميل الملفات';
+
+  @override
   String get resume => 'استئناف';
 
   @override
@@ -810,6 +828,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذا المحتوى غير متاح بدون اتصال. يرجى تنزيله أولاً.';
 
   @override
+  String get offlineFileMissingError =>
+      'ملف التنزيل مفقود. يرجى إعادة تنزيل هذا المحتوى.';
+
+  @override
+  String get offlineDownloadIncompleteError =>
+      'لم يكتمل تنزيل هذا المحتوى. يرجى إكمال التنزيل أولاً.';
+
+  @override
   String get bookmarks => 'العلامات المرجعية';
 
   @override
@@ -913,13 +939,59 @@ class AppLocalizationsAr extends AppLocalizations {
   String get isha => 'العشاء';
 
   @override
+  String get midnight => 'منتصف الليل';
+
+  @override
+  String get lastThird => 'الثلث الأخير';
+
+  @override
   String get nextPrayer => 'الصلاة القادمة';
 
   @override
   String get calculationMethod => 'طريقة الحساب';
 
   @override
+  String get calculationMethodMuslimWorldLeague => 'رابطة العالم الإسلامي';
+
+  @override
+  String get calculationMethodEgyptian => 'الهيئة المصرية العامة للمساحة';
+
+  @override
+  String get calculationMethodKarachi => 'جامعة العلوم الإسلامية بكراتشي';
+
+  @override
+  String get calculationMethodUmmAlQura => 'جامعة أم القرى، مكة المكرمة';
+
+  @override
+  String get calculationMethodIsna =>
+      ' الجمعية الإسلامية لأمريكا الشمالية (ISNA)';
+
+  @override
+  String get calculationMethodTehran => 'معهد الجيوفيزياء بجامعة طهران';
+
+  @override
+  String get calculationMethodGulf => 'منطقة الخليج العربي';
+
+  @override
+  String get calculationMethodKuwait => 'دولة الكويت';
+
+  @override
+  String get calculationMethodQatar => 'دولة قطر';
+
+  @override
+  String get calculationMethodSingapore => 'سنغافورة (MUIS)';
+
+  @override
+  String get calculationMethodTurkey => 'رئاسة الشؤون الدينية التركية';
+
+  @override
   String get asrCalculation => 'حساب العصر';
+
+  @override
+  String get asrCalculationShafii => 'شافعي، مالكي، حنبلي';
+
+  @override
+  String get asrCalculationHanafi => 'حنفي';
 
   @override
   String get displayOptions => 'خيارات العرض';
@@ -947,10 +1019,56 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currentLocation => 'الموقع الحالي';
 
   @override
+  String get prayerTimesTodaySchedule => 'جدول اليوم';
+
+  @override
+  String get prayerTimesTodayScheduleSubtitle =>
+      'الأوقات الأساسية والمؤشرات الليلية';
+
+  @override
+  String get prayerTimesRefreshingLocation => 'جارٍ تحديث الموقع...';
+
+  @override
+  String get prayerTimesTapToRefreshLocation => 'اضغط لتحديث الموقع';
+
+  @override
+  String prayerTimesTimeRemainingUntil(String prayerName) {
+    return 'الوقت المتبقي حتى صلاة $prayerName';
+  }
+
+  @override
+  String get prayerTimesScheduled => 'الموعد';
+
+  @override
+  String get prayerTimesUpcoming => 'قادمة';
+
+  @override
+  String get prayerTimesPassed => 'انتهت';
+
+  @override
+  String prayerTimesIqamahAt(String time) {
+    return 'الإقامة: $time';
+  }
+
+  @override
+  String prayerTimesIshraqAt(String time) {
+    return 'الإشراق: $time';
+  }
+
+  @override
+  String get prayerTimesNightMidpointMarker => 'علامة منتصف الليل';
+
+  @override
+  String get prayerTimesLastThirdBegins => 'بداية الثلث الأخير';
+
+  @override
   String get hours => 'ساعات';
 
   @override
   String get minutes => 'دقائق';
+
+  @override
+  String get minutesShort => 'دقيقة';
 
   @override
   String get seconds => 'ثواني';

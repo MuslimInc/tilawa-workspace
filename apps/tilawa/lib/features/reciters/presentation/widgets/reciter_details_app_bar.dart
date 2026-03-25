@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 /// Compact app bar showing the reciter name with a gradient
@@ -12,11 +11,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Color appBarForegroundColor = theme.colorScheme.onPrimary;
 
     return SliverAppBar(
       pinned: true,
       backgroundColor: theme.primaryColor,
-      leading: const BackButton(color: Colors.white),
+      foregroundColor: appBarForegroundColor,
+      leading: BackButton(color: appBarForegroundColor),
       centerTitle: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -31,14 +32,14 @@ class ReciterDetailsAppBar extends StatelessWidget {
             children: [
               // Subtle decorative circles
               Positioned(
-                left: -30.w,
-                top: -20.h,
-                child: _DecorativeCircle(size: 80.w, opacity: 0.06),
+                left: -30,
+                top: -20,
+                child: _DecorativeCircle(size: 80, opacity: 0.06),
               ),
               Positioned(
-                right: -15.w,
-                bottom: -10.h,
-                child: _DecorativeCircle(size: 60.w, opacity: 0.04),
+                right: -15,
+                bottom: -10,
+                child: _DecorativeCircle(size: 60, opacity: 0.04),
               ),
             ],
           ),
@@ -49,25 +50,25 @@ class ReciterDetailsAppBar extends StatelessWidget {
         children: [
           // Small inline avatar
           CircleAvatar(
-            radius: 16.r,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            radius: 16,
+            backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
             child: Text(
               reciter.name[0],
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.sp,
+                color: appBarForegroundColor,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 10),
           Flexible(
             child: Text(
               reciter.name,
               style: TextStyle(
-                color: Colors.white,
+                color: appBarForegroundColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 18.sp,
+                fontSize: 18,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -91,7 +92,9 @@ class _DecorativeCircle extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: opacity),
+        color: Theme.of(
+          context,
+        ).colorScheme.onPrimary.withValues(alpha: opacity),
       ),
     );
   }

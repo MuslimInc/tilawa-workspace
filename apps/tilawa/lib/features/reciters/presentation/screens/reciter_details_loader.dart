@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa_core/di/injection.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
@@ -30,10 +29,10 @@ class ReciterDetailsLoader extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
-                    SizedBox(height: 16.h),
+                    Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    SizedBox(height: 16),
                     Text(state.message),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
                         context.read<ReciterDetailsLoaderCubit>().loadReciter(

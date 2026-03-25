@@ -1,0 +1,105 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-xl font-semibold leading-6 text-gray-900 dark:text-white">Users Management</h1>
+      <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">A list of all the users fetched live from Firebase Firestore.</p>
+    </div>
+    
+    <!-- Bulk Actions Bar -->
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none space-x-3">
+      <button type="button" 
+        (click)="openNotificationModal('selected')"
+        [disabled]="selectedUserIds.size === 0"
+        class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+        Notify Selected ({{ selectedUserIds.size }})
+      </button>
+      <button type="button" 
+        (click)="openNotificationModal('all')"
+        class="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+        Notify All Users
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg dark:ring-white/10">
+          
+          <!-- Use *ngIf inside an ng-auto to unwrap users$ stream just once for the table scope if needed, or stick to @for -->
+          @if (users$ | async; as usersList) {
+            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th scope="col" class="relative px-7 sm:w-12 sm:px-6">
+                    <input type="checkbox" 
+                      [checked]="isAllSelected(usersList.length)"
+                      (change)="toggleSelectAll(usersList)"
+                      class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700">
+                  </th>
+                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-0">ID</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Name</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Email</th>
+                  <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white dark:bg-gray-900 dark:divide-gray-800">
+                @for (user of usersList; track user.id) {
+                <tr [class.bg-blue-50]="selectedUserIds.has(user.id)" [class.dark:bg-blue-900]="selectedUserIds.has(user.id)">
+                  <td class="relative px-7 sm:w-12 sm:px-6">
+                    @if (selectedUserIds.has(user.id)) {
+                      <div class="absolute inset-y-0 left-0 w-0.5 bg-blue-600"></div>
+                    }
+                    <input type="checkbox" 
+                      [checked]="selectedUserIds.has(user.id)"
+                      (change)="toggleSelection(user.id)"
+                      class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700">
+                  </td>
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-0">{{ user.id }}</td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-white">
+                    <div class="flex items-center">
+                      <div class="h-10 w-10 flex-shrink-0">
+                        @if (user.photoUrl) {
+                          <img class="h-10 w-10 rounded-full" [src]="user.photoUrl" alt="" />
+                        } @else {
+                          <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ (user.displayName || user.name || 'U').charAt(0).toUpperCase() }}</span>
+                          </div>
+                        }
+                      </div>
+                      <div class="ml-4">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ user.displayName || user.name || 'N/A' }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{ user.email || 'N/A' }}</td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <button type="button" (click)="openNotificationModal('single', user.id)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                      Notify<span class="sr-only">, {{ user.displayName || user.name }}</span>
+                    </button>
+                  </td>
+                </tr>
+                } @empty {
+                <tr>
+                   <td colspan="5" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-center text-gray-500 dark:text-gray-400">No users found in database.</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="p-8 text-center text-gray-500 dark:text-gray-400">Loading users...</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-notification-modal
+  [isOpen]="isModalOpen"
+  [targetSummary]="notificationTargetSummary"
+  (send)="onSendNotification($event)"
+  (close)="isModalOpen = false">
+</app-notification-modal>

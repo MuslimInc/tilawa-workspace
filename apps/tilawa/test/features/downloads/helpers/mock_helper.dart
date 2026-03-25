@@ -7,6 +7,7 @@ import 'package:tilawa/features/downloads/data/datasources/downloads_local_datas
 import 'package:tilawa/features/downloads/data/services/batch_download_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_path_resolver.dart';
+import 'package:tilawa/features/downloads/domain/services/download_notification_navigator.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
 import 'package:tilawa/features/downloads/data/services/download_status_synchronizer.dart';
@@ -94,6 +95,7 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
     ResumeDownloadUseCase,
     SharedPreferencesAsync,
     INotificationDispatcher,
+    DownloadNotificationNavigator,
   ],
   customMocks: [MockSpec<Dio>(as: #MockDio)],
 )

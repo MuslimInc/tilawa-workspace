@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
 
@@ -124,7 +123,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     _buildContent(context, state),
 
                     // Bottom padding for the player
-                    SliverToBoxAdapter(child: SizedBox(height: 120.h)),
+                    SliverToBoxAdapter(child: SizedBox(height: 120)),
                   ],
                 ),
               );

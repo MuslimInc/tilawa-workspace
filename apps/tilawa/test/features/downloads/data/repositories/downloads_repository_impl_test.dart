@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:dio/dio.dart';
@@ -787,6 +788,7 @@ void main() {
 
           when(mockQueueManager.isQueued(any)).thenReturn(false);
           when(mockQueueManager.isActive(any)).thenReturn(false);
+          when(mockQueueManager.locale).thenReturn(const Locale('ar'));
           when(
             mockQueueManager.enqueueBatch(any),
           ).thenThrow(MissingPluginException());

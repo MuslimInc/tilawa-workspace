@@ -1,44 +1,47 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
-import 'package:tilawa/features/auth/data/auth_service.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
 
 import 'fcm_service_test.mocks.dart';
 
-@GenerateMocks([AuthService, SyncDeviceTokenUseCase, DeviceTokenService, User])
+@GenerateMocks([AuthRepository, SyncDeviceTokenUseCase, DeviceTokenService])
 void main() {
   late FCMService service;
-  late MockAuthService mockAuthService;
+  late MockAuthRepository mockAuthRepository;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockDeviceTokenService mockDeviceTokenService;
-  late MockUser mockUser;
+
+  final testUser = UserEntity(
+    id: 'user123',
+    email: 'test@test.com',
+    displayName: 'Test User',
+    createdAt: DateTime(2024),
+  );
 
   setUp(() {
-    mockAuthService = MockAuthService();
+    mockAuthRepository = MockAuthRepository();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockDeviceTokenService = MockDeviceTokenService();
-    mockUser = MockUser();
-
-    when(mockUser.uid).thenReturn('user123');
 
     // Default stubs
     when(
-      mockAuthService.authStateChanges,
+      mockAuthRepository.authStateChanges,
     ).thenAnswer((_) => const Stream.empty());
     when(
       mockDeviceTokenService.onTokenRefresh,
     ).thenAnswer((_) => const Stream.empty());
-    when(mockAuthService.currentUser).thenReturn(null);
+    when(mockAuthRepository.currentUser).thenReturn(null);
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer((_) async {});
 
     service = FCMService(
-      mockAuthService,
+      mockAuthRepository,
       mockSyncDeviceTokenUseCase,
       mockDeviceTokenService,
     );
@@ -47,16 +50,16 @@ void main() {
   group('initialize', () {
     test('should sync token when auth state changes to logged in', () async {
       // Arrange
-      final userController = StreamController<User?>();
+      final userController = StreamController<UserEntity?>();
       when(
-        mockAuthService.authStateChanges,
+        mockAuthRepository.authStateChanges,
       ).thenAnswer((_) => userController.stream);
 
       service.initialize();
 
       // Act
-      userController.add(mockUser);
-      await Future.delayed(Duration.zero); // Wait for stream listener
+      userController.add(testUser);
+      await Future.delayed(Duration.zero);
 
       // Assert
       verify(mockSyncDeviceTokenUseCase('user123')).called(1);
@@ -72,7 +75,7 @@ void main() {
         when(
           mockDeviceTokenService.onTokenRefresh,
         ).thenAnswer((_) => tokenController.stream);
-        when(mockAuthService.currentUser).thenReturn(mockUser);
+        when(mockAuthRepository.currentUser).thenReturn(testUser);
 
         service.initialize();
 
@@ -80,8 +83,9 @@ void main() {
         tokenController.add('new_token');
         await Future.delayed(Duration.zero);
 
-        // Assert
-        verify(mockSyncDeviceTokenUseCase('user123')).called(1);
+        // Assert: called twice — once during initialize() for current user,
+        // once for the token refresh
+        verify(mockSyncDeviceTokenUseCase('user123')).called(2);
 
         await tokenController.close();
       },
@@ -95,7 +99,7 @@ void main() {
         when(
           mockDeviceTokenService.onTokenRefresh,
         ).thenAnswer((_) => tokenController.stream);
-        when(mockAuthService.currentUser).thenReturn(null);
+        when(mockAuthRepository.currentUser).thenReturn(null);
 
         service.initialize();
 

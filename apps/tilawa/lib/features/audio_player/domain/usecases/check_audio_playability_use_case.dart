@@ -52,7 +52,8 @@ class CheckAudioPlayabilityUseCase {
       if (downloadItem == null) {
         return const Left(
           OfflinePlaybackFailure(
-            'This content is not available offline. Please download it first.',
+            'Not available offline',
+            OfflinePlaybackReason.notDownloaded,
           ),
         );
       }
@@ -68,7 +69,8 @@ class CheckAudioPlayabilityUseCase {
         } else {
           return const Left(
             OfflinePlaybackFailure(
-              'Downloaded file is missing. Please re-download this content.',
+              'File missing',
+              OfflinePlaybackReason.fileMissing,
             ),
           );
         }
@@ -77,7 +79,8 @@ class CheckAudioPlayabilityUseCase {
       // Download exists but not completed (pending, downloading, failed, etc.)
       return const Left(
         OfflinePlaybackFailure(
-          'This content is not fully downloaded. Please complete the download first.',
+          'Download incomplete',
+          OfflinePlaybackReason.downloadIncomplete,
         ),
       );
     } catch (e) {

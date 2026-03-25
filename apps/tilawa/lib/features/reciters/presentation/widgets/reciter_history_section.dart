@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 
@@ -28,34 +27,30 @@ class ReciterHistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Icon(
-                Icons.history_rounded,
-                size: 16.sp,
-                color: theme.primaryColor,
-              ),
-              SizedBox(width: 6.w),
+              Icon(Icons.history_rounded, size: 16, color: theme.primaryColor),
+              SizedBox(width: 6),
               Text(
                 context.l10n.continueListening,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 13.sp,
+                  fontSize: 13,
                   color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 8),
         SizedBox(
-          height: 40.h,
+          height: 40,
           child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             itemCount: displayList.length,
-            separatorBuilder: (_, _) => SizedBox(width: 8.w),
+            separatorBuilder: (_, _) => SizedBox(width: 8),
             itemBuilder: (context, index) {
               final history = displayList[index];
               return _HistoryChip(
@@ -94,12 +89,12 @@ class _HistoryChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: isComplete
               ? theme.primaryColor.withValues(alpha: 0.08)
               : theme.cardColor,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isComplete
                 ? theme.primaryColor.withValues(alpha: 0.3)
@@ -114,25 +109,25 @@ class _HistoryChip extends StatelessWidget {
                   ? Icons.check_circle_rounded
                   : Icons.play_circle_fill_rounded,
               color: theme.primaryColor,
-              size: 18.sp,
+              size: 18,
             ),
-            SizedBox(width: 6.w),
+            SizedBox(width: 6),
             Text(
               displayName,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                fontSize: 12.sp,
+                fontSize: 12,
                 color: isComplete
                     ? theme.primaryColor
                     : theme.textTheme.bodyLarge?.color,
               ),
             ),
             if (!isComplete && percent >= 5) ...[
-              SizedBox(width: 6.w),
+              SizedBox(width: 6),
               Text(
                 '$percent%',
                 style: TextStyle(
-                  fontSize: 10.sp,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: theme.primaryColor.withValues(alpha: 0.7),
                 ),

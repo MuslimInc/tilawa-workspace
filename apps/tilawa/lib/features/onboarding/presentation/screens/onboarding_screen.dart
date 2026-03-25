@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:gap/gap.dart';
 
 import 'package:tilawa_core/di/injection.dart';
@@ -82,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       },
                     ),
                   ),
-                  Gap(20.h),
+                  Gap(20),
                   // Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -90,22 +89,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       pages.length,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        height: 6.h,
-                        width: _currentPage == index ? 24.w : 8.w,
+                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        height: 6,
+                        width: _currentPage == index ? 24 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? context.colorScheme.primary
                               : context.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(4.r),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
                   ),
-                  Gap(30.h),
+                  Gap(30),
                   // Button
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    padding: EdgeInsets.symmetric(horizontal: 24),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -130,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.only(
-                                left: 16.w,
+                                left: 16,
                               ), // Add padding if back button is hidden? No, if hidden it's shrunk.
                               // Actually if back button is explicitly visible, we want Start button to take remaining space or be on right.
                               // Design shows "Next" or "Start"
@@ -141,9 +140,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       .completeOnboarding();
                                 },
                                 style: FilledButton.styleFrom(
-                                  minimumSize: Size.fromHeight(50.h),
+                                  minimumSize: Size.fromHeight(50),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12.r),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                                 child: Text(context.l10n.startJourney),
@@ -159,9 +158,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               );
                             },
                             style: FilledButton.styleFrom(
-                              minimumSize: Size(100.w, 48.h),
+                              minimumSize: Size(100, 48),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: Text(context.l10n.next),
@@ -169,7 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ],
                     ),
                   ),
-                  Gap(40.h),
+                  Gap(40),
                 ],
               ),
             ),

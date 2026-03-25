@@ -13,7 +13,9 @@ class DeviceTokenServiceImpl implements DeviceTokenService {
   final FirebaseMessaging _firebaseMessaging;
 
   @override
-  Future<String?> getToken() => _firebaseMessaging.getToken();
+  Future<String?> getToken() async {
+    return _firebaseMessaging.getToken();
+  }
 
   @override
   Stream<String> get onTokenRefresh => _firebaseMessaging.onTokenRefresh;

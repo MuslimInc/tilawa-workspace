@@ -4,9 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
-import '../quran.dart';
 import 'layout/quran_layout_strategy.dart';
 
 class PageContent extends StatefulWidget {
@@ -88,6 +86,7 @@ class _PageContentState extends State<PageContent>
   /// subsequent frames during swipe animation composite a cached bitmap
   /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
   final SnapshotController _snapshotController = SnapshotController();
+  Orientation? _lastOrientation;
 
   @override
   bool get wantKeepAlive => true;
@@ -99,6 +98,34 @@ class _PageContentState extends State<PageContent>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool didOrientationChange =
+        _lastOrientation != null && _lastOrientation != orientation;
+
+    if (didOrientationChange || orientation == Orientation.landscape) {
+      _snapshotController.allowSnapshotting = false;
+      _snapshotController.clear();
+    }
+
+    if (orientation == Orientation.portrait &&
+        !_snapshotController.allowSnapshotting) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        if (MediaQuery.orientationOf(context) == Orientation.portrait) {
+          _snapshotController.allowSnapshotting = true;
+        }
+      });
+    }
+
+    _lastOrientation = orientation;
+  }
+
+  @override
   void dispose() {
     _snapshotController.dispose();
     super.dispose();
@@ -106,13 +133,17 @@ class _PageContentState extends State<PageContent>
 
   Future<void> _initQuranData() async {
     if (_qpcV4Data != null && _processedPageIndex != null) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       return;
     }
 
     if (_loadCompleter != null) {
       await _loadCompleter!.future;
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       return;
     }
 
@@ -195,7 +226,9 @@ class _PageContentState extends State<PageContent>
       return [];
     }
     final List<Map<String, dynamic>> lineWords = lines[lineIndex];
-    if (lineWords.isEmpty) return [];
+    if (lineWords.isEmpty) {
+      return [];
+    }
 
     final hasVerseColorCallback = widget.verseBackgroundColor != null;
 
@@ -233,215 +266,170 @@ class _PageContentState extends State<PageContent>
       return const Center(child: CircularProgressIndicator());
     }
 
-    final List<Map<String, int>> ranges = QuranServiceLocator.quranDataService
-        .getPageData(widget.pageNumber);
-    final Map<String, int> firstVerse = ranges.first;
-    final int surahNumber = firstVerse['surah']!;
-    final int juzNumber = QuranServiceLocator.quranDataService.getJuzNumber(
-      surahNumber,
-      firstVerse['start']!,
-    );
-    final int? quarterNumber = widget.pageNumber == 1 || widget.pageNumber == 2
-        ? null
-        : QuranServiceLocator.quranDataService.getQuarterNumber(
-            surahNumber,
-            firstVerse['start']!,
-          );
-
-    final String displaySurahName =
-        widget.surahNameBuilder?.call(surahNumber) ??
-        QuranServiceLocator.surahService
-            .getName(surahNumber)
-            .replaceAll('Al ', 'Al-');
-
-    final header = _PageHeader(
-      surahName: displaySurahName,
-      juzNumber: juzNumber,
-      juzLabel: widget.juzLabel ?? 'Juz',
-      textColor: widget.textColor,
-    );
-
-    final footer = _PageFooter(
-      quarterNumber: quarterNumber,
-      pageNumber: widget.pageNumber,
-      hizbLabel: widget.hizbLabel ?? 'Hizb',
-      textColor: widget.textColor,
-      onSurahSelected: widget.onSurahSelected,
-      onShowIndex: widget.onShowIndex,
-    );
-
     // Fetch line data once — does not depend on layout constraints.
     final List<List<Map<String, dynamic>>> pageLines = _getWordsGroupedByLine(
       widget.pageNumber,
     );
     final int firstLineIdx = _firstContentLineIndexFromLines(pageLines);
-    // Enable raster caching after the first frame so swipe animation
-    // composites a cached bitmap instead of re-rasterizing.
-    if (!_snapshotController.allowSnapshotting) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _snapshotController.allowSnapshotting = true;
+
+    final pageBody = LayoutBuilder(
+      builder: (context, constraints) {
+        final QuranLayoutMetrics metrics = _layoutStrategy.calculateMetrics(
+          context,
+          constraints,
+        );
+        final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+
+        // Pages 1-2 use the same 15-line grid height as all
+        // other pages in portrait. In landscape we render only
+        // the visible lines and let the page scroll naturally.
+        final bool isSpecialPage =
+            widget.pageNumber == 1 || widget.pageNumber == 2;
+        final double lineHeight = metrics.fontSize * metrics.fontHeight;
+
+        // Build one shared TextStyle for the entire page — all words
+        // share font, size, color, height. Only verse background
+        // color (rare) needs a per-word override via copyWith.
+        final baseStyle = TextStyle(
+          fontFamily: pageFont,
+          fontSize: metrics.fontSize,
+          color: widget.textColor,
+          height: metrics.fontHeight,
+        );
+
+        // Thin-space style for first content line separator.
+        final spaceStyle = TextStyle(
+          fontFamily: pageFont,
+          fontSize: metrics.fontSize,
+          height: metrics.fontHeight,
+        );
+
+        final List<int> lineIndices = metrics.isScrollable
+            ? List<int>.generate(15, (index) => index)
+                  .where(
+                    (lineIndex) =>
+                        pageLines[lineIndex].isNotEmpty ||
+                        _isSurahHeader(widget.pageNumber, lineIndex + 1) ||
+                        _isBismillah(widget.pageNumber, lineIndex + 1),
+                  )
+                  .toList()
+            : List<int>.generate(15, (index) => index);
+
+        final List<Widget> lineWidgets = lineIndices.map((lineIndex) {
+          final bool isHeader = _isSurahHeader(
+            widget.pageNumber,
+            lineIndex + 1,
+          );
+          final bool isBismillah = _isBismillah(
+            widget.pageNumber,
+            lineIndex + 1,
+          );
+
+          if (isHeader) {
+            final int surahNum = _getSurahAtLine(
+              widget.pageNumber,
+              lineIndex + 1,
+            );
+            return _SurahHeaderBanner(
+              surahNumber: surahNum,
+              lineHeight: lineHeight,
+            );
+          }
+
+          if (isBismillah) {
+            const bismillahText = '齃𧻓𥳐龎';
+            const bismillahFont = 'QCF_BSML';
+            final double bismillahFontSize = metrics.fontSize * 0.75;
+
+            return SizedBox(
+              width: double.infinity,
+              height: lineHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    bismillahText,
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: bismillahFont,
+                      package: 'quran',
+                      fontSize: bismillahFontSize,
+                      color: widget.textColor,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final List<InlineSpan> spans = _getSpansForLine(
+            pageLines,
+            lineIndex,
+            baseStyle,
+          );
+
+          // Insert a thin space after the first word on the first content line
+          final isFirstContentLine = lineIndex == firstLineIdx;
+          if (isFirstContentLine && spans.length > 1) {
+            spans.insert(1, TextSpan(text: '\u200A', style: spaceStyle));
+          }
+
+          if (spans.isEmpty) {
+            return const SizedBox();
+          }
+
+          final richText = RichText(
+            textDirection: TextDirection.rtl,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            maxLines: 1,
+            textHeightBehavior: const TextHeightBehavior(
+              applyHeightToFirstAscent: false,
+              applyHeightToLastDescent: false,
+            ),
+            text: TextSpan(children: spans),
+          );
+
+          // Keep the QCF glyphs at their natural proportions and
+          // prevent Flutter from wrapping a single Mushaf line into a
+          // second visual line.
+
+          return SizedBox(
+            width: double.infinity,
+            height: lineHeight,
+            child: Center(child: richText),
+          );
+        }).toList();
+
+        final lines = Column(
+          mainAxisAlignment: metrics.isScrollable
+              ? MainAxisAlignment.start
+              : isSpecialPage
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
+          children: lineWidgets,
+        );
+
+        final content = Padding(padding: metrics.padding, child: lines);
+
+        if (metrics.isScrollable) {
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: content,
+          );
         }
-      });
-    }
+
+        return content;
+      },
+    );
 
     final Widget result = SnapshotWidget(
+      key: ValueKey<Orientation>(_lastOrientation ?? Orientation.portrait),
+      autoresize: true,
       controller: _snapshotController,
-      child: SafeArea(
-        bottom: false, // Allow it to extend to the very bottom
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: header,
-            ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final QuranLayoutMetrics metrics = _layoutStrategy
-                      .calculateMetrics(context, constraints);
-                  final pageFont =
-                      'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
-
-                  final isLandscape =
-                      MediaQuery.orientationOf(context) ==
-                      Orientation.landscape;
-
-                  // Pages 1-2 use the same 15-line grid height as all
-                  // other pages. With BoxFit.contain the text stays compact
-                  // and the column centers vertically in available space.
-                  final bool isSpecialPage =
-                      widget.pageNumber == 1 || widget.pageNumber == 2;
-                  final double lineHeight =
-                      metrics.fontSize * metrics.fontHeight;
-
-                  // Build one shared TextStyle for the entire page — all words
-                  // share font, size, color, height. Only verse background
-                  // color (rare) needs a per-word override via copyWith.
-                  final baseStyle = TextStyle(
-                    fontFamily: pageFont,
-                    fontSize: metrics.fontSize,
-                    color: widget.textColor,
-                    height: metrics.fontHeight,
-                  );
-
-                  // Thin-space style for first content line separator.
-                  final spaceStyle = TextStyle(
-                    fontFamily: pageFont,
-                    fontSize: metrics.fontSize,
-                    height: metrics.fontHeight,
-                  );
-
-                  // No special short-surah detection needed — QCF fonts
-                  // are designed to fill width on all pages (BoxFit.fill).
-                  // Only pages 1-2 use contain since they have fewer than
-                  // 15 content lines.
-
-                  final List<Widget> lineWidgets = List.generate(15, (
-                    lineIndex,
-                  ) {
-                    final bool isHeader = _isSurahHeader(
-                      widget.pageNumber,
-                      lineIndex + 1,
-                    );
-                    final bool isBismillah = _isBismillah(
-                      widget.pageNumber,
-                      lineIndex + 1,
-                    );
-
-                    if (isHeader) {
-                      final int surahNum = _getSurahAtLine(
-                        widget.pageNumber,
-                        lineIndex + 1,
-                      );
-                      return _SurahHeaderBanner(
-                        surahNumber: surahNum,
-                        lineHeight: lineHeight,
-                      );
-                    }
-
-                    if (isBismillah) {
-                      return SizedBox(
-                        width: double.infinity,
-                        height: lineHeight,
-                        child: Center(
-                          child: Text(
-                            _getVerseQCF(1, 1, spaceChar: '\u200A'),
-                            style: TextStyle(
-                              fontFamily: 'QCF_P001',
-                              // fontSize: metrics.fontSize * 1.1,
-                              color: widget.textColor,
-                              height: 1.0,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    final List<InlineSpan> spans = _getSpansForLine(
-                      pageLines,
-                      lineIndex,
-                      baseStyle,
-                    );
-
-                    // Insert a thin space after the first word on the first content line
-                    final isFirstContentLine = lineIndex == firstLineIdx;
-                    if (isFirstContentLine && spans.length > 1) {
-                      spans.insert(
-                        1,
-                        TextSpan(text: '\u200A', style: spaceStyle),
-                      );
-                    }
-
-                    if (spans.isEmpty) return const SizedBox();
-
-                    final richText = RichText(
-                      textDirection: TextDirection.rtl,
-                      textHeightBehavior: const TextHeightBehavior(
-                        applyHeightToFirstAscent: false,
-                        applyHeightToLastDescent: false,
-                      ),
-                      text: TextSpan(children: spans),
-                    );
-
-                    // Pages 1-2: contain to keep text compact.
-                    // All other pages: fill for edge-to-edge Mushaf layout
-                    // (QCF fonts are designed to fill width).
-                    final BoxFit lineFit = isSpecialPage
-                        ? BoxFit.contain
-                        : BoxFit.fill;
-
-                    return Container(
-                      width: double.infinity,
-                      height: lineHeight,
-                      padding: EdgeInsets.symmetric(horizontal: 10.w),
-                      child: FittedBox(fit: lineFit, child: richText),
-                    );
-                  });
-
-                  // Pages 1-2 have few content lines — center
-                  // them vertically instead of top-aligning.
-                  final lines = Column(
-                    mainAxisAlignment: isSpecialPage
-                        ? MainAxisAlignment.center
-                        : MainAxisAlignment.start,
-                    children: lineWidgets,
-                  );
-
-                  if (isLandscape) {
-                    return SingleChildScrollView(child: lines);
-                  }
-                  return lines;
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: footer,
-            ),
-          ],
-        ),
-      ),
+      child: SafeArea(bottom: false, child: pageBody),
     );
     return result;
   }
@@ -450,7 +438,9 @@ class _PageContentState extends State<PageContent>
   /// from pre-fetched [lines]. Avoids a redundant `_getWordsGroupedByLine` call.
   int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
     for (var i = 0; i < lines.length; i++) {
-      if (lines[i].isNotEmpty) return i;
+      if (lines[i].isNotEmpty) {
+        return i;
+      }
     }
     return 0;
   }
@@ -536,33 +526,6 @@ class _PageContentState extends State<PageContent>
     }
     return special;
   }
-
-  String _getVerseQCF(
-    int surah,
-    int ayah, {
-    bool addSpace = true,
-    String spaceChar = ' ',
-  }) {
-    if (_qpcV4Data == null) {
-      return '';
-    }
-    final buffer = StringBuffer();
-    var wordIndex = 1;
-    while (true) {
-      final key = '$surah:$ayah:$wordIndex';
-      final wordData = _qpcV4Data![key] as Map<String, dynamic>?;
-      if (wordData != null) {
-        buffer.write(wordData['text']);
-        if (addSpace) {
-          buffer.write(spaceChar);
-        }
-        wordIndex++;
-      } else {
-        break;
-      }
-    }
-    return buffer.toString();
-  }
 }
 
 class _SurahHeaderBanner extends StatelessWidget {
@@ -572,6 +535,7 @@ class _SurahHeaderBanner extends StatelessWidget {
   });
   final int surahNumber;
   final double lineHeight;
+  static const double _visualHeightRatio = 40 / 47;
 
   static const AssetImage _bannerImage = AssetImage(
     'assets/mainframe.png',
@@ -580,255 +544,42 @@ class _SurahHeaderBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bannerHeight = lineHeight * _visualHeightRatio;
+
     return RepaintBoundary(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
+        padding: const EdgeInsets.symmetric(horizontal: 8).copyWith(top: 4),
         child: SizedBox(
           height: lineHeight,
           width: double.infinity,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Positioned.fill(
-                child: Image(
-                  image: _bannerImage,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.low,
-                ),
-              ),
-              Text(
-                String.fromCharCode(0xF100 + surahNumber - 1),
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  fontFamily: 'QCF_BSML',
-                  package: 'quran',
-                  fontSize: lineHeight * 0.45,
-                  color: const Color(0xFF000000),
-                  height: 1.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.surahName,
-    required this.juzNumber,
-    required this.textColor,
-    required this.juzLabel,
-  });
-
-  final String surahName;
-  final int juzNumber;
-  final Color textColor;
-  final String juzLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF4E342E);
-    const dividerColor = Color(0x1A4E342E);
-    final double verseFontSize = MediaQuery.sizeOf(context).width * 0.032;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 4.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  surahName,
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontSize: verseFontSize,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.2,
+          child: Center(
+            child: SizedBox(
+              height: bannerHeight,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Positioned.fill(
+                    child: Image(
+                      image: _bannerImage,
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.low,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  '$juzLabel $juzNumber',
-                  style: TextStyle(
-                    color: primaryColor.withValues(alpha: 0.6),
-                    fontSize: verseFontSize * 0.9,
-                    fontWeight: FontWeight.w500,
+                  Text(
+                    String.fromCharCode(0xF100 + surahNumber - 1),
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: 'QCF_BSML',
+                      package: 'quran',
+                      fontSize: bannerHeight * 0.45,
+                      color: const Color(0xFF000000),
+                      height: 1.0,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Divider(color: dividerColor, height: 1, thickness: 0.5),
-      ],
-    );
-  }
-}
-
-class _PageFooter extends StatelessWidget {
-  const _PageFooter({
-    required this.quarterNumber,
-    required this.pageNumber,
-    required this.hizbLabel,
-    required this.textColor,
-    required this.onSurahSelected,
-    required this.onShowIndex,
-  });
-
-  final int? quarterNumber;
-  final int pageNumber;
-  final String hizbLabel;
-  final Color textColor;
-  final ValueChanged<int>? onSurahSelected;
-  final VoidCallback? onShowIndex;
-
-  String _getHizbLabel() {
-    if (quarterNumber == null) {
-      return '';
-    }
-    final int hizbIndex = (quarterNumber! - 1) ~/ 4 + 1;
-    final int quarterInHizb = (quarterNumber! - 1) % 4;
-
-    final String prefix;
-    switch (quarterInHizb) {
-      case 0:
-        prefix = '';
-      case 1:
-        prefix = '1/4 ';
-      case 2:
-        prefix = '1/2 ';
-      case 3:
-        prefix = '3/4 ';
-      default:
-        prefix = '';
-    }
-
-    return '$prefix$hizbLabel $hizbIndex';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (pageNumber == 1 || pageNumber == 2) {
-      return const SizedBox.shrink();
-    }
-
-    final String hizbLabel = _getHizbLabel();
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Show index button only when callback is provided
-          if (onShowIndex != null)
-            _SurahIndexButton(onShowIndex: onShowIndex)
-          else
-            const SizedBox.shrink(),
-          _QuranPageIndex(hizbLabel: hizbLabel, pageNumber: pageNumber),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuranPageIndex extends StatelessWidget {
-  const _QuranPageIndex({required this.hizbLabel, required this.pageNumber});
-
-  final String hizbLabel;
-  final int pageNumber;
-
-  static final List<BoxShadow> _shadows = [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.05),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 20.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9F5EF),
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: _shadows,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hizbLabel.isNotEmpty) ...[
-              Text(
-                hizbLabel,
-                style: const TextStyle(
-                  color: Color(0xFF4E342E), // Match header contrast
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                width: 1,
-                height: 14,
-                color: const Color(0xFF4E342E).withValues(alpha: 0.3),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Text(
-              '$pageNumber',
-              style: const TextStyle(
-                color: Color(0xFF4E342E), // Match header contrast
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SurahIndexButton extends StatelessWidget {
-  const _SurahIndexButton({required this.onShowIndex});
-
-  final VoidCallback? onShowIndex;
-
-  static final List<BoxShadow> _shadows = [
-    BoxShadow(
-      color: const Color(0xFFA68B67).withValues(alpha: 0.3),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: InkWell(
-        onTap: onShowIndex,
-        child: Container(
-          width: 40.h,
-          height: 40.h,
-          decoration: BoxDecoration(
-            color: const Color(0xFFA68B67),
-            shape: BoxShape.circle,
-            boxShadow: _shadows,
-          ),
-          child: const Icon(
-            Icons.menu_book_rounded,
-            size: 22,
-            color: Colors.white,
           ),
         ),
       ),

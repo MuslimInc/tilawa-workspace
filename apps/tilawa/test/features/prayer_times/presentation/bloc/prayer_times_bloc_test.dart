@@ -245,11 +245,15 @@ void main() {
       expect: () => [const PrayerTimesState()],
     );
     blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'should auto-detect calculation method for Egypt when using default settings',
+      'should auto-detect calculation method for Egypt when using ummAlQura settings',
       build: () {
-        when(
-          mockLoadPrayerSettingsUseCase.call(),
-        ).thenAnswer((_) async => const Right(PrayerSettingsEntity()));
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              calculationMethod: CalculationMethod.ummAlQura,
+            ),
+          ),
+        );
 
         when(mockGetCurrentLocationUseCase.call()).thenAnswer(
           (_) async => Right(
@@ -297,7 +301,7 @@ void main() {
     );
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'should auto-detect calculation method for Egypt when using default settings and SAVED location',
+      'should auto-detect calculation method for Egypt when using ummAlQura settings and saved location',
       build: () {
         // Saved location exists (Cairo)
         when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(

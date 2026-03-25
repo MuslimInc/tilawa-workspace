@@ -4,28 +4,29 @@ import 'dart:ui';
 import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/config/language_config.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/download_notification_service_interface.dart';
+import '../../domain/services/download_queue_service_interface.dart';
 import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
-/// Manages a queue of pending downloads and controls concurrency
 @LazySingleton()
-class DownloadQueueManager {
+class DownloadQueueManager implements IDownloadQueueService {
   DownloadQueueManager(this._downloadService, this._notificationService);
 
   final DownloadServiceInterface _downloadService;
   final IDownloadNotificationService _notificationService;
 
   // Maximum number of concurrent downloads
-  // Maximum number of concurrent downloads
   int _maxConcurrentDownloads = 2; // Default to 2
 
   /// Set the maximum number of concurrent downloads
+  @override
   set maxConcurrentDownloads(int count) {
     if (count < 1) {
       return;
@@ -41,10 +42,11 @@ class DownloadQueueManager {
   }
 
   /// Get the maximum number of concurrent downloads
+  @override
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
   // Current locale for localized notification messages
-  Locale locale = const Locale('en');
+  Locale locale = Locale(LanguageConfig.defaultLanguageCode);
 
   // Queue of pending downloads
   final List<QueuedDownload> _queue = [];
@@ -83,11 +85,14 @@ class DownloadQueueManager {
     }
 
     // Listen to download progress to know when downloads complete
-    _progressSubscription = _downloadService.globalProgressStream.listen((
-      progress,
-    ) {
-      _handleDownloadProgress(progress);
-    });
+    _progressSubscription = _downloadService.globalProgressStream.listen(
+      (progress) {
+        _handleDownloadProgress(progress);
+      },
+      onError: (Object error) {
+        logger.e('[DownloadQueueManager] Error in progress stream: $error');
+      },
+    );
 
     // Initial sync
     await _syncActiveDownloads();
@@ -219,8 +224,10 @@ class DownloadQueueManager {
   }
 
   /// Remove a download from the queue
+  @override
   void removeFromQueue(String id) {
     _queue.removeWhere((download) => download.id == id);
+    _downloadMetadata.remove(id);
     _notifyQueueUpdate();
     logger.d('[DownloadQueueManager] Removed from queue: id=$id');
   }
@@ -230,7 +237,8 @@ class DownloadQueueManager {
     return _queue.any((download) => download.id == id);
   }
 
-  /// Get queue position for a download (0-based, -1 if not in queue)
+  /// Get queue position for a download (1-based, -1 if not in queue)
+  @override
   int getQueuePosition(String id) {
     final int index = _queue.indexWhere((download) => download.id == id);
     return index >= 0 ? index + 1 : -1;
@@ -448,6 +456,7 @@ class DownloadQueueManager {
         downloadId: progress.id,
         title: metadata.title,
         reciterName: metadata.reciterName,
+        reciterId: metadata.reciterId,
         progress: progressPercent,
         status: progress.status,
         pendingMessage: l10n.notificationWaitingToStart,
@@ -588,6 +597,7 @@ class DownloadQueueManager {
   /// [_processQueue] — which is triggered by completed/cancelled events —
   /// cannot pick up new items for this reciter while the cancel loop is
   /// running.
+  @override
   void dequeueForReciter(String reciterName) {
     final String normalizedName = reciterName.toLowerCase();
     final List<String> removedIds = _queue
@@ -810,7 +820,6 @@ class DownloadQueueManager {
     _progressSubscription?.cancel();
     _syncTimer?.cancel();
     _queueUpdateController.close();
-    _queue.clear();
     _queue.clear();
     _activeDownloads.clear();
     _activeDownloadUrls.clear();

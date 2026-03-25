@@ -6,19 +6,29 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../entities/download_item.dart';
-import '../repositories/downloads_repository.dart';
 
 @lazySingleton
 class PlayAllDownloadsUseCase implements UseCase<void, PlayAllDownloadsParams> {
-  PlayAllDownloadsUseCase(this._repository, this._audioPlayerHandler);
-  final DownloadsRepository _repository;
+  PlayAllDownloadsUseCase(this._audioPlayerHandler);
   final AudioPlayerHandler _audioPlayerHandler;
 
   @override
   Future<Either<Failure, void>> call(PlayAllDownloadsParams params) async {
     try {
-      final List<MediaItem> mediaItems = _repository
-          .createMediaItemsFromDownloads(params.items);
+      final List<MediaItem> mediaItems = params.items.map((download) {
+        final fileUri = Uri.file(download.filePath).toString();
+        return MediaItem(
+          id: fileUri,
+          title: download.title,
+          artist: download.reciterName,
+          album: 'Downloaded',
+          extras: {
+            'isDownloaded': true,
+            'localFilePath': download.filePath,
+            'downloadId': download.id,
+          },
+        );
+      }).toList();
       await _audioPlayerHandler.updateQueue(mediaItems);
       if (params.initialIndex != null) {
         await _audioPlayerHandler.skipToQueueItem(params.initialIndex!);

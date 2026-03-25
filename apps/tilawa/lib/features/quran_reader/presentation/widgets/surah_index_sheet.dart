@@ -46,12 +46,14 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     final l10n = context.l10n;
-
-    const primaryColor = Color(0xFFA68B67);
-    const bgColor = Color(0xFFFAF7F2);
-    const cardColor = Color(0xFFF4EFE6);
-    const borderColor = Color(0xFFDED3C4);
+    final Color primaryColor = colorScheme.primary;
+    final Color bgColor = colorScheme.surface;
+    final Color cardColor = colorScheme.surfaceContainerLow;
+    final Color borderColor = colorScheme.outlineVariant;
+    final Color titleColor = colorScheme.onSurface;
+    final Color subtitleColor = colorScheme.onSurfaceVariant;
 
     final filteredSurahs = <int>[
       for (int i = 1; i <= 114; i++)
@@ -65,9 +67,9 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -93,7 +95,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                         color: primaryColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.menu_book_rounded,
                         color: primaryColor,
                         size: 24,
@@ -107,14 +109,14 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                           Text(
                             l10n.surahIndex,
                             style: theme.textTheme.titleLarge?.copyWith(
-                              color: primaryColor,
+                              color: titleColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             l10n.surahCountLabel(114),
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: primaryColor.withValues(alpha: 0.7),
+                              color: subtitleColor,
                             ),
                           ),
                         ],
@@ -136,7 +138,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                     setState(() => _searchQuery = value);
                   },
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF3E3E3E),
+                    color: titleColor,
                   ),
                   decoration: InputDecoration(
                     hintText: l10n.searchSurah,
@@ -167,30 +169,21 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: borderColor,
-                        width: 0.8,
-                      ),
+                      borderSide: BorderSide(color: borderColor, width: 0.8),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: borderColor,
-                        width: 0.8,
-                      ),
+                      borderSide: BorderSide(color: borderColor, width: 0.8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: primaryColor,
-                        width: 1.2,
-                      ),
+                      borderSide: BorderSide(color: primaryColor, width: 1.2),
                     ),
                   ),
                 ),
               ),
 
-              const Divider(color: borderColor, height: 1),
+              Divider(color: borderColor, height: 1),
 
               // Surah list
               Expanded(
@@ -249,11 +242,13 @@ class _SurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     final l10n = context.l10n;
-
-    const primaryColor = Color(0xFFA68B67);
-    const cardColor = Color(0xFFF4EFE6);
-    const borderColor = Color(0xFFDED3C4);
+    final Color primaryColor = colorScheme.primary;
+    final Color cardColor = colorScheme.surfaceContainerLow;
+    final Color borderColor = colorScheme.outlineVariant;
+    final Color titleColor = colorScheme.onSurface;
+    final Color subtitleColor = colorScheme.onSurfaceVariant;
 
     final arabicName = getSurahNameArabic(surahNumber);
     final englishName = getSurahName(surahNumber);
@@ -305,7 +300,7 @@ class _SurahTile extends StatelessWidget {
                     Text(
                       englishName,
                       style: theme.textTheme.titleSmall?.copyWith(
-                        color: const Color(0xFF3E3E3E),
+                        color: titleColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -313,7 +308,7 @@ class _SurahTile extends StatelessWidget {
                     Text(
                       '${l10n.ayahCountWithPlace(verseCount, place)} · ${l10n.page} $startPage',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: primaryColor.withValues(alpha: 0.7),
+                        color: subtitleColor,
                         fontSize: 11,
                       ),
                     ),

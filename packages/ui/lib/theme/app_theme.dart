@@ -24,7 +24,7 @@ class AppTheme {
   static const FlexSurfaceMode _darkSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
   static const int _darkBlendLevel = 13;
-  static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.background;
+  static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.primary;
   static const double _darkAppBarOpacity = 0.90;
   static const double _darkAppBarElevation = 0;
   static const FlexTabBarStyle _darkTabBarStyle = FlexTabBarStyle.forAppBar;

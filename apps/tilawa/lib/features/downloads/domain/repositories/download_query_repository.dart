@@ -1,5 +1,3 @@
-import 'package:audio_service/audio_service.dart';
-
 import '../entities/download_item.dart';
 
 /// Repository interface for querying download data
@@ -9,9 +7,6 @@ import '../entities/download_item.dart';
 /// Clients that only need to read download data don't have to depend
 /// on download operation methods.
 abstract class DownloadQueryRepository {
-  /// Initialize the repository (start listening to progress updates)
-  Future<void> initialize();
-
   /// Get all downloads (raw list)
   Future<List<DownloadItem>> getAllDownloads();
 
@@ -21,18 +16,6 @@ abstract class DownloadQueryRepository {
   /// Validate if downloaded file exists on disk
   Future<bool> validateDownloadedFile(DownloadItem download);
 
-  /// Create MediaItem from a download
-  MediaItem createMediaItemFromDownload(DownloadItem download);
-
-  /// Create MediaItems from multiple downloads
-  List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads);
-
   /// Get total size of all downloads in bytes
   Future<int> getTotalDownloadsSize();
-
-  /// Clear all downloads (delete all data and files)
-  Future<void> clearAllDownloads();
-
-  /// Resume any pending or stuck downloads on app start
-  Future<void> resumePendingDownloads();
 }

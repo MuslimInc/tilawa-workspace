@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
@@ -93,11 +92,11 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
 
         return RepaintBoundary(
           child: Container(
-            width: 36.w,
-            margin: EdgeInsets.fromLTRB(4.w, 8.h, 12.w, 8.h),
+            width: 36,
+            margin: EdgeInsets.fromLTRB(4, 8, 12, 8),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.03),
@@ -111,7 +110,7 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
               onPanUpdate: (details) => _onPanUpdate(details, context),
               onPanEnd: (details) => _onPanEnd(details, context),
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -121,9 +120,9 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
                         onTap: () => _onLetterTap(letter, context),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          height: 30.h,
-                          width: 30.w,
-                          margin: EdgeInsets.symmetric(vertical: 2.h),
+                          height: 30,
+                          width: 30,
+                          margin: EdgeInsets.symmetric(vertical: 2),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? theme.primaryColor
@@ -145,7 +144,7 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
                             child: Text(
                               letter,
                               style: TextStyle(
-                                fontSize: 13.sp,
+                                fontSize: 13,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
                                     : FontWeight.w500,

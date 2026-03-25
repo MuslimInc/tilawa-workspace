@@ -5,6 +5,9 @@ import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/services/athkar_notification_service.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -25,8 +28,15 @@ void main() {
     late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
     late MockSharedPreferencesAsync mockPrefs;
     late MockINotificationDispatcher mockDispatcher;
+    late FakePrayerTimesRepository fakePrayerTimesRepository;
 
     setUp(() {
+      const PrayerSettingsEntity defaultPrayerSettings = PrayerSettingsEntity(
+        calculationMethod: CalculationMethod.egyptian,
+        savedLatitude: 30.0444,
+        savedLongitude: 31.2357,
+      );
+
       // Initialize timezone for tests
       tz.initializeTimeZones();
 
@@ -34,6 +44,12 @@ void main() {
       mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
       mockPrefs = MockSharedPreferencesAsync();
       mockDispatcher = MockINotificationDispatcher();
+      fakePrayerTimesRepository = FakePrayerTimesRepository(
+        settings: defaultPrayerSettings,
+        prayerTimesForRange: <PrayerTimeEntity>[
+          buildPrayerTimeEntity(DateTime.now().add(const Duration(days: 1))),
+        ],
+      );
 
       // Mock dispatcher to return our mock plugin
       when(mockDispatcher.initialize()).thenAnswer((_) async {
@@ -50,10 +66,21 @@ void main() {
         ),
       ).thenReturn(null);
       when(
+        mockDispatcher.registerPayloadHandler(
+          serviceId: anyNamed('serviceId'),
+          matcher: anyNamed('matcher'),
+          handler: anyNamed('handler'),
+        ),
+      ).thenReturn(null);
+      when(
         mockDispatcher.getNotificationAppLaunchDetails(),
       ).thenAnswer((_) async => null);
 
-      service = AthkarNotificationService(mockPrefs, mockDispatcher);
+      service = AthkarNotificationService(
+        mockPrefs,
+        mockDispatcher,
+        prayerTimesRepository: fakePrayerTimesRepository,
+      );
 
       // Default mock behavior
       when(
@@ -101,6 +128,9 @@ void main() {
       ) async {
         return;
       });
+      when(
+        mockNotificationsPlugin.pendingNotificationRequests(),
+      ).thenAnswer((_) async => <PendingNotificationRequest>[]);
 
       when(
         mockDispatcher.getNotificationAppLaunchDetails(),
@@ -108,6 +138,9 @@ void main() {
 
       when(mockPrefs.getString(any)).thenAnswer((_) async => null);
       when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
         return;
       });
     });
@@ -131,6 +164,13 @@ void main() {
           mockDispatcher.registerHandler(
             serviceId: 'athkar',
             notificationIds: anyNamed('notificationIds'),
+            handler: anyNamed('handler'),
+          ),
+        ).called(1);
+        verify(
+          mockDispatcher.registerPayloadHandler(
+            serviceId: 'athkar',
+            matcher: anyNamed('matcher'),
             handler: anyNamed('handler'),
           ),
         ).called(1);
@@ -225,30 +265,67 @@ void main() {
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            id: 1001, // Morning ID
+            id: anyNamed('id'),
             title: 'أذكار الصباح',
             body: 'حان وقت أذكار الصباح 🌅',
             scheduledDate: anyNamed('scheduledDate'),
             notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
-            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            matchDateTimeComponents: null,
             payload: anyNamed('payload'),
           ),
         ).called(1);
 
         verify(
           mockNotificationsPlugin.zonedSchedule(
-            id: 1002, // Evening ID
+            id: anyNamed('id'),
             title: 'أذكار المساء',
             body: 'حان وقت أذكار المساء 🌙',
             scheduledDate: anyNamed('scheduledDate'),
             notificationDetails: anyNamed('notificationDetails'),
             androidScheduleMode: anyNamed('androidScheduleMode'),
-            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            matchDateTimeComponents: null,
             payload: anyNamed('payload'),
           ),
         ).called(1);
       });
+
+      test(
+        'should fallback to fixed times when prayer-time context is missing',
+        () async {
+          fakePrayerTimesRepository.settings = const PrayerSettingsEntity();
+          fakePrayerTimesRepository.hasPermission = false;
+          fakePrayerTimesRepository.prayerTimesForRange = <PrayerTimeEntity>[];
+
+          await service.scheduleAthkarNotifications();
+
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: 1001,
+              title: 'أذكار الصباح',
+              body: 'حان وقت أذكار الصباح 🌅',
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: DateTimeComponents.time,
+              payload: anyNamed('payload'),
+            ),
+          ).called(1);
+
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: 1002,
+              title: 'أذكار المساء',
+              body: 'حان وقت أذكار المساء 🌙',
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: DateTimeComponents.time,
+              payload: anyNamed('payload'),
+            ),
+          ).called(1);
+        },
+      );
 
       test('should not schedule if disabled', () async {
         NotificationConfig.enableLocalNotifications = false;
@@ -360,10 +437,36 @@ void main() {
 
     group('cancelAll', () {
       test('should cancel all athkar notifications', () async {
+        when(mockNotificationsPlugin.pendingNotificationRequests()).thenAnswer(
+          (_) async => <PendingNotificationRequest>[
+            const PendingNotificationRequest(
+              31001,
+              'Morning',
+              'Body',
+              'morning_athkar_123',
+            ),
+            const PendingNotificationRequest(
+              31002,
+              'Evening',
+              'Body',
+              'evening_athkar_456',
+            ),
+            const PendingNotificationRequest(
+              7777,
+              'Other',
+              'Body',
+              'other_notification',
+            ),
+          ],
+        );
+
         await service.cancelAllAthkarNotifications();
 
+        verify(mockNotificationsPlugin.cancel(id: 31001)).called(1);
+        verify(mockNotificationsPlugin.cancel(id: 31002)).called(1);
         verify(mockNotificationsPlugin.cancel(id: 1001)).called(1);
         verify(mockNotificationsPlugin.cancel(id: 1002)).called(1);
+        verifyNever(mockNotificationsPlugin.cancel(id: 7777));
       });
 
       test('should not cancel if disabled', () async {
@@ -479,7 +582,7 @@ void main() {
           final response = NotificationResponse(
             notificationResponseType:
                 NotificationResponseType.selectedNotification,
-            id: 1001,
+            id: 2001,
             payload: payload,
           );
 
@@ -498,7 +601,7 @@ void main() {
               .checkLaunchNotification();
 
           expect(result, isNotNull);
-          expect(result?.id, 1001);
+          expect(result?.id, 2001);
           expect(result?.payload, payload);
         },
       );
@@ -512,7 +615,7 @@ void main() {
           final response = NotificationResponse(
             notificationResponseType:
                 NotificationResponseType.selectedNotification,
-            id: 1002,
+            id: 2002,
             payload: payload,
           );
 
@@ -531,7 +634,7 @@ void main() {
               .checkLaunchNotification();
 
           expect(result, isNotNull);
-          expect(result?.id, 1002);
+          expect(result?.id, 2002);
         },
       );
 
@@ -847,4 +950,101 @@ class TestTimezoneErrorAthkarNotificationService
   String getTimeZoneOffsetString() {
     throw Exception('Timezone detection failed');
   }
+}
+
+class FakePrayerTimesRepository implements PrayerTimesRepository {
+  FakePrayerTimesRepository({
+    required this.settings,
+    required this.prayerTimesForRange,
+    this.hasPermission = true,
+    LocationResult? currentLocation,
+    this.countryCode,
+  }) : currentLocation =
+           currentLocation ??
+           LocationResult(
+             latitude: settings.savedLatitude ?? 30.0444,
+             longitude: settings.savedLongitude ?? 31.2357,
+             countryCode: countryCode,
+           );
+
+  PrayerSettingsEntity settings;
+  List<PrayerTimeEntity> prayerTimesForRange;
+  bool hasPermission;
+  LocationResult currentLocation;
+  String? countryCode;
+
+  @override
+  Future<PrayerTimeEntity> getPrayerTimes({
+    required double latitude,
+    required double longitude,
+    required DateTime date,
+    required PrayerSettingsEntity settings,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<List<PrayerTimeEntity>> getPrayerTimesForRange({
+    required double latitude,
+    required double longitude,
+    required DateTime startDate,
+    required DateTime endDate,
+    required PrayerSettingsEntity settings,
+  }) async => prayerTimesForRange;
+
+  @override
+  Future<List<PrayerTimeEntity>> getMonthlyPrayerTimes({
+    required double latitude,
+    required double longitude,
+    required int year,
+    required int month,
+    required PrayerSettingsEntity settings,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<LocationResult> getCurrentLocation({
+    bool forceRefresh = false,
+  }) async => currentLocation;
+
+  @override
+  Future<String?> getLocationName({
+    required double latitude,
+    required double longitude,
+  }) async => null;
+
+  @override
+  Future<String?> getCountryCode({
+    required double latitude,
+    required double longitude,
+  }) async => countryCode;
+
+  @override
+  Future<void> saveSettings(PrayerSettingsEntity settings) async {
+    this.settings = settings;
+  }
+
+  @override
+  Future<PrayerSettingsEntity> loadSettings() async => settings;
+
+  @override
+  Future<bool> hasLocationPermission() async => hasPermission;
+
+  @override
+  Future<bool> requestLocationPermission() async => hasPermission;
+}
+
+PrayerTimeEntity buildPrayerTimeEntity(DateTime date) {
+  final DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+
+  return PrayerTimeEntity(
+    date: normalizedDate,
+    fajr: normalizedDate.add(const Duration(hours: 5, minutes: 10)),
+    sunrise: normalizedDate.add(const Duration(hours: 6, minutes: 25)),
+    dhuhr: normalizedDate.add(const Duration(hours: 12, minutes: 5)),
+    asr: normalizedDate.add(const Duration(hours: 15, minutes: 40)),
+    maghrib: normalizedDate.add(const Duration(hours: 18, minutes: 8)),
+    isha: normalizedDate.add(const Duration(hours: 19, minutes: 25)),
+    midnight: normalizedDate.add(const Duration(hours: 23, minutes: 30)),
+    lastThird: normalizedDate.add(const Duration(hours: 2, minutes: 45)),
+    latitude: 30.0444,
+    longitude: 31.2357,
+  );
 }

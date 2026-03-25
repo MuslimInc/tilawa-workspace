@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/bookmark_entity.dart';
 
@@ -23,20 +22,20 @@ class BookmarkCard extends StatelessWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(12.r),
+          padding: EdgeInsets.all(12),
           child: Row(
             children: [
               // Artwork
               ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
-                  width: 56.w,
-                  height: 56.w,
+                  width: 56,
+                  height: 56,
                   child: bookmark.artworkUrl != null
                       ? CachedNetworkImage(
                           imageUrl: bookmark.artworkUrl!,
@@ -49,7 +48,7 @@ class BookmarkCard extends StatelessWidget {
                       : _buildPlaceholder(context),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 12),
               // Content
               Expanded(
                 child: Column(
@@ -59,57 +58,57 @@ class BookmarkCard extends StatelessWidget {
                     Text(
                       bookmark.surahName,
                       style: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     // Reciter name
                     Text(
                       bookmark.reciterName,
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: 13,
                         color: colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     // Position and label
                     Row(
                       children: [
                         Icon(
                           FluentIcons.play_circle_24_regular,
-                          size: 14.sp,
+                          size: 14,
                           color: colorScheme.primary,
                         ),
-                        SizedBox(width: 4.w),
+                        SizedBox(width: 4),
                         Text(
                           '${bookmark.formattedPosition} / ${bookmark.formattedDuration}',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 12,
                             color: colorScheme.primary,
                           ),
                         ),
                         if (bookmark.label != null) ...[
-                          SizedBox(width: 8.w),
+                          SizedBox(width: 8),
                           Expanded(
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 6.w,
-                                vertical: 2.h,
+                                horizontal: 6,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(4.r),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 bookmark.label!,
                                 style: TextStyle(
-                                  fontSize: 10.sp,
+                                  fontSize: 10,
                                   color: colorScheme.onPrimaryContainer,
                                 ),
                                 maxLines: 1,
@@ -128,7 +127,7 @@ class BookmarkCard extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     FluentIcons.edit_24_regular,
-                    size: 20.sp,
+                    size: 20,
                     color: colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   onPressed: onEdit,
@@ -147,7 +146,7 @@ class BookmarkCard extends StatelessWidget {
       ).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Icon(
         FluentIcons.bookmark_24_regular,
-        size: 24.sp,
+        size: 24,
         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
       ),
     );

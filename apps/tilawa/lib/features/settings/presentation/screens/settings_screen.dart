@@ -2,7 +2,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -47,14 +46,14 @@ class SettingsScreen extends StatelessWidget {
         appBar: AppBar(title: Text(context.l10n.settings)),
         body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 20.h,
-          ).copyWith(bottom: 120.h),
+            horizontal: 16,
+            vertical: 20,
+          ).copyWith(bottom: 120),
           child: Column(
             children: [
               // User Profile Section
               _buildProfileSection(context),
-              SizedBox(height: 32.h),
+              SizedBox(height: 32),
 
               // General Group (Theme & Language)
               _SettingsGroup(
@@ -71,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
                             subtitle: _getThemeName(context, state.mode),
                             onTap: () => _showThemePicker(context, state.mode),
                             borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(16.r),
+                              top: Radius.circular(16),
                             ),
                           ),
                           _SettingsTile(
@@ -101,7 +100,7 @@ class SettingsScreen extends StatelessWidget {
                         onTap: () => _showLanguagePicker(context, state.locale),
                         showDivider: false,
                         borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(16.r),
+                          bottom: Radius.circular(16),
                         ),
                       );
                     },
@@ -109,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
 
               // Audio Group
               _SettingsGroup(
@@ -131,7 +130,7 @@ class SettingsScreen extends StatelessWidget {
                                   .toggleRestorePlaybackState(value);
                             },
                             borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(16.r),
+                              top: Radius.circular(16),
                             ),
                           ),
                           _SwitchSettingsTile(
@@ -148,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
                             },
                             showDivider: false,
                             borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(16.r),
+                              bottom: Radius.circular(16),
                             ),
                           ),
                         ],
@@ -158,7 +157,7 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
 
               // Features Group
               _SettingsGroup(
@@ -171,7 +170,7 @@ class SettingsScreen extends StatelessWidget {
                     subtitle: context.l10n.noBookmarksHint,
                     onTap: () => const BookmarksRoute().push(context),
                     borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16.r),
+                      top: Radius.circular(16),
                     ),
                   ),
                   _SettingsTile(
@@ -196,13 +195,13 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => const QuranLastReadRoute().push(context),
                     showDivider: false,
                     borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(16.r),
+                      bottom: Radius.circular(16),
                     ),
                   ),
                 ],
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 24),
 
               // Downloads Group
               _SettingsGroup(
@@ -215,7 +214,7 @@ class SettingsScreen extends StatelessWidget {
                     subtitle: context.l10n.manageStorageSubtitle,
                     onTap: () => const DownloadsRoute().push(context),
                     borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16.r),
+                      top: Radius.circular(16),
                     ),
                   ),
                   BlocBuilder<SettingsCubit, SettingsState>(
@@ -233,7 +232,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         showDivider: false,
                         borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(16.r),
+                          bottom: Radius.circular(16),
                         ),
                       );
                     },
@@ -241,7 +240,7 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 32.h),
+              SizedBox(height: 32),
 
               // Logout Button
               BlocBuilder<AuthBloc, AuthState>(
@@ -251,12 +250,12 @@ class SettingsScreen extends StatelessWidget {
                       color: context.isDarkMode
                           ? context.theme.cardColor
                           : AppColors.logoutBackground,
-                      borderRadius: BorderRadius.circular(20.r),
+                      borderRadius: BorderRadius.circular(20),
                       child: InkWell(
                         onTap: () => _showLogoutDialog(context),
-                        borderRadius: BorderRadius.circular(16.r),
+                        borderRadius: BorderRadius.circular(16),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          padding: EdgeInsets.symmetric(vertical: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -265,12 +264,12 @@ class SettingsScreen extends StatelessWidget {
                                 color: AppColors.error,
                                 size: 20,
                               ),
-                              SizedBox(width: 12.w),
+                              SizedBox(width: 12),
                               Text(
                                 context.l10n.logout,
                                 style: TextStyle(
                                   color: AppColors.error,
-                                  fontSize: 16.sp,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -285,17 +284,17 @@ class SettingsScreen extends StatelessWidget {
 
               // Route List (Dev)
               if (kDebugMode) ...[
-                SizedBox(height: 32.h),
+                SizedBox(height: 32),
                 _SettingsTile(
                   icon: Icons.list_alt_rounded,
                   title: 'Route List (Dev)',
                   onTap: () => const RouteListRoute().push(context),
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(16),
                   showDivider: false,
                 ),
               ],
 
-              SizedBox(height: 32.h),
+              SizedBox(height: 32),
 
               // App Version Section
               BlocBuilder<SettingsCubit, SettingsState>(
@@ -307,18 +306,18 @@ class SettingsScreen extends StatelessWidget {
                       Text(
                         context.l10n.version(version),
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: context.colorScheme.onSurface.withValues(
                             alpha: 0.5,
                           ),
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 4),
                       Text(
                         context.l10n.build(buildNumber),
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: 12,
                           color: context.colorScheme.onSurface.withValues(
                             alpha: 0.3,
                           ),
@@ -343,7 +342,7 @@ class SettingsScreen extends StatelessWidget {
           orElse: () => null,
         );
         return Container(
-          padding: EdgeInsets.all(24.r),
+          padding: EdgeInsets.all(24),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -353,7 +352,7 @@ class SettingsScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24.r),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: AppColors.profileGradientStart.withValues(alpha: 0.2),
@@ -365,8 +364,8 @@ class SettingsScreen extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 60.r,
-                height: 60.r,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
@@ -378,12 +377,12 @@ class SettingsScreen extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
-                    size: 32.sp,
+                    size: 32,
                     color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,16 +390,16 @@ class SettingsScreen extends StatelessWidget {
                     Text(
                       user?.displayName ?? context.l10n.guestUser,
                       style: TextStyle(
-                        fontSize: 20.sp,
+                        fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 4),
                     Text(
                       user?.email ?? context.l10n.signInToSync,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w500,
                       ),
@@ -438,18 +437,18 @@ class SettingsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               context.l10n.chooseTheme,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             _ThemeOption(
               title: context.l10n.systemTheme,
               value: ThemeMode.system,
@@ -477,7 +476,7 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -516,7 +515,7 @@ class SettingsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
       builder: (sheetContext) {
@@ -528,15 +527,12 @@ class SettingsScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16),
                   Text(
                     context.l10n.choosePrimaryColor,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16),
                   ...ThemeCubit.colorOptions.map((option) {
                     final isSelected =
                         option.color.toARGB32() == currentColor.toARGB32();
@@ -549,7 +545,7 @@ class SettingsScreen extends StatelessWidget {
                       },
                       leading: CircleAvatar(
                         backgroundColor: option.color,
-                        radius: 12.r,
+                        radius: 12,
                       ),
                       title: Text(
                         _getLocalizedColorName(context, option.name),
@@ -575,8 +571,8 @@ class SettingsScreen extends StatelessWidget {
                       _showCustomColorPicker(context, currentColor);
                     },
                     leading: Container(
-                      width: 24.r,
-                      height: 24.r,
+                      width: 24,
+                      height: 24,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: SweepGradient(
@@ -621,7 +617,7 @@ class SettingsScreen extends StatelessWidget {
                           )
                         : null,
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 16),
                 ],
               ),
             ),
@@ -672,18 +668,18 @@ class SettingsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               context.l10n.chooseLanguage,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             ListTile(
               title: Text("العربية"),
               trailing: currentLocale.languageCode == arabicLanguageCode
@@ -714,7 +710,7 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -725,18 +721,18 @@ class SettingsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             Text(
               context.l10n.concurrentDownloads,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
             for (int i = 1; i <= 5; i++)
               ListTile(
                 title: Text('$i'),
@@ -751,7 +747,7 @@ class SettingsScreen extends StatelessWidget {
                   Navigator.pop(context);
                 },
               ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -796,11 +792,11 @@ class _SettingsGroup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(12.w, 16.h, 16.w, 8.h),
+          padding: EdgeInsets.fromLTRB(12, 16, 16, 8),
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 12.5.sp,
+              fontSize: 12.5,
               fontWeight: FontWeight.w800,
               color: Theme.of(context).primaryColor,
               letterSpacing: 1.1,
@@ -810,7 +806,7 @@ class _SettingsGroup extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: const [
               BoxShadow(
                 color: AppColors.settingsCardShadow,
@@ -855,28 +851,25 @@ class _SettingsTile extends StatelessWidget {
           borderRadius: borderRadius,
           child: ListTile(
             onTap: onTap,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 2.h,
-            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             shape: RoundedRectangleBorder(borderRadius: borderRadius),
             leading: Container(
-              padding: EdgeInsets.all(10.r),
+              padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: effectiveIconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: effectiveIconColor, size: 22.sp),
+              child: Icon(icon, color: effectiveIconColor, size: 22),
             ),
             title: Text(
               title,
-              style: TextStyle(fontSize: 15.5.sp, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
             ),
             subtitle: subtitle != null
                 ? Text(
                     subtitle!,
                     style: TextStyle(
-                      fontSize: 12.5.sp,
+                      fontSize: 12.5,
                       color: theme.textTheme.bodySmall?.color?.withValues(
                         alpha: 0.5,
                       ),
@@ -885,14 +878,14 @@ class _SettingsTile extends StatelessWidget {
                 : null,
             trailing: Icon(
               FluentIcons.chevron_right_24_filled,
-              size: 14.sp,
+              size: 14,
               color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
             ),
           ),
         ),
         if (showDivider)
           Padding(
-            padding: EdgeInsets.only(left: 64.w, right: 16.w),
+            padding: EdgeInsets.only(left: 64, right: 16),
             child: Divider(
               height: 1,
               thickness: 0.5,
@@ -974,18 +967,18 @@ class _SwitchSettingsTile extends StatelessWidget {
                 ? borderRadius as BorderRadius
                 : null,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(10.r),
+                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: effectiveIconColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: effectiveIconColor, size: 22.sp),
+                    child: Icon(icon, color: effectiveIconColor, size: 22),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -993,16 +986,16 @@ class _SwitchSettingsTile extends StatelessWidget {
                         Text(
                           title,
                           style: TextStyle(
-                            fontSize: 15.5.sp,
+                            fontSize: 15.5,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         if (subtitle != null) ...[
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 4),
                           Text(
                             subtitle!,
                             style: TextStyle(
-                              fontSize: 12.5.sp,
+                              fontSize: 12.5,
                               color: theme.textTheme.bodySmall?.color
                                   ?.withValues(alpha: 0.5),
                             ),
@@ -1024,7 +1017,7 @@ class _SwitchSettingsTile extends StatelessWidget {
         ),
         if (showDivider)
           Padding(
-            padding: EdgeInsets.only(left: 64.w, right: 16.w),
+            padding: EdgeInsets.only(left: 64, right: 16),
             child: Divider(
               height: 1,
               thickness: 0.5,

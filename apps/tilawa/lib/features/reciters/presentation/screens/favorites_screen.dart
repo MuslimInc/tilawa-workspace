@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -62,20 +61,19 @@ class FavoritesScreen extends StatelessWidget {
                       return _buildEmptyState(context, context.l10n);
                     }
                     return ListView.separated(
-                      padding: EdgeInsets.fromLTRB(16.r, 16.r, 16.r, 120.h),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
                       itemCount: state.favorites.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 8.h),
+                      separatorBuilder: (context, index) => SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final ReciterEntity reciter = state.favorites[index];
                         return Dismissible(
                           key: ValueKey(reciter.id),
                           background: Container(
                             alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20.w),
+                            padding: EdgeInsets.only(right: 20),
                             decoration: BoxDecoration(
                               color: Colors.red,
-                              borderRadius: BorderRadius.circular(20.r),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
                               Icons.delete_outline_rounded,
@@ -110,14 +108,14 @@ class FavoritesScreen extends StatelessWidget {
         children: [
           Icon(
             Icons.favorite_border_rounded,
-            size: 80.r,
+            size: 80,
             color: Theme.of(context).disabledColor,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 16),
           Text(
             l10n.noFavorites,
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 18,
               color: Theme.of(context).disabledColor,
             ),
           ),

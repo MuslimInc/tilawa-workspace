@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -12,7 +15,7 @@ import 'package:tilawa_core/services/analytics_service.dart';
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
 import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
-import '../../../settings/presentation/cubit/settings_cubit.dart';
+import '../../../settings/domain/services/sleep_timer_settings.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/check_audio_playability_use_case.dart';
@@ -45,7 +48,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._moveQueueItem,
     this._loadAudioPlayerData,
     this._checkAudioPlayability,
-    this._settingsCubit,
+    this._sleepTimerSettings,
     this._addOrUpdateHistory,
     this._analyticsService,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
@@ -104,7 +107,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final MoveQueueItemUseCase _moveQueueItem;
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
   final CheckAudioPlayabilityUseCase _checkAudioPlayability;
-  final SettingsCubit _settingsCubit;
+  final SleepTimerSettings _sleepTimerSettings;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
   final AnalyticsService _analyticsService;
 
@@ -114,30 +117,61 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final Map<String, Duration> _lastKnownDurations = {};
   final Set<String> _completedAudioIds = {};
   Timer? _sleepTimer;
+  bool _isSleepTimerEnabled = true;
+  String? _lastPersistedStateJson;
+
+  /// Maximum number of cached entries before eviction.
+  static const int _maxCacheSize = 50;
+
+  /// Evicts oldest entries when the cache exceeds [_maxCacheSize].
+  void _evictCacheIfNeeded() {
+    if (_lastKnownPositions.length > _maxCacheSize) {
+      final keysToRemove = _lastKnownPositions.keys
+          .take(_lastKnownPositions.length - _maxCacheSize)
+          .toList();
+      keysToRemove.forEach(_lastKnownPositions.remove);
+    }
+    if (_lastKnownDurations.length > _maxCacheSize) {
+      final keysToRemove = _lastKnownDurations.keys
+          .take(_lastKnownDurations.length - _maxCacheSize)
+          .toList();
+      keysToRemove.forEach(_lastKnownDurations.remove);
+    }
+  }
 
   void _setupAudioStreams() {
+    void onStreamError(Object error, StackTrace stackTrace) {
+      // Swallow stream errors to prevent unhandled exceptions in release mode.
+      // The audio service can emit errors on codec failures, OS kills, etc.
+    }
+
     _subscriptions.add(
-      _getAudioStreams.currentAudio.listen((audio) {
-        add(AudioPlayerEvent.updateAudio(audio));
-      }),
+      _getAudioStreams.currentAudio.listen(
+        (audio) => add(AudioPlayerEvent.updateAudio(audio)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.playbackState.listen((playbackState) {
-        add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState));
-      }),
+      _getAudioStreams.playbackState.listen(
+        (playbackState) =>
+            add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.volume.listen((volume) {
-        add(AudioPlayerEvent.updateVolume(volume));
-      }),
+      _getAudioStreams.volume.listen(
+        (volume) => add(AudioPlayerEvent.updateVolume(volume)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
-      _getAudioStreams.speed.listen((speed) {
-        add(AudioPlayerEvent.updateSpeed(speed));
-      }),
+      _getAudioStreams.speed.listen(
+        (speed) => add(AudioPlayerEvent.updateSpeed(speed)),
+        onError: onStreamError,
+      ),
     );
 
     _subscriptions.add(
@@ -161,17 +195,23 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
             ),
           ),
         );
-      }),
+      }, onError: onStreamError),
     );
   }
 
   void _setupSettingsSubscription() {
     _subscriptions.add(
-      _settingsCubit.stream.listen((settingsState) {
-        if (!settingsState.isSleepTimerEnabled) {
-          add(const AudioPlayerEvent.cancelSleepTimer());
-        }
-      }),
+      _sleepTimerSettings.isSleepTimerEnabledStream.listen(
+        (isEnabled) {
+          _isSleepTimerEnabled = isEnabled;
+          if (!isEnabled) {
+            add(const AudioPlayerEvent.cancelSleepTimer());
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          // Swallow settings stream errors to prevent crashes.
+        },
+      ),
     );
   }
 
@@ -342,12 +382,22 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   ) async {
     // Optimistically un-dismiss when play is requested
     emit(state.copyWith(dismissedAudioId: null));
-    await _playAudio();
-    // Start sleep timer if a duration was previously selected and feature is enabled
-    if (_settingsCubit.state.isSleepTimerEnabled &&
-        state.lastSleepTimerDuration != null) {
-      add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
-    }
+    final result = await _playAudio();
+    result.fold(
+      (failure) {
+        // Revert the optimistic un-dismiss on failure
+        emit(state.copyWith(dismissedAudioId: state.currentAudio?.id));
+      },
+      (_) {
+        // Only restart sleep timer if one was actively running before pause
+        // (sleepTimerTargetTime is cleared on stop/expiry but kept on pause)
+        if (_isSleepTimerEnabled &&
+            state.lastSleepTimerDuration != null &&
+            state.sleepTimerTargetTime != null) {
+          add(AudioPlayerEvent.setSleepTimer(state.lastSleepTimerDuration!));
+        }
+      },
+    );
   }
 
   Future<void> _onPauseAudio(
@@ -370,7 +420,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final Either<Failure, void> result = await _stopAudio();
     await result.fold(
       (failure) async {
-        emit(state.copyWith());
+        // Stop failed — force-pause as fallback so the user isn't stuck
+        await _pauseAudio();
       },
       (success) async {
         if (state.currentAudio != null) {
@@ -461,12 +512,21 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     await playabilityResult.fold(
       (failure) {
-        // Playback not allowed - show user-friendly toast
-        if (failure is OfflinePlaybackFailure || failure is NetworkFailure) {
-          ToastUtils.showErrorToast(
-            failure.message ??
-                'This content is not available offline. Please download it first.',
-          );
+        // Playback not allowed - show localized toast
+        if (failure is OfflinePlaybackFailure) {
+          final context = AppRouter.navigatorKey.currentContext;
+          final l10n = context != null ? AppLocalizations.of(context) : null;
+          final String message = switch (failure.reason) {
+            OfflinePlaybackReason.notDownloaded =>
+              l10n?.offlinePlaybackError ?? failure.message ?? '',
+            OfflinePlaybackReason.fileMissing =>
+              l10n?.offlineFileMissingError ?? failure.message ?? '',
+            OfflinePlaybackReason.downloadIncomplete =>
+              l10n?.offlineDownloadIncompleteError ?? failure.message ?? '',
+          };
+          ToastUtils.showErrorToast(message);
+        } else if (failure is NetworkFailure) {
+          ToastUtils.showErrorToast(failure.message ?? '');
         }
         // Don't proceed with playback
       },
@@ -538,7 +598,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         final Duration remaining = state.sleepTimerTargetTime!.difference(now);
         _sleepTimer?.cancel();
         _sleepTimer = Timer(remaining, () {
-          add(const AudioPlayerEvent.audioTimerExpired());
+          if (!isClosed) add(const AudioPlayerEvent.audioTimerExpired());
         });
       } else {
         // Timer already expired while app was closed
@@ -559,7 +619,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   void _onSetSleepTimer(SetSleepTimer event, Emitter<AudioPlayerState> emit) {
     _sleepTimer?.cancel();
     _sleepTimer = Timer(event.duration, () {
-      add(const AudioPlayerEvent.audioTimerExpired());
+      if (!isClosed) add(const AudioPlayerEvent.audioTimerExpired());
     });
     emit(
       state.copyWith(
@@ -703,6 +763,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
         );
       }
     }
+
+    _evictCacheIfNeeded();
   }
 
   Duration _resolveDuration(
@@ -754,11 +816,24 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
-    return AudioPlayerState.fromJson(json);
+    _lastPersistedStateJson = jsonEncode(json);
+    return AudioPlayerState.fromJson(
+      json,
+    ).copyWith(playbackState: null, positionData: null);
   }
 
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
-    return state.toJson();
+    final Map<String, dynamic> persistedStateJson = state
+        .copyWith(playbackState: null, positionData: null)
+        .toJson();
+    final String serializedState = jsonEncode(persistedStateJson);
+
+    if (_lastPersistedStateJson == serializedState) {
+      return null;
+    }
+
+    _lastPersistedStateJson = serializedState;
+    return persistedStateJson;
   }
 }

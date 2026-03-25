@@ -69,14 +69,14 @@ void main() {
               // availableWidth = 392.7 * (1.0 - 0.05) = 373.065
               // fontSize = 373.065 / 16.35
               const double expectedFontSize = 373.065 / 16.35;
-              // fontHeight = (803.6 / 15.0) / fontSize
+              // fontHeight = ((803.6 - 4.0) / 15.0) / fontSize
               const double expectedFontHeight =
-                  (803.6 / 15.0) / expectedFontSize;
+                  ((803.6 - 4.0) / 15.0) / expectedFontSize;
 
               expect(metrics.isScrollable, false);
               expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
               expect(metrics.fontHeight, closeTo(expectedFontHeight, 0.0001));
-              expect(metrics.padding, EdgeInsets.zero); // Should be default
+              expect(metrics.padding, const EdgeInsets.only(top: 4.0));
 
               return const SizedBox();
             },
@@ -103,22 +103,13 @@ void main() {
               // adaptiveFontSize = 763.42 / 16.35
               const double expectedFontSize = 763.42 / 16.35;
 
-              // fontHeight = 1 / 0.40
-              const expectedFontHeight = 2.5;
+              const expectedFontHeight = 1.75;
 
               expect(metrics.isScrollable, true);
               expect(metrics.fontSize, closeTo(expectedFontSize, 0.0001));
               expect(metrics.fontHeight, closeTo(expectedFontHeight, 0.0001));
 
-              // Padding should have +16 on top and bottom
-              expect(metrics.padding.top, padding.top + 16);
-              expect(metrics.padding.bottom, padding.bottom + 16);
-              // Left/Right padding is not explicitly handled in the strategy but the object is created with EdgeInsets.only(top, bottom) in the strategy?
-              // The strategy returns:
-              // padding: EdgeInsets.only(
-              //   top: padding.top + 16,
-              //   bottom: padding.bottom + 16,
-              // ),
+              expect(metrics.padding, EdgeInsets.zero);
               expect(metrics.padding.left, 0);
               expect(metrics.padding.right, 0);
 

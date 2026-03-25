@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -113,7 +112,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      Gap(14.h),
+                      Gap(14),
 
                       // Subtitle
                       Text(
@@ -154,7 +153,7 @@ class _GoogleSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50.h,
+      height: 50,
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -170,9 +169,9 @@ class _GoogleSignInButton extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 24.w),
+          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 24),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
         child: Row(
@@ -180,17 +179,17 @@ class _GoogleSignInButton extends StatelessWidget {
           children: [
             if (isLoading)
               SizedBox(
-                width: 24.w,
-                height: 24.h,
+                width: 24,
+                height: 24,
                 child: CircularProgressIndicator(strokeWidth: 2.5),
               )
             else ...[
               SvgPicture.asset(
                 'assets/icons/google_icon.svg',
-                width: 24.w,
-                height: 24.w,
+                width: 24,
+                height: 24,
               ),
-              Gap(12.w),
+              Gap(12),
               Text(context.l10n.continueWithGoogle),
             ],
           ],

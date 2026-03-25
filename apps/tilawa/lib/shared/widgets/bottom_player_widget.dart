@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,18 +5,14 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
-import '../../helpers/reciter_helper.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import '../models/reciter_model.dart';
 import 'bottom_player_ui.dart';
 import 'seek_bar.dart';
 
@@ -33,6 +28,8 @@ class BottomPlayerWidget extends StatefulWidget {
     this.isKeyboardOpen = false,
   });
 
+  static const double collapsedHeight = 100;
+
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
@@ -45,8 +42,6 @@ class BottomPlayerWidget extends StatefulWidget {
 
 class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     with TickerProviderStateMixin {
-  int? _currentReciterId;
-  String? _currentReciterName;
   bool _isDismissed = false;
 
   late AnimationController _expandController;
@@ -59,7 +54,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
   /// inner padding (12+12) + row content (~48) = ~99.
-  double get _miniPlayerHeight => 100.h;
+  double get _miniPlayerHeight => BottomPlayerWidget.collapsedHeight;
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;
@@ -210,19 +205,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        // Load reciter ID if not cached or if the reciter name changed
-        if (_currentReciterId == null || _currentReciterName != audio.artist) {
-          _loadReciterId(audio);
-        }
-
-        final PositionData position =
-            state.positionData ??
-            const PositionData(
-              position: Duration.zero,
-              bufferedPosition: Duration.zero,
-              duration: Duration.zero,
-            );
-
         final double progress = _expandController.value;
         final double screenHeight = MediaQuery.of(context).size.height;
         // When collapsed (progress=0), the height must be
@@ -248,12 +230,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                   if (progress > 0.01)
                     Opacity(
                       opacity: progress.clamp(0.0, 1.0),
-                      child: _buildExpandedPlayer(
-                        context,
-                        state,
-                        audio,
-                        position,
-                      ),
+                      child: _buildExpandedPlayer(context, state, audio),
                     ),
 
                   // Mini player (in front, fades out quickly)
@@ -275,12 +252,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                   .clamp(0.0, 1.0),
                           child: IgnorePointer(
                             ignoring: progress > 0.4,
-                            child: _buildMiniPlayer(
-                              context,
-                              state,
-                              audio,
-                              position,
-                            ),
+                            child: _buildMiniPlayer(context, state, audio),
                           ),
                         ),
                       ),
@@ -302,13 +274,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     BuildContext context,
     AudioPlayerState state,
     AudioEntity audio,
-    PositionData position,
   ) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: BottomPlayerUi(
         audio: audio,
-        positionData: position,
+        positionData: const PositionData(
+          position: Duration.zero,
+          bufferedPosition: Duration.zero,
+          duration: Duration.zero,
+        ),
+        progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,
         canGoNext: state.canGoNext,
@@ -366,7 +342,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     BuildContext context,
     AudioPlayerState state,
     AudioEntity audio,
-    PositionData position,
   ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -423,27 +398,27 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
                             // Artwork — flexible via ConstrainedBox
                             Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              padding: EdgeInsets.symmetric(vertical: 12),
                               child: Container(
-                                width: 280.w,
+                                width: 280,
                                 height: (constraints.maxHeight * 0.35).clamp(
                                   0.0,
-                                  280.w,
+                                  280,
                                 ),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24.r),
+                                  borderRadius: BorderRadius.circular(24),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(
                                         alpha: 0.3,
                                       ),
-                                      blurRadius: 30.r,
+                                      blurRadius: 30,
                                       offset: const Offset(0, 15),
                                     ),
                                   ],
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24.r),
+                                  borderRadius: BorderRadius.circular(24),
                                   child: audio.artUri != null
                                       ? CachedNetworkImage(
                                           imageUrl: audio.artUri!,
@@ -458,24 +433,24 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
                             // Title & Artist
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              padding: EdgeInsets.symmetric(horizontal: 24),
                               child: Column(
                                 children: [
                                   Text(
                                     audio.title,
                                     style: TextStyle(
-                                      fontSize: 24.sp,
+                                      fontSize: 24,
                                       color: Colors.white,
                                     ),
                                     textAlign: TextAlign.center,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 8.h),
+                                  SizedBox(height: 8),
                                   Text(
                                     audio.artist ?? 'Unknown',
                                     style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                       color: Colors.white.withValues(
                                         alpha: 0.7,
                                       ),
@@ -488,17 +463,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                               ),
                             ),
 
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 16),
 
                             // Seek bar
-                            _buildProgressBar(context, state),
+                            const _ExpandedProgressBar(),
 
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 16),
 
                             // Controls
                             _buildControls(context, state),
 
-                            SizedBox(height: 24.h),
+                            SizedBox(height: 24),
                           ],
                         ),
                       ),
@@ -515,11 +490,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               right: 0,
               child: Center(
                 child: Container(
-                  width: 40.w,
-                  height: 4.h,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2.r),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
@@ -538,13 +513,13 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         icon: Icon(
           FluentIcons.chevron_down_24_regular,
           color: Colors.white,
-          size: 28.sp,
+          size: 28,
         ),
         onPressed: collapse,
       ),
       title: Text(
         context.l10n.currentPlaying,
-        style: TextStyle(color: Colors.white, fontSize: 16.sp),
+        style: TextStyle(color: Colors.white, fontSize: 16),
       ),
       actions: [
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
@@ -556,7 +531,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               color: state.isSleepTimerActive
                   ? Theme.of(context).primaryColor
                   : Colors.white,
-              size: 24.sp,
+              size: 24,
             ),
             onPressed: () {
               showDialog(
@@ -575,55 +550,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       child: Icon(
         FluentIcons.music_note_1_24_regular,
         color: Colors.white,
-        size: 80.sp,
-      ),
-    );
-  }
-
-  Widget _buildProgressBar(BuildContext context, AudioPlayerState state) {
-    final PositionData positionData =
-        state.positionData ??
-        const PositionData(
-          position: Duration.zero,
-          bufferedPosition: Duration.zero,
-          duration: Duration.zero,
-        );
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Column(
-        children: [
-          SeekBar(
-            duration: positionData.duration,
-            position: positionData.position,
-            bufferedPosition: positionData.bufferedPosition,
-            onChangeEnd: (newPosition) {
-              context.read<AudioPlayerBloc>().add(
-                AudioPlayerEvent.seekTo(newPosition),
-              );
-            },
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatDuration(positionData.position),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12.sp,
-                ),
-              ),
-              Text(
-                _formatDuration(positionData.duration),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12.sp,
-                ),
-              ),
-            ],
-          ),
-        ],
+        size: 80,
       ),
     );
   }
@@ -632,7 +559,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     final bool isPlaying = state.isPlaying;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
@@ -643,7 +570,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               icon: Icon(
                 FluentIcons.speaker_2_24_regular,
                 color: Colors.white,
-                size: 24.sp,
+                size: 24,
               ),
               onPressed: () {
                 showSliderDialog(
@@ -669,7 +596,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 color: state.canGoPrevious
                     ? Colors.white
                     : Colors.white.withValues(alpha: 0.3),
-                size: 32.sp,
+                size: 32,
               ),
               onPressed: state.canGoPrevious
                   ? () {
@@ -682,15 +609,15 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
             // Play/Pause
             Container(
-              width: 72.w,
-              height: 72.w,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20.r,
+                    blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
@@ -701,7 +628,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                       ? FluentIcons.pause_24_filled
                       : FluentIcons.play_24_filled,
                   color: Colors.black,
-                  size: 32.sp,
+                  size: 32,
                 ),
                 onPressed: () {
                   if (isPlaying) {
@@ -724,7 +651,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 color: state.canGoNext
                     ? Colors.white
                     : Colors.white.withValues(alpha: 0.3),
-                size: 32.sp,
+                size: 32,
               ),
               onPressed: state.canGoNext
                   ? () {
@@ -739,7 +666,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             IconButton(
               icon: Text(
                 '${state.speed.toStringAsFixed(1)}x',
-                style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
               onPressed: () {
                 showSliderDialog(
@@ -762,58 +689,102 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       ),
     );
   }
+}
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    if (duration.inHours > 0) {
-      return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
-    } else {
-      return '$twoDigitMinutes:$twoDigitSeconds';
-    }
+class _MiniPlayerProgressBar extends StatelessWidget {
+  const _MiniPlayerProgressBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final Color primaryColor = Theme.of(context).primaryColor;
+    return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
+      selector: (state) {
+        final PositionData pos =
+            state.positionData ??
+            const PositionData(
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration.zero,
+            );
+        if (pos.duration.inMilliseconds <= 0) return 0.0;
+        return (pos.position.inMilliseconds / pos.duration.inMilliseconds)
+            .clamp(0.0, 1.0);
+      },
+      builder: (context, progress) {
+        return LinearProgressIndicator(
+          value: progress,
+          backgroundColor: primaryColor.withValues(alpha: 0.1),
+          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+          minHeight: 3,
+        );
+      },
+    );
   }
+}
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
+class _ExpandedProgressBar extends StatelessWidget {
+  const _ExpandedProgressBar();
 
-  void _loadReciterId(AudioEntity audio) {
-    if (audio.artist == null) return;
-    _currentReciterName = audio.artist;
-    ReciterHelper.getReciterFromAudioEntity(audio)
-        .then((reciter) {
-          if (mounted && reciter != null) {
-            setState(() {
-              _currentReciterId = reciter.id;
-            });
-          }
-        })
-        .catchError((_) {});
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<AudioPlayerBloc, AudioPlayerState, PositionData>(
+      selector: (state) =>
+          state.positionData ??
+          const PositionData(
+            position: Duration.zero,
+            bufferedPosition: Duration.zero,
+            duration: Duration.zero,
+          ),
+      builder: (context, positionData) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              SeekBar(
+                duration: positionData.duration,
+                position: positionData.position,
+                bufferedPosition: positionData.bufferedPosition,
+                onChangeEnd: (newPosition) {
+                  context.read<AudioPlayerBloc>().add(
+                    AudioPlayerEvent.seekTo(newPosition),
+                  );
+                },
+              ),
+              SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatDuration(positionData.position),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    _formatDuration(positionData.duration),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
+}
 
-  bool isCurrentRouteAlreadyViewing(BuildContext context) {
-    try {
-      final GoRouterState routerState = GoRouterState.of(context);
-      final String? currentReciterId = routerState.pathParameters['reciterId'];
-      if (currentReciterId == null) return false;
-      if (_currentReciterId != null) {
-        return currentReciterId == _currentReciterId.toString();
-      }
-      final String? reciterJson = routerState.uri.queryParameters['reciter'];
-      if (reciterJson != null) {
-        try {
-          final reciter = Reciter.fromJson(
-            jsonDecode(reciterJson) as Map<String, dynamic>,
-          );
-          return reciter.name == _currentReciterName;
-        } catch (_) {
-          return false;
-        }
-      }
-      return false;
-    } catch (_) {
-      return false;
-    }
+String _formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+  if (duration.inHours > 0) {
+    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
+  } else {
+    return '$twoDigitMinutes:$twoDigitSeconds';
   }
 }

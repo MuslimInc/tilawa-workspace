@@ -481,6 +481,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationDownloadFailed => 'Download failed';
 
   @override
+  String notificationBatchDownloadingTitle(int count) {
+    return 'Downloading $count files';
+  }
+
+  @override
+  String notificationBatchProgress(int completed, int total, int progress) {
+    return 'Progress: $completed/$total ($progress%)';
+  }
+
+  @override
+  String notificationBatchComplete(int count) {
+    return 'All $count files downloaded successfully';
+  }
+
+  @override
+  String get notificationBatchFailed => 'Batch download failed';
+
+  @override
   String get resume => 'Resume';
 
   @override
@@ -817,6 +835,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This content is not available offline. Please download it first.';
 
   @override
+  String get offlineFileMissingError =>
+      'Downloaded file is missing. Please re-download this content.';
+
+  @override
+  String get offlineDownloadIncompleteError =>
+      'This content is not fully downloaded. Please complete the download first.';
+
+  @override
   String get bookmarks => 'Bookmarks';
 
   @override
@@ -921,13 +947,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get isha => 'Isha';
 
   @override
+  String get midnight => 'Midnight';
+
+  @override
+  String get lastThird => 'Last Third';
+
+  @override
   String get nextPrayer => 'Next Prayer';
 
   @override
   String get calculationMethod => 'Calculation Method';
 
   @override
+  String get calculationMethodMuslimWorldLeague => 'Muslim World League';
+
+  @override
+  String get calculationMethodEgyptian => 'Egyptian General Authority';
+
+  @override
+  String get calculationMethodKarachi => 'University of Karachi';
+
+  @override
+  String get calculationMethodUmmAlQura => 'Umm Al-Qura, Makkah';
+
+  @override
+  String get calculationMethodIsna => 'ISNA (North America)';
+
+  @override
+  String get calculationMethodTehran => 'Tehran';
+
+  @override
+  String get calculationMethodGulf => 'Gulf Region';
+
+  @override
+  String get calculationMethodKuwait => 'Kuwait';
+
+  @override
+  String get calculationMethodQatar => 'Qatar';
+
+  @override
+  String get calculationMethodSingapore => 'Singapore (MUIS)';
+
+  @override
+  String get calculationMethodTurkey => 'Turkey (Diyanet)';
+
+  @override
   String get asrCalculation => 'Asr Calculation';
+
+  @override
+  String get asrCalculationShafii => 'Shafi\'i, Maliki, Hanbali';
+
+  @override
+  String get asrCalculationHanafi => 'Hanafi';
 
   @override
   String get displayOptions => 'Display Options';
@@ -955,10 +1026,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentLocation => 'Current Location';
 
   @override
+  String get prayerTimesTodaySchedule => 'Today\'s schedule';
+
+  @override
+  String get prayerTimesTodayScheduleSubtitle =>
+      'Prayer times and nightly markers';
+
+  @override
+  String get prayerTimesRefreshingLocation => 'Refreshing location...';
+
+  @override
+  String get prayerTimesTapToRefreshLocation => 'Tap to refresh location';
+
+  @override
+  String prayerTimesTimeRemainingUntil(String prayerName) {
+    return 'Time remaining until $prayerName';
+  }
+
+  @override
+  String get prayerTimesScheduled => 'Scheduled';
+
+  @override
+  String get prayerTimesUpcoming => 'Upcoming';
+
+  @override
+  String get prayerTimesPassed => 'Passed';
+
+  @override
+  String prayerTimesIqamahAt(String time) {
+    return 'Iqamah: $time';
+  }
+
+  @override
+  String prayerTimesIshraqAt(String time) {
+    return 'Ishraq: $time';
+  }
+
+  @override
+  String get prayerTimesNightMidpointMarker => 'Night midpoint marker';
+
+  @override
+  String get prayerTimesLastThirdBegins => 'Last third begins';
+
+  @override
   String get hours => 'hours';
 
   @override
   String get minutes => 'minutes';
+
+  @override
+  String get minutesShort => 'min';
 
   @override
   String get seconds => 'seconds';

@@ -177,7 +177,7 @@ void main() {
         expect(result, isA<Left>());
         result.fold((failure) {
           expect(failure, isA<OfflinePlaybackFailure>());
-          expect(failure.message, contains('Downloaded file is missing'));
+          expect(failure.message, contains('File missing'));
         }, (_) => fail('Should return failure'));
       },
     );

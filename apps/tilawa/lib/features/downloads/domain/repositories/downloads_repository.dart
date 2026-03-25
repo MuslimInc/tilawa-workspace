@@ -22,10 +22,16 @@ abstract class DownloadsRepository
         SingleDownloadRepository,
         BatchDownloadRepository,
         DownloadQueryRepository {
-  // No additional methods - this interface just combines the three specialized interfaces
-  // All methods are inherited from the parent interfaces
+  /// Lifecycle & command methods (not part of query interface per ISP)
 
-  /// Additional methods that don't fit neatly into the three categories
+  /// Initialize the repository (start listening to progress updates)
+  Future<void> initialize();
+
+  /// Clear all downloads (delete all data and files)
+  Future<void> clearAllDownloads();
+
+  /// Resume any pending or stuck downloads on app start
+  Future<void> resumePendingDownloads();
 
   /// Add a new download (internal use by repository implementation)
   Future<void> addDownload(DownloadItem downloadItem);

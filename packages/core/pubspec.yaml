@@ -5,7 +5,7 @@ version: 0.0.1
 publish_to: none
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.11.3
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   # State Management
   flutter_bloc: ^9.1.1
   bloc_concurrency: ^0.3.0
-  hydrated_bloc: ^10.1.1
+  hydrated_bloc: ^11.0.0
 
   # DI
   get_it: ^9.2.0

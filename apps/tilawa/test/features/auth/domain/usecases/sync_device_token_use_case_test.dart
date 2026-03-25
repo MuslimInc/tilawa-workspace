@@ -8,13 +8,16 @@ void main() {
   late SyncDeviceTokenUseCase useCase;
   late MockUserRepository mockUserRepository;
   late MockDeviceTokenService mockDeviceTokenService;
+  late MockTokenSyncCache mockTokenSyncCache;
 
   setUp(() {
     mockUserRepository = MockUserRepository();
     mockDeviceTokenService = MockDeviceTokenService();
+    mockTokenSyncCache = MockTokenSyncCache();
     useCase = SyncDeviceTokenUseCase(
       mockUserRepository,
       mockDeviceTokenService,
+      mockTokenSyncCache,
     );
   });
 
@@ -27,8 +30,15 @@ void main() {
       // Arrange
       when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
       when(
+        mockTokenSyncCache.getLastSyncedToken(),
+      ).thenAnswer((_) async => null);
+      when(
+        mockTokenSyncCache.getLastSyncedUserId(),
+      ).thenAnswer((_) async => null);
+      when(
         mockUserRepository.saveDeviceToken(any, any),
       ).thenAnswer((_) async => Future.value());
+      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
 
       // Act
       await useCase(tUserId);
@@ -36,6 +46,7 @@ void main() {
       // Assert
       verify(mockDeviceTokenService.getToken()).called(1);
       verify(mockUserRepository.saveDeviceToken(tUserId, tToken)).called(1);
+      verify(mockTokenSyncCache.saveSync(tToken, tUserId)).called(1);
     },
   );
 
@@ -50,6 +61,33 @@ void main() {
     verify(mockDeviceTokenService.getToken()).called(1);
     verifyNever(mockUserRepository.saveDeviceToken(any, any));
   });
+
+  test(
+    'should remove previous synced token when token ownership changes',
+    () async {
+      when(mockDeviceTokenService.getToken()).thenAnswer((_) async => tToken);
+      when(
+        mockTokenSyncCache.getLastSyncedToken(),
+      ).thenAnswer((_) async => 'old_token');
+      when(
+        mockTokenSyncCache.getLastSyncedUserId(),
+      ).thenAnswer((_) async => 'old_user');
+      when(
+        mockUserRepository.deleteDeviceToken(any, any),
+      ).thenAnswer((_) async {});
+      when(
+        mockUserRepository.saveDeviceToken(any, any),
+      ).thenAnswer((_) async {});
+      when(mockTokenSyncCache.saveSync(any, any)).thenAnswer((_) async {});
+
+      await useCase(tUserId);
+
+      verify(
+        mockUserRepository.deleteDeviceToken('old_user', 'old_token'),
+      ).called(1);
+      verify(mockUserRepository.saveDeviceToken(tUserId, tToken)).called(1);
+    },
+  );
 
   test('should fail silently if getting token throws exception', () async {
     // Arrange

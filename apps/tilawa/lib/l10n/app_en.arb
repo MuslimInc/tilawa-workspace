@@ -646,6 +646,48 @@
     "@notificationDownloadFailed": {
         "description": "Notification message when download fails"
     },
+    "notificationBatchDownloadingTitle": "Downloading {count} files",
+    "@notificationBatchDownloadingTitle": {
+        "description": "Notification title for batch download",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of files in batch"
+            }
+        }
+    },
+    "notificationBatchProgress": "Progress: {completed}/{total} ({progress}%)",
+    "@notificationBatchProgress": {
+        "description": "Notification body for batch download progress",
+        "placeholders": {
+            "completed": {
+                "type": "int",
+                "description": "Number of completed downloads"
+            },
+            "total": {
+                "type": "int",
+                "description": "Total number of downloads"
+            },
+            "progress": {
+                "type": "int",
+                "description": "Overall progress percentage"
+            }
+        }
+    },
+    "notificationBatchComplete": "All {count} files downloaded successfully",
+    "@notificationBatchComplete": {
+        "description": "Notification message when batch download completes",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Number of files downloaded"
+            }
+        }
+    },
+    "notificationBatchFailed": "Batch download failed",
+    "@notificationBatchFailed": {
+        "description": "Notification message when batch download fails"
+    },
     "resume": "Resume",
     "@resume": {
         "description": "Resume button text"
@@ -1094,6 +1136,14 @@
     "@offlinePlaybackError": {
         "description": "Error shown when user tries to play undownloaded content while offline"
     },
+    "offlineFileMissingError": "Downloaded file is missing. Please re-download this content.",
+    "@offlineFileMissingError": {
+        "description": "Error shown when downloaded file no longer exists on disk"
+    },
+    "offlineDownloadIncompleteError": "This content is not fully downloaded. Please complete the download first.",
+    "@offlineDownloadIncompleteError": {
+        "description": "Error shown when download exists but is not completed"
+    },
     "bookmarks": "Bookmarks",
     "@bookmarks": {
         "description": "Bookmarks screen title"
@@ -1223,6 +1273,14 @@
     "@isha": {
         "description": "Isha prayer name"
     },
+    "midnight": "Midnight",
+    "@midnight": {
+        "description": "Midnight marker label"
+    },
+    "lastThird": "Last Third",
+    "@lastThird": {
+        "description": "Last third of night label"
+    },
     "nextPrayer": "Next Prayer",
     "@nextPrayer": {
         "description": "Next prayer label"
@@ -1231,9 +1289,61 @@
     "@calculationMethod": {
         "description": "Prayer calculation method label"
     },
+    "calculationMethodMuslimWorldLeague": "Muslim World League",
+    "@calculationMethodMuslimWorldLeague": {
+        "description": "Muslim World League calculation method"
+    },
+    "calculationMethodEgyptian": "Egyptian General Authority",
+    "@calculationMethodEgyptian": {
+        "description": "Egyptian General Authority of Survey calculation method"
+    },
+    "calculationMethodKarachi": "University of Karachi",
+    "@calculationMethodKarachi": {
+        "description": "University of Islamic Sciences, Karachi calculation method"
+    },
+    "calculationMethodUmmAlQura": "Umm Al-Qura, Makkah",
+    "@calculationMethodUmmAlQura": {
+        "description": "Umm al-Qura University, Makkah calculation method"
+    },
+    "calculationMethodIsna": "ISNA (North America)",
+    "@calculationMethodIsna": {
+        "description": "Islamic Society of North America calculation method"
+    },
+    "calculationMethodTehran": "Tehran",
+    "@calculationMethodTehran": {
+        "description": "Tehran, Institute of Geophysics calculation method"
+    },
+    "calculationMethodGulf": "Gulf Region",
+    "@calculationMethodGulf": {
+        "description": "Gulf Region calculation method"
+    },
+    "calculationMethodKuwait": "Kuwait",
+    "@calculationMethodKuwait": {
+        "description": "Kuwait calculation method"
+    },
+    "calculationMethodQatar": "Qatar",
+    "@calculationMethodQatar": {
+        "description": "Qatar calculation method"
+    },
+    "calculationMethodSingapore": "Singapore (MUIS)",
+    "@calculationMethodSingapore": {
+        "description": "Singapore, MUIS calculation method"
+    },
+    "calculationMethodTurkey": "Turkey (Diyanet)",
+    "@calculationMethodTurkey": {
+        "description": "Turkey, Diyanet calculation method"
+    },
     "asrCalculation": "Asr Calculation",
     "@asrCalculation": {
         "description": "Asr calculation method label"
+    },
+    "asrCalculationShafii": "Shafi'i, Maliki, Hanbali",
+    "@asrCalculationShafii": {
+        "description": "Standard Asr calculation method (Shafi'i, Maliki, Hanbali)"
+    },
+    "asrCalculationHanafi": "Hanafi",
+    "@asrCalculationHanafi": {
+        "description": "Hanafi Asr calculation method"
     },
     "displayOptions": "Display Options",
     "@displayOptions": {
@@ -1267,6 +1377,69 @@
     "@currentLocation": {
         "description": "Current location label"
     },
+    "prayerTimesTodaySchedule": "Today's schedule",
+    "@prayerTimesTodaySchedule": {
+        "description": "Title for today's prayer times schedule section"
+    },
+    "prayerTimesTodayScheduleSubtitle": "Prayer times and nightly markers",
+    "@prayerTimesTodayScheduleSubtitle": {
+        "description": "Subtitle for today's prayer times schedule section"
+    },
+    "prayerTimesRefreshingLocation": "Refreshing location...",
+    "@prayerTimesRefreshingLocation": {
+        "description": "Helper text shown while refreshing prayer times location"
+    },
+    "prayerTimesTapToRefreshLocation": "Tap to refresh location",
+    "@prayerTimesTapToRefreshLocation": {
+        "description": "Helper text inviting the user to refresh prayer times location"
+    },
+    "prayerTimesTimeRemainingUntil": "Time remaining until {prayerName}",
+    "@prayerTimesTimeRemainingUntil": {
+        "description": "Countdown label until the next prayer",
+        "placeholders": {
+            "prayerName": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesScheduled": "Scheduled",
+    "@prayerTimesScheduled": {
+        "description": "Label for the scheduled time of the next prayer"
+    },
+    "prayerTimesUpcoming": "Upcoming",
+    "@prayerTimesUpcoming": {
+        "description": "Status label for an upcoming prayer"
+    },
+    "prayerTimesPassed": "Passed",
+    "@prayerTimesPassed": {
+        "description": "Status label for a prayer that has passed"
+    },
+    "prayerTimesIqamahAt": "Iqamah: {time}",
+    "@prayerTimesIqamahAt": {
+        "description": "Label for iqamah time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesIshraqAt": "Ishraq: {time}",
+    "@prayerTimesIshraqAt": {
+        "description": "Label for ishraq time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "prayerTimesNightMidpointMarker": "Night midpoint marker",
+    "@prayerTimesNightMidpointMarker": {
+        "description": "Description for the midnight marker card"
+    },
+    "prayerTimesLastThirdBegins": "Last third begins",
+    "@prayerTimesLastThirdBegins": {
+        "description": "Description for the last third of night marker card"
+    },
     "hours": "hours",
     "@hours": {
         "description": "Hours label"
@@ -1274,6 +1447,10 @@
     "minutes": "minutes",
     "@minutes": {
         "description": "Minutes label"
+    },
+    "minutesShort": "min",
+    "@minutesShort": {
+        "description": "Minutes short label"
     },
     "seconds": "seconds",
     "@seconds": {

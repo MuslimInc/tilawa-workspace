@@ -47,7 +47,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
       return;
     }
 
-    emit(state.copyWith(status: QiblaStatus.loading));
+    emit(state.copyWith(status: QiblaStatus.loading, errorMessage: null));
 
     // 1. Check if Location Services are enabled.
     final Either<Failure, bool> serviceResult = await _checkLocationService(
@@ -99,7 +99,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     RequestLocationPermission event,
     Emitter<QiblaState> emit,
   ) async {
-    emit(state.copyWith(status: QiblaStatus.loading));
+    emit(state.copyWith(status: QiblaStatus.loading, errorMessage: null));
 
     final Either<Failure, bool> permissionResult =
         await _requestLocationPermission(const NoParams());
@@ -127,7 +127,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     StartQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
-    emit(state.copyWith(status: QiblaStatus.loading));
+    emit(state.copyWith(status: QiblaStatus.loading, errorMessage: null));
     _startListening();
   }
 

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 
 import 'prayer_time_entity.dart';
 
@@ -50,6 +51,16 @@ enum AsrJuristicMethod {
   hanafi,
 }
 
+/// Extension for Asr juristic method display names
+extension AsrJuristicMethodExtension on AsrJuristicMethod {
+  String localize(AppLocalizations l10n) {
+    return switch (this) {
+      AsrJuristicMethod.shafii => l10n.asrCalculationShafii,
+      AsrJuristicMethod.hanafi => l10n.asrCalculationHanafi,
+    };
+  }
+}
+
 /// High latitude adjustment method
 enum HighLatitudeMethod {
   /// No adjustment
@@ -83,7 +94,7 @@ abstract class PrayerNotificationSettings with _$PrayerNotificationSettings {
 @freezed
 abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
   const factory PrayerSettingsEntity({
-    @Default(CalculationMethod.ummAlQura) CalculationMethod calculationMethod,
+    @Default(CalculationMethod.egyptian) CalculationMethod calculationMethod,
     @Default(AsrJuristicMethod.shafii) AsrJuristicMethod asrJuristicMethod,
     @Default(HighLatitudeMethod.none) HighLatitudeMethod highLatitudeMethod,
     @Default(0) int fajrAdjustment,
@@ -200,6 +211,23 @@ extension CalculationMethodExtension on CalculationMethod {
       CalculationMethod.qatar => 'قطر',
       CalculationMethod.singapore => 'سنغافورة',
       CalculationMethod.turkey => 'تركيا (الديانة)',
+    };
+  }
+
+  String localize(AppLocalizations l10n) {
+    return switch (this) {
+      CalculationMethod.muslimWorldLeague =>
+        l10n.calculationMethodMuslimWorldLeague,
+      CalculationMethod.egyptian => l10n.calculationMethodEgyptian,
+      CalculationMethod.karachi => l10n.calculationMethodKarachi,
+      CalculationMethod.ummAlQura => l10n.calculationMethodUmmAlQura,
+      CalculationMethod.isna => l10n.calculationMethodIsna,
+      CalculationMethod.tehran => l10n.calculationMethodTehran,
+      CalculationMethod.gulf => l10n.calculationMethodGulf,
+      CalculationMethod.kuwait => l10n.calculationMethodKuwait,
+      CalculationMethod.qatar => l10n.calculationMethodQatar,
+      CalculationMethod.singapore => l10n.calculationMethodSingapore,
+      CalculationMethod.turkey => l10n.calculationMethodTurkey,
     };
   }
 }

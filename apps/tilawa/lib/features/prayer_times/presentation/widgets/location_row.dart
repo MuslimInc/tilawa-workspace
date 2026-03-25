@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 
 class LocationRow extends StatelessWidget {
@@ -16,79 +15,137 @@ class LocationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final String helperText = isLoading
+        ? context.l10n.prayerTimesRefreshingLocation
+        : context.l10n.prayerTimesTapToRefreshLocation;
 
-    return Material(
-      color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(12.r),
-      child: InkWell(
-        onTap: isLoading ? null : onUpdateLocation,
-        borderRadius: BorderRadius.circular(12.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(10.r),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(
-                    alpha: 0.2,
-                  ),
-                  shape: BoxShape.circle,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool compact = constraints.maxWidth < 420;
+        final bool showHelperText = isLoading || !compact;
+        final double borderRadius = compact ? 20 : 24;
+        final double outerPadding = compact ? 14 : 16;
+        final double leadingSize = compact ? 46 : 52;
+        final double actionSize = compact ? 38 : 42;
+        final double leadingIconSize = compact ? 22 : 24;
+        final double actionIconSize = compact ? 20 : 22;
+
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: InkWell(
+            onTap: isLoading ? null : onUpdateLocation,
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Ink(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colorScheme.surface,
+                    colorScheme.surfaceContainerLowest,
+                  ],
                 ),
-                child: Icon(
-                  Icons.location_on_rounded,
-                  size: 22.sp,
-                  color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.42),
                 ),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: Padding(
+                padding: EdgeInsets.all(outerPadding),
+                child: Row(
                   children: [
-                    Text(
-                      context.l10n.currentLocation,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                    Container(
+                      width: leadingSize,
+                      height: leadingSize,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(compact ? 16 : 18),
+                      ),
+                      child: Icon(
+                        Icons.location_on_rounded,
+                        size: leadingIconSize,
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      (locationName != null && locationName!.isNotEmpty)
-                          ? locationName!
-                          : context.l10n.unknownLocation,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+                    SizedBox(width: compact ? 12 : 14),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.currentLocation,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            (locationName != null && locationName!.isNotEmpty)
+                                ? locationName!
+                                : context.l10n.unknownLocation,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: colorScheme.onSurface,
+                            ),
+                            maxLines: showHelperText ? 1 : 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (showHelperText) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              helperText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 10),
+                    Tooltip(
+                      message: context.l10n.updateLocation,
+                      child: Container(
+                        width: actionSize,
+                        height: actionSize,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            compact ? 14 : 16,
+                          ),
+                        ),
+                        child: Center(
+                          child: isLoading
+                              ? SizedBox(
+                                  width: compact ? 18 : 20,
+                                  height: compact ? 18 : 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.gps_fixed_rounded,
+                                  size: actionIconSize,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: 12.w),
-              if (isLoading)
-                SizedBox(
-                  width: 20.w,
-                  height: 20.w,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: theme.colorScheme.primary,
-                  ),
-                )
-              else
-                Icon(
-                  Icons.my_location_rounded,
-                  size: 24.sp,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_card.dart';
@@ -41,33 +40,48 @@ class PrayerTimesGrid extends StatelessWidget {
       _getPrayer(PrayerType.lastThird),
     ];
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio:
-              1.2, // Adjusted ratio to provide more vertical space and prevent overflow
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 12.h,
-        ),
-        itemCount: gridItems.length,
-        padding: EdgeInsets.zero,
-        itemBuilder: (context, index) {
-          final prayer = gridItems[index];
-          final isNext = currentPrayer?.type == prayer.type;
-          final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double spacing = 14;
+        final double textScale = MediaQuery.textScalerOf(context).scale(1);
+        final int crossAxisCount = constraints.maxWidth >= 980
+            ? 4
+            : constraints.maxWidth >= 680
+            ? 3
+            : 2;
+        final double itemWidth =
+            (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
+            crossAxisCount;
+        final bool compact = itemWidth < 180;
+        final double mainAxisExtent =
+            (compact ? 202.0 : 190.0) +
+            ((textScale - 1.0).clamp(0.0, 0.6) * 28);
 
-          return PrayerTimeCard(
-            prayer: prayer,
-            isNext: isNext,
-            hasPassed: hasPassed && !isNext,
-            use24HourFormat: use24HourFormat,
-          );
-        },
-      ),
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisExtent: mainAxisExtent,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: spacing,
+          ),
+          itemCount: gridItems.length,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemBuilder: (context, index) {
+            final prayer = gridItems[index];
+            final isNext = currentPrayer?.type == prayer.type;
+            final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
+
+            return PrayerTimeCard(
+              prayer: prayer,
+              isNext: isNext,
+              hasPassed: hasPassed && !isNext,
+              use24HourFormat: use24HourFormat,
+            );
+          },
+        );
+      },
     );
   }
 

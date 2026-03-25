@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_card.dart';
@@ -27,14 +26,14 @@ class PrayerTimesList extends StatelessWidget {
               .toList();
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         children: prayers.map((prayer) {
           final isNext = currentPrayer?.type == prayer.type;
           final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
 
           return Padding(
-            padding: EdgeInsets.only(bottom: 8.h),
+            padding: EdgeInsets.only(bottom: 8),
             child: PrayerTimeCard(
               prayer: prayer,
               isNext: isNext,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 
@@ -32,11 +31,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            title: Text(context.l10n.premium),
-            backgroundColor: Colors.amber,
-            foregroundColor: Colors.black,
-          ),
+          appBar: AppBar(title: Text(context.l10n.premium)),
           body: BlocConsumer<PremiumBloc, PremiumState>(
             listener: (context, state) {
               state.when(
@@ -94,7 +89,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     bool canDownload,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16).copyWith(bottom: 120.h),
+      padding: const EdgeInsets.all(16).copyWith(bottom: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

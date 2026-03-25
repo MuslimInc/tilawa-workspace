@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa_core/config/language_config.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../main.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/services/batch_download_service_interface.dart';
 import '../../domain/services/download_notification_service_interface.dart';
 import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages batch downloads and their notifications
 @lazySingleton
-class BatchDownloadManager {
+class BatchDownloadManager implements IBatchDownloadService {
   BatchDownloadManager(
     this._downloadService,
     this._notificationService,
@@ -30,6 +34,9 @@ class BatchDownloadManager {
   // Reverse map for O(1) lookups during progress updates
   final Map<String, String> _downloadIdToBatchId = {};
   bool _isDisposed = false;
+
+  /// Current locale for localized notification messages.
+  Locale locale = Locale(LanguageConfig.defaultLanguageCode);
 
   // Stream subscription for progress updates
   StreamSubscription? _progressSubscription;
@@ -154,6 +161,7 @@ class BatchDownloadManager {
 
   /// Cancel all active batches for a specific reciter
   /// Used when user pauses/cancels downloads for a specific reciter
+  @override
   Future<void> cancelBatchesForReciter(String reciterName) async {
     if (_activeBatches.isEmpty) {
       return;
@@ -281,6 +289,8 @@ class BatchDownloadManager {
       return;
     }
 
+    final AppLocalizations l10n = lookupAppLocalizations(locale);
+
     _notificationService.showBatchDownloadProgress(
       batchId: batch.id,
       title: batch.title,
@@ -288,6 +298,13 @@ class BatchDownloadManager {
       completedCount: batch.completedCount,
       totalCount: batch.totalItems,
       status: batch.status,
+      progressMessage: l10n.notificationBatchProgress(
+        batch.completedCount,
+        batch.totalItems,
+        batch.overallProgress,
+      ),
+      completeMessage: l10n.notificationBatchComplete(batch.totalItems),
+      failedMessage: l10n.notificationBatchFailed,
     );
   }
 
@@ -313,7 +330,14 @@ class _BatchInfo {
     required this.itemIds,
     required this.totalItems,
     this.reciterName,
-  });
+    Map<String, int>? itemProgress,
+  }) {
+    if (itemProgress != null) {
+      _itemProgress.addAll(itemProgress);
+      // Recompute counters from restored progress data
+      _recomputeCounters();
+    }
+  }
 
   final String id;
   final String title;
@@ -327,40 +351,67 @@ class _BatchInfo {
   int cancelledCount = 0;
   final Map<String, int> _itemProgress = {};
 
-  bool updateItemProgress(DownloadProgress progress) {
-    // track status
-    if (progress.status == DownloadStatus.completed) {
-      if (!_itemProgress.containsKey(progress.id) ||
-          _itemProgress[progress.id] != 100) {
-        _itemProgress[progress.id] = 100;
+  /// Recompute counters from [_itemProgress] values.
+  ///
+  /// Used after restoring from JSON to rebuild the counters that were
+  /// not explicitly serialized.
+  void _recomputeCounters() {
+    completedCount = 0;
+    failedCount = 0;
+    cancelledCount = 0;
+    for (final int value in _itemProgress.values) {
+      if (value == 100) {
         completedCount++;
-        return true;
-      }
-    } else if (progress.status == DownloadStatus.failed) {
-      // If it failed, we count it as processed
-      if (!_itemProgress.containsKey(progress.id) ||
-          _itemProgress[progress.id] != -1) {
-        _itemProgress[progress.id] = -1; // mark as failed
+      } else if (value == -1) {
         failedCount++;
-        return true;
-      }
-    } else if (progress.status == DownloadStatus.cancelled) {
-      if (!_itemProgress.containsKey(progress.id) ||
-          _itemProgress[progress.id] != -2) {
-        _itemProgress[progress.id] = -2; // mark as cancelled
+      } else if (value == -2) {
         cancelledCount++;
-        return true;
       }
+    }
+  }
+
+  bool updateItemProgress(DownloadProgress progress) {
+    final int? previousValue = _itemProgress[progress.id];
+
+    if (progress.status == DownloadStatus.completed) {
+      if (previousValue == 100) return false;
+      // Decrement the old counter if transitioning from failed/cancelled
+      _decrementOldCounter(previousValue);
+      _itemProgress[progress.id] = 100;
+      completedCount++;
+      return true;
+    } else if (progress.status == DownloadStatus.failed) {
+      if (previousValue == -1) return false;
+      _decrementOldCounter(previousValue);
+      _itemProgress[progress.id] = -1;
+      failedCount++;
+      return true;
+    } else if (progress.status == DownloadStatus.cancelled) {
+      if (previousValue == -2) return false;
+      _decrementOldCounter(previousValue);
+      _itemProgress[progress.id] = -2;
+      cancelledCount++;
+      return true;
     } else {
       // Running
       final int newProgress = (progress.progress * 100).toInt();
-      if (!_itemProgress.containsKey(progress.id) ||
-          _itemProgress[progress.id] != newProgress) {
-        _itemProgress[progress.id] = newProgress;
-        return true;
-      }
+      if (previousValue == newProgress) return false;
+      // If previously in a terminal state and now retrying, fix the counter
+      _decrementOldCounter(previousValue);
+      _itemProgress[progress.id] = newProgress;
+      return true;
     }
-    return false;
+  }
+
+  /// Decrements the counter corresponding to a previous terminal value.
+  void _decrementOldCounter(int? previousValue) {
+    if (previousValue == 100) {
+      completedCount--;
+    } else if (previousValue == -1) {
+      failedCount--;
+    } else if (previousValue == -2) {
+      cancelledCount--;
+    }
   }
 
   int get overallProgress {
@@ -374,9 +425,7 @@ class _BatchInfo {
       final int? p = _itemProgress[id];
       if (p != null) {
         if (p == -1 || p == -2) {
-          // failed or cancelled, count as 0 or 100?
-          // Usually for batch progress, we might just count them as done (100) but failed.
-          // Or 0. Let's say 100 explicitly so the bar fills up.
+          // failed or cancelled — count as 100 so the bar fills up.
           totalProgressSum += 100;
         } else {
           totalProgressSum += p;
@@ -409,15 +458,22 @@ class _BatchInfo {
     'item_ids': itemIds.toList(),
     'reciter_name': reciterName,
     'total_items': totalItems,
+    'item_progress': _itemProgress,
   };
 
   factory _BatchInfo.fromJson(Map<String, dynamic> json) {
+    final rawProgress = json['item_progress'] as Map<String, dynamic>?;
+    final Map<String, int>? itemProgress = rawProgress?.map(
+      (key, value) => MapEntry(key, value as int),
+    );
+
     return _BatchInfo(
       id: json['id'] as String,
       title: json['title'] as String,
       itemIds: Set.from(json['item_ids'] as List),
       totalItems: json['total_items'] as int,
       reciterName: json['reciter_name'] as String?,
+      itemProgress: itemProgress,
     );
   }
 }

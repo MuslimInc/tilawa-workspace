@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../notifications/presentation/services/fcm_notification_handler_service.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
 
 part 'splash_state.dart';
@@ -8,6 +9,7 @@ part 'splash_state.dart';
 /// Cubit responsible for splash screen logic and initial navigation.
 ///
 /// Determines the next destination based on:
+/// - Notification launch (highest priority)
 /// - Onboarding completion status
 /// - User authentication status
 @injectable
@@ -17,22 +19,36 @@ class SplashCubit extends Cubit<SplashState> {
   final GetSplashNextRouteUseCase _getSplashNextRoute;
 
   Future<void> init() async {
-    // Artificial delay to display branding
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final SplashRouteResult result = await _getSplashNextRoute();
 
-    final SplashDestination destination = await _getSplashNextRoute();
+      // Skip the artificial splash delay for notification launches so the
+      // cold-start deep link can be shown immediately.
+      if (result.destination != SplashDestination.notificationLaunch) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
 
-    switch (destination) {
-      case SplashDestination.home:
-        emit(const SplashNavigateToHome());
-      case SplashDestination.login:
-        emit(const SplashNavigateToLogin());
-      case SplashDestination.onboarding:
-        emit(const SplashNavigateToOnboarding());
-      case SplashDestination.notificationLaunch:
-        // Do nothing - let the notification service handle navigation
-        // This prevents the splash screen from overriding the notification navigation
-        break;
+      String? location;
+      if (result.destination == SplashDestination.notificationLaunch &&
+          result.notificationData != null) {
+        location = FCMNotificationHandlerService.resolveLocation(
+          result.notificationData!,
+        );
+      }
+
+      if (isClosed) return;
+
+      emit(switch (result.destination) {
+        SplashDestination.home => const SplashNavigateToHome(),
+        SplashDestination.login => const SplashNavigateToLogin(),
+        SplashDestination.onboarding => const SplashNavigateToOnboarding(),
+        SplashDestination.notificationLaunch when location != null =>
+          SplashNavigateToNotification(location),
+        SplashDestination.notificationLaunch => const SplashNavigateToHome(),
+      });
+    } catch (_) {
+      // Fallback to home on any unexpected error to avoid a frozen splash
+      emit(const SplashNavigateToHome());
     }
   }
 }

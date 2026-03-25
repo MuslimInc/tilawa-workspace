@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 
@@ -73,15 +72,10 @@ class BookmarksScreen extends StatelessWidget {
                       child: filteredBookmarks.isEmpty
                           ? _buildEmptyState(context, searchQuery.isNotEmpty)
                           : ListView.separated(
-                              padding: EdgeInsets.fromLTRB(
-                                16.r,
-                                16.r,
-                                16.r,
-                                120.h,
-                              ),
+                              padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
                               itemCount: filteredBookmarks.length,
                               separatorBuilder: (context, index) =>
-                                  SizedBox(height: 8.h),
+                                  SizedBox(height: 8),
                               itemBuilder: (context, index) {
                                 final BookmarkEntity bookmark =
                                     filteredBookmarks[index];
@@ -89,10 +83,10 @@ class BookmarksScreen extends StatelessWidget {
                                   key: ValueKey(bookmark.id),
                                   background: Container(
                                     alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.only(right: 20.w),
+                                    padding: EdgeInsets.only(right: 20),
                                     decoration: BoxDecoration(
                                       color: Colors.red,
-                                      borderRadius: BorderRadius.circular(16.r),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: const Icon(
                                       Icons.delete_outline_rounded,
@@ -129,18 +123,18 @@ class BookmarksScreen extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline_rounded,
-                        size: 64.sp,
+                        size: 64,
                         color: Theme.of(context).colorScheme.error,
                       ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       Text(
                         message,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 16,
                           color: Theme.of(context).colorScheme.error,
                         ),
                       ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
                           context.read<BookmarksBloc>().add(
@@ -170,19 +164,19 @@ class BookmarksScreen extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(16.r, 16.r, 16.r, 120.h),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
       itemCount: bookmarks.length,
-      separatorBuilder: (context, index) => SizedBox(height: 8.h),
+      separatorBuilder: (context, index) => SizedBox(height: 8),
       itemBuilder: (context, index) {
         final BookmarkEntity bookmark = bookmarks[index];
         return Dismissible(
           key: ValueKey(bookmark.id),
           background: Container(
             alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(right: 20.w),
+            padding: EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
               color: Colors.red,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
               Icons.delete_outline_rounded,
@@ -211,31 +205,31 @@ class BookmarksScreen extends StatelessWidget {
         children: [
           Icon(
             FluentIcons.bookmark_24_regular,
-            size: 80.sp,
+            size: 80,
             color: Theme.of(
               context,
             ).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 16),
           Text(
             isSearching
                 ? context.l10n.noBookmarksFound
                 : context.l10n.noBookmarks,
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Theme.of(
                 context,
               ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 8),
           Text(
             isSearching
                 ? context.l10n.tryDifferentSearch
                 : context.l10n.noBookmarksHint,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 14,
               color: Theme.of(
                 context,
               ).colorScheme.onSurface.withValues(alpha: 0.5),

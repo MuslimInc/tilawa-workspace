@@ -33,10 +33,18 @@ class AudioFailure extends Failure {
   const AudioFailure([super.message]);
 }
 
+enum OfflinePlaybackReason { notDownloaded, fileMissing, downloadIncomplete }
+
 class OfflinePlaybackFailure extends NetworkFailure {
   const OfflinePlaybackFailure([
     super.message = 'Cannot play online content while offline',
+    this.reason = OfflinePlaybackReason.notDownloaded,
   ]);
+
+  final OfflinePlaybackReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
 }
 
 // Exception classes for throwing

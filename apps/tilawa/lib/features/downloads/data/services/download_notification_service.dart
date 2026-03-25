@@ -1,34 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:dartz_plus/dartz_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
-import 'package:tilawa/core/services/navigation_service.dart';
-import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
 
 import '../../../../main.dart';
-import '../../../../router/app_router_config.dart';
-import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/services/download_notification_navigator.dart';
 import '../../domain/services/download_notification_service_interface.dart';
 
 /// Service for showing custom download notifications with proper title formatting
 @LazySingleton(as: IDownloadNotificationService)
 class DownloadNotificationService implements IDownloadNotificationService {
-  DownloadNotificationService(
-    this._recitersRepository,
-    this._navigator,
-    this._dispatcher,
-  );
+  DownloadNotificationService(this._notificationNavigator, this._dispatcher);
 
-  final RecitersRepository _recitersRepository;
-  final NavigationService _navigator;
+  final DownloadNotificationNavigator _notificationNavigator;
   final INotificationDispatcher _dispatcher;
 
   /// Channel ID for download notifications
@@ -62,7 +51,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
       _dispatcher.registerPayloadHandler(
         serviceId: 'downloads',
         matcher: _isDownloadPayload,
-        handler: handleNotificationResponse,
+        handler: (response) => handleNotificationTap(response.payload),
       );
 
       // Create notification channel for Android
@@ -98,7 +87,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
-      return data.containsKey('reciterName');
+      return data.containsKey('reciterId') || data.containsKey('reciterName');
     } catch (_) {
       return false;
     }
@@ -115,6 +104,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required String downloadId,
     required String title,
     required String reciterName,
+    int? reciterId,
     required int progress,
     required DownloadStatus status,
     String? pendingMessage,
@@ -178,7 +168,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
               ? (pendingMessage ?? 'Waiting to start...')
               : (progressMessage ?? 'Downloading: $progress%'),
           notificationDetails: notificationDetails,
-          payload: jsonEncode({'reciterName': reciterName}),
+          payload: _buildNotificationPayload(
+            reciterId: reciterId,
+            reciterName: reciterName,
+          ),
         );
       } else if (isEffectivelyCompleted) {
         // Show completed notification
@@ -186,6 +179,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           notificationId: notificationId,
           title: notificationTitle,
           message: completeMessage ?? 'Download complete',
+          reciterId: reciterId,
           reciterName: reciterName,
         );
       } else if (status == DownloadStatus.failed) {
@@ -214,6 +208,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required int completedCount,
     required int totalCount,
     required DownloadStatus status,
+    String? progressMessage,
+    String? completeMessage,
+    String? failedMessage,
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
@@ -260,21 +257,25 @@ class DownloadNotificationService implements IDownloadNotificationService {
         await _notifications.show(
           id: notificationId,
           title: title,
-          body: 'Progress: $completedCount/$totalCount ($progress%)',
+          body:
+              progressMessage ??
+              'Progress: $completedCount/$totalCount ($progress%)',
           notificationDetails: notificationDetails,
         );
       } else if (status == DownloadStatus.completed) {
         await _showCompletedNotification(
           notificationId: notificationId,
           title: title,
-          message: 'All $totalCount files downloaded successfully',
+          message:
+              completeMessage ??
+              'All $totalCount files downloaded successfully',
           reciterName: '', // Opens default screen or handled differently
         );
       } else if (status == DownloadStatus.failed) {
         await _showFailedNotification(
           notificationId: notificationId,
           title: title,
-          message: 'Batch download failed',
+          message: failedMessage ?? 'Batch download failed',
         );
       } else if (status == DownloadStatus.cancelled ||
           status == DownloadStatus.paused) {
@@ -302,35 +303,50 @@ class DownloadNotificationService implements IDownloadNotificationService {
   }
 
   /// Cancel all download notifications
+  ///
+  /// Only cancels notifications owned by this service (tracked in
+  /// [_notificationIds]). Does NOT call `cancelAll()` on the shared
+  /// notification plugin to avoid removing notifications from other
+  /// services (e.g., athkar reminders).
   @override
   Future<void> cancelAllNotifications() async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
     }
 
-    await _notifications.cancelAll();
+    for (final int id in _notificationIds.values) {
+      await _notifications.cancel(id: id);
+    }
     _notificationIds.clear();
   }
 
   /// Handle notification tap
   @override
   @visibleForTesting
-  Future<void> handleNotificationResponse(NotificationResponse response) async {
+  Future<void> handleNotificationTap(String? payload) async {
     if (!NotificationConfig.enableLocalNotifications) {
       return;
     }
 
-    final String? payload = response.payload;
     if (payload == null) {
       return;
     }
 
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
-      final String? reciterName = data['reciterName'];
+      final String? reciterId = switch (data['reciterId']) {
+        final int value => value.toString(),
+        final String value when value.isNotEmpty => value,
+        _ => null,
+      };
+      final String? reciterName = data['reciterName'] as String?;
 
-      if (reciterName != null) {
-        await _navigateToReciter(reciterName);
+      if (reciterId != null ||
+          (reciterName != null && reciterName.isNotEmpty)) {
+        await _notificationNavigator.navigateToReciter(
+          reciterId: reciterId,
+          reciterName: reciterName,
+        );
       }
     } on FormatException catch (e) {
       // Not a JSON payload - not a download notification, ignore it
@@ -346,55 +362,25 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
   }
 
-  /// Navigate to reciter details screen
-  Future<void> _navigateToReciter(String reciterName) async {
-    // Use injected navigator
-    try {
-      final Either<Failure, List<ReciterEntity>> result =
-          await _recitersRepository.getReciters();
-
-      result.fold(
-        (failure) => logger.e(
-          'DownloadNotificationService: Failed to fetch reciters: $failure',
-        ),
-        (reciters) {
-          try {
-            final ReciterEntity reciterEntity = reciters.firstWhere(
-              (r) => r.name == reciterName,
-            );
-
-            final reciter = reciterEntity;
-            final reciterId = reciter.id.toString();
-            final String location = ReciterDetailsRoute(
-              reciterId: reciterId,
-              $extra: reciter,
-            ).location;
-
-            final String? currentLocation = _navigator.getCurrentLocation();
-            if (currentLocation != null) {
-              final Uri currentUri = Uri.parse(currentLocation);
-              final Uri targetUri = Uri.parse(location);
-              if (currentUri.path == targetUri.path) {
-                return;
-              }
-            }
-
-            _navigator.push(location, extra: reciter);
-          } catch (e) {
-            logger.w(
-              'DownloadNotificationService: Reciter not found for name: $reciterName',
-            );
-          }
-        },
-      );
-    } catch (e) {
-      logger.e('DownloadNotificationService: Navigation error: $e');
+  String? _buildNotificationPayload({int? reciterId, String? reciterName}) {
+    if (reciterId == null && (reciterName == null || reciterName.isEmpty)) {
+      return null;
     }
+
+    return jsonEncode({
+      'reciterId': ?reciterId,
+      if (reciterName != null && reciterName.isNotEmpty)
+        'reciterName': reciterName,
+    });
   }
 
   /// Helper to generate a consistent notification ID from string ID
+  /// Offset to avoid collision with notification IDs used by other services.
+  static const int _idOffset = 100000;
+  int _nextId = _idOffset;
+
   int _getNotificationId(String id) {
-    return _notificationIds.putIfAbsent(id, () => id.hashCode);
+    return _notificationIds.putIfAbsent(id, () => _nextId++);
   }
 
   /// Helper to show completed notification
@@ -402,6 +388,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     required int notificationId,
     required String title,
     required String message,
+    int? reciterId,
     required String reciterName,
   }) async {
     if (!NotificationConfig.enableLocalNotifications) {
@@ -433,7 +420,10 @@ class DownloadNotificationService implements IDownloadNotificationService {
         title: title,
         body: message,
         notificationDetails: notificationDetails,
-        payload: jsonEncode({'reciterName': reciterName}),
+        payload: _buildNotificationPayload(
+          reciterId: reciterId,
+          reciterName: reciterName,
+        ),
       );
     } catch (e) {
       logger.e('[DownloadNotificationService] Error showing completion: $e');

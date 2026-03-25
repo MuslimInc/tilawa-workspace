@@ -992,6 +992,30 @@ abstract class AppLocalizations {
   /// **'Download failed'**
   String get notificationDownloadFailed;
 
+  /// Notification title for batch download
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {count} files'**
+  String notificationBatchDownloadingTitle(int count);
+
+  /// Notification body for batch download progress
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {completed}/{total} ({progress}%)'**
+  String notificationBatchProgress(int completed, int total, int progress);
+
+  /// Notification message when batch download completes
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} files downloaded successfully'**
+  String notificationBatchComplete(int count);
+
+  /// Notification message when batch download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Batch download failed'**
+  String get notificationBatchFailed;
+
   /// Resume button text
   ///
   /// In en, this message translates to:
@@ -1550,6 +1574,18 @@ abstract class AppLocalizations {
   /// **'This content is not available offline. Please download it first.'**
   String get offlinePlaybackError;
 
+  /// Error shown when downloaded file no longer exists on disk
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded file is missing. Please re-download this content.'**
+  String get offlineFileMissingError;
+
+  /// Error shown when download exists but is not completed
+  ///
+  /// In en, this message translates to:
+  /// **'This content is not fully downloaded. Please complete the download first.'**
+  String get offlineDownloadIncompleteError;
+
   /// Bookmarks screen title
   ///
   /// In en, this message translates to:
@@ -1736,6 +1772,18 @@ abstract class AppLocalizations {
   /// **'Isha'**
   String get isha;
 
+  /// Midnight marker label
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get midnight;
+
+  /// Last third of night label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Third'**
+  String get lastThird;
+
   /// Next prayer label
   ///
   /// In en, this message translates to:
@@ -1748,11 +1796,89 @@ abstract class AppLocalizations {
   /// **'Calculation Method'**
   String get calculationMethod;
 
+  /// Muslim World League calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim World League'**
+  String get calculationMethodMuslimWorldLeague;
+
+  /// Egyptian General Authority of Survey calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian General Authority'**
+  String get calculationMethodEgyptian;
+
+  /// University of Islamic Sciences, Karachi calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'University of Karachi'**
+  String get calculationMethodKarachi;
+
+  /// Umm al-Qura University, Makkah calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Umm Al-Qura, Makkah'**
+  String get calculationMethodUmmAlQura;
+
+  /// Islamic Society of North America calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'ISNA (North America)'**
+  String get calculationMethodIsna;
+
+  /// Tehran, Institute of Geophysics calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Tehran'**
+  String get calculationMethodTehran;
+
+  /// Gulf Region calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Gulf Region'**
+  String get calculationMethodGulf;
+
+  /// Kuwait calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwait'**
+  String get calculationMethodKuwait;
+
+  /// Qatar calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Qatar'**
+  String get calculationMethodQatar;
+
+  /// Singapore, MUIS calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore (MUIS)'**
+  String get calculationMethodSingapore;
+
+  /// Turkey, Diyanet calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey (Diyanet)'**
+  String get calculationMethodTurkey;
+
   /// Asr calculation method label
   ///
   /// In en, this message translates to:
   /// **'Asr Calculation'**
   String get asrCalculation;
+
+  /// Standard Asr calculation method (Shafi'i, Maliki, Hanbali)
+  ///
+  /// In en, this message translates to:
+  /// **'Shafi\'i, Maliki, Hanbali'**
+  String get asrCalculationShafii;
+
+  /// Hanafi Asr calculation method
+  ///
+  /// In en, this message translates to:
+  /// **'Hanafi'**
+  String get asrCalculationHanafi;
 
   /// Display options section title
   ///
@@ -1802,6 +1928,78 @@ abstract class AppLocalizations {
   /// **'Current Location'**
   String get currentLocation;
 
+  /// Title for today's prayer times schedule section
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s schedule'**
+  String get prayerTimesTodaySchedule;
+
+  /// Subtitle for today's prayer times schedule section
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times and nightly markers'**
+  String get prayerTimesTodayScheduleSubtitle;
+
+  /// Helper text shown while refreshing prayer times location
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing location...'**
+  String get prayerTimesRefreshingLocation;
+
+  /// Helper text inviting the user to refresh prayer times location
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to refresh location'**
+  String get prayerTimesTapToRefreshLocation;
+
+  /// Countdown label until the next prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining until {prayerName}'**
+  String prayerTimesTimeRemainingUntil(String prayerName);
+
+  /// Label for the scheduled time of the next prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get prayerTimesScheduled;
+
+  /// Status label for an upcoming prayer
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get prayerTimesUpcoming;
+
+  /// Status label for a prayer that has passed
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get prayerTimesPassed;
+
+  /// Label for iqamah time
+  ///
+  /// In en, this message translates to:
+  /// **'Iqamah: {time}'**
+  String prayerTimesIqamahAt(String time);
+
+  /// Label for ishraq time
+  ///
+  /// In en, this message translates to:
+  /// **'Ishraq: {time}'**
+  String prayerTimesIshraqAt(String time);
+
+  /// Description for the midnight marker card
+  ///
+  /// In en, this message translates to:
+  /// **'Night midpoint marker'**
+  String get prayerTimesNightMidpointMarker;
+
+  /// Description for the last third of night marker card
+  ///
+  /// In en, this message translates to:
+  /// **'Last third begins'**
+  String get prayerTimesLastThirdBegins;
+
   /// Hours label
   ///
   /// In en, this message translates to:
@@ -1813,6 +2011,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'minutes'**
   String get minutes;
+
+  /// Minutes short label
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesShort;
 
   /// Seconds label
   ///

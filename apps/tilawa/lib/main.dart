@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:credential_manager/credential_manager.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -27,10 +28,20 @@ import 'features/downloads/domain/services/download_notification_service_interfa
 import 'features/notifications/domain/repositories/notifications_repository.dart';
 import 'features/notifications/presentation/services/fcm_service.dart';
 import 'firebase_options.dart';
-import 'quran_player_app.dart';
 import 'router/app_router.dart';
+import 'tilawa_app.dart';
 
-final logger = Logger();
+final logger = Logger(
+  filter: ProductionFilter(),
+  printer: PrettyPrinter(
+    methodCount: 0,
+    errorMethodCount: 5,
+    lineLength: 80,
+    colors: false,
+    printEmojis: true,
+    printTime: true,
+  ),
+);
 
 @visibleForTesting
 Future<void> bootstrap({
@@ -44,17 +55,7 @@ Future<void> bootstrap({
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize AppRouter (registers JSON types)
-    AppRouter.init();
-
-    // Enable edge-to-edge display (Flutter recommended approach)
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-    // Lock global orientation to portrait by default
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    // SystemChrome calls moved later to avoid platform-channel hangs during boot
 
     // ========================================================================
     // CRITICAL: Must complete before app starts (blocking)
@@ -65,23 +66,32 @@ Future<void> bootstrap({
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+
+      // Initialize AppRouter (registers JSON types) after Firebase
+      // to ensure dependencies and timing are correct.
+      AppRouter.init();
+
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-      logger.d('Firebase initialized successfully');
     } catch (e, stackTrace) {
-      logger.d('CRITICAL: Firebase initialization failed: $e');
-      logger.d('Stack trace: $stackTrace');
+      logger.e('Firebase initialization failed: $e', stackTrace: stackTrace);
       // Continue anyway - app can work without Firebase
     }
 
     // Initialize DI container
     try {
       await configureDI();
-      logger.d('DI container initialized successfully');
     } catch (e, stackTrace) {
-      logger.d('CRITICAL: DI initialization failed: $e');
-      logger.d('Stack trace: $stackTrace');
-      // This is critical - without DI, services can't be resolved
-      // But we'll try to continue for better error reporting
+      logger.e('DI initialization failed: $e', stackTrace: stackTrace);
+      // Without DI, no service can be resolved — rethrow so the outer
+      // catastrophic catch block shows a minimal error screen.
+      rethrow;
     }
 
     // Initialize HydratedStorage (needed for BLoC state persistence)
@@ -123,27 +133,50 @@ Future<void> bootstrap({
     }
 
     // ========================================================================
+    // Non-critical UI configuration - moved late to avoid boot hangs
+    // ========================================================================
+    try {
+      await Future.wait([
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]),
+      ]).timeout(const Duration(milliseconds: 1000));
+    } catch (e) {
+      logger.w('SystemUI configuration timed out or failed: $e');
+    }
+
+    // ========================================================================
     // APP STARTS HERE - User sees UI immediately!
     // ========================================================================
-    run(const QuranPlayerApp());
+    run(DevicePreview(enabled: false, builder: (context) => const TilawaApp()));
 
     // ========================================================================
     // NON-CRITICAL: Initialize in background after app is visible
     // ========================================================================
     initializeNonCriticalServices();
   } catch (e, stackTrace) {
-    // Catastrophic failure - log and try to start app anyway
-    logger.d('CATASTROPHIC ERROR in bootstrap(): $e');
-    logger.d('Stack trace: $stackTrace');
+    // Catastrophic failure - log and show minimal error screen
+    logger.f('CATASTROPHIC ERROR in bootstrap(): $e', stackTrace: stackTrace);
 
-    // Last resort: try to start the app with minimal initialization
-    try {
-      run(const QuranPlayerApp());
-    } catch (appError) {
-      logger.d('Failed to start app: $appError');
-      // At this point, nothing we can do
-      rethrow;
-    }
+    // Show a minimal error screen that doesn't depend on DI
+    run(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                'Something went wrong.\nPlease restart the app.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -212,9 +245,7 @@ Future<void> initializeNotificationService() async {
     final FCMService fcmService = getIt<FCMService>();
     fcmService.initialize();
 
-    logger.d(
-      'Notification Repository and FCM Service initialized successfully',
-    );
+    logger.d('Notification services initialized successfully');
   } catch (e) {
     logger.d('Warning: Could not initialize Notification services: $e');
   }
@@ -227,7 +258,9 @@ Future<void> initializeHydratedStorage() async {
     HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: kIsWeb
           ? HydratedStorageDirectory.web
-          : HydratedStorageDirectory((await getTemporaryDirectory()).path),
+          : HydratedStorageDirectory(
+              (await getApplicationDocumentsDirectory()).path,
+            ),
     );
 
     logger.d('HydratedStorage initialized successfully');
@@ -340,13 +373,27 @@ Future<void> initializeNotificationDispatcher() async {
     // Check if there's a pending launch notification BEFORE registering handlers
     // If so, disable state restoration so the splash screen shows and handles it
     final NotificationAppLaunchDetails? launchDetails = await dispatcher
-        .getNotificationAppLaunchDetails();
+        .getNotificationAppLaunchDetails()
+        .timeout(const Duration(milliseconds: 1000), onTimeout: () => null);
+
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      logger.d('App launched from notification - disabling state restoration');
-      // Import is needed - add to imports
       AppRouter.disableStateRestoration = true;
+      AppRouter.pendingStartupNotificationLaunch = true;
+    }
+
+    // Consume FCM initial message early and store it.
+    // getInitialMessage() can only be called ONCE — if we don't consume it
+    // here, state restoration may prevent the splash screen from ever
+    // reading it (the splash screen never gets created).
+    final RemoteMessage? fcmInitialMessage = await FirebaseMessaging.instance
+        .getInitialMessage()
+        .timeout(const Duration(milliseconds: 1000), onTimeout: () => null);
+    if (fcmInitialMessage != null) {
+      AppRouter.disableStateRestoration = true;
+      AppRouter.pendingStartupNotificationLaunch = true;
+      AppRouter.pendingFcmMessage = fcmInitialMessage;
     }
 
     // Initialize athkar service (registers its handler with the dispatcher)
@@ -371,7 +418,8 @@ Future<void> initializeAthkarNotifications() async {
   try {
     final IAthkarNotificationService athkarService =
         getIt<IAthkarNotificationService>();
-    await athkarService.initialize();
+    // Note: initialize() is already called in initializeNotificationDispatcher()
+    // so we only schedule here to avoid double handler registration.
     await athkarService.scheduleAthkarNotifications();
     logger.d('Athkar notifications scheduled successfully');
   } catch (e) {

@@ -1,7 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 
@@ -37,11 +36,11 @@ class AthkarCategoriesScreen extends StatelessWidget {
               return Center(child: Text(state.message));
             } else if (state is AthkarCategoriesLoaded) {
               return GridView.builder(
-                padding: EdgeInsets.all(20.r).copyWith(bottom: 120.h),
+                padding: EdgeInsets.all(20).copyWith(bottom: 120),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 16.r,
-                  mainAxisSpacing: 16.r,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                   childAspectRatio: 0.9,
                 ),
                 itemCount: state.categories.length,

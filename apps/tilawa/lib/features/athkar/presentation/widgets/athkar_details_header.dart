@@ -14,11 +14,15 @@ class AthkarDetailsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color appBarForegroundColor = theme.colorScheme.onPrimary;
+
     return SliverAppBar(
       expandedHeight: 100.0,
       pinned: true,
       stretch: true,
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: theme.primaryColor,
+      foregroundColor: appBarForegroundColor,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(
@@ -26,8 +30,8 @@ class AthkarDetailsHeader extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                theme.primaryColor,
+                theme.primaryColor.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -37,13 +41,16 @@ class AthkarDetailsHeader extends StatelessWidget {
         children: [
           Text(
             categoryName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: appBarForegroundColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           if (totalItems > 0)
             Text(
               '${currentPage + 1} / $totalItems',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: appBarForegroundColor.withValues(alpha: 0.9),
               ),
             ),
         ],
@@ -54,8 +61,10 @@ class AthkarDetailsHeader extends StatelessWidget {
               preferredSize: const Size.fromHeight(4),
               child: LinearProgressIndicator(
                 value: (currentPage + 1) / totalItems,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  appBarForegroundColor,
+                ),
               ),
             )
           : null,

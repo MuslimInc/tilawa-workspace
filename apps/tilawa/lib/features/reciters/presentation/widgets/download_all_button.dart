@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -39,10 +38,10 @@ class DownloadAllButton extends StatelessWidget {
         // All downloaded — small check badge
         if (isAllDownloaded) {
           return Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: theme.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -50,15 +49,15 @@ class DownloadAllButton extends StatelessWidget {
                 Icon(
                   Icons.check_circle_rounded,
                   color: theme.primaryColor,
-                  size: 14.sp,
+                  size: 14,
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: 4),
                 Text(
                   context.l10n.allDownloaded,
                   style: TextStyle(
                     color: theme.primaryColor,
                     fontWeight: FontWeight.w600,
-                    fontSize: 11.sp,
+                    fontSize: 11,
                   ),
                 ),
               ],
@@ -82,14 +81,14 @@ class DownloadAllButton extends StatelessWidget {
               );
             }
           },
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: isDownloading
                   ? theme.primaryColor.withValues(alpha: 0.15)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDownloading
                     ? theme.primaryColor.withValues(alpha: 0.6)
@@ -101,8 +100,8 @@ class DownloadAllButton extends StatelessWidget {
               children: [
                 if (isDownloading) ...[
                   SizedBox(
-                    width: 14.w,
-                    height: 14.w,
+                    width: 14,
+                    height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       value: progress,
@@ -112,34 +111,34 @@ class DownloadAllButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 6.w),
+                  SizedBox(width: 6),
                   Text(
                     '${state.downloadedCount}/${state.totalCount}',
                     style: TextStyle(
                       color: theme.primaryColor,
                       fontWeight: FontWeight.w600,
-                      fontSize: 12.sp,
+                      fontSize: 12,
                     ),
                   ),
-                  SizedBox(width: 4.w),
+                  SizedBox(width: 4),
                   Icon(
                     Icons.pause_rounded,
                     color: theme.primaryColor,
-                    size: 14.sp,
+                    size: 14,
                   ),
                 ] else ...[
                   Icon(
                     Icons.download_rounded,
                     color: theme.textTheme.bodyMedium?.color,
-                    size: 14.sp,
+                    size: 14,
                   ),
-                  SizedBox(width: 4.w),
+                  SizedBox(width: 4),
                   Text(
                     _buildLabel(context, state, isDownloading, progress),
                     style: TextStyle(
                       color: theme.textTheme.bodyMedium?.color,
                       fontWeight: FontWeight.w500,
-                      fontSize: 11.sp,
+                      fontSize: 11,
                     ),
                   ),
                 ],

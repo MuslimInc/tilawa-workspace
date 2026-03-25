@@ -1,35 +1,39 @@
+import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../../domain/repositories/notifications_repository.dart';
+import '../../presentation/services/fcm_notification_handler_service.dart';
 import '../datasources/notifications_remote_data_source.dart';
 
 @LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
-  NotificationsRepositoryImpl(this._remoteDataSource);
+  NotificationsRepositoryImpl(
+    this._remoteDataSource,
+    this._dispatcher,
+    this._handler,
+    this._logger,
+  );
+
   final NotificationsRemoteDataSource _remoteDataSource;
-  final Logger _logger = Logger();
+  final INotificationDispatcher _dispatcher;
+  final FCMNotificationHandlerService _handler;
+  final Logger _logger;
+  bool _listenersInitialized = false;
 
   @override
   Future<void> requestPermission() async {
     final NotificationSettings settings = await _remoteDataSource
         .requestPermission();
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      _logger.d('User granted permission');
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      _logger.d('User granted provisional permission');
-    } else {
-      _logger.d('User declined or has not accepted permission');
-    }
+    _logger.d('Notification permission: ${settings.authorizationStatus}');
   }
 
   @override
   Future<String?> getToken() async {
     try {
       final String? token = await _remoteDataSource.getToken();
-      _logger.d('FCM Token: $token');
       return token;
     } catch (e) {
       _logger.e('Error getting FCM token', error: e);
@@ -39,23 +43,32 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   @override
   Future<void> initializeListeners() async {
-    // Handle Foreground Messages
+    if (_listenersInitialized) return;
+    _listenersInitialized = true;
+
+    // 1. Listen for dynamic FCM events from RemoteDataSource
     _remoteDataSource.onMessage.listen((RemoteMessage message) {
-      _logger.d('Got a message whilst in the foreground!');
-      _logger.d(r'Message data: ${message.data}');
-
-      if (message.notification != null) {
-        _logger.d(
-          r'Message also contained a notification: ${message.notification}',
-        );
-        // TODO: Show local notification (Use a UseCase or Helper for UI logic if needed)
-      }
+      _handler.showForegroundNotification(message);
     });
 
-    // Handle Background/Terminated Messages (when opened)
+    // 2. Listen for app opens from background state
     _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
-      _logger.d('A new onMessageOpenedApp event was published!');
-      // TODO: Handle navigation (Use a RouterService or similar)
+      _handler.handleRemoteMessageTap(message);
     });
+
+    // 4. Register for global notification actions via Dispatcher
+    _dispatcher.registerPayloadHandler(
+      serviceId: 'fcm_service',
+      matcher: (payload) {
+        if (payload == null) return false;
+        try {
+          final data = jsonDecode(payload);
+          return data['type'] != null || data['actionType'] != null;
+        } catch (_) {
+          return false;
+        }
+      },
+      handler: (response) => _handler.handleNotificationResponse(response),
+    );
   }
 }

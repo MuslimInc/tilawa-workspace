@@ -31,10 +31,10 @@ abstract class PremiumStatus with _$PremiumStatus {
   }
 
   bool get isTrialActive {
-    if (isTrialUsed || trialEndDate == null) {
+    if (trialEndDate == null) {
       return false;
     }
-    return DateTime.now().isBefore(trialEndDate!);
+    return !isSubscriptionActive && DateTime.now().isBefore(trialEndDate!);
   }
 
   bool get canDownload {

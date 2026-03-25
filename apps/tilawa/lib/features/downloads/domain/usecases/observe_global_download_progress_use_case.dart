@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 
-import '../../data/models/download_progress.dart';
-import '../../data/services/download_service_interface.dart';
+import '../entities/download_progress.dart';
+import '../services/download_service_interface.dart';
 
 @Singleton()
 class ObserveGlobalDownloadProgressUseCase {

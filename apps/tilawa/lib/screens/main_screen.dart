@@ -2,7 +2,6 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/presentation/widgets/offline_indicator_widget.dart';
@@ -34,6 +33,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  static const double _bottomNavBarBaseHeight = 56;
+
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -54,6 +55,10 @@ class _MainScreenState extends State<MainScreen> {
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
     final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardOpen = keyboardHeight > 0;
+    final bool playerShouldShow = context.select((AudioPlayerBloc bloc) {
+      final AudioPlayerState state = bloc.state;
+      return state.shouldShowBottomPlayer && state.currentAudio != null;
+    });
 
     return MultiBlocProvider(
       providers: [
@@ -65,8 +70,8 @@ class _MainScreenState extends State<MainScreen> {
             ..setCountdownActive(_currentIndex == 1),
         ),
       ],
-      child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-        builder: (context, state) {
+      child: Builder(
+        builder: (context) {
           final theme = Theme.of(context);
           return PopScope(
             canPop: _currentIndex == 0,
@@ -85,60 +90,44 @@ class _MainScreenState extends State<MainScreen> {
               resizeToAvoidBottomInset: false,
               body: BlocBuilder<UiVisibilityCubit, bool>(
                 builder: (context, isVisible) {
-                  return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                    builder: (context, audioState) {
-                      // Base height (~72h) + top/bottom padding (8h + 8h)
-                      // We always reserve space if the player SHOULD be showing,
-                      // even if it's currently animatng.
-                      final bool playerShouldShow =
-                          audioState.shouldShowBottomPlayer &&
-                          audioState.currentAudio != null;
-                      final double playerHeight = isVisible && playerShouldShow
-                          ? 100.h
-                          : 0;
+                  final double bottomNavBarHeight = isVisible
+                      ? (_bottomNavBarBaseHeight + bottomPadding)
+                      : 0;
+                  final double playerHeight = isVisible && playerShouldShow
+                      ? 100
+                      : 0;
+                  final double contentBottomPadding = isVisible
+                      ? (bottomNavBarHeight + playerHeight)
+                      : (bottomPadding + 20);
 
-                      final double contentBottomPadding = isVisible
-                          ? (80.h + playerHeight + bottomPadding)
-                          : (bottomPadding + 20.h);
-
-                      return Stack(
-                        children: [
-                          // Main content layer
-                          Positioned.fill(
-                            child: AnimatedPadding(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              padding: EdgeInsets.only(
-                                bottom: contentBottomPadding,
-                              ),
-                              child: IndexedStack(
-                                index: _currentIndex,
-                                children: _screens,
-                              ),
-                            ),
+                  return Stack(
+                    children: [
+                      Positioned.fill(
+                        child: AnimatedPadding(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          padding: EdgeInsets.only(
+                            bottom: contentBottomPadding,
                           ),
-
-                          // Offline indicator overlay at the top
-                          const Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: OfflineIndicatorWidget(),
+                          child: IndexedStack(
+                            index: _currentIndex,
+                            children: _screens,
                           ),
-
-                          // Bottom Player overlay — Positioned.fill allows
-                          // the player to expand to full-screen (YouTube/Spotify UX).
-                          Positioned.fill(
-                            child: BottomPlayerWidget(
-                              bottomNavBarHeight: isVisible
-                                  ? 80.h + bottomPadding
-                                  : 0,
-                              isKeyboardOpen: isKeyboardOpen,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: OfflineIndicatorWidget(),
+                      ),
+                      Positioned.fill(
+                        child: BottomPlayerWidget(
+                          bottomNavBarHeight: bottomNavBarHeight,
+                          isKeyboardOpen: isKeyboardOpen,
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
@@ -291,7 +280,7 @@ class _BottomNavItem extends StatelessWidget {
       },
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -299,12 +288,12 @@ class _BottomNavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              width: isSelected ? 32.w : 0,
-              height: 3.h,
-              margin: EdgeInsets.only(bottom: 4.h),
+              width: isSelected ? 32 : 0,
+              height: 3,
+              margin: EdgeInsets.only(bottom: 4),
               decoration: BoxDecoration(
                 color: isSelected ? activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(2.r),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
             // Icon with animated color transition
@@ -314,8 +303,8 @@ class _BottomNavItem extends StatelessWidget {
                   ? SvgPicture.asset(
                       svgPath!,
                       key: ValueKey('${svgPath}_$isSelected'),
-                      width: 22.sp,
-                      height: 22.sp,
+                      width: 22,
+                      height: 22,
                       colorFilter: ColorFilter.mode(
                         isSelected ? activeColor : inactiveColor,
                         BlendMode.srcIn,
@@ -324,16 +313,16 @@ class _BottomNavItem extends StatelessWidget {
                   : Icon(
                       isSelected ? activeIcon : icon,
                       key: ValueKey('${icon.hashCode}_$isSelected'),
-                      size: 22.sp,
+                      size: 22,
                       color: isSelected ? activeColor : inactiveColor,
                     ),
             ),
-            SizedBox(height: 3.h),
+            SizedBox(height: 3),
             // Label with consistent size (no jitter)
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: baseLabelStyle.copyWith(
-                fontSize: 10.sp,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? activeColor : inactiveColor,
               ),

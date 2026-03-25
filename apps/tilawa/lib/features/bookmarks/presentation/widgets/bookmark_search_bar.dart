@@ -1,6 +1,5 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import 'package:tilawa/core/extensions.dart';
 
@@ -32,7 +31,7 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(16),
       child: TextField(
         controller: _controller,
         focusNode: _focusNode,
@@ -49,7 +48,7 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           filled: true,

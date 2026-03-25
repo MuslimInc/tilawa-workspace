@@ -1,11 +1,23 @@
+import 'dart:convert';
+
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
+import '../../../../router/app_router.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/get_current_user_use_case.dart';
 import '../../../onboarding/domain/usecases/check_onboarding_status.dart';
 
 enum SplashDestination { home, login, onboarding, notificationLaunch }
+
+/// Result of determining the splash next route.
+/// When [destination] is [SplashDestination.notificationLaunch],
+/// [notificationData] contains the payload to resolve the deep link.
+class SplashRouteResult {
+  const SplashRouteResult(this.destination, {this.notificationData});
+  final SplashDestination destination;
+  final Map<String, dynamic>? notificationData;
+}
 
 @injectable
 class GetSplashNextRouteUseCase {
@@ -19,28 +31,52 @@ class GetSplashNextRouteUseCase {
   final CheckOnboardingStatus _checkOnboardingStatus;
   final INotificationDispatcher _dispatcher;
 
-  Future<SplashDestination> call() async {
-    // Check if app was launched from notification first
+  Future<SplashRouteResult> call() async {
+    // Check if app was launched from a local notification (athkar, downloads)
     final details = await _dispatcher.getNotificationAppLaunchDetails();
     if (details != null &&
         details.didNotificationLaunchApp &&
         details.notificationResponse != null) {
-      return SplashDestination.notificationLaunch;
+      // Record the ID so the resume handler in TilawaApp does not
+      // re-process this same launch notification on the first resume.
+      AppRouter.lastProcessedNotificationId = details.notificationResponse!.id;
+
+      final payload = details.notificationResponse!.payload;
+      Map<String, dynamic>? data;
+      if (payload != null) {
+        try {
+          data = Map<String, dynamic>.from(jsonDecode(payload) as Map);
+        } catch (_) {}
+      }
+      return SplashRouteResult(
+        SplashDestination.notificationLaunch,
+        notificationData: data,
+      );
+    }
+
+    // Check if app was launched from an FCM push notification.
+    // The initial message was already consumed in main.dart and stored in
+    // AppRouter.pendingFcmMessage (getInitialMessage() can only be called once).
+    final pendingFcm = AppRouter.pendingFcmMessage;
+    if (pendingFcm != null) {
+      AppRouter.pendingFcmMessage = null;
+      return SplashRouteResult(
+        SplashDestination.notificationLaunch,
+        notificationData: pendingFcm.data,
+      );
     }
 
     final bool isOnboardingCompleted = await _checkOnboardingStatus();
     if (!isOnboardingCompleted) {
-      return SplashDestination.onboarding;
+      return SplashRouteResult(SplashDestination.onboarding);
     }
 
-    // Check user for future logic (e.g. specialized greeting or analytics)
     final UserEntity? user = _getCurrentUserUseCase();
 
     if (user != null) {
-      // User is logged in
-      return SplashDestination.home;
+      return SplashRouteResult(SplashDestination.home);
     }
 
-    return SplashDestination.login;
+    return SplashRouteResult(SplashDestination.login);
   }
 }
