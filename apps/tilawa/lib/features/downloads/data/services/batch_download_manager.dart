@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/batch_download_service_interface.dart';
 import '../../domain/services/download_notification_service_interface.dart';

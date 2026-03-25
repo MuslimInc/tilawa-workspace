@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:injectable/injectable.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../datasources/downloads_local_datasource.dart';
 
 @LazySingleton()

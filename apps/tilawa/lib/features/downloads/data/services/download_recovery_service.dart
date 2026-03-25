@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_queue_manager.dart';
 import 'download_service_interface.dart';

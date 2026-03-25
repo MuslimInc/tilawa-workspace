@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 class FirebaseInitializationService {
   FirebaseInitializationService({

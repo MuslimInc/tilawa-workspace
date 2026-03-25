@@ -3,7 +3,7 @@ import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
-import '../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../shared/audio/audio_player_handler.dart';
 
 class ReciterHelper {

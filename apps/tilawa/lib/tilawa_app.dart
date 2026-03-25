@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:device_preview/device_preview.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/bootstrap/app_startup.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui/theme/app_theme.dart';
@@ -15,10 +16,8 @@ import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
-import 'features/notifications/presentation/services/fcm_notification_handler_service.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
-import 'main.dart';
 import 'router/app_router.dart';
 
 class TilawaApp extends StatefulWidget {
@@ -87,6 +86,8 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     _isCheckingNotification = true;
 
     try {
+      await initializeNotificationHandlers();
+
       final INotificationDispatcher dispatcher =
           getIt<INotificationDispatcher>();
 
@@ -118,6 +119,8 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     }
     _hasProcessedLaunchNotification = true;
 
+    await initializeNotificationHandlers();
+
     if (AppRouter.pendingStartupNotificationLaunch) {
       AppRouter.pendingStartupNotificationLaunch = false;
       return;
@@ -129,17 +132,10 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
         logger.d('Launch notification processed after app ready');
-        return;
       }
-
-      final RemoteMessage? initialMessage = await FirebaseMessaging.instance
-          .getInitialMessage();
-      if (initialMessage != null) {
-        await getIt<FCMNotificationHandlerService>().handleRemoteMessageTap(
-          initialMessage,
-        );
-        logger.d('Initial FCM message processed after app ready');
-      }
+      // NOTE: getInitialMessage() is already consumed once in main.dart
+      // bootstrap and stored in AppRouter.pendingFcmMessage. A second call
+      // would always return null, so we don't call it here.
     } catch (e) {
       logger.d('Error processing launch notification: $e');
     }

@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../config/notification_config.dart';
 
 /// Handler registration data

@@ -2,7 +2,7 @@ import 'package:injectable/injectable.dart';
 
 import 'package:tilawa_core/config/currency_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/repositories/premium_repository.dart';

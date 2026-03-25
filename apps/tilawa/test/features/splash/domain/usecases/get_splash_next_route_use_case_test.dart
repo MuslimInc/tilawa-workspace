@@ -6,35 +6,30 @@ import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.d
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/router/app_router.dart';
-import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 
 class MockCheckOnboardingStatus extends Mock implements CheckOnboardingStatus {}
 
-class MockNotificationDispatcher extends Mock
-    implements INotificationDispatcher {}
-
 void main() {
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockCheckOnboardingStatus mockCheckOnboardingStatus;
-  late MockNotificationDispatcher mockDispatcher;
   late GetSplashNextRouteUseCase useCase;
 
   setUp(() {
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockCheckOnboardingStatus = MockCheckOnboardingStatus();
-    mockDispatcher = MockNotificationDispatcher();
     useCase = GetSplashNextRouteUseCase(
       mockGetCurrentUserUseCase,
       mockCheckOnboardingStatus,
-      mockDispatcher,
     );
     AppRouter.pendingFcmMessage = null;
+    AppRouter.pendingLocalNotificationResponse = null;
   });
 
   tearDown(() {
     AppRouter.pendingFcmMessage = null;
+    AppRouter.pendingLocalNotificationResponse = null;
   });
 
   group('GetSplashNextRouteUseCase', () {
@@ -46,18 +41,13 @@ void main() {
               NotificationResponseType.selectedNotification,
           payload: '{"type":"settings"}',
         );
-
-        when(() => mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
-          (_) async => const NotificationAppLaunchDetails(
-            true,
-            notificationResponse: response,
-          ),
-        );
+        AppRouter.pendingLocalNotificationResponse = response;
 
         final result = await useCase();
 
         expect(result.destination, SplashDestination.notificationLaunch);
         expect(result.notificationData, {'type': 'settings'});
+        expect(AppRouter.pendingLocalNotificationResponse, isNull);
         verifyNever(() => mockCheckOnboardingStatus.call());
         verifyNever(() => mockGetCurrentUserUseCase.call());
       },
@@ -66,9 +56,6 @@ void main() {
     test(
       'returns notification launch for a pending FCM message and clears it',
       () async {
-        when(
-          () => mockDispatcher.getNotificationAppLaunchDetails(),
-        ).thenAnswer((_) async => null);
         AppRouter.pendingFcmMessage = const RemoteMessage(
           data: {'type': 'quran', 'surahNumber': '2'},
         );

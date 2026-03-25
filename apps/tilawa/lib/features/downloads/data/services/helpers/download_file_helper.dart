@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:injectable/injectable.dart';
 
-import '../../../../../main.dart'; // For logger
+import 'package:tilawa/core/logging/app_logger.dart'; // For logger
 import '../../../utils/download_path_utils.dart';
 
 @lazySingleton

@@ -10,7 +10,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../data/models/download_progress.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/usecases/cancel_download_use_case.dart';

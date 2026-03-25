@@ -22,12 +22,6 @@ class SplashCubit extends Cubit<SplashState> {
     try {
       final SplashRouteResult result = await _getSplashNextRoute();
 
-      // Skip the artificial splash delay for notification launches so the
-      // cold-start deep link can be shown immediately.
-      if (result.destination != SplashDestination.notificationLaunch) {
-        await Future.delayed(const Duration(seconds: 2));
-      }
-
       String? location;
       if (result.destination == SplashDestination.notificationLaunch &&
           result.notificationData != null) {

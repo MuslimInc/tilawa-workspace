@@ -20,7 +20,7 @@ import 'package:tilawa_core/utils/url_validator.dart';
 import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../models/queue_state.dart';
 import 'audio_player_handler.dart';
 

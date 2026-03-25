@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // No FirebaseAuth dependency required here
 import 'package:tilawa_core/config/currency_config.dart';
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlansService {

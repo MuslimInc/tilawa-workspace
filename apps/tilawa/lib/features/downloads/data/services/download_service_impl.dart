@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../models/download_progress.dart';
 import 'download_service_interface.dart';

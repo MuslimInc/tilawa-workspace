@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 class LoggingAudioHandler extends CompositeAudioHandler {
   LoggingAudioHandler(super.inner) {

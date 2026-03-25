@@ -58,7 +58,6 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   void _onCheckAuthStatus(CheckAuthStatusEvent event, Emitter<AuthState> emit) {
     final UserEntity? user = _getCurrentUser();
     if (user != null) {
-      unawaited(_syncDeviceToken(user.id).catchError((_) {}));
       emit(AuthState.authenticated(user: user));
     } else {
       emit(const AuthState.unauthenticated());

@@ -326,7 +326,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     final pageData = getPageData(pageNumber);
     final surahNumber = pageData.first['surah']!;
     context.read<QuranReaderBloc>().add(
-      QuranReaderEvent.saveLastRead(surahNumber: surahNumber, page: pageNumber),
+      QuranReaderEvent.saveLastReadImmediate(
+        surahNumber: surahNumber,
+        page: pageNumber,
+      ),
     );
   }
 }

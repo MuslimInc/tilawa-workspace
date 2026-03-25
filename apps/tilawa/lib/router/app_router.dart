@@ -4,6 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
@@ -25,6 +26,10 @@ class AppRouter {
   /// [getInitialMessage] can only be called once, so we capture it early
   /// and let the splash use case read it from here.
   static RemoteMessage? pendingFcmMessage;
+
+  /// Holds the cold-start local notification response captured during
+  /// bootstrap so splash does not need another platform call.
+  static NotificationResponse? pendingLocalNotificationResponse;
 
   /// Indicates that the app cold-started from a notification and splash
   /// should be the only place that consumes that startup navigation.

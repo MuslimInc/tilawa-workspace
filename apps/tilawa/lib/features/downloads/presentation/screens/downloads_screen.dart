@@ -6,7 +6,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';

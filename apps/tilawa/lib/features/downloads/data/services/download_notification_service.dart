@@ -7,7 +7,7 @@ import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui/theme/app_colors.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/download_notification_navigator.dart';
 import '../../domain/services/download_notification_service_interface.dart';

@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:tilawa/main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/api_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
@@ -93,48 +93,24 @@ abstract class ExternalDependenciesModule {
   @singleton
   List<MediaItem> mediaItemList() => [];
 
-  @preResolve
   @singleton
-  Future<AudioPlayerHandler> audioPlayerHandler(
+  AudioPlayerHandler audioPlayerHandler(
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
     SharedPreferencesAsync prefs,
     RecitersRepository recitersRepository,
     DownloadsRepository downloadsRepository,
-  ) async {
-    try {
-      logger.d('Initializing audio service...');
-      final audioPlayerHandlerImpl = AudioPlayerHandlerImpl(
-        mediaItems,
-        analyticsService,
-        prefs,
-        recitersRepository,
-        downloadsRepository,
-      );
-
-      final AudioPlayerHandlerImpl audioHandler = await AudioService.init(
-        builder: () => audioPlayerHandlerImpl,
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
-          androidNotificationChannelName: 'Audio playback',
-          androidNotificationOngoing: true,
-        ),
-      );
-      logger.d('Audio service initialized successfully');
-      return audioHandler;
-    } catch (e) {
-      logger.d('Warning: Could not initialize audio service: $e');
-      // Register a fallback handler to prevent crashes
-      final fallbackHandler = AudioPlayerHandlerImpl(
-        [],
-        analyticsService,
-        prefs,
-        recitersRepository,
-        downloadsRepository,
-      );
-      logger.d('Fallback AudioPlayerHandler registered');
-      return fallbackHandler;
-    }
+  ) {
+    // Create the handler synchronously so DI doesn't block the first frame.
+    // AudioService.init() (the platform notification bridge) is deferred to
+    // initializeAudioService() which runs post-frame in main.dart.
+    return AudioPlayerHandlerImpl(
+      mediaItems,
+      analyticsService,
+      prefs,
+      recitersRepository,
+      downloadsRepository,
+    );
   }
 
   @singleton

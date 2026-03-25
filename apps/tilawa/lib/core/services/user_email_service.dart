@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 abstract class UserEmailService {
   Future<List<String>> getUserEmails();

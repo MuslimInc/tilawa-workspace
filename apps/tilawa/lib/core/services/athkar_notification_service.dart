@@ -13,7 +13,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
 import '../../features/prayer_times/domain/repositories/prayer_times_repository.dart';
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';

@@ -61,19 +61,19 @@ class AppProviders {
       create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
     ),
 
-    // Font Loader provider
+    // Font Loader provider — lazy so font-checking I/O only runs when the
+    // QuranFontLoaderScreen is first accessed, not at app startup.
     BlocProvider<QuranFontLoaderBloc>(
       create: (context) =>
           getIt<QuranFontLoaderBloc>()
             ..add(const QuranFontLoaderEvent.initialize()),
-      lazy: false,
     ),
 
-    // Quran Reader provider (Global for UX and persistence)
+    // Quran Reader provider — lazy so last-read loading only runs when the
+    // Quran reader is first accessed, not at app startup.
     BlocProvider<QuranReaderBloc>(
       create: (context) =>
           getIt<QuranReaderBloc>()..add(const QuranReaderEvent.loadLastRead()),
-      lazy: false,
     ),
     // UI Visibility provider (Global for immersive mode across routes)
     BlocProvider<UiVisibilityCubit>(

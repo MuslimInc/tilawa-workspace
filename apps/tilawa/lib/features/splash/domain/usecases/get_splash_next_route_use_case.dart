@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
-import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
-
 import '../../../../router/app_router.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/get_current_user_use_case.dart';
@@ -24,24 +22,22 @@ class GetSplashNextRouteUseCase {
   GetSplashNextRouteUseCase(
     this._getCurrentUserUseCase,
     this._checkOnboardingStatus,
-    this._dispatcher,
   );
 
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final CheckOnboardingStatus _checkOnboardingStatus;
-  final INotificationDispatcher _dispatcher;
 
   Future<SplashRouteResult> call() async {
-    // Check if app was launched from a local notification (athkar, downloads)
-    final details = await _dispatcher.getNotificationAppLaunchDetails();
-    if (details != null &&
-        details.didNotificationLaunchApp &&
-        details.notificationResponse != null) {
+    final localNotificationResponse =
+        AppRouter.pendingLocalNotificationResponse;
+    if (localNotificationResponse != null) {
+      AppRouter.pendingLocalNotificationResponse = null;
+
       // Record the ID so the resume handler in TilawaApp does not
       // re-process this same launch notification on the first resume.
-      AppRouter.lastProcessedNotificationId = details.notificationResponse!.id;
+      AppRouter.lastProcessedNotificationId = localNotificationResponse.id;
 
-      final payload = details.notificationResponse!.payload;
+      final payload = localNotificationResponse.payload;
       Map<String, dynamic>? data;
       if (payload != null) {
         try {

@@ -114,14 +114,12 @@ class QuranFontService {
   }
 
   /// Registers all 604 fonts with the Flutter engine so they can be used via TextStyle(fontFamily: 'QCF_Pxxx').
+  /// Registers all 604 fonts with the Flutter engine.
+  ///
+  /// Callers must ensure fonts have already been downloaded before invoking
+  /// this method (the [QuranFontLoaderBloc] guarantees this).
   Future<void> loadFontsToEngine() async {
     if (_fontsLoadedToEngine) return;
-
-    if (!await areFontsDownloaded()) {
-      throw Exception(
-        'Fonts have not been downloaded yet. Call downloadFonts() first.',
-      );
-    }
 
     final String path = await _localPath;
     final dir = Directory(path);

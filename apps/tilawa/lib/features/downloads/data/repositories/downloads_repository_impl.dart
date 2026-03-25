@@ -8,7 +8,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';

@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import '../../features/premium/data/services/subscription_plans_service.dart';
 import '../../firebase_options.dart';
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../services/firebase_initialization_service.dart';
 
 /// Command-line tool to initialize Firebase data

@@ -140,7 +140,14 @@ class _PageContentState extends State<PageContent>
     }
 
     if (_loadCompleter != null) {
-      await _loadCompleter!.future;
+      try {
+        await _loadCompleter!.future;
+      } catch (_) {
+        // Another instance failed to load; this instance will stay in loading
+        // state. A retry can happen when a new PageContent mounts and
+        // _loadCompleter has been reset to null by the failing instance.
+        return;
+      }
       if (mounted) {
         setState(() => _isLoading = false);
       }

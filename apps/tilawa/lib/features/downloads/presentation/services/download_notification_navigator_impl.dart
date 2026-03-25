@@ -5,7 +5,7 @@ import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
-import '../../../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/services/download_notification_navigator.dart';

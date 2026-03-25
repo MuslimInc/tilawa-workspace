@@ -31,6 +31,11 @@ class QuranReaderEvent with _$QuranReaderEvent {
     int? ayahNumber,
     int? page,
   }) = _SaveLastRead;
+  const factory QuranReaderEvent.saveLastReadImmediate({
+    required int surahNumber,
+    int? ayahNumber,
+    int? page,
+  }) = _SaveLastReadImmediate;
   const factory QuranReaderEvent.loadLastRead() = _LoadLastRead;
   const factory QuranReaderEvent.searchAyahs(String query) = _SearchAyahs;
   const factory QuranReaderEvent.clearSearch() = _ClearSearch;
@@ -79,6 +84,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       transformer: (events, mapper) =>
           events.debounce(const Duration(milliseconds: 500)).switchMap(mapper),
     );
+    on<_SaveLastReadImmediate>(_onSaveLastReadImmediate);
     on<_LoadLastRead>(_onLoadLastRead, transformer: restartable());
     on<_SearchAyahs>(_onSearchAyahs, transformer: restartable());
     on<_ClearSearch>(_onClearSearch);
@@ -267,6 +273,17 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
 
   Future<void> _onSaveLastRead(
     _SaveLastRead event,
+    Emitter<QuranReaderState> emit,
+  ) async {
+    await _saveLastReadPositionUseCase.call(
+      surahNumber: event.surahNumber,
+      ayahNumber: event.ayahNumber,
+      page: event.page,
+    );
+  }
+
+  Future<void> _onSaveLastReadImmediate(
+    _SaveLastReadImmediate event,
     Emitter<QuranReaderState> emit,
   ) async {
     await _saveLastReadPositionUseCase.call(

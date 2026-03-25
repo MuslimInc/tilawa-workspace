@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tilawa_core/logger.dart';
 
-import '../features/downloads/data/services/downloads_initialization_service.dart';
 import '../firebase_options.dart';
 
 Future<void> main() async {

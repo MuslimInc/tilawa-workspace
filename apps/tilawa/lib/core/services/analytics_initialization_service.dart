@@ -4,7 +4,7 @@ import 'package:tilawa_core/config/currency_config.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
-import '../../main.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'crashlytics_service.dart';
 
 /// Service to initialize analytics with user data and app settings
