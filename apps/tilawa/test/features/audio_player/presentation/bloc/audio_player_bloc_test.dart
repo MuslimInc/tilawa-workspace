@@ -261,9 +261,17 @@ void main() {
       },
       expect: () => [
         // 1. UpdateAudio state
-        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', 'initial-sync'),
+        isA<AudioPlayerState>().having(
+          (s) => s.currentAudio?.id,
+          'audioId',
+          'initial-sync',
+        ),
         // 2. IMMEDIATE UpdatePositionData state (triggered by _emitPositionDataUpdate)
-        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialDuration', const Duration(minutes: 3)),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.duration,
+          'initialDuration',
+          const Duration(minutes: 3),
+        ),
       ],
     );
 
@@ -289,20 +297,36 @@ void main() {
           currentIndex: 0,
           queue: const [zeroAudio],
         );
-        
+
         // This should trigger immediate PositionData update with the new duration
         bloc.add(AudioPlayerEvent.updatePlaybackStateEntity(discoveredState));
         await Future.delayed(Duration.zero);
       },
       expect: () => [
         // From updateAudio
-        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', 'discovery'),
+        isA<AudioPlayerState>().having(
+          (s) => s.currentAudio?.id,
+          'audioId',
+          'discovery',
+        ),
         // From _emitPositionDataUpdate after updateAudio (duration 0)
-        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialZeroDuration', Duration.zero),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.duration,
+          'initialZeroDuration',
+          Duration.zero,
+        ),
         // From updatePlaybackStateEntity
-        isA<AudioPlayerState>().having((s) => s.playbackState?.duration, 'discoveredDuration', const Duration(seconds: 45)),
+        isA<AudioPlayerState>().having(
+          (s) => s.playbackState?.duration,
+          'discoveredDuration',
+          const Duration(seconds: 45),
+        ),
         // From _emitPositionDataUpdate after updatePlaybackStateEntity (duration 45s!)
-        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'syncedDuration', const Duration(seconds: 45)),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.duration,
+          'syncedDuration',
+          const Duration(seconds: 45),
+        ),
       ],
     );
 
@@ -341,15 +365,35 @@ void main() {
       },
       expect: () => [
         // 1. UpdateAudio
-        isA<AudioPlayerState>().having((s) => s.currentAudio?.id, 'audioId', '1'),
+        isA<AudioPlayerState>().having(
+          (s) => s.currentAudio?.id,
+          'audioId',
+          '1',
+        ),
         // 2. IMMEDIATE UpdatePositionData after UpdateAudio
-        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'initialDuration', Duration.zero),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.duration,
+          'initialDuration',
+          Duration.zero,
+        ),
         // 3. UpdatePlaybackState
-        isA<AudioPlayerState>().having((s) => s.playbackState?.duration, 'playbackDuration', const Duration(minutes: 5)),
+        isA<AudioPlayerState>().having(
+          (s) => s.playbackState?.duration,
+          'playbackDuration',
+          const Duration(minutes: 5),
+        ),
         // 4. IMMEDIATE UpdatePositionData after UpdatePlaybackState (fixed duration!)
-        isA<AudioPlayerState>().having((s) => s.positionData?.duration, 'syncedDuration', const Duration(minutes: 5)),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.duration,
+          'syncedDuration',
+          const Duration(minutes: 5),
+        ),
         // 5. UpdatePositionData from positionSubject
-        isA<AudioPlayerState>().having((s) => s.positionData?.position, 'position', const Duration(seconds: 10)),
+        isA<AudioPlayerState>().having(
+          (s) => s.positionData?.position,
+          'position',
+          const Duration(seconds: 10),
+        ),
       ],
     );
 

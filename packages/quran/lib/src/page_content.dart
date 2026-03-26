@@ -1,11 +1,12 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import 'helpers/app_logger.dart';
 import 'layout/quran_layout_strategy.dart';
+import 'services/quran_data_service.dart';
+import 'widgets/bismillah_widget.dart';
+import 'widgets/quran_line.dart';
+import 'widgets/surah_header_banner.dart';
 
 class PageContent extends StatefulWidget {
   const PageContent({
@@ -15,16 +16,24 @@ class PageContent extends StatefulWidget {
     this.verseBackgroundColor,
     this.onLongPress,
     this.onLongPressUp,
-    required this.onLongPressCancel,
-    required this.onLongPressDown,
+    this.onLongPressCancel,
+    this.onLongPressDown,
     this.juzLabel,
     this.hizbLabel,
     this.surahNameBuilder,
     this.onSurahSelected,
     this.onShowIndex,
+    this.headerImageFilter,
+    this.headerTextColor,
+    this.headerFontSizeMultiplier = 0.45,
+    this.currentPageListenable,
   });
 
   final int pageNumber;
+
+  /// Optional listenable for the current page number in the PageView.
+  /// Used for smart keep-alive logic.
+  final ValueListenable<int>? currentPageListenable;
   final Color textColor;
   final Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor;
   final void Function(int surahNumber, int verseNumber)? onLongPress;
@@ -35,6 +44,9 @@ class PageContent extends StatefulWidget {
   final String Function(int surahNumber)? surahNameBuilder;
   final ValueChanged<int>? onSurahSelected;
   final VoidCallback? onShowIndex;
+  final ColorFilter? headerImageFilter;
+  final Color? headerTextColor;
+  final double headerFontSizeMultiplier;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -46,37 +58,11 @@ class PageContent extends StatefulWidget {
   State<PageContent> createState() => _PageContentState();
 }
 
-/// Pre-seeds the QPC v4 data cache for testing. Avoids the need for
-/// `rootBundle` + `compute()` in the test environment.
-@visibleForTesting
-void preloadPageContentCache(
-  Map<String, dynamic> qpcV4Data,
-  Map<int, List<List<Map<String, dynamic>>>> processedPageIndex,
-) {
-  _PageContentState._qpcV4Data = qpcV4Data;
-  _PageContentState._processedPageIndex = processedPageIndex;
-  _PageContentState._loadCompleter = Completer<void>()..complete();
-}
-
-/// Clears the QPC v4 data cache. Call in test tearDown to reset state.
-@visibleForTesting
-void clearPageContentCache() {
-  _PageContentState._qpcV4Data = null;
-  _PageContentState._processedPageIndex = null;
-  _PageContentState._loadCompleter = null;
-}
+// Page caching is now managed by QuranDataService.
 
 class _PageContentState extends State<PageContent>
-    with AutomaticKeepAliveClientMixin {
-  /// Word glyph data keyed by "surah:ayah:wordPos" -> { text, surah, ayah, ... }
-  static Map<String, dynamic>? _qpcV4Data;
-
-  /// Processed Page index: page (int) -> 15-element list of word-map lists.
-  static Map<int, List<List<Map<String, dynamic>>>>? _processedPageIndex;
-
-  static Completer<void>? _loadCompleter;
-
-  /// Shared layout strategy instance (stateless — no need to recreate).
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+  /// Shared layout strategy strategy instance (stateless — no need to recreate).
   static final StandardQuranLayoutStrategy _layoutStrategy =
       StandardQuranLayoutStrategy();
 
@@ -87,14 +73,30 @@ class _PageContentState extends State<PageContent>
   /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
   final SnapshotController _snapshotController = SnapshotController();
   Orientation? _lastOrientation;
+  int _lastCurrentPage = 0;
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive {
+    if (widget.currentPageListenable == null) {
+      return false;
+    }
+    // Keep alive if within 2 pages of the current page
+    final int distance =
+        (widget.pageNumber - widget.currentPageListenable!.value).abs();
+    return distance <= 2;
+  }
 
   @override
   void initState() {
     super.initState();
+    logger.d('[PageContent] initState for page ${widget.pageNumber}');
+    WidgetsBinding.instance.addObserver(this);
     _initQuranData();
+
+    widget.currentPageListenable?.addListener(_handlePageChange);
+    if (widget.currentPageListenable != null) {
+      _lastCurrentPage = widget.currentPageListenable!.value;
+    }
   }
 
   @override
@@ -106,6 +108,9 @@ class _PageContentState extends State<PageContent>
         _lastOrientation != null && _lastOrientation != orientation;
 
     if (didOrientationChange || orientation == Orientation.landscape) {
+      logger.d(
+        '[PageContent] Orientation change or landscape, clearing snapshot for page ${widget.pageNumber}',
+      );
       _snapshotController.allowSnapshotting = false;
       _snapshotController.clear();
     }
@@ -127,103 +132,89 @@ class _PageContentState extends State<PageContent>
 
   @override
   void dispose() {
+    widget.currentPageListenable?.removeListener(_handlePageChange);
+    logger.d('[PageContent] dispose for page ${widget.pageNumber}');
+    WidgetsBinding.instance.removeObserver(this);
     _snapshotController.dispose();
     super.dispose();
   }
 
-  Future<void> _initQuranData() async {
-    if (_qpcV4Data != null && _processedPageIndex != null) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-      return;
-    }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      logger.d(
+        '[PageContent] App resumed, clearing snapshot for page ${widget.pageNumber}',
+      );
+      _snapshotController.allowSnapshotting = false;
+      _snapshotController.clear();
 
-    if (_loadCompleter != null) {
-      try {
-        await _loadCompleter!.future;
-      } catch (_) {
-        // Another instance failed to load; this instance will stay in loading
-        // state. A retry can happen when a new PageContent mounts and
-        // _loadCompleter has been reset to null by the failing instance.
-        return;
-      }
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-      return;
-    }
-
-    _loadCompleter = Completer<void>();
-    try {
-      final List<String> responses = await Future.wait([
-        rootBundle.loadString('packages/quran/assets/quran_fonts/qpc-v4.json'),
-        rootBundle.loadString(
-          'packages/quran/assets/quran_fonts/quran_page_index.json',
-        ),
-      ]);
-
-      // Offload decoding and heavy processing to a background isolate.
-      final List<dynamic> decoded = await compute(_decodeAndProcess, responses);
-
-      _qpcV4Data = decoded[0] as Map<String, dynamic>;
-      _processedPageIndex =
-          decoded[1] as Map<int, List<List<Map<String, dynamic>>>>;
-
-      _loadCompleter!.complete();
-    } catch (e) {
-      debugPrint('Error loading Quran data: $e');
-      _loadCompleter!.completeError(e);
-      _loadCompleter = null; // Allow retry
-    }
-
-    if (mounted) {
-      setState(() => _isLoading = false);
+      // Give images a frame to re-load before re-snapshotting.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _snapshotController.allowSnapshotting = true;
+        }
+      });
+    } else if (state == AppLifecycleState.paused) {
+      logger.d('[PageContent] App paused for page ${widget.pageNumber}');
     }
   }
 
-  /// Heavy lifting: decode JSON and pre-build the O(1) page lookup map.
-  static List<dynamic> _decodeAndProcess(List<String> jsonStrings) {
-    final qpc = json.decode(jsonStrings[0]) as Map<String, dynamic>;
-    final pageIndexRaw = json.decode(jsonStrings[1]) as Map<String, dynamic>;
+  void _handlePageChange() {
+    if (!mounted) {
+      return;
+    }
+    final int currentPage = widget.currentPageListenable!.value;
+    // Only update keep-alive if the distance state changed for this page
+    final bool currentlyKeep = (widget.pageNumber - currentPage).abs() <= 2;
+    final bool previouslyKeep =
+        (widget.pageNumber - _lastCurrentPage).abs() <= 2;
 
-    final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
+    if (currentlyKeep != previouslyKeep) {
+      _lastCurrentPage = currentPage;
+      updateKeepAlive();
+    }
+  }
 
-    for (final MapEntry<String, dynamic> pageEntry in pageIndexRaw.entries) {
-      final int pageNum = int.parse(pageEntry.key);
-      final lineMap = pageEntry.value as Map<String, dynamic>;
+  Future<void> _initQuranData() async {
+    final startTime = DateTime.now();
+    final QuranDataService dataService = QuranDataService.instance;
 
-      final List<List<Map<String, dynamic>>> lines = List.generate(
-        15,
-        (_) => <Map<String, dynamic>>[],
-      );
-
-      for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
-        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
-        final List<String> wordKeys = (lineEntry.value as List<dynamic>)
-            .cast<String>();
-        for (final key in wordKeys) {
-          final wordData = qpc[key] as Map<String, dynamic>?;
-          if (wordData != null) {
-            lines[lineIndex].add(wordData);
-          }
-        }
+    if (dataService.isLoaded) {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
-      processedIndex[pageNum] = lines;
+      return;
     }
 
-    return [qpc, processedIndex];
+    try {
+      await dataService.ensureLoaded();
+      if (!mounted) {
+        return;
+      }
+
+      setState(() => _isLoading = false);
+      final Duration duration = DateTime.now().difference(startTime);
+      logger.d(
+        '[PageContent] Page ${widget.pageNumber} ready in ${duration.inMilliseconds}ms',
+      );
+    } catch (e) {
+      if (mounted) {
+        debugPrint('Error loading Quran data: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   /// Returns words for [pageNumber] grouped into 15 lines (O(1) lookup).
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
-    return _processedPageIndex?[pageNumber] ?? List.generate(15, (_) => []);
+    return QuranDataService.instance.getPageData(pageNumber) ??
+        List.generate(15, (_) => []);
   }
 
   /// Returns the [InlineSpan]s to render for [lineIndex] from pre-fetched [lines].
-  ///
-  /// Accepts a pre-built [baseStyle] to avoid allocating a new TextStyle per
-  /// word when no verse-specific background color is needed.
   List<InlineSpan> _getSpansForLine(
     List<List<Map<String, dynamic>>> lines,
     int lineIndex,
@@ -268,7 +259,9 @@ class _PageContentState extends State<PageContent>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
+    final renderStartTime = DateTime.now();
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -288,15 +281,11 @@ class _PageContentState extends State<PageContent>
         final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
         // Pages 1-2 use the same 15-line grid height as all
-        // other pages in portrait. In landscape we render only
-        // the visible lines and let the page scroll naturally.
+        // other pages in portrait.
         final bool isSpecialPage =
             widget.pageNumber == 1 || widget.pageNumber == 2;
         final double lineHeight = metrics.fontSize * metrics.fontHeight;
 
-        // Build one shared TextStyle for the entire page — all words
-        // share font, size, color, height. Only verse background
-        // color (rare) needs a per-word override via copyWith.
         final baseStyle = TextStyle(
           fontFamily: pageFont,
           fontSize: metrics.fontSize,
@@ -304,7 +293,6 @@ class _PageContentState extends State<PageContent>
           height: metrics.fontHeight,
         );
 
-        // Thin-space style for first content line separator.
         final spaceStyle = TextStyle(
           fontFamily: pageFont,
           fontSize: metrics.fontSize,
@@ -337,37 +325,22 @@ class _PageContentState extends State<PageContent>
               widget.pageNumber,
               lineIndex + 1,
             );
-            return _SurahHeaderBanner(
+            return SurahHeaderBanner(
               surahNumber: surahNum,
               lineHeight: lineHeight,
+              headerImageFilter: widget.headerImageFilter,
+              headerTextColor: widget.headerTextColor,
+              headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
             );
           }
 
           if (isBismillah) {
-            const bismillahText = '齃𧻓𥳐龎';
-            const bismillahFont = 'QCF_BSML';
-            final double bismillahFontSize = metrics.fontSize * 0.75;
-
-            return SizedBox(
-              width: double.infinity,
-              height: lineHeight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    bismillahText,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: bismillahFont,
-                      package: 'quran',
-                      fontSize: bismillahFontSize,
-                      color: widget.textColor,
-                      height: 1.0,
-                    ),
-                  ),
-                ),
-              ),
+            final String pageStr = widget.pageNumber.toString().padLeft(3, '0');
+            return BismillahWidget(
+              fontSize: metrics.fontSize,
+              pageNumber: widget.pageNumber,
+              color: widget.textColor,
+              fontFamily: 'QCF_P$pageStr',
             );
           }
 
@@ -389,25 +362,12 @@ class _PageContentState extends State<PageContent>
 
           final richText = RichText(
             textDirection: TextDirection.rtl,
-            softWrap: false,
             overflow: TextOverflow.visible,
             maxLines: 1,
-            textHeightBehavior: const TextHeightBehavior(
-              applyHeightToFirstAscent: false,
-              applyHeightToLastDescent: false,
-            ),
             text: TextSpan(children: spans),
           );
 
-          // Keep the QCF glyphs at their natural proportions and
-          // prevent Flutter from wrapping a single Mushaf line into a
-          // second visual line.
-
-          return SizedBox(
-            width: double.infinity,
-            height: lineHeight,
-            child: Center(child: richText),
-          );
+          return QuranLine(richText: richText);
         }).toList();
 
         final lines = Column(
@@ -416,19 +376,18 @@ class _PageContentState extends State<PageContent>
               : isSpecialPage
               ? MainAxisAlignment.center
               : MainAxisAlignment.start,
+          spacing: 4,
           children: lineWidgets,
         );
-
-        final content = Padding(padding: metrics.padding, child: lines);
 
         if (metrics.isScrollable) {
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            child: content,
+            child: lines,
           );
         }
 
-        return content;
+        return lines;
       },
     );
 
@@ -438,11 +397,18 @@ class _PageContentState extends State<PageContent>
       controller: _snapshotController,
       child: SafeArea(bottom: false, child: pageBody),
     );
+
+    final Duration renderDuration = DateTime.now().difference(renderStartTime);
+    if (renderDuration.inMilliseconds > 16) {
+      logger.d(
+        '[PageContent] Page ${widget.pageNumber} build took ${renderDuration.inMilliseconds}ms (Slow)',
+      );
+    }
+
     return result;
   }
 
-  /// Returns the 0-based line index of the first line that has content
-  /// from pre-fetched [lines]. Avoids a redundant `_getWordsGroupedByLine` call.
+  /// Returns the 0-based line index of the first line that has content.
   int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
     for (var i = 0; i < lines.length; i++) {
       if (lines[i].isNotEmpty) {
@@ -532,64 +498,5 @@ class _PageContentState extends State<PageContent>
       }
     }
     return special;
-  }
-}
-
-class _SurahHeaderBanner extends StatelessWidget {
-  const _SurahHeaderBanner({
-    required this.surahNumber,
-    required this.lineHeight,
-  });
-  final int surahNumber;
-  final double lineHeight;
-  static const double _visualHeightRatio = 40 / 47;
-
-  static const AssetImage _bannerImage = AssetImage(
-    'assets/mainframe.png',
-    package: 'quran',
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final double bannerHeight = lineHeight * _visualHeightRatio;
-
-    return RepaintBoundary(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8).copyWith(top: 4),
-        child: SizedBox(
-          height: lineHeight,
-          width: double.infinity,
-          child: Center(
-            child: SizedBox(
-              height: bannerHeight,
-              width: double.infinity,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const Positioned.fill(
-                    child: Image(
-                      image: _bannerImage,
-                      fit: BoxFit.fill,
-                      filterQuality: FilterQuality.low,
-                    ),
-                  ),
-                  Text(
-                    String.fromCharCode(0xF100 + surahNumber - 1),
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: 'QCF_BSML',
-                      package: 'quran',
-                      fontSize: bannerHeight * 0.45,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      height: 1.0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

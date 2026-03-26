@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
@@ -34,11 +35,14 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen>
     with WidgetsBindingObserver {
-  static const Color _readerSystemBarColor = Color(0xFFF9F5EF);
-
   late PageController _pageController;
+  late final ValueNotifier<int> _currentPageNotifier;
   late final UiVisibilityCubit _uiVisibilityCubit;
-  int _currentPageNumber = 1;
+  bool _didInitDependencies = false;
+  bool _isInitialPageJumpDone = false;
+  final GlobalKey _pageViewKey = GlobalKey();
+
+  static const _headerFontSizeMultiplier = 0.57;
 
   @override
   void initState() {
@@ -51,7 +55,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    _enterReaderImmersiveMode();
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
 
@@ -94,14 +97,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       }
     }
 
-    _currentPageNumber = initialPage;
+    _currentPageNotifier = ValueNotifier<int>(initialPage);
     _pageController = PageController(initialPage: initialPage - 1);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitDependencies) {
+      _didInitDependencies = true;
+      _enterReaderImmersiveMode();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
+    _currentPageNotifier.dispose();
     // Revert to portrait only when leaving this screen
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -121,17 +134,18 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   }
 
   void _enterReaderImmersiveMode() {
+    final readerTheme = QuranReaderTheme.of(context);
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: const [SystemUiOverlay.top],
     );
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: _readerSystemBarColor,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+      SystemUiOverlayStyle(
+        statusBarColor: readerTheme.systemBarColor,
+        statusBarIconBrightness: readerTheme.statusBarIconBrightness,
+        statusBarBrightness: readerTheme.statusBarBrightness,
         systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarIconBrightness: readerTheme.statusBarIconBrightness,
         systemStatusBarContrastEnforced: false,
         systemNavigationBarContrastEnforced: false,
       ),
@@ -143,156 +157,170 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle());
   }
 
-  bool _isInitialPageJumpDone = false;
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
+    final readerTheme = QuranReaderTheme.of(context);
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(scaffoldBackgroundColor: readerTheme.pageBackground),
+      child: BlocListener<QuranReaderBloc, QuranReaderState>(
+        listenWhen: (previous, current) =>
+            previous.currentPage != current.currentPage &&
+            current.currentPage != null,
+        listener: (context, state) {
+          final pageNumber = state.currentPage!.pageNumber;
 
-    return BlocListener<QuranReaderBloc, QuranReaderState>(
-      listenWhen: (previous, current) =>
-          previous.currentPage != current.currentPage &&
-          current.currentPage != null,
-      listener: (context, state) {
-        final pageNumber = state.currentPage!.pageNumber;
+          // Sync PageController ONLY if it's not already at the correct page
+          if (_pageController.hasClients) {
+            final currentPageInController =
+                _pageController.page ?? _pageController.initialPage.toDouble();
 
-        // Sync PageController ONLY if it's not already at the correct page
-        if (_pageController.hasClients) {
-          final currentPageInController =
-              _pageController.page ?? _pageController.initialPage.toDouble();
-
-          if ((currentPageInController + 1 - pageNumber).abs() > 0.1) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_pageController.hasClients &&
-                  !_pageController.position.isScrollingNotifier.value) {
-                _pageController.jumpToPage(pageNumber - 1);
-              }
-            });
-          }
-        }
-
-        if (!_isInitialPageJumpDone) {
-          setState(() {
-            _isInitialPageJumpDone = true;
-          });
-        }
-      },
-      child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
-        buildWhen: (previous, current) =>
-            previous.status != current.status ||
-            previous.errorMessage != current.errorMessage,
-        builder: (context, state) {
-          // Show loading if we are waiting for the last read position
-          if (widget.surahNumber == 0 &&
-              !_isInitialPageJumpDone &&
-              state.status == QuranReaderStatus.loading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            if ((currentPageInController + 1 - pageNumber).abs() > 0.1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_pageController.hasClients &&
+                    !_pageController.position.isScrollingNotifier.value) {
+                  _pageController.jumpToPage(pageNumber - 1);
+                }
+              });
+            }
           }
 
-          if (state.status == QuranReaderStatus.error) {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, color: colorScheme.error, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.errorMessage,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface,
+          if (!_isInitialPageJumpDone) {
+            if (mounted) {
+              setState(() {
+                _isInitialPageJumpDone = true;
+              });
+            }
+          }
+        },
+        child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
+          buildWhen: (previous, current) =>
+              previous.status != current.status ||
+              previous.errorMessage != current.errorMessage,
+          builder: (context, state) {
+            final ThemeData theme = Theme.of(context);
+            final ColorScheme colorScheme = theme.colorScheme;
+
+            // Show loading if we are waiting for the last read position
+            if (widget.surahNumber == 0 &&
+                !_isInitialPageJumpDone &&
+                state.status == QuranReaderStatus.loading) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (state.status == QuranReaderStatus.error) {
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, color: colorScheme.error, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.errorMessage,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<QuranReaderBloc>().add(
-                          const QuranReaderEvent.loadLastRead(),
-                        );
-                      },
-                      child: const Text('Try Again'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return Stack(
-            children: [
-              Scaffold(
-                body: GestureDetector(
-                  onTap: () {
-                    context.read<UiVisibilityCubit>().toggle();
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: BlocBuilder<UiVisibilityCubit, bool>(
-                    builder: (context, isVisible) {
-                      return BlocBuilder<QuranReaderBloc, QuranReaderState>(
-                        buildWhen: (oldState, newState) {
-                          return oldState.settings != newState.settings ||
-                              oldState.status != newState.status;
-                        },
-                        builder: (context, state) {
-                          return QuranPageView(
-                            controller: _pageController,
-                            onPageChanged: (pageNumber) {
-                              setState(() {
-                                _currentPageNumber = pageNumber;
-                              });
-                              final pageData = getPageData(pageNumber);
-                              final surahNumber = pageData.first['surah']!;
-                              context.read<QuranReaderBloc>().add(
-                                QuranReaderEvent.saveLastRead(
-                                  surahNumber: surahNumber,
-                                  page: pageNumber,
-                                ),
-                              );
-                            },
-                            juzLabel: context.l10n.juzPart,
-                            hizbLabel: context.l10n.hizb,
-                            surahNameBuilder: (surahNumber) {
-                              return context.l10n.localeName == 'ar'
-                                  ? getSurahNameArabic(surahNumber)
-                                  : getSurahNameEnglish(surahNumber);
-                            },
-                            onSurahSelected: _jumpToSurah,
-                            onShowIndex: () => _showSurahIndex(context),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<QuranReaderBloc>().add(
+                            const QuranReaderEvent.loadLastRead(),
                           );
                         },
-                      );
-                    },
+                        child: const Text('Try Again'),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              // Page navigation slider — appears when UI chrome is visible.
-              BlocBuilder<UiVisibilityCubit, bool>(
-                builder: (context, isVisible) {
-                  return AnimatedPositioned(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: AnimatedSlide(
+              );
+            }
+
+            return Stack(
+              children: [
+                Scaffold(
+                  key: const ValueKey('QuranReaderScaffold'),
+                  body: GestureDetector(
+                    onTap: () {
+                      context.read<UiVisibilityCubit>().toggle();
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
+                      buildWhen: (oldState, newState) =>
+                          oldState.settings != newState.settings ||
+                          oldState.status != newState.status,
+                      builder: (context, state) {
+                        return QuranPageView(
+                          key: _pageViewKey,
+                          controller: _pageController,
+                          currentPageListenable: _currentPageNotifier,
+                          pageBackgroundColor: readerTheme.pageBackground,
+                          textColor: readerTheme.textColor,
+                          headerImageFilter: readerTheme.headerImageFilter,
+                          headerTextColor: readerTheme.headerTextColor,
+                          headerFontSizeMultiplier: _headerFontSizeMultiplier,
+                          onPageChanged: (pageNumber) {
+                            if (_currentPageNotifier.value != pageNumber) {
+                              _currentPageNotifier.value = pageNumber;
+                            }
+                            final pageData = getPageData(pageNumber);
+                            final surahNumber = pageData.first['surah']!;
+                            context.read<QuranReaderBloc>().add(
+                              QuranReaderEvent.saveLastRead(
+                                surahNumber: surahNumber,
+                                page: pageNumber,
+                              ),
+                            );
+                          },
+                          juzLabel: context.l10n.juzPart,
+                          hizbLabel: context.l10n.hizb,
+                          surahNameBuilder: (surahNumber) {
+                            return context.l10n.localeName == 'ar'
+                                ? getSurahNameArabic(surahNumber)
+                                : getSurahNameEnglish(surahNumber);
+                          },
+                          onSurahSelected: _jumpToSurah,
+                          onShowIndex: () => _showSurahIndex(context),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                // Page navigation slider — appears when UI chrome is visible.
+                BlocBuilder<UiVisibilityCubit, bool>(
+                  builder: (context, isVisible) {
+                    return AnimatedPositioned(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      offset: isVisible ? Offset.zero : const Offset(0, 1),
-                      child: _PageNavigationBar(
-                        currentPage: _currentPageNumber,
-                        onPageChanged: _jumpToPage,
-                        onShowIndex: () => _showSurahIndex(context),
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: AnimatedSlide(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        offset: isVisible ? Offset.zero : const Offset(0, 1),
+                        child: ValueListenableBuilder<int>(
+                          valueListenable: _currentPageNotifier,
+                          builder: (context, currentPage, _) {
+                            return _PageNavigationBar(
+                              currentPage: currentPage,
+                              onPageChanged: _jumpToPage,
+                              onShowIndex: () => _showSurahIndex(context),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -357,13 +385,9 @@ class _PagePreviewInfo {
       pageData.first['start']!,
     );
 
-    final int? quarterNumber =
-        pageNumber == 1 || pageNumber == 2
-            ? null
-            : getQuarterNumber(
-              pageData.first['surah']!,
-              pageData.first['start']!,
-            );
+    final int? quarterNumber = pageNumber == 1 || pageNumber == 2
+        ? null
+        : getQuarterNumber(pageData.first['surah']!, pageData.first['start']!);
 
     String hizbLabelStr = '';
     if (quarterNumber != null) {
@@ -387,15 +411,13 @@ class _PagePreviewInfo {
     }
 
     return _PagePreviewInfo(
-      surahName:
-          uniqueSurahNumbers
-              .map(
-                (surahNumber) =>
-                    isArabic
-                        ? getSurahNameArabic(surahNumber)
-                        : getSurahNameEnglish(surahNumber),
-              )
-              .join(' · '),
+      surahName: uniqueSurahNumbers
+          .map(
+            (surahNumber) => isArabic
+                ? getSurahNameArabic(surahNumber)
+                : getSurahNameEnglish(surahNumber),
+          )
+          .join(' · '),
       juzNumber: juzNumber,
       hizbLabel: hizbLabelStr,
     );
@@ -421,10 +443,10 @@ class _PageNavigationBar extends StatefulWidget {
 class _PageNavigationBarState extends State<_PageNavigationBar> {
   static const int _totalPages = 604;
   static const double _sliderHeight = 32;
-  static const double _sliderPreviewHeight = 76;
-  static const double _sliderThumbRadius = 7;
-  static const double _sliderOverlayRadius = 16;
-  static const Duration _animationDuration = Duration(milliseconds: 180);
+  static const double _sliderPreviewHeight = 140;
+  static const double _sliderThumbRadius = 8;
+  static const double _sliderOverlayRadius = 24;
+  static const Duration _animationDuration = Duration(milliseconds: 200);
 
   double? _sliderValueOverride;
   int? _lastPreviewPage;
@@ -490,11 +512,13 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final bool isDark = theme.brightness == Brightness.dark;
     final Color primaryColor = colorScheme.primary;
-    final Color accentColor = colorScheme.primary;
-    final Color barColor = colorScheme.surface.withValues(alpha: 0.92);
+    final Color barColor = isDark
+        ? colorScheme.surface.withValues(alpha: 0.88)
+        : colorScheme.surface.withValues(alpha: 0.92);
     final Color borderColor = colorScheme.outlineVariant.withValues(
-      alpha: 0.55,
+      alpha: isDark ? 0.3 : 0.55,
     );
     final Color textColor = colorScheme.onSurface;
     final Color mutedTextColor = colorScheme.onSurfaceVariant;
@@ -509,14 +533,14 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
 
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Material(
           color: Colors.transparent,
           child: Container(
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
-              top: 12,
+              top: 16,
               bottom: bottomPadding + 8,
             ),
             decoration: BoxDecoration(
@@ -526,87 +550,113 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Surah name + page info row
+                // Info row
                 Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
+                    mainAxisAlignment: .spaceBetween,
                     children: [
-                      // Surah index button
-                      GestureDetector(
-                        onTap: widget.onShowIndex,
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: primaryColor.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.menu_book_rounded,
-                            size: 18,
-                            color: primaryColor,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      // Surah name
-                      Expanded(
-                        child: Text(
-                          currentInfo.surahName,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: textColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      // Juz + Hizb info
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Row(
                         children: [
-                          Text(
-                            '${context.l10n.juzPart} ${currentInfo.juzNumber}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: textColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                          // Page number badge
+                          Container(
+                            constraints: const BoxConstraints(minWidth: 44),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
                             ),
-                          ),
-                          if (currentInfo.hizbLabel.isNotEmpty)
-                            Text(
-                              currentInfo.hizbLabel,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: mutedTextColor,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w500,
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(
+                                alpha: isDark ? 0.2 : 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${widget.currentPage}',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
                               ),
                             ),
+                          ),
+                          const SizedBox(width: 10),
+                          // Juz + Hizb info
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${context.l10n.juzPart} ${currentInfo.juzNumber}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: textColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (currentInfo.hizbLabel.isNotEmpty) ...[
+                                const SizedBox(height: 1),
+                                Text(
+                                  currentInfo.hizbLabel,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: mutedTextColor,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
-                      SizedBox(width: 8),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${widget.currentPage}',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: textColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: .end,
+                          children: [
+                            // Surah names
+                            Flexible(
+                              flex: 3,
+                              child: Text(
+                                currentInfo.surahName,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: textColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.end,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Surah index button
+                            Material(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(12),
+                              elevation: isDark ? 0 : 2,
+                              shadowColor: primaryColor.withValues(alpha: 0.3),
+                              child: InkWell(
+                                onTap: widget.onShowIndex,
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Icon(
+                                    Icons.menu_book_rounded,
+                                    size: 20,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Page slider (RTL: page 1 on the right, 604 on the left)
+                // Page slider
                 AnimatedContainer(
                   duration: _animationDuration,
                   curve: Curves.easeOutCubic,
@@ -638,36 +688,16 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                           Positioned(
                             left: 0,
                             right: 0,
-                            bottom: 0,
-                            child: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: SliderTheme(
-                                data: SliderThemeData(
-                                  activeTrackColor: accentColor,
-                                  inactiveTrackColor: accentColor.withValues(
-                                    alpha: 0.15,
-                                  ),
-                                  thumbColor: accentColor,
-                                  overlayColor: accentColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  trackHeight: 3,
-                                  thumbShape: RoundSliderThumbShape(
-                                    enabledThumbRadius: _sliderThumbRadius,
-                                  ),
-                                  overlayShape: RoundSliderOverlayShape(
-                                    overlayRadius: _sliderOverlayRadius,
-                                  ),
-                                ),
-                                child: Slider(
-                                  value: _sliderValue,
-                                  min: 1,
-                                  max: _totalPages.toDouble(),
-                                  onChangeStart: _handleSliderChangeStart,
-                                  onChanged: _handleSliderChanged,
-                                  onChangeEnd: _handleSliderChangeEnd,
-                                ),
-                              ),
+                            bottom: 12,
+                            child: _CustomSlider(
+                              value: _sliderValue,
+                              min: 1,
+                              max: _totalPages.toDouble(),
+                              onChanged: _handleSliderChanged,
+                              onChangeStart: _handleSliderChangeStart,
+                              onChangeEnd: _handleSliderChangeEnd,
+                              activeColor: primaryColor,
+                              isDark: isDark,
                             ),
                           ),
                           if (_isDragging)
@@ -683,6 +713,7 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                                   backgroundColor: colorScheme.surface,
                                   textColor: textColor,
                                   mutedTextColor: mutedTextColor,
+                                  isDark: isDark,
                                 ),
                               ),
                             ),
@@ -691,7 +722,7 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                     },
                   ),
                 ),
-                // Page range labels (RTL: 604 on the left, 1 on the right)
+                // Page range labels
                 const _PageRange(totalPages: _totalPages),
               ],
             ),
@@ -711,6 +742,7 @@ class _SliderPreviewPill extends StatelessWidget {
     required this.backgroundColor,
     required this.textColor,
     required this.mutedTextColor,
+    required this.isDark,
   });
 
   final double width;
@@ -720,54 +752,110 @@ class _SliderPreviewPill extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final Color mutedTextColor;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final Color pillBg = backgroundColor.withValues(
+      alpha: isDark ? 0.92 : 0.85,
+    );
+    final Color pillBorder = primaryColor.withValues(
+      alpha: isDark ? 0.25 : 0.15,
+    );
 
-    return Container(
-      width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: backgroundColor.withValues(alpha: 0.98),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: primaryColor.withValues(alpha: 0.18)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: width,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: pillBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: pillBorder, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+                blurRadius: 24,
+                spreadRadius: -4,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            surahName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: textColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    surahName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${context.l10n.page} $pageNumber',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: mutedTextColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            '${context.l10n.page} $pageNumber',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: mutedTextColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+        ),
+        // Pointer triangle
+        CustomPaint(
+          size: const Size(12, 6),
+          painter: _TrianglePainter(color: pillBg, borderColor: pillBorder),
+        ),
+      ],
     );
   }
+}
+
+class _TrianglePainter extends CustomPainter {
+  const _TrianglePainter({required this.color, required this.borderColor});
+
+  final Color color;
+  final Color borderColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..lineTo(size.width, 0)
+      ..close();
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _PageRange extends StatelessWidget {
@@ -797,5 +885,116 @@ class _PageRange extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _CustomSlider extends StatelessWidget {
+  const _CustomSlider({
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+    required this.onChangeStart,
+    required this.onChangeEnd,
+    required this.activeColor,
+    required this.isDark,
+  });
+
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
+  final Color activeColor;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final double normalizedValue = (value - min) / (max - min);
+        // Slider is RTL in Mushaf view: 1 is on the right, 604 on the left.
+        final double thumbPos = (1 - normalizedValue) * width;
+
+        return GestureDetector(
+          onHorizontalDragStart: (details) {
+            onChangeStart(_getValueFromPos(details.localPosition.dx, width));
+          },
+          onHorizontalDragUpdate: (details) {
+            onChanged(_getValueFromPos(details.localPosition.dx, width));
+          },
+          onHorizontalDragEnd: (details) {
+            onChangeEnd(value);
+          },
+          onTapDown: (details) {
+            onChangeStart(_getValueFromPos(details.localPosition.dx, width));
+            onChanged(_getValueFromPos(details.localPosition.dx, width));
+            onChangeEnd(value);
+          },
+          child: Container(
+            height: 32,
+            width: double.infinity,
+            color: Colors.transparent, // Hit test area
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Track
+                Container(
+                  height: 4,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: activeColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Active Track (drawn RTL)
+                Positioned(
+                  right: 0,
+                  child: Container(
+                    height: 4,
+                    width: width - thumbPos,
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                // Thumb
+                Positioned(
+                  left: thumbPos - 7,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark ? Colors.black : Colors.white,
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: activeColor.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  double _getValueFromPos(double x, double width) {
+    // RTL logic: x=0 is max, x=width is min
+    final double normalized = (1 - (x / width)).clamp(0.0, 1.0);
+    return min + (normalized * (max - min));
   }
 }

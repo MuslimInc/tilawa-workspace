@@ -108,8 +108,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       return false;
     }
 
-    final FavoritesLoaded? currentState =
-        state is FavoritesLoaded ? state as FavoritesLoaded : null;
+    final FavoritesLoaded? currentState = state is FavoritesLoaded
+        ? state as FavoritesLoaded
+        : null;
     if (currentState == null || currentState.favoriteIds.isEmpty) {
       return true;
     }
@@ -117,7 +118,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     final List<ReciterEntity> previousFavorites = List<ReciterEntity>.from(
       currentState.favorites,
     );
-    final Set<int> previousFavoriteIds = Set<int>.from(currentState.favoriteIds);
+    final Set<int> previousFavoriteIds = Set<int>.from(
+      currentState.favoriteIds,
+    );
 
     _currentFavoriteIds = {};
     emit(

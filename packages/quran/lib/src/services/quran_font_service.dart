@@ -7,10 +7,12 @@ import 'package:path_provider/path_provider.dart';
 
 /// Service responsible for downloading, managing, and loading QCF4 Quran fonts dynamically.
 class QuranFontService {
-  final Dio _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(minutes: 5),
-  ));
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(minutes: 5),
+    ),
+  );
   final String _fontZipUrl =
       'https://pub-7f6f6686010343899ba5b2f0ac6cb7b3.r2.dev/quran_fonts.zip';
   final int _totalFonts = 604;
@@ -162,9 +164,9 @@ class QuranFontService {
     }
 
     // Load fonts in batches to avoid memory spikes from 604 concurrent reads.
-    const int batchSize = 50;
+    const batchSize = 50;
     for (var i = 0; i < loadFutures.length; i += batchSize) {
-      final end = (i + batchSize < loadFutures.length)
+      final int end = (i + batchSize < loadFutures.length)
           ? i + batchSize
           : loadFutures.length;
       await Future.wait(loadFutures.sublist(i, end));

@@ -1,7 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
@@ -29,14 +28,26 @@ void main() {
   late MockGetRecitersUseCase mockGetReciters;
   late FakeStorage fakeStorage;
 
-  const tReciter1 = ReciterEntity(id: 1, name: 'A', letter: 'A', date: '2023', moshaf: []);
-  const tReciter2 = ReciterEntity(id: 2, name: 'B', letter: 'B', date: '2023', moshaf: []);
+  const tReciter1 = ReciterEntity(
+    id: 1,
+    name: 'A',
+    letter: 'A',
+    date: '2023',
+    moshaf: [],
+  );
+  const tReciter2 = ReciterEntity(
+    id: 2,
+    name: 'B',
+    letter: 'B',
+    date: '2023',
+    moshaf: [],
+  );
   const tReciters = [tReciter1, tReciter2];
 
   setUp(() {
     mockGetReciters = MockGetRecitersUseCase();
     fakeStorage = FakeStorage();
-    
+
     HydratedBloc.storage = fakeStorage;
     bloc = RecitersBloc(mockGetReciters);
   });
@@ -58,7 +69,11 @@ void main() {
         isA<RecitersLoaded>()
             .having((s) => s.showFavoritesOnly, 'showFavoritesOnly', false)
             .having((s) => s.favoriteIds, 'favoriteIds', [2])
-            .having((s) => s.filteredReciters.length, 'filteredReciters count', 2),
+            .having(
+              (s) => s.filteredReciters.length,
+              'filteredReciters count',
+              2,
+            ),
       ],
     );
 
@@ -75,8 +90,11 @@ void main() {
       ),
       act: (bloc) => bloc.add(const ClearFavoritesFilter()),
       expect: () => [
-        isA<RecitersLoaded>()
-            .having((s) => s.filteredReciters.first.id, 'first reciter is favorite', 2),
+        isA<RecitersLoaded>().having(
+          (s) => s.filteredReciters.first.id,
+          'first reciter is favorite',
+          2,
+        ),
       ],
     );
   });

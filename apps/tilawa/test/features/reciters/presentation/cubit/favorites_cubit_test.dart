@@ -235,11 +235,10 @@ void main() {
         when(mockClearFavorites()).thenAnswer((_) async => const Right(null));
         return cubit;
       },
-      seed: () => const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      seed: () =>
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       act: (cubit) => cubit.clearAllFavorites(),
-      expect: () => [
-        const FavoritesLoaded(favorites: [], favoriteIds: {}),
-      ],
+      expect: () => [const FavoritesLoaded(favorites: [], favoriteIds: {})],
       verify: (_) {
         verify(mockClearFavorites()).called(1);
       },
@@ -253,7 +252,8 @@ void main() {
         ).thenAnswer((_) async => const Left(ServerFailure('Fail')));
         return cubit;
       },
-      seed: () => const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      seed: () =>
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       act: (cubit) => cubit.clearAllFavorites(),
       expect: () => [
         // Optimistic clear

@@ -68,7 +68,8 @@ abstract class ExternalDependenciesModule {
       receiveTimeout: const Duration(seconds: 30),
       followRedirects: true,
       maxRedirects: 5,
-      validateStatus: (status) => status != null && status >= 200 && status < 300,
+      validateStatus: (status) =>
+          status != null && status >= 200 && status < 300,
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'tilawa/1.0 (Flutter; Dart)',

@@ -407,7 +407,9 @@ class AppStartupTasks {
 
       logger.d('HydratedStorage initialized successfully');
     } catch (e) {
-      logger.d('Warning: Could not initialize HydratedStorage, using in-memory fallback: $e');
+      logger.d(
+        'Warning: Could not initialize HydratedStorage, using in-memory fallback: $e',
+      );
       HydratedBloc.storage = _InMemoryStorage();
     }
   }

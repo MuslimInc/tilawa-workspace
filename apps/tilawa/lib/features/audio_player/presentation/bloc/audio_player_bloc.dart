@@ -188,7 +188,8 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
           duration = playbackState.duration;
         }
 
-        final Duration buffered = playbackState?.bufferedPosition ?? Duration.zero;
+        final Duration buffered =
+            playbackState?.bufferedPosition ?? Duration.zero;
 
         add(
           AudioPlayerEvent.updatePositionData(

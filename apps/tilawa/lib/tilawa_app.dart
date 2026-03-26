@@ -11,6 +11,7 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
 import 'package:tilawa_ui/theme/app_theme.dart';
 
 import 'core/di/injection.dart';
+import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'core/providers/app_providers.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
@@ -168,10 +169,10 @@ class _PlayerApp extends StatelessWidget {
                 builder: DevicePreview.appBuilder,
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
-                ),
+                ).copyWith(extensions: [QuranReaderTheme.light]),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
-                ),
+                ).copyWith(extensions: [QuranReaderTheme.dark]),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
                 // Disable restoration when launched from notification

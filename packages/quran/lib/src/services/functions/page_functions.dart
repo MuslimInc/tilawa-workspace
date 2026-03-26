@@ -30,11 +30,9 @@ int getJuzNumber(int surahNumber, int verseNumber) =>
     QuranServiceLocator.quranDataService.getJuzNumber(surahNumber, verseNumber);
 
 /// Takes [surahNumber], [verseNumber] and returns the quarter number (1-240).
-int getQuarterNumber(int surahNumber, int verseNumber) =>
-    QuranServiceLocator.quranDataService.getQuarterNumber(
-      surahNumber,
-      verseNumber,
-    );
+int getQuarterNumber(int surahNumber, int verseNumber) => QuranServiceLocator
+    .quranDataService
+    .getQuarterNumber(surahNumber, verseNumber);
 
 /// Takes [surahNumber], [verseNumber] and returns the page number.
 ///

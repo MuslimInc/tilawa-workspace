@@ -50,7 +50,11 @@ class SplashCubit extends Cubit<SplashState> {
         SplashDestination.notificationLaunch => const SplashNavigateToHome(),
       });
     } catch (e, stackTrace) {
-      logger.e('Splash init failed, falling back to home', error: e, stackTrace: stackTrace);
+      logger.e(
+        'Splash init failed, falling back to home',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(const SplashNavigateToHome());
     }
   }

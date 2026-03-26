@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../quran.dart';
@@ -27,6 +28,10 @@ class QuranPageView extends StatefulWidget {
     this.surahNameBuilder,
     this.onSurahSelected,
     this.onShowIndex,
+    this.headerImageFilter,
+    this.headerTextColor,
+    this.headerFontSizeMultiplier = 0.45,
+    this.currentPageListenable,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
@@ -37,6 +42,10 @@ class QuranPageView extends StatefulWidget {
 
   /// Optional external controller. If not provided, an internal one is created.
   final PageController? controller;
+
+  /// Optional listenable for the current page number.
+  /// Used for smart keep-alive logic in [PageContent].
+  final ValueListenable<int>? currentPageListenable;
 
   /// Optional callback when page changes. Provides 1-based page number.
   final ValueChanged<int>? onPageChanged;
@@ -67,6 +76,9 @@ class QuranPageView extends StatefulWidget {
   final String Function(int surahNumber)? surahNameBuilder;
   final ValueChanged<int>? onSurahSelected;
   final VoidCallback? onShowIndex;
+  final ColorFilter? headerImageFilter;
+  final Color? headerTextColor;
+  final double headerFontSizeMultiplier;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -114,6 +126,7 @@ class _QuranPageViewState extends State<QuranPageView> {
       child: ColoredBox(
         color: widget.pageBackgroundColor,
         child: PageView.builder(
+          key: const GlobalObjectKey('InternalQuranPageView'),
           controller: _controller,
           itemCount: QuranConstants.totalPagesCount,
           onPageChanged: (index) {
@@ -123,6 +136,7 @@ class _QuranPageViewState extends State<QuranPageView> {
           itemBuilder: (context, index) {
             final int pageNumber = index + 1; // 1-based page
             return PageContent(
+              key: ValueKey<int>(pageNumber),
               pageNumber: pageNumber,
               textColor: widget.textColor,
               verseBackgroundColor: widget.verseBackgroundColor,
@@ -135,6 +149,10 @@ class _QuranPageViewState extends State<QuranPageView> {
               surahNameBuilder: widget.surahNameBuilder,
               onSurahSelected: widget.onSurahSelected,
               onShowIndex: widget.onShowIndex,
+              headerImageFilter: widget.headerImageFilter,
+              headerTextColor: widget.headerTextColor,
+              headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+              currentPageListenable: widget.currentPageListenable,
             );
           },
         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../helpers/app_logger.dart';
+
 /// Strategy interface for calculating Quran page layout metrics.
 ///
 /// Adheres to the Strategy pattern to allow for different layout algorithms
@@ -49,20 +51,31 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     BuildContext context,
     BoxConstraints constraints,
   ) {
+    final startTime = DateTime.now();
     // Use narrow MediaQuery accessors to avoid rebuilds on unrelated changes
     // (e.g., keyboard appearance, text scale factor).
     final Orientation orientation = MediaQuery.orientationOf(context);
 
+    QuranLayoutMetrics metrics;
     if (orientation == Orientation.landscape) {
       // Common Base Font Size based on AVAILABLE width (after padding)
       final double availableWidth =
           constraints.maxWidth * (1.0 - (_horizontalPaddingRatio * 2));
       final double adaptiveFontSize = availableWidth / _widthDivisor;
-      return _calculateLandscapeMetrics(adaptiveFontSize);
+      metrics = _calculateLandscapeMetrics(adaptiveFontSize);
     } else {
       // Use actual constraints provided by the parent (e.g. SafeArea)
-      return _calculatePortraitMetrics(constraints);
+      metrics = _calculatePortraitMetrics(constraints);
     }
+
+    final Duration duration = DateTime.now().difference(startTime);
+    if (duration.inMilliseconds > 2) {
+      logger.d(
+        '[PageContent] StandardQuranLayoutStrategy: Metrics calculated in ${duration.inMilliseconds}ms',
+      );
+    }
+
+    return metrics;
   }
 
   QuranLayoutMetrics _calculateLandscapeMetrics(double fontSize) {
