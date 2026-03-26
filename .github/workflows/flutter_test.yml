@@ -1,5 +1,8 @@
 name: Flutter Test & Deploy
 
+env:
+  FLUTTER_VERSION: "3.41.5"
+
 on:
   push:
     branches: ["master"]
@@ -15,7 +18,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.38.9"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
 
@@ -54,7 +57,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.38.9"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
 
@@ -92,7 +95,7 @@ jobs:
           shorebird release android \
             --artifact apk \
             --target-platform android-arm,android-arm64,android-x64 \
-            --flutter-version=3.38.9 \
+            --flutter-version=${{ env.FLUTTER_VERSION }} \
             --no-confirm
 
       - name: Upload APKs
@@ -121,7 +124,7 @@ jobs:
 #
 #      - uses: subosito/flutter-action@v2
 #        with:
-#          flutter-version: "3.38.9"
+#          flutter-version: ${{ env.FLUTTER_VERSION }}
 #          channel: "stable"
 #          cache: true
 #
