@@ -281,7 +281,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
             ? 0.0
             : (state.positionData?.position.inMilliseconds ?? 0) /
-                (state.positionData?.duration.inMilliseconds ?? 1),
+                  (state.positionData?.duration.inMilliseconds ?? 1),
         progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,

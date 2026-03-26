@@ -1069,10 +1069,14 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
 
     return ArabicAlphabetScrollbar(
       letters: letters,
-      selectedLetter: context.watch<AlphabetScrollbarBloc>().state.selectedLetter,
+      selectedLetter: context
+          .watch<AlphabetScrollbarBloc>()
+          .state
+          .selectedLetter,
       onLetterSelected: (letter) {
-        final AlphabetScrollbarState currentState =
-            context.read<AlphabetScrollbarBloc>().state;
+        final AlphabetScrollbarState currentState = context
+            .read<AlphabetScrollbarBloc>()
+            .state;
 
         if (currentState.selectedLetter == letter) {
           // Toggle off
@@ -1102,8 +1106,9 @@ class ReciterAlphabetScrollbar extends StatelessWidget {
       onPanStart: (details) =>
           context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
       onPanUpdate: (details) {
-        final AlphabetScrollbarState currentState =
-            context.read<AlphabetScrollbarBloc>().state;
+        final AlphabetScrollbarState currentState = context
+            .read<AlphabetScrollbarBloc>()
+            .state;
         if (!currentState.isDragging) {
           return;
         }

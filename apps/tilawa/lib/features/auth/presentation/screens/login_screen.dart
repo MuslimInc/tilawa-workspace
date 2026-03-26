@@ -232,9 +232,7 @@ class _AppLanguageSwitcher extends StatelessWidget {
           languages: const ['ar', 'en'],
           getLanguageName: (code) => code == 'ar' ? 'العربية' : 'English',
           onLanguageChanged: (code) {
-            context.read<LocalizationBloc>().add(
-                  ChangeLanguage(Locale(code)),
-                );
+            context.read<LocalizationBloc>().add(ChangeLanguage(Locale(code)));
           },
         );
       },

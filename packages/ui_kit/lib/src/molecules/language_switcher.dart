@@ -19,7 +19,7 @@ class LanguageSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    
+
     return Container(
       padding: EdgeInsets.all(tokens.spaceExtraSmall),
       decoration: BoxDecoration(
@@ -58,7 +58,9 @@ class LanguageSwitcher extends StatelessWidget {
               child: Text(
                 getLanguageName(lang),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

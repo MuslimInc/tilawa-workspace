@@ -49,9 +49,7 @@ class AppTheme {
     required Color primaryColor,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
-    final scheme = FlexSchemeColor.from(
-      primary: primaryColor,
-    );
+    final scheme = FlexSchemeColor.from(primary: primaryColor);
 
     return FlexThemeData.light(
       colors: scheme,
@@ -66,12 +64,7 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
-    ).copyWith(
-      extensions: [
-        TilawaDesignTokens.light(),
-        ...extensions,
-      ],
-    );
+    ).copyWith(extensions: [TilawaDesignTokens.light(), ...extensions]);
   }
 
   /// Get the dark theme for the given primary color
@@ -80,9 +73,7 @@ class AppTheme {
     bool darkIsTrueBlack = false,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
-    final scheme = FlexSchemeColor.from(
-      primary: primaryColor,
-    );
+    final scheme = FlexSchemeColor.from(primary: primaryColor);
 
     return FlexThemeData.dark(
       colors: scheme,
@@ -97,11 +88,6 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
-    ).copyWith(
-      extensions: [
-        TilawaDesignTokens.dark(),
-        ...extensions,
-      ],
-    );
+    ).copyWith(extensions: [TilawaDesignTokens.dark(), ...extensions]);
   }
 }

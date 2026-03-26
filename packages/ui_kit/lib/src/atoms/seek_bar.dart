@@ -60,7 +60,9 @@ class SeekBarState extends State<SeekBar> {
       children: [
         // Progress bar
         Container(
-          height: tokens.spaceExtraLarge * 1.25, // Increased height for better touch target
+          height:
+              tokens.spaceExtraLarge *
+              1.25, // Increased height for better touch target
           margin: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Stack(
             alignment: Alignment.center, // Center the sliders vertically

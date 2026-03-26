@@ -49,21 +49,21 @@ class BottomPlayerUi extends StatelessWidget {
 
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: theme.textTheme.bodyLarge?.color,
-      decoration: TextDecoration.none,
-      decorationColor: Colors.transparent,
-    );
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: theme.textTheme.bodyLarge?.color,
+          decoration: TextDecoration.none,
+          decorationColor: Colors.transparent,
+        );
     final TextStyle subtitleStyle =
         (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-      fontSize: 12,
-      color: theme.textTheme.bodyMedium?.color?.withValues(
-        alpha: tokens.opacityEmphasis,
-      ),
-      decoration: TextDecoration.none,
-      decorationColor: Colors.transparent,
-    );
+          fontSize: 12,
+          color: theme.textTheme.bodyMedium?.color?.withValues(
+            alpha: tokens.opacityEmphasis,
+          ),
+          decoration: TextDecoration.none,
+          decorationColor: Colors.transparent,
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -117,7 +117,9 @@ class BottomPlayerUi extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                            borderRadius: BorderRadius.circular(
+                              tokens.radiusMedium,
+                            ),
                             color: theme.primaryColor.withValues(
                               alpha: tokens.opacitySubtle,
                             ),

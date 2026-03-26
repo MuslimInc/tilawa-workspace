@@ -112,4 +112,51 @@ class QuranDataService {
 
     return [qpc, processedIndex];
   }
+
+  /// Returns counts of [headers, bismillahs] for a specific page.
+  Map<String, int> getSpecialLineCounts(int pageNumber) {
+    final Map<int, String> special = _calculateSpecialLines(pageNumber);
+    var headers = 0;
+    var bismillahs = 0;
+    for (final String type in special.values) {
+      if (type.startsWith('HEADER')) headers++;
+      if (type.startsWith('BISMILLAH')) bismillahs++;
+    }
+    return {'headers': headers, 'bismillahs': bismillahs};
+  }
+
+  /// Calculates which lines on a page should be headers or bismillahs.
+  /// Logic moved from PageContent for centralized layout management.
+  Map<int, String> _calculateSpecialLines(int pageNumber) {
+    final Map<int, String> special = {};
+    final List<List<Map<String, dynamic>>> lines =
+        getPageData(pageNumber) ?? [];
+
+    for (var i = 0; i < lines.length; i++) {
+      final List<Map<String, dynamic>> lineWords = lines[i];
+      if (lineWords.isNotEmpty) {
+        final Map<String, dynamic> firstWord = lineWords.first;
+        final int surah = int.tryParse(firstWord['surah'].toString()) ?? 0;
+        final int ayah = int.tryParse(firstWord['ayah'].toString()) ?? 0;
+        final int word = int.tryParse(firstWord['word'].toString()) ?? 0;
+
+        if (ayah == 1 && word == 1) {
+          final int lineNum = i + 1;
+          if (surah == 1) {
+            if (pageNumber == 1) special[1] = 'HEADER:1';
+          } else if (surah == 9) {
+            if (lineNum > 1) special[lineNum - 1] = 'HEADER:9';
+          } else {
+            if (lineNum > 2) {
+              special[lineNum - 2] = 'HEADER:$surah';
+              special[lineNum - 1] = 'BISMILLAH:$surah';
+            } else if (lineNum == 2) {
+              special[1] = 'BISMILLAH:$surah';
+            }
+          }
+        }
+      }
+    }
+    return special;
+  }
 }

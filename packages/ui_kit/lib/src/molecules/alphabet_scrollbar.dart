@@ -34,7 +34,9 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
           tokens.spaceSmall,
         ),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+          color: theme.colorScheme.surface.withValues(
+            alpha: tokens.opacityGlass,
+          ),
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           boxShadow: [
             BoxShadow(
@@ -65,7 +67,9 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
                         vertical: tokens.spaceExtraSmall / 2,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected ? theme.primaryColor : Colors.transparent,
+                        color: isSelected
+                            ? theme.primaryColor
+                            : Colors.transparent,
                         shape: BoxShape.circle,
                         boxShadow: isSelected
                             ? [
@@ -84,7 +88,9 @@ class ArabicAlphabetScrollbar extends StatelessWidget {
                           letter,
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                             color: isSelected
                                 ? Colors.white
                                 : theme.colorScheme.onSurfaceVariant.withValues(

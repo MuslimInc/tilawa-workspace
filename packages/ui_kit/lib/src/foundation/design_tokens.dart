@@ -109,32 +109,32 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// Default values for light/dark theme
   factory TilawaDesignTokens.light() => const TilawaDesignTokens(
-        spaceExtraSmall: 4.0,
-        spaceSmall: 8.0,
-        spaceMedium: 12.0,
-        spaceLarge: 16.0,
-        spaceExtraLarge: 24.0,
-        radiusSmall: 8.0,
-        radiusMedium: 12.0,
-        radiusLarge: 16.0,
-        radiusExtraLarge: 24.0,
-        opacitySubtle: 0.1,
-        opacityMedium: 0.3,
-        opacityEmphasis: 0.7,
-        opacityGlass: 0.8,
-        blurGlass: 12.0,
-        blurShadow: 16.0,
-        shadowOffsetSmall: Offset(0, 2),
-        shadowOffsetMedium: Offset(0, 4),
-        borderWidthThin: 0.5,
-        progressHeight: 3.0,
-        iconSizeSmall: 16.0,
-        iconSizeMedium: 20.0,
-        iconSizeLarge: 24.0,
-        durationFast: Duration(milliseconds: 200),
-        durationMedium: Duration(milliseconds: 400),
-        durationSlow: Duration(milliseconds: 600),
-      );
+    spaceExtraSmall: 4.0,
+    spaceSmall: 8.0,
+    spaceMedium: 12.0,
+    spaceLarge: 16.0,
+    spaceExtraLarge: 24.0,
+    radiusSmall: 8.0,
+    radiusMedium: 12.0,
+    radiusLarge: 16.0,
+    radiusExtraLarge: 24.0,
+    opacitySubtle: 0.1,
+    opacityMedium: 0.3,
+    opacityEmphasis: 0.7,
+    opacityGlass: 0.8,
+    blurGlass: 12.0,
+    blurShadow: 16.0,
+    shadowOffsetSmall: Offset(0, 2),
+    shadowOffsetMedium: Offset(0, 4),
+    borderWidthThin: 0.5,
+    progressHeight: 3.0,
+    iconSizeSmall: 16.0,
+    iconSizeMedium: 20.0,
+    iconSizeLarge: 24.0,
+    durationFast: Duration(milliseconds: 200),
+    durationMedium: Duration(milliseconds: 400),
+    durationSlow: Duration(milliseconds: 600),
+  );
 
   factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
 
@@ -196,10 +196,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   }
 
   @override
-  TilawaDesignTokens lerp(
-    ThemeExtension<TilawaDesignTokens>? other,
-    double t,
-  ) {
+  TilawaDesignTokens lerp(ThemeExtension<TilawaDesignTokens>? other, double t) {
     if (other is! TilawaDesignTokens) return this;
     return TilawaDesignTokens(
       spaceExtraSmall: lerpDouble(spaceExtraSmall, other.spaceExtraSmall, t)!,
@@ -210,17 +207,27 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusSmall: lerpDouble(radiusSmall, other.radiusSmall, t)!,
       radiusMedium: lerpDouble(radiusMedium, other.radiusMedium, t)!,
       radiusLarge: lerpDouble(radiusLarge, other.radiusLarge, t)!,
-      radiusExtraLarge:
-          lerpDouble(radiusExtraLarge, other.radiusExtraLarge, t)!,
+      radiusExtraLarge: lerpDouble(
+        radiusExtraLarge,
+        other.radiusExtraLarge,
+        t,
+      )!,
       opacitySubtle: lerpDouble(opacitySubtle, other.opacitySubtle, t)!,
       opacityMedium: lerpDouble(opacityMedium, other.opacityMedium, t)!,
       opacityEmphasis: lerpDouble(opacityEmphasis, other.opacityEmphasis, t)!,
       opacityGlass: lerpDouble(opacityGlass, other.opacityGlass, t)!,
       blurGlass: lerpDouble(blurGlass, other.blurGlass, t)!,
       blurShadow: lerpDouble(blurShadow, other.blurShadow, t)!,
-      shadowOffsetSmall: Offset.lerp(shadowOffsetSmall, other.shadowOffsetSmall, t)!,
-      shadowOffsetMedium:
-          Offset.lerp(shadowOffsetMedium, other.shadowOffsetMedium, t)!,
+      shadowOffsetSmall: Offset.lerp(
+        shadowOffsetSmall,
+        other.shadowOffsetSmall,
+        t,
+      )!,
+      shadowOffsetMedium: Offset.lerp(
+        shadowOffsetMedium,
+        other.shadowOffsetMedium,
+        t,
+      )!,
       borderWidthThin: lerpDouble(borderWidthThin, other.borderWidthThin, t)!,
       progressHeight: lerpDouble(progressHeight, other.progressHeight, t)!,
       iconSizeSmall: lerpDouble(iconSizeSmall, other.iconSizeSmall, t)!,

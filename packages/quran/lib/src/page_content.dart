@@ -277,6 +277,7 @@ class _PageContentState extends State<PageContent>
         final QuranLayoutMetrics metrics = _layoutStrategy.calculateMetrics(
           context,
           constraints,
+          widget.pageNumber,
         );
         final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
@@ -376,7 +377,7 @@ class _PageContentState extends State<PageContent>
               : isSpecialPage
               ? MainAxisAlignment.center
               : MainAxisAlignment.start,
-          spacing: 4,
+          spacing: metrics.lineSpacing,
           children: lineWidgets,
         );
 
