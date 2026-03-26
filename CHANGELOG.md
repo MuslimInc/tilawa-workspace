@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3+20] - 2026-03-26
+
+### Added
+
+- **Analytics**: Integrated Firebase Analytics to track Athkar notification interactions and reading progress.
+- **Analytics**: Added `athkar_notification_open` and `athkar_read_start` events with source tracking.
+
+### Changed
+
+- **Athkar Notifications**: Optimized reminder scheduling with a 1-hour delay after Fajr (morning) and Asr (evening) prayer times.
+- **Athkar Notifications**: Refactored notification logic to use an injected `NavigationService`, improving testability and separation of concerns.
+- **UI Kit**: Replaced magic numbers and hardcoded values with centralized design tokens in `TilawaDesignTokens`.
+- **UI Kit**: Stabilized the language switcher with fixed-width buttons and absolute LTR visual ordering.
+
+### Fixed
+
+- **UI**: Resolved layout overflow issues in the Quran reader and responsive Bismillah widget text.
+- **UI**: Fixed a null-check crash in the Arabic alphabet scrollbar.
+- **Localization**: Corrected various RTL styling inconsistencies across the authentication and reciters screens.
+- **Testing**: Achieved 99.3% unit test coverage for the `AthkarNotificationService`.
+
 ## [0.1.2+19] - 2026-03-19
 
 ### Added
