@@ -24,12 +24,27 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Cache Pub packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.flutter-plugins-dependencies
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Add Melos to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Bootstrap Workspace
+        run: melos bootstrap
 
       - name: Run Tests
-        run: flutter test
+        run: melos run test --no-select
 
   build_android:
     name: Build & Deploy Android
@@ -75,7 +90,7 @@ jobs:
         run: melos bootstrap
 
       - name: Generate Code
-        run: melos run gen
+        run: melos run gen --no-select
 
       - name: Configure Keystore
         env:
@@ -216,7 +231,7 @@ jobs:
         run: melos bootstrap
 
       - name: Generate Code
-        run: melos run gen
+        run: melos run gen --no-select
 
       - name: Configure Keystore
         env:
