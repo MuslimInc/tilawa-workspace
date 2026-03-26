@@ -61,6 +61,9 @@ class AthkarNotificationService implements IAthkarNotificationService {
   static const String _morningAthkarPayloadPrefix = 'morning_athkar_';
   static const String _eveningAthkarPayloadPrefix = 'evening_athkar_';
 
+  /// Delay for athkar notifications after prayer times (1 hour)
+  static const Duration _athkarNotificationDelay = Duration(hours: 1);
+
   /// Get notification IDs for external use (e.g., dispatcher registration)
   static Set<int> get notificationIds => {
     _morningAthkarNotificationId,
@@ -93,7 +96,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
 
       // Set local timezone (try to use device timezone, fallback to UTC)
       try {
-        final String? timeZoneName = await _getLocalTimeZone();
+        final String? timeZoneName = await getLocalTimeZone();
         if (timeZoneName != null) {
           tz.setLocalLocation(tz.getLocation(timeZoneName));
           logger.d(
@@ -264,7 +267,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
   }
 
   /// Get the local timezone name for the device
-  Future<String?> _getLocalTimeZone() async {
+  @visibleForTesting
+  Future<String?> getLocalTimeZone() async {
     try {
       // For Android and iOS, we can try to get the system timezone
       // This is a simple approach - in production you might want to use
@@ -341,7 +345,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Schedule morning athkar notification at a fixed fallback time.
   Future<void> _scheduleMorningAthkarFallback() async {
     try {
-      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(7, 0);
+      // Use 1 hour after common Fajr (e.g., 5:30 -> 6:30 or 7:00)
+      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(7, 30);
 
       await _notifications.zonedSchedule(
         id: _morningAthkarNotificationId,
@@ -368,7 +373,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Schedule evening athkar notification at a fixed fallback time.
   Future<void> _scheduleEveningAthkarFallback() async {
     try {
-      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(17, 0);
+      // Use 1 hour after common Asr (e.g., 16:30 -> 17:30 or 18:00)
+      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(18, 0);
 
       await _notifications.zonedSchedule(
         id: _eveningAthkarNotificationId,
@@ -448,13 +454,13 @@ class AthkarNotificationService implements IAthkarNotificationService {
         final _ScheduledAthkarNotification? morningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
-              prayerTime: prayerTime.fajr,
+              prayerTime: prayerTime.fajr.add(_athkarNotificationDelay),
               isMorning: true,
             );
         final _ScheduledAthkarNotification? eveningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
-              prayerTime: prayerTime.asr,
+              prayerTime: prayerTime.asr.add(_athkarNotificationDelay),
               isMorning: false,
             );
 
