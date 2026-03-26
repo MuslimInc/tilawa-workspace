@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gap/gap.dart';
-
-import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../../../../router/app_router_config.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_content.dart';
@@ -64,6 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             backgroundColor: context.colorScheme.surface,
             body: SafeArea(
               child: Column(
+                spacing: 20,
                 children: [
                   // Skip button or similar could go here if needed
                   Expanded(
@@ -81,7 +81,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       },
                     ),
                   ),
-                  Gap(20),
                   // Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +100,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  Gap(30),
                   // Button
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
@@ -168,7 +166,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ],
                     ),
                   ),
-                  Gap(40),
                 ],
               ),
             ),
