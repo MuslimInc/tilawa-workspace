@@ -20,10 +20,6 @@ melos:
       usePubspecOverrides: true
 
   scripts:
-    bootstrap:
-      run: melos bootstrap
-      description: Link all internal packages together and install dependencies.
-
     clean:
       run: melos clean
       description: Clean all packages in the workspace.
