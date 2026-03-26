@@ -5,9 +5,11 @@ import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/services/athkar_notification_service.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -19,6 +21,8 @@ import 'athkar_notification_service_test.mocks.dart';
   AndroidFlutterLocalNotificationsPlugin,
   SharedPreferencesAsync,
   INotificationDispatcher,
+  AnalyticsService,
+  NavigationService,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +33,8 @@ void main() {
     late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
     late MockSharedPreferencesAsync mockPrefs;
     late MockINotificationDispatcher mockDispatcher;
+    late MockAnalyticsService mockAnalyticsService;
+    late MockNavigationService mockNavigationService;
     late FakePrayerTimesRepository fakePrayerTimesRepository;
 
     setUp(() {
@@ -45,6 +51,8 @@ void main() {
       mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
       mockPrefs = MockSharedPreferencesAsync();
       mockDispatcher = MockINotificationDispatcher();
+      mockAnalyticsService = MockAnalyticsService();
+      mockNavigationService = MockNavigationService();
       fakePrayerTimesRepository = FakePrayerTimesRepository(
         settings: defaultPrayerSettings,
         prayerTimesForRange: <PrayerTimeEntity>[
@@ -80,7 +88,9 @@ void main() {
       service = AthkarNotificationService(
         mockPrefs,
         mockDispatcher,
-        prayerTimesRepository: fakePrayerTimesRepository,
+        mockAnalyticsService,
+        mockNavigationService,
+        fakePrayerTimesRepository,
       );
 
       // Default mock behavior
@@ -212,21 +222,28 @@ void main() {
       test(
         'should handle timezone detection error and fallback to UTC',
         () async {
-          final testService = TestTimezoneErrorAthkarNotificationService(
-            mockPrefs,
-            mockDispatcher,
-          );
+          final testService =
+              TestTimezoneDetectingErrorAthkarNotificationService(
+                mockPrefs,
+                mockDispatcher,
+                mockAnalyticsService,
+                mockNavigationService,
+                fakePrayerTimesRepository,
+              );
 
           await testService
               .initialize(); // Should not throw and fallback to UTC
         },
       );
 
-      test('should handle invalid timezone name and fallback to UTC', () async {
+      test('should handle invalid timezone and fallback to UTC', () async {
         // Test with an invalid timezone that will cause getLocation to fail
         final testService = TestInvalidTimezoneAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
         );
 
         await testService.initialize(); // Should not throw and fallback to UTC
@@ -236,6 +253,9 @@ void main() {
         final testService = TestTimezoneLocationErrorAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
         );
 
         await testService.initialize(); // Should not throw and fallback to UTC
@@ -805,7 +825,10 @@ void main() {
         final NotificationResponse? result = await service
             .checkLaunchNotification();
 
-        expect(result, isNotNull); // Still processed but timestamp check skipped
+        expect(
+          result,
+          isNotNull,
+        ); // Still processed but timestamp check skipped
       });
     });
 
@@ -971,6 +994,9 @@ void main() {
         final androidService = TestAndroidAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
         );
 
         await androidService.initialize();
@@ -984,6 +1010,9 @@ void main() {
         final testService = TestTimezoneAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
           '2:00:00.000000',
         );
 
@@ -997,6 +1026,9 @@ void main() {
         final testService = TestTimezoneAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
           '3:00:00.000000',
         );
         await testService.initialize();
@@ -1006,6 +1038,9 @@ void main() {
         final testService = TestTimezoneAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
           '4:00:00.000000',
         );
         await testService.initialize();
@@ -1015,6 +1050,9 @@ void main() {
         final testService = TestTimezoneAthkarNotificationService(
           mockPrefs,
           mockDispatcher,
+          mockAnalyticsService,
+          mockNavigationService,
+          fakePrayerTimesRepository,
           '0:00:00.000000',
         );
         await testService.initialize();
@@ -1022,52 +1060,47 @@ void main() {
     });
 
     group('notification timing', () {
-      test('should schedule morning athkar exactly 1 hour after Fajr', () async {
-        final DateTime tomorrow =
-            DateTime.now().add(const Duration(days: 1)).copyWith(
-              hour: 0,
-              minute: 0,
-              second: 0,
-              millisecond: 0,
-            );
-        final PrayerTimeEntity prayerTime = buildPrayerTimeEntity(tomorrow);
-        fakePrayerTimesRepository.prayerTimesForRange = [prayerTime];
+      test(
+        'should schedule morning athkar exactly 1 hour after Fajr',
+        () async {
+          final DateTime tomorrow = DateTime.now()
+              .add(const Duration(days: 1))
+              .copyWith(hour: 0, minute: 0, second: 0, millisecond: 0);
+          final PrayerTimeEntity prayerTime = buildPrayerTimeEntity(tomorrow);
+          fakePrayerTimesRepository.prayerTimesForRange = [prayerTime];
 
-        await service.scheduleAthkarNotifications();
+          await service.scheduleAthkarNotifications();
 
-        final DateTime expectedDate = prayerTime.fajr.add(
-          const Duration(hours: 1),
-        );
+          final DateTime expectedDate = prayerTime.fajr.add(
+            const Duration(hours: 1),
+          );
 
-        verify(
-          mockNotificationsPlugin.zonedSchedule(
-            id: anyNamed('id'),
-            title: 'أذكار الصباح',
-            body: anyNamed('body'),
-            scheduledDate: argThat(
-              predicate(
-                (tz.TZDateTime date) =>
-                    date.hour == expectedDate.hour &&
-                    date.minute == expectedDate.minute,
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: 'أذكار الصباح',
+              body: anyNamed('body'),
+              scheduledDate: argThat(
+                predicate(
+                  (tz.TZDateTime date) =>
+                      date.hour == expectedDate.hour &&
+                      date.minute == expectedDate.minute,
+                ),
+                named: 'scheduledDate',
               ),
-              named: 'scheduledDate',
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
             ),
-            notificationDetails: anyNamed('notificationDetails'),
-            androidScheduleMode: anyNamed('androidScheduleMode'),
-            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
-            payload: anyNamed('payload'),
-          ),
-        ).called(1);
-      });
+          ).called(1);
+        },
+      );
 
       test('should schedule evening athkar exactly 1 hour after Asr', () async {
-        final DateTime tomorrow =
-            DateTime.now().add(const Duration(days: 1)).copyWith(
-              hour: 0,
-              minute: 0,
-              second: 0,
-              millisecond: 0,
-            );
+        final DateTime tomorrow = DateTime.now()
+            .add(const Duration(days: 1))
+            .copyWith(hour: 0, minute: 0, second: 0, millisecond: 0);
         final PrayerTimeEntity prayerTime = buildPrayerTimeEntity(tomorrow);
         fakePrayerTimesRepository.prayerTimesForRange = [prayerTime];
 
@@ -1098,51 +1131,54 @@ void main() {
         ).called(1);
       });
 
-      test('should use updated fallback times when prayer times are missing', () async {
-        fakePrayerTimesRepository.settings = const PrayerSettingsEntity();
-        fakePrayerTimesRepository.hasPermission = false;
-        fakePrayerTimesRepository.prayerTimesForRange = <PrayerTimeEntity>[];
+      test(
+        'should use updated fallback times when prayer times are missing',
+        () async {
+          fakePrayerTimesRepository.settings = const PrayerSettingsEntity();
+          fakePrayerTimesRepository.hasPermission = false;
+          fakePrayerTimesRepository.prayerTimesForRange = <PrayerTimeEntity>[];
 
-        await service.scheduleAthkarNotifications();
+          await service.scheduleAthkarNotifications();
 
-        // 07:30 Morning
-        verify(
-          mockNotificationsPlugin.zonedSchedule(
-            id: 1001,
-            title: anyNamed('title'),
-            body: anyNamed('body'),
-            scheduledDate: argThat(
-              predicate(
-                (tz.TZDateTime date) => date.hour == 7 && date.minute == 30,
+          // 07:30 Morning
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: 1001,
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: argThat(
+                predicate(
+                  (tz.TZDateTime date) => date.hour == 7 && date.minute == 30,
+                ),
+                named: 'scheduledDate',
               ),
-              named: 'scheduledDate',
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: DateTimeComponents.time,
+              payload: anyNamed('payload'),
             ),
-            notificationDetails: anyNamed('notificationDetails'),
-            androidScheduleMode: anyNamed('androidScheduleMode'),
-            matchDateTimeComponents: DateTimeComponents.time,
-            payload: anyNamed('payload'),
-          ),
-        ).called(1);
+          ).called(1);
 
-        // 18:00 Evening
-        verify(
-          mockNotificationsPlugin.zonedSchedule(
-            id: 1002,
-            title: anyNamed('title'),
-            body: anyNamed('body'),
-            scheduledDate: argThat(
-              predicate(
-                (tz.TZDateTime date) => date.hour == 18 && date.minute == 0,
+          // 18:00 Evening
+          verify(
+            mockNotificationsPlugin.zonedSchedule(
+              id: 1002,
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: argThat(
+                predicate(
+                  (tz.TZDateTime date) => date.hour == 18 && date.minute == 0,
+                ),
+                named: 'scheduledDate',
               ),
-              named: 'scheduledDate',
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: DateTimeComponents.time,
+              payload: anyNamed('payload'),
             ),
-            notificationDetails: anyNamed('notificationDetails'),
-            androidScheduleMode: anyNamed('androidScheduleMode'),
-            matchDateTimeComponents: DateTimeComponents.time,
-            payload: anyNamed('payload'),
-          ),
-        ).called(1);
-      });
+          ).called(1);
+        },
+      );
     });
 
     group('location and prayer context', () {
@@ -1224,8 +1260,11 @@ void main() {
           payload: 'morning_athkar_123',
         );
 
-        // AppRouter.router will likely fail in this test environment
-        // if not explicitly initialized, triggering the catch.
+        // Navigation service should throw to trigger the catch block
+        when(
+          mockNavigationService.navigateToNotification(any),
+        ).thenThrow(Exception('Navigation failed'));
+
         await service.handleNotificationResponse(response);
       });
     });
@@ -1239,11 +1278,56 @@ void main() {
   });
 }
 
+class TestAndroidAthkarNotificationService extends AthkarNotificationService {
+  TestAndroidAthkarNotificationService(
+    super.prefs,
+    super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
+  );
+
+  @override
+  bool get isAndroid => true;
+}
+
+class TestIOSAthkarNotificationService extends AthkarNotificationService {
+  TestIOSAthkarNotificationService(
+    super.prefs,
+    super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
+  );
+
+  @override
+  bool get isAndroid => false;
+}
+
+class TestTimezoneDetectingErrorAthkarNotificationService
+    extends AthkarNotificationService {
+  TestTimezoneDetectingErrorAthkarNotificationService(
+    super.prefs,
+    super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
+  );
+
+  @override
+  String getTimeZoneOffsetString() {
+    throw Exception('Timezone detection failed');
+  }
+}
+
 class TestTimezoneLocationErrorAthkarNotificationService
     extends AthkarNotificationService {
   TestTimezoneLocationErrorAthkarNotificationService(
     super.prefs,
     super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
   );
 
   @override
@@ -1253,22 +1337,17 @@ class TestTimezoneLocationErrorAthkarNotificationService
 
   @override
   Future<String?> getLocalTimeZone() async {
-    // This will trigger tz.getLocation error if the name is invalid
     return 'Invalid/Timezone';
   }
-}
-
-class TestAndroidAthkarNotificationService extends AthkarNotificationService {
-  TestAndroidAthkarNotificationService(super.prefs, super.dispatcher);
-
-  @override
-  bool get isAndroid => true;
 }
 
 class TestTimezoneAthkarNotificationService extends AthkarNotificationService {
   TestTimezoneAthkarNotificationService(
     super.prefs,
     super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
     this.mockOffset,
   );
 
@@ -1276,29 +1355,19 @@ class TestTimezoneAthkarNotificationService extends AthkarNotificationService {
 
   @override
   String getTimeZoneOffsetString() {
-    // If mockOffset is a special marker for invalid timezone, return result
-    // that will trigger returning a timezone name from _getLocalTimeZone
-    if (mockOffset == 'INVALID_TZ') {
-      // Return offset that matches no valid timezone to trigger the catch block
-      return mockOffset;
-    }
     return mockOffset;
   }
 }
 
 class TestInvalidTimezoneAthkarNotificationService
     extends AthkarNotificationService {
-  TestInvalidTimezoneAthkarNotificationService(super.prefs, super.dispatcher);
-}
-
-class TestTimezoneErrorAthkarNotificationService
-    extends AthkarNotificationService {
-  TestTimezoneErrorAthkarNotificationService(super.prefs, super.dispatcher);
-
-  @override
-  String getTimeZoneOffsetString() {
-    throw Exception('Timezone detection failed');
-  }
+  TestInvalidTimezoneAthkarNotificationService(
+    super.prefs,
+    super.dispatcher,
+    super.analytics,
+    super.navigationService,
+    super.prayerTimesRepository,
+  );
 }
 
 class FakePrayerTimesRepository implements PrayerTimesRepository {

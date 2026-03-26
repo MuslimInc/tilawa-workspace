@@ -166,15 +166,18 @@ class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
   const AthkarDetailsRoute({
     required this.categoryId,
     required this.categoryName,
+    this.source = 'manual',
   });
   final int categoryId;
   final String categoryName;
+  final String source;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return AthkarDetailsScreen(
       categoryId: categoryId,
       categoryName: categoryName,
+      source: source,
     );
   }
 }

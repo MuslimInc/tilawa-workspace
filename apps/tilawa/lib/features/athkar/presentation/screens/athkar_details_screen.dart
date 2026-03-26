@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
@@ -11,10 +12,12 @@ class AthkarDetailsScreen extends StatefulWidget {
     super.key,
     required this.categoryId,
     required this.categoryName,
+    this.source = 'manual',
   });
 
   final int categoryId;
   final String categoryName;
+  final String source;
 
   @override
   State<AthkarDetailsScreen> createState() => _AthkarDetailsScreenState();
@@ -22,6 +25,16 @@ class AthkarDetailsScreen extends StatefulWidget {
 
 class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    getIt<AnalyticsService>().logAthkarReadStart(
+      widget.categoryId,
+      widget.categoryName,
+      source: widget.source,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,7 @@ import '../../router/app_router.dart';
 
 abstract class NavigationService {
   Future<void> push(String location, {Object? extra});
+  void navigateToNotification(String location, {Object? extra});
   String? getCurrentLocation();
 }
 
@@ -14,6 +15,11 @@ class NavigationServiceImpl implements NavigationService {
   Future<void> push(String location, {Object? extra}) async {
     // We use the static router instance
     await AppRouter.router.push(location, extra: extra);
+  }
+
+  @override
+  void navigateToNotification(String location, {Object? extra}) {
+    AppRouter.navigateToNotification(location, extra: extra);
   }
 
   @override

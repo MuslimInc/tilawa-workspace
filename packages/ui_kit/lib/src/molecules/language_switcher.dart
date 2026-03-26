@@ -30,6 +30,7 @@ class LanguageSwitcher extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.ltr,
         children: languages.map((lang) {
           final isSelected = currentLanguage == lang;
           return GestureDetector(
@@ -40,6 +41,7 @@ class LanguageSwitcher extends StatelessWidget {
                 horizontal: tokens.spaceLarge,
                 vertical: tokens.spaceSmall,
               ),
+              constraints: const BoxConstraints(minWidth: 100),
               decoration: BoxDecoration(
                 color: isSelected ? theme.primaryColor : Colors.transparent,
                 borderRadius: BorderRadius.circular(tokens.radiusSmall),
@@ -55,13 +57,17 @@ class LanguageSwitcher extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: Text(
-                getLanguageName(lang),
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : theme.colorScheme.onSurface,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              child: Center(
+                child: Text(
+                  getLanguageName(lang),
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : theme.colorScheme.onSurface,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
             ),

@@ -23,6 +23,8 @@ class AnalyticsEvents {
   static const String athkarItemDecrement = 'athkar_item_decrement';
   static const String athkarItemCompleted = 'athkar_item_completed';
   static const String athkarItemReset = 'athkar_item_reset';
+  static const String athkarNotificationOpen = 'athkar_notification_open';
+  static const String athkarReadStart = 'athkar_read_start';
 
   // Commerce/Premium
   static const String purchase = 'purchase';
@@ -44,6 +46,7 @@ class AnalyticsParams {
   static const String timestamp = 'timestamp';
   static const String reason = 'reason';
   static const String action = 'action';
+  static const String source = 'source';
 
   // Navigation
   static const String screenName = 'screen_name';

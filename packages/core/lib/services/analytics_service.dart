@@ -50,6 +50,14 @@ abstract class AnalyticsService {
   Future<void> logFavorite(String itemId, {String? itemType});
   Future<void> logRating(int rating, {String? itemId, String? itemType});
 
+  /// Log Athkar events
+  Future<void> logAthkarNotificationOpen(int categoryId, String categoryName);
+  Future<void> logAthkarReadStart(
+    int categoryId,
+    String categoryName, {
+    required String source,
+  });
+
   /// Set user properties
   Future<void> setUserId(String? userId);
   Future<void> setUserProperty(String name, String? value);

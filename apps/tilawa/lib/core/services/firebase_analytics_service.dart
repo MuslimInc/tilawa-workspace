@@ -208,6 +208,36 @@ class FirebaseAnalyticsService implements AnalyticsService {
     );
   }
 
+  @override
+  Future<void> logAthkarNotificationOpen(
+    int categoryId,
+    String categoryName,
+  ) async {
+    await logEvent(
+      AnalyticsEvents.athkarNotificationOpen,
+      parameters: {
+        AnalyticsParams.categoryId: categoryId,
+        AnalyticsParams.contentType: categoryName,
+      },
+    );
+  }
+
+  @override
+  Future<void> logAthkarReadStart(
+    int categoryId,
+    String categoryName, {
+    required String source,
+  }) async {
+    await logEvent(
+      AnalyticsEvents.athkarReadStart,
+      parameters: {
+        AnalyticsParams.categoryId: categoryId,
+        AnalyticsParams.contentType: categoryName,
+        AnalyticsParams.source: source,
+      },
+    );
+  }
+
   Map<String, Object> _cleanParameters(Map<String, Object?> parameters) {
     return Map<String, Object>.fromEntries(
       parameters.entries

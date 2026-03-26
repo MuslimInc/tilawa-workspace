@@ -5,16 +5,17 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
-import '../../features/prayer_times/domain/repositories/prayer_times_repository.dart';
-import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import '../di/injection.dart';
@@ -30,12 +31,16 @@ import '../di/injection.dart';
 class AthkarNotificationService implements IAthkarNotificationService {
   AthkarNotificationService(
     this._prefs,
-    this._dispatcher, {
-    PrayerTimesRepository? prayerTimesRepository,
-  }) : _prayerTimesRepository = prayerTimesRepository;
+    this._dispatcher,
+    this._analytics,
+    this._navigationService,
+    this._prayerTimesRepository,
+  );
 
   final SharedPreferencesAsync _prefs;
   final INotificationDispatcher _dispatcher;
+  final AnalyticsService _analytics;
+  final NavigationService _navigationService;
   final PrayerTimesRepository? _prayerTimesRepository;
   static const String _lastHandledPayloadKey =
       'last_handled_notification_payload';
@@ -784,12 +789,14 @@ class AthkarNotificationService implements IAthkarNotificationService {
       logger.d(
         '[AthkarNotificationService] Morning athkar notification tapped - navigating',
       );
-      const route = AthkarDetailsRoute(
-        categoryId: 1,
-        categoryName: 'أذكار الصباح',
-      );
+      _analytics.logAthkarNotificationOpen(1, 'أذكار الصباح');
       // Use go to ensure clean navigation from any state
-      _navigateToRoute(route.location);
+      _navigateToRoute(
+        const AthkarDetailsRoute(
+          categoryId: 1,
+          categoryName: 'أذكار الصباح',
+        ).location,
+      );
     } else if (_isEveningAthkarNotification(
       id: response.id,
       payload: payload,
@@ -797,19 +804,21 @@ class AthkarNotificationService implements IAthkarNotificationService {
       logger.d(
         '[AthkarNotificationService] Evening athkar notification tapped - navigating',
       );
-      const route = AthkarDetailsRoute(
-        categoryId: 2,
-        categoryName: 'أذكار المساء',
-      );
+      _analytics.logAthkarNotificationOpen(2, 'أذكار المساء');
       // Use go to ensure clean navigation from any state
-      _navigateToRoute(route.location);
+      _navigateToRoute(
+        const AthkarDetailsRoute(
+          categoryId: 2,
+          categoryName: 'أذكار المساء',
+        ).location,
+      );
     }
   }
 
   /// Navigate to a route, catching errors in test environments
   void _navigateToRoute(String location) {
     try {
-      AppRouter.navigateToNotification(location);
+      _navigationService.navigateToNotification(location);
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }
