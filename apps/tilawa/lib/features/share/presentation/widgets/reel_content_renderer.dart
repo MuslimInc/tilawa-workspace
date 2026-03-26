@@ -60,14 +60,7 @@ class ReelContentRenderer extends StatelessWidget {
                 
                 // Basmalah (If applicable)
                 if (showBasmalah && surahNumber != 1 && surahNumber != 9 && fromAyah == 1) ...[
-                  Text(
-                    'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-                    style: GoogleFonts.amiri(
-                      fontSize: 64,
-                      color: Colors.black.withValues(alpha: 0.9),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  _Basmalah(pageNumber: getPageNumber(surahNumber, fromAyah)),
                   const SizedBox(height: 80),
                 ],
                 
@@ -143,11 +136,12 @@ class _SurahHeader extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          'سورة $name',
-          style: GoogleFonts.amiri(
-            fontSize: 54,
-            fontWeight: FontWeight.bold,
-            color: Colors.brown[800],
+          String.fromCharCode(0xF100 + number - 1),
+          style: TextStyle(
+            fontFamily: 'QCF_BSML',
+            package: 'quran',
+            fontSize: 84, // Scaled for 1080p header
+            color: Colors.brown[900],
           ),
         ),
       ),
@@ -169,20 +163,37 @@ class _AyahFlow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spans = <InlineSpan>[];
-    
-    // Scaled style to match Reader aesthetics at Reel resolution
-    final textStyle = GoogleFonts.amiri(
-      fontSize: 62,
-      height: 2.2,
-      color: Colors.black.withValues(alpha: 0.85),
-    );
 
     for (int i = fromAyah; i <= toAyah; i++) {
-      final text = getVerse(surahNumber, i, verseEndSymbol: true);
+      final int pageNumber = getPageNumber(surahNumber, i);
+      final String pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
+
+      // QCF Font Style
+      final textStyle = TextStyle(
+        fontFamily: pageFont,
+        fontSize: 72, // Larger for 1080p
+        height: 2.4, // Mushaf-like line spacing
+        color: Colors.black.withValues(alpha: 0.9),
+      );
+
+      // Verse Text in QCF Mapping
+      final qcfText = getVerseQCF(surahNumber, i, verseEndSymbol: false);
       spans.add(
         TextSpan(
-          text: '$text ',
+          text: qcfText,
           style: textStyle,
+        ),
+      );
+
+      // Verse Number End Symbol in QCF Mapping
+      final qcfNumber = getVerseNumberQCF(surahNumber, i);
+      spans.add(
+        TextSpan(
+          text: '$qcfNumber ',
+          style: textStyle.copyWith(
+            // Some QCF fonts need slight height adjustment for the end symbol
+            height: 1.8,
+          ),
         ),
       );
     }
@@ -217,6 +228,41 @@ class _ReelFooter extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _Basmalah extends StatelessWidget {
+  const _Basmalah({required this.pageNumber});
+  final int pageNumber;
+
+  @override
+  Widget build(BuildContext context) {
+    final String bismillahText;
+    final String bismillahFont;
+    final String? package;
+
+    if (pageNumber == 1) {
+      bismillahText = '\uFC41\uFC42\uFC43\uFC44';
+      bismillahFont = 'QCF_P001';
+      package = null; // Loaded into engine
+    } else {
+      bismillahText = '齃𧻓𥳐龎';
+      bismillahFont = 'QCF_BSML';
+      package = 'quran'; // Package asset
+    }
+
+    return Text(
+      bismillahText,
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: bismillahFont,
+        package: package,
+        fontSize: 80,
+        color: Colors.black.withValues(alpha: 0.9),
+        height: 1.5,
+      ),
     );
   }
 }
