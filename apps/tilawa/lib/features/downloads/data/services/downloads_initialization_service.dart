@@ -1,14 +1,24 @@
 import 'dart:ui';
 
 import 'package:injectable/injectable.dart';
+<<<<<<< HEAD
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+=======
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+>>>>>>> master
 import 'package:tilawa_core/config/language_config.dart';
 
 import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/services/download_notification_service_interface.dart';
 import 'batch_download_manager.dart';
 import 'download_queue_manager.dart';
+<<<<<<< HEAD
+=======
+
+final logger = Logger();
+>>>>>>> master
 
 @singleton
 class DownloadsInitializationService {

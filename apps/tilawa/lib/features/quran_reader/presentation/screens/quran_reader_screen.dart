@@ -35,6 +35,7 @@ class QuranReaderScreen extends StatefulWidget {
 
 class _QuranReaderScreenState extends State<QuranReaderScreen>
     with WidgetsBindingObserver {
+<<<<<<< HEAD
   late PageController _pageController;
   late final ValueNotifier<int> _currentPageNotifier;
   late final UiVisibilityCubit _uiVisibilityCubit;
@@ -43,6 +44,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   final GlobalKey _pageViewKey = GlobalKey();
 
   static const _headerFontSizeMultiplier = 0.57;
+=======
+  static const Color _readerSystemBarColor = Color(0xFFF9F5EF);
+
+  late PageController _pageController;
+  late final UiVisibilityCubit _uiVisibilityCubit;
+  int _currentPageNumber = 1;
+>>>>>>> master
 
   @override
   void initState() {
@@ -55,6 +63,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    _enterReaderImmersiveMode();
+
+    _uiVisibilityCubit = context.read<UiVisibilityCubit>();
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
 
@@ -134,18 +145,30 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   }
 
   void _enterReaderImmersiveMode() {
+<<<<<<< HEAD
     final readerTheme = QuranReaderTheme.of(context);
+=======
+>>>>>>> master
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: const [SystemUiOverlay.top],
     );
     SystemChrome.setSystemUIOverlayStyle(
+<<<<<<< HEAD
       SystemUiOverlayStyle(
         statusBarColor: readerTheme.systemBarColor,
         statusBarIconBrightness: readerTheme.statusBarIconBrightness,
         statusBarBrightness: readerTheme.statusBarBrightness,
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: readerTheme.statusBarIconBrightness,
+=======
+      const SystemUiOverlayStyle(
+        statusBarColor: _readerSystemBarColor,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+>>>>>>> master
         systemStatusBarContrastEnforced: false,
         systemNavigationBarContrastEnforced: false,
       ),
@@ -156,6 +179,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle());
   }
+<<<<<<< HEAD
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +194,22 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
             current.currentPage != null,
         listener: (context, state) {
           final pageNumber = state.currentPage!.pageNumber;
+=======
+
+  bool _isInitialPageJumpDone = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return BlocListener<QuranReaderBloc, QuranReaderState>(
+      listenWhen: (previous, current) =>
+          previous.currentPage != current.currentPage &&
+          current.currentPage != null,
+      listener: (context, state) {
+        final pageNumber = state.currentPage!.pageNumber;
+>>>>>>> master
 
           // Sync PageController ONLY if it's not already at the correct page
           if (_pageController.hasClients) {
@@ -186,12 +226,42 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
             }
           }
 
+<<<<<<< HEAD
           if (!_isInitialPageJumpDone) {
             if (mounted) {
               setState(() {
                 _isInitialPageJumpDone = true;
               });
             }
+=======
+          if (state.status == QuranReaderStatus.error) {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: colorScheme.error, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.errorMessage,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<QuranReaderBloc>().add(
+                          const QuranReaderEvent.loadLastRead(),
+                        );
+                      },
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+>>>>>>> master
           }
         },
         child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
@@ -424,6 +494,74 @@ class _PagePreviewInfo {
   }
 }
 
+class _PagePreviewInfo {
+  const _PagePreviewInfo({
+    required this.surahName,
+    required this.juzNumber,
+    required this.hizbLabel,
+  });
+
+  final String surahName;
+  final int juzNumber;
+  final String hizbLabel;
+
+  static _PagePreviewInfo fromPage(BuildContext context, int pageNumber) {
+    final pageData = getPageData(pageNumber);
+    final bool isArabic = context.l10n.localeName == 'ar';
+    final Set<int> uniqueSurahNumbers = pageData
+        .map((entry) => entry['surah']!)
+        .toSet();
+
+    final int juzNumber = getJuzNumber(
+      pageData.first['surah']!,
+      pageData.first['start']!,
+    );
+
+    final int? quarterNumber =
+        pageNumber == 1 || pageNumber == 2
+            ? null
+            : getQuarterNumber(
+              pageData.first['surah']!,
+              pageData.first['start']!,
+            );
+
+    String hizbLabelStr = '';
+    if (quarterNumber != null) {
+      final int hizbIndex = (quarterNumber - 1) ~/ 4 + 1;
+      final int quarterInHizb = (quarterNumber - 1) % 4;
+
+      final String prefix;
+      switch (quarterInHizb) {
+        case 0:
+          prefix = '';
+        case 1:
+          prefix = '1/4 ';
+        case 2:
+          prefix = '1/2 ';
+        case 3:
+          prefix = '3/4 ';
+        default:
+          prefix = '';
+      }
+      hizbLabelStr = '$prefix${context.l10n.hizb} $hizbIndex';
+    }
+
+    return _PagePreviewInfo(
+      surahName:
+          uniqueSurahNumbers
+              .map(
+                (surahNumber) =>
+                    isArabic
+                        ? getSurahNameArabic(surahNumber)
+                        : getSurahNameEnglish(surahNumber),
+              )
+              .join(' · '),
+      juzNumber: juzNumber,
+      hizbLabel: hizbLabelStr,
+    );
+  }
+}
+
 /// A bottom bar with a slider for quick page navigation and a surah index button.
 class _PageNavigationBar extends StatefulWidget {
   const _PageNavigationBar({
@@ -443,10 +581,17 @@ class _PageNavigationBar extends StatefulWidget {
 class _PageNavigationBarState extends State<_PageNavigationBar> {
   static const int _totalPages = 604;
   static const double _sliderHeight = 32;
+<<<<<<< HEAD
   static const double _sliderPreviewHeight = 140;
   static const double _sliderThumbRadius = 8;
   static const double _sliderOverlayRadius = 24;
   static const Duration _animationDuration = Duration(milliseconds: 200);
+=======
+  static const double _sliderPreviewHeight = 76;
+  static const double _sliderThumbRadius = 7;
+  static const double _sliderOverlayRadius = 16;
+  static const Duration _animationDuration = Duration(milliseconds: 180);
+>>>>>>> master
 
   double? _sliderValueOverride;
   int? _lastPreviewPage;
@@ -512,6 +657,7 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+<<<<<<< HEAD
     final bool isDark = theme.brightness == Brightness.dark;
     final Color primaryColor = colorScheme.primary;
     final Color barColor = isDark
@@ -519,6 +665,13 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
         : colorScheme.surface.withValues(alpha: 0.92);
     final Color borderColor = colorScheme.outlineVariant.withValues(
       alpha: isDark ? 0.3 : 0.55,
+=======
+    final Color primaryColor = colorScheme.primary;
+    final Color accentColor = colorScheme.primary;
+    final Color barColor = colorScheme.surface.withValues(alpha: 0.92);
+    final Color borderColor = colorScheme.outlineVariant.withValues(
+      alpha: 0.55,
+>>>>>>> master
     );
     final Color textColor = colorScheme.onSurface;
     final Color mutedTextColor = colorScheme.onSurfaceVariant;
@@ -540,7 +693,11 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
+<<<<<<< HEAD
               top: 16,
+=======
+              top: 12,
+>>>>>>> master
               bottom: bottomPadding + 8,
             ),
             decoration: BoxDecoration(
@@ -552,10 +709,15 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
               children: [
                 // Info row
                 Padding(
+<<<<<<< HEAD
                   padding: const EdgeInsets.only(bottom: 12),
+=======
+                  padding: EdgeInsets.only(bottom: 8),
+>>>>>>> master
                   child: Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
+<<<<<<< HEAD
                       Row(
                         children: [
                           // Page number badge
@@ -608,9 +770,26 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                                 ),
                               ],
                             ],
+=======
+                      // Surah index button
+                      GestureDetector(
+                        onTap: widget.onShowIndex,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: primaryColor.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.menu_book_rounded,
+                            size: 18,
+                            color: primaryColor,
+>>>>>>> master
                           ),
                         ],
                       ),
+<<<<<<< HEAD
                       Expanded(
                         child: Row(
                           mainAxisAlignment: .end,
@@ -651,12 +830,71 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                               ),
                             ),
                           ],
+=======
+                      SizedBox(width: 10),
+                      // Surah name
+                      Expanded(
+                        child: Text(
+                          currentInfo.surahName,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: textColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Juz + Hizb info
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${context.l10n.juzPart} ${currentInfo.juzNumber}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: textColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (currentInfo.hizbLabel.isNotEmpty)
+                            Text(
+                              currentInfo.hizbLabel,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: mutedTextColor,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(width: 8),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${widget.currentPage}',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: textColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+>>>>>>> master
                         ),
                       ),
                     ],
                   ),
                 ),
+<<<<<<< HEAD
                 // Page slider
+=======
+                // Page slider (RTL: page 1 on the right, 604 on the left)
+>>>>>>> master
                 AnimatedContainer(
                   duration: _animationDuration,
                   curve: Curves.easeOutCubic,
@@ -688,6 +926,7 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                           Positioned(
                             left: 0,
                             right: 0,
+<<<<<<< HEAD
                             bottom: 12,
                             child: _CustomSlider(
                               value: _sliderValue,
@@ -698,6 +937,38 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                               onChangeEnd: _handleSliderChangeEnd,
                               activeColor: primaryColor,
                               isDark: isDark,
+=======
+                            bottom: 0,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: SliderTheme(
+                                data: SliderThemeData(
+                                  activeTrackColor: accentColor,
+                                  inactiveTrackColor: accentColor.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  thumbColor: accentColor,
+                                  overlayColor: accentColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  trackHeight: 3,
+                                  thumbShape: RoundSliderThumbShape(
+                                    enabledThumbRadius: _sliderThumbRadius,
+                                  ),
+                                  overlayShape: RoundSliderOverlayShape(
+                                    overlayRadius: _sliderOverlayRadius,
+                                  ),
+                                ),
+                                child: Slider(
+                                  value: _sliderValue,
+                                  min: 1,
+                                  max: _totalPages.toDouble(),
+                                  onChangeStart: _handleSliderChangeStart,
+                                  onChanged: _handleSliderChanged,
+                                  onChangeEnd: _handleSliderChangeEnd,
+                                ),
+                              ),
+>>>>>>> master
                             ),
                           ),
                           if (_isDragging)
@@ -713,7 +984,10 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                                   backgroundColor: colorScheme.surface,
                                   textColor: textColor,
                                   mutedTextColor: mutedTextColor,
+<<<<<<< HEAD
                                   isDark: isDark,
+=======
+>>>>>>> master
                                 ),
                               ),
                             ),
@@ -722,7 +996,11 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                     },
                   ),
                 ),
+<<<<<<< HEAD
                 // Page range labels
+=======
+                // Page range labels (RTL: 604 on the left, 1 on the right)
+>>>>>>> master
                 const _PageRange(totalPages: _totalPages),
               ],
             ),
@@ -742,7 +1020,10 @@ class _SliderPreviewPill extends StatelessWidget {
     required this.backgroundColor,
     required this.textColor,
     required this.mutedTextColor,
+<<<<<<< HEAD
     required this.isDark,
+=======
+>>>>>>> master
   });
 
   final double width;
@@ -752,11 +1033,15 @@ class _SliderPreviewPill extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final Color mutedTextColor;
+<<<<<<< HEAD
   final bool isDark;
+=======
+>>>>>>> master
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+<<<<<<< HEAD
     final Color pillBg = backgroundColor.withValues(
       alpha: isDark ? 0.92 : 0.85,
     );
@@ -823,10 +1108,55 @@ class _SliderPreviewPill extends StatelessWidget {
           painter: _TrianglePainter(color: pillBg, borderColor: pillBorder),
         ),
       ],
+=======
+
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: backgroundColor.withValues(alpha: 0.98),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            surahName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${context.l10n.page} $pageNumber',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: mutedTextColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+>>>>>>> master
     );
   }
 }
 
+<<<<<<< HEAD
 class _TrianglePainter extends CustomPainter {
   const _TrianglePainter({required this.color, required this.borderColor});
 
@@ -858,6 +1188,8 @@ class _TrianglePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+=======
+>>>>>>> master
 class _PageRange extends StatelessWidget {
   const _PageRange({required this.totalPages});
 

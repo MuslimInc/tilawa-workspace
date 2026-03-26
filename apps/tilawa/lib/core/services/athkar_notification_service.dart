@@ -13,9 +13,17 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+<<<<<<< HEAD
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
+=======
+import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
+import '../../features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import '../../main.dart';
+import '../../router/app_router.dart';
+>>>>>>> master
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import '../di/injection.dart';
@@ -31,6 +39,7 @@ import '../di/injection.dart';
 class AthkarNotificationService implements IAthkarNotificationService {
   AthkarNotificationService(
     this._prefs,
+<<<<<<< HEAD
     this._dispatcher,
     this._analytics,
     this._navigationService,
@@ -41,6 +50,14 @@ class AthkarNotificationService implements IAthkarNotificationService {
   final INotificationDispatcher _dispatcher;
   final AnalyticsService _analytics;
   final NavigationService _navigationService;
+=======
+    this._dispatcher, {
+    PrayerTimesRepository? prayerTimesRepository,
+  }) : _prayerTimesRepository = prayerTimesRepository;
+
+  final SharedPreferencesAsync _prefs;
+  final INotificationDispatcher _dispatcher;
+>>>>>>> master
   final PrayerTimesRepository? _prayerTimesRepository;
   static const String _lastHandledPayloadKey =
       'last_handled_notification_payload';
@@ -65,9 +82,12 @@ class AthkarNotificationService implements IAthkarNotificationService {
   static const int _dynamicScheduleWindowDays = 14;
   static const String _morningAthkarPayloadPrefix = 'morning_athkar_';
   static const String _eveningAthkarPayloadPrefix = 'evening_athkar_';
+<<<<<<< HEAD
 
   /// Delay for athkar notifications after prayer times (1 hour)
   static const Duration _athkarNotificationDelay = Duration(hours: 1);
+=======
+>>>>>>> master
 
   /// Get notification IDs for external use (e.g., dispatcher registration)
   static Set<int> get notificationIds => {
@@ -350,8 +370,12 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Schedule morning athkar notification at a fixed fallback time.
   Future<void> _scheduleMorningAthkarFallback() async {
     try {
+<<<<<<< HEAD
       // Use 1 hour after common Fajr (e.g., 5:30 -> 6:30 or 7:00)
       final tz.TZDateTime scheduledDate = _nextInstanceOfTime(7, 30);
+=======
+      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(7, 0);
+>>>>>>> master
 
       await _notifications.zonedSchedule(
         id: _morningAthkarNotificationId,
@@ -378,8 +402,12 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Schedule evening athkar notification at a fixed fallback time.
   Future<void> _scheduleEveningAthkarFallback() async {
     try {
+<<<<<<< HEAD
       // Use 1 hour after common Asr (e.g., 16:30 -> 17:30 or 18:00)
       final tz.TZDateTime scheduledDate = _nextInstanceOfTime(18, 0);
+=======
+      final tz.TZDateTime scheduledDate = _nextInstanceOfTime(17, 0);
+>>>>>>> master
 
       await _notifications.zonedSchedule(
         id: _eveningAthkarNotificationId,
@@ -459,13 +487,21 @@ class AthkarNotificationService implements IAthkarNotificationService {
         final _ScheduledAthkarNotification? morningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
+<<<<<<< HEAD
               prayerTime: prayerTime.fajr.add(_athkarNotificationDelay),
+=======
+              prayerTime: prayerTime.fajr,
+>>>>>>> master
               isMorning: true,
             );
         final _ScheduledAthkarNotification? eveningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
+<<<<<<< HEAD
               prayerTime: prayerTime.asr.add(_athkarNotificationDelay),
+=======
+              prayerTime: prayerTime.asr,
+>>>>>>> master
               isMorning: false,
             );
 
@@ -791,12 +827,16 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
       _analytics.logAthkarNotificationOpen(1, 'أذكار الصباح');
       // Use go to ensure clean navigation from any state
+<<<<<<< HEAD
       _navigateToRoute(
         const AthkarDetailsRoute(
           categoryId: 1,
           categoryName: 'أذكار الصباح',
         ).location,
       );
+=======
+      _navigateToRoute(route.location);
+>>>>>>> master
     } else if (_isEveningAthkarNotification(
       id: response.id,
       payload: payload,
@@ -818,7 +858,11 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Navigate to a route, catching errors in test environments
   void _navigateToRoute(String location) {
     try {
+<<<<<<< HEAD
       _navigationService.navigateToNotification(location);
+=======
+      AppRouter.navigateToNotification(location);
+>>>>>>> master
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }

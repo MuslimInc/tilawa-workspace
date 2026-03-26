@@ -260,7 +260,13 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     List<int> favoriteIds,
   ) {
     final String normalizedQuery = searchQuery.trim().toLowerCase();
+<<<<<<< HEAD
     final Set<int> favoriteIdsLookup = favoriteIds.toSet();
+=======
+    final Set<int> favoriteIdsLookup = showFavoritesOnly
+        ? favoriteIds.toSet()
+        : const <int>{};
+>>>>>>> master
     var filtered = reciters;
 
     // Filter by search query
