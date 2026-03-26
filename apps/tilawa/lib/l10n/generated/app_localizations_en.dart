@@ -1351,4 +1351,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontsFailedToLoad => 'Failed to load fonts';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareScreenshot => 'Share Screenshot';
+
+  @override
+  String get shareAudioClip => 'Share Audio Clip';
+
+  @override
+  String get shareAsText => 'Share as Text';
+
+  @override
+  String get shareVerseAudioClip => 'Share Verse Audio';
+
+  @override
+  String get fromAyah => 'From Ayah';
+
+  @override
+  String get toAyah => 'To Ayah';
+
+  @override
+  String get generateAndShare => 'Generate & Share';
+
+  @override
+  String maxVersesExceeded(int count) {
+    return 'Maximum $count verses per clip.';
+  }
+
+  @override
+  String get sharing => 'Sharing...';
+
+  @override
+  String get sharedViaTilawa => 'Shared via Tilawa';
+
+  @override
+  String get reciterNotAvailable =>
+      'Verse audio not available for this reciter. Using default reciter.';
+
+  @override
+  String get shareAudio => 'Share Audio Clip';
+
+  @override
+  String get generateReel => 'Generate Reel (Video)';
+
+  @override
+  String get reviewReel => 'Review Reel';
+
+  @override
+  String get shareReel => 'Share Reel';
 }

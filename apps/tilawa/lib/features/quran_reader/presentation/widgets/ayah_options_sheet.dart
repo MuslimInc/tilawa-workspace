@@ -11,6 +11,8 @@ class AyahOptionsSheet extends StatelessWidget {
     required this.onShare,
     required this.onBookmark,
     required this.onPlay,
+    this.onShareScreenshot,
+    this.onShareAudioClip,
   });
 
   final AyahEntity ayah;
@@ -18,6 +20,8 @@ class AyahOptionsSheet extends StatelessWidget {
   final VoidCallback onShare;
   final VoidCallback onBookmark;
   final VoidCallback onPlay;
+  final VoidCallback? onShareScreenshot;
+  final VoidCallback? onShareAudioClip;
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +89,30 @@ class AyahOptionsSheet extends StatelessWidget {
             title: Text(context.l10n.copyAyah),
             onTap: onCopy,
           ),
-          ListTile(
+          ExpansionTile(
             leading: const Icon(Icons.share),
             title: Text(context.l10n.shareAyah),
-            onTap: onShare,
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+            childrenPadding: const EdgeInsets.only(left: 24),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.text_fields),
+                title: Text(context.l10n.shareAsText),
+                onTap: onShare,
+              ),
+              if (onShareScreenshot != null)
+                ListTile(
+                  leading: const Icon(Icons.camera_alt_outlined),
+                  title: Text(context.l10n.shareScreenshot),
+                  onTap: onShareScreenshot,
+                ),
+              if (onShareAudioClip != null)
+                ListTile(
+                  leading: const Icon(Icons.audiotrack_outlined),
+                  title: Text(context.l10n.shareVerseAudioClip),
+                  onTap: onShareAudioClip,
+                ),
+            ],
           ),
           ListTile(
             leading: const Icon(Icons.bookmark_border),

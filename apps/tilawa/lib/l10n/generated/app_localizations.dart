@@ -2515,6 +2515,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load fonts'**
   String get fontsFailedToLoad;
+
+  /// Share action title
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// Option to share a page screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Share Screenshot'**
+  String get shareScreenshot;
+
+  /// Option to share an audio clip of a recitation
+  ///
+  /// In en, this message translates to:
+  /// **'Share Audio Clip'**
+  String get shareAudioClip;
+
+  /// Option to share ayah as text
+  ///
+  /// In en, this message translates to:
+  /// **'Share as Text'**
+  String get shareAsText;
+
+  /// Option to share audio clip of a single verse
+  ///
+  /// In en, this message translates to:
+  /// **'Share Verse Audio'**
+  String get shareVerseAudioClip;
+
+  /// Label for start ayah picker
+  ///
+  /// In en, this message translates to:
+  /// **'From Ayah'**
+  String get fromAyah;
+
+  /// Label for end ayah picker
+  ///
+  /// In en, this message translates to:
+  /// **'To Ayah'**
+  String get toAyah;
+
+  /// Button to generate audio clip and share
+  ///
+  /// In en, this message translates to:
+  /// **'Generate & Share'**
+  String get generateAndShare;
+
+  /// Error when verse range exceeds maximum
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum {count} verses per clip.'**
+  String maxVersesExceeded(int count);
+
+  /// Status message while sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing...'**
+  String get sharing;
+
+  /// Branding text on shared content
+  ///
+  /// In en, this message translates to:
+  /// **'Shared via Tilawa'**
+  String get sharedViaTilawa;
+
+  /// Fallback message when reciter is not mapped
+  ///
+  /// In en, this message translates to:
+  /// **'Verse audio not available for this reciter. Using default reciter.'**
+  String get reciterNotAvailable;
+
+  /// Button to share audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Share Audio Clip'**
+  String get shareAudio;
+
+  /// Button to generate a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Reel (Video)'**
+  String get generateReel;
+
+  /// Title for reel review section
+  ///
+  /// In en, this message translates to:
+  /// **'Review Reel'**
+  String get reviewReel;
+
+  /// Button to share generated reel
+  ///
+  /// In en, this message translates to:
+  /// **'Share Reel'**
+  String get shareReel;
 }
 
 class _AppLocalizationsDelegate

@@ -1838,5 +1838,74 @@
     "fontsFailedToLoad": "فشل تحميل الخطوط",
     "@fontsFailedToLoad": {
         "description": "Error message when Quran fonts fail to load"
+    },
+    "share": "مشاركة",
+    "@share": {
+        "description": "Share action title"
+    },
+    "shareScreenshot": "مشاركة لقطة شاشة",
+    "@shareScreenshot": {
+        "description": "Option to share a page screenshot"
+    },
+    "shareAudioClip": "مشاركة مقطع صوتي",
+    "@shareAudioClip": {
+        "description": "Option to share an audio clip of a recitation"
+    },
+    "shareAsText": "مشاركة كنص",
+    "@shareAsText": {
+        "description": "Option to share ayah as text"
+    },
+    "shareVerseAudioClip": "مشاركة صوت الآية",
+    "@shareVerseAudioClip": {
+        "description": "Option to share audio clip of a single verse"
+    },
+    "fromAyah": "من الآية",
+    "@fromAyah": {
+        "description": "Label for start ayah picker"
+    },
+    "toAyah": "إلى الآية",
+    "@toAyah": {
+        "description": "Label for end ayah picker"
+    },
+    "generateAndShare": "إنشاء ومشاركة",
+    "@generateAndShare": {
+        "description": "Button to generate audio clip and share"
+    },
+    "maxVersesExceeded": "الحد الأقصى {count} آية لكل مقطع.",
+    "@maxVersesExceeded": {
+        "description": "Error when verse range exceeds maximum",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sharing": "جاري المشاركة...",
+    "@sharing": {
+        "description": "Status message while sharing"
+    },
+    "sharedViaTilawa": "تمت المشاركة عبر تلاوة",
+    "@sharedViaTilawa": {
+        "description": "Branding text on shared content"
+    },
+    "reciterNotAvailable": "صوت الآيات غير متاح لهذا القارئ. سيتم استخدام القارئ الافتراضي.",
+    "@reciterNotAvailable": {
+        "description": "Fallback message when reciter is not mapped"
+    },
+    "shareAudio": "مشاركة مقطع صوتي",
+    "@shareAudio": {
+        "description": "Button to share audio clip"
+    },
+    "generateReel": "إنشاء ريل (فيديو)",
+    "@generateReel": {
+        "description": "Button to generate a reel"
+    },
+    "reviewReel": "مراجعة الريل",
+    "@reviewReel": {
+        "description": "Title for reel review section"
+    },
+    "shareReel": "مشاركة الريل",
+    "@shareReel": {
+        "description": "Button to share generated reel"
     }
 }

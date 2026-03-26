@@ -16,6 +16,7 @@ import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_sc
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
+import '../../features/share/presentation/cubit/share_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
 import '../presentation/cubit/ui_visibility_cubit.dart';
 
@@ -78,6 +79,11 @@ class AppProviders {
     // UI Visibility provider (Global for immersive mode across routes)
     BlocProvider<UiVisibilityCubit>(
       create: (context) => getIt<UiVisibilityCubit>(),
+    ),
+
+    // Share provider — ephemeral cubit for screenshot & audio clip sharing
+    BlocProvider<ShareCubit>(
+      create: (context) => getIt<ShareCubit>(),
     ),
   ];
 

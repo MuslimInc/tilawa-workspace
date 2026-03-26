@@ -1344,4 +1344,55 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fontsFailedToLoad => 'فشل تحميل الخطوط';
+
+  @override
+  String get share => 'مشاركة';
+
+  @override
+  String get shareScreenshot => 'مشاركة لقطة شاشة';
+
+  @override
+  String get shareAudioClip => 'مشاركة مقطع صوتي';
+
+  @override
+  String get shareAsText => 'مشاركة كنص';
+
+  @override
+  String get shareVerseAudioClip => 'مشاركة صوت الآية';
+
+  @override
+  String get fromAyah => 'من الآية';
+
+  @override
+  String get toAyah => 'إلى الآية';
+
+  @override
+  String get generateAndShare => 'إنشاء ومشاركة';
+
+  @override
+  String maxVersesExceeded(int count) {
+    return 'الحد الأقصى $count آية لكل مقطع.';
+  }
+
+  @override
+  String get sharing => 'جاري المشاركة...';
+
+  @override
+  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+
+  @override
+  String get reciterNotAvailable =>
+      'صوت الآيات غير متاح لهذا القارئ. سيتم استخدام القارئ الافتراضي.';
+
+  @override
+  String get shareAudio => 'مشاركة مقطع صوتي';
+
+  @override
+  String get generateReel => 'إنشاء ريل (فيديو)';
+
+  @override
+  String get reviewReel => 'مراجعة الريل';
+
+  @override
+  String get shareReel => 'مشاركة الريل';
 }

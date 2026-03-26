@@ -1838,5 +1838,74 @@
     "fontsFailedToLoad": "Failed to load fonts",
     "@fontsFailedToLoad": {
         "description": "Error message when Quran fonts fail to load"
+    },
+    "share": "Share",
+    "@share": {
+        "description": "Share action title"
+    },
+    "shareScreenshot": "Share Screenshot",
+    "@shareScreenshot": {
+        "description": "Option to share a page screenshot"
+    },
+    "shareAudioClip": "Share Audio Clip",
+    "@shareAudioClip": {
+        "description": "Option to share an audio clip of a recitation"
+    },
+    "shareAsText": "Share as Text",
+    "@shareAsText": {
+        "description": "Option to share ayah as text"
+    },
+    "shareVerseAudioClip": "Share Verse Audio",
+    "@shareVerseAudioClip": {
+        "description": "Option to share audio clip of a single verse"
+    },
+    "fromAyah": "From Ayah",
+    "@fromAyah": {
+        "description": "Label for start ayah picker"
+    },
+    "toAyah": "To Ayah",
+    "@toAyah": {
+        "description": "Label for end ayah picker"
+    },
+    "generateAndShare": "Generate & Share",
+    "@generateAndShare": {
+        "description": "Button to generate audio clip and share"
+    },
+    "maxVersesExceeded": "Maximum {count} verses per clip.",
+    "@maxVersesExceeded": {
+        "description": "Error when verse range exceeds maximum",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sharing": "Sharing...",
+    "@sharing": {
+        "description": "Status message while sharing"
+    },
+    "sharedViaTilawa": "Shared via Tilawa",
+    "@sharedViaTilawa": {
+        "description": "Branding text on shared content"
+    },
+    "reciterNotAvailable": "Verse audio not available for this reciter. Using default reciter.",
+    "@reciterNotAvailable": {
+        "description": "Fallback message when reciter is not mapped"
+    },
+    "shareAudio": "Share Audio Clip",
+    "@shareAudio": {
+        "description": "Button to share audio clip"
+    },
+    "generateReel": "Generate Reel (Video)",
+    "@generateReel": {
+        "description": "Button to generate a reel"
+    },
+    "reviewReel": "Review Reel",
+    "@reviewReel": {
+        "description": "Title for reel review section"
+    },
+    "shareReel": "Share Reel",
+    "@shareReel": {
+        "description": "Button to share generated reel"
     }
 }

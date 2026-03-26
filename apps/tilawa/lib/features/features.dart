@@ -10,5 +10,6 @@ export 'premium/premium.dart';
 export 'quran_reader/quran_reader.dart';
 export 'reciters/reciters.dart';
 export 'settings/settings.dart';
+export 'share/share.dart';
 export 'surah/surah.dart';
 export 'theme/theme.dart';

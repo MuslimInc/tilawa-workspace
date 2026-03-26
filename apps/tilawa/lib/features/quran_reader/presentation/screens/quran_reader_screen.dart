@@ -7,6 +7,9 @@ import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
+import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
+import 'package:tilawa/features/share/presentation/widgets/share_audio_config_sheet.dart';
+import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -41,6 +44,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   bool _didInitDependencies = false;
   bool _isInitialPageJumpDone = false;
   final GlobalKey _pageViewKey = GlobalKey();
+  final GlobalKey _screenshotBoundaryKey = GlobalKey();
 
   static const _headerFontSizeMultiplier = 0.57;
 
@@ -254,7 +258,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                           oldState.settings != newState.settings ||
                           oldState.status != newState.status,
                       builder: (context, state) {
-                        return QuranPageView(
+                        return RepaintBoundary(
+                          key: _screenshotBoundaryKey,
+                          child: QuranPageView(
                           key: _pageViewKey,
                           controller: _pageController,
                           currentPageListenable: _currentPageNotifier,
@@ -285,6 +291,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                           },
                           onSurahSelected: _jumpToSurah,
                           onShowIndex: () => _showSurahIndex(context),
+                        ),
                         );
                       },
                     ),
@@ -310,6 +317,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                               currentPage: currentPage,
                               onPageChanged: _jumpToPage,
                               onShowIndex: () => _showSurahIndex(context),
+                              onShare: () => _showShareOptions(context, currentPage),
                             );
                           },
                         ),
@@ -320,6 +328,77 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  void _showShareOptions(BuildContext context, int currentPage) {
+    final pageData = getPageData(currentPage);
+    final surahNumber = pageData.first['surah']!;
+    final surahName = context.l10n.localeName == 'ar'
+        ? getSurahNameArabic(surahNumber)
+        : getSurahNameEnglish(surahNumber);
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => ShareOptionsSheet(
+        onShareScreenshot: () {
+          // Hide overlays before capture, wait one frame, then capture.
+          _uiVisibilityCubit.hide();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<ShareCubit>().captureAndShareScreenshot(
+              boundaryKey: _screenshotBoundaryKey,
+              surahName: surahName,
+              pageNumber: currentPage,
+              appName: 'Tilawa',
+              sharedViaLabel: context.l10n.sharedViaTilawa,
+            );
+            // Restore overlays after capture starts.
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) _uiVisibilityCubit.show();
+            });
+          });
+        },
+        onShareAudioClip: () {
+          _showAudioClipConfig(
+            context,
+            surahNumber: surahNumber,
+            currentPage: currentPage,
+          );
+        },
+      ),
+    );
+  }
+
+  void _showAudioClipConfig(
+    BuildContext context, {
+    required int surahNumber,
+    required int currentPage,
+  }) {
+    final pageData = getPageData(currentPage);
+    final firstAyah = pageData.first['start'] ?? 1;
+    final lastAyah = pageData.last['end'] ?? firstAyah;
+
+    // Use the currently selected reciter from the audio player, or a default.
+    final audioState = context.read<AudioPlayerBloc>().state;
+    final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
+    final serverUrl = audioState.currentAudio?.url ?? '';
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => BlocProvider.value(
+        value: context.read<ShareCubit>(),
+        child: ShareAudioConfigSheet(
+          surahNumber: surahNumber,
+          initialFromAyah: firstAyah,
+          initialToAyah: lastAyah,
+          reciterName: reciterName,
+          reciterServerUrl: serverUrl,
+          boundaryKey: _screenshotBoundaryKey,
         ),
       ),
     );
@@ -430,11 +509,13 @@ class _PageNavigationBar extends StatefulWidget {
     required this.currentPage,
     required this.onPageChanged,
     required this.onShowIndex,
+    required this.onShare,
   });
 
   final int currentPage;
   final ValueChanged<int> onPageChanged;
   final VoidCallback onShowIndex;
+  final VoidCallback onShare;
 
   @override
   State<_PageNavigationBar> createState() => _PageNavigationBarState();
@@ -629,7 +710,26 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
+                            // Share button
+                            Material(
+                              color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                onTap: widget.onShare,
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: Icon(
+                                    Icons.share_rounded,
+                                    size: 20,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             // Surah index button
                             Material(
                               color: primaryColor,
