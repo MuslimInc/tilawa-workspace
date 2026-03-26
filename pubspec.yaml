@@ -27,13 +27,13 @@ melos:
         dependsOn: build_runner
 
     test:
-      run: melos exec -- "flutter test"
+      run: melos exec --concurrency=1 -- "flutter test"
       description: Run all tests in the workspace.
       packageFilters:
         dirExists: test
 
     lint:
-      run: melos exec -- "flutter analyze"
+      run: melos exec --concurrency=1 -- "flutter analyze"
       description: Run analyzer for all packages.
 
     fix:
