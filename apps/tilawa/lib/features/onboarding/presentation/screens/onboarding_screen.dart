@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../router/app_router_config.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_content.dart';

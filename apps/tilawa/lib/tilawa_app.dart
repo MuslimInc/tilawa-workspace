@@ -8,7 +8,7 @@ import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
-import 'package:tilawa_ui/theme/app_theme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
 import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class ReciterSearchHeader extends StatelessWidget {
   const ReciterSearchHeader({super.key, required this.controller});

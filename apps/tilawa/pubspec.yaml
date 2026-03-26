@@ -58,7 +58,7 @@ dependencies:
   intl: ^0.20.2
   json_annotation: ^4.10.0
   just_audio: ^0.10.5
-  logger: ^2.6.2
+  logger: ^2.7.0
   path: ^1.9.1
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
@@ -67,8 +67,8 @@ dependencies:
     path: ../../packages/qibla
   tilawa_core:
     path: ../../packages/core
-  tilawa_ui:
-    path: ../../packages/ui
+  tilawa_ui_kit:
+    path: ../../packages/ui_kit
   quran:
     path: ../../packages/quran
 

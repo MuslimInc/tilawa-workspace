@@ -5,8 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/config/language_config.dart';
-import 'package:tilawa_ui/theme/app_colors.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
-import 'package:tilawa_ui/theme/app_colors.dart';
-import 'package:tilawa_ui/theme/app_theme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class ThemeState extends Equatable {
   const ThemeState({

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
 import 'package:tilawa_core/entities/audio.dart';
-import 'package:tilawa_ui/theme/app_theme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'shared/models/position_data.dart';
 import 'shared/widgets/bottom_player_ui.dart';
 

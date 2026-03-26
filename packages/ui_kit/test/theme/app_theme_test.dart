@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ui/theme/app_theme.dart';
+import '../../lib/src/theme/app_theme.dart';
 
 void main() {
   group('AppTheme', () {

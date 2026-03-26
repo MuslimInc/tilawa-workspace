@@ -5,7 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/shared/widgets/language_switcher.dart';
-import 'package:tilawa_ui/theme/text_theme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';

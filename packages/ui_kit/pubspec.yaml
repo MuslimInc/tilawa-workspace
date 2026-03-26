@@ -1,4 +1,4 @@
-name: tilawa_ui
+name: tilawa_ui_kit
 resolution: workspace
 description: UI library for Tilawa.
 version: 0.0.1

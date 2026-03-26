@@ -8,7 +8,7 @@ workspace:
   - apps/tilawa
   - packages/core
   - packages/qibla
-  - packages/ui
+  - packages/ui_kit
 
 dev_dependencies:
   melos: ^7.4.0

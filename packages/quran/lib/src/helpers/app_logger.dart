@@ -5,8 +5,6 @@ final Logger logger = Logger(
     methodCount: 0,
     errorMethodCount: 5,
     lineLength: 80,
-    colors: true,
-    printEmojis: true,
     dateTimeFormat: DateTimeFormat.onlyTime,
   ),
 );

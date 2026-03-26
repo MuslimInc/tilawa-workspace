@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
-import 'package:tilawa_ui/theme/app_colors.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';

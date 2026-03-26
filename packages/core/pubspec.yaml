@@ -23,7 +23,7 @@ dependencies:
   # Utils
   dartz_plus: ^0.3.0
   equatable: ^2.0.8
-  logger: ^2.6.2
+  logger: ^2.7.0
   intl: ^0.20.2
   gap: ^3.0.1
 

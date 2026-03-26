@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class MoshafSelector extends StatelessWidget {
   const MoshafSelector({super.key, required this.reciter, required this.state});

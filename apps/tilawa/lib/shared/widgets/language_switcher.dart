@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:tilawa_core/config/language_config.dart';
-import 'package:tilawa_ui/theme/color_scheme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 
