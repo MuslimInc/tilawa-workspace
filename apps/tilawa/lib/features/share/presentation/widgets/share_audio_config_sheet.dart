@@ -11,6 +11,7 @@ import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
+import 'reel_content_renderer.dart';
 
 /// Bottom sheet for configuring and generating an audio clip to share.
 ///
@@ -42,6 +43,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _fromAyah;
   late int _toAyah;
   late int _maxAyah;
+  final GlobalKey _reelContentKey = GlobalKey();
 
   @override
   void initState() {
@@ -56,7 +58,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
       fromAyah: _fromAyah,
       toAyah: _toAyah,
       reciterName: widget.reciterName,
-      reciterServerUrl: widget.reciterServerUrl,
+      serverUrl: widget.reciterServerUrl,
       boundaryKey: widget.boundaryKey,
     );
   }
@@ -94,193 +96,211 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
         final isSharing = state.status == ShareStatus.sharing;
         final hasError = state.status == ShareStatus.error;
 
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              16 + MediaQuery.of(context).viewInsets.bottom,
+        return Stack(
+          children: [
+            // Off-screen renderer for reel content capture
+            Positioned(
+              left: -2000,
+              top: 0,
+              child: RepaintBoundary(
+                key: _reelContentKey,
+                child: ReelContentRenderer(
+                  surahNumber: widget.surahNumber,
+                  fromAyah: _fromAyah,
+                  toAyah: _toAyah,
+                ),
+              ),
             ),
-            child: SingleChildScrollView(
-              child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  8,
+                  16,
+                  16 + MediaQuery.of(context).viewInsets.bottom,
                 ),
-
-                // Title
-                Text(
-                  context.l10n.shareAudioClip,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$_surahName  •  ${widget.reciterName}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-
-                // Verse range pickers
-                Row(
-                  children: [
-                    Expanded(
-                      child: _VerseDropdown(
-                        label: context.l10n.fromAyah,
-                        value: _fromAyah,
-                        max: _toAyah,
-                        min: 1,
-                        enabled: !isGenerating && !isSharing,
-                        onChanged: (v) {
-                          setState(() => _fromAyah = v);
-                          context.read<ShareCubit>().updateVerseRange(
-                            fromAyah: v,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _VerseDropdown(
-                        label: context.l10n.toAyah,
-                        value: _toAyah,
-                        max: _maxAyah,
-                        min: _fromAyah,
-                        enabled: !isGenerating && !isSharing,
-                        onChanged: (v) {
-                          setState(() => _toAyah = v);
-                          context.read<ShareCubit>().updateVerseRange(
-                            toAyah: v,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Verse count info
-                if (_verseCount > AudioClipService.maxVerses)
-                  Text(
-                    context.l10n.maxVersesExceeded(AudioClipService.maxVerses),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  )
-                else
-                  Text(
-                    '${context.l10n.verses}: $_verseCount',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                // Progress indicator
-                if (isGenerating) ...[
-                  LinearProgressIndicator(value: state.progress),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.progressMessage,
-                    style: theme.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: () {
-                      context.read<ShareCubit>().cancelGeneration();
-                    },
-                    child: Text(context.l10n.cancel),
-                  ),
-                ] else if (state.status == ShareStatus.reviewing && state.content is ShareReel) ...[
-                  // Reel preview
-                  _ReelPreview(
-                    filePath: state.content!.filePath,
-                    onShare: () => context.read<ShareCubit>().shareContent(),
-                  ),
-                ] else if (isSharing) ...[
-                  const Center(child: CircularProgressIndicator()),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.sharing,
-                    style: theme.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ] else ...[
-                  // Error message
-                  if (hasError && state.errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        state.errorMessage!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onErrorContainer,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Drag handle
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
 
-                  // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _isValid
-                              ? () {
+                      // Title
+                      Text(
+                        context.l10n.shareAudioClip,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$_surahName  •  ${widget.reciterName}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Verse range pickers
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _VerseDropdown(
+                              label: context.l10n.fromAyah,
+                              value: _fromAyah,
+                              max: _toAyah,
+                              min: 1,
+                              enabled: !isGenerating && !isSharing,
+                              onChanged: (v) {
+                                setState(() => _fromAyah = v);
+                                context.read<ShareCubit>().updateVerseRange(
+                                  fromAyah: v,
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _VerseDropdown(
+                              label: context.l10n.toAyah,
+                              value: _toAyah,
+                              max: _maxAyah,
+                              min: _fromAyah,
+                              enabled: !isGenerating && !isSharing,
+                              onChanged: (v) {
+                                setState(() => _toAyah = v);
+                                context.read<ShareCubit>().updateVerseRange(
+                                  toAyah: v,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Verse count info
+                      if (_verseCount > AudioClipService.maxVerses)
+                        Text(
+                          context.l10n.maxVersesExceeded(AudioClipService.maxVerses),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        )
+                      else
+                        Text(
+                          '${context.l10n.verses}: $_verseCount',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      // Progress indicator
+                      if (isGenerating) ...[
+                        LinearProgressIndicator(value: state.progress),
+                        const SizedBox(height: 8),
+                        Text(
+                          state.progressMessage,
+                          style: theme.textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () {
+                            context.read<ShareCubit>().cancelGeneration();
+                          },
+                          child: Text(context.l10n.cancel),
+                        ),
+                      ] else if (state.status == ShareStatus.reviewing && state.content is ShareReel) ...[
+                        // Reel preview
+                        _ReelPreview(
+                          filePath: state.content!.filePath,
+                          onShare: () => context.read<ShareCubit>().shareContent(),
+                        ),
+                      ] else if (isSharing) ...[
+                        const Center(child: CircularProgressIndicator()),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.sharing,
+                          style: theme.textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ] else ...[
+                        // Error message
+                        if (hasError && state.errorMessage != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.errorContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              state.errorMessage!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // Action buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _isValid
+                                    ? () {
                                   context.read<ShareCubit>().generateAndShareAudioClip(
                                     surahName: _surahName,
                                   );
                                 }
-                              : null,
-                          icon: const Icon(Icons.audiotrack),
-                          label: Text(context.l10n.shareAudio),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: _isValid
-                              ? () {
+                                    : null,
+                                icon: const Icon(Icons.audiotrack),
+                                label: Text(context.l10n.shareAudio),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: _isValid
+                                    ? () {
                                   context.read<ShareCubit>().generateReel(
                                     surahName: _surahName,
+                                    boundaryKey: _reelContentKey,
                                   );
                                 }
-                              : null,
-                          icon: const Icon(Icons.movie),
-                          label: Text(context.l10n.generateReel),
+                                    : null,
+                                icon: const Icon(Icons.movie),
+                                label: Text(context.l10n.generateReel),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      ],
                     ],
                   ),
-                ],
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
+          ],
+        );
       },
     );
   }
@@ -319,7 +339,7 @@ class _VerseDropdown extends StatelessWidget {
           onChanged: enabled ? (v) => onChanged(v!) : null,
           items: List.generate(
             max - min + 1,
-            (i) {
+                (i) {
               final v = min + i;
               return DropdownMenuItem(value: v, child: Text('$v'));
             },

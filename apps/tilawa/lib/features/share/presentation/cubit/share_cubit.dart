@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,37 +6,101 @@ import 'package:injectable/injectable.dart';
 
 import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/audio_clip_config.dart';
-import '../../domain/entities/share_content.dart';
 import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
 import '../../domain/usecases/generate_reel_use_case.dart';
 import '../../domain/usecases/share_content_use_case.dart';
+import '../../../quran_reader/domain/entities/entities.dart';
+import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'share_state.dart';
 
-/// Manages the share flow for both screenshots and audio clips.
-///
-/// This is an ephemeral cubit — no state persistence is needed.
 @injectable
 class ShareCubit extends Cubit<ShareState> {
   ShareCubit(
     this._captureScreenshot,
     this._generateAudioClip,
     this._generateReel,
+    this._quranRepository,
     this._shareContent,
   ) : super(const ShareState());
 
   final CaptureScreenshotUseCase _captureScreenshot;
   final GenerateAudioClipUseCase _generateAudioClip;
   final GenerateReelUseCase _generateReel;
+  final QuranReaderRepository _quranRepository;
   final ShareContentUseCase _shareContent;
 
   CancelToken? _cancelToken;
 
-  // ---------------------------------------------------------------------------
-  // Screenshot flow
-  // ---------------------------------------------------------------------------
+  /// Initializes the sharing flow with current context.
+  void configureAudioClip({
+    required int surahNumber,
+    required int fromAyah,
+    required int toAyah,
+    required String reciterName,
+    required String serverUrl,
+    String? reciterFolder,
+    GlobalKey? boundaryKey,
+  }) {
+    emit(state.copyWith(
+      status: ShareStatus.idle,
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+      reciterName: reciterName,
+      reciterServerUrl: serverUrl,
+      boundaryKey: boundaryKey,
+      errorMessage: null,
+    ));
 
-  /// Captures the current Quran page and opens the share sheet.
+    _fetchAyahs(surahNumber, fromAyah, toAyah);
+  }
+
+  /// Updates the verse range.
+  void updateVerseRange({int? fromAyah, int? toAyah}) {
+    final nextFrom = fromAyah ?? state.fromAyah;
+    final nextTo = toAyah ?? state.toAyah;
+
+    emit(state.copyWith(
+      fromAyah: nextFrom,
+      toAyah: nextTo,
+    ));
+
+    if (state.surahNumber != null && nextFrom != null && nextTo != null) {
+      _fetchAyahs(state.surahNumber!, nextFrom, nextTo);
+    }
+  }
+
+  Future<void> _fetchAyahs(int surahNumber, int fromAyah, int toAyah) async {
+    try {
+      final surahContent = await _quranRepository.getSurahContent(surahNumber);
+      final rangeAyahs = surahContent.ayahs
+          .where((a) => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah)
+          .map((a) => PageAyahInfo(
+                surahNumber: surahNumber,
+                surahName: surahContent.name,
+                surahNameEnglish: surahContent.nameEnglish,
+                ayahNumber: a.numberInSurah,
+                text: a.textUthmani ?? a.text,
+                words: null,
+              ))
+          .toList();
+
+      emit(state.copyWith(ayahs: rangeAyahs));
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  /// Updates the selected reciter.
+  void updateReciter({required String name, required String serverUrl}) {
+    emit(state.copyWith(
+      reciterName: name,
+      reciterServerUrl: serverUrl,
+    ));
+  }
+
+  /// Captures a screenshot of the current page and shares it.
   Future<void> captureAndShareScreenshot({
     required GlobalKey boundaryKey,
     required String surahName,
@@ -43,8 +108,7 @@ class ShareCubit extends Cubit<ShareState> {
     required String appName,
     required String sharedViaLabel,
   }) async {
-    emit(state.copyWith(status: ShareStatus.capturing, errorMessage: null));
-
+    emit(state.copyWith(status: ShareStatus.sharing, boundaryKey: boundaryKey));
     try {
       final content = await _captureScreenshot(
         boundaryKey: boundaryKey,
@@ -53,12 +117,8 @@ class ShareCubit extends Cubit<ShareState> {
         appName: appName,
         sharedViaLabel: sharedViaLabel,
       );
-
-      emit(state.copyWith(status: ShareStatus.sharing, content: content));
-
       await _shareContent(content);
-
-      emit(const ShareState()); // Reset to idle
+      emit(state.copyWith(status: ShareStatus.idle));
     } catch (e) {
       emit(state.copyWith(
         status: ShareStatus.error,
@@ -67,255 +127,139 @@ class ShareCubit extends Cubit<ShareState> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Audio clip flow
-  // ---------------------------------------------------------------------------
-
-  /// Configures the audio clip parameters before generation.
-  void configureAudioClip({
-    required int surahNumber,
-    required int fromAyah,
-    required int toAyah,
-    required String reciterName,
-    required String reciterServerUrl,
-    GlobalKey? boundaryKey,
-  }) {
-    emit(state.copyWith(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-      reciterName: reciterName,
-      reciterServerUrl: reciterServerUrl,
-      boundaryKey: boundaryKey,
-      errorMessage: null,
-    ));
-  }
-
-  /// Updates the verse range.
-  void updateVerseRange({int? fromAyah, int? toAyah}) {
-    emit(state.copyWith(
-      fromAyah: fromAyah ?? state.fromAyah,
-      toAyah: toAyah ?? state.toAyah,
-    ));
-  }
-
-  /// Updates the selected reciter.
-  void updateReciter({
-    required String reciterName,
-    required String reciterServerUrl,
-  }) {
-    emit(state.copyWith(
-      reciterName: reciterName,
-      reciterServerUrl: reciterServerUrl,
-    ));
-  }
-
-  /// Generates the audio clip and opens the share sheet.
-  Future<void> generateAndShareAudioClip({
-    required String surahName,
-  }) async {
+  /// Generates the audio clip and shares it.
+  Future<void> generateAndShareAudioClip({required String surahName}) async {
     final surahNumber = state.surahNumber;
     final fromAyah = state.fromAyah;
     final toAyah = state.toAyah;
-    final serverUrl = state.reciterServerUrl;
     final reciterName = state.reciterName;
+    final serverUrl = state.reciterServerUrl;
 
     if (surahNumber == null ||
         fromAyah == null ||
         toAyah == null ||
-        serverUrl == null ||
-        reciterName == null) {
-      emit(state.copyWith(
-        status: ShareStatus.error,
-        errorMessage: 'Missing audio clip configuration.',
-      ));
+        reciterName == null ||
+        serverUrl == null) {
       return;
     }
 
     _cancelToken = CancelToken();
     emit(state.copyWith(
       status: ShareStatus.generating,
-      progress: 0.0,
-      progressMessage: '',
-      errorMessage: null,
+      progress: 0,
+      progressMessage: 'Preparing audio clip...',
     ));
 
     try {
-      final reciterFolder = ReciterAudioMapping.resolveFolder(serverUrl);
+      final folder = ReciterAudioMapping.resolveFolder(serverUrl);
       final config = AudioClipConfig(
         surahNumber: surahNumber,
         fromAyah: fromAyah,
         toAyah: toAyah,
         reciterName: reciterName,
-        reciterFolder: reciterFolder,
+        reciterFolder: folder,
         serverUrl: serverUrl,
       );
 
       final content = await _generateAudioClip(
         config: config,
-        onProgress: (progress, message) {
-          if (!isClosed) {
-            emit(state.copyWith(
-              progress: progress,
-              progressMessage: message,
-            ));
-          }
-        },
         cancelToken: _cancelToken,
+        onProgress: (progress, message) {
+          emit(state.copyWith(progress: progress, progressMessage: message));
+        },
       );
 
-      // Fill in the localized surah name.
-      final namedContent = switch (content) {
-        ShareAudioClip(
-          :final filePath,
-          :final fromAyah,
-          :final toAyah,
-          :final reciterName,
-        ) =>
-          ShareContent.audioClip(
-            filePath: filePath,
-            surahName: surahName,
-            fromAyah: fromAyah,
-            toAyah: toAyah,
-            reciterName: reciterName,
-          ),
-        _ => content,
-      };
-
-      emit(state.copyWith(
-        status: ShareStatus.sharing,
-        content: namedContent,
-        progress: 1.0,
-      ));
-
-      await _shareContent(namedContent);
-
-      emit(const ShareState()); // Reset to idle
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.cancel) {
-        emit(const ShareState()); // Cancelled — reset silently
-      } else {
+      emit(state.copyWith(status: ShareStatus.sharing));
+      await _shareContent(content);
+      emit(state.copyWith(status: ShareStatus.idle));
+    } catch (e) {
+      if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(state.copyWith(
           status: ShareStatus.error,
-          errorMessage: e.message ?? 'Download failed.',
+          errorMessage: e.toString(),
         ));
+      } else {
+        emit(state.copyWith(status: ShareStatus.idle));
       }
-    } catch (e) {
-      emit(state.copyWith(
-        status: ShareStatus.error,
-        errorMessage: e.toString(),
-      ));
-    } finally {
-      _cancelToken = null;
     }
   }
 
   /// Generates a vertical video (9:16) for social media.
   Future<void> generateReel({
     required String surahName,
+    GlobalKey? boundaryKey,
   }) async {
     final surahNumber = state.surahNumber;
     final fromAyah = state.fromAyah;
     final toAyah = state.toAyah;
     final reciterName = state.reciterName;
     final serverUrl = state.reciterServerUrl;
-    final boundaryKey = state.boundaryKey;
+    final effectiveBoundaryKey = boundaryKey ?? state.boundaryKey;
 
     if (surahNumber == null ||
         fromAyah == null ||
         toAyah == null ||
         reciterName == null ||
         serverUrl == null ||
-        boundaryKey == null) {
+        effectiveBoundaryKey == null) {
       return;
     }
 
     _cancelToken = CancelToken();
     emit(state.copyWith(
       status: ShareStatus.generating,
-      progress: 0.0,
-      progressMessage: 'Initializing reel generation...',
-      errorMessage: null,
+      progress: 0,
+      progressMessage: 'Preparing reel...',
     ));
 
     try {
-      final reciterFolder = ReciterAudioMapping.resolveFolder(serverUrl);
-      final config = AudioClipConfig(
+      // 1. Prepare audio config
+      final folder = ReciterAudioMapping.resolveFolder(serverUrl);
+      final audioConfig = AudioClipConfig(
         surahNumber: surahNumber,
         fromAyah: fromAyah,
         toAyah: toAyah,
         reciterName: reciterName,
-        reciterFolder: reciterFolder,
+        reciterFolder: folder,
         serverUrl: serverUrl,
       );
 
+      // 2. Generate reel (captures its own screenshot of the boundary)
       final content = await _generateReel(
-        boundaryKey: boundaryKey,
-        config: config,
+        boundaryKey: effectiveBoundaryKey,
+        config: audioConfig,
         appName: 'Tilawa',
         sharedViaLabel: 'Shared via Tilawa',
-        onProgress: (progress, message) {
-          if (!isClosed) {
-            emit(state.copyWith(
-              progress: progress,
-              progressMessage: message,
-            ));
-          }
-        },
         cancelToken: _cancelToken,
+        onProgress: (p, m) => emit(state.copyWith(
+          progress: p,
+          progressMessage: m,
+        )),
       );
-
-      // Fill in localized surah name.
-      final namedContent = switch (content) {
-        ShareReel(
-          :final filePath,
-          :final fromAyah,
-          :final toAyah,
-          :final reciterName,
-        ) =>
-          ShareContent.reel(
-            filePath: filePath,
-            surahName: surahName,
-            fromAyah: fromAyah,
-            toAyah: toAyah,
-            reciterName: reciterName,
-          ),
-        _ => content,
-      };
 
       emit(state.copyWith(
         status: ShareStatus.reviewing,
-        content: namedContent,
-        progress: 1.0,
+        content: content,
       ));
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.cancel) {
-        emit(const ShareState()); // Cancelled — reset silently
-      } else {
+    } catch (e) {
+      if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(state.copyWith(
           status: ShareStatus.error,
-          errorMessage: e.message ?? 'Reel generation failed.',
+          errorMessage: e.toString(),
         ));
+      } else {
+        emit(state.copyWith(status: ShareStatus.idle));
       }
-    } catch (e) {
-      emit(state.copyWith(
-        status: ShareStatus.error,
-        errorMessage: e.toString(),
-      ));
-    } finally {
-      _cancelToken = null;
     }
   }
 
-  /// Initiates the final native share for the generated content.
+  /// Shares the currently reviewed content.
   Future<void> shareContent() async {
-    final content = state.content;
-    if (content == null) return;
-
+    if (state.content == null) return;
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
-      await _shareContent(content);
-      emit(const ShareState()); // Return to idle after share
+      await _shareContent(state.content!);
+      emit(state.copyWith(status: ShareStatus.idle, content: null));
     } catch (e) {
       emit(state.copyWith(
         status: ShareStatus.error,
@@ -324,20 +268,9 @@ class ShareCubit extends Cubit<ShareState> {
     }
   }
 
-  /// Cancels an in-progress audio clip generation.
   void cancelGeneration() {
-    _cancelToken?.cancel('User cancelled');
+    _cancelToken?.cancel();
     _cancelToken = null;
-  }
-
-  /// Clears any error state and returns to idle.
-  void clearError() {
-    emit(const ShareState());
-  }
-
-  @override
-  Future<void> close() {
-    cancelGeneration();
-    return super.close();
+    emit(state.copyWith(status: ShareStatus.idle));
   }
 }

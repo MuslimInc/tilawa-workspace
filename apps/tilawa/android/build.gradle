@@ -5,6 +5,10 @@ allprojects {
     }
 }
 
+ext {
+    ffmpegKitPackage = "full-gpl"
+}
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

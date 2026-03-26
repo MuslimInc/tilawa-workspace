@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
+import '../../domain/entities/entities.dart';
 import '../../domain/entities/share_content.dart';
+import '../../../quran_reader/domain/entities/entities.dart';
 
 part 'share_state.freezed.dart';
 
@@ -26,5 +27,6 @@ abstract class ShareState with _$ShareState {
     GlobalKey? boundaryKey,
     // Error
     String? errorMessage,
+    List<PageAyahInfo>? ayahs,
   }) = _ShareState;
 }
