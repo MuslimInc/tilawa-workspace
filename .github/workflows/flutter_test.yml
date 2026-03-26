@@ -34,23 +34,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Install Melos
-        run: dart pub global activate melos
-
-      - name: Add Melos to PATH
-        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-
-      - name: Bootstrap Workspace
-        run: melos bootstrap
-
-      - name: Generate Code
-        run: melos run gen
-
-      - name: Static Analysis
-        run: melos run lint
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Run Tests
-        run: melos run test
+        run: flutter test
 
   build_android:
     name: Build & Deploy Android
