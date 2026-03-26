@@ -1,4 +1,5 @@
 name: quran
+resolution: workspace
 description: "Quran Reader"
 version: 0.0.1
 

@@ -9,6 +9,7 @@ workspace:
   - packages/core
   - packages/qibla
   - packages/ui_kit
+  - packages/quran
 
 dev_dependencies:
   melos: ^7.4.0
@@ -17,6 +18,35 @@ melos:
   command:
     bootstrap:
       usePubspecOverrides: true
+
+  scripts:
+    bootstrap:
+      run: melos bootstrap
+      description: Link all internal packages together and install dependencies.
+
+    clean:
+      run: melos clean
+      description: Clean all packages in the workspace.
+
+    gen:
+      run: melos exec --concurrency=1 -- "dart run build_runner build --delete-conflicting-outputs"
+      description: Run build_runner for all packages.
+      packageFilters:
+        dependsOn: build_runner
+
+    test:
+      run: melos exec -- "flutter test"
+      description: Run all tests in the workspace.
+      packageFilters:
+        dirExists: test
+
+    lint:
+      run: melos exec -- "flutter analyze"
+      description: Run analyzer for all packages.
+
+    fix:
+      run: melos exec -- "dart fix --apply"
+      description: Apply dart fixes for all packages.
 
 dependency_overrides:
   test_api: 0.7.7
