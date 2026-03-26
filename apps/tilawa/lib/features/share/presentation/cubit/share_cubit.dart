@@ -42,16 +42,22 @@ class ShareCubit extends Cubit<ShareState> {
     String? reciterFolder,
     GlobalKey? boundaryKey,
   }) {
-    emit(state.copyWith(
-      status: ShareStatus.idle,
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-      reciterName: reciterName,
-      reciterServerUrl: serverUrl,
-      boundaryKey: boundaryKey,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: ShareStatus.idle,
+        surahNumber: surahNumber,
+        fromAyah: fromAyah,
+        toAyah: toAyah,
+        reciterName: reciterName,
+        reciterServerUrl: serverUrl,
+        boundaryKey: boundaryKey,
+        content: null,
+        progress: 0,
+        progressMessage: '',
+        ayahs: null,
+        errorMessage: null,
+      ),
+    );
 
     _fetchAyahs(surahNumber, fromAyah, toAyah);
   }
@@ -61,10 +67,17 @@ class ShareCubit extends Cubit<ShareState> {
     final nextFrom = fromAyah ?? state.fromAyah;
     final nextTo = toAyah ?? state.toAyah;
 
-    emit(state.copyWith(
-      fromAyah: nextFrom,
-      toAyah: nextTo,
-    ));
+    emit(
+      state.copyWith(
+        status: ShareStatus.idle,
+        fromAyah: nextFrom,
+        toAyah: nextTo,
+        content: null,
+        progress: 0,
+        progressMessage: '',
+        errorMessage: null,
+      ),
+    );
 
     if (state.surahNumber != null && nextFrom != null && nextTo != null) {
       _fetchAyahs(state.surahNumber!, nextFrom, nextTo);
@@ -75,15 +88,19 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       final surahContent = await _quranRepository.getSurahContent(surahNumber);
       final rangeAyahs = surahContent.ayahs
-          .where((a) => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah)
-          .map((a) => PageAyahInfo(
-                surahNumber: surahNumber,
-                surahName: surahContent.name,
-                surahNameEnglish: surahContent.nameEnglish,
-                ayahNumber: a.numberInSurah,
-                text: a.textUthmani ?? a.text,
-                words: null,
-              ))
+          .where(
+            (a) => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah,
+          )
+          .map(
+            (a) => PageAyahInfo(
+              surahNumber: surahNumber,
+              surahName: surahContent.name,
+              surahNameEnglish: surahContent.nameEnglish,
+              ayahNumber: a.numberInSurah,
+              text: a.textUthmani ?? a.text,
+              words: null,
+            ),
+          )
           .toList();
 
       emit(state.copyWith(ayahs: rangeAyahs));
@@ -94,10 +111,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Updates the selected reciter.
   void updateReciter({required String name, required String serverUrl}) {
-    emit(state.copyWith(
-      reciterName: name,
-      reciterServerUrl: serverUrl,
-    ));
+    emit(state.copyWith(reciterName: name, reciterServerUrl: serverUrl));
   }
 
   /// Captures a screenshot of the current page and shares it.
@@ -120,10 +134,9 @@ class ShareCubit extends Cubit<ShareState> {
       await _shareContent(content);
       emit(state.copyWith(status: ShareStatus.idle));
     } catch (e) {
-      emit(state.copyWith(
-        status: ShareStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
@@ -144,11 +157,14 @@ class ShareCubit extends Cubit<ShareState> {
     }
 
     _cancelToken = CancelToken();
-    emit(state.copyWith(
-      status: ShareStatus.generating,
-      progress: 0,
-      progressMessage: 'Preparing audio clip...',
-    ));
+    emit(
+      state.copyWith(
+        status: ShareStatus.generating,
+        progress: 0,
+        progressMessage: 'Preparing audio clip...',
+        errorMessage: null,
+      ),
+    );
 
     try {
       final folder = ReciterAudioMapping.resolveFolder(serverUrl);
@@ -174,10 +190,9 @@ class ShareCubit extends Cubit<ShareState> {
       emit(state.copyWith(status: ShareStatus.idle));
     } catch (e) {
       if (e is! DioException || e.type != DioExceptionType.cancel) {
-        emit(state.copyWith(
-          status: ShareStatus.error,
-          errorMessage: e.toString(),
-        ));
+        emit(
+          state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        );
       } else {
         emit(state.copyWith(status: ShareStatus.idle));
       }
@@ -206,11 +221,15 @@ class ShareCubit extends Cubit<ShareState> {
     }
 
     _cancelToken = CancelToken();
-    emit(state.copyWith(
-      status: ShareStatus.generating,
-      progress: 0,
-      progressMessage: 'Preparing reel...',
-    ));
+    emit(
+      state.copyWith(
+        status: ShareStatus.generating,
+        progress: 0,
+        progressMessage: 'Preparing reel...',
+        errorMessage: null,
+        content: null,
+      ),
+    );
 
     try {
       // 1. Prepare audio config
@@ -231,22 +250,16 @@ class ShareCubit extends Cubit<ShareState> {
         appName: 'Tilawa',
         sharedViaLabel: 'Shared via Tilawa',
         cancelToken: _cancelToken,
-        onProgress: (p, m) => emit(state.copyWith(
-          progress: p,
-          progressMessage: m,
-        )),
+        onProgress: (p, m) =>
+            emit(state.copyWith(progress: p, progressMessage: m)),
       );
 
-      emit(state.copyWith(
-        status: ShareStatus.reviewing,
-        content: content,
-      ));
+      emit(state.copyWith(status: ShareStatus.reviewing, content: content));
     } catch (e) {
       if (e is! DioException || e.type != DioExceptionType.cancel) {
-        emit(state.copyWith(
-          status: ShareStatus.error,
-          errorMessage: e.toString(),
-        ));
+        emit(
+          state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        );
       } else {
         emit(state.copyWith(status: ShareStatus.idle));
       }
@@ -261,16 +274,21 @@ class ShareCubit extends Cubit<ShareState> {
       await _shareContent(state.content!);
       emit(state.copyWith(status: ShareStatus.idle, content: null));
     } catch (e) {
-      emit(state.copyWith(
-        status: ShareStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
   void cancelGeneration() {
     _cancelToken?.cancel();
     _cancelToken = null;
-    emit(state.copyWith(status: ShareStatus.idle));
+    emit(
+      state.copyWith(
+        status: ShareStatus.idle,
+        progress: 0,
+        progressMessage: '',
+      ),
+    );
   }
 }

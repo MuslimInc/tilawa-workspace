@@ -2611,6 +2611,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share Reel'**
   String get shareReel;
+
+  /// Subtitle in the share options sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a format that carries these verses beautifully.'**
+  String get shareSheetSubtitle;
+
+  /// Description for the screenshot share option
+  ///
+  /// In en, this message translates to:
+  /// **'A clean Quran page capture ready to send.'**
+  String get shareScreenshotDescription;
+
+  /// Description for the audio clip share option
+  ///
+  /// In en, this message translates to:
+  /// **'Create a recitation clip or reel with audio.'**
+  String get shareAudioClipDescription;
+
+  /// Subtitle in the audio clip and reel configuration sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select a verse range and generate audio or a vertical reel.'**
+  String get audioClipConfigSubtitle;
+
+  /// Supportive text describing the verse limit for a clip
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} verses per clip.'**
+  String shareVerseLimit(int count);
+
+  /// Label above the live reel preview
+  ///
+  /// In en, this message translates to:
+  /// **'Live Reel Preview'**
+  String get liveReelPreview;
 }
 
 class _AppLocalizationsDelegate

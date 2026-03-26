@@ -1395,4 +1395,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareReel => 'مشاركة الريل';
+
+  @override
+  String get shareSheetSubtitle =>
+      'اختر الصيغة الأنسب لمشاركة هذه الآيات بصورة جميلة.';
+
+  @override
+  String get shareScreenshotDescription =>
+      'لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.';
+
+  @override
+  String get shareAudioClipDescription =>
+      'أنشئ مقطع تلاوة أو ريل مصحوبًا بالصوت.';
+
+  @override
+  String get audioClipConfigSubtitle =>
+      'حدّد نطاق الآيات ثم أنشئ مقطعًا صوتيًا أو ريل عموديًا.';
+
+  @override
+  String shareVerseLimit(int count) {
+    return 'حتى $count آية لكل مقطع.';
+  }
+
+  @override
+  String get liveReelPreview => 'معاينة مباشرة للريل';
 }

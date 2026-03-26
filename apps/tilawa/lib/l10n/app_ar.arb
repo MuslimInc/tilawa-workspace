@@ -1907,5 +1907,34 @@
     "shareReel": "مشاركة الريل",
     "@shareReel": {
         "description": "Button to share generated reel"
+    },
+    "shareSheetSubtitle": "اختر الصيغة الأنسب لمشاركة هذه الآيات بصورة جميلة.",
+    "@shareSheetSubtitle": {
+        "description": "Subtitle in the share options sheet"
+    },
+    "shareScreenshotDescription": "لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.",
+    "@shareScreenshotDescription": {
+        "description": "Description for the screenshot share option"
+    },
+    "shareAudioClipDescription": "أنشئ مقطع تلاوة أو ريل مصحوبًا بالصوت.",
+    "@shareAudioClipDescription": {
+        "description": "Description for the audio clip share option"
+    },
+    "audioClipConfigSubtitle": "حدّد نطاق الآيات ثم أنشئ مقطعًا صوتيًا أو ريل عموديًا.",
+    "@audioClipConfigSubtitle": {
+        "description": "Subtitle in the audio clip and reel configuration sheet"
+    },
+    "shareVerseLimit": "حتى {count} آية لكل مقطع.",
+    "@shareVerseLimit": {
+        "description": "Supportive text describing the verse limit for a clip",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "liveReelPreview": "معاينة مباشرة للريل",
+    "@liveReelPreview": {
+        "description": "Label above the live reel preview"
     }
 }

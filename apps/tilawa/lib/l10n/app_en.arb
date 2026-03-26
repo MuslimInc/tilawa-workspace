@@ -1907,5 +1907,34 @@
     "shareReel": "Share Reel",
     "@shareReel": {
         "description": "Button to share generated reel"
+    },
+    "shareSheetSubtitle": "Choose a format that carries these verses beautifully.",
+    "@shareSheetSubtitle": {
+        "description": "Subtitle in the share options sheet"
+    },
+    "shareScreenshotDescription": "A clean Quran page capture ready to send.",
+    "@shareScreenshotDescription": {
+        "description": "Description for the screenshot share option"
+    },
+    "shareAudioClipDescription": "Create a recitation clip or reel with audio.",
+    "@shareAudioClipDescription": {
+        "description": "Description for the audio clip share option"
+    },
+    "audioClipConfigSubtitle": "Select a verse range and generate audio or a vertical reel.",
+    "@audioClipConfigSubtitle": {
+        "description": "Subtitle in the audio clip and reel configuration sheet"
+    },
+    "shareVerseLimit": "Up to {count} verses per clip.",
+    "@shareVerseLimit": {
+        "description": "Supportive text describing the verse limit for a clip",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "liveReelPreview": "Live Reel Preview",
+    "@liveReelPreview": {
+        "description": "Label above the live reel preview"
     }
 }

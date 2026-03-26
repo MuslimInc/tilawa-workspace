@@ -1402,4 +1402,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareReel => 'Share Reel';
+
+  @override
+  String get shareSheetSubtitle =>
+      'Choose a format that carries these verses beautifully.';
+
+  @override
+  String get shareScreenshotDescription =>
+      'A clean Quran page capture ready to send.';
+
+  @override
+  String get shareAudioClipDescription =>
+      'Create a recitation clip or reel with audio.';
+
+  @override
+  String get audioClipConfigSubtitle =>
+      'Select a verse range and generate audio or a vertical reel.';
+
+  @override
+  String shareVerseLimit(int count) {
+    return 'Up to $count verses per clip.';
+  }
+
+  @override
+  String get liveReelPreview => 'Live Reel Preview';
 }

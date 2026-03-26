@@ -261,37 +261,37 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                         return RepaintBoundary(
                           key: _screenshotBoundaryKey,
                           child: QuranPageView(
-                          key: _pageViewKey,
-                          controller: _pageController,
-                          currentPageListenable: _currentPageNotifier,
-                          pageBackgroundColor: readerTheme.pageBackground,
-                          textColor: readerTheme.textColor,
-                          headerImageFilter: readerTheme.headerImageFilter,
-                          headerTextColor: readerTheme.headerTextColor,
-                          headerFontSizeMultiplier: _headerFontSizeMultiplier,
-                          onPageChanged: (pageNumber) {
-                            if (_currentPageNotifier.value != pageNumber) {
-                              _currentPageNotifier.value = pageNumber;
-                            }
-                            final pageData = getPageData(pageNumber);
-                            final surahNumber = pageData.first['surah']!;
-                            context.read<QuranReaderBloc>().add(
-                              QuranReaderEvent.saveLastRead(
-                                surahNumber: surahNumber,
-                                page: pageNumber,
-                              ),
-                            );
-                          },
-                          juzLabel: context.l10n.juzPart,
-                          hizbLabel: context.l10n.hizb,
-                          surahNameBuilder: (surahNumber) {
-                            return context.l10n.localeName == 'ar'
-                                ? getSurahNameArabic(surahNumber)
-                                : getSurahNameEnglish(surahNumber);
-                          },
-                          onSurahSelected: _jumpToSurah,
-                          onShowIndex: () => _showSurahIndex(context),
-                        ),
+                            key: _pageViewKey,
+                            controller: _pageController,
+                            currentPageListenable: _currentPageNotifier,
+                            pageBackgroundColor: readerTheme.pageBackground,
+                            textColor: readerTheme.textColor,
+                            headerImageFilter: readerTheme.headerImageFilter,
+                            headerTextColor: readerTheme.headerTextColor,
+                            headerFontSizeMultiplier: _headerFontSizeMultiplier,
+                            onPageChanged: (pageNumber) {
+                              if (_currentPageNotifier.value != pageNumber) {
+                                _currentPageNotifier.value = pageNumber;
+                              }
+                              final pageData = getPageData(pageNumber);
+                              final surahNumber = pageData.first['surah']!;
+                              context.read<QuranReaderBloc>().add(
+                                QuranReaderEvent.saveLastRead(
+                                  surahNumber: surahNumber,
+                                  page: pageNumber,
+                                ),
+                              );
+                            },
+                            juzLabel: context.l10n.juzPart,
+                            hizbLabel: context.l10n.hizb,
+                            surahNameBuilder: (surahNumber) {
+                              return context.l10n.localeName == 'ar'
+                                  ? getSurahNameArabic(surahNumber)
+                                  : getSurahNameEnglish(surahNumber);
+                            },
+                            onSurahSelected: _jumpToSurah,
+                            onShowIndex: () => _showSurahIndex(context),
+                          ),
                         );
                       },
                     ),
@@ -317,7 +317,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                               currentPage: currentPage,
                               onPageChanged: _jumpToPage,
                               onShowIndex: () => _showSurahIndex(context),
-                              onShare: () => _showShareOptions(context, currentPage),
+                              onShare: () =>
+                                  _showShareOptions(context, currentPage),
                             );
                           },
                         ),
@@ -342,8 +343,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => ShareOptionsSheet(
+        surahNumber: surahNumber,
+        pageNumber: currentPage,
         onShareScreenshot: () {
           // Hide overlays before capture, wait one frame, then capture.
           _uiVisibilityCubit.hide();
@@ -389,7 +393,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: context.read<ShareCubit>(),
         child: ShareAudioConfigSheet(
@@ -713,7 +717,9 @@ class _PageNavigationBarState extends State<_PageNavigationBar> {
                             const SizedBox(width: 8),
                             // Share button
                             Material(
-                              color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                              color: primaryColor.withValues(
+                                alpha: isDark ? 0.2 : 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                               child: InkWell(
                                 onTap: widget.onShare,
