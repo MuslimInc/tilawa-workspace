@@ -20,10 +20,6 @@ melos:
       usePubspecOverrides: true
 
   scripts:
-    clean:
-      run: melos clean
-      description: Clean all packages in the workspace.
-
     gen:
       run: melos exec --concurrency=1 -- "dart run build_runner build --delete-conflicting-outputs"
       description: Run build_runner for all packages.

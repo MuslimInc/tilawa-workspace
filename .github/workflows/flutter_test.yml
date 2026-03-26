@@ -2,10 +2,12 @@ name: Flutter Test & Deploy
 
 env:
   FLUTTER_VERSION: "3.41.5"
+  PACKAGE_NAME: "com.tilawa.app"
 
 on:
   push:
     branches: ["master"]
+    tags: ["v*"]
   pull_request:
     branches: ["master"]
 
@@ -32,14 +34,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Add Melos to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Bootstrap Workspace
+        run: melos bootstrap
+
+      - name: Generate Code
+        run: melos run gen
 
       - name: Static Analysis
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: melos run lint
 
-      - name: Run tests
-        run: flutter test
+      - name: Run Tests
+        run: melos run test
 
   build_android:
     name: Build & Deploy Android
@@ -75,8 +86,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Add Melos to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Bootstrap Workspace
+        run: melos bootstrap
+
+      - name: Generate Code
+        run: melos run gen
 
       - name: Configure Keystore
         env:
@@ -172,4 +192,79 @@ jobs:
 #          args: appdistribution:distribute build/ios/ipa/*.ipa --app ${{ secrets.IOS_FIREBASE_APP_ID || '1:181575856185:ios:3f02220381ba118d381de8' }} --groups testers
 #        env:
 #          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+  deploy_google_play:
+    name: Build & Deploy Google Play
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Cache Pub packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.flutter-plugins-dependencies
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Add Melos to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Bootstrap Workspace
+        run: melos bootstrap
+
+      - name: Generate Code
+        run: melos run gen
+
+      - name: Configure Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEY_PROPERTIES" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+          fi
+
+      - name: Build AAB with Shorebird
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          shorebird release android \
+            --artifact aab \
+            --target-platform android-arm,android-arm64,android-x64 \
+            --flutter-version=${{ env.FLUTTER_VERSION }} \
+            --no-confirm
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: production
+          status: completed
 
