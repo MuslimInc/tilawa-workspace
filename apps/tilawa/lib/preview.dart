@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import 'shared/models/position_data.dart';
-import 'shared/widgets/bottom_player_ui.dart';
 
 PreviewThemeData themeData() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(primaryColor: Colors.red),
-    materialDark: AppTheme.getDarkTheme(primaryColor: Colors.red),
+    materialLight: AppTheme.getLightTheme(primaryColor: AppColors.primaryCyan),
+    materialDark: AppTheme.getDarkTheme(primaryColor: AppColors.primaryCyan),
   );
 }
 
@@ -30,20 +27,13 @@ Widget preview() {
     artUri: 'https://example.com/art.jpg',
   );
 
-  // Example position data
-  const positionData = PositionData(
-    position: Duration(seconds: 30),
-    bufferedPosition: Duration(seconds: 60),
-    duration: Duration(minutes: 3),
-  );
-
   return Scaffold(
     body: Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
         child: BottomPlayerUi(
           audio: audio,
-          positionData: positionData,
+          progress: 0.5,
           isPlaying: true,
           canGoPrevious: true,
           canGoNext: true,

@@ -13,8 +13,7 @@ import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import 'bottom_player_ui.dart';
-import 'seek_bar.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A YouTube/Spotify-style sliding player panel.
 ///
@@ -279,11 +278,10 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: BottomPlayerUi(
         audio: audio,
-        positionData: const PositionData(
-          position: Duration.zero,
-          bufferedPosition: Duration.zero,
-          duration: Duration.zero,
-        ),
+        progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
+            ? 0.0
+            : (state.positionData?.position.inMilliseconds ?? 0) /
+                (state.positionData?.duration.inMilliseconds ?? 1),
         progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,

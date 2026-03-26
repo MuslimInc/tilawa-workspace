@@ -4,8 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa/shared/widgets/language_switcher.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import '../../../../features/localization/presentation/bloc/localization_bloc.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
           // Language Switcher
-          const Positioned(top: 50, right: 16, child: LanguageSwitcher()),
+          const Positioned(top: 50, right: 16, child: _AppLanguageSwitcher()),
 
           SafeArea(
             child: BlocConsumer<AuthBloc, AuthState>(
@@ -216,6 +216,28 @@ class _GoogleSignInButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AppLanguageSwitcher extends StatelessWidget {
+  const _AppLanguageSwitcher();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LocalizationBloc, LocalizationState>(
+      builder: (context, state) {
+        return LanguageSwitcher(
+          currentLanguage: state.locale.languageCode,
+          languages: const ['ar', 'en'],
+          getLanguageName: (code) => code == 'ar' ? 'العربية' : 'English',
+          onLanguageChanged: (code) {
+            context.read<LocalizationBloc>().add(
+                  ChangeLanguage(Locale(code)),
+                );
+          },
+        );
+      },
     );
   }
 }

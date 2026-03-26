@@ -169,10 +169,12 @@ class _PlayerApp extends StatelessWidget {
                 builder: DevicePreview.appBuilder,
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
-                ).copyWith(extensions: [QuranReaderTheme.light]),
+                  extensions: [QuranReaderTheme.light],
+                ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
-                ).copyWith(extensions: [QuranReaderTheme.dark]),
+                  extensions: [QuranReaderTheme.dark],
+                ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
                 // Disable restoration when launched from notification

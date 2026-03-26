@@ -1,6 +1,7 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'design_tokens.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -40,31 +41,16 @@ class AppTheme {
         ? GoogleFonts.alexandriaTextTheme()
         : const TextTheme();
 
-    // return base.copyWith(
-    //   displayLarge: base.displayLarge?.copyWith(fontSize: 53),
-    //   displayMedium: base.displayMedium?.copyWith(fontSize: 41),
-    //   displaySmall: base.displaySmall?.copyWith(fontSize: 32),
-    //   headlineLarge: base.headlineLarge?.copyWith(fontSize: 28),
-    //   headlineMedium: base.headlineMedium?.copyWith(fontSize: 24),
-    //   headlineSmall: base.headlineSmall?.copyWith(fontSize: 20),
-    //   titleLarge: base.titleLarge?.copyWith(fontSize: 18),
-    //   titleMedium: base.titleMedium?.copyWith(fontSize: 14),
-    //   titleSmall: base.titleSmall?.copyWith(fontSize: 12),
-    //   bodyLarge: base.bodyLarge?.copyWith(fontSize: 14),
-    //   bodyMedium: base.bodyMedium?.copyWith(fontSize: 12),
-    //   bodySmall: base.bodySmall?.copyWith(fontSize: 10),
-    //   labelLarge: base.labelLarge?.copyWith(fontSize: 12),
-    //   labelMedium: base.labelMedium?.copyWith(fontSize: 10),
-    //   labelSmall: base.labelSmall?.copyWith(fontSize: 9),
-    // );
     return base;
   }
 
   /// Get the light theme for the given primary color
-  static ThemeData getLightTheme({required Color primaryColor}) {
+  static ThemeData getLightTheme({
+    required Color primaryColor,
+    List<ThemeExtension<dynamic>> extensions = const [],
+  }) {
     final scheme = FlexSchemeColor.from(
       primary: primaryColor,
-      secondary: primaryColor,
     );
 
     return FlexThemeData.light(
@@ -80,6 +66,11 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
+    ).copyWith(
+      extensions: [
+        TilawaDesignTokens.light(),
+        ...extensions,
+      ],
     );
   }
 
@@ -87,10 +78,10 @@ class AppTheme {
   static ThemeData getDarkTheme({
     required Color primaryColor,
     bool darkIsTrueBlack = false,
+    List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final scheme = FlexSchemeColor.from(
       primary: primaryColor,
-      secondary: primaryColor,
     );
 
     return FlexThemeData.dark(
@@ -106,6 +97,11 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
+    ).copyWith(
+      extensions: [
+        TilawaDesignTokens.dark(),
+        ...extensions,
+      ],
     );
   }
 }

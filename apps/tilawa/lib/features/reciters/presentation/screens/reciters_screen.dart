@@ -9,7 +9,7 @@ import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import '../../../../router/app_router_config.dart';
-import '../../../../shared/widgets/arabic_alphabet_scrollbar.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
@@ -1042,6 +1042,104 @@ class _ReciterGridView extends StatelessWidget {
           return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
         },
       ),
+    );
+  }
+}
+
+class ReciterAlphabetScrollbar extends StatelessWidget {
+  const ReciterAlphabetScrollbar({
+    super.key,
+    required this.reciters,
+    required this.scrollController,
+    required this.onLetterSelected,
+  });
+  final List<ReciterEntity> reciters;
+  final ScrollController scrollController;
+  final Function(String? letter) onLetterSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    // Get unique letters from reciters, sorted
+    final List<String> letters =
+        reciters.map((reciter) => reciter.letter).toSet().toList()..sort();
+
+    if (letters.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return ArabicAlphabetScrollbar(
+      letters: letters,
+      selectedLetter: context.watch<AlphabetScrollbarBloc>().state.selectedLetter,
+      onLetterSelected: (letter) {
+        final AlphabetScrollbarState currentState =
+            context.read<AlphabetScrollbarBloc>().state;
+
+        if (currentState.selectedLetter == letter) {
+          // Toggle off
+          context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+          onLetterSelected(null);
+          return;
+        }
+
+        context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
+
+        // Find the first item that starts with this letter
+        final int index = reciters.indexWhere((item) {
+          return item.letter == letter;
+        });
+
+        if (index != -1) {
+          // Scroll to the top of the list when a letter is selected
+          scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+
+        onLetterSelected(letter);
+      },
+      onPanStart: (details) =>
+          context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
+      onPanUpdate: (details) {
+        final AlphabetScrollbarState currentState =
+            context.read<AlphabetScrollbarBloc>().state;
+        if (!currentState.isDragging) {
+          return;
+        }
+
+        final box = context.findRenderObject()! as RenderBox;
+        final Offset localPosition = box.globalToLocal(details.globalPosition);
+        final double letterHeight = box.size.height / letters.length;
+        final int letterIndex = (localPosition.dy / letterHeight)
+            .clamp(0, letters.length - 1)
+            .floor();
+
+        if (letterIndex >= 0 && letterIndex < letters.length) {
+          final String letter = letters[letterIndex];
+          if (currentState.selectedLetter != letter) {
+            context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
+
+            // Find the first item that starts with this letter
+            final int index = reciters.indexWhere((item) {
+              return item.letter == letter;
+            });
+
+            if (index != -1) {
+              // Scroll to the top of the list when a letter is selected
+              scrollController.animateTo(
+                0.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+
+            onLetterSelected(letter);
+          }
+        }
+      },
+      onPanEnd: (details) =>
+          context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
     );
   }
 }

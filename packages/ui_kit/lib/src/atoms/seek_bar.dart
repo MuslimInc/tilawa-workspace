@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
-import 'package:tilawa_core/widgets/hidden_thumb_component_shape.dart';
+import '../foundation/design_tokens.dart';
+import 'hidden_thumb_shape.dart';
 
 class SeekBar extends StatefulWidget {
   const SeekBar({
@@ -31,11 +31,12 @@ class SeekBarState extends State<SeekBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final tokens = Theme.of(context).tokens;
 
     _sliderThemeData = SliderTheme.of(context).copyWith(
-      trackHeight: 8.0,
+      trackHeight: tokens.spaceSmall,
       thumbShape: widget.duration.inMilliseconds > 0
-          ? const RoundSliderThumbShape(enabledThumbRadius: 12.0)
+          ? RoundSliderThumbShape(enabledThumbRadius: tokens.radiusMedium)
           : HiddenThumbComponentShape(),
       overlayShape: widget.duration.inMilliseconds > 0
           ? const RoundSliderOverlayShape()
@@ -46,6 +47,7 @@ class SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     final double value = min(
       _dragValue ?? widget.position.inMilliseconds.toDouble(),
       widget.duration.inMilliseconds.toDouble(),
@@ -58,8 +60,8 @@ class SeekBarState extends State<SeekBar> {
       children: [
         // Progress bar
         Container(
-          height: 30, // Increased height for better touch target
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+          height: tokens.spaceExtraLarge * 1.25, // Increased height for better touch target
+          margin: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Stack(
             alignment: Alignment.center, // Center the sliders vertically
             clipBehavior: Clip.none,
@@ -68,8 +70,12 @@ class SeekBarState extends State<SeekBar> {
               SliderTheme(
                 data: _sliderThemeData.copyWith(
                   thumbShape: HiddenThumbComponentShape(),
-                  activeTrackColor: Colors.white.withValues(alpha: 0.3),
-                  inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+                  activeTrackColor: Colors.white.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
+                  inactiveTrackColor: Colors.white.withValues(
+                    alpha: tokens.opacitySubtle,
+                  ),
                 ),
                 child: ExcludeSemantics(
                   child: Slider(

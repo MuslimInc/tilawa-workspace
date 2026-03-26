@@ -4,8 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_core/entities/audio.dart';
-
-import '../models/position_data.dart';
+import '../foundation/design_tokens.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
 /// without any bloc dependencies.
@@ -13,7 +12,7 @@ class BottomPlayerUi extends StatelessWidget {
   const BottomPlayerUi({
     super.key,
     required this.audio,
-    required this.positionData,
+    required this.progress,
     this.progressBarOverride,
     required this.isPlaying,
     required this.canGoPrevious,
@@ -29,7 +28,7 @@ class BottomPlayerUi extends StatelessWidget {
   });
 
   final AudioEntity audio;
-  final PositionData positionData;
+  final double progress;
   final Widget? progressBarOverride;
   final bool isPlaying;
   final bool canGoPrevious;
@@ -46,42 +45,49 @@ class BottomPlayerUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: theme.textTheme.bodyLarge?.color,
-          decoration: TextDecoration.none,
-          decorationColor: Colors.transparent,
-        );
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: theme.textTheme.bodyLarge?.color,
+      decoration: TextDecoration.none,
+      decorationColor: Colors.transparent,
+    );
     final TextStyle subtitleStyle =
         (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-          fontSize: 12,
-          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-          decoration: TextDecoration.none,
-          decorationColor: Colors.transparent,
-        );
+      fontSize: 12,
+      color: theme.textTheme.bodyMedium?.color?.withValues(
+        alpha: tokens.opacityEmphasis,
+      ),
+      decoration: TextDecoration.none,
+      decorationColor: Colors.transparent,
+    );
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(16),
+        color: theme.cardColor.withValues(alpha: tokens.opacityGlass),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: tokens.opacitySubtle),
+            blurRadius: tokens.blurShadow,
+            offset: tokens.shadowOffsetMedium,
           ),
         ],
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.1),
-          width: 0.5,
+          color: theme.dividerColor.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(
+            sigmaX: tokens.blurGlass,
+            sigmaY: tokens.blurGlass,
+          ),
           child: GestureDetector(
             onTap: onTap,
             behavior: HitTestBehavior.opaque,
@@ -91,20 +97,17 @@ class BottomPlayerUi extends StatelessWidget {
                 // Progress Bar (Slim at top)
                 progressBarOverride ??
                     LinearProgressIndicator(
-                      value: positionData.duration.inMilliseconds > 0
-                          ? positionData.position.inMilliseconds /
-                                positionData.duration.inMilliseconds
-                          : 0.0,
+                      value: progress,
                       backgroundColor: theme.primaryColor.withValues(
-                        alpha: 0.1,
+                        alpha: tokens.opacitySubtle,
                       ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         theme.primaryColor,
                       ),
-                      minHeight: 3,
+                      minHeight: tokens.progressHeight,
                     ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  padding: EdgeInsets.all(tokens.spaceMedium),
                   child: Row(
                     children: [
                       // Album Art
@@ -114,12 +117,16 @@ class BottomPlayerUi extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: theme.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                            color: theme.primaryColor.withValues(
+                              alpha: tokens.opacitySubtle,
+                            ),
                           ),
                           child: audio.artUri != null
                               ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                    tokens.radiusMedium,
+                                  ),
                                   child: CachedNetworkImage(
                                     imageUrl: audio.artUri.toString(),
                                     fit: BoxFit.cover,
@@ -133,7 +140,7 @@ class BottomPlayerUi extends StatelessWidget {
                         ),
                       ),
 
-                      SizedBox(width: 12),
+                      SizedBox(width: tokens.spaceMedium),
 
                       // Info
                       Expanded(
@@ -147,7 +154,7 @@ class BottomPlayerUi extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 2),
+                            SizedBox(height: tokens.spaceExtraSmall / 2),
                             Text(
                               audio.artist ?? 'Unknown Reciter',
                               style: subtitleStyle,
@@ -158,7 +165,7 @@ class BottomPlayerUi extends StatelessWidget {
                         ),
                       ),
 
-                      SizedBox(width: 8),
+                      SizedBox(width: tokens.spaceSmall),
 
                       // Controls
                       Directionality(
@@ -174,16 +181,18 @@ class BottomPlayerUi extends StatelessWidget {
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   FluentIcons.previous_20_filled,
-                                  size: 20,
+                                  size: tokens.iconSizeMedium,
                                   color: canGoPrevious
                                       ? theme.iconTheme.color
-                                      : Colors.grey.withValues(alpha: 0.3),
+                                      : Colors.grey.withValues(
+                                          alpha: tokens.opacityMedium,
+                                        ),
                                 ),
                                 onPressed: canGoPrevious ? onPrevious : null,
                               ),
                             ),
 
-                            SizedBox(width: 4),
+                            SizedBox(width: tokens.spaceExtraSmall),
 
                             // Play/Pause
                             Container(
@@ -195,10 +204,10 @@ class BottomPlayerUi extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: theme.primaryColor.withValues(
-                                      alpha: 0.3,
+                                      alpha: tokens.opacityMedium,
                                     ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                    blurRadius: tokens.radiusSmall,
+                                    offset: tokens.shadowOffsetSmall,
                                   ),
                                 ],
                               ),
@@ -209,13 +218,13 @@ class BottomPlayerUi extends StatelessWidget {
                                       ? FluentIcons.pause_16_filled
                                       : FluentIcons.play_16_filled,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: tokens.iconSizeSmall,
                                 ),
                                 onPressed: onPlayPause,
                               ),
                             ),
 
-                            SizedBox(width: 4),
+                            SizedBox(width: tokens.spaceExtraSmall),
 
                             // Next
                             SizedBox(
@@ -225,16 +234,18 @@ class BottomPlayerUi extends StatelessWidget {
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
                                   FluentIcons.next_20_filled,
-                                  size: 20,
+                                  size: tokens.iconSizeMedium,
                                   color: canGoNext
                                       ? theme.iconTheme.color
-                                      : Colors.grey.withValues(alpha: 0.3),
+                                      : Colors.grey.withValues(
+                                          alpha: tokens.opacityMedium,
+                                        ),
                                 ),
                                 onPressed: canGoNext ? onNext : null,
                               ),
                             ),
 
-                            SizedBox(width: 4),
+                            SizedBox(width: tokens.spaceExtraSmall),
 
                             // Sleep Timer
                             if (isSleepTimerEnabled)
@@ -247,10 +258,12 @@ class BottomPlayerUi extends StatelessWidget {
                                     isSleepTimerActive
                                         ? FluentIcons.timer_20_filled
                                         : FluentIcons.timer_20_regular,
-                                    size: 20,
+                                    size: tokens.iconSizeMedium,
                                     color: isSleepTimerActive
                                         ? theme.primaryColor
-                                        : Colors.grey.withValues(alpha: 0.3),
+                                        : Colors.grey.withValues(
+                                            alpha: tokens.opacityMedium,
+                                          ),
                                   ),
                                   onPressed: onSleepTimerTap,
                                 ),
