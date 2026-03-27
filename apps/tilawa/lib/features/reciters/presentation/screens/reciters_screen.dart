@@ -471,73 +471,18 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return ListenableBuilder(
-      listenable: Listenable.merge([controller, focusNode]),
-      builder: (context, _) {
-        final bool hasText = controller.text.isNotEmpty;
-        final bool isFocused = focusNode.hasFocus;
-
-        return Container(
-          height: 48,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isFocused
-                  ? theme.primaryColor.withValues(alpha: 0.28)
-                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.primaryColor.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextField(
-            focusNode: focusNode,
-            controller: controller,
-            textAlignVertical: TextAlignVertical.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              hintText: context.l10n.searchReciters,
-              hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.58,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              prefixIcon: Icon(
-                FluentIcons.search_24_regular,
-                size: 18,
-                color: isFocused
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.72,
-                      ),
-              ),
-              suffixIcon: hasText
-                  ? IconButton(
-                      icon: const Icon(
-                        FluentIcons.dismiss_24_regular,
-                        size: 18,
-                      ),
-                      onPressed: onClear,
-                    )
-                  : null,
-            ),
-            onChanged: onChanged,
-            onTapOutside: (_) => focusNode.unfocus(),
-          ),
-        );
-      },
+    return TilawaSearchField(
+      controller: controller,
+      focusNode: focusNode,
+      hintText: context.l10n.searchReciters,
+      prefixIcon: FluentIcons.search_24_regular,
+      clearIcon: FluentIcons.dismiss_24_regular,
+      onChanged: onChanged,
+      onClear: onClear,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      showShadow: true,
+      onTapOutside: (_) => focusNode.unfocus(),
     );
   }
 }
@@ -557,7 +502,7 @@ class _FavoritesToggle extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        _SquareActionButton(
+        TilawaIconActionButton(
           icon: isActive
               ? Icons.favorite_rounded
               : Icons.favorite_border_rounded,
@@ -610,60 +555,9 @@ class _DownloadsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SquareActionButton(
+    return TilawaIconActionButton(
       icon: FluentIcons.arrow_download_24_regular,
       onTap: () => const DownloadsRoute().push(context),
-    );
-  }
-}
-
-class _SquareActionButton extends StatelessWidget {
-  const _SquareActionButton({
-    required this.icon,
-    required this.onTap,
-    this.isActive = false,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Material(
-        color: isActive
-            ? theme.primaryColor.withValues(alpha: 0.12)
-            : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isActive
-                    ? theme.primaryColor.withValues(alpha: 0.35)
-                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                icon,
-                size: 20,
-                color: isActive
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

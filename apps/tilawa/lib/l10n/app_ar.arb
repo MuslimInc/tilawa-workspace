@@ -2029,6 +2029,78 @@
     "@preparingScreenshot": {
         "description": "Status message while preparing a screenshot"
     },
+    "preparingAudioClip": "جارِ تجهيز المقطع الصوتي...",
+    "@preparingAudioClip": {
+        "description": "Status message while preparing an audio clip"
+    },
+    "preparingReelStatus": "جارِ تجهيز الريل...",
+    "@preparingReelStatus": {
+        "description": "Status message while preparing a reel"
+    },
+    "generatingAudioClipStatus": "جارِ إنشاء المقطع الصوتي...",
+    "@generatingAudioClipStatus": {
+        "description": "Status message while generating the audio portion of a reel"
+    },
+    "capturingReaderVisuals": "جارِ التقاط مشهد القارئ...",
+    "@capturingReaderVisuals": {
+        "description": "Status message while capturing the Quran reader visuals for a reel"
+    },
+    "combiningReelMedia": "جارِ دمج المشهد والصوت في ريل...",
+    "@combiningReelMedia": {
+        "description": "Status message while combining reel visuals and audio"
+    },
+    "preparingToTrimLocalAudio": "جارِ تجهيز قص الصوت المحلي...",
+    "@preparingToTrimLocalAudio": {
+        "description": "Status message while preparing to trim a locally stored audio file"
+    },
+    "reciterNotSupportedForLocalTrim": "هذا القارئ غير مدعوم للقص المحلي. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@reciterNotSupportedForLocalTrim": {
+        "description": "Status message when the selected reciter cannot be trimmed locally and the app falls back to downloading verses"
+    },
+    "fetchingAyahTimings": "جارِ جلب توقيت الآيات...",
+    "@fetchingAyahTimings": {
+        "description": "Status message while loading verse timing data"
+    },
+    "noTimingsFound": "لم يتم العثور على توقيتات. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@noTimingsFound": {
+        "description": "Status message when no timing data is available and the app falls back to online download"
+    },
+    "noTimingsFoundForRange": "لم يتم العثور على توقيتات للنطاق المحدد. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@noTimingsFoundForRange": {
+        "description": "Status message when no timing data is available for the chosen verse range"
+    },
+    "trimmingAudio": "جارِ قص الصوت...",
+    "@trimmingAudio": {
+        "description": "Status message while trimming audio"
+    },
+    "downloadingVerseProgress": "جارِ تنزيل الآية {currentVerse} من {totalVerses}...",
+    "@downloadingVerseProgress": {
+        "description": "Status message while downloading verse-by-verse audio",
+        "placeholders": {
+            "currentVerse": {
+                "type": "int"
+            },
+            "totalVerses": {
+                "type": "int"
+            }
+        }
+    },
+    "assemblingAudioClip": "جارِ تجميع المقطع الصوتي...",
+    "@assemblingAudioClip": {
+        "description": "Status message while assembling the final audio clip"
+    },
+    "preparingVideoEncoding": "جارِ تجهيز ترميز الفيديو...",
+    "@preparingVideoEncoding": {
+        "description": "Status message while preparing reel video encoding"
+    },
+    "encodingVerticalVideo": "جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...",
+    "@encodingVerticalVideo": {
+        "description": "Status message while encoding the final vertical reel video"
+    },
+    "reelGenerated": "تم إنشاء الريل!",
+    "@reelGenerated": {
+        "description": "Status message after the reel has been generated successfully"
+    },
     "shareReviewTitle": "راجع المشاركة",
     "@shareReviewTitle": {
         "description": "Title for the final share review panel"

@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:tilawa/core/extensions.dart';
 
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
+import '../share_progress_messages_l10n.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import 'reel_content_renderer.dart';
@@ -150,7 +152,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                         const Positioned(
                           top: -120,
                           right: -40,
-                          child: _AmbientOrb(
+                          child: TilawaAmbientOrb(
                             size: 220,
                             color: _ShareComposerColors.mint,
                             opacity: 0.08,
@@ -159,7 +161,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                         const Positioned(
                           bottom: -90,
                           left: -30,
-                          child: _AmbientOrb(
+                          child: TilawaAmbientOrb(
                             size: 170,
                             color: _ShareComposerColors.gold,
                             opacity: 0.07,
@@ -170,7 +172,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const _SheetHandle(),
+                              const TilawaSheetHandle(color: Colors.white24),
                               _ConfigHeader(
                                 arabicSurahName: _arabicSurahName,
                                 englishSurahName: _englishSurahName,
@@ -248,6 +250,11 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                     ? () {
                                         context.read<ShareCubit>().generateReel(
                                           surahName: _surahName,
+                                          progressMessages:
+                                              context.shareProgressMessages,
+                                          appName: context.l10n.appTitle,
+                                          sharedViaLabel:
+                                              context.l10n.sharedViaTilawa,
                                           boundaryKey: _reelContentKey,
                                         );
                                       }
@@ -278,6 +285,8 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             .read<ShareCubit>()
                                             .generateAndShareAudioClip(
                                               surahName: _surahName,
+                                              progressMessages:
+                                                  context.shareProgressMessages,
                                             );
                                       }
                                     : null,
@@ -885,56 +894,6 @@ class _SelectionBadge extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 46,
-        height: 5,
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: Colors.white.withValues(alpha: 0.22),
-        ),
-      ),
-    );
-  }
-}
-
-class _AmbientOrb extends StatelessWidget {
-  const _AmbientOrb({
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
-
-  final double size;
-  final Color color;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: opacity),
-              color.withValues(alpha: 0),
-            ],
-          ),
-        ),
       ),
     );
   }

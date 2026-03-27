@@ -1,6 +1,7 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'component_tokens.dart';
 import 'design_tokens.dart';
 
 /// Centralized app theme configuration
@@ -64,7 +65,13 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
-    ).copyWith(extensions: [TilawaDesignTokens.light(), ...extensions]);
+    ).copyWith(
+      extensions: [
+        TilawaDesignTokens.light(),
+        TilawaComponentTokens.light(),
+        ...extensions,
+      ],
+    );
   }
 
   /// Get the dark theme for the given primary color
@@ -88,6 +95,12 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _textTheme,
-    ).copyWith(extensions: [TilawaDesignTokens.dark(), ...extensions]);
+    ).copyWith(
+      extensions: [
+        TilawaDesignTokens.dark(),
+        TilawaComponentTokens.dark(),
+        ...extensions,
+      ],
+    );
   }
 }

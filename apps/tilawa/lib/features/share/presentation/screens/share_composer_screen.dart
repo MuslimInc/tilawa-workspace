@@ -13,6 +13,7 @@ import 'package:tilawa/core/extensions.dart';
 
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_limits.dart';
+import '../share_progress_messages_l10n.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import '../widgets/reel_content_renderer.dart';
@@ -454,20 +455,25 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
               : _posterBoundaryKey,
           surahName: _surahName,
           pageNumber: widget.currentPage,
-          appName: 'Tilawa',
+          appName: context.l10n.appTitle,
           sharedViaLabel: context.l10n.sharedViaTilawa,
+          preparingImageLabel: context.shareProgressMessages.preparingImage,
           brandCapture: useReaderCapture,
         );
         return;
       case ShareComposerMode.audio:
         await cubit.prepareAudioClip(
           surahName: _surahName,
+          progressMessages: context.shareProgressMessages,
           maxDurationSeconds: _durationPreset.maxDurationSeconds,
         );
         return;
       case ShareComposerMode.reel:
         await cubit.generateReel(
           surahName: _surahName,
+          progressMessages: context.shareProgressMessages,
+          appName: context.l10n.appTitle,
+          sharedViaLabel: context.l10n.sharedViaTilawa,
           boundaryKey: _reelBoundaryKey,
           maxDurationSeconds: _durationPreset.maxDurationSeconds,
         );
@@ -580,7 +586,7 @@ class _ComposerControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionTitle(title: context.l10n.shareMode),
+        TilawaSectionTitle(title: context.l10n.shareMode),
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
@@ -634,7 +640,7 @@ class _ComposerControls extends StatelessWidget {
         ),
         if (mode == ShareComposerMode.screenshot) ...[
           const SizedBox(height: 16),
-          _SectionTitle(title: context.l10n.shareContentLayout),
+          TilawaSectionTitle(title: context.l10n.shareContentLayout),
           const SizedBox(height: 10),
           Wrap(
             spacing: 10,
@@ -660,7 +666,7 @@ class _ComposerControls extends StatelessWidget {
         if (mode != ShareComposerMode.screenshot ||
             screenshotLayout == ShareScreenshotLayout.passageCard) ...[
           const SizedBox(height: 16),
-          _SectionTitle(title: context.l10n.verses),
+          TilawaSectionTitle(title: context.l10n.verses),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -713,7 +719,7 @@ class _ComposerControls extends StatelessWidget {
         ],
         if (mode != ShareComposerMode.screenshot) ...[
           const SizedBox(height: 16),
-          _SectionTitle(title: context.l10n.shareDuration),
+          TilawaSectionTitle(title: context.l10n.shareDuration),
           const SizedBox(height: 10),
           Wrap(
             spacing: 10,
@@ -755,7 +761,7 @@ class _ComposerControls extends StatelessWidget {
         ],
         if (errorMessage != null) ...[
           const SizedBox(height: 16),
-          _FeedbackStrip(
+          TilawaFeedbackStrip(
             icon: Icons.error_outline_rounded,
             message: errorMessage!,
             backgroundColor: const Color(0xFFFFECE9),
@@ -764,7 +770,7 @@ class _ComposerControls extends StatelessWidget {
         ],
         if (progressLabel != null) ...[
           const SizedBox(height: 16),
-          _FeedbackStrip(
+          TilawaFeedbackStrip(
             icon: Icons.hourglass_top_rounded,
             message: progressLabel!,
             backgroundColor: const Color(0xFFF5EFE1),
@@ -1230,74 +1236,6 @@ class _VerseDropdown extends StatelessWidget {
         final current = min + index;
         return DropdownMenuItem<int>(value: current, child: Text('$current'));
       }),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(
-        context,
-      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-    );
-  }
-}
-
-class _FeedbackStrip extends StatelessWidget {
-  const _FeedbackStrip({
-    required this.icon,
-    required this.message,
-    required this.backgroundColor,
-    required this.foregroundColor,
-    this.showSpinner = false,
-  });
-
-  final IconData icon;
-  final String message;
-  final Color backgroundColor;
-  final Color foregroundColor;
-  final bool showSpinner;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          if (showSpinner)
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.2,
-                valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
-              ),
-            )
-          else
-            Icon(icon, color: foregroundColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: foregroundColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

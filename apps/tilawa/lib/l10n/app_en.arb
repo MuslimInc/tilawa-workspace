@@ -2029,6 +2029,78 @@
     "@preparingScreenshot": {
         "description": "Status message while preparing a screenshot"
     },
+    "preparingAudioClip": "Preparing audio clip...",
+    "@preparingAudioClip": {
+        "description": "Status message while preparing an audio clip"
+    },
+    "preparingReelStatus": "Preparing reel...",
+    "@preparingReelStatus": {
+        "description": "Status message while preparing a reel"
+    },
+    "generatingAudioClipStatus": "Generating audio clip...",
+    "@generatingAudioClipStatus": {
+        "description": "Status message while generating the audio portion of a reel"
+    },
+    "capturingReaderVisuals": "Capturing reader visuals...",
+    "@capturingReaderVisuals": {
+        "description": "Status message while capturing the Quran reader visuals for a reel"
+    },
+    "combiningReelMedia": "Combining visuals and audio into a reel...",
+    "@combiningReelMedia": {
+        "description": "Status message while combining reel visuals and audio"
+    },
+    "preparingToTrimLocalAudio": "Preparing to trim local audio...",
+    "@preparingToTrimLocalAudio": {
+        "description": "Status message while preparing to trim a locally stored audio file"
+    },
+    "reciterNotSupportedForLocalTrim": "Reciter not supported for local trimming. Falling back to online download...",
+    "@reciterNotSupportedForLocalTrim": {
+        "description": "Status message when the selected reciter cannot be trimmed locally and the app falls back to downloading verses"
+    },
+    "fetchingAyahTimings": "Fetching ayah timings...",
+    "@fetchingAyahTimings": {
+        "description": "Status message while loading verse timing data"
+    },
+    "noTimingsFound": "No timings found. Falling back to online download...",
+    "@noTimingsFound": {
+        "description": "Status message when no timing data is available and the app falls back to online download"
+    },
+    "noTimingsFoundForRange": "No timings found for the selected range. Falling back to online download...",
+    "@noTimingsFoundForRange": {
+        "description": "Status message when no timing data is available for the chosen verse range"
+    },
+    "trimmingAudio": "Trimming audio...",
+    "@trimmingAudio": {
+        "description": "Status message while trimming audio"
+    },
+    "downloadingVerseProgress": "Downloading verse {currentVerse} of {totalVerses}...",
+    "@downloadingVerseProgress": {
+        "description": "Status message while downloading verse-by-verse audio",
+        "placeholders": {
+            "currentVerse": {
+                "type": "int"
+            },
+            "totalVerses": {
+                "type": "int"
+            }
+        }
+    },
+    "assemblingAudioClip": "Assembling audio clip...",
+    "@assemblingAudioClip": {
+        "description": "Status message while assembling the final audio clip"
+    },
+    "preparingVideoEncoding": "Preparing video encoding...",
+    "@preparingVideoEncoding": {
+        "description": "Status message while preparing reel video encoding"
+    },
+    "encodingVerticalVideo": "Encoding vertical video (this may take a moment)...",
+    "@encodingVerticalVideo": {
+        "description": "Status message while encoding the final vertical reel video"
+    },
+    "reelGenerated": "Reel generated!",
+    "@reelGenerated": {
+        "description": "Status message after the reel has been generated successfully"
+    },
     "shareReviewTitle": "Review Your Share",
     "@shareReviewTitle": {
         "description": "Title for the final share review panel"

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A Quran-focused 9:16 canvas used for reel generation.
 class ReelContentRenderer extends StatelessWidget {
@@ -49,7 +50,7 @@ class ReelContentRenderer extends StatelessWidget {
             const Positioned(
               top: -140,
               right: -60,
-              child: _AmbientOrb(
+              child: TilawaAmbientOrb(
                 size: 320,
                 color: _ReelPalette.mint,
                 opacity: 0.12,
@@ -58,7 +59,7 @@ class ReelContentRenderer extends StatelessWidget {
             const Positioned(
               bottom: -120,
               left: -50,
-              child: _AmbientOrb(
+              child: TilawaAmbientOrb(
                 size: 260,
                 color: _ReelPalette.gold,
                 opacity: 0.12,
@@ -566,37 +567,6 @@ class _Basmalah extends StatelessWidget {
         fontSize: 86,
         height: 1.28,
         color: _ReelPalette.deepGreen,
-      ),
-    );
-  }
-}
-
-class _AmbientOrb extends StatelessWidget {
-  const _AmbientOrb({
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
-
-  final double size;
-  final Color color;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: opacity),
-              color.withValues(alpha: 0),
-            ],
-          ),
-        ),
       ),
     );
   }

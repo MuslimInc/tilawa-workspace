@@ -1501,6 +1501,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparingScreenshot => 'Preparing screenshot...';
 
   @override
+  String get preparingAudioClip => 'Preparing audio clip...';
+
+  @override
+  String get preparingReelStatus => 'Preparing reel...';
+
+  @override
+  String get generatingAudioClipStatus => 'Generating audio clip...';
+
+  @override
+  String get capturingReaderVisuals => 'Capturing reader visuals...';
+
+  @override
+  String get combiningReelMedia => 'Combining visuals and audio into a reel...';
+
+  @override
+  String get preparingToTrimLocalAudio => 'Preparing to trim local audio...';
+
+  @override
+  String get reciterNotSupportedForLocalTrim =>
+      'Reciter not supported for local trimming. Falling back to online download...';
+
+  @override
+  String get fetchingAyahTimings => 'Fetching ayah timings...';
+
+  @override
+  String get noTimingsFound =>
+      'No timings found. Falling back to online download...';
+
+  @override
+  String get noTimingsFoundForRange =>
+      'No timings found for the selected range. Falling back to online download...';
+
+  @override
+  String get trimmingAudio => 'Trimming audio...';
+
+  @override
+  String downloadingVerseProgress(int currentVerse, int totalVerses) {
+    return 'Downloading verse $currentVerse of $totalVerses...';
+  }
+
+  @override
+  String get assemblingAudioClip => 'Assembling audio clip...';
+
+  @override
+  String get preparingVideoEncoding => 'Preparing video encoding...';
+
+  @override
+  String get encodingVerticalVideo =>
+      'Encoding vertical video (this may take a moment)...';
+
+  @override
+  String get reelGenerated => 'Reel generated!';
+
+  @override
   String get shareReviewTitle => 'Review Your Share';
 
   @override

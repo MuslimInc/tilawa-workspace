@@ -55,14 +55,14 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 32),
 
               // General Group (Theme & Language)
-              _SettingsGroup(
+              TilawaSettingsGroup(
                 title: context.l10n.appearance.toUpperCase(),
                 children: [
                   BlocBuilder<ThemeCubit, ThemeState>(
                     builder: (context, state) {
                       return Column(
                         children: [
-                          _SettingsTile(
+                          TilawaSettingsTile(
                             icon: FluentIcons.dark_theme_24_regular,
                             iconColor: AppColors.settingsTheme,
                             title: context.l10n.theme,
@@ -72,7 +72,7 @@ class SettingsScreen extends StatelessWidget {
                               top: Radius.circular(16),
                             ),
                           ),
-                          _SettingsTile(
+                          TilawaSettingsTile(
                             icon: FluentIcons.color_24_regular,
                             iconColor: AppColors.settingsColor,
                             title: context.l10n.primaryColor,
@@ -89,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   BlocBuilder<LocalizationBloc, LocalizationState>(
                     builder: (context, state) {
-                      return _SettingsTile(
+                      return TilawaSettingsTile(
                         icon: FluentIcons.local_language_24_regular,
                         iconColor: AppColors.settingsLanguage,
                         title: context.l10n.language,
@@ -110,14 +110,14 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 24),
 
               // Audio Group
-              _SettingsGroup(
+              TilawaSettingsGroup(
                 title: context.l10n.audioSettings.toUpperCase(),
                 children: [
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
                       return Column(
                         children: [
-                          _SwitchSettingsTile(
+                          TilawaSettingsSwitchTile(
                             icon: FluentIcons.history_24_regular,
                             iconColor: AppColors.settingsPlayback,
                             title: context.l10n.restorePlaybackState,
@@ -132,7 +132,7 @@ class SettingsScreen extends StatelessWidget {
                               top: Radius.circular(16),
                             ),
                           ),
-                          _SwitchSettingsTile(
+                          TilawaSettingsSwitchTile(
                             icon: FluentIcons.timer_24_regular,
                             iconColor: AppColors.settingsDuration,
                             title: context.l10n.enableRecitationDuration,
@@ -159,10 +159,10 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 24),
 
               // Features Group
-              _SettingsGroup(
+              TilawaSettingsGroup(
                 title: context.l10n.features.toUpperCase(),
                 children: [
-                  _SettingsTile(
+                  TilawaSettingsTile(
                     icon: FluentIcons.bookmark_24_regular,
                     iconColor: AppColors.settingsBookmarks,
                     title: context.l10n.bookmarks,
@@ -172,21 +172,21 @@ class SettingsScreen extends StatelessWidget {
                       top: Radius.circular(16),
                     ),
                   ),
-                  _SettingsTile(
+                  TilawaSettingsTile(
                     icon: FluentIcons.history_24_regular,
                     iconColor: AppColors.settingsHistory,
                     title: context.l10n.listeningHistory,
                     subtitle: context.l10n.noHistoryDescription,
                     onTap: () => const HistoryRoute().push(context),
                   ),
-                  _SettingsTile(
+                  TilawaSettingsTile(
                     icon: FluentIcons.clock_24_regular,
                     iconColor: AppColors.settingsPrayer,
                     title: context.l10n.prayerTimes,
                     subtitle: context.l10n.locationRequiredDescription,
                     onTap: () => const PrayerTimesRoute().push(context),
                   ),
-                  _SettingsTile(
+                  TilawaSettingsTile(
                     icon: FluentIcons.book_24_regular,
                     iconColor: AppColors.settingsQuran,
                     title: context.l10n.quranReader,
@@ -203,10 +203,10 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 24),
 
               // Downloads Group
-              _SettingsGroup(
+              TilawaSettingsGroup(
                 title: context.l10n.downloads.toUpperCase(),
                 children: [
-                  _SettingsTile(
+                  TilawaSettingsTile(
                     icon: FluentIcons.folder_24_regular,
                     iconColor: AppColors.settingsStorage,
                     title: context.l10n.manageStorage,
@@ -218,7 +218,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, state) {
-                      return _SettingsTile(
+                      return TilawaSettingsTile(
                         icon: FluentIcons.arrow_download_24_regular,
                         iconColor: AppColors.settingsDownloads,
                         title: context.l10n.concurrentDownloads,
@@ -284,7 +284,7 @@ class SettingsScreen extends StatelessWidget {
               // Route List (Dev)
               if (kDebugMode) ...[
                 SizedBox(height: 32),
-                _SettingsTile(
+                TilawaSettingsTile(
                   icon: Icons.list_alt_rounded,
                   title: 'Route List (Dev)',
                   onTap: () => const RouteListRoute().push(context),
@@ -780,122 +780,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({required this.title, required this.children});
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(12, 16, 16, 8),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).primaryColor,
-              letterSpacing: 1.1,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.settingsCardShadow,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(children: children),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.iconColor,
-    this.subtitle,
-    this.showDivider = true,
-    this.borderRadius = BorderRadius.zero,
-  });
-  final IconData icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final bool showDivider;
-  final BorderRadiusGeometry borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: ListTile(
-            onTap: onTap,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-            shape: RoundedRectangleBorder(borderRadius: borderRadius),
-            leading: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: effectiveIconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: effectiveIconColor, size: 22),
-            ),
-            title: Text(
-              title,
-              style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
-            ),
-            subtitle: subtitle != null
-                ? Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: theme.textTheme.bodySmall?.color?.withValues(
-                        alpha: 0.5,
-                      ),
-                    ),
-                  )
-                : null,
-            trailing: Icon(
-              FluentIcons.chevron_right_24_filled,
-              size: 14,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
-            ),
-          ),
-        ),
-        if (showDivider)
-          Padding(
-            padding: EdgeInsets.only(left: 64, right: 16),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: theme.dividerColor.withValues(alpha: 0.05),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _ThemeOption extends StatelessWidget {
   const _ThemeOption({
     required this.title,
@@ -926,104 +810,6 @@ class _ThemeOption extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             )
           : null,
-    );
-  }
-}
-
-class _SwitchSettingsTile extends StatelessWidget {
-  const _SwitchSettingsTile({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.onChanged,
-    this.iconColor,
-    this.subtitle,
-    this.showDivider = true,
-    this.borderRadius = BorderRadius.zero,
-  });
-
-  final IconData icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool showDivider;
-  final BorderRadiusGeometry borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: InkWell(
-            onTap: () => onChanged(!value),
-            borderRadius: borderRadius is BorderRadius
-                ? borderRadius as BorderRadius
-                : null,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: effectiveIconColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, color: effectiveIconColor, size: 22),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          SizedBox(height: 4),
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: theme.textTheme.bodySmall?.color
-                                  ?.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: value,
-                    onChanged: onChanged,
-                    activeTrackColor: theme.primaryColor.withValues(alpha: 0.5),
-                    activeThumbColor: theme.primaryColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (showDivider)
-          Padding(
-            padding: EdgeInsets.only(left: 64, right: 16),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: theme.dividerColor.withValues(alpha: 0.05),
-            ),
-          ),
-      ],
     );
   }
 }

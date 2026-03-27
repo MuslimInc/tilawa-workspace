@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
 import '../../domain/usecases/generate_reel_use_case.dart';
@@ -188,6 +189,7 @@ class ShareCubit extends Cubit<ShareState> {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
+    required String preparingImageLabel,
     bool brandCapture = true,
   }) async {
     emit(
@@ -196,7 +198,7 @@ class ShareCubit extends Cubit<ShareState> {
         boundaryKey: boundaryKey,
         content: null,
         progress: 0,
-        progressMessage: 'Preparing image...',
+        progressMessage: preparingImageLabel,
         errorMessage: null,
       ),
     );
@@ -247,6 +249,7 @@ class ShareCubit extends Cubit<ShareState> {
   /// Generates the audio clip and enters review mode.
   Future<void> prepareAudioClip({
     required String surahName,
+    required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
   }) async {
     final config = _buildAudioConfig();
@@ -257,7 +260,7 @@ class ShareCubit extends Cubit<ShareState> {
       state.copyWith(
         status: ShareStatus.generating,
         progress: 0,
-        progressMessage: 'Preparing audio clip...',
+        progressMessage: progressMessages.preparingAudioClip,
         errorMessage: null,
       ),
     );
@@ -265,6 +268,7 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       final content = await _generateAudioClip(
         config: config,
+        progressMessages: progressMessages.audioClip,
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (progress, message) {
@@ -292,10 +296,12 @@ class ShareCubit extends Cubit<ShareState> {
   /// Generates the audio clip and shares it.
   Future<void> generateAndShareAudioClip({
     required String surahName,
+    required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
   }) async {
     await prepareAudioClip(
       surahName: surahName,
+      progressMessages: progressMessages,
       maxDurationSeconds: maxDurationSeconds,
     );
     if (state.status == ShareStatus.reviewing &&
@@ -307,6 +313,9 @@ class ShareCubit extends Cubit<ShareState> {
   /// Generates a vertical video (9:16) for social media.
   Future<void> generateReel({
     required String surahName,
+    required ShareProgressMessages progressMessages,
+    required String appName,
+    required String sharedViaLabel,
     GlobalKey? boundaryKey,
     int? maxDurationSeconds,
   }) async {
@@ -322,7 +331,7 @@ class ShareCubit extends Cubit<ShareState> {
       state.copyWith(
         status: ShareStatus.generating,
         progress: 0,
-        progressMessage: 'Preparing reel...',
+        progressMessage: progressMessages.preparingReel,
         errorMessage: null,
         content: null,
       ),
@@ -332,8 +341,9 @@ class ShareCubit extends Cubit<ShareState> {
       final content = await _generateReel(
         boundaryKey: effectiveBoundaryKey,
         config: audioConfig,
-        appName: 'Tilawa',
-        sharedViaLabel: 'Shared via Tilawa',
+        appName: appName,
+        sharedViaLabel: sharedViaLabel,
+        progressMessages: progressMessages,
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (p, m) =>

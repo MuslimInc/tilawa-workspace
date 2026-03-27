@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
 
@@ -57,7 +58,7 @@ class ShareOptionsSheet extends StatelessWidget {
                 const Positioned(
                   top: -120,
                   right: -60,
-                  child: _AmbientOrb(
+                  child: TilawaAmbientOrb(
                     size: 220,
                     color: _ShareSheetColors.mint,
                     opacity: 0.08,
@@ -66,7 +67,7 @@ class ShareOptionsSheet extends StatelessWidget {
                 const Positioned(
                   bottom: -90,
                   left: -30,
-                  child: _AmbientOrb(
+                  child: TilawaAmbientOrb(
                     size: 180,
                     color: _ShareSheetColors.gold,
                     opacity: 0.08,
@@ -78,7 +79,7 @@ class ShareOptionsSheet extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const _SheetHandle(),
+                      const TilawaSheetHandle(color: Colors.white24),
                       _ShareHeader(
                         arabicSurahName: _arabicSurahName,
                         englishSurahName: _englishSurahName,
@@ -318,56 +319,6 @@ class _ShareOptionCard extends StatelessWidget {
                 Icon(Icons.arrow_outward_rounded, color: accent),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 46,
-        height: 5,
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: Colors.white.withValues(alpha: 0.22),
-        ),
-      ),
-    );
-  }
-}
-
-class _AmbientOrb extends StatelessWidget {
-  const _AmbientOrb({
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
-
-  final double size;
-  final Color color;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: opacity),
-              color.withValues(alpha: 0),
-            ],
           ),
         ),
       ),

@@ -2786,6 +2786,102 @@ abstract class AppLocalizations {
   /// **'Preparing screenshot...'**
   String get preparingScreenshot;
 
+  /// Status message while preparing an audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing audio clip...'**
+  String get preparingAudioClip;
+
+  /// Status message while preparing a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing reel...'**
+  String get preparingReelStatus;
+
+  /// Status message while generating the audio portion of a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Generating audio clip...'**
+  String get generatingAudioClipStatus;
+
+  /// Status message while capturing the Quran reader visuals for a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing reader visuals...'**
+  String get capturingReaderVisuals;
+
+  /// Status message while combining reel visuals and audio
+  ///
+  /// In en, this message translates to:
+  /// **'Combining visuals and audio into a reel...'**
+  String get combiningReelMedia;
+
+  /// Status message while preparing to trim a locally stored audio file
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing to trim local audio...'**
+  String get preparingToTrimLocalAudio;
+
+  /// Status message when the selected reciter cannot be trimmed locally and the app falls back to downloading verses
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter not supported for local trimming. Falling back to online download...'**
+  String get reciterNotSupportedForLocalTrim;
+
+  /// Status message while loading verse timing data
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching ayah timings...'**
+  String get fetchingAyahTimings;
+
+  /// Status message when no timing data is available and the app falls back to online download
+  ///
+  /// In en, this message translates to:
+  /// **'No timings found. Falling back to online download...'**
+  String get noTimingsFound;
+
+  /// Status message when no timing data is available for the chosen verse range
+  ///
+  /// In en, this message translates to:
+  /// **'No timings found for the selected range. Falling back to online download...'**
+  String get noTimingsFoundForRange;
+
+  /// Status message while trimming audio
+  ///
+  /// In en, this message translates to:
+  /// **'Trimming audio...'**
+  String get trimmingAudio;
+
+  /// Status message while downloading verse-by-verse audio
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading verse {currentVerse} of {totalVerses}...'**
+  String downloadingVerseProgress(int currentVerse, int totalVerses);
+
+  /// Status message while assembling the final audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Assembling audio clip...'**
+  String get assemblingAudioClip;
+
+  /// Status message while preparing reel video encoding
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing video encoding...'**
+  String get preparingVideoEncoding;
+
+  /// Status message while encoding the final vertical reel video
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding vertical video (this may take a moment)...'**
+  String get encodingVerticalVideo;
+
+  /// Status message after the reel has been generated successfully
+  ///
+  /// In en, this message translates to:
+  /// **'Reel generated!'**
+  String get reelGenerated;
+
   /// Title for the final share review panel
   ///
   /// In en, this message translates to:

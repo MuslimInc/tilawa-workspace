@@ -61,71 +61,31 @@ class ReciterSearchHeader extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: TilawaSearchField(
                         controller: controller,
-                        decoration: InputDecoration(
-                          hintText: context.l10n.searchSurah,
-                          hintStyle: TextStyle(
-                            color: theme.hintColor.withValues(alpha: 0.5),
-                          ),
-                          // Glassy input field
-                          fillColor: theme.scaffoldBackgroundColor.withValues(
-                            alpha: 0.5,
-                          ),
-                          filled: true,
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: inputHorizontalPadding,
-                            vertical: inputVerticalPadding,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: context.primaryColor,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: inputBorderRadius,
-                            borderSide: BorderSide(
-                              color: context.primaryColor.withValues(
-                                alpha: 0.1,
-                              ),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: inputBorderRadius,
-                            borderSide: BorderSide(
-                              color: context.primaryColor.withValues(
-                                alpha: 0.1,
-                              ),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: inputBorderRadius,
-                            borderSide: BorderSide(color: context.primaryColor),
-                          ),
-                          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                            valueListenable: controller,
-                            builder: (context, value, child) {
-                              if (value.text.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-                              return IconButton(
-                                icon: const Icon(Icons.clear_rounded),
-                                color: theme.hintColor,
-                                onPressed: () {
-                                  controller.clear();
-                                  context.read<ReciterDetailsBloc>().add(
-                                    const FilterSurahs(''),
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                        hintText: context.l10n.searchSurah,
+                        backgroundColor: theme.scaffoldBackgroundColor
+                            .withValues(alpha: 0.5),
+                        borderRadius: inputBorderRadius,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: inputHorizontalPadding,
+                          vertical: inputVerticalPadding,
                         ),
+                        hintStyle: TextStyle(
+                          color: theme.hintColor.withValues(alpha: 0.5),
+                        ),
+                        onClear: () {
+                          controller.clear();
+                          context.read<ReciterDetailsBloc>().add(
+                            const FilterSurahs(''),
+                          );
+                        },
                         onChanged: (query) {
                           context.read<ReciterDetailsBloc>().add(
                             FilterSurahs(query),
                           );
                         },
+                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       ),
                     ),
                     SizedBox(width: 8),

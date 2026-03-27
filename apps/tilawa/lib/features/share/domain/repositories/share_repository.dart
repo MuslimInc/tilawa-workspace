@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../entities/audio_clip_config.dart';
 import '../entities/share_content.dart';
+import '../entities/share_progress_messages.dart';
 
 /// Abstract interface for share operations.
 abstract class ShareRepository {
@@ -19,6 +20,7 @@ abstract class ShareRepository {
   /// Generates an audio clip for the given verse range and reciter.
   Future<ShareContent> generateAudioClip({
     required AudioClipConfig config,
+    required AudioClipProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
@@ -30,6 +32,7 @@ abstract class ShareRepository {
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
+    required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,

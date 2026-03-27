@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
 import '../services/audio_clip_service.dart';
 import '../services/reel_service.dart';
@@ -60,6 +61,7 @@ class ShareRepositoryImpl implements ShareRepository {
   @override
   Future<ShareContent> generateAudioClip({
     required AudioClipConfig config,
+    required AudioClipProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
@@ -77,6 +79,7 @@ class ShareRepositoryImpl implements ShareRepository {
     final filePath = await _audioClipService.generateAudioClip(
       effectiveConfig,
       localSurahPath: localDownload?.filePath,
+      progressMessages: progressMessages,
       onProgress: onProgress,
       cancelToken: cancelToken,
     );
@@ -95,6 +98,7 @@ class ShareRepositoryImpl implements ShareRepository {
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
+    required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
@@ -105,27 +109,29 @@ class ShareRepositoryImpl implements ShareRepository {
     );
 
     // 1. Generate audio clip first (usually faster/more prone to error)
-    onProgress?.call(0.1, 'Generating audio clip...');
+    onProgress?.call(0.1, progressMessages.generatingAudioClip);
     final audioContent = await generateAudioClip(
       config: effectiveConfig,
+      progressMessages: progressMessages.audioClip,
       onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.2, msg),
       cancelToken: cancelToken,
     );
 
     // 2. Capture screenshot
-    onProgress?.call(0.4, 'Capturing reader visuals...');
+    onProgress?.call(0.4, progressMessages.capturingReaderVisuals);
     final screenshotPath = await _screenshotService.captureRaw(
       boundaryKey: boundaryKey,
       fileName: 'reel_capture_${DateTime.now().millisecondsSinceEpoch}.png',
     );
 
     // 3. Generate reel video
-    onProgress?.call(0.6, 'Combining visuals and audio into a reel...');
+    onProgress?.call(0.6, progressMessages.combiningReelMedia);
     final reelPath = await _reelService.generateReel(
       screenshotPath: screenshotPath,
       audioPath: audioContent.filePath,
       surahName: '', // Metadata
       reciterName: effectiveConfig.reciterName,
+      progressMessages: progressMessages.reel,
       onProgress: (p, msg) => onProgress?.call(0.6 + p * 0.4, msg),
     );
 

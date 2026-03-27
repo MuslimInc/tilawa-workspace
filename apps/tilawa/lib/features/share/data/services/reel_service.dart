@@ -2,6 +2,8 @@ import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+
+import '../../domain/entities/share_progress_messages.dart';
 import 'share_file_manager.dart';
 
 @lazySingleton
@@ -19,9 +21,10 @@ class ReelService {
     required String audioPath,
     required String surahName,
     required String reciterName,
+    required ReelProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
   }) async {
-    onProgress?.call(0.1, 'Preparing video encoding...');
+    onProgress?.call(0.1, progressMessages.preparingVideoEncoding);
 
     final shareDir = await _fileManager.getShareDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -39,23 +42,36 @@ class ReelService {
     // -vf "scale=..." : Scales and crops into 9:16 (1080x1920)
     // -shortest: End video when the shortest input (audio) ends
     final command = [
-      '-loop', '1',
-      '-i', '"$screenshotPath"',
-      '-i', '"$audioPath"',
-      '-c:v', 'libx264',
-      '-tune', 'stillimage',
-      '-c:a', 'aac',
-      '-b:a', '192k',
-      '-pix_fmt', 'yuv420p',
+      '-loop',
+      '1',
+      '-i',
+      '"$screenshotPath"',
+      '-i',
+      '"$audioPath"',
+      '-c:v',
+      'libx264',
+      '-tune',
+      'stillimage',
+      '-c:a',
+      'aac',
+      '-b:a',
+      '192k',
+      '-pix_fmt',
+      'yuv420p',
       '-shortest',
-      '-vf', '"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"',
-      '-metadata', 'title="$surahName Reel"',
-      '-metadata', 'artist="$reciterName"',
-      '-metadata', 'album="Tilawa"',
-      '-y', '"$outputPath"',
+      '-vf',
+      '"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"',
+      '-metadata',
+      'title="$surahName Reel"',
+      '-metadata',
+      'artist="$reciterName"',
+      '-metadata',
+      'album="Tilawa"',
+      '-y',
+      '"$outputPath"',
     ].join(' ');
 
-    onProgress?.call(0.3, 'Encoding vertical video (this may take a moment)...');
+    onProgress?.call(0.3, progressMessages.encodingVerticalVideo);
 
     final session = await FFmpegKit.execute(command);
     final returnCode = await session.getReturnCode();
@@ -67,7 +83,7 @@ class ReelService {
       );
     }
 
-    onProgress?.call(1.0, 'Reel generated!');
+    onProgress?.call(1.0, progressMessages.reelGenerated);
     return outputPath;
   }
 }

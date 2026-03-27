@@ -2,7 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../molecules/tilawa_glass_panel.dart';
 
 class ImmersiveComposerScaffold extends StatelessWidget {
   const ImmersiveComposerScaffold({
@@ -31,7 +33,8 @@ class ImmersiveComposerScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.immersiveComposer;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -55,38 +58,47 @@ class ImmersiveComposerScaffold extends StatelessWidget {
               Positioned.fill(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
-                    sigmaX: tokens.blurShadow * 0.9,
-                    sigmaY: tokens.blurShadow * 0.9,
+                    sigmaX:
+                        designTokens.blurShadow *
+                        componentTokens.backgroundBlurScale,
+                    sigmaY:
+                        designTokens.blurShadow *
+                        componentTokens.backgroundBlurScale,
                   ),
                   child: ColoredBox(
-                    color: theme.colorScheme.surface.withValues(alpha: 0.42),
+                    color: theme.colorScheme.surface.withValues(
+                      alpha: componentTokens.backgroundOverlayOpacity,
+                    ),
                   ),
                 ),
               ),
             ],
             SafeArea(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  tokens.spaceLarge,
-                  tokens.spaceLarge,
-                  tokens.spaceLarge,
-                  tokens.spaceLarge,
-                ),
+                padding: EdgeInsets.all(designTokens.spaceLarge),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final isCompactHeight = constraints.maxHeight < 760;
+                    final isCompactHeight =
+                        constraints.maxHeight <
+                        componentTokens.compactHeightBreakpoint;
                     final verticalSpacing = isCompactHeight
-                        ? tokens.spaceMedium
-                        : tokens.spaceLarge;
+                        ? designTokens.spaceMedium
+                        : designTokens.spaceLarge;
                     final panelMaxHeight = clampDouble(
-                      constraints.maxHeight * (isCompactHeight ? 0.5 : 0.44),
-                      220,
+                      constraints.maxHeight *
+                          (isCompactHeight
+                              ? componentTokens.compactPanelHeightFactor
+                              : componentTokens.regularPanelHeightFactor),
+                      componentTokens.panelMinHeight,
                       constraints.maxHeight,
                     );
                     final previewHeight = clampDouble(
-                      constraints.maxHeight * (isCompactHeight ? 0.42 : 0.5),
-                      220,
-                      460,
+                      constraints.maxHeight *
+                          (isCompactHeight
+                              ? componentTokens.compactPreviewHeightFactor
+                              : componentTokens.regularPreviewHeightFactor),
+                      componentTokens.panelMinHeight,
+                      componentTokens.previewMaxHeight,
                     );
 
                     Widget buildHeader() {
@@ -97,7 +109,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                                 icon: Icons.close_rounded,
                                 onPressed: onClose,
                               ),
-                          SizedBox(width: tokens.spaceMedium),
+                          SizedBox(width: designTokens.spaceMedium),
                           Expanded(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -110,7 +122,9 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                                   ),
                                 ),
                                 if (subtitle != null) ...[
-                                  SizedBox(height: tokens.spaceExtraSmall),
+                                  SizedBox(
+                                    height: designTokens.spaceExtraSmall,
+                                  ),
                                   Text(
                                     subtitle!,
                                     textAlign: TextAlign.center,
@@ -122,8 +136,12 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                               ],
                             ),
                           ),
-                          SizedBox(width: tokens.spaceMedium),
-                          trailing ?? const SizedBox(width: 44, height: 44),
+                          SizedBox(width: designTokens.spaceMedium),
+                          trailing ??
+                              SizedBox(
+                                width: componentTokens.headerButtonSize,
+                                height: componentTokens.headerButtonSize,
+                              ),
                         ],
                       );
                     }
@@ -136,7 +154,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                             )
                           : bottomPanel;
 
-                      return _GlassPanel(child: panelChild);
+                      return TilawaGlassPanel(child: panelChild);
                     }
 
                     if (isCompactHeight) {
@@ -201,50 +219,6 @@ class ImmersiveComposerScaffold extends StatelessWidget {
   }
 }
 
-class _GlassPanel extends StatelessWidget {
-  const _GlassPanel({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(tokens.radiusExtraLarge + 8),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: tokens.blurGlass,
-          sigmaY: tokens.blurGlass,
-        ),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(tokens.spaceLarge),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge + 8),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(
-                alpha: tokens.opacitySubtle,
-              ),
-              width: tokens.borderWidthThin,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: tokens.opacitySubtle),
-                blurRadius: tokens.blurShadow,
-                offset: tokens.shadowOffsetMedium,
-              ),
-            ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
 class _RoundHeaderButton extends StatelessWidget {
   const _RoundHeaderButton({required this.icon, required this.onPressed});
 
@@ -254,24 +228,32 @@ class _RoundHeaderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.immersiveComposer;
 
     return Container(
-      width: 44,
-      height: 44,
+      width: componentTokens.headerButtonSize,
+      height: componentTokens.headerButtonSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: theme.colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+        color: theme.colorScheme.surface.withValues(
+          alpha: designTokens.opacityGlass,
+        ),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(
-            alpha: tokens.opacitySubtle,
+            alpha: designTokens.opacitySubtle,
           ),
-          width: tokens.borderWidthThin,
+          width: designTokens.borderWidthThin,
         ),
       ),
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon, size: tokens.iconSizeMedium + 2),
+        icon: Icon(
+          icon,
+          size:
+              designTokens.iconSizeMedium +
+              componentTokens.headerIconSizeOffset,
+        ),
       ),
     );
   }

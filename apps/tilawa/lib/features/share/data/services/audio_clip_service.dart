@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_limits.dart';
+import '../../domain/entities/share_progress_messages.dart';
 import 'ayah_timing_service.dart';
 import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
@@ -90,14 +91,21 @@ class AudioClipService {
   Future<String> generateAudioClip(
     AudioClipConfig config, {
     String? localSurahPath,
+    required AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
     if (localSurahPath != null && File(localSurahPath).existsSync()) {
-      return _generateFromLocalFile(config, localSurahPath, onProgress);
+      return _generateFromLocalFile(
+        config,
+        localSurahPath,
+        progressMessages,
+        onProgress,
+      );
     }
     return _generateFromOnlineVerses(
       config: config,
+      progressMessages: progressMessages,
       onProgress: onProgress,
       cancelToken: cancelToken,
     );
@@ -106,34 +114,37 @@ class AudioClipService {
   Future<String> _generateFromLocalFile(
     AudioClipConfig config,
     String localPath,
+    AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
   ) async {
-    onProgress?.call(0.0, 'Preparing to trim local audio...');
+    onProgress?.call(0.0, progressMessages.preparingToTrimLocalAudio);
 
     final recitationId = ReciterAudioMapping.resolveRecitationId(
       config.serverUrl,
     );
     if (recitationId == null) {
       // Fallback to online verse download if we can't get timings
-      onProgress?.call(
-        0.0,
-        'Reciter not supported for local trimming. Falling back to online download...',
+      onProgress?.call(0.0, progressMessages.reciterNotSupportedForLocalTrim);
+      return _generateFromOnlineVerses(
+        config: config,
+        progressMessages: progressMessages,
+        onProgress: onProgress,
       );
-      return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
-    onProgress?.call(0.1, 'Fetching ayah timings...');
+    onProgress?.call(0.1, progressMessages.fetchingAyahTimings);
     final timings = await _timingService.getSurahTimings(
       recitationId: recitationId,
       surahNumber: config.surahNumber,
     );
 
     if (timings.isEmpty) {
-      onProgress?.call(
-        0.0,
-        'No timings found. Falling back to online download...',
+      onProgress?.call(0.0, progressMessages.noTimingsFound);
+      return _generateFromOnlineVerses(
+        config: config,
+        progressMessages: progressMessages,
+        onProgress: onProgress,
       );
-      return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
     final rangeTimings = timings
@@ -144,11 +155,12 @@ class AudioClipService {
         .toList();
 
     if (rangeTimings.isEmpty) {
-      onProgress?.call(
-        0.0,
-        'No timings found for the specified range. Falling back to online download...',
+      onProgress?.call(0.0, progressMessages.noTimingsFoundForRange);
+      return _generateFromOnlineVerses(
+        config: config,
+        progressMessages: progressMessages,
+        onProgress: onProgress,
       );
-      return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
     final startTime = rangeTimings.first.startSeconds;
@@ -160,9 +172,9 @@ class AudioClipService {
         'trimmed_${config.reciterFolder}_${s}_${config.fromAyah}-${config.toAyah}.mp3';
     final outputPath = p.join(shareDir.path, outputFileName);
 
-    onProgress?.call(0.5, 'Trimming audio...');
+    onProgress?.call(0.5, progressMessages.trimmingAudio);
     await _trimWithFFmpeg(localPath, startTime, endTime, outputPath, config);
-    onProgress?.call(1.0, 'Done');
+    onProgress?.call(1.0, progressMessages.done);
 
     return outputPath;
   }
@@ -205,6 +217,7 @@ class AudioClipService {
   /// Supports cancellation via [cancelToken].
   Future<String> _generateFromOnlineVerses({
     required AudioClipConfig config,
+    required AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
@@ -233,7 +246,7 @@ class AudioClipService {
 
           onProgress?.call(
             ayahIndex / totalVerses * 0.9, // 90% for downloads
-            'Downloading verse ${ayahIndex + 1} of $totalVerses...',
+            progressMessages.downloadingVerse(ayahIndex + 1, totalVerses),
           );
 
           return _downloadVerseWithRetry(
@@ -248,7 +261,7 @@ class AudioClipService {
 
     versePaths.addAll(await Future.wait(futures));
 
-    onProgress?.call(0.95, 'Assembling audio clip...');
+    onProgress?.call(0.95, progressMessages.assemblingAudioClip);
 
     // Concatenate MP3 files.
     final outputPath = await _concatenateFiles(
@@ -256,7 +269,7 @@ class AudioClipService {
       config: config,
     );
 
-    onProgress?.call(1.0, 'Done');
+    onProgress?.call(1.0, progressMessages.done);
 
     // Evict old cache entries in the background.
     unawaited(_fileManager.evictVerseCacheIfNeeded());

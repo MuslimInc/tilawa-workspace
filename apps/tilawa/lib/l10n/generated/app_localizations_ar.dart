@@ -1494,6 +1494,60 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparingScreenshot => 'جارِ تجهيز الصورة...';
 
   @override
+  String get preparingAudioClip => 'جارِ تجهيز المقطع الصوتي...';
+
+  @override
+  String get preparingReelStatus => 'جارِ تجهيز الريل...';
+
+  @override
+  String get generatingAudioClipStatus => 'جارِ إنشاء المقطع الصوتي...';
+
+  @override
+  String get capturingReaderVisuals => 'جارِ التقاط مشهد القارئ...';
+
+  @override
+  String get combiningReelMedia => 'جارِ دمج المشهد والصوت في ريل...';
+
+  @override
+  String get preparingToTrimLocalAudio => 'جارِ تجهيز قص الصوت المحلي...';
+
+  @override
+  String get reciterNotSupportedForLocalTrim =>
+      'هذا القارئ غير مدعوم للقص المحلي. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get fetchingAyahTimings => 'جارِ جلب توقيت الآيات...';
+
+  @override
+  String get noTimingsFound =>
+      'لم يتم العثور على توقيتات. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get noTimingsFoundForRange =>
+      'لم يتم العثور على توقيتات للنطاق المحدد. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get trimmingAudio => 'جارِ قص الصوت...';
+
+  @override
+  String downloadingVerseProgress(int currentVerse, int totalVerses) {
+    return 'جارِ تنزيل الآية $currentVerse من $totalVerses...';
+  }
+
+  @override
+  String get assemblingAudioClip => 'جارِ تجميع المقطع الصوتي...';
+
+  @override
+  String get preparingVideoEncoding => 'جارِ تجهيز ترميز الفيديو...';
+
+  @override
+  String get encodingVerticalVideo =>
+      'جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...';
+
+  @override
+  String get reelGenerated => 'تم إنشاء الريل!';
+
+  @override
   String get shareReviewTitle => 'راجع المشاركة';
 
   @override
