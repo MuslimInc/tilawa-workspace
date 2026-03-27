@@ -27,6 +27,10 @@ class SurahHeaderBanner extends StatelessWidget {
 
   static const double _portraitRatio = 0.108;
   static const double _landscapeRatio = 0.094;
+  static const double _portraitPaddingRatio = 0.019;
+  // Landscape padding: bannerWidth = bannerHeight * aspectRatio,
+  // padding = (screenWidth - bannerWidth) / 2
+  static const double _landscapeBannerAspectRatio = 1192 / 134;
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +47,27 @@ class SurahHeaderBanner extends StatelessWidget {
             screenSize: screenSize,
             isLandscape: isLandscape,
           );
-          final double bannerWidth = constraints.maxWidth;
+          final double horizontalPadding;
+          if (isLandscape) {
+            final double bannerWidth =
+                bannerHeight * _landscapeBannerAspectRatio;
+            horizontalPadding =
+                ((constraints.maxWidth - bannerWidth) / 2).clamp(0.0, constraints.maxWidth / 2);
+          } else {
+            horizontalPadding = constraints.maxWidth * _portraitPaddingRatio;
+          }
+          final double bannerWidth =
+              constraints.maxWidth - (horizontalPadding * 2);
           final double headerFontSize =
               bannerHeight *
               (headerFontSizeMultiplier / _referenceBannerHeightMultiplier);
 
-          return SizedBox(
-            height: bannerHeight,
-            width: bannerWidth,
-            child: Stack(
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: SizedBox(
+              height: bannerHeight,
+              width: bannerWidth,
+              child: Stack(
               alignment: Alignment.center,
               children: [
                 Positioned.fill(
@@ -89,6 +105,7 @@ class SurahHeaderBanner extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           );
         },
       ),
