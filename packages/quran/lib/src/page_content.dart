@@ -2,9 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'helpers/app_logger.dart';
+import 'helpers/convert_to_arabic_number.dart';
 import 'layout/quran_layout_strategy.dart';
+import 'services/functions/page_functions.dart' as page_functions;
 import 'services/quran_data_service.dart';
 import 'widgets/bismillah_widget.dart';
+import 'widgets/page_metadata_strip.dart';
+import 'widgets/page_number_badge.dart';
 import 'widgets/quran_line.dart';
 import 'widgets/surah_header_banner.dart';
 
@@ -26,6 +30,8 @@ class PageContent extends StatefulWidget {
     this.headerImageFilter,
     this.headerTextColor,
     this.headerFontSizeMultiplier = 0.45,
+    required this.pageBackgroundColor,
+    this.uiTextDirection = TextDirection.ltr,
     this.currentPageListenable,
   });
 
@@ -47,6 +53,8 @@ class PageContent extends StatefulWidget {
   final ColorFilter? headerImageFilter;
   final Color? headerTextColor;
   final double headerFontSizeMultiplier;
+  final Color pageBackgroundColor;
+  final TextDirection uiTextDirection;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -74,6 +82,13 @@ class _PageContentState extends State<PageContent>
   final SnapshotController _snapshotController = SnapshotController();
   Orientation? _lastOrientation;
   int _lastCurrentPage = 0;
+
+  static const double _portraitPageHorizontalPadding = 6;
+  static const double _portraitPageBottomPadding = 2;
+  static const double _pageChromeSpacing = 0;
+  static const Color _lightMetaTextColor = Color(0xFF9A7A57);
+  static const Color _lightPageNumberBackgroundColor = Color(0xFFE8DDD0);
+  static const Color _lightPageNumberBorderColor = Color(0xFFD2C0AE);
 
   @override
   bool get wantKeepAlive {
@@ -270,7 +285,24 @@ class _PageContentState extends State<PageContent>
     final List<List<Map<String, dynamic>>> pageLines = _getWordsGroupedByLine(
       widget.pageNumber,
     );
+    final _PageMetaInfo pageMeta = _buildPageMeta(widget.pageNumber);
     final int firstLineIdx = _firstContentLineIndexFromLines(pageLines);
+    final isPortrait =
+        MediaQuery.orientationOf(context) == Orientation.portrait;
+    final bool isLightPage =
+        widget.pageBackgroundColor.computeLuminance() > 0.8;
+    final Color metaTextColor = isLightPage
+        ? _lightMetaTextColor
+        : Color.lerp(widget.textColor, widget.pageBackgroundColor, 0.45)!;
+    final Color pageNumberBadgeColor = isLightPage
+        ? _lightPageNumberBackgroundColor
+        : Color.lerp(widget.pageBackgroundColor, widget.textColor, 0.1)!;
+    final Color pageNumberBorderColor = isLightPage
+        ? _lightPageNumberBorderColor
+        : Color.lerp(widget.pageBackgroundColor, widget.textColor, 0.22)!;
+    final String pageNumberLabel = widget.uiTextDirection == TextDirection.rtl
+        ? convertToArabicNumber(widget.pageNumber.toString())
+        : widget.pageNumber.toString();
 
     final pageBody = LayoutBuilder(
       builder: (context, constraints) {
@@ -337,11 +369,16 @@ class _PageContentState extends State<PageContent>
 
           if (isBismillah) {
             final String pageStr = widget.pageNumber.toString().padLeft(3, '0');
-            return BismillahWidget(
-              fontSize: metrics.fontSize,
-              pageNumber: widget.pageNumber,
-              color: widget.textColor,
-              fontFamily: 'QCF_P$pageStr',
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: metrics.bismillahHorizontalPadding,
+              ),
+              child: BismillahWidget(
+                fontSize: metrics.fontSize,
+                pageNumber: widget.pageNumber,
+                color: widget.textColor,
+                fontFamily: 'QCF_P$pageStr',
+              ),
             );
           }
 
@@ -381,22 +418,58 @@ class _PageContentState extends State<PageContent>
           children: lineWidgets,
         );
 
+        final paddedLines = Padding(padding: metrics.padding, child: lines);
+
         if (metrics.isScrollable) {
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            child: lines,
+            child: paddedLines,
           );
         }
 
-        return lines;
+        return paddedLines;
       },
+    );
+
+    final Widget pageChrome = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isPortrait && pageMeta.surahNames.isNotEmpty)
+          PageMetadataStrip(
+            surahNames: pageMeta.surahNames,
+            juzLabel: pageMeta.juzLabel(widget.juzLabel),
+            uiTextDirection: widget.uiTextDirection,
+            textColor: metaTextColor,
+          ),
+        Expanded(child: pageBody),
+        if (isPortrait) ...[
+          const SizedBox(height: _pageChromeSpacing),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              _portraitPageHorizontalPadding,
+              0,
+              _portraitPageHorizontalPadding,
+              _portraitPageBottomPadding,
+            ),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: PageNumberBadge(
+                label: pageNumberLabel,
+                backgroundColor: pageNumberBadgeColor,
+                borderColor: pageNumberBorderColor,
+                textColor: metaTextColor,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
 
     final Widget result = SnapshotWidget(
       key: ValueKey<Orientation>(_lastOrientation ?? Orientation.portrait),
       autoresize: true,
       controller: _snapshotController,
-      child: SafeArea(bottom: false, child: pageBody),
+      child: SafeArea(bottom: false, child: pageChrome),
     );
 
     final Duration renderDuration = DateTime.now().difference(renderStartTime);
@@ -499,5 +572,112 @@ class _PageContentState extends State<PageContent>
       }
     }
     return special;
+  }
+
+  _PageMetaInfo _buildPageMeta(int pageNumber) {
+    final List<Map<String, int>> pageEntries = page_functions.getPageData(
+      pageNumber,
+    );
+    if (pageEntries.isEmpty) {
+      return const _PageMetaInfo(surahNames: '', juzNumber: null);
+    }
+
+    final surahNumbers = <int>[];
+    for (final entry in pageEntries) {
+      final int? surahNumber = entry['surah'];
+      if (surahNumber == null) {
+        continue;
+      }
+      if (surahNumbers.isEmpty || surahNumbers.last != surahNumber) {
+        surahNumbers.add(surahNumber);
+      }
+    }
+
+    final int firstSurahNumber = pageEntries.first['surah'] ?? 1;
+    final int firstVerseNumber = pageEntries.first['start'] ?? 1;
+    final int juzNumber = page_functions.getJuzNumber(
+      firstSurahNumber,
+      firstVerseNumber,
+    );
+    final separator = widget.uiTextDirection == TextDirection.rtl ? ' ' : ' · ';
+    final String surahNames = surahNumbers
+        .map((surahNumber) => _buildSurahName(surahNumber))
+        .where((name) => name.isNotEmpty)
+        .join(separator);
+
+    return _PageMetaInfo(
+      surahNames: surahNames,
+      juzNumber: juzNumber > 0 ? juzNumber : null,
+    );
+  }
+
+  String _buildSurahName(int surahNumber) {
+    final String Function(int surahNumber)? builder = widget.surahNameBuilder;
+    if (builder != null) {
+      return builder(surahNumber);
+    }
+    return surahNumber.toString();
+  }
+}
+
+class _PageMetaInfo {
+  const _PageMetaInfo({required this.surahNames, required this.juzNumber});
+
+  final String surahNames;
+  final int? juzNumber;
+
+  String juzLabel(String? prefix) {
+    if (juzNumber == null || prefix == null || prefix.isEmpty) {
+      return '';
+    }
+    if (_isArabicText(prefix)) {
+      return '$prefix ${_arabicOrdinalForJuz(juzNumber!)}';
+    }
+    return '$prefix $juzNumber';
+  }
+
+  bool _isArabicText(String value) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(value);
+  }
+
+  String _arabicOrdinalForJuz(int juzNumber) {
+    const arabicOrdinals = <String>[
+      'الأول',
+      'الثاني',
+      'الثالث',
+      'الرابع',
+      'الخامس',
+      'السادس',
+      'السابع',
+      'الثامن',
+      'التاسع',
+      'العاشر',
+      'الحادي عشر',
+      'الثاني عشر',
+      'الثالث عشر',
+      'الرابع عشر',
+      'الخامس عشر',
+      'السادس عشر',
+      'السابع عشر',
+      'الثامن عشر',
+      'التاسع عشر',
+      'العشرون',
+      'الحادي والعشرون',
+      'الثاني والعشرون',
+      'الثالث والعشرون',
+      'الرابع والعشرون',
+      'الخامس والعشرون',
+      'السادس والعشرون',
+      'السابع والعشرون',
+      'الثامن والعشرون',
+      'التاسع والعشرون',
+      'الثلاثون',
+    ];
+
+    if (juzNumber < 1 || juzNumber > arabicOrdinals.length) {
+      return convertToArabicNumber(juzNumber.toString());
+    }
+
+    return arabicOrdinals[juzNumber - 1];
   }
 }

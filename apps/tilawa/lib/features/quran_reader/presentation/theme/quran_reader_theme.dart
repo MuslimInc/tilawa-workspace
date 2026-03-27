@@ -18,12 +18,12 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
 
   /// Pre-built light-mode instance.
   static const QuranReaderTheme light = QuranReaderTheme(
-    pageBackground: Color(0xFFF9F5EF),
+    pageBackground: Color(0xFFFFF9F1),
     textColor: Color(0xFF000000),
     headerBackground: Color(0xFFF4EAD2),
     headerTextColor: Color(0xFF4E342E), // Colors.brown.shade800
     headerImageFilter: null,
-    systemBarColor: Color(0xFFF9F5EF),
+    systemBarColor: Color(0xFFFFF9F1),
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
   );

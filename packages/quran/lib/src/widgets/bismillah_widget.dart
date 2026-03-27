@@ -16,6 +16,9 @@ class BismillahWidget extends StatelessWidget {
   final Color? color;
   final String? fontFamily;
 
+  static const double _lineHeight = 2.30;
+  static const double _calligraphyFontScale = 0.8;
+
   @override
   Widget build(BuildContext context) {
     final renderStartTime = DateTime.now();
@@ -29,10 +32,12 @@ class BismillahWidget extends StatelessWidget {
 
     final String bismillahText;
     final String bismillahFont;
+    final double effectiveFontSize;
 
     if (pageNumber == 1) {
       bismillahText = '\uFC41\uFC42\uFC43\uFC44';
       bismillahFont = fontFamily ?? 'QCF_P001';
+      effectiveFontSize = fontSize;
     } else {
       // For Page 2+, 0xFC41 is the first word of the first Ayah (e.g. Alif-Lam-Mim).
       // The actual Bismillah is at 0x0008 in the page font.
@@ -40,6 +45,7 @@ class BismillahWidget extends StatelessWidget {
       bismillahText = '齃𧻓𥳐龎';
 
       bismillahFont = 'QCF_BSML';
+      effectiveFontSize = fontSize * _calligraphyFontScale;
     }
 
     final result = Text(
@@ -49,9 +55,9 @@ class BismillahWidget extends StatelessWidget {
       style: TextStyle(
         fontFamily: bismillahFont,
         package: 'quran',
-        fontSize: fontSize,
+        fontSize: effectiveFontSize,
         color: color,
-        height: 2.5,
+        height: _lineHeight,
       ),
     );
 

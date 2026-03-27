@@ -143,7 +143,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     final readerTheme = QuranReaderTheme.of(context);
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
-      overlays: const [SystemUiOverlay.top],
+      overlays: const [SystemUiOverlay.bottom],
     );
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -272,6 +272,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                             headerImageFilter: readerTheme.headerImageFilter,
                             headerTextColor: readerTheme.headerTextColor,
                             headerFontSizeMultiplier: _headerFontSizeMultiplier,
+                            uiTextDirection: Directionality.of(context),
                             onPageChanged: (pageNumber) {
                               if (_currentPageNotifier.value != pageNumber) {
                                 _currentPageNotifier.value = pageNumber;

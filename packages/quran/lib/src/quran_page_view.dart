@@ -17,7 +17,7 @@ class QuranPageView extends StatefulWidget {
     this.controller,
     this.onPageChanged,
     this.textColor = const Color(0xFF000000),
-    this.pageBackgroundColor = const Color(0xFFF9F5EF),
+    this.pageBackgroundColor = const Color(0xFFFFF9F1),
     this.verseBackgroundColor,
     this.onLongPress,
     this.onLongPressUp,
@@ -32,6 +32,7 @@ class QuranPageView extends StatefulWidget {
     this.headerTextColor,
     this.headerFontSizeMultiplier = 0.45,
     this.currentPageListenable,
+    this.uiTextDirection = TextDirection.ltr,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
@@ -79,6 +80,7 @@ class QuranPageView extends StatefulWidget {
   final ColorFilter? headerImageFilter;
   final Color? headerTextColor;
   final double headerFontSizeMultiplier;
+  final TextDirection uiTextDirection;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -152,6 +154,8 @@ class _QuranPageViewState extends State<QuranPageView> {
               headerImageFilter: widget.headerImageFilter,
               headerTextColor: widget.headerTextColor,
               headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+              pageBackgroundColor: widget.pageBackgroundColor,
+              uiTextDirection: widget.uiTextDirection,
               currentPageListenable: widget.currentPageListenable,
             );
           },
