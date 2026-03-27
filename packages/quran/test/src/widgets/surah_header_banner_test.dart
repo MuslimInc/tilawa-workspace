@@ -36,14 +36,14 @@ void main() {
       );
     });
 
-    // Landscape: bannerHeight = height * 0.094
+    // Landscape: bannerHeight = width * 0.094
     test('matches Ayah landscape banner height on 1280×720 device', () {
       expect(
         SurahHeaderBanner.computeBannerHeight(
           screenSize: const Size(1280, 720),
           isLandscape: true,
         ),
-        closeTo(68, 1.0),
+        closeTo(120, 1.0),
       );
     });
 
@@ -53,7 +53,7 @@ void main() {
           screenSize: const Size(2400, 1080),
           isLandscape: true,
         ),
-        closeTo(102, 1.0),
+        closeTo(226, 1.0),
       );
     });
 
@@ -63,7 +63,7 @@ void main() {
           screenSize: const Size(2992, 1344),
           isLandscape: true,
         ),
-        closeTo(126, 1.0),
+        closeTo(281, 1.0),
       );
     });
   });
