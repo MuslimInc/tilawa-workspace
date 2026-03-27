@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../utils/share_ayah_range_utils.dart';
+
 /// A Quran-focused 9:16 canvas used for reel generation.
 class ReelContentRenderer extends StatelessWidget {
   const ReelContentRenderer({
@@ -22,9 +24,15 @@ class ReelContentRenderer extends StatelessWidget {
 
   String get _arabicSurahName => getSurahNameArabic(surahNumber);
   String get _englishSurahName => getSurahNameEnglish(surahNumber);
+  ShareAyahRange get _ayahRange => normalizeShareAyahRange(
+    surahNumber: surahNumber,
+    fromAyah: fromAyah,
+    toAyah: toAyah,
+  );
 
-  String get _ayahRangeLabel =>
-      fromAyah == toAyah ? 'آية $fromAyah' : 'الآيات $fromAyah - $toAyah';
+  String get _ayahRangeLabel => _ayahRange.fromAyah == _ayahRange.toAyah
+      ? 'آية ${_ayahRange.fromAyah}'
+      : 'الآيات ${_ayahRange.fromAyah} - ${_ayahRange.toAyah}';
 
   @override
   Widget build(BuildContext context) {
@@ -121,10 +129,13 @@ class ReelContentRenderer extends StatelessWidget {
                           if (showBasmalah &&
                               surahNumber != 1 &&
                               surahNumber != 9 &&
-                              fromAyah == 1) ...[
+                              _ayahRange.fromAyah == 1) ...[
                             const SizedBox(height: 36),
                             _Basmalah(
-                              pageNumber: getPageNumber(surahNumber, fromAyah),
+                              pageNumber: getPageNumber(
+                                surahNumber,
+                                _ayahRange.fromAyah,
+                              ),
                             ),
                           ],
                           const SizedBox(height: 32),
@@ -150,8 +161,8 @@ class ReelContentRenderer extends StatelessWidget {
                                 textDirection: TextDirection.rtl,
                                 child: _AyahFlow(
                                   surahNumber: surahNumber,
-                                  fromAyah: fromAyah,
-                                  toAyah: toAyah,
+                                  fromAyah: _ayahRange.fromAyah,
+                                  toAyah: _ayahRange.toAyah,
                                 ),
                               ),
                             ),
@@ -358,15 +369,22 @@ class _AyahFlow extends StatelessWidget {
   final int toAyah;
 
   _AyahTypography _resolveTypography() {
-    final verseCount = toAyah - fromAyah + 1;
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
+    final verseCount = ayahRange.toAyah - ayahRange.fromAyah + 1;
     var glyphCount = 0;
 
-    for (int ayah = fromAyah; ayah <= toAyah; ayah++) {
-      glyphCount += getVerseQCF(
-        surahNumber,
-        ayah,
-        verseEndSymbol: false,
-      ).length;
+    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
+      glyphCount +=
+          tryGetVerseQcfText(
+            surahNumber,
+            ayah,
+            verseEndSymbol: false,
+          )?.length ??
+          getVerse(surahNumber, ayah, verseEndSymbol: false).length;
     }
 
     if (verseCount >= 24 || glyphCount > 600) {
@@ -410,29 +428,43 @@ class _AyahFlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
     final typography = _resolveTypography();
     final spans = <InlineSpan>[];
 
-    for (int ayah = fromAyah; ayah <= toAyah; ayah++) {
+    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
       final pageNumber = getPageNumber(surahNumber, ayah);
       final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
-      final baseStyle = TextStyle(
+      final qcfStyle = TextStyle(
         fontFamily: pageFont,
         fontSize: typography.fontSize,
         height: typography.lineHeight,
         color: _ReelPalette.ink.withValues(alpha: 0.94),
       );
-
-      spans.add(
-        TextSpan(
-          text: getVerseQCF(surahNumber, ayah, verseEndSymbol: false),
-          style: baseStyle,
-        ),
+      final fallbackStyle = GoogleFonts.amiri(
+        fontSize: typography.fontSize * 0.76,
+        height: typography.lineHeight,
+        color: _ReelPalette.ink.withValues(alpha: 0.94),
       );
+      final verseText =
+          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) ??
+          getVerse(surahNumber, ayah, verseEndSymbol: false);
+      final verseNumberText =
+          tryGetVerseNumberQcfText(surahNumber, ayah) ??
+          getVerseEndSymbol(ayah);
+      final usesQcf =
+          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) != null;
+      final baseStyle = usesQcf ? qcfStyle : fallbackStyle;
+
+      spans.add(TextSpan(text: verseText, style: baseStyle));
 
       spans.add(
         TextSpan(
-          text: '${getVerseNumberQCF(surahNumber, ayah)} ',
+          text: '$verseNumberText ',
           style: baseStyle.copyWith(height: typography.endSymbolHeight),
         ),
       );

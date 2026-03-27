@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
 
+import '../utils/share_ayah_range_utils.dart';
+
 /// A premium static poster used for screenshot previews and audio artwork.
 class SharePosterRenderer extends StatelessWidget {
   const SharePosterRenderer({
@@ -23,6 +25,11 @@ class SharePosterRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final normalizedReciterName = reciterName?.trim();
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
 
     return SizedBox(
       width: 1080,
@@ -85,9 +92,9 @@ class SharePosterRenderer extends StatelessWidget {
                         const Spacer(),
                         _PosterPill(
                           icon: Icons.menu_book_rounded,
-                          label: fromAyah == toAyah
-                              ? 'آية $fromAyah'
-                              : 'الآيات $fromAyah - $toAyah',
+                          label: ayahRange.fromAyah == ayahRange.toAyah
+                              ? 'آية ${ayahRange.fromAyah}'
+                              : 'الآيات ${ayahRange.fromAyah} - ${ayahRange.toAyah}',
                         ),
                       ],
                     ),
@@ -115,10 +122,13 @@ class SharePosterRenderer extends StatelessWidget {
                     ),
                     if (surahNumber != 1 &&
                         surahNumber != 9 &&
-                        fromAyah == 1) ...[
+                        ayahRange.fromAyah == 1) ...[
                       const SizedBox(height: 24),
                       _PosterBasmalah(
-                        pageNumber: getPageNumber(surahNumber, fromAyah),
+                        pageNumber: getPageNumber(
+                          surahNumber,
+                          ayahRange.fromAyah,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 24),
@@ -137,8 +147,8 @@ class SharePosterRenderer extends StatelessWidget {
                           textDirection: TextDirection.rtl,
                           child: _PosterAyahFlow(
                             surahNumber: surahNumber,
-                            fromAyah: fromAyah,
-                            toAyah: toAyah,
+                            fromAyah: ayahRange.fromAyah,
+                            toAyah: ayahRange.toAyah,
                           ),
                         ),
                       ),
@@ -184,15 +194,22 @@ class _PosterAyahFlow extends StatelessWidget {
   final int toAyah;
 
   _PosterTypography _resolveTypography() {
-    final verseCount = toAyah - fromAyah + 1;
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
+    final verseCount = ayahRange.toAyah - ayahRange.fromAyah + 1;
     var glyphCount = 0;
 
-    for (int ayah = fromAyah; ayah <= toAyah; ayah++) {
-      glyphCount += getVerseQCF(
-        surahNumber,
-        ayah,
-        verseEndSymbol: false,
-      ).length;
+    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
+      glyphCount +=
+          tryGetVerseQcfText(
+            surahNumber,
+            ayah,
+            verseEndSymbol: false,
+          )?.length ??
+          getVerse(surahNumber, ayah, verseEndSymbol: false).length;
     }
 
     if (verseCount >= 16 || glyphCount > 460) {
@@ -209,29 +226,43 @@ class _PosterAyahFlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
     final typography = _resolveTypography();
     final spans = <InlineSpan>[];
 
-    for (int ayah = fromAyah; ayah <= toAyah; ayah++) {
+    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
       final pageNumber = getPageNumber(surahNumber, ayah);
       final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
-      final style = TextStyle(
+      final qcfStyle = TextStyle(
         fontFamily: pageFont,
         fontSize: typography.fontSize,
         height: typography.lineHeight,
         color: _PosterPalette.ink.withValues(alpha: 0.92),
       );
-
-      spans.add(
-        TextSpan(
-          text: getVerseQCF(surahNumber, ayah, verseEndSymbol: false),
-          style: style,
-        ),
+      final fallbackStyle = GoogleFonts.amiri(
+        fontSize: typography.fontSize * 0.76,
+        height: typography.lineHeight,
+        color: _PosterPalette.ink.withValues(alpha: 0.92),
       );
+      final verseText =
+          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) ??
+          getVerse(surahNumber, ayah, verseEndSymbol: false);
+      final verseNumberText =
+          tryGetVerseNumberQcfText(surahNumber, ayah) ??
+          getVerseEndSymbol(ayah);
+      final usesQcf =
+          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) != null;
+      final baseStyle = usesQcf ? qcfStyle : fallbackStyle;
+
+      spans.add(TextSpan(text: verseText, style: baseStyle));
       spans.add(
         TextSpan(
-          text: '${getVerseNumberQCF(surahNumber, ayah)} ',
-          style: style.copyWith(height: typography.endSymbolHeight),
+          text: '$verseNumberText ',
+          style: baseStyle.copyWith(height: typography.endSymbolHeight),
         ),
       );
     }

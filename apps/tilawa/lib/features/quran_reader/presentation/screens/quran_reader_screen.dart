@@ -337,9 +337,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
   Future<void> _showShareOptions(BuildContext context, int currentPage) async {
     final pageData = getPageData(currentPage);
-    final surahNumber = pageData.first['surah']!;
-    final firstAyah = pageData.first['start'] ?? 1;
-    final lastAyah = pageData.last['end'] ?? firstAyah;
+    final primarySurahNumber = pageData.first['surah']!;
+    final primarySurahEntries = pageData
+        .where((entry) => entry['surah'] == primarySurahNumber)
+        .toList();
+    final surahNumber = primarySurahNumber;
+    final firstAyah = primarySurahEntries.first['start'] ?? 1;
+    final lastAyah = primarySurahEntries.last['end'] ?? firstAyah;
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';

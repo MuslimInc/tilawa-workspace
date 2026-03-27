@@ -13,6 +13,7 @@ import 'package:tilawa/core/extensions.dart';
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
 import '../share_progress_messages_l10n.dart';
+import '../utils/share_ayah_range_utils.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import 'reel_content_renderer.dart';
@@ -49,9 +50,14 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   @override
   void initState() {
     super.initState();
-    _fromAyah = widget.initialFromAyah;
-    _toAyah = widget.initialToAyah;
     _maxAyah = getVerseCount(widget.surahNumber);
+    final ayahRange = normalizeShareAyahRange(
+      surahNumber: widget.surahNumber,
+      fromAyah: widget.initialFromAyah,
+      toAyah: widget.initialToAyah,
+    );
+    _fromAyah = ayahRange.fromAyah;
+    _toAyah = ayahRange.toAyah;
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
