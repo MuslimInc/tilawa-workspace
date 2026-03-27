@@ -1,73 +1,69 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran/src/widgets/surah_header_banner.dart';
 
 void main() {
   group('SurahHeaderBanner sizing', () {
-    test(
-      'returns Ayah-calibrated physical banner height for 1200px viewport',
-      () {
-        expect(SurahHeaderBanner.bannerPhysicalHeightForViewport(1200), 59);
-      },
-    );
-
-    test(
-      'returns Ayah-calibrated physical banner height for 1280px viewport',
-      () {
-        expect(SurahHeaderBanner.bannerPhysicalHeightForViewport(1280), 77);
-      },
-    );
-
-    test('interpolates physical banner height between 1200px and 1280px', () {
-      expect(SurahHeaderBanner.bannerPhysicalHeightForViewport(1240), 68);
-    });
-
-    test(
-      'clamps physical banner height below the supported viewport range',
-      () {
-        expect(SurahHeaderBanner.bannerPhysicalHeightForViewport(1000), 59);
-      },
-    );
-
-    test(
-      'clamps physical banner height above the supported viewport range',
-      () {
-        expect(SurahHeaderBanner.bannerPhysicalHeightForViewport(1400), 77);
-      },
-    );
-
-    test('converts 1280px physical target to logical height at 2.0 dpr', () {
+    // Portrait: bannerHeight = width * 0.108
+    test('matches Ayah banner height on 720×1280 portrait device', () {
       expect(
         SurahHeaderBanner.computeBannerHeight(
-          viewportHeight: 640,
-          devicePixelRatio: 2.0,
-          isPortrait: true,
-          lineHeight: 50,
+          screenSize: const Size(720, 1280),
+          isLandscape: false,
         ),
-        38.5,
+        closeTo(78, 1.0),
       );
     });
 
-    test('converts 1200px physical target to logical height at 2.0 dpr', () {
+    test('matches Ayah banner height on 1080×2400 portrait device', () {
       expect(
         SurahHeaderBanner.computeBannerHeight(
-          viewportHeight: 600,
-          devicePixelRatio: 2.0,
-          isPortrait: true,
-          lineHeight: 50,
+          screenSize: const Size(1080, 2400),
+          isLandscape: false,
         ),
-        29.5,
+        closeTo(117, 1.0),
       );
     });
 
-    test('uses line-height scaling in landscape', () {
+    test('matches Ayah banner height on 1344×2992 portrait device', () {
       expect(
         SurahHeaderBanner.computeBannerHeight(
-          viewportHeight: 720,
-          devicePixelRatio: 2.0,
-          isPortrait: false,
-          lineHeight: 50,
+          screenSize: const Size(1344, 2992),
+          isLandscape: false,
         ),
-        closeTo(61, 0.001),
+        closeTo(145, 1.0),
+      );
+    });
+
+    // Landscape: bannerHeight = height * 0.094
+    test('matches Ayah landscape banner height on 1280×720 device', () {
+      expect(
+        SurahHeaderBanner.computeBannerHeight(
+          screenSize: const Size(1280, 720),
+          isLandscape: true,
+        ),
+        closeTo(68, 1.0),
+      );
+    });
+
+    test('matches Ayah landscape banner height on 2400×1080 device', () {
+      expect(
+        SurahHeaderBanner.computeBannerHeight(
+          screenSize: const Size(2400, 1080),
+          isLandscape: true,
+        ),
+        closeTo(102, 1.0),
+      );
+    });
+
+    test('matches Ayah landscape banner height on 2992×1344 device', () {
+      expect(
+        SurahHeaderBanner.computeBannerHeight(
+          screenSize: const Size(2992, 1344),
+          isLandscape: true,
+        ),
+        closeTo(126, 1.0),
       );
     });
   });
