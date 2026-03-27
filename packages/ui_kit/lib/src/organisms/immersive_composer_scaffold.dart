@@ -18,6 +18,12 @@ class ImmersiveComposerScaffold extends StatelessWidget {
     this.trailing,
     this.background,
     this.backgroundGradient,
+    this.compactPanelHeightFactor,
+    this.regularPanelHeightFactor,
+    this.compactPreviewHeightFactor,
+    this.regularPreviewHeightFactor,
+    this.panelMinHeight,
+    this.previewMaxHeight,
   });
 
   final String title;
@@ -29,6 +35,12 @@ class ImmersiveComposerScaffold extends StatelessWidget {
   final Widget? trailing;
   final Widget? background;
   final Gradient? backgroundGradient;
+  final double? compactPanelHeightFactor;
+  final double? regularPanelHeightFactor;
+  final double? compactPreviewHeightFactor;
+  final double? regularPreviewHeightFactor;
+  final double? panelMinHeight;
+  final double? previewMaxHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -84,21 +96,37 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                     final verticalSpacing = isCompactHeight
                         ? designTokens.spaceMedium
                         : designTokens.spaceLarge;
+                    final resolvedCompactPanelHeightFactor =
+                        compactPanelHeightFactor ??
+                        componentTokens.compactPanelHeightFactor;
+                    final resolvedRegularPanelHeightFactor =
+                        regularPanelHeightFactor ??
+                        componentTokens.regularPanelHeightFactor;
+                    final resolvedCompactPreviewHeightFactor =
+                        compactPreviewHeightFactor ??
+                        componentTokens.compactPreviewHeightFactor;
+                    final resolvedRegularPreviewHeightFactor =
+                        regularPreviewHeightFactor ??
+                        componentTokens.regularPreviewHeightFactor;
+                    final resolvedPanelMinHeight =
+                        panelMinHeight ?? componentTokens.panelMinHeight;
+                    final resolvedPreviewMaxHeight =
+                        previewMaxHeight ?? componentTokens.previewMaxHeight;
                     final panelMaxHeight = clampDouble(
                       constraints.maxHeight *
                           (isCompactHeight
-                              ? componentTokens.compactPanelHeightFactor
-                              : componentTokens.regularPanelHeightFactor),
-                      componentTokens.panelMinHeight,
+                              ? resolvedCompactPanelHeightFactor
+                              : resolvedRegularPanelHeightFactor),
+                      resolvedPanelMinHeight,
                       constraints.maxHeight,
                     );
                     final previewHeight = clampDouble(
                       constraints.maxHeight *
                           (isCompactHeight
-                              ? componentTokens.compactPreviewHeightFactor
-                              : componentTokens.regularPreviewHeightFactor),
-                      componentTokens.panelMinHeight,
-                      componentTokens.previewMaxHeight,
+                              ? resolvedCompactPreviewHeightFactor
+                              : resolvedRegularPreviewHeightFactor),
+                      resolvedPanelMinHeight,
+                      resolvedPreviewMaxHeight,
                     );
 
                     Widget buildHeader() {

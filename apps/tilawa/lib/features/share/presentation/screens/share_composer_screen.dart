@@ -1,23 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:quran/quran.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:tilawa/core/extensions.dart';
-
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_limits.dart';
-import '../share_progress_messages_l10n.dart';
-import '../utils/share_ayah_range_utils.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
+import '../share_progress_messages_l10n.dart';
+import '../utils/share_ayah_range_utils.dart';
 import '../widgets/reel_content_renderer.dart';
 import '../widgets/share_poster_renderer.dart';
 
@@ -182,6 +180,8 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
             state.status == ShareStatus.sharing;
         final isReviewing =
             state.status == ShareStatus.reviewing && state.content != null;
+        final reviewContent = isReviewing ? state.content! : null;
+        final isReelReview = reviewContent is ShareReel;
 
         return Stack(
           children: [
@@ -216,7 +216,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                   ? context.l10n.shareReadyTitle
                   : context.l10n.createShare,
               subtitle: isReviewing
-                  ? context.l10n.shareReviewSubtitle
+                  ? (isReelReview ? null : context.l10n.shareReviewSubtitle)
                   : context.l10n.shareComposerSubtitle,
               onClose: () => Navigator.of(context).maybePop(),
               background: _buildBackdrop(),
@@ -229,12 +229,18 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                   Color(0xFF1E5D52),
                 ],
               ),
+              compactPanelHeightFactor: isReelReview ? 0.32 : null,
+              regularPanelHeightFactor: isReelReview ? 0.28 : null,
+              compactPreviewHeightFactor: isReelReview ? 0.56 : null,
+              regularPreviewHeightFactor: isReelReview ? 0.7 : null,
+              panelMinHeight: isReelReview ? 156 : null,
+              previewMaxHeight: isReelReview ? 640 : null,
               preview: AnimatedSwitcher(
                 duration: tokens.durationMedium,
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: isReviewing
-                    ? _buildReviewPreview(state.content!)
+                    ? _buildReviewPreview(reviewContent!)
                     : _buildLivePreview(state),
               ),
               bottomPanel: AnimatedSwitcher(
@@ -244,7 +250,8 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                 child: isReviewing
                     ? _ReviewPanel(
                         key: const ValueKey('review_panel'),
-                        content: state.content!,
+                        content: reviewContent!,
+                        compact: isReelReview,
                         onEdit: () =>
                             context.read<ShareCubit>().discardPreparedContent(),
                         onShare: () =>
@@ -397,6 +404,14 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       ShareReel(:final filePath) => ValueKey('review_reel_$filePath'),
     };
 
+    if (content case ShareReel(:final filePath, :final surahName)) {
+      return _ReelReviewPreview(
+        key: reviewKey,
+        filePath: filePath,
+        surahName: surahName,
+      );
+    }
+
     return Column(
       key: reviewKey,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -447,13 +462,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                     reciterName: reciterName,
                   ),
                 ),
-              ShareReel(:final filePath) => _MediaPreviewFrame(
-                aspectRatio: 9 / 16,
-                child: _GeneratedReelPreview(
-                  key: ValueKey('generated_reel_$filePath'),
-                  filePath: filePath,
-                ),
-              ),
+              ShareReel() => const SizedBox.shrink(),
             },
           ),
         ),
@@ -833,44 +842,63 @@ class _ReviewPanel extends StatelessWidget {
     required this.content,
     required this.onEdit,
     required this.onShare,
+    this.compact = false,
   });
 
   final ShareContent content;
   final VoidCallback onEdit;
   final VoidCallback onShare;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final title = compact
+        ? switch (content) {
+            ShareScreenshot() => context.l10n.shareReviewScreenshot,
+            ShareAudioClip() => context.l10n.shareReviewAudio,
+            ShareReel() => context.l10n.shareReviewReel,
+          }
+        : context.l10n.shareReviewTitle;
+    final subtitle = switch (content) {
+      ShareScreenshot() => context.l10n.shareReviewScreenshot,
+      ShareAudioClip() => context.l10n.shareReviewAudio,
+      ShareReel() => context.l10n.shareReviewReel,
+    };
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          context.l10n.shareReviewTitle,
+          title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          switch (content) {
-            ShareScreenshot() => context.l10n.shareReviewScreenshot,
-            ShareAudioClip() => context.l10n.shareReviewAudio,
-            ShareReel() => context.l10n.shareReviewReel,
-          },
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        if (!compact) ...[
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+        ],
+        SizedBox(height: compact ? 12 : 16),
         Row(
           children: [
             Expanded(
               child: OutlinedButton(
                 onPressed: onEdit,
-                child: Text(context.l10n.edit),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: compact ? 14 : 16),
+                ),
+                child: Text(
+                  context.l10n.edit,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -878,16 +906,17 @@ class _ReviewPanel extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onShare,
                 icon: const Icon(Icons.share_rounded),
-                label: Text(switch (content) {
-                  ShareScreenshot() => context.l10n.shareScreenshot,
-                  ShareAudioClip() => context.l10n.shareAudio,
-                  ShareReel() => context.l10n.shareReel,
-                }),
+                label: Text(
+                  switch (content) {
+                    ShareScreenshot() => context.l10n.shareScreenshot,
+                    ShareAudioClip() => context.l10n.shareAudio,
+                    ShareReel() => context.l10n.shareReel,
+                  },
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
+                  padding: EdgeInsets.symmetric(vertical: compact ? 14 : 16),
                 ),
               ),
             ),
@@ -951,16 +980,21 @@ class _PreviewFrame extends StatelessWidget {
 }
 
 class _MediaPreviewFrame extends StatelessWidget {
-  const _MediaPreviewFrame({required this.aspectRatio, required this.child});
+  const _MediaPreviewFrame({
+    required this.aspectRatio,
+    required this.child,
+    this.padding = 14,
+  });
 
   final double aspectRatio;
   final Widget child;
+  final double padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 420, maxHeight: 760),
-      padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(maxWidth: 460, maxHeight: 760),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
         color: Colors.white.withValues(alpha: 0.08),
@@ -982,6 +1016,65 @@ class _MediaPreviewFrame extends StatelessWidget {
           child: AspectRatio(aspectRatio: aspectRatio, child: child),
         ),
       ),
+    );
+  }
+}
+
+class _ReelReviewPreview extends StatelessWidget {
+  const _ReelReviewPreview({
+    super.key,
+    required this.filePath,
+    required this.surahName,
+  });
+
+  final String filePath;
+  final String surahName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: _MediaPreviewFrame(
+            aspectRatio: 9 / 16,
+            padding: 8,
+            child: _GeneratedReelPreview(
+              key: ValueKey('generated_reel_surface_$filePath'),
+              filePath: filePath,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                MetadataChip(
+                  icon: Icons.check_circle_rounded,
+                  label: context.l10n.readyToShare,
+                  foregroundColor: const Color(0xFFF7F1E1),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  borderColor: Colors.white.withValues(alpha: 0.12),
+                ),
+                MetadataChip(
+                  icon: Icons.auto_stories_rounded,
+                  label: surahName,
+                  foregroundColor: const Color(0xFFF7F1E1),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  borderColor: Colors.white.withValues(alpha: 0.12),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1428,8 +1521,8 @@ class _GeneratedReelPreview extends StatefulWidget {
 
 class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
   VideoPlayerController? _videoPlayerController;
-  ChewieController? _chewieController;
   String? _errorMessage;
+  bool _isMuted = false;
 
   @override
   void initState() {
@@ -1462,6 +1555,7 @@ class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
       await controller.initialize();
       await controller.setLooping(false);
       await controller.setVolume(1);
+      await controller.play();
     } catch (error) {
       await controller.dispose();
       if (!mounted) return;
@@ -1472,44 +1566,18 @@ class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
     }
 
     _videoPlayerController = controller;
-    _chewieController = ChewieController(
-      videoPlayerController: controller,
-      aspectRatio:
-          controller.value.isInitialized && controller.value.aspectRatio > 0
-          ? controller.value.aspectRatio
-          : 9 / 16,
-      autoPlay: true,
-      looping: false,
-      showControls: true,
-      allowMuting: true,
-      placeholder: const Center(child: CircularProgressIndicator()),
-      errorBuilder: (context, errorMessage) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            errorMessage,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-      ),
-    );
     if (mounted) {
       setState(() {
         _errorMessage = null;
+        _isMuted = false;
       });
     }
   }
 
   Future<void> _disposeControllers() async {
-    final chewieController = _chewieController;
     final videoPlayerController = _videoPlayerController;
-
-    _chewieController = null;
     _videoPlayerController = null;
-
-    await chewieController?.pause();
-    chewieController?.dispose();
+    await videoPlayerController?.pause();
     await videoPlayerController?.dispose();
   }
 
@@ -1519,8 +1587,45 @@ class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
     super.dispose();
   }
 
+  Future<void> _togglePlayback() async {
+    final controller = _videoPlayerController;
+    if (controller == null) return;
+
+    final value = controller.value;
+    final isCompleted =
+        value.duration > Duration.zero && value.position >= value.duration;
+
+    if (isCompleted) {
+      await controller.seekTo(Duration.zero);
+      await controller.play();
+      return;
+    }
+
+    if (value.isPlaying) {
+      await controller.pause();
+    } else {
+      await controller.play();
+    }
+  }
+
+  Future<void> _toggleMute() async {
+    final controller = _videoPlayerController;
+    if (controller == null) return;
+
+    final nextMuted = !_isMuted;
+    await controller.setVolume(nextMuted ? 0 : 1);
+    if (!mounted) return;
+    setState(() {
+      _isMuted = nextMuted;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final controller = _videoPlayerController;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     if (_errorMessage != null) {
       return ColoredBox(
         color: Colors.black12,
@@ -1537,14 +1642,160 @@ class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
       );
     }
 
-    if (_chewieController == null) {
+    if (controller == null || !controller.value.isInitialized) {
       return const ColoredBox(
         color: Colors.black12,
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Chewie(controller: _chewieController!);
+    return ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: controller,
+      builder: (context, value, child) {
+        final videoSize = value.size.isEmpty
+            ? const Size(1080, 1920)
+            : value.size;
+        final isCompleted =
+            value.duration > Duration.zero && value.position >= value.duration;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(
+              color: Colors.black,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: videoSize.width,
+                  height: videoSize.height,
+                  child: VideoPlayer(controller),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.08),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.48),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _togglePlayback,
+                  splashColor: Colors.white.withValues(alpha: 0.08),
+                  highlightColor: Colors.transparent,
+                ),
+              ),
+            ),
+            if (value.isBuffering)
+              const Center(child: CircularProgressIndicator()),
+            Positioned(
+              top: tokens.spaceMedium,
+              right: tokens.spaceMedium,
+              child: _PreviewOverlayButton(
+                icon: _isMuted
+                    ? Icons.volume_off_rounded
+                    : Icons.volume_up_rounded,
+                onPressed: _toggleMute,
+                diameter: tokens.iconSizeLarge * 1.6,
+              ),
+            ),
+            Center(
+              child: _PreviewOverlayButton(
+                icon: isCompleted
+                    ? Icons.replay_rounded
+                    : value.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+                onPressed: _togglePlayback,
+                diameter: tokens.iconSizeLarge * 2.2,
+                iconSize: tokens.iconSizeLarge * 1.2,
+                backgroundColor: const Color(
+                  0xFF0B342E,
+                ).withValues(alpha: 0.82),
+                foregroundColor: const Color(0xFFE1C17B),
+              ),
+            ),
+            Positioned(
+              left: tokens.spaceMedium,
+              right: tokens.spaceMedium,
+              bottom: tokens.spaceMedium,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                child: VideoProgressIndicator(
+                  controller,
+                  allowScrubbing: true,
+                  padding: EdgeInsets.zero,
+                  colors: VideoProgressColors(
+                    playedColor: const Color(0xFFE1C17B),
+                    bufferedColor: Colors.white.withValues(alpha: 0.22),
+                    backgroundColor: Colors.white.withValues(alpha: 0.12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PreviewOverlayButton extends StatelessWidget {
+  const _PreviewOverlayButton({
+    required this.icon,
+    required this.onPressed,
+    required this.diameter,
+    this.iconSize,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final double diameter;
+  final double? iconSize;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Container(
+      width: diameter,
+      height: diameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color:
+            backgroundColor ?? const Color(0xFF0B342E).withValues(alpha: 0.72),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: tokens.blurShadow,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        iconSize: iconSize ?? tokens.iconSizeMedium,
+        color: foregroundColor ?? Colors.white,
+      ),
+    );
   }
 }
 
