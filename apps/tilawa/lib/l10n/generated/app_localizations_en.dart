@@ -1426,4 +1426,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveReelPreview => 'Live Reel Preview';
+
+  @override
+  String get createShare => 'Create Share';
+
+  @override
+  String get shareComposerSubtitle =>
+      'Build a polished Quran share with live preview and simple controls.';
+
+  @override
+  String get shareReadyTitle => 'Ready to Share';
+
+  @override
+  String get shareReviewSubtitle =>
+      'Review the final result, then share it when it feels right.';
+
+  @override
+  String get readyToShare => 'Ready to Share';
+
+  @override
+  String get shareMode => 'Share Format';
+
+  @override
+  String get shareModeScreenshot => 'Screenshot';
+
+  @override
+  String get shareModeAudio => 'Audio';
+
+  @override
+  String get shareModeReel => 'Reel';
+
+  @override
+  String get shareContentLayout => 'Visual Layout';
+
+  @override
+  String get shareLayoutReaderPage => 'Reader Page';
+
+  @override
+  String get shareLayoutPassageCard => 'Passage Card';
+
+  @override
+  String get shareReaderPageHint =>
+      'Reader Page uses the current Quran page exactly as shown in the reader.';
+
+  @override
+  String get shareDuration => 'Clip Duration';
+
+  @override
+  String get shareDurationAuto => 'Full Range';
+
+  @override
+  String get shareDurationShort => '30 sec';
+
+  @override
+  String get shareDurationMedium => '60 sec';
+
+  @override
+  String get shareDurationLong => '90 sec';
+
+  @override
+  String get shareDurationHint =>
+      'Duration presets keep the full-ayah flow when timing data is available.';
+
+  @override
+  String get prepareScreenshot => 'Prepare Screenshot';
+
+  @override
+  String get prepareAudioClip => 'Prepare Audio Clip';
+
+  @override
+  String get prepareReel => 'Prepare Reel';
+
+  @override
+  String get preparingScreenshot => 'Preparing screenshot...';
+
+  @override
+  String get shareReviewTitle => 'Review Your Share';
+
+  @override
+  String get shareReviewScreenshot => 'Screenshot is ready to share.';
+
+  @override
+  String get shareReviewAudio => 'Audio clip is ready to share.';
+
+  @override
+  String get shareReviewReel => 'Reel is ready to share.';
+
+  @override
+  String shareDurationPresetLabel(int seconds) {
+    return '$seconds sec max';
+  }
+
+  @override
+  String get edit => 'Edit';
 }

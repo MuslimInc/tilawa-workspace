@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/audio_clip_config.dart';
+import '../../domain/entities/share_content.dart';
 import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
 import '../../domain/usecases/generate_reel_use_case.dart';
@@ -114,6 +115,109 @@ class ShareCubit extends Cubit<ShareState> {
     emit(state.copyWith(reciterName: name, reciterServerUrl: serverUrl));
   }
 
+  AudioClipConfig? _buildAudioConfig() {
+    final surahNumber = state.surahNumber;
+    final fromAyah = state.fromAyah;
+    final toAyah = state.toAyah;
+    final reciterName = state.reciterName;
+    final serverUrl = state.reciterServerUrl;
+
+    if (surahNumber == null ||
+        fromAyah == null ||
+        toAyah == null ||
+        reciterName == null ||
+        serverUrl == null) {
+      return null;
+    }
+
+    final folder = ReciterAudioMapping.resolveFolder(serverUrl);
+    return AudioClipConfig(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+      reciterName: reciterName,
+      reciterFolder: folder,
+      serverUrl: serverUrl,
+    );
+  }
+
+  ShareContent _withLocalizedSurahName(
+    ShareContent content, {
+    required String surahName,
+  }) {
+    return switch (content) {
+      ShareScreenshot(:final filePath, :final pageNumber) =>
+        ShareContent.screenshot(
+          filePath: filePath,
+          surahName: surahName,
+          pageNumber: pageNumber,
+        ),
+      ShareAudioClip(
+        :final filePath,
+        :final fromAyah,
+        :final toAyah,
+        :final reciterName,
+      ) =>
+        ShareContent.audioClip(
+          filePath: filePath,
+          surahName: surahName,
+          fromAyah: fromAyah,
+          toAyah: toAyah,
+          reciterName: reciterName,
+        ),
+      ShareReel(
+        :final filePath,
+        :final fromAyah,
+        :final toAyah,
+        :final reciterName,
+      ) =>
+        ShareContent.reel(
+          filePath: filePath,
+          surahName: surahName,
+          fromAyah: fromAyah,
+          toAyah: toAyah,
+          reciterName: reciterName,
+        ),
+    };
+  }
+
+  /// Captures a screenshot and enters review mode.
+  Future<void> prepareScreenshot({
+    required GlobalKey boundaryKey,
+    required String surahName,
+    required int pageNumber,
+    required String appName,
+    required String sharedViaLabel,
+    bool brandCapture = true,
+  }) async {
+    emit(
+      state.copyWith(
+        status: ShareStatus.capturing,
+        boundaryKey: boundaryKey,
+        content: null,
+        progress: 0,
+        progressMessage: 'Preparing image...',
+        errorMessage: null,
+      ),
+    );
+
+    try {
+      final content = await _captureScreenshot(
+        boundaryKey: boundaryKey,
+        surahName: surahName,
+        pageNumber: pageNumber,
+        appName: appName,
+        sharedViaLabel: sharedViaLabel,
+        brandCapture: brandCapture,
+      );
+      emit(state.copyWith(status: ShareStatus.reviewing, content: content));
+    } catch (e) {
+      emit(
+        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+      );
+    }
+  }
+
   /// Captures a screenshot of the current page and shares it.
   Future<void> captureAndShareScreenshot({
     required GlobalKey boundaryKey,
@@ -140,21 +244,13 @@ class ShareCubit extends Cubit<ShareState> {
     }
   }
 
-  /// Generates the audio clip and shares it.
-  Future<void> generateAndShareAudioClip({required String surahName}) async {
-    final surahNumber = state.surahNumber;
-    final fromAyah = state.fromAyah;
-    final toAyah = state.toAyah;
-    final reciterName = state.reciterName;
-    final serverUrl = state.reciterServerUrl;
-
-    if (surahNumber == null ||
-        fromAyah == null ||
-        toAyah == null ||
-        reciterName == null ||
-        serverUrl == null) {
-      return;
-    }
+  /// Generates the audio clip and enters review mode.
+  Future<void> prepareAudioClip({
+    required String surahName,
+    int? maxDurationSeconds,
+  }) async {
+    final config = _buildAudioConfig();
+    if (config == null) return;
 
     _cancelToken = CancelToken();
     emit(
@@ -167,27 +263,21 @@ class ShareCubit extends Cubit<ShareState> {
     );
 
     try {
-      final folder = ReciterAudioMapping.resolveFolder(serverUrl);
-      final config = AudioClipConfig(
-        surahNumber: surahNumber,
-        fromAyah: fromAyah,
-        toAyah: toAyah,
-        reciterName: reciterName,
-        reciterFolder: folder,
-        serverUrl: serverUrl,
-      );
-
       final content = await _generateAudioClip(
         config: config,
+        maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (progress, message) {
           emit(state.copyWith(progress: progress, progressMessage: message));
         },
       );
 
-      emit(state.copyWith(status: ShareStatus.sharing));
-      await _shareContent(content);
-      emit(state.copyWith(status: ShareStatus.idle));
+      emit(
+        state.copyWith(
+          status: ShareStatus.reviewing,
+          content: _withLocalizedSurahName(content, surahName: surahName),
+        ),
+      );
     } catch (e) {
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
@@ -199,24 +289,31 @@ class ShareCubit extends Cubit<ShareState> {
     }
   }
 
+  /// Generates the audio clip and shares it.
+  Future<void> generateAndShareAudioClip({
+    required String surahName,
+    int? maxDurationSeconds,
+  }) async {
+    await prepareAudioClip(
+      surahName: surahName,
+      maxDurationSeconds: maxDurationSeconds,
+    );
+    if (state.status == ShareStatus.reviewing &&
+        state.content is ShareAudioClip) {
+      await shareContent();
+    }
+  }
+
   /// Generates a vertical video (9:16) for social media.
   Future<void> generateReel({
     required String surahName,
     GlobalKey? boundaryKey,
+    int? maxDurationSeconds,
   }) async {
-    final surahNumber = state.surahNumber;
-    final fromAyah = state.fromAyah;
-    final toAyah = state.toAyah;
-    final reciterName = state.reciterName;
-    final serverUrl = state.reciterServerUrl;
+    final audioConfig = _buildAudioConfig();
     final effectiveBoundaryKey = boundaryKey ?? state.boundaryKey;
 
-    if (surahNumber == null ||
-        fromAyah == null ||
-        toAyah == null ||
-        reciterName == null ||
-        serverUrl == null ||
-        effectiveBoundaryKey == null) {
+    if (audioConfig == null || effectiveBoundaryKey == null) {
       return;
     }
 
@@ -232,29 +329,23 @@ class ShareCubit extends Cubit<ShareState> {
     );
 
     try {
-      // 1. Prepare audio config
-      final folder = ReciterAudioMapping.resolveFolder(serverUrl);
-      final audioConfig = AudioClipConfig(
-        surahNumber: surahNumber,
-        fromAyah: fromAyah,
-        toAyah: toAyah,
-        reciterName: reciterName,
-        reciterFolder: folder,
-        serverUrl: serverUrl,
-      );
-
-      // 2. Generate reel (captures its own screenshot of the boundary)
       final content = await _generateReel(
         boundaryKey: effectiveBoundaryKey,
         config: audioConfig,
         appName: 'Tilawa',
         sharedViaLabel: 'Shared via Tilawa',
+        maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (p, m) =>
             emit(state.copyWith(progress: p, progressMessage: m)),
       );
 
-      emit(state.copyWith(status: ShareStatus.reviewing, content: content));
+      emit(
+        state.copyWith(
+          status: ShareStatus.reviewing,
+          content: _withLocalizedSurahName(content, surahName: surahName),
+        ),
+      );
     } catch (e) {
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
@@ -264,6 +355,18 @@ class ShareCubit extends Cubit<ShareState> {
         emit(state.copyWith(status: ShareStatus.idle));
       }
     }
+  }
+
+  void discardPreparedContent() {
+    emit(
+      state.copyWith(
+        status: ShareStatus.idle,
+        content: null,
+        progress: 0,
+        progressMessage: '',
+        errorMessage: null,
+      ),
+    );
   }
 
   /// Shares the currently reviewed content.

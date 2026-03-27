@@ -1,6 +1,8 @@
+import 'dart:ui' as ui;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
@@ -8,8 +10,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
-import 'package:tilawa/features/share/presentation/widgets/share_audio_config_sheet.dart';
-import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
+import 'package:tilawa/features/share/presentation/screens/share_composer_screen.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -334,78 +335,51 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     );
   }
 
-  void _showShareOptions(BuildContext context, int currentPage) {
+  Future<void> _showShareOptions(BuildContext context, int currentPage) async {
     final pageData = getPageData(currentPage);
     final surahNumber = pageData.first['surah']!;
-    final surahName = context.l10n.localeName == 'ar'
-        ? getSurahNameArabic(surahNumber)
-        : getSurahNameEnglish(surahNumber);
+    final firstAyah = pageData.first['start'] ?? 1;
+    final lastAyah = pageData.last['end'] ?? firstAyah;
+    final audioState = context.read<AudioPlayerBloc>().state;
+    final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
+    final serverUrl = audioState.currentAudio?.url ?? '';
+    final shareCubit = context.read<ShareCubit>();
+    final navigator = Navigator.of(context);
+    final previewBytes = await _captureSharePreviewBytes();
+    if (!mounted) return;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ShareOptionsSheet(
+    await navigator.push(
+      ShareComposerScreen.route(
+        cubit: shareCubit,
         surahNumber: surahNumber,
-        pageNumber: currentPage,
-        onShareScreenshot: () {
-          // Hide overlays before capture, wait one frame, then capture.
-          _uiVisibilityCubit.hide();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<ShareCubit>().captureAndShareScreenshot(
-              boundaryKey: _screenshotBoundaryKey,
-              surahName: surahName,
-              pageNumber: currentPage,
-              appName: 'Tilawa',
-              sharedViaLabel: context.l10n.sharedViaTilawa,
-            );
-            // Restore overlays after capture starts.
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) _uiVisibilityCubit.show();
-            });
-          });
-        },
-        onShareAudioClip: () {
-          _showAudioClipConfig(
-            context,
-            surahNumber: surahNumber,
-            currentPage: currentPage,
-          );
-        },
+        currentPage: currentPage,
+        initialFromAyah: firstAyah,
+        initialToAyah: lastAyah,
+        reciterName: reciterName,
+        reciterServerUrl: serverUrl,
+        readerBoundaryKey: _screenshotBoundaryKey,
+        readerPreviewBytes: previewBytes,
       ),
     );
   }
 
-  void _showAudioClipConfig(
-    BuildContext context, {
-    required int surahNumber,
-    required int currentPage,
-  }) {
-    final pageData = getPageData(currentPage);
-    final firstAyah = pageData.first['start'] ?? 1;
-    final lastAyah = pageData.last['end'] ?? firstAyah;
+  Future<Uint8List?> _captureSharePreviewBytes() async {
+    final boundary =
+        _screenshotBoundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+    if (boundary == null) return null;
 
-    // Use the currently selected reciter from the audio player, or a default.
-    final audioState = context.read<AudioPlayerBloc>().state;
-    final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
-    final serverUrl = audioState.currentAudio?.url ?? '';
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<ShareCubit>(),
-        child: ShareAudioConfigSheet(
-          surahNumber: surahNumber,
-          initialFromAyah: firstAyah,
-          initialToAyah: lastAyah,
-          reciterName: reciterName,
-          reciterServerUrl: serverUrl,
-          boundaryKey: _screenshotBoundaryKey,
-        ),
-      ),
-    );
+    try {
+      final image = await boundary.toImage(pixelRatio: 0.4);
+      try {
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        return byteData?.buffer.asUint8List();
+      } finally {
+        image.dispose();
+      }
+    } catch (_) {
+      return null;
+    }
   }
 
   void _showSurahIndex(BuildContext context) {

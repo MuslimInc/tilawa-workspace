@@ -2647,6 +2647,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Live Reel Preview'**
   String get liveReelPreview;
+
+  /// Title for the full-screen share composer
+  ///
+  /// In en, this message translates to:
+  /// **'Create Share'**
+  String get createShare;
+
+  /// Subtitle for the full-screen share composer
+  ///
+  /// In en, this message translates to:
+  /// **'Build a polished Quran share with live preview and simple controls.'**
+  String get shareComposerSubtitle;
+
+  /// Title shown when the share asset is prepared
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Share'**
+  String get shareReadyTitle;
+
+  /// Subtitle shown in the review step
+  ///
+  /// In en, this message translates to:
+  /// **'Review the final result, then share it when it feels right.'**
+  String get shareReviewSubtitle;
+
+  /// Short label showing content is ready
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Share'**
+  String get readyToShare;
+
+  /// Section title for share mode selection
+  ///
+  /// In en, this message translates to:
+  /// **'Share Format'**
+  String get shareMode;
+
+  /// Screenshot share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get shareModeScreenshot;
+
+  /// Audio share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get shareModeAudio;
+
+  /// Reel share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Reel'**
+  String get shareModeReel;
+
+  /// Section title for screenshot layout selection
+  ///
+  /// In en, this message translates to:
+  /// **'Visual Layout'**
+  String get shareContentLayout;
+
+  /// Option label for capturing the current reader page
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Page'**
+  String get shareLayoutReaderPage;
+
+  /// Option label for generating a stylized passage card
+  ///
+  /// In en, this message translates to:
+  /// **'Passage Card'**
+  String get shareLayoutPassageCard;
+
+  /// Hint shown when the reader page screenshot option is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Page uses the current Quran page exactly as shown in the reader.'**
+  String get shareReaderPageHint;
+
+  /// Section title for share duration presets
+  ///
+  /// In en, this message translates to:
+  /// **'Clip Duration'**
+  String get shareDuration;
+
+  /// Label for automatic clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'Full Range'**
+  String get shareDurationAuto;
+
+  /// Label for short clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'30 sec'**
+  String get shareDurationShort;
+
+  /// Label for medium clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'60 sec'**
+  String get shareDurationMedium;
+
+  /// Label for long clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'90 sec'**
+  String get shareDurationLong;
+
+  /// Hint below duration presets
+  ///
+  /// In en, this message translates to:
+  /// **'Duration presets keep the full-ayah flow when timing data is available.'**
+  String get shareDurationHint;
+
+  /// Primary action to prepare a screenshot for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Screenshot'**
+  String get prepareScreenshot;
+
+  /// Primary action to prepare an audio clip for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Audio Clip'**
+  String get prepareAudioClip;
+
+  /// Primary action to prepare a reel for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Reel'**
+  String get prepareReel;
+
+  /// Status message while preparing a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing screenshot...'**
+  String get preparingScreenshot;
+
+  /// Title for the final share review panel
+  ///
+  /// In en, this message translates to:
+  /// **'Review Your Share'**
+  String get shareReviewTitle;
+
+  /// Review text for a prepared screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot is ready to share.'**
+  String get shareReviewScreenshot;
+
+  /// Review text for a prepared audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Audio clip is ready to share.'**
+  String get shareReviewAudio;
+
+  /// Review text for a prepared reel
+  ///
+  /// In en, this message translates to:
+  /// **'Reel is ready to share.'**
+  String get shareReviewReel;
+
+  /// Label showing the selected duration preset in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} sec max'**
+  String shareDurationPresetLabel(int seconds);
+
+  /// Button label to go back and edit the share
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _AppLocalizationsDelegate

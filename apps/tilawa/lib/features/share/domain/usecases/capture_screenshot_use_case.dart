@@ -15,6 +15,7 @@ class CaptureScreenshotUseCase {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
+    bool brandCapture = true,
   }) {
     return _repository.captureScreenshot(
       boundaryKey: boundaryKey,
@@ -22,6 +23,7 @@ class CaptureScreenshotUseCase {
       pageNumber: pageNumber,
       appName: appName,
       sharedViaLabel: sharedViaLabel,
+      brandCapture: brandCapture,
     );
   }
 }

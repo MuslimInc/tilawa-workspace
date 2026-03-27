@@ -35,14 +35,21 @@ class ShareRepositoryImpl implements ShareRepository {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
+    bool brandCapture = true,
   }) async {
-    final filePath = await _screenshotService.captureAndBrand(
-      boundaryKey: boundaryKey,
-      surahName: surahName,
-      pageNumber: pageNumber,
-      appName: appName,
-      sharedViaLabel: sharedViaLabel,
-    );
+    final filePath = brandCapture
+        ? await _screenshotService.captureAndBrand(
+            boundaryKey: boundaryKey,
+            surahName: surahName,
+            pageNumber: pageNumber,
+            appName: appName,
+            sharedViaLabel: sharedViaLabel,
+          )
+        : await _screenshotService.captureRaw(
+            boundaryKey: boundaryKey,
+            fileName:
+                'share_capture_${DateTime.now().millisecondsSinceEpoch}.png',
+          );
     return ShareContent.screenshot(
       filePath: filePath,
       surahName: surahName,
@@ -53,17 +60,22 @@ class ShareRepositoryImpl implements ShareRepository {
   @override
   Future<ShareContent> generateAudioClip({
     required AudioClipConfig config,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    final effectiveConfig = await _audioClipService.resolveConfigForDuration(
+      config: config,
+      maxDurationSeconds: maxDurationSeconds,
+    );
     final allDownloads = await _downloadQueryRepository.getAllDownloads();
     final localDownload = allDownloads.cast<dynamic>().firstWhere(
-      (d) => d.url == config.serverUrl,
+      (d) => d.url == effectiveConfig.serverUrl,
       orElse: () => null,
     );
 
     final filePath = await _audioClipService.generateAudioClip(
-      config,
+      effectiveConfig,
       localSurahPath: localDownload?.filePath,
       onProgress: onProgress,
       cancelToken: cancelToken,
@@ -71,9 +83,9 @@ class ShareRepositoryImpl implements ShareRepository {
     return ShareContent.audioClip(
       filePath: filePath,
       surahName: '', // Will be filled by the cubit with localized name
-      fromAyah: config.fromAyah,
-      toAyah: config.toAyah,
-      reciterName: config.reciterName,
+      fromAyah: effectiveConfig.fromAyah,
+      toAyah: effectiveConfig.toAyah,
+      reciterName: effectiveConfig.reciterName,
     );
   }
 
@@ -83,25 +95,28 @@ class ShareRepositoryImpl implements ShareRepository {
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    final effectiveConfig = await _audioClipService.resolveConfigForDuration(
+      config: config,
+      maxDurationSeconds: maxDurationSeconds,
+    );
+
     // 1. Generate audio clip first (usually faster/more prone to error)
     onProgress?.call(0.1, 'Generating audio clip...');
     final audioContent = await generateAudioClip(
-      config: config,
+      config: effectiveConfig,
       onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.2, msg),
       cancelToken: cancelToken,
     );
 
     // 2. Capture screenshot
     onProgress?.call(0.4, 'Capturing reader visuals...');
-    final screenshotPath = await _screenshotService.captureAndBrand(
+    final screenshotPath = await _screenshotService.captureRaw(
       boundaryKey: boundaryKey,
-      surahName: '', // surahName will be taken from metadata later
-      pageNumber: 0,
-      appName: appName,
-      sharedViaLabel: sharedViaLabel,
+      fileName: 'reel_capture_${DateTime.now().millisecondsSinceEpoch}.png',
     );
 
     // 3. Generate reel video
@@ -110,16 +125,16 @@ class ShareRepositoryImpl implements ShareRepository {
       screenshotPath: screenshotPath,
       audioPath: audioContent.filePath,
       surahName: '', // Metadata
-      reciterName: config.reciterName,
+      reciterName: effectiveConfig.reciterName,
       onProgress: (p, msg) => onProgress?.call(0.6 + p * 0.4, msg),
     );
 
     return ShareContent.reel(
       filePath: reelPath,
       surahName: '',
-      fromAyah: config.fromAyah,
-      toAyah: config.toAyah,
-      reciterName: config.reciterName,
+      fromAyah: effectiveConfig.fromAyah,
+      toAyah: effectiveConfig.toAyah,
+      reciterName: effectiveConfig.reciterName,
     );
   }
 

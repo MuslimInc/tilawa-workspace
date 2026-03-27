@@ -16,6 +16,7 @@ class GenerateReelUseCase {
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) {
@@ -24,6 +25,7 @@ class GenerateReelUseCase {
       config: config,
       appName: appName,
       sharedViaLabel: sharedViaLabel,
+      maxDurationSeconds: maxDurationSeconds,
       onProgress: onProgress,
       cancelToken: cancelToken,
     );

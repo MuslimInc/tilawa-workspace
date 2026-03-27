@@ -1936,5 +1936,126 @@
     "liveReelPreview": "Live Reel Preview",
     "@liveReelPreview": {
         "description": "Label above the live reel preview"
+    },
+    "createShare": "Create Share",
+    "@createShare": {
+        "description": "Title for the full-screen share composer"
+    },
+    "shareComposerSubtitle": "Build a polished Quran share with live preview and simple controls.",
+    "@shareComposerSubtitle": {
+        "description": "Subtitle for the full-screen share composer"
+    },
+    "shareReadyTitle": "Ready to Share",
+    "@shareReadyTitle": {
+        "description": "Title shown when the share asset is prepared"
+    },
+    "shareReviewSubtitle": "Review the final result, then share it when it feels right.",
+    "@shareReviewSubtitle": {
+        "description": "Subtitle shown in the review step"
+    },
+    "readyToShare": "Ready to Share",
+    "@readyToShare": {
+        "description": "Short label showing content is ready"
+    },
+    "shareMode": "Share Format",
+    "@shareMode": {
+        "description": "Section title for share mode selection"
+    },
+    "shareModeScreenshot": "Screenshot",
+    "@shareModeScreenshot": {
+        "description": "Screenshot share mode label"
+    },
+    "shareModeAudio": "Audio",
+    "@shareModeAudio": {
+        "description": "Audio share mode label"
+    },
+    "shareModeReel": "Reel",
+    "@shareModeReel": {
+        "description": "Reel share mode label"
+    },
+    "shareContentLayout": "Visual Layout",
+    "@shareContentLayout": {
+        "description": "Section title for screenshot layout selection"
+    },
+    "shareLayoutReaderPage": "Reader Page",
+    "@shareLayoutReaderPage": {
+        "description": "Option label for capturing the current reader page"
+    },
+    "shareLayoutPassageCard": "Passage Card",
+    "@shareLayoutPassageCard": {
+        "description": "Option label for generating a stylized passage card"
+    },
+    "shareReaderPageHint": "Reader Page uses the current Quran page exactly as shown in the reader.",
+    "@shareReaderPageHint": {
+        "description": "Hint shown when the reader page screenshot option is selected"
+    },
+    "shareDuration": "Clip Duration",
+    "@shareDuration": {
+        "description": "Section title for share duration presets"
+    },
+    "shareDurationAuto": "Full Range",
+    "@shareDurationAuto": {
+        "description": "Label for automatic clip duration"
+    },
+    "shareDurationShort": "30 sec",
+    "@shareDurationShort": {
+        "description": "Label for short clip duration"
+    },
+    "shareDurationMedium": "60 sec",
+    "@shareDurationMedium": {
+        "description": "Label for medium clip duration"
+    },
+    "shareDurationLong": "90 sec",
+    "@shareDurationLong": {
+        "description": "Label for long clip duration"
+    },
+    "shareDurationHint": "Duration presets keep the full-ayah flow when timing data is available.",
+    "@shareDurationHint": {
+        "description": "Hint below duration presets"
+    },
+    "prepareScreenshot": "Prepare Screenshot",
+    "@prepareScreenshot": {
+        "description": "Primary action to prepare a screenshot for review"
+    },
+    "prepareAudioClip": "Prepare Audio Clip",
+    "@prepareAudioClip": {
+        "description": "Primary action to prepare an audio clip for review"
+    },
+    "prepareReel": "Prepare Reel",
+    "@prepareReel": {
+        "description": "Primary action to prepare a reel for review"
+    },
+    "preparingScreenshot": "Preparing screenshot...",
+    "@preparingScreenshot": {
+        "description": "Status message while preparing a screenshot"
+    },
+    "shareReviewTitle": "Review Your Share",
+    "@shareReviewTitle": {
+        "description": "Title for the final share review panel"
+    },
+    "shareReviewScreenshot": "Screenshot is ready to share.",
+    "@shareReviewScreenshot": {
+        "description": "Review text for a prepared screenshot"
+    },
+    "shareReviewAudio": "Audio clip is ready to share.",
+    "@shareReviewAudio": {
+        "description": "Review text for a prepared audio clip"
+    },
+    "shareReviewReel": "Reel is ready to share.",
+    "@shareReviewReel": {
+        "description": "Review text for a prepared reel"
+    },
+    "shareDurationPresetLabel": "{seconds} sec max",
+    "@shareDurationPresetLabel": {
+        "description": "Label showing the selected duration preset in seconds",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Button label to go back and edit the share"
     }
 }

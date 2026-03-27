@@ -1419,4 +1419,97 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get liveReelPreview => 'معاينة مباشرة للريل';
+
+  @override
+  String get createShare => 'إنشاء مشاركة';
+
+  @override
+  String get shareComposerSubtitle =>
+      'أنشئ مشاركة قرآنية أنيقة مع معاينة مباشرة وتحكمات سهلة.';
+
+  @override
+  String get shareReadyTitle => 'جاهز للمشاركة';
+
+  @override
+  String get shareReviewSubtitle =>
+      'راجع النتيجة النهائية ثم شاركها عندما تراها مناسبة.';
+
+  @override
+  String get readyToShare => 'جاهز للمشاركة';
+
+  @override
+  String get shareMode => 'صيغة المشاركة';
+
+  @override
+  String get shareModeScreenshot => 'صورة';
+
+  @override
+  String get shareModeAudio => 'صوت';
+
+  @override
+  String get shareModeReel => 'ريل';
+
+  @override
+  String get shareContentLayout => 'نمط المحتوى';
+
+  @override
+  String get shareLayoutReaderPage => 'صفحة القارئ';
+
+  @override
+  String get shareLayoutPassageCard => 'بطاقة الآيات';
+
+  @override
+  String get shareReaderPageHint =>
+      'تستخدم صفحة القارئ الصفحة الحالية كما تظهر داخل القارئ تمامًا.';
+
+  @override
+  String get shareDuration => 'مدة المقطع';
+
+  @override
+  String get shareDurationAuto => 'النطاق الكامل';
+
+  @override
+  String get shareDurationShort => '30 ثانية';
+
+  @override
+  String get shareDurationMedium => '60 ثانية';
+
+  @override
+  String get shareDurationLong => '90 ثانية';
+
+  @override
+  String get shareDurationHint =>
+      'تحافظ خيارات المدة على اكتمال الآيات عندما تكون بيانات التوقيت متاحة.';
+
+  @override
+  String get prepareScreenshot => 'تجهيز الصورة';
+
+  @override
+  String get prepareAudioClip => 'تجهيز المقطع الصوتي';
+
+  @override
+  String get prepareReel => 'تجهيز الريل';
+
+  @override
+  String get preparingScreenshot => 'جارِ تجهيز الصورة...';
+
+  @override
+  String get shareReviewTitle => 'راجع المشاركة';
+
+  @override
+  String get shareReviewScreenshot => 'الصورة جاهزة للمشاركة.';
+
+  @override
+  String get shareReviewAudio => 'المقطع الصوتي جاهز للمشاركة.';
+
+  @override
+  String get shareReviewReel => 'الريل جاهز للمشاركة.';
+
+  @override
+  String shareDurationPresetLabel(int seconds) {
+    return 'حتى $seconds ثانية';
+  }
+
+  @override
+  String get edit => 'تعديل';
 }

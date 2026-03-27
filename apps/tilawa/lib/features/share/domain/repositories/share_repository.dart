@@ -13,11 +13,13 @@ abstract class ShareRepository {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
+    bool brandCapture = true,
   });
 
   /// Generates an audio clip for the given verse range and reciter.
   Future<ShareContent> generateAudioClip({
     required AudioClipConfig config,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   });
@@ -28,6 +30,7 @@ abstract class ShareRepository {
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   });

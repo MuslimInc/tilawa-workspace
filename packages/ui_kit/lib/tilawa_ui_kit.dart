@@ -4,6 +4,7 @@ library tilawa_ui_kit;
 export 'src/foundation/app_colors.dart';
 export 'src/foundation/app_theme.dart';
 export 'src/foundation/color_scheme_ext.dart';
+export 'src/foundation/design_tokens.dart';
 export 'src/foundation/text_theme_ext.dart';
 
 // Atoms
@@ -14,6 +15,9 @@ export 'src/atoms/view_reciter_button.dart';
 // Molecules
 export 'src/molecules/alphabet_scrollbar.dart';
 export 'src/molecules/language_switcher.dart';
+export 'src/molecules/metadata_chip.dart';
+export 'src/molecules/selection_pill.dart';
 
 // Organisms
 export 'src/organisms/bottom_player_ui.dart';
+export 'src/organisms/immersive_composer_scaffold.dart';

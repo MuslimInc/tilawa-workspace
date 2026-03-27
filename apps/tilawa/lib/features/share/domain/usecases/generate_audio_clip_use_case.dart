@@ -12,11 +12,13 @@ class GenerateAudioClipUseCase {
 
   Future<ShareContent> call({
     required AudioClipConfig config,
+    int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) {
     return _repository.generateAudioClip(
       config: config,
+      maxDurationSeconds: maxDurationSeconds,
       onProgress: onProgress,
       cancelToken: cancelToken,
     );

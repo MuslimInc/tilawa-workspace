@@ -8,6 +8,7 @@ import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 
 import '../../domain/entities/audio_clip_config.dart';
+import '../../domain/entities/share_limits.dart';
 import 'ayah_timing_service.dart';
 import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
@@ -22,7 +23,7 @@ class AudioClipService {
   final AyahTimingService _timingService;
 
   /// Maximum number of verses allowed per clip.
-  static const maxVerses = 30;
+  static const maxVerses = ShareLimits.maxVersesPerClip;
 
   /// Maximum concurrent downloads.
   static const _maxConcurrency = 5;
@@ -32,6 +33,55 @@ class AudioClipService {
 
   /// Max retries per verse.
   static const _maxRetries = 3;
+
+  /// Resolves the effective verse range for a duration-constrained clip.
+  Future<AudioClipConfig> resolveConfigForDuration({
+    required AudioClipConfig config,
+    int? maxDurationSeconds,
+  }) async {
+    if (maxDurationSeconds == null || maxDurationSeconds <= 0) {
+      return config;
+    }
+
+    final recitationId = ReciterAudioMapping.resolveRecitationId(
+      config.serverUrl,
+    );
+    if (recitationId == null) return config;
+
+    try {
+      final timings = await _timingService.getSurahTimings(
+        recitationId: recitationId,
+        surahNumber: config.surahNumber,
+      );
+      if (timings.isEmpty) return config;
+
+      final rangeTimings = timings
+          .where(
+            (timing) =>
+                timing.ayahNumber >= config.fromAyah &&
+                timing.ayahNumber <= config.toAyah,
+          )
+          .toList();
+      if (rangeTimings.isEmpty) return config;
+
+      final maxDurationMs = maxDurationSeconds * 1000;
+      final startTimeMs = rangeTimings.first.startTimeMs;
+      var resolvedToAyah = config.fromAyah;
+
+      for (final timing in rangeTimings) {
+        final elapsedMs = timing.endTimeMs - startTimeMs;
+        if (elapsedMs <= maxDurationMs) {
+          resolvedToAyah = timing.ayahNumber;
+        } else {
+          break;
+        }
+      }
+
+      return config.copyWith(toAyah: resolvedToAyah);
+    } catch (_) {
+      return config;
+    }
+  }
 
   /// Generates an audio clip for a range of ayahs.
   ///
@@ -65,7 +115,10 @@ class AudioClipService {
     );
     if (recitationId == null) {
       // Fallback to online verse download if we can't get timings
-      onProgress?.call(0.0, 'Reciter not supported for local trimming. Falling back to online download...');
+      onProgress?.call(
+        0.0,
+        'Reciter not supported for local trimming. Falling back to online download...',
+      );
       return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
@@ -76,16 +129,25 @@ class AudioClipService {
     );
 
     if (timings.isEmpty) {
-      onProgress?.call(0.0, 'No timings found. Falling back to online download...');
+      onProgress?.call(
+        0.0,
+        'No timings found. Falling back to online download...',
+      );
       return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
-    final rangeTimings = timings.where(
-      (t) => t.ayahNumber >= config.fromAyah && t.ayahNumber <= config.toAyah,
-    ).toList();
+    final rangeTimings = timings
+        .where(
+          (t) =>
+              t.ayahNumber >= config.fromAyah && t.ayahNumber <= config.toAyah,
+        )
+        .toList();
 
     if (rangeTimings.isEmpty) {
-      onProgress?.call(0.0, 'No timings found for the specified range. Falling back to online download...');
+      onProgress?.call(
+        0.0,
+        'No timings found for the specified range. Falling back to online download...',
+      );
       return _generateFromOnlineVerses(config: config, onProgress: onProgress);
     }
 
@@ -114,7 +176,7 @@ class AudioClipService {
   ) async {
     final s = config.surahNumber.toString().padLeft(3, '0');
     final title = 'Surah $s (${config.fromAyah}-${config.toAyah})';
-    
+
     // FFmpeg command with metadata
     final session = await FFmpegKit.execute(
       '-i "$inputPath" -ss $start -to $end -acodec copy '
@@ -147,9 +209,7 @@ class AudioClipService {
     CancelToken? cancelToken,
   }) async {
     if (config.verseCount > maxVerses) {
-      throw ArgumentError(
-        'Verse range exceeds maximum of $maxVerses verses.',
-      );
+      throw ArgumentError('Verse range exceeds maximum of $maxVerses verses.');
     }
 
     final versePaths = <String>[];

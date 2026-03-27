@@ -1936,5 +1936,126 @@
     "liveReelPreview": "معاينة مباشرة للريل",
     "@liveReelPreview": {
         "description": "Label above the live reel preview"
+    },
+    "createShare": "إنشاء مشاركة",
+    "@createShare": {
+        "description": "Title for the full-screen share composer"
+    },
+    "shareComposerSubtitle": "أنشئ مشاركة قرآنية أنيقة مع معاينة مباشرة وتحكمات سهلة.",
+    "@shareComposerSubtitle": {
+        "description": "Subtitle for the full-screen share composer"
+    },
+    "shareReadyTitle": "جاهز للمشاركة",
+    "@shareReadyTitle": {
+        "description": "Title shown when the share asset is prepared"
+    },
+    "shareReviewSubtitle": "راجع النتيجة النهائية ثم شاركها عندما تراها مناسبة.",
+    "@shareReviewSubtitle": {
+        "description": "Subtitle shown in the review step"
+    },
+    "readyToShare": "جاهز للمشاركة",
+    "@readyToShare": {
+        "description": "Short label showing content is ready"
+    },
+    "shareMode": "صيغة المشاركة",
+    "@shareMode": {
+        "description": "Section title for share mode selection"
+    },
+    "shareModeScreenshot": "صورة",
+    "@shareModeScreenshot": {
+        "description": "Screenshot share mode label"
+    },
+    "shareModeAudio": "صوت",
+    "@shareModeAudio": {
+        "description": "Audio share mode label"
+    },
+    "shareModeReel": "ريل",
+    "@shareModeReel": {
+        "description": "Reel share mode label"
+    },
+    "shareContentLayout": "نمط المحتوى",
+    "@shareContentLayout": {
+        "description": "Section title for screenshot layout selection"
+    },
+    "shareLayoutReaderPage": "صفحة القارئ",
+    "@shareLayoutReaderPage": {
+        "description": "Option label for capturing the current reader page"
+    },
+    "shareLayoutPassageCard": "بطاقة الآيات",
+    "@shareLayoutPassageCard": {
+        "description": "Option label for generating a stylized passage card"
+    },
+    "shareReaderPageHint": "تستخدم صفحة القارئ الصفحة الحالية كما تظهر داخل القارئ تمامًا.",
+    "@shareReaderPageHint": {
+        "description": "Hint shown when the reader page screenshot option is selected"
+    },
+    "shareDuration": "مدة المقطع",
+    "@shareDuration": {
+        "description": "Section title for share duration presets"
+    },
+    "shareDurationAuto": "النطاق الكامل",
+    "@shareDurationAuto": {
+        "description": "Label for automatic clip duration"
+    },
+    "shareDurationShort": "30 ثانية",
+    "@shareDurationShort": {
+        "description": "Label for short clip duration"
+    },
+    "shareDurationMedium": "60 ثانية",
+    "@shareDurationMedium": {
+        "description": "Label for medium clip duration"
+    },
+    "shareDurationLong": "90 ثانية",
+    "@shareDurationLong": {
+        "description": "Label for long clip duration"
+    },
+    "shareDurationHint": "تحافظ خيارات المدة على اكتمال الآيات عندما تكون بيانات التوقيت متاحة.",
+    "@shareDurationHint": {
+        "description": "Hint below duration presets"
+    },
+    "prepareScreenshot": "تجهيز الصورة",
+    "@prepareScreenshot": {
+        "description": "Primary action to prepare a screenshot for review"
+    },
+    "prepareAudioClip": "تجهيز المقطع الصوتي",
+    "@prepareAudioClip": {
+        "description": "Primary action to prepare an audio clip for review"
+    },
+    "prepareReel": "تجهيز الريل",
+    "@prepareReel": {
+        "description": "Primary action to prepare a reel for review"
+    },
+    "preparingScreenshot": "جارِ تجهيز الصورة...",
+    "@preparingScreenshot": {
+        "description": "Status message while preparing a screenshot"
+    },
+    "shareReviewTitle": "راجع المشاركة",
+    "@shareReviewTitle": {
+        "description": "Title for the final share review panel"
+    },
+    "shareReviewScreenshot": "الصورة جاهزة للمشاركة.",
+    "@shareReviewScreenshot": {
+        "description": "Review text for a prepared screenshot"
+    },
+    "shareReviewAudio": "المقطع الصوتي جاهز للمشاركة.",
+    "@shareReviewAudio": {
+        "description": "Review text for a prepared audio clip"
+    },
+    "shareReviewReel": "الريل جاهز للمشاركة.",
+    "@shareReviewReel": {
+        "description": "Review text for a prepared reel"
+    },
+    "shareDurationPresetLabel": "حتى {seconds} ثانية",
+    "@shareDurationPresetLabel": {
+        "description": "Label showing the selected duration preset in seconds",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "edit": "تعديل",
+    "@edit": {
+        "description": "Button label to go back and edit the share"
     }
 }
