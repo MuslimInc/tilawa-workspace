@@ -2852,6 +2852,18 @@ abstract class AppLocalizations {
   /// **'Trimming audio...'**
   String get trimmingAudio;
 
+  /// Error shown when a generated audio preview file is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Generated audio file was not found.'**
+  String get generatedAudioFileNotFound;
+
+  /// Error shown when a generated reel preview file is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Generated reel file was not found.'**
+  String get generatedReelFileNotFound;
+
   /// Status message while downloading verse-by-verse audio
   ///
   /// In en, this message translates to:

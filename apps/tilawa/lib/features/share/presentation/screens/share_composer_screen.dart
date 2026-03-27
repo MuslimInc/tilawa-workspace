@@ -5,6 +5,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_audio/just_audio.dart' as ja;
 import 'package:quran/quran.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
@@ -390,8 +391,14 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   }
 
   Widget _buildReviewPreview(ShareContent content) {
+    final reviewKey = switch (content) {
+      ShareScreenshot(:final filePath) => ValueKey('review_image_$filePath'),
+      ShareAudioClip(:final filePath) => ValueKey('review_audio_$filePath'),
+      ShareReel(:final filePath) => ValueKey('review_reel_$filePath'),
+    };
+
     return Column(
-      key: ValueKey('review_${content.runtimeType}'),
+      key: reviewKey,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Wrap(
@@ -424,22 +431,28 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                 child: _GeneratedImagePreview(filePath: filePath),
               ),
               ShareAudioClip(
+                :final filePath,
                 :final fromAyah,
                 :final toAyah,
                 :final reciterName,
               ) =>
-                _PreviewFrame(
+                _MediaPreviewFrame(
                   aspectRatio: 4 / 5,
-                  child: _PreparedAudioReview(
+                  child: _GeneratedAudioPreview(
+                    key: ValueKey('generated_audio_$filePath'),
+                    filePath: filePath,
                     surahNumber: widget.surahNumber,
                     fromAyah: fromAyah,
                     toAyah: toAyah,
                     reciterName: reciterName,
                   ),
                 ),
-              ShareReel(:final filePath) => _PreviewFrame(
+              ShareReel(:final filePath) => _MediaPreviewFrame(
                 aspectRatio: 9 / 16,
-                child: _GeneratedReelPreview(filePath: filePath),
+                child: _GeneratedReelPreview(
+                  key: ValueKey('generated_reel_$filePath'),
+                  filePath: filePath,
+                ),
               ),
             },
           ),
@@ -937,6 +950,42 @@ class _PreviewFrame extends StatelessWidget {
   }
 }
 
+class _MediaPreviewFrame extends StatelessWidget {
+  const _MediaPreviewFrame({required this.aspectRatio, required this.child});
+
+  final double aspectRatio;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 420, maxHeight: 760),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.16),
+            blurRadius: 28,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          child: AspectRatio(aspectRatio: aspectRatio, child: child),
+        ),
+      ),
+    );
+  }
+}
+
 class _ReaderPagePreview extends StatelessWidget {
   const _ReaderPagePreview({
     required this.bytes,
@@ -1094,63 +1143,282 @@ class _GeneratedImagePreview extends StatelessWidget {
   }
 }
 
-class _PreparedAudioReview extends StatelessWidget {
-  const _PreparedAudioReview({
+class _GeneratedAudioPreview extends StatefulWidget {
+  const _GeneratedAudioPreview({
+    super.key,
+    required this.filePath,
     required this.surahNumber,
     required this.fromAyah,
     required this.toAyah,
     required this.reciterName,
   });
 
+  final String filePath;
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
   final String reciterName;
 
   @override
+  State<_GeneratedAudioPreview> createState() => _GeneratedAudioPreviewState();
+}
+
+class _GeneratedAudioPreviewState extends State<_GeneratedAudioPreview> {
+  late final ja.AudioPlayer _audioPlayer;
+  String? _errorMessage;
+  bool _isInitializing = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = ja.AudioPlayer();
+    _initializePlayer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GeneratedAudioPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.filePath != widget.filePath) {
+      _initializePlayer();
+    }
+  }
+
+  Future<void> _initializePlayer() async {
+    setState(() {
+      _isInitializing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      if (!File(widget.filePath).existsSync()) {
+        throw StateError(context.l10n.generatedAudioFileNotFound);
+      }
+      await _audioPlayer.stop();
+      await _audioPlayer.setFilePath(widget.filePath);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = error.toString();
+        _isInitializing = false;
+      });
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isInitializing = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _togglePlayback() async {
+    final playerState = _audioPlayer.playerState;
+    if (playerState.processingState == ja.ProcessingState.completed) {
+      await _audioPlayer.seek(Duration.zero);
+      await _audioPlayer.play();
+      return;
+    }
+
+    if (playerState.playing) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Stack(
+      fit: StackFit.expand,
       children: [
-        SharePosterRenderer(
-          surahNumber: surahNumber,
-          fromAyah: fromAyah,
-          toAyah: toAyah,
-          reciterName: reciterName,
-        ),
-        Positioned(
-          left: 32,
-          right: 32,
-          bottom: 28,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: const Color(0xFF0B342E).withValues(alpha: 0.86),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.audio_file_rounded, color: Color(0xFFE1C17B)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    context.l10n.shareReviewAudio,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
+        Positioned.fill(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: 1080,
+              height: 1350,
+              child: SharePosterRenderer(
+                surahNumber: widget.surahNumber,
+                fromAyah: widget.fromAyah,
+                toAyah: widget.toAyah,
+                reciterName: widget.reciterName,
+              ),
             ),
           ),
         ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.04),
+                  Colors.black.withValues(alpha: 0.12),
+                  Colors.black.withValues(alpha: 0.58),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (_isInitializing)
+          const Center(child: CircularProgressIndicator())
+        else if (_errorMessage != null)
+          ColoredBox(
+            color: Colors.black.withValues(alpha: 0.42),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          )
+        else
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                color: const Color(0xFF0B342E).withValues(alpha: 0.92),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              ),
+              child: StreamBuilder<ja.PlayerState>(
+                stream: _audioPlayer.playerStateStream,
+                initialData: _audioPlayer.playerState,
+                builder: (context, playerSnapshot) {
+                  final playerState =
+                      playerSnapshot.data ?? _audioPlayer.playerState;
+                  final isPlaying = playerState.playing;
+                  final isCompleted =
+                      playerState.processingState ==
+                      ja.ProcessingState.completed;
+
+                  return StreamBuilder<Duration?>(
+                    stream: _audioPlayer.durationStream,
+                    initialData: _audioPlayer.duration,
+                    builder: (context, durationSnapshot) {
+                      final duration = durationSnapshot.data ?? Duration.zero;
+
+                      return StreamBuilder<Duration>(
+                        stream: _audioPlayer.positionStream,
+                        initialData: _audioPlayer.position,
+                        builder: (context, positionSnapshot) {
+                          final position =
+                              positionSnapshot.data ?? Duration.zero;
+
+                          return StreamBuilder<Duration>(
+                            stream: _audioPlayer.bufferedPositionStream,
+                            initialData: _audioPlayer.bufferedPosition,
+                            builder: (context, bufferedSnapshot) {
+                              final bufferedPosition =
+                                  bufferedSnapshot.data ?? Duration.zero;
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(
+                                            0xFFE1C17B,
+                                          ).withValues(alpha: 0.18),
+                                        ),
+                                        child: IconButton(
+                                          onPressed: _togglePlayback,
+                                          icon: Icon(
+                                            isCompleted
+                                                ? Icons.replay_rounded
+                                                : isPlaying
+                                                ? Icons.pause_rounded
+                                                : Icons.play_arrow_rounded,
+                                            color: const Color(0xFFE1C17B),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              context.l10n.shareReviewAudio,
+                                              style: theme.textTheme.titleSmall
+                                                  ?.copyWith(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${_formatPreviewDuration(position)} / ${_formatPreviewDuration(duration)}',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                          alpha: 0.74,
+                                                        ),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SeekBar(
+                                    duration: duration,
+                                    position: position,
+                                    bufferedPosition: bufferedPosition,
+                                    onChangeEnd: _audioPlayer.seek,
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
       ],
     );
   }
 }
 
+String _formatPreviewDuration(Duration duration) {
+  final totalSeconds = duration.inSeconds;
+  final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+  final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+  return '$minutes:$seconds';
+}
+
 class _GeneratedReelPreview extends StatefulWidget {
-  const _GeneratedReelPreview({required this.filePath});
+  const _GeneratedReelPreview({super.key, required this.filePath});
 
   final String filePath;
 
@@ -1159,40 +1427,116 @@ class _GeneratedReelPreview extends StatefulWidget {
 }
 
 class _GeneratedReelPreviewState extends State<_GeneratedReelPreview> {
-  late final VideoPlayerController _videoPlayerController;
+  VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
     _initialize();
   }
 
+  @override
+  void didUpdateWidget(covariant _GeneratedReelPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.filePath != widget.filePath) {
+      _initialize();
+    }
+  }
+
   Future<void> _initialize() async {
-    await _videoPlayerController.initialize();
+    await _disposeControllers();
+
+    if (!File(widget.filePath).existsSync()) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = context.l10n.generatedReelFileNotFound;
+      });
+      return;
+    }
+
+    final controller = VideoPlayerController.file(File(widget.filePath));
+
+    try {
+      await controller.initialize();
+      await controller.setLooping(false);
+      await controller.setVolume(1);
+    } catch (error) {
+      await controller.dispose();
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = error.toString();
+      });
+      return;
+    }
+
+    _videoPlayerController = controller;
     _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      aspectRatio: 9 / 16,
+      videoPlayerController: controller,
+      aspectRatio:
+          controller.value.isInitialized && controller.value.aspectRatio > 0
+          ? controller.value.aspectRatio
+          : 9 / 16,
       autoPlay: true,
       looping: false,
       showControls: true,
+      allowMuting: true,
       placeholder: const Center(child: CircularProgressIndicator()),
+      errorBuilder: (context, errorMessage) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            errorMessage,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ),
     );
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _errorMessage = null;
+      });
     }
+  }
+
+  Future<void> _disposeControllers() async {
+    final chewieController = _chewieController;
+    final videoPlayerController = _videoPlayerController;
+
+    _chewieController = null;
+    _videoPlayerController = null;
+
+    await chewieController?.pause();
+    chewieController?.dispose();
+    await videoPlayerController?.dispose();
   }
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
-    _chewieController?.dispose();
+    _disposeControllers();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_errorMessage != null) {
+      return ColoredBox(
+        color: Colors.black12,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ),
+      );
+    }
+
     if (_chewieController == null) {
       return const ColoredBox(
         color: Colors.black12,

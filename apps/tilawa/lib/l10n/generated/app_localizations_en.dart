@@ -1537,6 +1537,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trimmingAudio => 'Trimming audio...';
 
   @override
+  String get generatedAudioFileNotFound =>
+      'Generated audio file was not found.';
+
+  @override
+  String get generatedReelFileNotFound => 'Generated reel file was not found.';
+
+  @override
   String downloadingVerseProgress(int currentVerse, int totalVerses) {
     return 'Downloading verse $currentVerse of $totalVerses...';
   }

@@ -2073,6 +2073,14 @@
     "@trimmingAudio": {
         "description": "Status message while trimming audio"
     },
+    "generatedAudioFileNotFound": "Generated audio file was not found.",
+    "@generatedAudioFileNotFound": {
+        "description": "Error shown when a generated audio preview file is missing"
+    },
+    "generatedReelFileNotFound": "Generated reel file was not found.",
+    "@generatedReelFileNotFound": {
+        "description": "Error shown when a generated reel preview file is missing"
+    },
     "downloadingVerseProgress": "Downloading verse {currentVerse} of {totalVerses}...",
     "@downloadingVerseProgress": {
         "description": "Status message while downloading verse-by-verse audio",

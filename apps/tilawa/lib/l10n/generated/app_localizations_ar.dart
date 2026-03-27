@@ -1530,6 +1530,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trimmingAudio => 'جارِ قص الصوت...';
 
   @override
+  String get generatedAudioFileNotFound =>
+      'لم يتم العثور على ملف الصوت الذي تم إنشاؤه.';
+
+  @override
+  String get generatedReelFileNotFound =>
+      'لم يتم العثور على ملف الريل الذي تم إنشاؤه.';
+
+  @override
   String downloadingVerseProgress(int currentVerse, int totalVerses) {
     return 'جارِ تنزيل الآية $currentVerse من $totalVerses...';
   }
