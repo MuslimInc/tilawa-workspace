@@ -356,18 +356,26 @@ class _PageContentState extends State<PageContent>
               widget.pageNumber,
               lineIndex + 1,
             );
-            return SurahHeaderBanner(
+            final Widget headerWidget = SurahHeaderBanner(
               surahNumber: surahNum,
               lineHeight: lineHeight,
               headerImageFilter: widget.headerImageFilter,
               headerTextColor: widget.headerTextColor,
               headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
             );
+
+            if (widget.pageNumber == 1 || widget.pageNumber == 2) {
+              return Padding(
+                padding: EdgeInsets.only(top: lineHeight * 1.25),
+                child: headerWidget,
+              );
+            }
+            return headerWidget;
           }
 
           if (isBismillah) {
             final String pageStr = widget.pageNumber.toString().padLeft(3, '0');
-            return Padding(
+            final Widget bismillahWidget = Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: metrics.bismillahHorizontalPadding,
               ),
@@ -378,6 +386,14 @@ class _PageContentState extends State<PageContent>
                 fontFamily: 'QCF_P$pageStr',
               ),
             );
+
+            if (widget.pageNumber == 2) {
+              return Padding(
+                padding: EdgeInsets.only(top: lineHeight * 1.25),
+                child: bismillahWidget,
+              );
+            }
+            return bismillahWidget;
           }
 
           final List<InlineSpan> spans = _getSpansForLine(
@@ -403,7 +419,18 @@ class _PageContentState extends State<PageContent>
             text: TextSpan(children: spans),
           );
 
-          return QuranLine(richText: richText);
+          final Widget lineWidget = QuranLine(richText: richText);
+
+          // For Page 1 (Fatiha), Ayah 1 (Bismillah) is at lineIndex 1.
+          // Add extra space below it to separate it from the remaining verses.
+          if (widget.pageNumber == 1 && lineIndex == 1) {
+            return Padding(
+              padding: EdgeInsets.only(top: lineHeight * 1.25),
+              child: lineWidget,
+            );
+          }
+
+          return lineWidget;
         }).toList();
 
         final lines = Column(

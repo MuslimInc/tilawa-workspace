@@ -2,6 +2,38 @@ import 'package:flutter/material.dart';
 
 import '../helpers/app_logger.dart';
 
+class BismillahStyleConfig {
+  const BismillahStyleConfig({
+    required this.text,
+    required this.fontFamily,
+    this.package,
+    this.fontScale = 1.0,
+  });
+  final String text;
+  final String fontFamily;
+  final String? package;
+  final double fontScale;
+
+  /// Factory defining the universal rules for rendering Bismillah across all Quran pages.
+  static BismillahStyleConfig forPage(int pageNumber) {
+    if (pageNumber == 1 || pageNumber == 2) {
+      // Pages 1 and 2 mirror each other using the native Page 1 word-by-word characters
+      return const BismillahStyleConfig(
+        text: '\uFC41\u200A\uFC42\uFC43\uFC44',
+        fontFamily: 'QCF_P001',
+      );
+    } else {
+      // Pages 3+ utilize the specialized calligraphic block sequence from the QCF_BSML font
+      return const BismillahStyleConfig(
+        text: '齃𧻓𥳐龎',
+        fontFamily: 'QCF_BSML',
+        package: 'quran',
+        fontScale: BismillahWidget._calligraphyFontScale,
+      );
+    }
+  }
+}
+
 class BismillahWidget extends StatelessWidget {
   const BismillahWidget({
     super.key,
@@ -23,39 +55,18 @@ class BismillahWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final renderStartTime = DateTime.now();
 
-    // Strategy for Bismillah rendering:
-    // 1. Page 1: Bismillah is part of the Ayahs (Ayah 1),
-    //    so it uses the page-specific font with the 0xFC41 range.
-    // 2. Other Pages: The page-specific font typically has a special
-    //    calligraphic Bismillah glyph at 0x0008 (User verified).
-    //    Fallback to QCF_BSML if not using page font.
-
-    final String bismillahText;
-    final String bismillahFont;
-    final double effectiveFontSize;
-
-    if (pageNumber == 1) {
-      bismillahText = '\uFC41\uFC42\uFC43\uFC44';
-      bismillahFont = fontFamily ?? 'QCF_P001';
-      effectiveFontSize = fontSize;
-    } else {
-      // For Page 2+, 0xFC41 is the first word of the first Ayah (e.g. Alif-Lam-Mim).
-      // The actual Bismillah is at 0x0008 in the page font.
-      // bismillahText = '\u0008';
-      bismillahText = '齃𧻓𥳐龎';
-
-      bismillahFont = 'QCF_BSML';
-      effectiveFontSize = fontSize * _calligraphyFontScale;
-    }
+    final BismillahStyleConfig config = BismillahStyleConfig.forPage(
+      pageNumber,
+    );
 
     final result = Text(
-      bismillahText,
+      config.text,
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontFamily: bismillahFont,
-        package: 'quran',
-        fontSize: effectiveFontSize,
+        fontFamily: config.fontFamily,
+        package: config.package,
+        fontSize: fontSize * config.fontScale,
         color: color,
         height: _lineHeight,
       ),
