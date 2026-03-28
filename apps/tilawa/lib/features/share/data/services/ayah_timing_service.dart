@@ -61,7 +61,7 @@ class AyahTimingService {
 
   List<AyahTiming> _parseTimings(dynamic data, int surahNumber) {
     if (data is! Map<String, dynamic>) return [];
-    
+
     final audioFiles = data['audio_files'] as List<dynamic>?;
     if (audioFiles == null) return [];
 
@@ -69,13 +69,13 @@ class AyahTimingService {
       final file = fileMap as Map<String, dynamic>;
       final verseKey = file['verse_key'] as String;
       final ayahNumber = int.parse(verseKey.split(':')[1]);
-      
+
       // Quran.com API returns segments: [[word_index, start_ms, end_ms, ...]]
       final segments = file['segments'] as List<dynamic>?;
-      
+
       int start = 0;
       int end = 0;
-      
+
       if (segments != null && segments.isNotEmpty) {
         start = segments.first[1] as int;
         end = segments.last[2] as int;

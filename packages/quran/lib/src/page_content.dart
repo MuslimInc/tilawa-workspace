@@ -75,6 +75,7 @@ class _PageContentState extends State<PageContent>
       StandardQuranLayoutStrategy();
 
   bool _isLoading = true;
+  final ScrollController _scrollController = ScrollController();
 
   /// Caches the rendered page as a raster image after first paint so that
   /// subsequent frames during swipe animation composite a cached bitmap
@@ -150,6 +151,7 @@ class _PageContentState extends State<PageContent>
     widget.currentPageListenable?.removeListener(_handlePageChange);
     logger.d('[PageContent] dispose for page ${widget.pageNumber}');
     WidgetsBinding.instance.removeObserver(this);
+    _scrollController.dispose();
     _snapshotController.dispose();
     super.dispose();
   }
@@ -313,10 +315,6 @@ class _PageContentState extends State<PageContent>
         );
         final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
-        // Pages 1-2 use the same 15-line grid height as all
-        // other pages in portrait.
-        final bool isSpecialPage =
-            widget.pageNumber == 1 || widget.pageNumber == 2;
         final double lineHeight = metrics.fontSize * metrics.fontHeight;
 
         final baseStyle = TextStyle(
@@ -409,11 +407,7 @@ class _PageContentState extends State<PageContent>
         }).toList();
 
         final lines = Column(
-          mainAxisAlignment: metrics.isScrollable
-              ? MainAxisAlignment.start
-              : isSpecialPage
-              ? MainAxisAlignment.center
-              : MainAxisAlignment.start,
+          mainAxisAlignment: .center,
           spacing: metrics.lineSpacing,
           children: lineWidgets,
         );
@@ -421,26 +415,34 @@ class _PageContentState extends State<PageContent>
         final paddedLines = Padding(padding: metrics.padding, child: lines);
 
         if (metrics.isScrollable) {
-          final Widget scrollChild = pageMeta.surahNames.isNotEmpty
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SafeArea(
-                      bottom: false,
-                      child: PageMetadataStrip(
-                        surahNames: pageMeta.surahNames,
-                        juzLabel: pageMeta.juzLabel(widget.juzLabel),
-                        uiTextDirection: widget.uiTextDirection,
-                        textColor: metaTextColor,
-                      ),
+          final Widget scrollChild;
+          if (pageMeta.surahNames.isNotEmpty) {
+            scrollChild = Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SafeArea(
+                    bottom: false,
+                    child: PageMetadataStrip(
+                      surahNames: pageMeta.surahNames,
+                      juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                      uiTextDirection: widget.uiTextDirection,
+                      textColor: metaTextColor,
                     ),
-                    paddedLines,
-                  ],
-                )
-              : paddedLines;
+                  ),
+                  paddedLines,
+                ],
+              ),
+            );
+          } else {
+            scrollChild = paddedLines;
+          }
           return Scrollbar(
+            controller: _scrollController,
             thumbVisibility: true,
             child: SingleChildScrollView(
+              controller: _scrollController,
+              primary: false,
               physics: const BouncingScrollPhysics(),
               child: scrollChild,
             ),
@@ -509,7 +511,9 @@ class _PageContentState extends State<PageContent>
     // before its asset image has loaded.
     final Widget result = isPortrait
         ? SnapshotWidget(
-            key: ValueKey<Orientation>(_lastOrientation ?? Orientation.portrait),
+            key: ValueKey<Orientation>(
+              _lastOrientation ?? Orientation.portrait,
+            ),
             autoresize: true,
             controller: _snapshotController,
             child: pageChrome,

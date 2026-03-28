@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../helpers/app_logger.dart';
-import '../services/quran_data_service.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
 ///
@@ -45,11 +44,10 @@ class QuranLayoutMetrics {
 /// - **Portrait**: Fits exactly 15 lines into the available vertical space (minus safe areas).
 /// - **Landscape**: Uses a compact scrollable layout closer to printed mushaf apps.
 class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
-  // Compact line height for landscape scrolling pages.
-  static const double _landscapeFontHeight = 1.75;
+  static const double _fontHeight = 1.75;
   // Width divisor to determine base font size relative to screen width.
   // Higher values produce a smaller font to prevent horizontal wrapping.
-  static const double _widthDivisor = 15.55;
+  static const double _widthDivisor = 16.0;
   // Explicit line inset measured from the Ayah reference on a 720px capture.
   static const double _verseHorizontalPaddingRatio = 25 / 720;
   // Explicit bismillah inset measured from the Ayah reference on a 720px capture.
@@ -57,8 +55,6 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Small top padding to prevent the first line's diacritical marks from
   // being clipped by the viewport boundary.
   static const double _topPadding = 4.0;
-  // Bismillah targeted line height (responsive multiplier)
-  static const double _bismillahTargetHeight = 2.30;
 
   @override
   QuranLayoutMetrics calculateMetrics(
@@ -84,14 +80,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         bismillahHorizontalPadding,
       );
     } else {
-      // Analyze page to count special lines for precise vertical distribution.
-      final Map<String, int> counts = QuranDataService.instance
-          .getSpecialLineCounts(pageNumber);
-      metrics = _calculatePortraitMetrics(
-        constraints,
-        counts['headers'] ?? 0,
-        counts['bismillahs'] ?? 0,
-      );
+      metrics = _calculatePortraitMetrics(constraints);
     }
 
     final Duration duration = DateTime.now().difference(startTime);
@@ -111,7 +100,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   ) {
     return QuranLayoutMetrics(
       fontSize: fontSize,
-      fontHeight: _landscapeFontHeight,
+      fontHeight: _fontHeight,
       isScrollable: true,
       lineSpacing: (fontSize * 0.108).clamp(0.8, 3.4),
       verseHorizontalPadding: verseHorizontalPadding,
@@ -119,15 +108,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     );
   }
 
-  QuranLayoutMetrics _calculatePortraitMetrics(
-    BoxConstraints constraints,
-    int headerCount,
-    int bismillahCount,
-  ) {
-    // 15 total lines per page in Mushaf standard.
-    const totalLines = 15;
-    final int standardLines = totalLines - headerCount - bismillahCount;
-
+  QuranLayoutMetrics _calculatePortraitMetrics(BoxConstraints constraints) {
     final double verseHorizontalPadding =
         constraints.maxWidth * _verseHorizontalPaddingRatio;
     final double bismillahHorizontalPadding =
@@ -135,35 +116,11 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     final double availableWidth =
         constraints.maxWidth - (verseHorizontalPadding * 2);
     final double fontSize = availableWidth / _widthDivisor;
-
-    // Reserve a small top margin.
-    final double availableHeight = constraints.maxHeight - _topPadding;
-
-    // Use adaptive spacing based on font size (approx 20% of font size).
     final double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);
-    final double totalSpacing = (totalLines - 1) * lineSpacing;
-
-    // Equation:
-    // (standardLines + headerCount) * (fontHeight * fontSize) + bismillahCount * (_bismillahTargetHeight * fontSize) + totalSpacing = availableHeight
-
-    final double bismillahTotalHeight =
-        bismillahCount * _bismillahTargetHeight * fontSize;
-    final double remainingHeightForLines =
-        (availableHeight - totalSpacing - bismillahTotalHeight).clamp(
-          0.0,
-          double.infinity,
-        );
-
-    // Divisor is (standardLines + headerCount) + some safety margin (e.g. 1.0) for vertical padding
-    final double lineFactor = (standardLines + headerCount + 0.75).clamp(
-      1.0,
-      16.0,
-    );
-    final double fontHeight = (remainingHeightForLines / lineFactor) / fontSize;
 
     return QuranLayoutMetrics(
       fontSize: fontSize,
-      fontHeight: fontHeight,
+      fontHeight: _fontHeight,
       isScrollable: false,
       padding: const EdgeInsets.only(top: _topPadding),
       lineSpacing: lineSpacing,

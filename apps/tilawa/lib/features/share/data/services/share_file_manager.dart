@@ -100,10 +100,7 @@ class ShareFileManager {
       final cacheDir = await getVerseCacheDirectory();
       if (!cacheDir.existsSync()) return;
 
-      final files = cacheDir
-          .listSync()
-          .whereType<File>()
-          .toList()
+      final files = cacheDir.listSync().whereType<File>().toList()
         ..sort(
           (a, b) => a.statSync().accessed.compareTo(b.statSync().accessed),
         );

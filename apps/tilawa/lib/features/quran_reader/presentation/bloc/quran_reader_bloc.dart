@@ -301,19 +301,20 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     final result = await _getLastReadPositionUseCase.call();
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: QuranReaderStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) {
+        emit(
+          state.copyWith(
+            status: QuranReaderStatus.error,
+            errorMessage: failure.toString(),
+          ),
+        );
+      },
       (position) {
         if (position.page != null) {
           add(QuranReaderEvent.loadPage(position.page!));
         } else if (position.surahNumber != null) {
           add(QuranReaderEvent.loadSurah(position.surahNumber!));
         } else {
-          // If no last read position, default to first surah
           add(const QuranReaderEvent.loadSurah(1));
         }
       },

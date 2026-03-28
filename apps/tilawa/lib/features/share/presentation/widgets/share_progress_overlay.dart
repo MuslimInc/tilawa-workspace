@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 /// A translucent overlay shown during screenshot capture.
 class ShareProgressOverlay extends StatelessWidget {
-  const ShareProgressOverlay({
-    super.key,
-    required this.message,
-  });
+  const ShareProgressOverlay({super.key, required this.message});
 
   final String message;
 

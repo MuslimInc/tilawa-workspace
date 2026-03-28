@@ -82,9 +82,7 @@ class AppProviders {
     ),
 
     // Share provider — ephemeral cubit for screenshot & audio clip sharing
-    BlocProvider<ShareCubit>(
-      create: (context) => getIt<ShareCubit>(),
-    ),
+    BlocProvider<ShareCubit>(create: (context) => getIt<ShareCubit>()),
   ];
 
   static List<RepositoryProvider> get repositories => [
