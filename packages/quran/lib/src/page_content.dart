@@ -227,8 +227,41 @@ class _PageContentState extends State<PageContent>
 
   /// Returns words for [pageNumber] grouped into 15 lines (O(1) lookup).
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
-    return QuranDataService.instance.getPageData(pageNumber) ??
+    final List<List<Map<String, dynamic>>> rawLines =
+        QuranDataService.instance.getPageData(pageNumber) ??
         List.generate(15, (_) => []);
+
+    // The backend JSON packs Fatiha and Baqarah tightly against the top of the grid
+    // leaving ~7 empty lines at the very bottom. To match the perfectly centered
+    // Ayah app Mushaf visual spacing (2 blank lines above, 2 blank lines between
+    // header and Bismillah, and 3 below), we intercept and dynamically remap the arrays.
+    if (pageNumber == 1 || pageNumber == 2) {
+      // Create a fresh 15-line empty grid
+      final List<List<Map<String, dynamic>>> centeredLines = List.generate(
+        15,
+        (_) => [],
+      );
+
+      // Page 1: Header takes index 0, Bismillah takes 1, verses take 2 through 7.
+      // Page 2: Header takes 0, Bismillah takes 1, verses take 2 through 7.
+      // We will map the content to start lower down the grid.
+      // Shift Header to line 3 (index 2).
+      // Shift Bismillah and Verses to start at line 6 (index 5).
+      centeredLines[0] = [];
+      centeredLines[1] = [];
+      centeredLines[2] =
+          rawLines[0]; // Header index (the logic in _calculateSpecialLines targets this)
+      centeredLines[3] = [];
+      centeredLines[4] = [];
+
+      // Map the 7 lines of actual content (Bismillah + Verses) down
+      for (var i = 0; i < 7; i++) {
+        centeredLines[5 + i] = rawLines[1 + i];
+      }
+      return centeredLines;
+    }
+
+    return rawLines;
   }
 
   /// Returns the [InlineSpan]s to render for [lineIndex] from pre-fetched [lines].
@@ -365,34 +398,20 @@ class _PageContentState extends State<PageContent>
             );
 
             if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-              return Padding(
-                padding: EdgeInsets.only(top: lineHeight * 1.25),
-                child: headerWidget,
-              );
+              return headerWidget;
             }
             return headerWidget;
           }
 
           if (isBismillah) {
             final String pageStr = widget.pageNumber.toString().padLeft(3, '0');
-            final Widget bismillahWidget = Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: metrics.bismillahHorizontalPadding,
-              ),
-              child: BismillahWidget(
-                fontSize: metrics.fontSize,
-                pageNumber: widget.pageNumber,
-                color: widget.textColor,
-                fontFamily: 'QCF_P$pageStr',
-              ),
+            final Widget bismillahWidget = BismillahWidget(
+              fontSize: metrics.fontSize,
+              pageNumber: widget.pageNumber,
+              color: widget.textColor,
+              fontFamily: 'QCF_P$pageStr',
             );
 
-            if (widget.pageNumber == 2) {
-              return Padding(
-                padding: EdgeInsets.only(top: lineHeight * 1.25),
-                child: bismillahWidget,
-              );
-            }
             return bismillahWidget;
           }
 
@@ -409,7 +428,9 @@ class _PageContentState extends State<PageContent>
           }
 
           if (spans.isEmpty) {
-            return const SizedBox();
+            // Render an empty space using the native font family so empty lines
+            // share the exact baseline and physical line height as verses.
+            spans.add(TextSpan(text: '\u0020', style: baseStyle));
           }
 
           final richText = RichText(
@@ -424,17 +445,13 @@ class _PageContentState extends State<PageContent>
           // For Page 1 (Fatiha), Ayah 1 (Bismillah) is at lineIndex 1.
           // Add extra space below it to separate it from the remaining verses.
           if (widget.pageNumber == 1 && lineIndex == 1) {
-            return Padding(
-              padding: EdgeInsets.only(top: lineHeight * 1.25),
-              child: lineWidget,
-            );
+            return lineWidget;
           }
 
           return lineWidget;
         }).toList();
 
         final lines = Column(
-          mainAxisAlignment: .center,
           spacing: metrics.lineSpacing,
           children: lineWidgets,
         );
@@ -448,14 +465,11 @@ class _PageContentState extends State<PageContent>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SafeArea(
-                    bottom: false,
-                    child: PageMetadataStrip(
-                      surahNames: pageMeta.surahNames,
-                      juzLabel: pageMeta.juzLabel(widget.juzLabel),
-                      uiTextDirection: widget.uiTextDirection,
-                      textColor: metaTextColor,
-                    ),
+                  PageMetadataStrip(
+                    surahNames: pageMeta.surahNames,
+                    juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                    uiTextDirection: widget.uiTextDirection,
+                    textColor: metaTextColor,
                   ),
                   paddedLines,
                 ],
@@ -489,34 +503,31 @@ class _PageContentState extends State<PageContent>
 
     final Widget pageChrome;
     if (isPortrait) {
-      pageChrome = SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (pageMeta.surahNames.isNotEmpty)
-              PageMetadataStrip(
-                surahNames: pageMeta.surahNames,
-                juzLabel: pageMeta.juzLabel(widget.juzLabel),
-                uiTextDirection: widget.uiTextDirection,
-                textColor: metaTextColor,
-              ),
-            Expanded(child: pageBody),
-            const SizedBox(height: _pageChromeSpacing),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                _portraitPageHorizontalPadding,
-                0,
-                _portraitPageHorizontalPadding,
-                _portraitPageBottomPadding,
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: pageNumberBadge,
-              ),
+      pageChrome = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (pageMeta.surahNames.isNotEmpty)
+            PageMetadataStrip(
+              surahNames: pageMeta.surahNames,
+              juzLabel: pageMeta.juzLabel(widget.juzLabel),
+              uiTextDirection: widget.uiTextDirection,
+              textColor: metaTextColor,
             ),
-          ],
-        ),
+          Expanded(child: pageBody),
+          const SizedBox(height: _pageChromeSpacing),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              _portraitPageHorizontalPadding,
+              0,
+              _portraitPageHorizontalPadding,
+              _portraitPageBottomPadding,
+            ),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: pageNumberBadge,
+            ),
+          ),
+        ],
       );
     } else {
       // Landscape: scroll body fills edge-to-edge (strip scrolls with content);
@@ -626,14 +637,28 @@ class _PageContentState extends State<PageContent>
           final int lineNum = i + 1;
           if (surah == 1) {
             // Fatiha Page 1 special logic
+            // Since we shifted Fatiha's Ayah 1 (Bismillah) to lineNum 6,
+            // and we want exactly 2 native empty lines between Header and Bismillah,
+            // Header must sit at lineNum - 3.
             if (pageNumber == 1) {
-              special[1] = 'HEADER:1';
+              if (lineNum > 3) {
+                special[lineNum - 3] = 'HEADER:1';
+              } else {
+                special[1] = 'HEADER:1';
+              }
             }
           } else if (surah == 9) {
             // At-Tawbah: Header only
             if (lineNum > 1) {
               special[lineNum - 1] = 'HEADER:9';
             }
+          } else if (surah == 2 && pageNumber == 2) {
+            // Baqarah Page 2 special logic
+            // We shifted Alif Lam Meem out down to index 6, but we want
+            // Header at index 2 (Line 3) and Bismillah at index 5 (Line 6).
+            // So if lineNum is 7 (verse 1 line):
+            special[3] = 'HEADER:2';
+            special[6] = 'BISMILLAH:2';
           } else {
             // Other surahs: Header then Bismillah
             if (lineNum > 2) {
