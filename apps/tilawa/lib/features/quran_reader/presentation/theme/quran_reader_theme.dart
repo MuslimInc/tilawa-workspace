@@ -21,7 +21,7 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
     pageBackground: Color(0xFFFFF9F1),
     textColor: Color(0xFF000000),
     headerBackground: Color(0xFFF4EAD2),
-    headerTextColor: Color(0xFF4E342E), // Colors.brown.shade800
+    headerTextColor: Color(0xFF000000),
     headerImageFilter: null,
     systemBarColor: Color(0xFFFFF9F1),
     statusBarIconBrightness: Brightness.dark,

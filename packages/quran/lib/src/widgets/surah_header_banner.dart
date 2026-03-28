@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../helpers/app_logger.dart';
@@ -22,45 +24,45 @@ class SurahHeaderBanner extends StatelessWidget {
     'assets/mainframe.png',
     package: 'quran',
   );
-  static const double _verticalOffset = -2;
-  static const double _referenceBannerHeightMultiplier = 1.22;
-
-  static const double _portraitRatio = 0.108;
-  static const double _landscapeRatio = 0.094;
-  static const double _portraitPaddingRatio = 0.019;
-  // Landscape padding: bannerWidth = bannerHeight * aspectRatio,
-  // padding = (screenWidth - bannerWidth) / 2
-  static const double _landscapeBannerAspectRatio = 1192 / 134;
+  static const double _bannerHeightToWidthRatio = 0.11228293967474158;
+  static const double _portraitWidthRatioBase = 0.97354259;
+  static const double _portraitWidthRatioAspectSlope = -0.015786;
+  static const double _portraitWidthRatioViewportSlope = -0.0000049331266667;
+  static const double _landscapeWidthRatioBase = 0.31947917;
+  static const double _landscapeWidthRatioAspectSlope = 1.05269164;
+  static const double _landscapeWidthRatioViewportSlope = 0.00001533733;
+  static const double _titleVerticalOffsetRatio = -0.02;
 
   @override
   Widget build(BuildContext context) {
     final renderStartTime = DateTime.now();
 
-    final Widget result = RepaintBoundary(
+    final result = RepaintBoundary(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final Size screenSize = MediaQuery.sizeOf(context);
           final isLandscape =
               MediaQuery.orientationOf(context) == Orientation.landscape;
-
-          final double bannerHeight = computeBannerHeight(
-            screenSize: screenSize,
+          final double viewportWidth = constraints.maxWidth;
+          final double viewportHeight = screenSize.height;
+          final double bannerWidth = computeBannerWidth(
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
             isLandscape: isLandscape,
           );
-          final double horizontalPadding;
-          if (isLandscape) {
-            final double bannerWidth =
-                bannerHeight * _landscapeBannerAspectRatio;
-            horizontalPadding =
-                ((constraints.maxWidth - bannerWidth) / 2).clamp(0.0, constraints.maxWidth / 2);
-          } else {
-            horizontalPadding = constraints.maxWidth * _portraitPaddingRatio;
-          }
-          final double bannerWidth =
-              constraints.maxWidth - (horizontalPadding * 2);
-          final double headerFontSize =
-              bannerHeight *
-              (headerFontSizeMultiplier / _referenceBannerHeightMultiplier);
+          final double horizontalPadding = computeHorizontalPadding(
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: isLandscape,
+          );
+          final double bannerHeight = computeBannerHeight(
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: isLandscape,
+          );
+          final double headerFontSize = bannerHeight * headerFontSizeMultiplier;
+          final double verticalOffset =
+              bannerHeight * _titleVerticalOffsetRatio;
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -68,44 +70,44 @@ class SurahHeaderBanner extends StatelessWidget {
               height: bannerHeight,
               width: bannerWidth,
               child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned.fill(
-                  child: headerImageFilter != null
-                      ? ColorFiltered(
-                          colorFilter: headerImageFilter!,
-                          child: const Image(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: headerImageFilter != null
+                        ? ColorFiltered(
+                            colorFilter: headerImageFilter!,
+                            child: const Image(
+                              image: _bannerImage,
+                              fit: BoxFit.fill,
+                              filterQuality: FilterQuality.low,
+                            ),
+                          )
+                        : const Image(
                             image: _bannerImage,
                             fit: BoxFit.fill,
                             filterQuality: FilterQuality.low,
                           ),
-                        )
-                      : const Image(
-                          image: _bannerImage,
-                          fit: BoxFit.fill,
-                          filterQuality: FilterQuality.low,
-                        ),
-                ),
-                // The Surah name calligraphy from QCF_BSML font.
-                Transform.translate(
-                  offset: const Offset(0, _verticalOffset),
-                  child: Text(
-                    String.fromCharCode(0xF100 + surahNumber - 1),
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'QCF_BSML',
-                      package: 'quran',
-                      fontSize: headerFontSize,
-                      color:
-                          headerTextColor ??
-                          Theme.of(context).colorScheme.onSurface,
+                  ),
+                  // The Surah name calligraphy from QCF_BSML font.
+                  Transform.translate(
+                    offset: Offset(0, verticalOffset),
+                    child: Text(
+                      String.fromCharCode(0xF100 + surahNumber - 1),
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'QCF_BSML',
+                        package: 'quran',
+                        fontSize: headerFontSize,
+                        color:
+                            headerTextColor ??
+                            Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           );
         },
       ),
@@ -122,12 +124,82 @@ class SurahHeaderBanner extends StatelessWidget {
 
   @visibleForTesting
   static double computeBannerHeight({
-    required Size screenSize,
+    required double viewportWidth,
+    required double viewportHeight,
     required bool isLandscape,
   }) {
-    if (isLandscape) {
-      return (screenSize.width * _landscapeRatio).roundToDouble();
+    return computeBannerWidth(
+          viewportWidth: viewportWidth,
+          viewportHeight: viewportHeight,
+          isLandscape: isLandscape,
+        ) *
+        _bannerHeightToWidthRatio;
+  }
+
+  @visibleForTesting
+  static double computeBannerWidth({
+    required double viewportWidth,
+    required double viewportHeight,
+    required bool isLandscape,
+  }) {
+    final double normalizedAspectRatio = _normalizedAspectRatio(
+      viewportWidth,
+      viewportHeight,
+    );
+    final double widthRatio = isLandscape
+        ? _computeLandscapeWidthRatio(
+            viewportWidth: viewportWidth,
+            normalizedAspectRatio: normalizedAspectRatio,
+          )
+        : _computePortraitWidthRatio(
+            viewportWidth: viewportWidth,
+            normalizedAspectRatio: normalizedAspectRatio,
+          );
+
+    return viewportWidth * widthRatio.clamp(0.0, 1.0);
+  }
+
+  static double _computePortraitWidthRatio({
+    required double viewportWidth,
+    required double normalizedAspectRatio,
+  }) {
+    return _portraitWidthRatioBase +
+        (_portraitWidthRatioAspectSlope * normalizedAspectRatio) +
+        (_portraitWidthRatioViewportSlope * viewportWidth);
+  }
+
+  static double _computeLandscapeWidthRatio({
+    required double viewportWidth,
+    required double normalizedAspectRatio,
+  }) {
+    return _landscapeWidthRatioBase +
+        (_landscapeWidthRatioAspectSlope * normalizedAspectRatio) +
+        (_landscapeWidthRatioViewportSlope * viewportWidth);
+  }
+
+  @visibleForTesting
+  static double computeHorizontalPadding({
+    required double viewportWidth,
+    required double viewportHeight,
+    required bool isLandscape,
+  }) {
+    final double bannerWidth = computeBannerWidth(
+      viewportWidth: viewportWidth,
+      viewportHeight: viewportHeight,
+      isLandscape: isLandscape,
+    );
+    return (viewportWidth - bannerWidth) / 2;
+  }
+
+  static double _normalizedAspectRatio(
+    double viewportWidth,
+    double viewportHeight,
+  ) {
+    final double shortSide = math.min(viewportWidth, viewportHeight);
+    final double longSide = math.max(viewportWidth, viewportHeight);
+    if (longSide == 0) {
+      return 0;
     }
-    return (screenSize.width * _portraitRatio).roundToDouble();
+    return shortSide / longSide;
   }
 }

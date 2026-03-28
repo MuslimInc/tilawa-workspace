@@ -141,10 +141,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
   void _enterReaderImmersiveMode() {
     final readerTheme = QuranReaderTheme.of(context);
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: const [SystemUiOverlay.bottom],
-    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: readerTheme.systemBarColor,

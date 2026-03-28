@@ -421,9 +421,29 @@ class _PageContentState extends State<PageContent>
         final paddedLines = Padding(padding: metrics.padding, child: lines);
 
         if (metrics.isScrollable) {
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: paddedLines,
+          final Widget scrollChild = pageMeta.surahNames.isNotEmpty
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SafeArea(
+                      bottom: false,
+                      child: PageMetadataStrip(
+                        surahNames: pageMeta.surahNames,
+                        juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                        uiTextDirection: widget.uiTextDirection,
+                        textColor: metaTextColor,
+                      ),
+                    ),
+                    paddedLines,
+                  ],
+                )
+              : paddedLines;
+          return Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: scrollChild,
+            ),
           );
         }
 
@@ -431,46 +451,70 @@ class _PageContentState extends State<PageContent>
       },
     );
 
-    final Widget pageChrome = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (isPortrait && pageMeta.surahNames.isNotEmpty)
-          PageMetadataStrip(
-            surahNames: pageMeta.surahNames,
-            juzLabel: pageMeta.juzLabel(widget.juzLabel),
-            uiTextDirection: widget.uiTextDirection,
-            textColor: metaTextColor,
-          ),
-        Expanded(child: pageBody),
-        if (isPortrait) ...[
-          const SizedBox(height: _pageChromeSpacing),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              _portraitPageHorizontalPadding,
-              0,
-              _portraitPageHorizontalPadding,
-              _portraitPageBottomPadding,
-            ),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: PageNumberBadge(
-                label: pageNumberLabel,
-                backgroundColor: pageNumberBadgeColor,
-                borderColor: pageNumberBorderColor,
-                textColor: metaTextColor,
-              ),
-            ),
-          ),
-        ],
-      ],
+    final Widget pageNumberBadge = PageNumberBadge(
+      label: pageNumberLabel,
+      backgroundColor: pageNumberBadgeColor,
+      borderColor: pageNumberBorderColor,
+      textColor: metaTextColor,
     );
 
-    final Widget result = SnapshotWidget(
-      key: ValueKey<Orientation>(_lastOrientation ?? Orientation.portrait),
-      autoresize: true,
-      controller: _snapshotController,
-      child: SafeArea(bottom: false, child: pageChrome),
-    );
+    final Widget pageChrome;
+    if (isPortrait) {
+      pageChrome = SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (pageMeta.surahNames.isNotEmpty)
+              PageMetadataStrip(
+                surahNames: pageMeta.surahNames,
+                juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                uiTextDirection: widget.uiTextDirection,
+                textColor: metaTextColor,
+              ),
+            Expanded(child: pageBody),
+            const SizedBox(height: _pageChromeSpacing),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                _portraitPageHorizontalPadding,
+                0,
+                _portraitPageHorizontalPadding,
+                _portraitPageBottomPadding,
+              ),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: pageNumberBadge,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Landscape: scroll body fills edge-to-edge (strip scrolls with content);
+      // only the page number badge is fixed.
+      pageChrome = Stack(
+        children: [
+          Positioned.fill(child: pageBody),
+          Positioned(
+            bottom: _portraitPageBottomPadding,
+            left: _portraitPageHorizontalPadding,
+            child: pageNumberBadge,
+          ),
+        ],
+      );
+    }
+
+    // SnapshotWidget caches a static bitmap — never use it for scrollable
+    // (landscape) pages, as it freezes scroll input and can capture the banner
+    // before its asset image has loaded.
+    final Widget result = isPortrait
+        ? SnapshotWidget(
+            key: ValueKey<Orientation>(_lastOrientation ?? Orientation.portrait),
+            autoresize: true,
+            controller: _snapshotController,
+            child: pageChrome,
+          )
+        : pageChrome;
 
     final Duration renderDuration = DateTime.now().difference(renderStartTime);
     if (renderDuration.inMilliseconds > 16) {
