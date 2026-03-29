@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../helpers/app_logger.dart';
+import '../services/quran_data_service.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
 ///
@@ -44,10 +47,11 @@ class QuranLayoutMetrics {
 /// - **Portrait**: Fits exactly 15 lines into the available vertical space (minus safe areas).
 /// - **Landscape**: Uses a compact scrollable layout closer to printed mushaf apps.
 class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
-  static const double _fontHeight = 1.75;
+  static const double _fontHeight = 1.85;
   // Width divisor to determine base font size relative to screen width.
   // Higher values produce a smaller font to prevent horizontal wrapping.
-  static const double _widthDivisor = 16.0;
+  // Set to 16.8 to match the Ayah app's larger text density.
+  static const double _widthDivisor = 15.5;
   // Explicit line inset measured from the Ayah reference on a 720px capture.
   static const double _verseHorizontalPaddingRatio = 25 / 720;
   // Explicit bismillah inset measured from the Ayah reference on a 720px capture.
@@ -78,9 +82,10 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         adaptiveFontSize,
         verseHorizontalPadding,
         bismillahHorizontalPadding,
+        pageNumber,
       );
     } else {
-      metrics = _calculatePortraitMetrics(constraints);
+      metrics = _calculatePortraitMetrics(constraints, pageNumber);
     }
 
     final Duration duration = DateTime.now().difference(startTime);
@@ -97,6 +102,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     double fontSize,
     double verseHorizontalPadding,
     double bismillahHorizontalPadding,
+    int pageNumber,
   ) {
     return QuranLayoutMetrics(
       fontSize: fontSize,
@@ -108,15 +114,56 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     );
   }
 
-  QuranLayoutMetrics _calculatePortraitMetrics(BoxConstraints constraints) {
+  QuranLayoutMetrics _calculatePortraitMetrics(
+    BoxConstraints constraints,
+    int pageNumber,
+  ) {
     final double verseHorizontalPadding =
         constraints.maxWidth * _verseHorizontalPaddingRatio;
     final double bismillahHorizontalPadding =
         constraints.maxWidth * _bismillahHorizontalPaddingRatio;
+
+    // 1. Calculate max safe font size by width (prevent horizontal bleed)
     final double availableWidth =
         constraints.maxWidth - (verseHorizontalPadding * 2);
-    final double fontSize = availableWidth / _widthDivisor;
-    final double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);
+    final double maxFontSizeByWidth = availableWidth / _widthDivisor;
+
+    final double availableHeight = constraints.maxHeight - _topPadding;
+    final double idealFontSizeByHeight = availableHeight / 27.762;
+
+    final double fontSize = math.min(idealFontSizeByHeight, maxFontSizeByWidth);
+    double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);
+
+    // We dynamically calculate height consumption using exact counts of 
+    // headers and bismillahs instead of blindly assuming 15 normal verses.
+    final Map<String, int> specialCounts =
+        QuranDataService.instance.getSpecialLineCounts(pageNumber);
+    final int headers = specialCounts['headers'] ?? 0;
+    final int bismillahs = specialCounts['bismillahs'] ?? 0;
+    final int normalLines = 15 - headers - bismillahs;
+
+    // Fixed math parameters based on Ayah bounds
+    final double bannerHeight = availableWidth * 0.11228293967474158; 
+    final double bismillahHeight = fontSize * 0.8 * 1.8; 
+
+    // Use uniform gaps (1.0x spacing) between all lines to calculate the 
+    // baseline height consumption on the page.
+    final double spacingHeight = 14 * lineSpacing;
+
+    final double usedHeight = (normalLines * fontSize * _fontHeight) +
+        (bismillahs * bismillahHeight) +
+        (headers * bannerHeight) +
+        spacingHeight;
+
+    // We reserve a 16px safety margin to ensure full-page coverage while 
+    // absorbing Flutter's sub-pixel TextSpan rounding accumulations.
+    final double safeHeightLimit = availableHeight - 16.0;
+
+    if (usedHeight < safeHeightLimit && pageNumber > 2) {
+      final double extraHeight = safeHeightLimit - usedHeight;
+      final double delta = extraHeight / 14;
+      lineSpacing += delta;
+    }
 
     return QuranLayoutMetrics(
       fontSize: fontSize,

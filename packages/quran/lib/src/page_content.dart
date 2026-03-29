@@ -33,7 +33,11 @@ class PageContent extends StatefulWidget {
     required this.pageBackgroundColor,
     this.uiTextDirection = TextDirection.ltr,
     this.currentPageListenable,
+    this.showOverlays = true,
   });
+
+  /// Whether to show the internal page metadata strips and badges.
+  final bool showOverlays;
 
   final int pageNumber;
 
@@ -105,7 +109,6 @@ class _PageContentState extends State<PageContent>
   @override
   void initState() {
     super.initState();
-    logger.d('[PageContent] initState for page ${widget.pageNumber}');
     WidgetsBinding.instance.addObserver(this);
     _initQuranData();
 
@@ -149,7 +152,6 @@ class _PageContentState extends State<PageContent>
   @override
   void dispose() {
     widget.currentPageListenable?.removeListener(_handlePageChange);
-    logger.d('[PageContent] dispose for page ${widget.pageNumber}');
     WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     _snapshotController.dispose();
@@ -159,9 +161,6 @@ class _PageContentState extends State<PageContent>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      logger.d(
-        '[PageContent] App resumed, clearing snapshot for page ${widget.pageNumber}',
-      );
       _snapshotController.allowSnapshotting = false;
       _snapshotController.clear();
 
@@ -171,8 +170,6 @@ class _PageContentState extends State<PageContent>
           _snapshotController.allowSnapshotting = true;
         }
       });
-    } else if (state == AppLifecycleState.paused) {
-      logger.d('[PageContent] App paused for page ${widget.pageNumber}');
     }
   }
 
@@ -457,9 +454,19 @@ class _PageContentState extends State<PageContent>
           return lineWidget;
         }).toList();
 
+        final List<Widget> spacedLineWidgets = [];
+        for (int i = 0; i < lineWidgets.length; i++) {
+          if (i > 0) {
+            final double gap = metrics.lineSpacing;
+
+            spacedLineWidgets.add(SizedBox(height: gap));
+          }
+          spacedLineWidgets.add(lineWidgets[i]);
+        }
+
         final lines = Column(
-          spacing: metrics.lineSpacing,
-          children: lineWidgets,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: spacedLineWidgets,
         );
 
         final paddedLines = Padding(padding: metrics.padding, child: lines);
@@ -471,11 +478,15 @@ class _PageContentState extends State<PageContent>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  PageMetadataStrip(
-                    surahNames: pageMeta.surahNames,
-                    juzLabel: pageMeta.juzLabel(widget.juzLabel),
-                    uiTextDirection: widget.uiTextDirection,
-                    textColor: metaTextColor,
+                  AnimatedOpacity(
+                    opacity: widget.showOverlays ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: PageMetadataStrip(
+                      surahNames: pageMeta.surahNames,
+                      juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                      uiTextDirection: widget.uiTextDirection,
+                      textColor: metaTextColor,
+                    ),
                   ),
                   paddedLines,
                 ],
@@ -500,11 +511,15 @@ class _PageContentState extends State<PageContent>
       },
     );
 
-    final Widget pageNumberBadge = PageNumberBadge(
-      label: pageNumberLabel,
-      backgroundColor: pageNumberBadgeColor,
-      borderColor: pageNumberBorderColor,
-      textColor: metaTextColor,
+    final Widget pageNumberBadge = AnimatedOpacity(
+      opacity: widget.showOverlays ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 300),
+      child: PageNumberBadge(
+        label: pageNumberLabel,
+        backgroundColor: pageNumberBadgeColor,
+        borderColor: pageNumberBorderColor,
+        textColor: metaTextColor,
+      ),
     );
 
     final Widget pageChrome;
@@ -513,11 +528,15 @@ class _PageContentState extends State<PageContent>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (pageMeta.surahNames.isNotEmpty)
-            PageMetadataStrip(
-              surahNames: pageMeta.surahNames,
-              juzLabel: pageMeta.juzLabel(widget.juzLabel),
-              uiTextDirection: widget.uiTextDirection,
-              textColor: metaTextColor,
+            AnimatedOpacity(
+              opacity: widget.showOverlays ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: PageMetadataStrip(
+                surahNames: pageMeta.surahNames,
+                juzLabel: pageMeta.juzLabel(widget.juzLabel),
+                uiTextDirection: widget.uiTextDirection,
+                textColor: metaTextColor,
+              ),
             ),
           Expanded(child: pageBody),
           const SizedBox(height: _pageChromeSpacing),

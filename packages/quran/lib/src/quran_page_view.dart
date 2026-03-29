@@ -33,10 +33,15 @@ class QuranPageView extends StatefulWidget {
     this.headerFontSizeMultiplier = 0.45,
     this.currentPageListenable,
     this.uiTextDirection = TextDirection.ltr,
+    this.showOverlays = true,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
        );
+
+  /// Whether to show the internal page metadata strips and badges.
+  /// Set to [false] when the reader Chrome (navigation bar) is active.
+  final bool showOverlays;
 
   /// 1-based initial page number (1..604)
   final int initialPageNumber;
@@ -157,6 +162,7 @@ class _QuranPageViewState extends State<QuranPageView> {
               pageBackgroundColor: widget.pageBackgroundColor,
               uiTextDirection: widget.uiTextDirection,
               currentPageListenable: widget.currentPageListenable,
+              showOverlays: widget.showOverlays,
             );
           },
         ),

@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 
 import '../helpers/app_logger.dart';
 
+/// Renders the decorative Surah name header banner.
+///
+/// Banner width is computed using a linear regression model calibrated
+/// against Figma measurements from the Ayah app across multiple devices.
+/// Height follows the intrinsic aspect ratio of the banner image asset.
 class SurahHeaderBanner extends StatelessWidget {
   const SurahHeaderBanner({
     super.key,
@@ -128,12 +133,13 @@ class SurahHeaderBanner extends StatelessWidget {
     required double viewportHeight,
     required bool isLandscape,
   }) {
-    return computeBannerWidth(
-          viewportWidth: viewportWidth,
-          viewportHeight: viewportHeight,
-          isLandscape: isLandscape,
-        ) *
-        _bannerHeightToWidthRatio;
+    return (computeBannerWidth(
+              viewportWidth: viewportWidth,
+              viewportHeight: viewportHeight,
+              isLandscape: isLandscape,
+            ) *
+            _bannerHeightToWidthRatio)
+        .roundToDouble();
   }
 
   @visibleForTesting
@@ -156,7 +162,7 @@ class SurahHeaderBanner extends StatelessWidget {
             normalizedAspectRatio: normalizedAspectRatio,
           );
 
-    return viewportWidth * widthRatio.clamp(0.0, 1.0);
+    return (viewportWidth * widthRatio.clamp(0.0, 1.0)).roundToDouble();
   }
 
   static double _computePortraitWidthRatio({

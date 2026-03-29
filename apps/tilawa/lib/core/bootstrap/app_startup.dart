@@ -12,6 +12,7 @@ import 'package:flutter_local_notifications_platform_interface/flutter_local_not
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quran/src/services/quran_data_service.dart' as quran_loader;
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
@@ -371,6 +372,10 @@ class AppStartupTasks {
       timeline.resetPhase();
       await initializeFirebaseDataAsync();
       timeline.log('Phase4 firebaseData');
+
+      timeline.resetPhase();
+      await quran_loader.QuranDataService.instance.ensureLoaded();
+      timeline.log('Phase4 quranFontData');
     } catch (e) {
       logger.d('[LaunchApp] Phase4 error: $e');
     }
