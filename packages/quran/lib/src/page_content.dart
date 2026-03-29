@@ -456,7 +456,6 @@ class _PageContentState extends State<PageContent>
         for (var i = 0; i < lineWidgets.length; i++) {
           if (i > 0) {
             final double gap = metrics.lineSpacing;
-
             spacedLineWidgets.add(SizedBox(height: gap));
           }
           spacedLineWidgets.add(lineWidgets[i]);

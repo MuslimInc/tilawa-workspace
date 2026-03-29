@@ -104,11 +104,15 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     double bismillahHorizontalPadding,
     int pageNumber,
   ) {
+    // In landscape, we use a much larger relative gap to create an "airy"
+    // scrollable experience, matching the user's preference for ~40px spacing.
+    final double lineSpacing = fontSize * 0.8;
+
     return QuranLayoutMetrics(
       fontSize: fontSize,
       fontHeight: _fontHeight,
       isScrollable: true,
-      lineSpacing: (fontSize * 0.108).clamp(0.8, 3.4),
+      lineSpacing: lineSpacing,
       verseHorizontalPadding: verseHorizontalPadding,
       bismillahHorizontalPadding: bismillahHorizontalPadding,
     );
