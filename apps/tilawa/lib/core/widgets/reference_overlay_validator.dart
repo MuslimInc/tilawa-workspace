@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 /// A developer tool widget that overlays a specified reference image (like an Ayah
 /// app screenshot) on top of your live UI. Allows tuning the layout pixel by pixel.
-/// 
+///
 /// Note: Only visible in debug mode.
 class ReferenceOverlayValidator extends StatefulWidget {
   const ReferenceOverlayValidator({
@@ -14,14 +14,15 @@ class ReferenceOverlayValidator extends StatefulWidget {
   });
 
   final Widget child;
-  
+
   /// The local asset path of the reference screenshot (e.g., 'assets/images/ayah_page_207.png')
   final String? referenceImagePath;
-  
+
   final double initialOpacity;
 
   @override
-  State<ReferenceOverlayValidator> createState() => _ReferenceOverlayValidatorState();
+  State<ReferenceOverlayValidator> createState() =>
+      _ReferenceOverlayValidatorState();
 }
 
 class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
@@ -91,12 +92,21 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                       children: [
                         const Text(
                           'Pixel Alignment Overlay',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Text('Opacity', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            const Text(
+                              'Opacity',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
                             Expanded(
                               child: Slider(
                                 value: _opacity,
@@ -109,7 +119,13 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                         ),
                         Row(
                           children: [
-                            const Text('Scale', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            const Text(
+                              'Scale',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
                             Expanded(
                               child: Slider(
                                 value: _scale,
@@ -124,20 +140,38 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
-                              onPressed: () => setState(() => _offset += const Offset(0, -1)),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_up,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => setState(
+                                () => _offset += const Offset(0, -1),
+                              ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
-                              onPressed: () => setState(() => _offset += const Offset(0, 1)),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.white,
+                              ),
+                              onPressed: () =>
+                                  setState(() => _offset += const Offset(0, 1)),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_left, color: Colors.white),
-                              onPressed: () => setState(() => _offset += const Offset(-1, 0)),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_left,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => setState(
+                                () => _offset += const Offset(-1, 0),
+                              ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.keyboard_arrow_right, color: Colors.white),
-                              onPressed: () => setState(() => _offset += const Offset(1, 0)),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_right,
+                                color: Colors.white,
+                              ),
+                              onPressed: () =>
+                                  setState(() => _offset += const Offset(1, 0)),
                             ),
                           ],
                         ),
@@ -150,7 +184,7 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                             });
                           },
                           child: const Text('Reset Overlay'),
-                        )
+                        ),
                       ],
                     ),
                   ),

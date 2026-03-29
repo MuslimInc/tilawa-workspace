@@ -47,8 +47,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   bool _isInitialPageJumpDone = false;
   late final GlobalKey _screenshotBoundaryKey;
 
-  /// Used to trigger AnimatedSwitcher for jumps.
-  int _jumpTransitionKey = 0;
+  // Removed _jumpTransitionKey as AnimatedSwitcher was removed to fix PageController conflicts.
 
   static const _headerFontSizeMultiplier = 0.57;
 
@@ -295,68 +294,49 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                               return SafeArea(
                                 child: RepaintBoundary(
                                   key: _screenshotBoundaryKey,
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    transitionBuilder: (child, animation) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
+                                  child: QuranPageView(
+                                    controller: _pageController,
+                                    currentPageListenable: _currentPageNotifier,
+                                    pageBackgroundColor:
+                                        readerTheme.pageBackground,
+                                    textColor: readerTheme.textColor,
+                                    headerImageFilter:
+                                        readerTheme.headerImageFilter,
+                                    headerTextColor:
+                                        readerTheme.headerTextColor,
+                                    headerFontSizeMultiplier:
+                                        _headerFontSizeMultiplier,
+                                    uiTextDirection: Directionality.of(context),
+                                    onPageChanged: (pageNumber) {
+                                      if (_currentPageNotifier.value !=
+                                          pageNumber) {
+                                        _currentPageNotifier.value = pageNumber;
+                                      }
+                                      final pageData = getPageData(pageNumber);
+                                      final surahNumber =
+                                          pageData.first['surah']!;
+                                      final bloc = context
+                                          .read<QuranReaderBloc>();
+                                      bloc.add(
+                                        QuranReaderEvent.loadPage(pageNumber),
+                                      );
+                                      bloc.add(
+                                        QuranReaderEvent.saveLastRead(
+                                          surahNumber: surahNumber,
+                                          page: pageNumber,
+                                        ),
                                       );
                                     },
-                                    child: QuranPageView(
-                                      key: ValueKey(
-                                        'page-view-$_jumpTransitionKey',
-                                      ),
-                                      controller: _pageController,
-                                      currentPageListenable:
-                                          _currentPageNotifier,
-                                      pageBackgroundColor:
-                                          readerTheme.pageBackground,
-                                      textColor: readerTheme.textColor,
-                                      headerImageFilter:
-                                          readerTheme.headerImageFilter,
-                                      headerTextColor:
-                                          readerTheme.headerTextColor,
-                                      headerFontSizeMultiplier:
-                                          _headerFontSizeMultiplier,
-                                      uiTextDirection: Directionality.of(
-                                        context,
-                                      ),
-                                      onPageChanged: (pageNumber) {
-                                        if (_currentPageNotifier.value !=
-                                            pageNumber) {
-                                          _currentPageNotifier.value =
-                                              pageNumber;
-                                        }
-                                        final pageData = getPageData(
-                                          pageNumber,
-                                        );
-                                        final surahNumber =
-                                            pageData.first['surah']!;
-                                        final bloc = context
-                                            .read<QuranReaderBloc>();
-                                        bloc.add(
-                                          QuranReaderEvent.loadPage(pageNumber),
-                                        );
-                                        bloc.add(
-                                          QuranReaderEvent.saveLastRead(
-                                            surahNumber: surahNumber,
-                                            page: pageNumber,
-                                          ),
-                                        );
-                                      },
-                                      juzLabel: context.l10n.juzPart,
-                                      hizbLabel: context.l10n.hizb,
-                                      surahNameBuilder: (surahNumber) {
-                                        return context.l10n.localeName == 'ar'
-                                            ? getSurahNameArabic(surahNumber)
-                                            : getSurahNameEnglish(surahNumber);
-                                      },
-                                      onSurahSelected: _jumpToSurah,
-                                      onShowIndex: () =>
-                                          _showSurahIndex(context),
-                                      showOverlays: !isVisible,
-                                    ),
+                                    juzLabel: context.l10n.juzPart,
+                                    hizbLabel: context.l10n.hizb,
+                                    surahNameBuilder: (surahNumber) {
+                                      return context.l10n.localeName == 'ar'
+                                          ? getSurahNameArabic(surahNumber)
+                                          : getSurahNameEnglish(surahNumber);
+                                    },
+                                    onSurahSelected: _jumpToSurah,
+                                    onShowIndex: () => _showSurahIndex(context),
+                                    showOverlays: !isVisible,
                                   ),
                                 ),
                               );
@@ -479,14 +459,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       final targetIndex = pageNumber - 1;
 
       if (animate) {
-        // For animated jumps, we instantly jump the controller
-        // but increment the transition key to trigger a Cross-Fade build.
         _pageController.jumpToPage(targetIndex);
-        if (mounted) {
-          setState(() {
-            _jumpTransitionKey++;
-          });
-        }
       } else {
         _pageController.jumpToPage(targetIndex);
       }

@@ -51,7 +51,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Width divisor to determine base font size relative to screen width.
   // Higher values produce a smaller font to prevent horizontal wrapping.
   // Set to 16.8 to match the Ayah app's larger text density.
-  static const double _widthDivisor = 15.5;
+  static const double _widthDivisor = 16.5;
   // Explicit line inset measured from the Ayah reference on a 720px capture.
   static const double _verseHorizontalPaddingRatio = 25 / 720;
   // Explicit bismillah inset measured from the Ayah reference on a 720px capture.
@@ -134,28 +134,29 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     final double fontSize = math.min(idealFontSizeByHeight, maxFontSizeByWidth);
     double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);
 
-    // We dynamically calculate height consumption using exact counts of 
+    // We dynamically calculate height consumption using exact counts of
     // headers and bismillahs instead of blindly assuming 15 normal verses.
-    final Map<String, int> specialCounts =
-        QuranDataService.instance.getSpecialLineCounts(pageNumber);
+    final Map<String, int> specialCounts = QuranDataService.instance
+        .getSpecialLineCounts(pageNumber);
     final int headers = specialCounts['headers'] ?? 0;
     final int bismillahs = specialCounts['bismillahs'] ?? 0;
     final int normalLines = 15 - headers - bismillahs;
 
     // Fixed math parameters based on Ayah bounds
-    final double bannerHeight = availableWidth * 0.11228293967474158; 
-    final double bismillahHeight = fontSize * 0.8 * 1.8; 
+    final double bannerHeight = availableWidth * 0.11228293967474158;
+    final double bismillahHeight = fontSize * 0.8 * 1.8;
 
-    // Use uniform gaps (1.0x spacing) between all lines to calculate the 
+    // Use uniform gaps (1.0x spacing) between all lines to calculate the
     // baseline height consumption on the page.
     final double spacingHeight = 14 * lineSpacing;
 
-    final double usedHeight = (normalLines * fontSize * _fontHeight) +
+    final double usedHeight =
+        (normalLines * fontSize * _fontHeight) +
         (bismillahs * bismillahHeight) +
         (headers * bannerHeight) +
         spacingHeight;
 
-    // We reserve a 16px safety margin to ensure full-page coverage while 
+    // We reserve a 16px safety margin to ensure full-page coverage while
     // absorbing Flutter's sub-pixel TextSpan rounding accumulations.
     final double safeHeightLimit = availableHeight - 16.0;
 

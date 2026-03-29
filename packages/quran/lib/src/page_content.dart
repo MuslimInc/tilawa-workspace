@@ -361,20 +361,18 @@ class _PageContentState extends State<PageContent>
         );
 
         final List<int> lineIndices = metrics.isScrollable
-            ? List<int>.generate(15, (index) => index).where(
-                (lineIndex) {
-                  // For Fatiha and Baqarah, our structured empty [] lines functionally 
-                  // represent native gaps layout margins, so they MUST be preserved 
-                  // visibly on the screen even during landscape scroll configurations.
-                  if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-                    return true;
-                  }
-                  
-                  return pageLines[lineIndex].isNotEmpty ||
-                      _isSurahHeader(widget.pageNumber, lineIndex + 1) ||
-                      _isBismillah(widget.pageNumber, lineIndex + 1);
-                },
-              ).toList()
+            ? List<int>.generate(15, (index) => index).where((lineIndex) {
+                // For Fatiha and Baqarah, our structured empty [] lines functionally
+                // represent native gaps layout margins, so they MUST be preserved
+                // visibly on the screen even during landscape scroll configurations.
+                if (widget.pageNumber == 1 || widget.pageNumber == 2) {
+                  return true;
+                }
+
+                return pageLines[lineIndex].isNotEmpty ||
+                    _isSurahHeader(widget.pageNumber, lineIndex + 1) ||
+                    _isBismillah(widget.pageNumber, lineIndex + 1);
+              }).toList()
             : List<int>.generate(15, (index) => index);
 
         final List<Widget> lineWidgets = lineIndices.map((lineIndex) {
@@ -455,7 +453,7 @@ class _PageContentState extends State<PageContent>
         }).toList();
 
         final List<Widget> spacedLineWidgets = [];
-        for (int i = 0; i < lineWidgets.length; i++) {
+        for (var i = 0; i < lineWidgets.length; i++) {
           if (i > 0) {
             final double gap = metrics.lineSpacing;
 

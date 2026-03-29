@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 
 /// A bottom sheet widget that displays the Quran surah index.
 ///
@@ -91,14 +92,20 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
+    final readerTheme = QuranReaderTheme.of(context);
+    final indexTheme = SurahIndexTheme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final l10n = context.l10n;
-    final Color primaryColor = colorScheme.primary;
-    final Color bgColor = colorScheme.surface;
-    final Color cardColor = colorScheme.surfaceContainerLow;
-    final Color borderColor = colorScheme.outlineVariant;
-    final Color titleColor = colorScheme.onSurface;
-    final Color subtitleColor = colorScheme.onSurfaceVariant;
+    final Color primaryColor = readerTheme.primaryColor;
+    final Color bgColor = readerTheme.pageBackground;
+    final Color cardColor = readerTheme.pageBackground.withValues(
+      alpha: isDark ? 0.08 : 0.05,
+    );
+    final Color borderColor = primaryColor.withValues(
+      alpha: isDark ? 0.15 : 0.1,
+    );
+    final Color titleColor = readerTheme.textColor;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final bool compactHeader = _searchFocusNode.hasFocus || keyboardInset > 0;
 
@@ -125,8 +132,8 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
             child: Container(
               decoration: BoxDecoration(
                 color: bgColor,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(indexTheme.sheetRadius),
                 ),
               ),
               child: Column(
@@ -134,11 +141,13 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                   // Drag handle
                   Container(
                     margin: const EdgeInsets.only(top: 12),
-                    width: 40,
-                    height: 4,
+                    width: indexTheme.dragHandleWidth,
+                    height: indexTheme.dragHandleHeight,
                     decoration: BoxDecoration(
                       color: primaryColor.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(
+                        indexTheme.dragHandleRadius,
+                      ),
                     ),
                   ),
 
@@ -153,15 +162,17 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(indexTheme.headerIconPadding),
                           decoration: BoxDecoration(
                             color: primaryColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                              indexTheme.headerIconRadius,
+                            ),
                           ),
                           child: Icon(
                             Icons.menu_book_rounded,
                             color: primaryColor,
-                            size: 24,
+                            size: indexTheme.headerIconSize,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -171,10 +182,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                             children: [
                               Text(
                                 l10n.surahIndex,
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  color: titleColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: readerTheme.indexTitleTextStyle,
                               ),
                               Text(
                                 _searchQuery.isEmpty
@@ -182,9 +190,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                                     : l10n.surahCountLabel(
                                         filteredSurahs.length,
                                       ),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: subtitleColor,
-                                ),
+                                style: readerTheme.indexSubtitleTextStyle,
                               ),
                             ],
                           ),
@@ -221,7 +227,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                         prefixIcon: Icon(
                           Icons.search_rounded,
                           color: primaryColor.withValues(alpha: 0.6),
-                          size: 20,
+                          size: indexTheme.searchBarIconSize,
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
@@ -238,28 +244,34 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                             : null,
                         filled: true,
                         fillColor: cardColor,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 10,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: indexTheme.searchBarVerticalPadding,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(
+                            indexTheme.searchBarRadius,
+                          ),
                           borderSide: BorderSide(
                             color: borderColor,
-                            width: 0.8,
+                            width: indexTheme.searchBarBorderWidth,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(
+                            indexTheme.searchBarRadius,
+                          ),
                           borderSide: BorderSide(
                             color: borderColor,
-                            width: 0.8,
+                            width: indexTheme.searchBarBorderWidth,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(
+                            indexTheme.searchBarRadius,
+                          ),
                           borderSide: BorderSide(
                             color: primaryColor,
-                            width: 1.2,
+                            width: indexTheme.searchBarBorderWidth + 0.4,
                           ),
                         ),
                       ),
@@ -341,13 +353,18 @@ class _SurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
+    final readerTheme = QuranReaderTheme.of(context);
+    final indexTheme = SurahIndexTheme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final l10n = context.l10n;
-    final Color primaryColor = colorScheme.primary;
-    final Color cardColor = colorScheme.surfaceContainerLow;
-    final Color borderColor = colorScheme.outlineVariant;
-    final Color titleColor = colorScheme.onSurface;
-    final Color subtitleColor = colorScheme.onSurfaceVariant;
+    final Color primaryColor = readerTheme.primaryColor;
+    final Color cardColor = readerTheme.pageBackground.withValues(
+      alpha: isDark ? 0.08 : 0.05,
+    );
+    final Color borderColor = primaryColor.withValues(
+      alpha: isDark ? 0.15 : 0.1,
+    );
 
     final arabicName = getSurahNameArabic(surahNumber);
     final englishName = getSurahName(surahNumber);
@@ -359,32 +376,37 @@ class _SurahTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(indexTheme.tileRadius),
         splashColor: primaryColor.withValues(alpha: 0.08),
         highlightColor: primaryColor.withValues(alpha: 0.04),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: indexTheme.tilePadding,
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: borderColor, width: 0.6),
+            borderRadius: BorderRadius.circular(indexTheme.tileRadius),
+            border: Border.all(
+              color: borderColor,
+              width: indexTheme.tileBorderWidth,
+            ),
           ),
           child: Row(
             children: [
               // Surah number badge
               Container(
-                width: 40,
-                height: 40,
+                width: indexTheme.tileNumberSize,
+                height: indexTheme.tileNumberSize,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: primaryColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(
+                    indexTheme.tileNumberRadius,
+                  ),
                 ),
                 child: Text(
                   '$surahNumber',
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: readerTheme.pillPageTextStyle.copyWith(
                     color: primaryColor,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -398,33 +420,19 @@ class _SurahTile extends StatelessWidget {
                   children: [
                     Text(
                       englishName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: titleColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: readerTheme.surahTileNameTextStyle,
                     ),
                     const SizedBox(height: 3),
                     Text(
                       '${l10n.ayahCountWithPlace(verseCount, place)} · ${l10n.page} $startPage',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: subtitleColor,
-                        fontSize: 11,
-                      ),
+                      style: readerTheme.surahTileMetaTextStyle,
                     ),
                   ],
                 ),
               ),
 
               // Arabic name
-              Text(
-                arabicName,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontFamily: 'Amiri',
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
+              Text(arabicName, style: readerTheme.surahTileArabicNameTextStyle),
             ],
           ),
         ),
