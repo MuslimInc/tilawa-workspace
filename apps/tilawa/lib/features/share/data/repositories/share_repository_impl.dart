@@ -146,6 +146,11 @@ class ShareRepositoryImpl implements ShareRepository {
 
   @override
   Future<void> shareContent(ShareContent content) async {
+    if (content case ShareText(:final text)) {
+      await SharePlus.instance.share(ShareParams(text: text));
+      return;
+    }
+
     final (filePath, text, mimeType) = switch (content) {
       ShareScreenshot(:final filePath, :final surahName, :final pageNumber) => (
         filePath,
@@ -176,6 +181,7 @@ class ShareRepositoryImpl implements ShareRepository {
           '$surahName ($fromAyah-$toAyah) — $reciterName',
           'video/mp4',
         ),
+      ShareText() => throw UnimplementedError(),
     };
 
     await SharePlus.instance.share(

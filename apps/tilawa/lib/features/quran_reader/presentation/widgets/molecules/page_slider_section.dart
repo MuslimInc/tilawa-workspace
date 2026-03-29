@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/features/quran_reader/presentation/widgets/atoms/mushaf_slider.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
+import 'package:tilawa/features/quran_reader/presentation/widgets/atoms/mushaf_slider.dart';
 
 /// A complete slider Molecule with range labels (1-604).
 class PageSliderSection extends StatelessWidget {
@@ -35,16 +35,8 @@ class PageSliderSection extends StatelessWidget {
     return Container(
       padding: navTheme.sliderSectionPadding,
       decoration: BoxDecoration(
-        color: textColor.withValues(alpha: isDark ? 0.06 : 0.04),
+        color: textColor.withValues(alpha: isDark ? 0.06 : 0.03),
         borderRadius: BorderRadius.circular(navTheme.sliderSectionRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.05),
-            blurRadius: 12,
-            spreadRadius: -8,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: SizedBox(
         height: navTheme.sliderStageHeight,

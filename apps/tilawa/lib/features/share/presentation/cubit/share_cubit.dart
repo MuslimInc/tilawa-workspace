@@ -179,6 +179,11 @@ class ShareCubit extends Cubit<ShareState> {
           toAyah: toAyah,
           reciterName: reciterName,
         ),
+      ShareText(:final filePath, :final text) => ShareContent.text(
+        filePath: filePath,
+        surahName: surahName,
+        text: text,
+      ),
     };
   }
 
@@ -386,6 +391,26 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       await _shareContent(state.content!);
       emit(state.copyWith(status: ShareStatus.idle, content: null));
+    } catch (e) {
+      emit(
+        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+      );
+    }
+  }
+
+  /// Shares Quran metadata as plain text without generating a media asset.
+  Future<void> shareText(String text, {String surahName = ''}) async {
+    emit(
+      state.copyWith(
+        status: ShareStatus.sharing,
+        content: null,
+        errorMessage: null,
+      ),
+    );
+
+    try {
+      await _shareContent(ShareContent.text(surahName: surahName, text: text));
+      emit(state.copyWith(status: ShareStatus.idle));
     } catch (e) {
       emit(
         state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),

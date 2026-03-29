@@ -15,6 +15,7 @@ import '../../domain/entities/share_limits.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import '../share_progress_messages_l10n.dart';
+import '../utils/quran_share_text_formatter.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../widgets/reel_content_renderer.dart';
 import '../widgets/share_poster_renderer.dart';
@@ -291,6 +292,9 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                         onFromChanged: _handleFromAyahChanged,
                         onToChanged: _handleToAyahChanged,
                         onPrimaryAction: _handlePrimaryAction,
+                        onShareText: () => _handleShareText(
+                          reciterName: state.reciterName ?? widget.reciterName,
+                        ),
                       ),
               ),
             ),
@@ -402,6 +406,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       ShareScreenshot(:final filePath) => ValueKey('review_image_$filePath'),
       ShareAudioClip(:final filePath) => ValueKey('review_audio_$filePath'),
       ShareReel(:final filePath) => ValueKey('review_reel_$filePath'),
+      ShareText() => const ValueKey('review_text'),
     };
 
     if (content case ShareReel(:final filePath, :final surahName)) {
@@ -463,6 +468,22 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                   ),
                 ),
               ShareReel() => const SizedBox.shrink(),
+              ShareText(:final text) => _PreviewFrame(
+                aspectRatio: 4 / 5,
+                child: Container(
+                  color: const Color(0xFFF7F1E1),
+                  padding: const EdgeInsets.all(48),
+                  alignment: Alignment.center,
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: const Color(0xFF0B342E),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ),
             },
           ),
         ),
@@ -556,6 +577,30 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
         ? '${context.l10n.ayah} $fromAyah'
         : '${context.l10n.ayahs} $fromAyah - $toAyah';
   }
+
+  Future<void> _handleShareText({required String reciterName}) {
+    final kind = switch (_mode) {
+      ShareComposerMode.screenshot =>
+        _screenshotLayout == ShareScreenshotLayout.readerPage
+            ? QuranShareTextKind.screenshotPage
+            : QuranShareTextKind.screenshotPassage,
+      ShareComposerMode.audio => QuranShareTextKind.audio,
+      ShareComposerMode.reel => QuranShareTextKind.reel,
+    };
+
+    final text = buildQuranShareText(
+      l10n: context.l10n,
+      surahName: _surahName,
+      arabicSurahName: _arabicSurahName,
+      kind: kind,
+      currentPage: widget.currentPage,
+      fromAyah: _fromAyah,
+      toAyah: _toAyah,
+      reciterName: _mode == ShareComposerMode.screenshot ? null : reciterName,
+    );
+
+    return context.read<ShareCubit>().shareText(text, surahName: _surahName);
+  }
 }
 
 class _ComposerControls extends StatelessWidget {
@@ -582,6 +627,7 @@ class _ComposerControls extends StatelessWidget {
     required this.onFromChanged,
     required this.onToChanged,
     required this.onPrimaryAction,
+    required this.onShareText,
   });
 
   final ShareComposerMode mode;
@@ -605,6 +651,7 @@ class _ComposerControls extends StatelessWidget {
   final ValueChanged<int> onFromChanged;
   final ValueChanged<int> onToChanged;
   final Future<void> Function() onPrimaryAction;
+  final Future<void> Function() onShareText;
 
   @override
   Widget build(BuildContext context) {
@@ -831,6 +878,25 @@ class _ComposerControls extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          onPressed: isBusy || !rangeIsValid ? null : () => onShareText(),
+          icon: const Icon(Icons.text_snippet_outlined),
+          label: Text(context.l10n.shareAsText),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: BorderSide(
+              color: const Color(0xFFE1C17B).withValues(alpha: 0.6),
+            ),
+            foregroundColor: const Color(0xFFF7F1E1),
+            textStyle: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -858,12 +924,14 @@ class _ReviewPanel extends StatelessWidget {
             ShareScreenshot() => context.l10n.shareReviewScreenshot,
             ShareAudioClip() => context.l10n.shareReviewAudio,
             ShareReel() => context.l10n.shareReviewReel,
+            ShareText() => context.l10n.shareAsText,
           }
         : context.l10n.shareReviewTitle;
     final subtitle = switch (content) {
       ShareScreenshot() => context.l10n.shareReviewScreenshot,
       ShareAudioClip() => context.l10n.shareReviewAudio,
       ShareReel() => context.l10n.shareReviewReel,
+      ShareText() => context.l10n.shareAsText,
     };
 
     return Column(
@@ -911,6 +979,7 @@ class _ReviewPanel extends StatelessWidget {
                     ShareScreenshot() => context.l10n.shareScreenshot,
                     ShareAudioClip() => context.l10n.shareAudio,
                     ShareReel() => context.l10n.shareReel,
+                    ShareText() => context.l10n.shareAsText,
                   },
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

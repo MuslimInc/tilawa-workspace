@@ -26,4 +26,10 @@ sealed class ShareContent with _$ShareContent {
     required int toAyah,
     required String reciterName,
   }) = ShareReel;
+
+  const factory ShareContent.text({
+    @Default('') String filePath,
+    @Default('') String surahName,
+    required String text,
+  }) = ShareText;
 }

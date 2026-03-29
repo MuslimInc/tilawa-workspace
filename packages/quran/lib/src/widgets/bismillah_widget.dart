@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../helpers/app_logger.dart';
+import '../helpers/quran_text_paint.dart';
 
 class BismillahStyleConfig {
   const BismillahStyleConfig({
@@ -68,7 +69,8 @@ class BismillahWidget extends StatelessWidget {
         package: config.package,
         fontSize: fontSize * config.fontScale,
         color: color,
-        height: _lineHeight,
+        shadows: buildQuranBoldShadows(color!),
+        // height: _lineHeight,
       ),
     );
 

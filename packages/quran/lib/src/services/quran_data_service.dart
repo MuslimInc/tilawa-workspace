@@ -17,11 +17,15 @@ class QuranDataService {
   /// A map for fast indexing of pages containing surahs and lines.
   /// Format: pageNumber -> SurahNumber -> LineNumber -> [Verses]
   Map<int, List<List<Map<String, dynamic>>>>? _processedPageIndex;
+  Map<String, int>? _verseLastWordIndexByVerse;
 
   Completer<void>? _loadCompleter;
 
   /// Returns true if the data is already loaded.
-  bool get isLoaded => _qpcV4Data != null && _processedPageIndex != null;
+  bool get isLoaded =>
+      _qpcV4Data != null &&
+      _processedPageIndex != null &&
+      _verseLastWordIndexByVerse != null;
 
   /// Returns a future that completes when data is loaded.
   Future<void> ensureLoaded() async {
@@ -57,6 +61,7 @@ class QuranDataService {
       _qpcV4Data = decoded[0] as Map<String, dynamic>;
       _processedPageIndex =
           decoded[1] as Map<int, List<List<Map<String, dynamic>>>>;
+      _verseLastWordIndexByVerse = decoded[2] as Map<String, int>;
 
       _loadCompleter!.complete();
       final Duration duration = DateTime.now().difference(startTime);
@@ -80,12 +85,47 @@ class QuranDataService {
     return _processedPageIndex?[pageNumber];
   }
 
+  /// Returns whether the given [wordData] is the ayah-end word on its verse.
+  ///
+  /// Ayah-end words carry the verse number marker glyph that must sometimes be
+  /// styled differently from the Quran text itself.
+  bool isVerseEndWord(Map<String, dynamic> wordData) {
+    final int surahNumber = int.tryParse(wordData['surah'].toString()) ?? 0;
+    final int verseNumber = int.tryParse(wordData['ayah'].toString()) ?? 0;
+    final int wordNumber = int.tryParse(wordData['word'].toString()) ?? 0;
+    final int? lastWordIndex = getLastWordIndexForVerse(
+      surahNumber,
+      verseNumber,
+    );
+
+    return lastWordIndex != null && wordNumber == lastWordIndex;
+  }
+
+  @visibleForTesting
+  int? getLastWordIndexForVerse(int surahNumber, int verseNumber) {
+    return _verseLastWordIndexByVerse?['$surahNumber:$verseNumber'];
+  }
+
   /// Heavy lifting: decode JSON and pre-build the O(1) page lookup map.
   static List<dynamic> _decodeAndProcessData(List<String> jsonStrings) {
     final qpc = json.decode(jsonStrings[0]) as Map<String, dynamic>;
     final pageIndexRaw = json.decode(jsonStrings[1]) as Map<String, dynamic>;
 
     final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
+    final verseLastWordIndexByVerse = <String, int>{};
+
+    for (final MapEntry<String, dynamic> wordEntry in qpc.entries) {
+      final Map<String, dynamic> wordData =
+          wordEntry.value as Map<String, dynamic>;
+      final String surah = wordData['surah'].toString();
+      final String ayah = wordData['ayah'].toString();
+      final int wordIndex = int.tryParse(wordData['word'].toString()) ?? 0;
+      final String verseKey = '$surah:$ayah';
+      final int previousMax = verseLastWordIndexByVerse[verseKey] ?? 0;
+      if (wordIndex > previousMax) {
+        verseLastWordIndexByVerse[verseKey] = wordIndex;
+      }
+    }
 
     for (final MapEntry<String, dynamic> pageEntry in pageIndexRaw.entries) {
       final int pageNum = int.parse(pageEntry.key);
@@ -110,7 +150,7 @@ class QuranDataService {
       processedIndex[pageNum] = lines;
     }
 
-    return [qpc, processedIndex];
+    return [qpc, processedIndex, verseLastWordIndexByVerse];
   }
 
   /// Returns counts of [headers, bismillahs] for a specific page.

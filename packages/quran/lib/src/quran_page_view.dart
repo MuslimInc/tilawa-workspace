@@ -133,7 +133,6 @@ class _QuranPageViewState extends State<QuranPageView> {
       child: ColoredBox(
         color: widget.pageBackgroundColor,
         child: PageView.builder(
-          key: const GlobalObjectKey('InternalQuranPageView'),
           controller: _controller,
           itemCount: QuranConstants.totalPagesCount,
           onPageChanged: (index) {
