@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../helpers/app_logger.dart';
 
 /// Renders the decorative Surah name header banner.
 ///
@@ -40,9 +39,7 @@ class SurahHeaderBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final renderStartTime = DateTime.now();
-
-    final result = RepaintBoundary(
+    return RepaintBoundary(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final Size screenSize = MediaQuery.sizeOf(context);
@@ -117,14 +114,6 @@ class SurahHeaderBanner extends StatelessWidget {
         },
       ),
     );
-
-    final Duration renderDuration = DateTime.now().difference(renderStartTime);
-    if (renderDuration.inMilliseconds > 8) {
-      logger.d(
-        '[PageContent] SurahHeaderBanner $surahNumber build took ${renderDuration.inMilliseconds}ms',
-      );
-    }
-    return result;
   }
 
   @visibleForTesting

@@ -33,15 +33,16 @@ class QuranPageView extends StatefulWidget {
     this.headerFontSizeMultiplier = 0.45,
     this.currentPageListenable,
     this.uiTextDirection = TextDirection.ltr,
-    this.showOverlays = true,
+    this.showOverlaysListenable,
   }) : assert(
          initialPageNumber >= 1 &&
              initialPageNumber <= QuranConstants.totalPagesCount,
        );
 
-  /// Whether to show the internal page metadata strips and badges.
-  /// Set to [false] when the reader Chrome (navigation bar) is active.
-  final bool showOverlays;
+  /// Controls visibility of the internal page metadata strips and badges.
+  /// Use a [ValueNotifier<bool>] so that tap-to-toggle rebuilds only the
+  /// chrome widgets, not the entire [QuranPageView] + [PageContent] tree.
+  final ValueListenable<bool>? showOverlaysListenable;
 
   /// 1-based initial page number (1..604)
   final int initialPageNumber;
@@ -135,8 +136,15 @@ class _QuranPageViewState extends State<QuranPageView> {
         child: PageView.builder(
           controller: _controller,
           itemCount: QuranConstants.totalPagesCount,
+          // Keep adjacent pages in the render tree so they are pre-built before
+          // the user swipes, eliminating the loading spinner flash on mid-range
+          // hardware (Snapdragon 695).
+          allowImplicitScrolling: true,
           onPageChanged: (index) {
             final int pageNumber = index + 1;
+            print(
+              '[PERF] onPageChanged → page $pageNumber at ${DateTime.now().millisecondsSinceEpoch}ms',
+            );
             widget.onPageChanged?.call(pageNumber);
           },
           itemBuilder: (context, index) {
@@ -161,7 +169,7 @@ class _QuranPageViewState extends State<QuranPageView> {
               pageBackgroundColor: widget.pageBackgroundColor,
               uiTextDirection: widget.uiTextDirection,
               currentPageListenable: widget.currentPageListenable,
-              showOverlays: widget.showOverlays,
+              showOverlaysListenable: widget.showOverlaysListenable,
             );
           },
         ),

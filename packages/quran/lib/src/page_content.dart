@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'helpers/app_logger.dart';
 import 'helpers/convert_to_arabic_number.dart';
 import 'helpers/quran_text_paint.dart';
 import 'layout/quran_layout_strategy.dart';
@@ -37,11 +36,13 @@ class PageContent extends StatefulWidget {
     required this.pageBackgroundColor,
     this.uiTextDirection = TextDirection.ltr,
     this.currentPageListenable,
-    this.showOverlays = true,
+    this.showOverlaysListenable,
   });
 
-  /// Whether to show the internal page metadata strips and badges.
-  final bool showOverlays;
+  /// Controls visibility of the page metadata strip and page number badge.
+  /// Passed as a [ValueListenable] so tap-to-toggle only rebuilds the chrome
+  /// widgets, not the full [PageContent] tree.
+  final ValueListenable<bool>? showOverlaysListenable;
 
   final int pageNumber;
 
@@ -107,6 +108,15 @@ class _PageContentState extends State<PageContent>
   static const Color _lightPageNumberBackgroundColor = Color(0xFFE8DDD0);
   static const Color _lightPageNumberBorderColor = Color(0xFFD2C0AE);
 
+  /// Process-wide cache: shadow list is identical for the same color value,
+  /// so we share a single list instance across all pages and builds.
+  static final Map<int, List<Shadow>> _shadowCache = {};
+
+  List<Shadow> _shadowsForColor(Color color) {
+    final int key = color.toARGB32();
+    return _shadowCache.putIfAbsent(key, () => buildQuranBoldShadows(color));
+  }
+
   @override
   bool get wantKeepAlive {
     if (widget.currentPageListenable == null) {
@@ -169,6 +179,9 @@ class _PageContentState extends State<PageContent>
     }
 
     if (snapshotInputsChanged) {
+      print(
+        '[PERF] page ${widget.pageNumber} snapshot invalidated by didUpdateWidget',
+      );
       _requestSnapshotRefresh(
         reason: 'visual inputs changed for page ${widget.pageNumber}',
         prewarmBanner: _pageHasSurahHeader(widget.pageNumber),
@@ -196,6 +209,9 @@ class _PageContentState extends State<PageContent>
 
     if (orientation == Orientation.portrait &&
         !_snapshotController.allowSnapshotting) {
+      print(
+        '[PERF] page ${widget.pageNumber} didChangeDependencies → requesting snapshot refresh',
+      );
       _requestSnapshotRefresh(
         reason: 'portrait snapshot restore for page ${widget.pageNumber}',
         prewarmBanner: _pageHasSurahHeader(widget.pageNumber),
@@ -223,7 +239,6 @@ class _PageContentState extends State<PageContent>
     _snapshotController.dispose();
     super.dispose();
   }
-
 
   void _handlePageChange() {
     if (!mounted) {
@@ -279,16 +294,17 @@ class _PageContentState extends State<PageContent>
     final pageBgChanged =
         oldWidget.pageBackgroundColor.toARGB32() !=
         widget.pageBackgroundColor.toARGB32();
-    final overlaysChanged = oldWidget.showOverlays != widget.showOverlays;
-
+    // showOverlays only affects AnimatedOpacity on the chrome widgets — it does
+    // not change the Quran text content, so it must NOT invalidate the snapshot.
+    // Including it caused a full re-rasterize of 15 RichText widgets on every
+    // chrome visibility toggle and on every page swipe rebuild.
     return metaChanged ||
         textColorChanged ||
         verseBgChanged ||
         filterChanged ||
         headerTextColorChanged ||
         fontSizeChanged ||
-        pageBgChanged ||
-        overlaysChanged;
+        pageBgChanged;
   }
 
   void _disposeWordRecognizers() {
@@ -303,7 +319,7 @@ class _PageContentState extends State<PageContent>
     if (!_snapshotController.allowSnapshotting) {
       return;
     }
-    logger.d('[PageContent] Disabling snapshot: $reason');
+    print('[PageContent] Disabling snapshot: $reason');
     _snapshotController.allowSnapshotting = false;
     _snapshotController.clear();
   }
@@ -354,12 +370,17 @@ class _PageContentState extends State<PageContent>
       _pendingBannerPrewarm = false;
 
       if (shouldPrewarmBanner) {
+        final prewarmStart = DateTime.now();
         await _prewarmBannerImage();
+        print(
+          '[PERF] page ${widget.pageNumber} banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
+        );
         if (!mounted) {
           return;
         }
       }
 
+      print('[PERF] page ${widget.pageNumber} snapshot ENABLED');
       _snapshotController.allowSnapshotting = true;
     });
   }
@@ -371,11 +392,25 @@ class _PageContentState extends State<PageContent>
     if (dataService.isLoaded) {
       if (mounted) {
         _cachedPageMeta = _buildPageMeta(widget.pageNumber);
-        // Defer prewarm: context is not safe for inherited-widget lookups in
-        // initState — schedule after the first frame instead.
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await _completeInitialPageLoad(startTime);
-        });
+        final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
+        if (!hasBanner) {
+          // Data is ready and no banner image decode needed — mark ready and
+          // enable snapshotting synchronously so the very first build() sees
+          // isLoading=false and renders directly into the snapshot cache.
+          // This avoids the double-rasterize (render tree → snapshot capture)
+          // that causes jank on non-banner pages on mid-range hardware.
+          _isLoading = false;
+          _snapshotController.allowSnapshotting = true;
+          print(
+            '[PERF] page ${widget.pageNumber} READY synchronously | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
+          );
+        } else {
+          // Banner pages still need context for image pre-warming, which is
+          // not safe to call during initState — defer to the next frame.
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await _completeInitialPageLoad(startTime);
+          });
+        }
       }
       return;
     }
@@ -400,16 +435,23 @@ class _PageContentState extends State<PageContent>
   }
 
   Future<void> _completeInitialPageLoad(DateTime startTime) async {
-    if (_pageHasSurahHeader(widget.pageNumber)) {
+    final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
+    print(
+      '[PERF] page ${widget.pageNumber} _completeInitialPageLoad | hasBanner=$hasBanner | elapsed so far=${DateTime.now().difference(startTime).inMilliseconds}ms',
+    );
+    if (hasBanner) {
+      final prewarmStart = DateTime.now();
       await _prewarmBannerImage();
+      print(
+        '[PERF] page ${widget.pageNumber} initial banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
+      );
     }
     if (!mounted) {
       return;
     }
     setState(() => _isLoading = false);
-    final Duration duration = DateTime.now().difference(startTime);
-    logger.d(
-      '[PageContent] Page ${widget.pageNumber} ready in ${duration.inMilliseconds}ms',
+    print(
+      '[PERF] page ${widget.pageNumber} READY (setState _isLoading=false) | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
     );
   }
 
@@ -512,12 +554,12 @@ class _PageContentState extends State<PageContent>
         bgColor = widget.verseBackgroundColor!(surahNumber, verseNumber);
       }
 
-      final TextStyle effectiveQuranStyle = bgColor == null
-          ? quranTextStyle
-          : quranTextStyle.copyWith(backgroundColor: bgColor);
-      final TextStyle effectiveMarkerStyle = bgColor == null
-          ? markerTextStyle
-          : markerTextStyle.copyWith(backgroundColor: bgColor);
+      final TextStyle effectiveQuranStyle = bgColor != null
+          ? quranTextStyle.copyWith(backgroundColor: bgColor)
+          : quranTextStyle;
+      final TextStyle effectiveMarkerStyle = bgColor != null
+          ? markerTextStyle.copyWith(backgroundColor: bgColor)
+          : markerTextStyle;
 
       wordSpans.add(
         _WordSpanGroup(
@@ -618,7 +660,10 @@ class _PageContentState extends State<PageContent>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final renderStartTime = DateTime.now();
+    final buildStart = DateTime.now();
+    print(
+      '[PERF] build() called for page ${widget.pageNumber} | isLoading=$_isLoading | snapshot=${_snapshotController.allowSnapshotting}',
+    );
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -650,10 +695,14 @@ class _PageContentState extends State<PageContent>
 
     final pageBody = LayoutBuilder(
       builder: (context, constraints) {
+        final metricsStart = DateTime.now();
         final QuranLayoutMetrics metrics = _layoutStrategy.calculateMetrics(
           context,
           constraints,
           widget.pageNumber,
+        );
+        print(
+          '[PERF] page ${widget.pageNumber} LayoutBuilder fired | calculateMetrics=${DateTime.now().difference(metricsStart).inMilliseconds}ms | size=${constraints.maxWidth.toStringAsFixed(0)}x${constraints.maxHeight.toStringAsFixed(0)}',
         );
         final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
 
@@ -666,7 +715,7 @@ class _PageContentState extends State<PageContent>
         );
         final TextStyle quranTextStyle = baseGlyphStyle.copyWith(
           color: widget.textColor,
-          shadows: buildQuranBoldShadows(widget.textColor),
+          shadows: _shadowsForColor(widget.textColor),
         );
         final TextStyle markerTextStyle = baseGlyphStyle.copyWith(
           color: widget.textColor,
@@ -824,13 +873,22 @@ class _PageContentState extends State<PageContent>
           );
         }
 
-        return paddedLines;
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topCenter,
+          child: SizedBox(width: constraints.maxWidth, child: paddedLines),
+        );
       },
     );
 
-    final Widget pageNumberBadge = AnimatedOpacity(
-      opacity: widget.showOverlays ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 300),
+    final Widget pageNumberBadge = ValueListenableBuilder<bool>(
+      valueListenable:
+          widget.showOverlaysListenable ?? const _AlwaysTrueListenable(),
+      builder: (context, showOverlays, child) => AnimatedOpacity(
+        opacity: showOverlays ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: child,
+      ),
       child: PageNumberBadge(
         label: pageNumberLabel,
         backgroundColor: pageNumberBadgeColor,
@@ -891,14 +949,10 @@ class _PageContentState extends State<PageContent>
           )
         : pageChrome;
 
-    final Duration renderDuration = DateTime.now().difference(renderStartTime);
-    if (renderDuration.inMilliseconds > 16) {
-      logger.d(
-        '[PageContent] Page ${widget.pageNumber} widget tree construction took ${renderDuration.inMilliseconds}ms (excludes layout/paint)',
-      );
-    }
-
-    return result;
+    print(
+      '[PERF] build() done for page ${widget.pageNumber} in ${DateTime.now().difference(buildStart).inMilliseconds}ms',
+    );
+    return SafeArea(maintainBottomViewPadding: true, child: result);
   }
 
   /// Returns the 0-based line index of the first line that has content.
@@ -949,13 +1003,18 @@ class _PageContentState extends State<PageContent>
       );
     }
 
-    return IgnorePointer(
-      ignoring: !widget.showOverlays,
-      child: AnimatedOpacity(
-        opacity: widget.showOverlays ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 300),
-        child: strip,
+    return ValueListenableBuilder<bool>(
+      valueListenable:
+          widget.showOverlaysListenable ?? const _AlwaysTrueListenable(),
+      builder: (context, showOverlays, child) => IgnorePointer(
+        ignoring: !showOverlays,
+        child: AnimatedOpacity(
+          opacity: showOverlays ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          child: child,
+        ),
       ),
+      child: strip,
     );
   }
 
@@ -1156,4 +1215,21 @@ class _PageMetaInfo {
 
     return arabicOrdinals[juzNumber - 1];
   }
+}
+
+/// A constant [ValueListenable<bool>] that always yields `true`.
+/// Used as a fallback when no [showOverlaysListenable] is provided,
+/// so overlays are visible by default without needing a nullable check
+/// at every usage site.
+class _AlwaysTrueListenable implements ValueListenable<bool> {
+  const _AlwaysTrueListenable();
+
+  @override
+  bool get value => true;
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
 }

@@ -147,7 +147,15 @@ class AppBootstrapper {
           .then((_) => timeline.log('HydratedStorage'))
           .catchError((Object e) => timeline.log('HydratedStorage FAILED'));
 
-      await Future.wait([firebaseFuture, hydratedFuture]);
+      // Kick off Quran JSON parsing in a background isolate immediately —
+      // it takes ~300-800ms and has no dependencies, so running it in parallel
+      // with Firebase + HydratedStorage hides the cost entirely.
+      final Future<void> quranDataFuture = quran_loader.QuranDataService.instance
+          .ensureLoaded()
+          .then((_) => timeline.log('QuranDataService'))
+          .catchError((Object e) => timeline.log('QuranDataService FAILED'));
+
+      await Future.wait([firebaseFuture, hydratedFuture, quranDataFuture]);
       timeline.log('Phase1 parallel done');
 
       if (firebaseOk) {
@@ -373,9 +381,7 @@ class AppStartupTasks {
       await initializeFirebaseDataAsync();
       timeline.log('Phase4 firebaseData');
 
-      timeline.resetPhase();
-      await quran_loader.QuranDataService.instance.ensureLoaded();
-      timeline.log('Phase4 quranFontData');
+      // QuranDataService is already loaded from Phase1 — no-op here.
     } catch (e) {
       logger.d('[LaunchApp] Phase4 error: $e');
     }

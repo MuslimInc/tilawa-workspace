@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import '../helpers/app_logger.dart';
 import '../services/quran_data_service.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
@@ -66,7 +65,6 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     BoxConstraints constraints,
     int pageNumber,
   ) {
-    final startTime = DateTime.now();
     final Orientation orientation = MediaQuery.orientationOf(context);
 
     QuranLayoutMetrics metrics;
@@ -86,13 +84,6 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       );
     } else {
       metrics = _calculatePortraitMetrics(constraints, pageNumber);
-    }
-
-    final Duration duration = DateTime.now().difference(startTime);
-    if (duration.inMilliseconds > 2) {
-      logger.d(
-        '[PageContent] StandardQuranLayoutStrategy: Metrics calculated in ${duration.inMilliseconds}ms',
-      );
     }
 
     return metrics;
@@ -160,9 +151,9 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         (headers * bannerHeight) +
         spacingHeight;
 
-    // We reserve a 16px safety margin to ensure full-page coverage while
+    // We reserve a 32px safety margin to ensure full-page coverage while
     // absorbing Flutter's sub-pixel TextSpan rounding accumulations.
-    final double safeHeightLimit = availableHeight - 16.0;
+    final double safeHeightLimit = availableHeight - 32.0;
 
     if (usedHeight < safeHeightLimit && pageNumber > 2) {
       final double extraHeight = safeHeightLimit - usedHeight;

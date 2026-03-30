@@ -19,8 +19,11 @@ class QuranFontLoaderEvent with _$QuranFontLoaderEvent {
 class QuranFontLoaderState with _$QuranFontLoaderState {
   const factory QuranFontLoaderState.initial() = _Initial;
   const factory QuranFontLoaderState.checking() = _Checking;
-  const factory QuranFontLoaderState.downloading(double progress) =
-      _Downloading;
+  const factory QuranFontLoaderState.downloading(
+    double progress, {
+    @Default(0.0) double speedKbps,
+    @Default(0) int etaSeconds,
+  }) = _Downloading;
   const factory QuranFontLoaderState.registering() = _Registering;
   const factory QuranFontLoaderState.success() = _Success;
   const factory QuranFontLoaderState.error(String message) = _Error;
@@ -46,18 +49,31 @@ class QuranFontLoaderBloc
     _Initialize event,
     Emitter<QuranFontLoaderState> emit,
   ) async {
+    final int t0 = DateTime.now().millisecondsSinceEpoch;
+    print('[FONT] _onInitialize start | t=${t0}ms');
+
     if (_loadQuranFontsToEngineUseCase.hasLoadedFontsToEngine) {
+      print('[FONT] fonts already loaded to engine → success | t=${DateTime.now().millisecondsSinceEpoch}ms');
       emit(const QuranFontLoaderState.success());
       return;
     }
 
     emit(const QuranFontLoaderState.checking());
+    print('[FONT] state=checking | t=${DateTime.now().millisecondsSinceEpoch}ms');
 
     try {
+      final int tCheck = DateTime.now().millisecondsSinceEpoch;
       final isDownloaded = await _checkFontsDownloadedUseCase();
+      print('[FONT] checkFontsDownloaded=$isDownloaded | took=${DateTime.now().millisecondsSinceEpoch - tCheck}ms');
+
       if (!isDownloaded) {
         emit(const QuranFontLoaderState.downloading(0));
+        print('[FONT] state=downloading(0%) | t=${DateTime.now().millisecondsSinceEpoch}ms');
+        final int tDownload = DateTime.now().millisecondsSinceEpoch;
         var lastEmittedProgress = 0.0;
+        // progress 0.0–0.8 = download phase, 0.8–1.0 = extract phase.
+        // Map download-phase progress back to 0–100% for speed/ETA calculation.
+        const double _downloadPhaseEnd = 0.8;
         await _downloadQuranFontsUseCase(
           onProgress: (progress) {
             if (isClosed) return;
@@ -65,16 +81,43 @@ class QuranFontLoaderBloc
             final lastPercent = (lastEmittedProgress * 100).floor();
             if (currentPercent > lastPercent || progress >= 1.0) {
               lastEmittedProgress = progress;
-              emit(QuranFontLoaderState.downloading(progress));
+              final int elapsedMs = DateTime.now().millisecondsSinceEpoch - tDownload;
+              double speedKbps = 0;
+              int etaSeconds = 0;
+              // Only compute speed/ETA during the download phase (progress ≤ 0.8).
+              if (progress <= _downloadPhaseEnd && elapsedMs > 0) {
+                final double downloadFraction = progress / _downloadPhaseEnd;
+                // Total zip is ~52444 KB; estimate received bytes from fraction.
+                const double totalKb = 52444.0;
+                final double receivedKb = downloadFraction * totalKb;
+                speedKbps = receivedKb / (elapsedMs / 1000);
+                if (speedKbps > 0) {
+                  final double remainingKb = totalKb - receivedKb;
+                  etaSeconds = (remainingKb / speedKbps).ceil();
+                }
+              }
+              print('[FONT] download progress=${(progress * 100).toStringAsFixed(1)}% | elapsed=${elapsedMs}ms | speed=${speedKbps.toStringAsFixed(0)}KB/s | eta=${etaSeconds}s');
+              emit(QuranFontLoaderState.downloading(
+                progress,
+                speedKbps: speedKbps,
+                etaSeconds: etaSeconds,
+              ));
             }
           },
         );
+        print('[FONT] download+extract done | total=${DateTime.now().millisecondsSinceEpoch - tDownload}ms');
       }
 
       emit(const QuranFontLoaderState.registering());
+      print('[FONT] state=registering | t=${DateTime.now().millisecondsSinceEpoch}ms');
+      final int tRegister = DateTime.now().millisecondsSinceEpoch;
       await _loadQuranFontsToEngineUseCase();
+      print('[FONT] registering done | took=${DateTime.now().millisecondsSinceEpoch - tRegister}ms');
+
       emit(const QuranFontLoaderState.success());
+      print('[FONT] state=success | total=${DateTime.now().millisecondsSinceEpoch - t0}ms');
     } catch (e) {
+      print('[FONT] ERROR: $e | t=${DateTime.now().millisecondsSinceEpoch}ms');
       emit(QuranFontLoaderState.error(e.toString()));
     }
   }
