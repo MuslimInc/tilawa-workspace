@@ -47,7 +47,9 @@ void main() {
           () => mockCheckFontsDownloadedUseCase(),
         ).thenAnswer((_) async => false);
         when(
-          () => mockLoadQuranFontsToEngineUseCase(),
+          () => mockLoadQuranFontsToEngineUseCase(
+            initialPageNumber: any(named: 'initialPageNumber'),
+          ),
         ).thenAnswer((_) async {});
 
         when(
@@ -72,7 +74,9 @@ void main() {
         });
         return bloc;
       },
-      act: (bloc) => bloc.add(const QuranFontLoaderEvent.initialize()),
+      act: (bloc) => bloc.add(
+        const QuranFontLoaderEvent.initialize(initialPageNumber: 118),
+      ),
       expect: () => [
         const QuranFontLoaderState.checking(),
         const QuranFontLoaderState.downloading(0),

@@ -42,6 +42,7 @@ abstract class QuranReaderState with _$QuranReaderState {
     @Default(QuranReaderStatus.initial) QuranReaderStatus status,
     SurahContentEntity? currentSurah,
     QuranPageEntity? currentPage,
+    int? initialPageHint,
     @Default({}) Map<int, QuranPageEntity> pages,
     @Default([]) List<AyahEntity> searchResults,
     @Default('') String searchQuery,
@@ -133,7 +134,12 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         );
       }
 
-      emit(state.copyWith(currentPage: cachedPage));
+      emit(
+        state.copyWith(
+          currentPage: cachedPage,
+          initialPageHint: cachedPage.pageNumber,
+        ),
+      );
       return;
     }
 
@@ -187,6 +193,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
           state.copyWith(
             status: QuranReaderStatus.loaded,
             currentPage: page,
+            initialPageHint: page.pageNumber,
             pages: newPages,
           ),
         );
@@ -239,10 +246,19 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       },
       (position) {
         if (position.page != null) {
+          emit(state.copyWith(initialPageHint: position.page));
           add(QuranReaderEvent.loadPage(position.page!));
         } else if (position.surahNumber != null) {
+          emit(
+            state.copyWith(
+              initialPageHint: _getStartPageForSurahUseCase.call(
+                position.surahNumber!,
+              ),
+            ),
+          );
           add(QuranReaderEvent.loadSurah(position.surahNumber!));
         } else {
+          emit(state.copyWith(initialPageHint: 1));
           add(const QuranReaderEvent.loadSurah(1));
         }
       },

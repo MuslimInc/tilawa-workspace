@@ -17,8 +17,9 @@ class QuranFontRepositoryImpl implements QuranFontRepository {
       _fontService.downloadFonts(onProgress: onProgress);
 
   @override
-  Future<void> loadFontsToEngine() => _fontService.loadFontsToEngine();
+  Future<void> loadFontsToEngine({required int initialPageNumber}) =>
+      _fontService.loadFontsToEngine(initialPageNumber: initialPageNumber);
 
   @override
-  bool get hasLoadedFontsToEngine => QuranFontService.hasLoadedFontsToEngine;
+  bool get hasLoadedFontsToEngine => _fontService.hasLoadedFontsToEngine;
 }

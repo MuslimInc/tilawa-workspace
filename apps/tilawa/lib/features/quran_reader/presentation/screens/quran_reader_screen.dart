@@ -14,7 +14,8 @@ import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/screens/share_composer_screen.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
-import '../../../audio_player/presentation/bloc/audio_player_bloc.dart' show AudioPlayerBloc;
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart'
+    show AudioPlayerBloc;
 import '../bloc/quran_reader_bloc.dart';
 import '../cubit/quran_settings_cubit.dart';
 import '../../domain/entities/entities.dart';
@@ -26,10 +27,12 @@ class QuranReaderScreen extends StatefulWidget {
     super.key,
     required this.surahNumber,
     this.initialAyah,
+    this.initialPageNumber,
   });
 
   final int surahNumber;
   final int? initialAyah;
+  final int? initialPageNumber;
 
   @override
   State<QuranReaderScreen> createState() => _QuranReaderScreenState();
@@ -84,8 +87,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   }
 
   int _resolveInitialPage(QuranReaderBloc bloc) {
+    final int explicitInitialPage = widget.initialPageNumber ?? 0;
+    if (explicitInitialPage > 0) return explicitInitialPage;
     final int inMemoryPage = bloc.state.currentPage?.pageNumber ?? 0;
     if (inMemoryPage > 0) return inMemoryPage;
+    final int hintedPage = bloc.state.initialPageHint ?? 0;
+    if (hintedPage > 0) return hintedPage;
     if (widget.surahNumber > 0) return getPageNumber(widget.surahNumber, 1);
     return 1;
   }

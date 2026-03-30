@@ -8,7 +8,8 @@ class LoadQuranFontsToEngineUseCase {
 
   final QuranFontRepository _repository;
 
-  Future<void> call() => _repository.loadFontsToEngine();
+  Future<void> call({required int initialPageNumber}) =>
+      _repository.loadFontsToEngine(initialPageNumber: initialPageNumber);
 
   bool get hasLoadedFontsToEngine => _repository.hasLoadedFontsToEngine;
 }

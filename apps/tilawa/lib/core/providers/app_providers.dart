@@ -66,9 +66,7 @@ class AppProviders {
     // Font Loader provider — lazy so font-checking I/O only runs when the
     // QuranFontLoaderScreen is first accessed, not at app startup.
     BlocProvider<QuranFontLoaderBloc>(
-      create: (context) =>
-          getIt<QuranFontLoaderBloc>()
-            ..add(const QuranFontLoaderEvent.initialize()),
+      create: (context) => getIt<QuranFontLoaderBloc>(),
     ),
 
     // Quran Reader provider — lazy so last-read loading only runs when the

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/quran_font_loader_bloc.dart';
+import '../bloc/quran_reader_bloc.dart';
 import 'quran_reader_screen.dart';
 
 /// Screen that ensures QCF4 fonts are downloaded and registered with the
@@ -12,7 +14,8 @@ import 'quran_reader_screen.dart';
 /// States:
 ///   initial / checking              → [_LoadingView]
 ///   downloading                     → [_DownloadView]
-///   registering / success           → [QuranReaderScreen] (registering shows a top banner)
+///   registering                     → [_LoadingView]
+///   success                         → [QuranReaderScreen]
 ///   error                           → [_ErrorView]
 class QuranFontLoaderScreen extends StatefulWidget {
   const QuranFontLoaderScreen({
@@ -32,19 +35,65 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
   // Lazily created and reused so that registering → success does NOT
   // destroy and recreate the reader widget (which would cause a double initState).
   Widget? _readerScreen;
+  int? _readerInitialPage;
+  int? _autoInitializedPage;
 
-  Widget get _reader {
-    _readerScreen ??= QuranReaderScreen(
+  Widget _readerForPage(int initialPageNumber) {
+    if (_readerScreen != null && _readerInitialPage == initialPageNumber) {
+      return _readerScreen!;
+    }
+    _readerInitialPage = initialPageNumber;
+    _readerScreen = QuranReaderScreen(
       surahNumber: widget.surahNumber,
       initialAyah: widget.initialAyah,
+      initialPageNumber: initialPageNumber,
     );
     return _readerScreen!;
   }
 
   @override
+  void didUpdateWidget(covariant QuranFontLoaderScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.surahNumber != widget.surahNumber ||
+        oldWidget.initialAyah != widget.initialAyah) {
+      _readerScreen = null;
+      _readerInitialPage = null;
+      _autoInitializedPage = null;
+    }
+  }
+
+  int? _resolveInitialPage(QuranReaderState readerState) {
+    if (widget.surahNumber > 0) {
+      return getPageNumber(widget.surahNumber, widget.initialAyah ?? 1);
+    }
+    return readerState.initialPageHint;
+  }
+
+  void _maybeInitializeFonts(int? initialPageNumber) {
+    if (initialPageNumber == null ||
+        _autoInitializedPage == initialPageNumber) {
+      return;
+    }
+    _autoInitializedPage = initialPageNumber;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      context.read<QuranFontLoaderBloc>().add(
+        QuranFontLoaderEvent.initialize(initialPageNumber: initialPageNumber),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final readerState = context.watch<QuranReaderBloc>().state;
+    final initialPageNumber = _resolveInitialPage(readerState);
+    _maybeInitializeFonts(initialPageNumber);
+
     return BlocConsumer<QuranFontLoaderBloc, QuranFontLoaderState>(
-      listenWhen: (_, current) => current.mapOrNull(error: (_) => true) ?? false,
+      listenWhen: (_, current) =>
+          current.mapOrNull(error: (_) => true) ?? false,
       listener: (context, state) {
         state.mapOrNull(
           error: (s) => ScaffoldMessenger.of(context).showSnackBar(
@@ -62,16 +111,15 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
         final isRegistering =
             state.mapOrNull(registering: (_) => true) ?? false;
 
-        if (isSuccess || isRegistering) {
-          // Keep the reader in a stable Stack slot so that registering→success
-          // does NOT change the widget's position in the element tree (which
-          // would remount it and cause a second initState).
-          return Stack(
-            children: [
-              _reader,
-              if (isRegistering) const _RegisteringBanner(),
-            ],
-          );
+        if (initialPageNumber == null) {
+          return const _FontLoaderScaffold(child: _LoadingView());
+        }
+
+        if (isSuccess) {
+          return _readerForPage(initialPageNumber);
+        }
+        if (isRegistering) {
+          return const _FontLoaderScaffold(child: _LoadingView());
         }
         if (downloading != null) {
           return _FontLoaderScaffold(
@@ -83,79 +131,19 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
           );
         }
         if (error != null) {
-          return _FontLoaderScaffold(child: _ErrorView(message: error.message));
+          return _FontLoaderScaffold(
+            child: _ErrorView(
+              message: error.message,
+              onRetry: () => context.read<QuranFontLoaderBloc>().add(
+                QuranFontLoaderEvent.initialize(
+                  initialPageNumber: initialPageNumber,
+                ),
+              ),
+            ),
+          );
         }
         return const _FontLoaderScaffold(child: _LoadingView());
       },
-    );
-  }
-}
-
-// ─── Banner: registering fonts in background ─────────────────────────────────
-
-class _RegisteringBanner extends StatelessWidget {
-  const _RegisteringBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceMedium,
-                vertical: tokens.spaceSmall,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.primaryColor,
-                    ),
-                  ),
-                  SizedBox(width: tokens.spaceSmall),
-                  Text(
-                    context.l10n.loadingQuran,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: tokens.opacityEmphasis,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -227,11 +215,7 @@ class _BrandIcon extends StatelessWidget {
         color: primary.withValues(alpha: tokens.opacitySubtle),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.menu_book_rounded,
-        size: 44,
-        color: primary,
-      ),
+      child: Icon(Icons.menu_book_rounded, size: 44, color: primary),
     );
   }
 }
@@ -388,10 +372,7 @@ class _DownloadView extends StatelessWidget {
                         label: _formatSpeed(speedKbps),
                       ),
                       if (eta.isNotEmpty)
-                        _StatChip(
-                          icon: Icons.timer_outlined,
-                          label: eta,
-                        ),
+                        _StatChip(icon: Icons.timer_outlined, label: eta),
                     ],
                   ),
                 ],
@@ -444,9 +425,10 @@ class _StatChip extends StatelessWidget {
 // ─── View: error ─────────────────────────────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message});
+  const _ErrorView({required this.message, required this.onRetry});
 
   final String message;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -489,9 +471,7 @@ class _ErrorView extends StatelessWidget {
           ),
           SizedBox(height: tokens.spaceExtraLarge),
           FilledButton.icon(
-            onPressed: () => context.read<QuranFontLoaderBloc>().add(
-              const QuranFontLoaderEvent.initialize(),
-            ),
+            onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
             label: Text(context.l10n.retry),
           ),
