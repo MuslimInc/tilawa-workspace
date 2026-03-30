@@ -186,7 +186,7 @@ class _PageContentState extends State<PageContent>
     }
 
     if (snapshotInputsChanged) {
-      print(
+      _debugLog(
         '[PERF] page ${widget.pageNumber} snapshot invalidated by didUpdateWidget',
       );
       _requestSnapshotRefresh(
@@ -216,7 +216,7 @@ class _PageContentState extends State<PageContent>
 
     if (orientation == Orientation.portrait &&
         !_snapshotController.allowSnapshotting) {
-      print(
+      _debugLog(
         '[PERF] page ${widget.pageNumber} didChangeDependencies → requesting snapshot refresh',
       );
       _requestSnapshotRefresh(
@@ -326,7 +326,7 @@ class _PageContentState extends State<PageContent>
     if (!_snapshotController.allowSnapshotting) {
       return;
     }
-    print('[PageContent] Disabling snapshot: $reason');
+    _debugLog('[PageContent] Disabling snapshot: $reason');
     _snapshotController.allowSnapshotting = false;
     _snapshotController.clear();
   }
@@ -379,7 +379,7 @@ class _PageContentState extends State<PageContent>
       if (shouldPrewarmBanner) {
         final prewarmStart = DateTime.now();
         await _prewarmBannerImage();
-        print(
+        _debugLog(
           '[PERF] page ${widget.pageNumber} banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
         );
         if (!mounted) {
@@ -387,7 +387,7 @@ class _PageContentState extends State<PageContent>
         }
       }
 
-      print('[PERF] page ${widget.pageNumber} snapshot ENABLED');
+      _debugLog('[PERF] page ${widget.pageNumber} snapshot ENABLED');
       _snapshotController.allowSnapshotting = true;
     });
   }
@@ -400,7 +400,9 @@ class _PageContentState extends State<PageContent>
       if (mounted) {
         _cachedPageMeta = _buildPageMeta(widget.pageNumber);
         _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
-        _cachedFirstLineIdx = _firstContentLineIndexFromLines(_cachedPageLines!);
+        _cachedFirstLineIdx = _firstContentLineIndexFromLines(
+          _cachedPageLines!,
+        );
         final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
         if (!hasBanner) {
           // Data is ready and no banner image decode needed — mark ready and
@@ -410,7 +412,7 @@ class _PageContentState extends State<PageContent>
           // that causes jank on non-banner pages on mid-range hardware.
           _isLoading = false;
           _snapshotController.allowSnapshotting = true;
-          print(
+          _debugLog(
             '[PERF] page ${widget.pageNumber} READY synchronously | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
           );
         } else {
@@ -439,7 +441,7 @@ class _PageContentState extends State<PageContent>
       });
     } catch (e) {
       if (mounted) {
-        debugPrint('Error loading Quran data: $e');
+        _debugLog('Error loading Quran data: $e');
         setState(() => _isLoading = false);
       }
     }
@@ -447,13 +449,13 @@ class _PageContentState extends State<PageContent>
 
   Future<void> _completeInitialPageLoad(DateTime startTime) async {
     final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
-    print(
+    _debugLog(
       '[PERF] page ${widget.pageNumber} _completeInitialPageLoad | hasBanner=$hasBanner | elapsed so far=${DateTime.now().difference(startTime).inMilliseconds}ms',
     );
     if (hasBanner) {
       final prewarmStart = DateTime.now();
       await _prewarmBannerImage();
-      print(
+      _debugLog(
         '[PERF] page ${widget.pageNumber} initial banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
       );
     }
@@ -461,7 +463,7 @@ class _PageContentState extends State<PageContent>
       return;
     }
     setState(() => _isLoading = false);
-    print(
+    _debugLog(
       '[PERF] page ${widget.pageNumber} READY (setState _isLoading=false) | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
     );
   }
@@ -672,7 +674,7 @@ class _PageContentState extends State<PageContent>
   Widget build(BuildContext context) {
     super.build(context);
     final buildStart = DateTime.now();
-    print(
+    _debugLog(
       '[PERF] build() called for page ${widget.pageNumber} | isLoading=$_isLoading | snapshot=${_snapshotController.allowSnapshotting}',
     );
 
@@ -709,7 +711,7 @@ class _PageContentState extends State<PageContent>
           constraints,
           widget.pageNumber,
         );
-        print(
+        _debugLog(
           '[PERF] page ${widget.pageNumber} LayoutBuilder fired | calculateMetrics=${DateTime.now().difference(metricsStart).inMilliseconds}ms | size=${constraints.maxWidth.toStringAsFixed(0)}x${constraints.maxHeight.toStringAsFixed(0)}',
         );
         final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
@@ -957,7 +959,7 @@ class _PageContentState extends State<PageContent>
           )
         : pageChrome;
 
-    print(
+    _debugLog(
       '[PERF] build() done for page ${widget.pageNumber} in ${DateTime.now().difference(buildStart).inMilliseconds}ms',
     );
     return SafeArea(maintainBottomViewPadding: true, child: result);
@@ -1155,6 +1157,13 @@ class _PageContentState extends State<PageContent>
     }
     return surahNumber.toString();
   }
+}
+
+void _debugLog(String message) {
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
 }
 
 class _WordSpanGroup {

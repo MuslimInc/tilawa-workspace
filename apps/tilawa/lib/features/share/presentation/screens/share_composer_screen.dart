@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -18,6 +17,8 @@ import '../share_progress_messages_l10n.dart';
 import '../utils/quran_share_text_formatter.dart';
 import '../utils/reel_page_specs.dart';
 import '../utils/share_ayah_range_utils.dart';
+import '../widgets/page_passage_card_renderer.dart';
+import '../widgets/reader_page_content_renderer.dart';
 import '../widgets/reel_content_renderer.dart';
 import '../widgets/share_poster_renderer.dart';
 
@@ -119,6 +120,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   ShareScreenshotLayout _screenshotLayout = ShareScreenshotLayout.readerPage;
   ShareDurationPreset _durationPreset = ShareDurationPreset.auto;
   final GlobalKey _posterBoundaryKey = GlobalKey();
+  final GlobalKey _readerPageBoundaryKey = GlobalKey();
   final List<GlobalKey> _reelBoundaryKeys = <GlobalKey>[];
 
   @override
@@ -151,6 +153,43 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   String get _arabicSurahName => getSurahNameArabic(widget.surahNumber);
 
   int get _verseCount => _toAyah - _fromAyah + 1;
+
+  List<int> get _currentPageSurahNumbers {
+    final List<int> surahNumbers = <int>[];
+    for (final Map<String, int?> entry in getPageData(widget.currentPage)) {
+      final int? surahNumber = entry['surah'];
+      if (surahNumber == null || surahNumbers.contains(surahNumber)) {
+        continue;
+      }
+      surahNumbers.add(surahNumber);
+    }
+    return surahNumbers;
+  }
+
+  bool get _hasMultipleSurahsOnPage => _currentPageSurahNumbers.length > 1;
+
+  bool get _usesPagePassageCard =>
+      _mode == ShareComposerMode.screenshot &&
+      _screenshotLayout == ShareScreenshotLayout.passageCard &&
+      _hasMultipleSurahsOnPage;
+
+  String get _currentPageArabicSurahNames =>
+      _currentPageSurahNumbers.map(getSurahNameArabic).join(' • ');
+
+  String get _currentPageEnglishSurahNames =>
+      _currentPageSurahNumbers.map(getSurahNameEnglish).join(' • ');
+
+  String get _effectivePreviewArabicSurahName =>
+      _usesPagePassageCard ? _currentPageArabicSurahNames : _arabicSurahName;
+
+  String get _effectiveShareSurahName => _usesPagePassageCard
+      ? (context.l10n.localeName == 'ar'
+            ? _currentPageArabicSurahNames
+            : _currentPageEnglishSurahNames)
+      : _surahName;
+
+  String get _effectiveShareArabicSurahName =>
+      _usesPagePassageCard ? _currentPageArabicSurahNames : _arabicSurahName;
 
   List<ReelPageSpec> get _reelPageSpecs => buildReelPageSpecs(
     surahNumber: widget.surahNumber,
@@ -212,11 +251,34 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
               top: -3000,
               child: RepaintBoundary(
                 key: _posterBoundaryKey,
-                child: SharePosterRenderer(
-                  surahNumber: widget.surahNumber,
-                  fromAyah: _fromAyah,
-                  toAyah: _toAyah,
-                  reciterName: state.reciterName ?? widget.reciterName,
+                child: _usesPagePassageCard
+                    ? PagePassageCardRenderer(
+                        pageNumber: widget.currentPage,
+                        arabicSurahNames: _currentPageArabicSurahNames,
+                        englishSurahNames: _currentPageEnglishSurahNames,
+                        reciterName: state.reciterName ?? widget.reciterName,
+                        uiTextDirection: Directionality.of(context),
+                      )
+                    : SharePosterRenderer(
+                        surahNumber: widget.surahNumber,
+                        fromAyah: _fromAyah,
+                        toAyah: _toAyah,
+                        reciterName: state.reciterName ?? widget.reciterName,
+                      ),
+              ),
+            ),
+            Positioned(
+              left: -4200,
+              top: -3000,
+              child: RepaintBoundary(
+                key: _readerPageBoundaryKey,
+                child: SizedBox(
+                  width: 1080,
+                  height: 1440,
+                  child: ReaderPageContentRenderer(
+                    pageNumber: widget.currentPage,
+                    uiTextDirection: Directionality.of(context),
+                  ),
                 ),
               ),
             ),
@@ -294,8 +356,9 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                         rangeIsValid: _isValidRange,
                         showVerseLimit: _enforcesVerseLimit,
                         reciterName: state.reciterName ?? widget.reciterName,
-                        arabicSurahName: _arabicSurahName,
+                        arabicSurahName: _effectivePreviewArabicSurahName,
                         currentPage: widget.currentPage,
+                        showVerseRangeControls: !_usesPagePassageCard,
                         errorMessage: state.status == ShareStatus.error
                             ? state.errorMessage
                             : null,
@@ -392,10 +455,17 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
               child: switch (_mode) {
                 ShareComposerMode.screenshot =>
                   _screenshotLayout == ShareScreenshotLayout.readerPage
-                      ? _ReaderPagePreview(
-                          bytes: widget.readerPreviewBytes,
+                      ? ReaderPageContentRenderer(
                           pageNumber: widget.currentPage,
-                          surahName: _surahName,
+                          uiTextDirection: Directionality.of(context),
+                        )
+                      : _usesPagePassageCard
+                      ? PagePassageCardRenderer(
+                          pageNumber: widget.currentPage,
+                          arabicSurahNames: _currentPageArabicSurahNames,
+                          englishSurahNames: _currentPageEnglishSurahNames,
+                          reciterName: reciterName,
+                          uiTextDirection: Directionality.of(context),
                         )
                       : SharePosterRenderer(
                           surahNumber: widget.surahNumber,
@@ -523,9 +593,9 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
             _screenshotLayout == ShareScreenshotLayout.readerPage;
         await cubit.prepareScreenshot(
           boundaryKey: useReaderCapture
-              ? widget.readerBoundaryKey
+              ? _readerPageBoundaryKey
               : _posterBoundaryKey,
-          surahName: _surahName,
+          surahName: _effectiveShareSurahName,
           pageNumber: widget.currentPage,
           appName: context.l10n.appTitle,
           sharedViaLabel: context.l10n.sharedViaTilawa,
@@ -606,7 +676,8 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   Future<void> _handleShareText({required String reciterName}) {
     final kind = switch (_mode) {
       ShareComposerMode.screenshot =>
-        _screenshotLayout == ShareScreenshotLayout.readerPage
+        _screenshotLayout == ShareScreenshotLayout.readerPage ||
+                _usesPagePassageCard
             ? QuranShareTextKind.screenshotPage
             : QuranShareTextKind.screenshotPassage,
       ShareComposerMode.audio => QuranShareTextKind.audio,
@@ -615,8 +686,8 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
 
     final text = buildQuranShareText(
       l10n: context.l10n,
-      surahName: _surahName,
-      arabicSurahName: _arabicSurahName,
+      surahName: _effectiveShareSurahName,
+      arabicSurahName: _effectiveShareArabicSurahName,
       kind: kind,
       currentPage: widget.currentPage,
       fromAyah: _fromAyah,
@@ -644,6 +715,7 @@ class _ComposerControls extends StatelessWidget {
     required this.reciterName,
     required this.arabicSurahName,
     required this.currentPage,
+    required this.showVerseRangeControls,
     required this.errorMessage,
     required this.progressLabel,
     required this.onModeChanged,
@@ -668,6 +740,7 @@ class _ComposerControls extends StatelessWidget {
   final String reciterName;
   final String arabicSurahName;
   final int currentPage;
+  final bool showVerseRangeControls;
   final String? errorMessage;
   final String? progressLabel;
   final ValueChanged<ShareComposerMode> onModeChanged;
@@ -763,8 +836,9 @@ class _ComposerControls extends StatelessWidget {
             ],
           ),
         ],
-        if (mode != ShareComposerMode.screenshot ||
-            screenshotLayout == ShareScreenshotLayout.passageCard) ...[
+        if (showVerseRangeControls &&
+            (mode != ShareComposerMode.screenshot ||
+                screenshotLayout == ShareScreenshotLayout.passageCard)) ...[
           const SizedBox(height: 16),
           TilawaSectionTitle(title: context.l10n.verses),
           const SizedBox(height: 10),
@@ -1170,68 +1244,6 @@ class _ReelReviewPreview extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-class _ReaderPagePreview extends StatelessWidget {
-  const _ReaderPagePreview({
-    required this.bytes,
-    required this.pageNumber,
-    required this.surahName,
-  });
-
-  final Uint8List? bytes;
-  final int pageNumber;
-  final String surahName;
-
-  @override
-  Widget build(BuildContext context) {
-    if (bytes == null) {
-      return DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF7F1E1), Color(0xFFEADCB9)],
-          ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.menu_book_rounded,
-                  size: 48,
-                  color: Color(0xFF0B342E),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  surahName,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.amiri(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0B342E),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '${context.l10n.page} $pageNumber',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: const Color(0xFF355B54),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Image.memory(bytes!, fit: BoxFit.cover);
   }
 }
 

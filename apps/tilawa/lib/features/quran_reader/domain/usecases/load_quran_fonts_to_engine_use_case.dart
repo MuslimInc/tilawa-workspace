@@ -11,5 +11,8 @@ class LoadQuranFontsToEngineUseCase {
   Future<void> call({required int initialPageNumber}) =>
       _repository.loadFontsToEngine(initialPageNumber: initialPageNumber);
 
+  Future<void> ensurePageWindowLoaded({required int pageNumber}) =>
+      _repository.ensureFontsForPageWindow(pageNumber: pageNumber);
+
   bool get hasLoadedFontsToEngine => _repository.hasLoadedFontsToEngine;
 }

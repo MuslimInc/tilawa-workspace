@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
@@ -16,6 +17,7 @@ import 'package:tilawa/features/share/presentation/screens/share_composer_screen
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
+import '../bloc/quran_font_loader_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../cubit/quran_settings_cubit.dart';
 import '../../domain/entities/entities.dart';
@@ -47,12 +49,15 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   late final GlobalKey _screenshotBoundaryKey;
   bool _didInitDependencies = false;
   bool _isProgrammaticJump = false;
+  bool _allowSystemPop = false;
+  Future<void>? _pendingExitPreparation;
 
   static const _headerFontSizeMultiplier = 0.57;
 
   // Cached to avoid subscribing this State as a Theme.of dependent.
   ThemeData? _cachedThemeData;
   QuranReaderTheme? _cachedReaderTheme;
+  SystemUiOverlayStyle? _cachedAppSystemUiStyle;
 
   @override
   void initState() {
@@ -108,6 +113,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
         scaffoldBackgroundColor: incomingReaderTheme.pageBackground,
       );
     }
+    _cachedAppSystemUiStyle = _buildAppSystemUiOverlayStyle(incomingTheme);
     if (!_didInitDependencies) {
       _didInitDependencies = true;
       _updateSystemUiConfig(_uiVisibilityCubit.state);
@@ -116,6 +122,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
   @override
   void dispose() {
+    _debugLog('[READER_EXIT] dispose');
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     _currentPageNotifier.dispose();
@@ -124,7 +131,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    _restoreAppSystemUiMode();
+    if (_pendingExitPreparation == null) {
+      _debugLog('[READER_EXIT] dispose fallback restore');
+      unawaited(_restoreAppSystemUiMode());
+    } else {
+      _debugLog('[READER_EXIT] dispose skips duplicate restore');
+    }
     _uiVisibilityCubit.show();
     disposeSideEffects();
     super.dispose();
@@ -141,6 +153,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   }
 
   void _updateSystemUiConfig(bool isVisible) {
+    _debugLog(
+      '[READER_EXIT] apply immersiveSticky | overlaysVisible=$isVisible',
+    );
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     final readerTheme = QuranReaderTheme.of(context);
     SystemChrome.setSystemUIOverlayStyle(
@@ -157,59 +172,155 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     );
   }
 
-  void _restoreAppSystemUiMode() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle());
+  SystemUiOverlayStyle _buildAppSystemUiOverlayStyle(ThemeData theme) {
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Brightness iconBrightness = isDark
+        ? Brightness.light
+        : Brightness.dark;
+    final Brightness statusBarBrightness = isDark
+        ? Brightness.dark
+        : Brightness.light;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: const Color(0x00000000),
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: statusBarBrightness,
+      systemNavigationBarColor: const Color(0x00000000),
+      systemNavigationBarDividerColor: const Color(0x00000000),
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
+  Future<void> _prepareForExit() {
+    if (_pendingExitPreparation != null) {
+      _debugLog('[READER_EXIT] reuse pending exit preparation');
+    } else {
+      _debugLog('[READER_EXIT] prepareForExit requested');
+    }
+    return _pendingExitPreparation ??= _restoreAppSystemUiMode(
+      waitForSystemUiFrame: true,
+    );
+  }
+
+  Future<void> _handleExitRequest() async {
+    _debugLog(
+      '[READER_EXIT] handleExitRequest | allowSystemPop=$_allowSystemPop',
+    );
+    if (_allowSystemPop) {
+      return;
+    }
+
+    await _prepareForExit();
+    _debugLog('[READER_EXIT] exit preparation completed');
+    if (!mounted) {
+      _debugLog('[READER_EXIT] widget unmounted before pop');
+      return;
+    }
+
+    setState(() {
+      _allowSystemPop = true;
+    });
+    _debugLog('[READER_EXIT] allowSystemPop=true');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        _debugLog('[READER_EXIT] widget unmounted before maybePop');
+        return;
+      }
+      _debugLog('[READER_EXIT] maybePop requested');
+      Navigator.of(context).maybePop();
+    });
+  }
+
+  Future<void> _restoreAppSystemUiMode({
+    bool waitForSystemUiFrame = false,
+  }) async {
+    _debugLog(
+      '[READER_EXIT] restoreAppSystemUiMode start | waitForSystemUiFrame=$waitForSystemUiFrame',
+    );
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _debugLog('[READER_EXIT] edgeToEdge applied');
+    SystemChrome.setSystemUIOverlayStyle(
+      _cachedAppSystemUiStyle ?? const SystemUiOverlayStyle(),
+    );
+    _debugLog(
+      '[READER_EXIT] overlay style restored | navIconBrightness=${_cachedAppSystemUiStyle?.systemNavigationBarIconBrightness}',
+    );
+    if (waitForSystemUiFrame) {
+      await SchedulerBinding.instance.endOfFrame;
+      _debugLog('[READER_EXIT] waited for endOfFrame after restore');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final readerTheme = _cachedReaderTheme!;
 
-    return Theme(
-      data: _cachedThemeData!,
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: const Color(0x00000000),
-          systemNavigationBarColor: const Color(0x00000000),
-          systemNavigationBarDividerColor: const Color(0x00000000),
-          statusBarIconBrightness: readerTheme.statusBarIconBrightness,
-          statusBarBrightness: readerTheme.statusBarBrightness,
-          systemNavigationBarIconBrightness:
-              readerTheme.statusBarIconBrightness,
-          systemStatusBarContrastEnforced: false,
-          systemNavigationBarContrastEnforced: false,
-        ),
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<UiVisibilityCubit, bool>(
-              listener: (context, isVisible) {
-                _updateSystemUiConfig(isVisible);
-                _showOverlaysNotifier.value = !isVisible;
-              },
-            ),
-            BlocListener<QuranReaderBloc, QuranReaderState>(
-              listenWhen: (previous, current) =>
-                  previous.currentPage != current.currentPage &&
-                  current.currentPage != null,
-              listener: (context, state) {
-                if (_isProgrammaticJump) return;
-                _syncToPage(state.currentPage!.pageNumber);
-              },
-            ),
-          ],
-          child: _buildStack(readerTheme),
+    return PopScope(
+      canPop: _allowSystemPop,
+      onPopInvokedWithResult: (didPop, result) {
+        _debugLog(
+          '[READER_EXIT] onPopInvoked | didPop=$didPop | allowSystemPop=$_allowSystemPop',
+        );
+        if (didPop || _allowSystemPop) {
+          return;
+        }
+        unawaited(_handleExitRequest());
+      },
+      child: Theme(
+        data: _cachedThemeData!,
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: const Color(0x00000000),
+            systemNavigationBarColor: const Color(0x00000000),
+            systemNavigationBarDividerColor: const Color(0x00000000),
+            statusBarIconBrightness: readerTheme.statusBarIconBrightness,
+            statusBarBrightness: readerTheme.statusBarBrightness,
+            systemNavigationBarIconBrightness:
+                readerTheme.statusBarIconBrightness,
+            systemStatusBarContrastEnforced: false,
+            systemNavigationBarContrastEnforced: false,
+          ),
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<UiVisibilityCubit, bool>(
+                listener: (context, isVisible) {
+                  _updateSystemUiConfig(isVisible);
+                  _showOverlaysNotifier.value = !isVisible;
+                },
+              ),
+              BlocListener<QuranReaderBloc, QuranReaderState>(
+                listenWhen: (previous, current) =>
+                    previous.currentPage != current.currentPage &&
+                    current.currentPage != null,
+                listener: (context, state) {
+                  if (_isProgrammaticJump) return;
+                  unawaited(_syncToPage(state.currentPage!.pageNumber));
+                },
+              ),
+            ],
+            child: _buildStack(readerTheme),
+          ),
         ),
       ),
     );
   }
 
-  void _syncToPage(int pageNumber) {
+  Future<void> _syncToPage(int pageNumber) async {
     if (pageNumber == _currentPageNotifier.value &&
         _pageController.hasClients &&
         (_pageController.page ?? _pageController.initialPage.toDouble())
                 .round() ==
             pageNumber - 1) {
+      return;
+    }
+
+    await context.read<QuranFontLoaderBloc>().ensurePageWindowLoaded(
+      pageNumber,
+    );
+    if (!mounted) {
       return;
     }
 
@@ -260,7 +371,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                     juzLabel: context.l10n.juzPart,
                     hizbLabel: context.l10n.hizb,
                     surahNameBuilder: _getSurahName,
-                    onSurahSelected: _jumpToSurah,
+                    onSurahSelected: (surahNumber) =>
+                        unawaited(_jumpToSurah(surahNumber)),
                     onShowIndex: _handleShowIndex,
                     showOverlaysListenable: _showOverlaysNotifier,
                   ),
@@ -290,7 +402,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
               builder: (context, currentPage, _) {
                 return PageNavigationBar(
                   currentPage: currentPage,
-                  onPageChanged: _jumpToPage,
+                  onPageChanged: (pageNumber) =>
+                      unawaited(_jumpToPage(pageNumber)),
                   onShowIndex: () => _showSurahIndex(context),
                   onShare: () => _showShareOptions(context, currentPage),
                 );
@@ -364,7 +477,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       builder: (context) => SurahIndexSheet(
         onSurahSelected: (surahNumber) {
           Navigator.of(context).pop();
-          _jumpToSurah(surahNumber, animate: true);
+          unawaited(_jumpToSurah(surahNumber, animate: true));
         },
       ),
     );
@@ -386,17 +499,36 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
         : getSurahNameEnglish(surahNumber);
   }
 
-  void _jumpToSurah(int surahNumber, {bool animate = false}) {
-    _jumpToPage(getPageNumber(surahNumber, 1));
+  Future<void> _jumpToSurah(int surahNumber, {bool animate = false}) {
+    return _jumpToPage(getPageNumber(surahNumber, 1));
   }
 
-  void _jumpToPage(int pageNumber) {
+  Future<void> _jumpToPage(int pageNumber) async {
     _isProgrammaticJump = true;
-    _currentPageNotifier.value = pageNumber;
-    if (_pageController.hasClients) {
-      _pageController.jumpToPage(pageNumber - 1);
+    try {
+      await context.read<QuranFontLoaderBloc>().ensurePageWindowLoaded(
+        pageNumber,
+      );
+      if (!mounted) {
+        return;
+      }
+      _currentPageNotifier.value = pageNumber;
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(pageNumber - 1);
+      }
+      context.read<QuranReaderBloc>().add(
+        QuranReaderEvent.loadPage(pageNumber),
+      );
+    } finally {
+      _isProgrammaticJump = false;
     }
-    context.read<QuranReaderBloc>().add(QuranReaderEvent.loadPage(pageNumber));
-    Future.microtask(() => _isProgrammaticJump = false);
   }
+}
+
+void _debugLog(String message) {
+  assert(() {
+    final int timestamp = DateTime.now().millisecondsSinceEpoch;
+    debugPrint('$message | t=${timestamp}ms');
+    return true;
+  }());
 }

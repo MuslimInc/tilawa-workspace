@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -9,7 +10,7 @@ import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 part 'quran_font_loader_bloc.freezed.dart';
 
 @freezed
-class QuranFontLoaderEvent with _$QuranFontLoaderEvent {
+abstract class QuranFontLoaderEvent with _$QuranFontLoaderEvent {
   const factory QuranFontLoaderEvent.initialize({
     required int initialPageNumber,
   }) = _Initialize;
@@ -18,7 +19,7 @@ class QuranFontLoaderEvent with _$QuranFontLoaderEvent {
 }
 
 @freezed
-class QuranFontLoaderState with _$QuranFontLoaderState {
+abstract class QuranFontLoaderState with _$QuranFontLoaderState {
   const factory QuranFontLoaderState.initial() = _Initial;
   const factory QuranFontLoaderState.checking() = _Checking;
   const factory QuranFontLoaderState.downloading(
@@ -47,15 +48,21 @@ class QuranFontLoaderBloc
   final DownloadQuranFontsUseCase _downloadQuranFontsUseCase;
   final LoadQuranFontsToEngineUseCase _loadQuranFontsToEngineUseCase;
 
+  Future<void> ensurePageWindowLoaded(int pageNumber) {
+    return _loadQuranFontsToEngineUseCase.ensurePageWindowLoaded(
+      pageNumber: pageNumber,
+    );
+  }
+
   Future<void> _onInitialize(
     _Initialize event,
     Emitter<QuranFontLoaderState> emit,
   ) async {
     final int t0 = DateTime.now().millisecondsSinceEpoch;
-    print('[FONT] _onInitialize start | t=${t0}ms');
+    _debugLog('[FONT] _onInitialize start | t=${t0}ms');
 
     if (_loadQuranFontsToEngineUseCase.hasLoadedFontsToEngine) {
-      print(
+      _debugLog(
         '[FONT] fonts already loaded to engine → success | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
       emit(const QuranFontLoaderState.success());
@@ -63,20 +70,20 @@ class QuranFontLoaderBloc
     }
 
     emit(const QuranFontLoaderState.checking());
-    print(
+    _debugLog(
       '[FONT] state=checking | t=${DateTime.now().millisecondsSinceEpoch}ms',
     );
 
     try {
       final int tCheck = DateTime.now().millisecondsSinceEpoch;
       final isDownloaded = await _checkFontsDownloadedUseCase();
-      print(
+      _debugLog(
         '[FONT] checkFontsDownloaded=$isDownloaded | took=${DateTime.now().millisecondsSinceEpoch - tCheck}ms',
       );
 
       if (!isDownloaded) {
         emit(const QuranFontLoaderState.downloading(0));
-        print(
+        _debugLog(
           '[FONT] state=downloading(0%) | t=${DateTime.now().millisecondsSinceEpoch}ms',
         );
         final int tDownload = DateTime.now().millisecondsSinceEpoch;
@@ -109,7 +116,7 @@ class QuranFontLoaderBloc
                   etaSeconds = (remainingKb / speedKbps).ceil();
                 }
               }
-              print(
+              _debugLog(
                 '[FONT] download progress=${(progress * 100).toStringAsFixed(1)}% | elapsed=${elapsedMs}ms | speed=${speedKbps.toStringAsFixed(0)}KB/s | eta=${etaSeconds}s',
               );
               emit(
@@ -122,29 +129,31 @@ class QuranFontLoaderBloc
             }
           },
         );
-        print(
+        _debugLog(
           '[FONT] download+extract done | total=${DateTime.now().millisecondsSinceEpoch - tDownload}ms',
         );
       }
 
       emit(const QuranFontLoaderState.registering());
-      print(
+      _debugLog(
         '[FONT] state=registering | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
       final int tRegister = DateTime.now().millisecondsSinceEpoch;
       await _loadQuranFontsToEngineUseCase(
         initialPageNumber: event.initialPageNumber,
       );
-      print(
+      _debugLog(
         '[FONT] registering done | took=${DateTime.now().millisecondsSinceEpoch - tRegister}ms',
       );
 
       emit(const QuranFontLoaderState.success());
-      print(
+      _debugLog(
         '[FONT] state=success | total=${DateTime.now().millisecondsSinceEpoch - t0}ms',
       );
     } catch (e) {
-      print('[FONT] ERROR: $e | t=${DateTime.now().millisecondsSinceEpoch}ms');
+      _debugLog(
+        '[FONT] ERROR: $e | t=${DateTime.now().millisecondsSinceEpoch}ms',
+      );
       emit(QuranFontLoaderState.error(e.toString()));
     }
   }
@@ -155,4 +164,11 @@ class QuranFontLoaderBloc
   ) {
     emit(QuranFontLoaderState.downloading(event.progress));
   }
+}
+
+void _debugLog(String message) {
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
 }

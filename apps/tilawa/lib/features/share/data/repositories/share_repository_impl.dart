@@ -38,6 +38,7 @@ class ShareRepositoryImpl implements ShareRepository {
     required String sharedViaLabel,
     bool brandCapture = true,
   }) async {
+    await WidgetsBinding.instance.endOfFrame;
     final filePath = brandCapture
         ? await _screenshotService.captureAndBrand(
             boundaryKey: boundaryKey,

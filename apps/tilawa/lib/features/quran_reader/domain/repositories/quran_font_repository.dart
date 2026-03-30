@@ -12,6 +12,9 @@ abstract class QuranFontRepository {
   /// warming the remaining page fonts in the background.
   Future<void> loadFontsToEngine({required int initialPageNumber});
 
+  /// Ensures the current page window is ready before a programmatic jump.
+  Future<void> ensureFontsForPageWindow({required int pageNumber});
+
   /// Returns true if fonts have already been loaded to engine in this session.
   bool get hasLoadedFontsToEngine;
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -63,7 +64,7 @@ class QuranFontService {
   /// Downloads the font zip from the server, extracts it, and saves it locally.
   Future<void> downloadFonts({Function(double)? onProgress}) async {
     if (await areFontsDownloaded()) {
-      print('[FONT] downloadFonts: already downloaded, skipping');
+      _debugLog('[FONT] downloadFonts: already downloaded, skipping');
       return;
     }
 
@@ -72,7 +73,9 @@ class QuranFontService {
 
     // 1. Download Zip
     final int tDownloadStart = DateTime.now().millisecondsSinceEpoch;
-    print('[FONT] download start | url=$_fontZipUrl | t=${tDownloadStart}ms');
+    _debugLog(
+      '[FONT] download start | url=$_fontZipUrl | t=${tDownloadStart}ms',
+    );
     var lastLoggedPercent = -1;
     try {
       await _dio.download(
@@ -91,7 +94,7 @@ class QuranFontService {
               final double kbps = elapsed > 0
                   ? (received / 1024) / (elapsed / 1000)
                   : 0;
-              print(
+              _debugLog(
                 '[FONT] download $pct% | received=${(received / 1024).toStringAsFixed(0)}KB / total=${(total / 1024).toStringAsFixed(0)}KB | speed=${kbps.toStringAsFixed(0)}KB/s | elapsed=${elapsed}ms',
               );
             }
@@ -99,7 +102,7 @@ class QuranFontService {
         },
       );
     } catch (e) {
-      print(
+      _debugLog(
         '[FONT] download FAILED after ${DateTime.now().millisecondsSinceEpoch - tDownloadStart}ms | error=$e',
       );
       if (zipFile.existsSync()) {
@@ -107,7 +110,7 @@ class QuranFontService {
       }
       throw Exception('Failed to download fonts: $e');
     }
-    print(
+    _debugLog(
       '[FONT] download complete | took=${DateTime.now().millisecondsSinceEpoch - tDownloadStart}ms | zipSize=${zipFile.existsSync() ? (zipFile.lengthSync() / 1024).toStringAsFixed(0) : "?"}KB',
     );
 
@@ -116,19 +119,19 @@ class QuranFontService {
       onProgress(0.85); // Extraction phase started
     }
     final int tExtractStart = DateTime.now().millisecondsSinceEpoch;
-    print('[FONT] extraction start | t=${tExtractStart}ms');
+    _debugLog('[FONT] extraction start | t=${tExtractStart}ms');
 
     try {
       final Uint8List bytes = await zipFile.readAsBytes();
-      print(
+      _debugLog(
         '[FONT] zip read into memory | ${(bytes.length / 1024).toStringAsFixed(0)}KB | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
       final Archive archive = ZipDecoder().decodeBytes(bytes);
-      print(
+      _debugLog(
         '[FONT] zip decoded | ${archive.length} entries | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
 
-      int extracted = 0;
+      var extracted = 0;
       for (final file in archive) {
         final String filename = file.name;
         if (file.isFile &&
@@ -143,17 +146,17 @@ class QuranFontService {
           await outFile.writeAsBytes(file.content as List<int>);
           extracted++;
           if (extracted % 100 == 0) {
-            print(
+            _debugLog(
               '[FONT] extracted $extracted files | t=${DateTime.now().millisecondsSinceEpoch}ms',
             );
           }
         }
       }
-      print(
+      _debugLog(
         '[FONT] extraction complete | $extracted files | took=${DateTime.now().millisecondsSinceEpoch - tExtractStart}ms',
       );
     } catch (e) {
-      print(
+      _debugLog(
         '[FONT] extraction FAILED after ${DateTime.now().millisecondsSinceEpoch - tExtractStart}ms | error=$e',
       );
       throw Exception('Failed to extract fonts: $e');
@@ -179,18 +182,20 @@ class QuranFontService {
     if (_fontsLoadedToEngine) return;
 
     final int tStart = DateTime.now().millisecondsSinceEpoch;
-    print(
+    _debugLog(
       '[FONT] loadFontsToEngine start | page=$initialPageNumber | t=${tStart}ms',
     );
 
     final Map<String, File> fontFilesByFamily = await _getFontFilesByFamily();
     if (fontFilesByFamily.isEmpty) {
-      print('[FONT] loadFontsToEngine: fonts directory not found!');
+      _debugLog('[FONT] loadFontsToEngine: fonts directory not found!');
       return;
     }
 
-    final priorityFamilies = _buildPriorityFamilies(initialPageNumber);
-    print(
+    final List<String> priorityFamilies = _buildPriorityFamilies(
+      initialPageNumber,
+    );
+    _debugLog(
       '[FONT] priority families=${priorityFamilies.join(",")} | loaded=${_loadedFontFamilies.length}/${fontFilesByFamily.length}',
     );
 
@@ -201,7 +206,7 @@ class QuranFontService {
       batchSize: priorityFamilies.length,
       phaseLabel: 'priority',
     );
-    print(
+    _debugLog(
       '[FONT] priority load done | took=${DateTime.now().millisecondsSinceEpoch - tPriority}ms',
     );
 
@@ -210,8 +215,23 @@ class QuranFontService {
       initialPageNumber: initialPageNumber,
     );
 
-    print(
+    _debugLog(
       '[FONT] loadFontsToEngine DONE | priorityOnly=true | total=${DateTime.now().millisecondsSinceEpoch - tStart}ms',
+    );
+  }
+
+  Future<void> ensureFontsForPageWindow({required int pageNumber}) async {
+    final Map<String, File> fontFilesByFamily = await _getFontFilesByFamily();
+    if (fontFilesByFamily.isEmpty) {
+      return;
+    }
+
+    final List<String> pageWindowFamilies = _buildPriorityFamilies(pageNumber);
+    await _loadFamilies(
+      families: pageWindowFamilies,
+      fontFilesByFamily: fontFilesByFamily,
+      batchSize: pageWindowFamilies.length,
+      phaseLabel: 'ensure',
     );
   }
 
@@ -221,13 +241,13 @@ class QuranFontService {
     }
 
     final String path = await _localPath;
-    final Directory dir = Directory(path);
+    final dir = Directory(path);
     if (!dir.existsSync()) {
       return const <String, File>{};
     }
 
     final List<FileSystemEntity> files = dir.listSync();
-    final Map<String, File> fontFilesByFamily = <String, File>{};
+    final fontFilesByFamily = <String, File>{};
 
     for (final entity in files) {
       if (entity is! File) {
@@ -243,7 +263,7 @@ class QuranFontService {
     }
 
     _fontFilesByFamily = fontFilesByFamily;
-    print(
+    _debugLog(
       '[FONT] indexed ${fontFilesByFamily.length} page fonts | t=${DateTime.now().millisecondsSinceEpoch}ms',
     );
     return fontFilesByFamily;
@@ -262,7 +282,7 @@ class QuranFontService {
   }
 
   List<String> _buildPriorityFamilies(int initialPageNumber) {
-    final Set<String> families = <String>{};
+    final families = <String>{};
     void addPage(int pageNumber) {
       if (pageNumber < 1 || pageNumber > _totalFonts) {
         return;
@@ -282,16 +302,16 @@ class QuranFontService {
   }
 
   List<String> _buildBackgroundFamilies(int initialPageNumber) {
-    final List<int> orderedPages =
-        List<int>.generate(_totalFonts, (index) => index + 1)..sort((a, b) {
-          final int distanceCompare = (a - initialPageNumber).abs().compareTo(
-            (b - initialPageNumber).abs(),
-          );
-          if (distanceCompare != 0) {
-            return distanceCompare;
-          }
-          return a.compareTo(b);
-        });
+    final orderedPages = List<int>.generate(_totalFonts, (index) => index + 1)
+      ..sort((a, b) {
+        final int distanceCompare = (a - initialPageNumber).abs().compareTo(
+          (b - initialPageNumber).abs(),
+        );
+        if (distanceCompare != 0) {
+          return distanceCompare;
+        }
+        return a.compareTo(b);
+      });
 
     return orderedPages.map(_pageFamily).toList(growable: false);
   }
@@ -312,11 +332,13 @@ class QuranFontService {
         .toList(growable: false);
 
     if (pendingFamilies.isEmpty) {
-      print('[FONT] $phaseLabel load skipped | all requested families ready');
+      _debugLog(
+        '[FONT] $phaseLabel load skipped | all requested families ready',
+      );
       return;
     }
 
-    final int safeBatchSize = batchSize <= 0 ? 1 : batchSize;
+    final safeBatchSize = batchSize <= 0 ? 1 : batchSize;
     final int batchCount = (pendingFamilies.length / safeBatchSize).ceil();
     final int tStart = DateTime.now().millisecondsSinceEpoch;
 
@@ -333,7 +355,7 @@ class QuranFontService {
           ),
         ),
       );
-      print(
+      _debugLog(
         '[FONT] $phaseLabel batch ${i ~/ safeBatchSize + 1}/$batchCount (fonts ${i + 1}–$end) | elapsed=${DateTime.now().millisecondsSinceEpoch - tStart}ms',
       );
 
@@ -369,7 +391,7 @@ class QuranFontService {
     required File file,
   }) async {
     final Uint8List bytes = await file.readAsBytes();
-    final FontLoader fontLoader = FontLoader(family);
+    final fontLoader = FontLoader(family);
     fontLoader.addFont(Future<ByteData>.value(ByteData.view(bytes.buffer)));
     await fontLoader.load();
     _loadedFontFamilies.add(family);
@@ -389,11 +411,18 @@ class QuranFontService {
         yieldBetweenBatches: true,
       );
       _fontsLoadedToEngine = true;
-      print(
+      _debugLog(
         '[FONT] background warm-up DONE | totalLoaded=${_loadedFontFamilies.length}/${fontFilesByFamily.length}',
       );
     } finally {
       _backgroundWarmUpFuture = null;
     }
   }
+}
+
+void _debugLog(String message) {
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
 }

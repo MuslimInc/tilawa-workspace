@@ -142,7 +142,7 @@ class _QuranPageViewState extends State<QuranPageView> {
           allowImplicitScrolling: true,
           onPageChanged: (index) {
             final int pageNumber = index + 1;
-            print(
+            _debugLog(
               '[PERF] onPageChanged → page $pageNumber at ${DateTime.now().millisecondsSinceEpoch}ms',
             );
             widget.onPageChanged?.call(pageNumber);
@@ -176,4 +176,11 @@ class _QuranPageViewState extends State<QuranPageView> {
       ),
     );
   }
+}
+
+void _debugLog(String message) {
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
 }

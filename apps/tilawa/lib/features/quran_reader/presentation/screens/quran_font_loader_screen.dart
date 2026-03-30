@@ -62,11 +62,13 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
     }
   }
 
-  int? _resolveInitialPage(QuranReaderState readerState) {
+  int? _resolveInitialPage(BuildContext context) {
     if (widget.surahNumber > 0) {
       return getPageNumber(widget.surahNumber, widget.initialAyah ?? 1);
     }
-    return readerState.initialPageHint;
+    return context.select<QuranReaderBloc, int?>(
+      (bloc) => bloc.state.initialPageHint,
+    );
   }
 
   void _maybeInitializeFonts(int? initialPageNumber) {
@@ -87,8 +89,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final readerState = context.watch<QuranReaderBloc>().state;
-    final initialPageNumber = _resolveInitialPage(readerState);
+    final initialPageNumber = _resolveInitialPage(context);
     _maybeInitializeFonts(initialPageNumber);
 
     return BlocConsumer<QuranFontLoaderBloc, QuranFontLoaderState>(
