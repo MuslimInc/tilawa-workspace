@@ -91,6 +91,11 @@ class _PageContentState extends State<PageContent>
   // Cached once after data loads; invalidated when pageNumber changes.
   _PageMetaInfo? _cachedPageMeta;
 
+  // Line data is deterministic for a given pageNumber — cache to avoid
+  // re-querying QuranDataService on every build() call.
+  List<List<Map<String, dynamic>>>? _cachedPageLines;
+  int _cachedFirstLineIdx = 0;
+
   /// Caches the rendered page as a raster image after first paint so that
   /// subsequent frames during swipe animation composite a cached bitmap
   /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
@@ -164,6 +169,8 @@ class _PageContentState extends State<PageContent>
     if (oldWidget.pageNumber != widget.pageNumber) {
       // Invalidate all page-specific cached state.
       _cachedPageMeta = null;
+      _cachedPageLines = null;
+      _cachedFirstLineIdx = 0;
       _specialLinesCache.remove(oldWidget.pageNumber);
       _specialLinesCache.remove(widget.pageNumber);
       _disposeWordRecognizers();
@@ -392,6 +399,8 @@ class _PageContentState extends State<PageContent>
     if (dataService.isLoaded) {
       if (mounted) {
         _cachedPageMeta = _buildPageMeta(widget.pageNumber);
+        _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
+        _cachedFirstLineIdx = _firstContentLineIndexFromLines(_cachedPageLines!);
         final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
         if (!hasBanner) {
           // Data is ready and no banner image decode needed — mark ready and
@@ -422,6 +431,8 @@ class _PageContentState extends State<PageContent>
       }
 
       _cachedPageMeta = _buildPageMeta(widget.pageNumber);
+      _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
+      _cachedFirstLineIdx = _firstContentLineIndexFromLines(_cachedPageLines!);
       // Same deferral for the async-load path.
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _completeInitialPageLoad(startTime);
@@ -669,13 +680,10 @@ class _PageContentState extends State<PageContent>
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Fetch line data once — does not depend on layout constraints.
-    final List<List<Map<String, dynamic>>> pageLines = _getWordsGroupedByLine(
-      widget.pageNumber,
-    );
+    final List<List<Map<String, dynamic>>> pageLines = _cachedPageLines!;
     final _PageMetaInfo pageMeta =
         _cachedPageMeta ?? _buildPageMeta(widget.pageNumber);
-    final int firstLineIdx = _firstContentLineIndexFromLines(pageLines);
+    final int firstLineIdx = _cachedFirstLineIdx;
     final isPortrait =
         MediaQuery.orientationOf(context) == Orientation.portrait;
     final bool isLightPage =

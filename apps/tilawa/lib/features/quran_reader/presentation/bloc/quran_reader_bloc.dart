@@ -19,12 +19,6 @@ class QuranReaderEvent with _$QuranReaderEvent {
     @Default(true) bool loadStartPage,
   }) = _LoadSurah;
   const factory QuranReaderEvent.loadPage(int pageNumber) = _LoadPage;
-  const factory QuranReaderEvent.loadSettings() = _LoadSettings;
-  const factory QuranReaderEvent.updateSettings(ReaderSettingsEntity settings) =
-      _UpdateSettings;
-  const factory QuranReaderEvent.updateFontSize(double fontSize) =
-      _UpdateFontSize;
-  const factory QuranReaderEvent.toggleTranslation() = _ToggleTranslation;
   const factory QuranReaderEvent.scrollToAyah(int ayahNumber) = _ScrollToAyah;
   const factory QuranReaderEvent.saveLastRead({
     required int surahNumber,
@@ -49,7 +43,6 @@ abstract class QuranReaderState with _$QuranReaderState {
     SurahContentEntity? currentSurah,
     QuranPageEntity? currentPage,
     @Default({}) Map<int, QuranPageEntity> pages,
-    @Default(ReaderSettingsEntity()) ReaderSettingsEntity settings,
     @Default([]) List<AyahEntity> searchResults,
     @Default('') String searchQuery,
     @Default(false) bool isSearching,
@@ -65,8 +58,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   QuranReaderBloc(
     this._getSurahContentUseCase,
     this._getQuranPageUseCase,
-    this._loadReaderSettingsUseCase,
-    this._saveReaderSettingsUseCase,
     this._saveLastReadPositionUseCase,
     this._getLastReadPositionUseCase,
     this._searchAyahsUseCase,
@@ -74,10 +65,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   ) : super(const QuranReaderState()) {
     on<_LoadSurah>(_onLoadSurah, transformer: restartable());
     on<_LoadPage>(_onLoadPage, transformer: restartable());
-    on<_LoadSettings>(_onLoadSettings);
-    on<_UpdateSettings>(_onUpdateSettings);
-    on<_UpdateFontSize>(_onUpdateFontSize);
-    on<_ToggleTranslation>(_onToggleTranslation);
     on<_ScrollToAyah>(_onScrollToAyah);
     on<_SaveLastRead>(
       _onSaveLastRead,
@@ -92,8 +79,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
 
   final GetSurahContentUseCase _getSurahContentUseCase;
   final GetQuranPageUseCase _getQuranPageUseCase;
-  final LoadReaderSettingsUseCase _loadReaderSettingsUseCase;
-  final SaveReaderSettingsUseCase _saveReaderSettingsUseCase;
   final SaveLastReadPositionUseCase _saveLastReadPositionUseCase;
   final GetLastReadPositionUseCase _getLastReadPositionUseCase;
   final SearchAyahsUseCase _searchAyahsUseCase;
@@ -121,11 +106,7 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         );
 
         if (event.loadStartPage) {
-          // Calculate the starting page of the surah using the UI-agnostic UseCase
           final startPage = _getStartPageForSurahUseCase.call(surah.number);
-
-          // Also trigger loading the page into the state
-          // This will handle saving the last read position and updating the currentPage
           add(QuranReaderEvent.loadPage(startPage));
         }
       },
@@ -136,18 +117,14 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     _LoadPage event,
     Emitter<QuranReaderState> emit,
   ) async {
-    // If page is already cached, just update current page
     if (state.pages.containsKey(event.pageNumber)) {
       final cachedPage = state.pages[event.pageNumber]!;
 
-      // Sync surah if necessary
       if (cachedPage.ayahs.isNotEmpty) {
         final firstSurahNum = cachedPage.ayahs.first.surahNumber;
         if (state.currentSurah?.number != firstSurahNum) {
           add(QuranReaderEvent.loadSurah(firstSurahNum, loadStartPage: false));
         }
-
-        // Always save last read when page changes
         add(
           QuranReaderEvent.saveLastRead(
             surahNumber: firstSurahNum,
@@ -160,7 +137,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
       return;
     }
 
-    // Only set loading if we don't have any pages yet (initial load)
     if (state.pages.isEmpty) {
       emit(state.copyWith(status: QuranReaderStatus.loading, errorMessage: ''));
     }
@@ -179,7 +155,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
         final newPages = Map<int, QuranPageEntity>.from(state.pages);
         newPages[page.pageNumber] = page;
 
-        // Evict oldest entries if cache exceeds max size to bound memory.
         const maxCachedPages = 20;
         if (newPages.length > maxCachedPages) {
           final keysToRemove =
@@ -188,13 +163,11 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
                   (b - page.pageNumber).abs(),
                 ),
               );
-          // Remove pages furthest from current page
           while (newPages.length > maxCachedPages) {
             newPages.remove(keysToRemove.removeLast());
           }
         }
 
-        // Sync surah if necessary
         if (page.ayahs.isNotEmpty) {
           final firstSurahNum = page.ayahs.first.surahNumber;
           if (state.currentSurah?.number != firstSurahNum) {
@@ -202,8 +175,6 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
               QuranReaderEvent.loadSurah(firstSurahNum, loadStartPage: false),
             );
           }
-
-          // Always save last read when page changes
           add(
             QuranReaderEvent.saveLastRead(
               surahNumber: firstSurahNum,
@@ -223,51 +194,8 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     );
   }
 
-  Future<void> _onLoadSettings(
-    _LoadSettings event,
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final Either<Failure, ReaderSettingsEntity> result =
-        await _loadReaderSettingsUseCase.call();
-
-    result.fold((failure) {
-      // Use default settings on error
-    }, (settings) => emit(state.copyWith(settings: settings)));
-  }
-
-  Future<void> _onUpdateSettings(
-    _UpdateSettings event,
-    Emitter<QuranReaderState> emit,
-  ) async {
-    await _saveReaderSettingsUseCase.call(settings: event.settings);
-    emit(state.copyWith(settings: event.settings));
-  }
-
-  Future<void> _onUpdateFontSize(
-    _UpdateFontSize event,
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final ReaderSettingsEntity newSettings = state.settings.copyWith(
-      fontSize: event.fontSize,
-    );
-    await _saveReaderSettingsUseCase.call(settings: newSettings);
-    emit(state.copyWith(settings: newSettings));
-  }
-
-  Future<void> _onToggleTranslation(
-    _ToggleTranslation event,
-    Emitter<QuranReaderState> emit,
-  ) async {
-    final ReaderSettingsEntity newSettings = state.settings.copyWith(
-      showTranslation: !state.settings.showTranslation,
-    );
-    await _saveReaderSettingsUseCase.call(settings: newSettings);
-    emit(state.copyWith(settings: newSettings));
-  }
-
   void _onScrollToAyah(_ScrollToAyah event, Emitter<QuranReaderState> emit) {
     emit(state.copyWith(scrollToAyah: event.ayahNumber));
-    // Clear after setting to allow re-scrolling to same ayah
     emit(state.copyWith(scrollToAyah: null));
   }
 

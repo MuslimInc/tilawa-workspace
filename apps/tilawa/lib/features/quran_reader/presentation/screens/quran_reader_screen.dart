@@ -6,23 +6,21 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/screens/share_composer_screen.dart';
-import 'package:tilawa_core/services/interfaces/keep_awake_service.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
-import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart' show AudioPlayerBloc;
 import '../bloc/quran_reader_bloc.dart';
+import '../cubit/quran_settings_cubit.dart';
+import '../../domain/entities/entities.dart';
+import '../utils/reader_side_effects_observer.dart';
 
 /// Screen for reading Quran text in a page-by-page Mushaf view.
-///
-/// Displays [QuranPageView] with a floating action button to open
-/// the surah index sheet for quick navigation.
 class QuranReaderScreen extends StatefulWidget {
   const QuranReaderScreen({
     super.key,
@@ -30,10 +28,7 @@ class QuranReaderScreen extends StatefulWidget {
     this.initialAyah,
   });
 
-  /// The surah number to open initially.
   final int surahNumber;
-
-  /// Optional initial ayah to scroll to.
   final int? initialAyah;
 
   @override
@@ -41,23 +36,18 @@ class QuranReaderScreen extends StatefulWidget {
 }
 
 class _QuranReaderScreenState extends State<QuranReaderScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, ReaderSideEffectsObserver {
   late final PageController _pageController;
   late final ValueNotifier<int> _currentPageNotifier;
   late final ValueNotifier<bool> _showOverlaysNotifier;
   late final UiVisibilityCubit _uiVisibilityCubit;
-  late final KeepAwakeService _keepAwakeService;
   late final GlobalKey _screenshotBoundaryKey;
   bool _didInitDependencies = false;
-
-  // True while a programmatic jump is in flight so _handleOnPageChanged
-  // knows to skip dispatching a redundant loadPage event.
   bool _isProgrammaticJump = false;
 
   static const _headerFontSizeMultiplier = 0.57;
 
-  // Cached to avoid creating a new ThemeData object on every build(), which
-  // would notify all Theme.of(context) dependents and cause a rebuild cascade.
+  // Cached to avoid subscribing this State as a Theme.of dependent.
   ThemeData? _cachedThemeData;
   QuranReaderTheme? _cachedReaderTheme;
 
@@ -77,19 +67,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     _uiVisibilityCubit.show();
     _showOverlaysNotifier = ValueNotifier<bool>(!_uiVisibilityCubit.state);
 
-    final audioBloc = context.read<AudioPlayerBloc>();
-    if (audioBloc.state.isPlaying) {
-      audioBloc.add(const AudioPlayerEvent.pauseAudio());
-    }
-
-    _keepAwakeService = getIt<KeepAwakeService>();
-    _keepAwakeService.enable();
+    // Delegate audio-pause + keep-awake to the mixin.
+    initSideEffects();
 
     final bloc = context.read<QuranReaderBloc>();
-
-    // Use whatever page the bloc already knows synchronously so the PageView
-    // opens at the right spot without waiting for an async round-trip.
-    // Falls back to surah start page or page 1 when nothing is cached yet.
     final int syncPage = _resolveInitialPage(bloc);
     _currentPageNotifier = ValueNotifier<int>(syncPage);
     _pageController = PageController(initialPage: syncPage - 1);
@@ -100,10 +81,8 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
         QuranReaderEvent.loadSurah(widget.surahNumber, loadStartPage: false),
       );
     }
-
   }
 
-  /// Returns the best page number to use synchronously from bloc state.
   int _resolveInitialPage(QuranReaderBloc bloc) {
     final int inMemoryPage = bloc.state.currentPage?.pageNumber ?? 0;
     if (inMemoryPage > 0) return inMemoryPage;
@@ -140,7 +119,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     ]);
     _restoreAppSystemUiMode();
     _uiVisibilityCubit.show();
-    _keepAwakeService.disable();
+    disposeSideEffects();
     super.dispose();
   }
 
@@ -148,9 +127,9 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _updateSystemUiConfig(_uiVisibilityCubit.state);
-      _keepAwakeService.enable();
+      onResumedSideEffects();
     } else if (state == AppLifecycleState.paused) {
-      _keepAwakeService.disable();
+      onPausedSideEffects();
     }
   }
 
@@ -207,31 +186,24 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                   previous.currentPage != current.currentPage &&
                   current.currentPage != null,
               listener: (context, state) {
-                final int pageNumber = state.currentPage!.pageNumber;
-                // Skip if this event was triggered by a programmatic jump we
-                // initiated ourselves — the controller and notifier are already
-                // at the right position.
                 if (_isProgrammaticJump) return;
-                _syncToPage(pageNumber);
+                _syncToPage(state.currentPage!.pageNumber);
               },
             ),
           ],
-          child: _buildReadyStack(readerTheme),
+          child: _buildStack(readerTheme),
         ),
       ),
     );
   }
 
-  /// Syncs both [_currentPageNotifier] and [_pageController] to [pageNumber].
-  /// Used by the BlocListener for externally-driven navigation (initial load,
-  /// surah index, deep-link) — NOT called for user swipes or slider jumps.
   void _syncToPage(int pageNumber) {
     if (pageNumber == _currentPageNotifier.value &&
-        (_pageController.hasClients &&
-            (_pageController.page ?? _pageController.initialPage.toDouble())
-                    .round() ==
-                pageNumber - 1)) {
-      return; // already in sync
+        _pageController.hasClients &&
+        (_pageController.page ?? _pageController.initialPage.toDouble())
+                .round() ==
+            pageNumber - 1) {
+      return;
     }
 
     _currentPageNotifier.value = pageNumber;
@@ -250,7 +222,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     }
   }
 
-  Widget _buildReadyStack(QuranReaderTheme readerTheme) {
+  Widget _buildStack(QuranReaderTheme readerTheme) {
     return Stack(
       children: [
         Scaffold(
@@ -261,10 +233,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
           body: GestureDetector(
             onTap: () => context.read<UiVisibilityCubit>().toggle(),
             behavior: HitTestBehavior.opaque,
-            child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
-              buildWhen: (oldState, newState) =>
-                  oldState.settings != newState.settings,
-              builder: (context, state) {
+            // BlocBuilder scope is now only QuranSettingsCubit — page swipes
+            // no longer cause QuranPageView to rebuild.
+            child: BlocBuilder<QuranSettingsCubit, ReaderSettingsEntity>(
+              buildWhen: (old, next) => old != next,
+              builder: (context, settings) {
                 return RepaintBoundary(
                   key: _screenshotBoundaryKey,
                   child: QuranPageView(
@@ -289,7 +262,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
             ),
           ),
         ),
-        // Page navigation bar — rebuilds only via ValueListenableBuilders.
         AnimatedPositioned(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
@@ -311,7 +283,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
               builder: (context, currentPage, _) {
                 return PageNavigationBar(
                   currentPage: currentPage,
-                  onPageChanged: (page) => _jumpToPage(page),
+                  onPageChanged: _jumpToPage,
                   onShowIndex: () => _showSurahIndex(context),
                   onShare: () => _showShareOptions(context, currentPage),
                 );
@@ -331,6 +303,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
         .toList();
     final firstAyah = primarySurahEntries.first['start'] ?? 1;
     final lastAyah = primarySurahEntries.last['end'] ?? firstAyah;
+    // Read context-dependent values before the async gap.
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
@@ -373,9 +346,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     }
   }
 
-  void _handleShowIndex() {
-    _showSurahIndex(context);
-  }
+  void _handleShowIndex() => _showSurahIndex(context);
 
   void _showSurahIndex(BuildContext context) {
     showModalBottomSheet<void>(
@@ -392,9 +363,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     );
   }
 
-  /// Called by [QuranPageView] when the user swipes to a new page.
-  /// Skip dispatching a bloc event when the change was caused by a programmatic
-  /// jump we already accounted for — avoids a BlocListener feedback loop.
   void _handleOnPageChanged(int pageNumber) {
     _currentPageNotifier.value = pageNumber;
     if (_isProgrammaticJump) return;
@@ -415,9 +383,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     _jumpToPage(getPageNumber(surahNumber, 1));
   }
 
-  /// Navigates the [PageView] to the given 1-based [pageNumber].
-  /// Sets [_isProgrammaticJump] so [_handleOnPageChanged] and the BlocListener
-  /// both ignore the PageView callback that the jump triggers.
   void _jumpToPage(int pageNumber) {
     _isProgrammaticJump = true;
     _currentPageNotifier.value = pageNumber;
@@ -425,8 +390,6 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
       _pageController.jumpToPage(pageNumber - 1);
     }
     context.read<QuranReaderBloc>().add(QuranReaderEvent.loadPage(pageNumber));
-    // Reset after the current microtask so the PageView onPageChanged fires
-    // before the flag clears, but any subsequent user swipe is unaffected.
     Future.microtask(() => _isProgrammaticJump = false);
   }
 }

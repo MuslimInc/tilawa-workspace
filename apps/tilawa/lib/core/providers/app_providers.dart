@@ -12,6 +12,7 @@ import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import '../../features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
@@ -75,6 +76,10 @@ class AppProviders {
     BlocProvider<QuranReaderBloc>(
       create: (context) =>
           getIt<QuranReaderBloc>()..add(const QuranReaderEvent.loadLastRead()),
+    ),
+    // Settings cubit — lazy, loads persisted settings on first access.
+    BlocProvider<QuranSettingsCubit>(
+      create: (context) => getIt<QuranSettingsCubit>()..load(),
     ),
     // UI Visibility provider (Global for immersive mode across routes)
     BlocProvider<UiVisibilityCubit>(
