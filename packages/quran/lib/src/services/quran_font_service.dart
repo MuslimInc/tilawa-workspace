@@ -162,46 +162,57 @@ class QuranFontService {
     }
 
     final List<FileSystemEntity> files = dir.listSync();
-    final List<Future<void>> loadFutures = [];
 
+    // Collect font files with their resolved family names first.
+    final List<({File file, String family})> fontFiles = [];
     for (final file in files) {
       if (file is File) {
         final String filename = file.path.split('/').last;
         final String extension = filename.split('.').last.toLowerCase();
+        if (!['woff', 'woff2', 'ttf'].contains(extension)) continue;
 
-        if (['woff', 'woff2', 'ttf'].contains(extension)) {
-          // Determine font family from filename
-          var fontFamily = '';
-
-          if (filename.startsWith('QCF4') && filename.contains('_')) {
-            // E.g. QCF4001_X-Regular.woff -> QCF_P001
-            final String pageNumStr = filename.substring(4, 7);
-            fontFamily = 'QCF_P$pageNumStr';
-          } else if (filename.contains('BSML') || filename.contains('bsml')) {
-            fontFamily = 'QCF_BSML';
-          } else if (filename.contains('UthmanicHafs') ||
-              filename.contains('uthmanic')) {
-            fontFamily = 'UthmanicHafsV22';
-          } else {
-            // Fallback: use filename without extension
-            fontFamily = filename.substring(0, filename.lastIndexOf('.'));
-          }
-
-          final fontLoader = FontLoader(fontFamily);
-          fontLoader.addFont(_getFontByteData(file));
-          loadFutures.add(fontLoader.load());
+        String fontFamily;
+        if (filename.startsWith('QCF4') && filename.contains('_')) {
+          fontFamily = 'QCF_P${filename.substring(4, 7)}';
+        } else if (filename.contains('BSML') || filename.contains('bsml')) {
+          fontFamily = 'QCF_BSML';
+        } else if (filename.contains('UthmanicHafs') ||
+            filename.contains('uthmanic')) {
+          fontFamily = 'UthmanicHafsV22';
+        } else {
+          fontFamily = filename.substring(0, filename.lastIndexOf('.'));
         }
+        fontFiles.add((file: file, family: fontFamily));
       }
     }
 
-    print('[FONT] loadFontsToEngine: ${loadFutures.length} fonts queued | t=${DateTime.now().millisecondsSinceEpoch}ms');
+    print('[FONT] loadFontsToEngine: ${fontFiles.length} fonts to register | t=${DateTime.now().millisecondsSinceEpoch}ms');
 
-    // Load fonts in batches to avoid memory spikes from 604 concurrent reads.
-    const batchSize = 50;
+    // Phase 1 — read all font bytes in parallel (pure I/O, no engine calls).
+    // This is the expensive step: 604 × ~86KB = ~52MB of disk reads.
+    final int tRead = DateTime.now().millisecondsSinceEpoch;
+    final List<Uint8List> allBytes = await Future.wait(
+      fontFiles.map((f) => f.file.readAsBytes()),
+    );
+    print('[FONT] all font bytes read | took=${DateTime.now().millisecondsSinceEpoch - tRead}ms');
+
+    // Phase 2 — register with the Flutter engine in batches to bound peak
+    // memory (ByteData views don't copy, but engine registration allocates).
+    const batchSize = 100;
+    final List<Future<void>> loadFutures = [];
+    for (var i = 0; i < fontFiles.length; i++) {
+      final fontLoader = FontLoader(fontFiles[i].family);
+      fontLoader.addFont(
+        Future.value(ByteData.view(allBytes[i].buffer)),
+      );
+      loadFutures.add(fontLoader.load());
+    }
+
     for (var i = 0; i < loadFutures.length; i += batchSize) {
-      final int end = (i + batchSize < loadFutures.length)
-          ? i + batchSize
-          : loadFutures.length;
+      final int end =
+          (i + batchSize < loadFutures.length)
+              ? i + batchSize
+              : loadFutures.length;
       await Future.wait(loadFutures.sublist(i, end));
       print('[FONT] registered batch ${i ~/ batchSize + 1}/${(loadFutures.length / batchSize).ceil()} (fonts ${i + 1}–$end) | elapsed=${DateTime.now().millisecondsSinceEpoch - tStart}ms');
     }
@@ -210,8 +221,4 @@ class QuranFontService {
     print('[FONT] loadFontsToEngine DONE | total=${DateTime.now().millisecondsSinceEpoch - tStart}ms');
   }
 
-  Future<ByteData> _getFontByteData(File file) async {
-    final Uint8List bytes = await file.readAsBytes();
-    return ByteData.view(bytes.buffer);
-  }
 }

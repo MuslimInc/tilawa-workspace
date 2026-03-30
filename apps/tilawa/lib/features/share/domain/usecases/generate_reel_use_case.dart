@@ -13,7 +13,8 @@ class GenerateReelUseCase {
   final ShareRepository _repository;
 
   Future<ShareContent> call({
-    required GlobalKey boundaryKey,
+    GlobalKey? boundaryKey,
+    List<GlobalKey>? boundaryKeys,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
@@ -24,6 +25,7 @@ class GenerateReelUseCase {
   }) {
     return _repository.generateReel(
       boundaryKey: boundaryKey,
+      boundaryKeys: boundaryKeys,
       config: config,
       appName: appName,
       sharedViaLabel: sharedViaLabel,

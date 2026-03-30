@@ -16,6 +16,7 @@ import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import '../share_progress_messages_l10n.dart';
 import '../utils/quran_share_text_formatter.dart';
+import '../utils/reel_page_specs.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../widgets/reel_content_renderer.dart';
 import '../widgets/share_poster_renderer.dart';
@@ -118,7 +119,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   ShareScreenshotLayout _screenshotLayout = ShareScreenshotLayout.readerPage;
   ShareDurationPreset _durationPreset = ShareDurationPreset.auto;
   final GlobalKey _posterBoundaryKey = GlobalKey();
-  final GlobalKey _reelBoundaryKey = GlobalKey();
+  final List<GlobalKey> _reelBoundaryKeys = <GlobalKey>[];
 
   @override
   void initState() {
@@ -131,6 +132,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
     );
     _fromAyah = ayahRange.fromAyah;
     _toAyah = ayahRange.toAyah;
+    _syncReelBoundaryKeys();
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
@@ -150,6 +152,12 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
 
   int get _verseCount => _toAyah - _fromAyah + 1;
 
+  List<ReelPageSpec> get _reelPageSpecs => buildReelPageSpecs(
+    surahNumber: widget.surahNumber,
+    fromAyah: _fromAyah,
+    toAyah: _toAyah,
+  );
+
   bool get _hasLogicalRange =>
       _fromAyah >= 1 && _toAyah >= _fromAyah && _toAyah <= _maxAyah;
 
@@ -158,6 +166,18 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   bool get _isValidRange =>
       _hasLogicalRange &&
       (!_enforcesVerseLimit || _verseCount <= ShareLimits.maxVersesPerClip);
+
+  void _syncReelBoundaryKeys() {
+    final int requiredCount = _reelPageSpecs.length;
+
+    while (_reelBoundaryKeys.length < requiredCount) {
+      _reelBoundaryKeys.add(GlobalKey());
+    }
+
+    if (_reelBoundaryKeys.length > requiredCount) {
+      _reelBoundaryKeys.removeRange(requiredCount, _reelBoundaryKeys.length);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +195,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
         }
       },
       builder: (context, state) {
+        final List<ReelPageSpec> reelPageSpecs = _reelPageSpecs;
         final isBusy =
             state.status == ShareStatus.capturing ||
             state.status == ShareStatus.generating ||
@@ -199,19 +220,21 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                 ),
               ),
             ),
-            Positioned(
-              left: -3000,
-              top: -3000,
-              child: RepaintBoundary(
-                key: _reelBoundaryKey,
-                child: ReelContentRenderer(
-                  surahNumber: widget.surahNumber,
-                  fromAyah: _fromAyah,
-                  toAyah: _toAyah,
-                  reciterName: state.reciterName ?? widget.reciterName,
+            for (int index = 0; index < reelPageSpecs.length; index++)
+              Positioned(
+                left: -3000 - (index * 1200),
+                top: -3000,
+                child: RepaintBoundary(
+                  key: _reelBoundaryKeys[index],
+                  child: ReelContentPage(
+                    surahNumber: widget.surahNumber,
+                    pageSpec: reelPageSpecs[index],
+                    pageIndex: index,
+                    totalPages: reelPageSpecs.length,
+                    reciterName: state.reciterName ?? widget.reciterName,
+                  ),
                 ),
               ),
-            ),
             ImmersiveComposerScaffold(
               title: isReviewing
                   ? context.l10n.shareReadyTitle
@@ -523,7 +546,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
           progressMessages: context.shareProgressMessages,
           appName: context.l10n.appTitle,
           sharedViaLabel: context.l10n.sharedViaTilawa,
-          boundaryKey: _reelBoundaryKey,
+          boundaryKeys: _reelBoundaryKeys,
           maxDurationSeconds: _durationPreset.maxDurationSeconds,
         );
         return;
@@ -536,6 +559,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       if (_toAyah < _fromAyah) {
         _toAyah = _fromAyah;
       }
+      _syncReelBoundaryKeys();
     });
     context.read<ShareCubit>().updateVerseRange(
       fromAyah: _fromAyah,
@@ -549,6 +573,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       if (_fromAyah > _toAyah) {
         _fromAyah = _toAyah;
       }
+      _syncReelBoundaryKeys();
     });
     context.read<ShareCubit>().updateVerseRange(
       fromAyah: _fromAyah,

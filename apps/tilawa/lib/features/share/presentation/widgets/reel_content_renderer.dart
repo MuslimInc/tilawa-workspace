@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
+// ignore: implementation_imports
+import 'package:quran/src/page_content.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../utils/share_ayah_range_utils.dart';
+import '../utils/reel_page_specs.dart';
+
+final ValueNotifier<bool> _hiddenOverlaysListenable = ValueNotifier<bool>(
+  false,
+);
 
 /// A Quran-focused 9:16 canvas used for reel generation.
 class ReelContentRenderer extends StatelessWidget {
@@ -12,27 +18,77 @@ class ReelContentRenderer extends StatelessWidget {
     required this.surahNumber,
     required this.fromAyah,
     required this.toAyah,
-    this.showBasmalah = true,
     this.reciterName,
   });
 
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
-  final bool showBasmalah;
+  final String? reciterName;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<ReelPageSpec> pageSpecs = buildReelPageSpecs(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah,
+      toAyah: toAyah,
+    );
+
+    if (pageSpecs.length == 1) {
+      return ReelContentPage(
+        surahNumber: surahNumber,
+        pageSpec: pageSpecs.single,
+        pageIndex: 0,
+        totalPages: 1,
+        reciterName: reciterName,
+      );
+    }
+
+    return SizedBox(
+      width: 1080,
+      height: 1920,
+      child: PageView.builder(
+        itemCount: pageSpecs.length,
+        itemBuilder: (context, index) {
+          return ReelContentPage(
+            surahNumber: surahNumber,
+            pageSpec: pageSpecs[index],
+            pageIndex: index,
+            totalPages: pageSpecs.length,
+            reciterName: reciterName,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ReelContentPage extends StatelessWidget {
+  const ReelContentPage({
+    super.key,
+    required this.surahNumber,
+    required this.pageSpec,
+    required this.pageIndex,
+    required this.totalPages,
+    this.reciterName,
+  });
+
+  final int surahNumber;
+  final ReelPageSpec pageSpec;
+  final int pageIndex;
+  final int totalPages;
   final String? reciterName;
 
   String get _arabicSurahName => getSurahNameArabic(surahNumber);
   String get _englishSurahName => getSurahNameEnglish(surahNumber);
-  ShareAyahRange get _ayahRange => normalizeShareAyahRange(
-    surahNumber: surahNumber,
-    fromAyah: fromAyah,
-    toAyah: toAyah,
-  );
 
-  String get _ayahRangeLabel => _ayahRange.fromAyah == _ayahRange.toAyah
-      ? 'آية ${_ayahRange.fromAyah}'
-      : 'الآيات ${_ayahRange.fromAyah} - ${_ayahRange.toAyah}';
+  String get _ayahRangeLabel => pageSpec.fromAyah == pageSpec.toAyah
+      ? 'آية ${pageSpec.fromAyah}'
+      : 'الآيات ${pageSpec.fromAyah} - ${pageSpec.toAyah}';
+
+  String get _mushafPageLabel => totalPages == 1
+      ? 'صفحة المصحف ${pageSpec.pageNumber}'
+      : 'صفحة المصحف ${pageSpec.pageNumber} • ${pageIndex + 1}/$totalPages';
 
   @override
   Widget build(BuildContext context) {
@@ -124,47 +180,14 @@ class ReelContentRenderer extends StatelessWidget {
                             englishSurahName: _englishSurahName,
                             surahNumber: surahNumber,
                             ayahRangeLabel: _ayahRangeLabel,
+                            mushafPageLabel: _mushafPageLabel,
                             reciterName: normalizedReciterName,
                           ),
-                          if (showBasmalah &&
-                              surahNumber != 1 &&
-                              surahNumber != 9 &&
-                              _ayahRange.fromAyah == 1) ...[
-                            const SizedBox(height: 36),
-                            _Basmalah(
-                              pageNumber: getPageNumber(
-                                surahNumber,
-                                _ayahRange.fromAyah,
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 32),
                           Expanded(
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.fromLTRB(
-                                40,
-                                34,
-                                40,
-                                34,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(34),
-                                color: Colors.white.withValues(alpha: 0.42),
-                                border: Border.all(
-                                  color: _ReelPalette.gold.withValues(
-                                    alpha: 0.26,
-                                  ),
-                                ),
-                              ),
-                              child: Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: _AyahFlow(
-                                  surahNumber: surahNumber,
-                                  fromAyah: _ayahRange.fromAyah,
-                                  toAyah: _ayahRange.toAyah,
-                                ),
-                              ),
+                            child: _ReelMushafPage(
+                              surahNumber: surahNumber,
+                              pageSpec: pageSpec,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -177,6 +200,63 @@ class ReelContentRenderer extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReelMushafPage extends StatelessWidget {
+  const _ReelMushafPage({required this.surahNumber, required this.pageSpec});
+
+  final int surahNumber;
+  final ReelPageSpec pageSpec;
+
+  bool _isSelectedVerse(int verseNumber) {
+    return verseNumber >= pageSpec.fromAyah && verseNumber <= pageSpec.toAyah;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        color: Colors.white.withValues(alpha: 0.42),
+        border: Border.all(color: _ReelPalette.gold.withValues(alpha: 0.26)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
+          child: MediaQuery(
+            data: mediaQuery.copyWith(
+              padding: EdgeInsets.zero,
+              viewPadding: EdgeInsets.zero,
+              viewInsets: EdgeInsets.zero,
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: PageContent(
+                pageNumber: pageSpec.pageNumber,
+                textColor: _ReelPalette.ink.withValues(alpha: 0.96),
+                pageBackgroundColor: const Color(0xFFFFF8ED),
+                verseBackgroundColor: (int currentSurah, int verseNumber) {
+                  if (currentSurah != surahNumber ||
+                      !_isSelectedVerse(verseNumber)) {
+                    return null;
+                  }
+
+                  return _ReelPalette.gold.withValues(alpha: 0.24);
+                },
+                uiTextDirection: TextDirection.rtl,
+                showOverlaysListenable: _hiddenOverlaysListenable,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -233,6 +313,7 @@ class _SurahHero extends StatelessWidget {
     required this.englishSurahName,
     required this.surahNumber,
     required this.ayahRangeLabel,
+    required this.mushafPageLabel,
     required this.reciterName,
   });
 
@@ -240,6 +321,7 @@ class _SurahHero extends StatelessWidget {
   final String englishSurahName;
   final int surahNumber;
   final String ayahRangeLabel;
+  final String mushafPageLabel;
   final String? reciterName;
 
   @override
@@ -300,6 +382,7 @@ class _SurahHero extends StatelessWidget {
                 icon: Icons.format_list_numbered_rounded,
                 label: ayahRangeLabel,
               ),
+              _HeroPill(icon: Icons.menu_book_rounded, label: mushafPageLabel),
               if (reciterName != null && reciterName!.isNotEmpty)
                 _HeroPill(
                   icon: Icons.multitrack_audio_rounded,
@@ -322,7 +405,7 @@ class _HeroPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 340),
+      constraints: const BoxConstraints(maxWidth: 360),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -337,8 +420,7 @@ class _HeroPill extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: _ReelPalette.gold),
             const SizedBox(width: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
+            Flexible(
               child: Text(
                 label,
                 maxLines: 1,
@@ -355,153 +437,6 @@ class _HeroPill extends StatelessWidget {
       ),
     );
   }
-}
-
-class _AyahFlow extends StatelessWidget {
-  const _AyahFlow({
-    required this.surahNumber,
-    required this.fromAyah,
-    required this.toAyah,
-  });
-
-  final int surahNumber;
-  final int fromAyah;
-  final int toAyah;
-
-  _AyahTypography _resolveTypography() {
-    final ayahRange = normalizeShareAyahRange(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-    );
-    final verseCount = ayahRange.toAyah - ayahRange.fromAyah + 1;
-    var glyphCount = 0;
-
-    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
-      glyphCount +=
-          tryGetVerseQcfText(
-            surahNumber,
-            ayah,
-            verseEndSymbol: false,
-          )?.length ??
-          getVerse(surahNumber, ayah, verseEndSymbol: false).length;
-    }
-
-    if (verseCount >= 24 || glyphCount > 600) {
-      return const _AyahTypography(
-        fontSize: 48,
-        lineHeight: 1.92,
-        endSymbolHeight: 1.52,
-      );
-    }
-
-    if (verseCount >= 18 || glyphCount > 440) {
-      return const _AyahTypography(
-        fontSize: 54,
-        lineHeight: 2.0,
-        endSymbolHeight: 1.6,
-      );
-    }
-
-    if (verseCount >= 12 || glyphCount > 300) {
-      return const _AyahTypography(
-        fontSize: 62,
-        lineHeight: 2.12,
-        endSymbolHeight: 1.68,
-      );
-    }
-
-    if (verseCount >= 8 || glyphCount > 180) {
-      return const _AyahTypography(
-        fontSize: 68,
-        lineHeight: 2.2,
-        endSymbolHeight: 1.74,
-      );
-    }
-
-    return const _AyahTypography(
-      fontSize: 74,
-      lineHeight: 2.28,
-      endSymbolHeight: 1.82,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ayahRange = normalizeShareAyahRange(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-    );
-    final typography = _resolveTypography();
-    final spans = <InlineSpan>[];
-
-    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
-      final pageNumber = getPageNumber(surahNumber, ayah);
-      final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
-      final qcfStyle = TextStyle(
-        fontFamily: pageFont,
-        fontSize: typography.fontSize,
-        height: typography.lineHeight,
-        color: _ReelPalette.ink.withValues(alpha: 0.94),
-      );
-      final fallbackStyle = GoogleFonts.amiri(
-        fontSize: typography.fontSize * 0.76,
-        height: typography.lineHeight,
-        color: _ReelPalette.ink.withValues(alpha: 0.94),
-      );
-      final verseText =
-          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) ??
-          getVerse(surahNumber, ayah, verseEndSymbol: false);
-      final verseNumberText =
-          tryGetVerseNumberQcfText(surahNumber, ayah) ??
-          getVerseEndSymbol(ayah);
-      final usesQcf =
-          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) != null;
-      final baseStyle = usesQcf ? qcfStyle : fallbackStyle;
-
-      spans.add(TextSpan(text: verseText, style: baseStyle));
-
-      spans.add(
-        TextSpan(
-          text: '$verseNumberText ',
-          style: baseStyle.copyWith(height: typography.endSymbolHeight),
-        ),
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              child: RichText(
-                text: TextSpan(children: spans),
-                textAlign: TextAlign.justify,
-                textDirection: TextDirection.rtl,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _AyahTypography {
-  const _AyahTypography({
-    required this.fontSize,
-    required this.lineHeight,
-    required this.endSymbolHeight,
-  });
-
-  final double fontSize;
-  final double lineHeight;
-  final double endSymbolHeight;
 }
 
 class _ReelFooter extends StatelessWidget {
@@ -563,42 +498,6 @@ class _FooterPill extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Basmalah extends StatelessWidget {
-  const _Basmalah({required this.pageNumber});
-
-  final int pageNumber;
-
-  @override
-  Widget build(BuildContext context) {
-    final String bismillahText;
-    final String bismillahFont;
-    final String? package;
-
-    if (pageNumber == 1) {
-      bismillahText = '\uFC41\uFC42\uFC43\uFC44';
-      bismillahFont = 'QCF_P001';
-      package = null;
-    } else {
-      bismillahText = '齃𧻓𥳐龎';
-      bismillahFont = 'QCF_BSML';
-      package = 'quran';
-    }
-
-    return Text(
-      bismillahText,
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: bismillahFont,
-        package: package,
-        fontSize: 86,
-        height: 1.28,
-        color: _ReelPalette.deepGreen,
       ),
     );
   }

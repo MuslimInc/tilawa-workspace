@@ -322,12 +322,17 @@ class ShareCubit extends Cubit<ShareState> {
     required String appName,
     required String sharedViaLabel,
     GlobalKey? boundaryKey,
+    List<GlobalKey>? boundaryKeys,
     int? maxDurationSeconds,
   }) async {
     final audioConfig = _buildAudioConfig();
     final effectiveBoundaryKey = boundaryKey ?? state.boundaryKey;
+    final List<GlobalKey> effectiveBoundaryKeys =
+        boundaryKeys?.where((key) => key.currentContext != null).toList() ??
+        const <GlobalKey>[];
 
-    if (audioConfig == null || effectiveBoundaryKey == null) {
+    if (audioConfig == null ||
+        (effectiveBoundaryKey == null && effectiveBoundaryKeys.isEmpty)) {
       return;
     }
 
@@ -345,6 +350,7 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       final content = await _generateReel(
         boundaryKey: effectiveBoundaryKey,
+        boundaryKeys: effectiveBoundaryKeys,
         config: audioConfig,
         appName: appName,
         sharedViaLabel: sharedViaLabel,

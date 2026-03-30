@@ -94,7 +94,8 @@ class ShareRepositoryImpl implements ShareRepository {
 
   @override
   Future<ShareContent> generateReel({
-    required GlobalKey<State<StatefulWidget>> boundaryKey,
+    GlobalKey? boundaryKey,
+    List<GlobalKey>? boundaryKeys,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
@@ -103,6 +104,18 @@ class ShareRepositoryImpl implements ShareRepository {
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    final List<GlobalKey> effectiveBoundaryKeys =
+        boundaryKeys?.where((key) => key.currentContext != null).toList() ??
+        <GlobalKey>[
+          if (boundaryKey != null && boundaryKey.currentContext != null)
+            boundaryKey,
+        ];
+    if (effectiveBoundaryKeys.isEmpty) {
+      throw StateError(
+        'RepaintBoundary not found. Reel pages may still be loading.',
+      );
+    }
+
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -119,15 +132,22 @@ class ShareRepositoryImpl implements ShareRepository {
 
     // 2. Capture screenshot
     onProgress?.call(0.4, progressMessages.capturingReaderVisuals);
-    final screenshotPath = await _screenshotService.captureRaw(
-      boundaryKey: boundaryKey,
-      fileName: 'reel_capture_${DateTime.now().millisecondsSinceEpoch}.png',
-    );
+    await WidgetsBinding.instance.endOfFrame;
+    final int timestamp = DateTime.now().millisecondsSinceEpoch;
+    final List<String> screenshotPaths = <String>[];
+    for (int index = 0; index < effectiveBoundaryKeys.length; index++) {
+      screenshotPaths.add(
+        await _screenshotService.captureRaw(
+          boundaryKey: effectiveBoundaryKeys[index],
+          fileName: 'reel_capture_${timestamp}_${index + 1}.png',
+        ),
+      );
+    }
 
     // 3. Generate reel video
     onProgress?.call(0.6, progressMessages.combiningReelMedia);
     final reelPath = await _reelService.generateReel(
-      screenshotPath: screenshotPath,
+      screenshotPaths: screenshotPaths,
       audioPath: audioContent.filePath,
       surahName: '', // Metadata
       reciterName: effectiveConfig.reciterName,

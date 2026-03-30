@@ -82,25 +82,21 @@ class NavigationIndexCard extends StatelessWidget {
   Widget _buildTopRow(BuildContext context, QuranReaderTheme readerTheme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: 10,
       children: [
         PageBadge(
           pageNumber: pageNumber,
           textStyle: readerTheme.cardPageBadgeTextStyle,
         ),
-        const SizedBox(width: 10),
         Expanded(
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(surahName),
+            child: Text(
+              surahName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ),
-        Icon(
-          Icons.chevron_right_rounded,
-          color: mutedTextColor.withValues(alpha: 0.4),
-          size: 20,
         ),
       ],
     );

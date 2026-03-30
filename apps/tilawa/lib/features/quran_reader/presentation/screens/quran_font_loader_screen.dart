@@ -10,11 +10,11 @@ import 'quran_reader_screen.dart';
 /// Flutter engine before displaying the actual [QuranReaderScreen].
 ///
 /// States:
-///   initial / checking / registering → [_LoadingView]
-///   downloading                      → [_DownloadView]
-///   error                            → [_ErrorView]
-///   success                          → [QuranReaderScreen]
-class QuranFontLoaderScreen extends StatelessWidget {
+///   initial / checking              → [_LoadingView]
+///   downloading                     → [_DownloadView]
+///   registering / success           → [QuranReaderScreen] (registering shows a top banner)
+///   error                           → [_ErrorView]
+class QuranFontLoaderScreen extends StatefulWidget {
   const QuranFontLoaderScreen({
     super.key,
     required this.surahNumber,
@@ -23,6 +23,23 @@ class QuranFontLoaderScreen extends StatelessWidget {
 
   final int surahNumber;
   final int? initialAyah;
+
+  @override
+  State<QuranFontLoaderScreen> createState() => _QuranFontLoaderScreenState();
+}
+
+class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
+  // Lazily created and reused so that registering → success does NOT
+  // destroy and recreate the reader widget (which would cause a double initState).
+  Widget? _readerScreen;
+
+  Widget get _reader {
+    _readerScreen ??= QuranReaderScreen(
+      surahNumber: widget.surahNumber,
+      initialAyah: widget.initialAyah,
+    );
+    return _readerScreen!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +59,18 @@ class QuranFontLoaderScreen extends StatelessWidget {
         final downloading = state.mapOrNull(downloading: (s) => s);
         final error = state.mapOrNull(error: (s) => s);
         final isSuccess = state.mapOrNull(success: (_) => true) ?? false;
+        final isRegistering =
+            state.mapOrNull(registering: (_) => true) ?? false;
 
-        if (isSuccess) {
-          return QuranReaderScreen(
-            surahNumber: surahNumber,
-            initialAyah: initialAyah,
+        if (isSuccess || isRegistering) {
+          // Keep the reader in a stable Stack slot so that registering→success
+          // does NOT change the widget's position in the element tree (which
+          // would remount it and cause a second initState).
+          return Stack(
+            children: [
+              _reader,
+              if (isRegistering) const _RegisteringBanner(),
+            ],
           );
         }
         if (downloading != null) {
@@ -63,6 +87,75 @@ class QuranFontLoaderScreen extends StatelessWidget {
         }
         return const _FontLoaderScaffold(child: _LoadingView());
       },
+    );
+  }
+}
+
+// ─── Banner: registering fonts in background ─────────────────────────────────
+
+class _RegisteringBanner extends StatelessWidget {
+  const _RegisteringBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
+              ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.primaryColor,
+                    ),
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Text(
+                    context.l10n.loadingQuran,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: tokens.opacityEmphasis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

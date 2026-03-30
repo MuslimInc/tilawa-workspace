@@ -13,6 +13,7 @@ import 'package:tilawa/core/extensions.dart';
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
 import '../share_progress_messages_l10n.dart';
+import '../utils/reel_page_specs.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
@@ -45,7 +46,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _fromAyah;
   late int _toAyah;
   late int _maxAyah;
-  final GlobalKey _reelContentKey = GlobalKey();
+  final List<GlobalKey> _reelContentKeys = <GlobalKey>[];
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
     );
     _fromAyah = ayahRange.fromAyah;
     _toAyah = ayahRange.toAyah;
+    _syncReelContentKeys();
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
@@ -79,11 +81,29 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
 
   int get _verseCount => _toAyah - _fromAyah + 1;
 
+  List<ReelPageSpec> get _reelPageSpecs => buildReelPageSpecs(
+    surahNumber: widget.surahNumber,
+    fromAyah: _fromAyah,
+    toAyah: _toAyah,
+  );
+
   bool get _isValid =>
       _fromAyah >= 1 &&
       _toAyah >= _fromAyah &&
       _toAyah <= _maxAyah &&
       _verseCount <= AudioClipService.maxVerses;
+
+  void _syncReelContentKeys() {
+    final int requiredCount = _reelPageSpecs.length;
+
+    while (_reelContentKeys.length < requiredCount) {
+      _reelContentKeys.add(GlobalKey());
+    }
+
+    if (_reelContentKeys.length > requiredCount) {
+      _reelContentKeys.removeRange(requiredCount, _reelContentKeys.length);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +118,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
         }
       },
       builder: (context, state) {
+        final List<ReelPageSpec> reelPageSpecs = _reelPageSpecs;
         final isGenerating = state.status == ShareStatus.generating;
         final isSharing = state.status == ShareStatus.sharing;
         final isReviewing =
@@ -107,19 +128,21 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
 
         return Stack(
           children: [
-            Positioned(
-              left: -2400,
-              top: 0,
-              child: RepaintBoundary(
-                key: _reelContentKey,
-                child: ReelContentRenderer(
-                  surahNumber: widget.surahNumber,
-                  fromAyah: _fromAyah,
-                  toAyah: _toAyah,
-                  reciterName: reciterName,
+            for (int index = 0; index < reelPageSpecs.length; index++)
+              Positioned(
+                left: -2400 - (index * 1200),
+                top: 0,
+                child: RepaintBoundary(
+                  key: _reelContentKeys[index],
+                  child: ReelContentPage(
+                    surahNumber: widget.surahNumber,
+                    pageSpec: reelPageSpecs[index],
+                    pageIndex: index,
+                    totalPages: reelPageSpecs.length,
+                    reciterName: reciterName,
+                  ),
                 ),
               ),
-            ),
             SafeArea(
               top: false,
               child: Padding(
@@ -216,15 +239,29 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                 verseCount: _verseCount,
                                 enabled: !isBusy,
                                 onFromChanged: (value) {
-                                  setState(() => _fromAyah = value);
+                                  setState(() {
+                                    _fromAyah = value;
+                                    if (_toAyah < _fromAyah) {
+                                      _toAyah = _fromAyah;
+                                    }
+                                    _syncReelContentKeys();
+                                  });
                                   context.read<ShareCubit>().updateVerseRange(
-                                    fromAyah: value,
+                                    fromAyah: _fromAyah,
+                                    toAyah: _toAyah,
                                   );
                                 },
                                 onToChanged: (value) {
-                                  setState(() => _toAyah = value);
+                                  setState(() {
+                                    _toAyah = value;
+                                    if (_fromAyah > _toAyah) {
+                                      _fromAyah = _toAyah;
+                                    }
+                                    _syncReelContentKeys();
+                                  });
                                   context.read<ShareCubit>().updateVerseRange(
-                                    toAyah: value,
+                                    fromAyah: _fromAyah,
+                                    toAyah: _toAyah,
                                   );
                                 },
                               ),
@@ -261,7 +298,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                           appName: context.l10n.appTitle,
                                           sharedViaLabel:
                                               context.l10n.sharedViaTilawa,
-                                          boundaryKey: _reelContentKey,
+                                          boundaryKeys: _reelContentKeys,
                                         );
                                       }
                                     : null,
