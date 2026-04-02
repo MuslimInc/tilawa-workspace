@@ -1,6 +1,5 @@
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -304,7 +303,7 @@ void main() {
         await firebaseMessagingBackgroundHandler(const RemoteMessage());
       } catch (e) {
         // Expected if platform is not supported or Firebase already initialized with different options
-        debugPrint(
+        print(
           'Handled expected error in firebaseMessagingBackgroundHandler test: $e',
         );
       }

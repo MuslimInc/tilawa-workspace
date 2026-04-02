@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
 import '../services/quran_data_service.dart';
@@ -18,7 +19,8 @@ abstract class QuranLayoutStrategy {
 }
 
 /// The result of a layout calculation.
-class QuranLayoutMetrics {
+@immutable
+class QuranLayoutMetrics extends Equatable {
   const QuranLayoutMetrics({
     required this.fontSize,
     required this.fontHeight,
@@ -39,6 +41,19 @@ class QuranLayoutMetrics {
   final double bismillahHeight;
   final double verseHorizontalPadding;
   final double bismillahHorizontalPadding;
+
+  @override
+  List<Object?> get props => [
+    fontSize,
+    fontHeight,
+    isScrollable,
+    padding,
+    lineSpacing,
+    letterSpacing,
+    bismillahHeight,
+    verseHorizontalPadding,
+    bismillahHorizontalPadding,
+  ];
 }
 
 /// The standard implementation of Quran layout logic.

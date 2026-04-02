@@ -12,10 +12,8 @@ import '../../domain/usecases/save_reader_settings_use_case.dart';
 /// from rebuilding on every page swipe just because settings are in scope.
 @lazySingleton
 class QuranSettingsCubit extends Cubit<ReaderSettingsEntity> {
-  QuranSettingsCubit(
-    this._loadSettings,
-    this._saveSettings,
-  ) : super(const ReaderSettingsEntity());
+  QuranSettingsCubit(this._loadSettings, this._saveSettings)
+    : super(const ReaderSettingsEntity());
 
   final LoadReaderSettingsUseCase _loadSettings;
   final SaveReaderSettingsUseCase _saveSettings;

@@ -9,10 +9,17 @@ import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_the
 /// verse count, and place of revelation. Tapping a surah invokes
 /// the [onSurahSelected] callback with the surah number.
 class SurahIndexSheet extends StatefulWidget {
-  const SurahIndexSheet({super.key, required this.onSurahSelected});
+  const SurahIndexSheet({
+    super.key,
+    required this.onSurahSelected,
+    this.onSurahTapped,
+  });
 
   /// Called when a surah is tapped. Returns the 1-based surah number.
   final ValueChanged<int> onSurahSelected;
+
+  /// Optional callback for proactive warming.
+  final ValueChanged<int>? onSurahTapped;
 
   @override
   State<SurahIndexSheet> createState() => _SurahIndexSheetState();
@@ -327,8 +334,10 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                               final surahNumber = filteredSurahs[index];
                               return _SurahTile(
                                 surahNumber: surahNumber,
-                                onTap: () =>
-                                    widget.onSurahSelected(surahNumber),
+                                onTap: () {
+                                  widget.onSurahTapped?.call(surahNumber);
+                                  widget.onSurahSelected(surahNumber);
+                                },
                               );
                             },
                           ),

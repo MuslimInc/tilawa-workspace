@@ -56,6 +56,7 @@ export 'src/header_widget.dart';
 // HELPERS
 // =============================================================================
 export 'src/helpers/convert_to_arabic_number.dart';
+export 'src/page_content.dart';
 export 'src/qcf_verse.dart';
 // =============================================================================
 // EXCEPTIONS

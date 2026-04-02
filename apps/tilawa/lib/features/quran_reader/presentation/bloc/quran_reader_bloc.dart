@@ -65,7 +65,11 @@ class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
     this._getStartPageForSurahUseCase,
   ) : super(const QuranReaderState()) {
     on<_LoadSurah>(_onLoadSurah, transformer: restartable());
-    on<_LoadPage>(_onLoadPage, transformer: restartable());
+    on<_LoadPage>(
+      _onLoadPage,
+      transformer: (events, mapper) =>
+          events.debounce(const Duration(milliseconds: 100)).switchMap(mapper),
+    );
     on<_ScrollToAyah>(_onScrollToAyah);
     on<_SaveLastRead>(
       _onSaveLastRead,

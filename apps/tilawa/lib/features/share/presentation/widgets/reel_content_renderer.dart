@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
 // ignore: implementation_imports
-import 'package:quran/src/page_content.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../utils/reel_page_specs.dart';
@@ -19,25 +18,29 @@ class ReelContentRenderer extends StatelessWidget {
     required this.fromAyah,
     required this.toAyah,
     this.reciterName,
+    this.pageSpecs,
   });
 
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
   final String? reciterName;
+  final List<ReelPageSpec>? pageSpecs;
 
   @override
   Widget build(BuildContext context) {
-    final List<ReelPageSpec> pageSpecs = buildReelPageSpecs(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-    );
+    final List<ReelPageSpec> effectivePageSpecs =
+        pageSpecs ??
+        buildReelPageSpecs(
+          surahNumber: surahNumber,
+          fromAyah: fromAyah,
+          toAyah: toAyah,
+        );
 
-    if (pageSpecs.length == 1) {
+    if (effectivePageSpecs.length == 1) {
       return ReelContentPage(
         surahNumber: surahNumber,
-        pageSpec: pageSpecs.single,
+        pageSpec: effectivePageSpecs.single,
         pageIndex: 0,
         totalPages: 1,
         reciterName: reciterName,
@@ -48,13 +51,13 @@ class ReelContentRenderer extends StatelessWidget {
       width: 1080,
       height: 1920,
       child: PageView.builder(
-        itemCount: pageSpecs.length,
+        itemCount: effectivePageSpecs.length,
         itemBuilder: (context, index) {
           return ReelContentPage(
             surahNumber: surahNumber,
-            pageSpec: pageSpecs[index],
+            pageSpec: effectivePageSpecs[index],
             pageIndex: index,
-            totalPages: pageSpecs.length,
+            totalPages: effectivePageSpecs.length,
             reciterName: reciterName,
           );
         },
@@ -206,14 +209,51 @@ class ReelContentPage extends StatelessWidget {
   }
 }
 
-class _ReelMushafPage extends StatelessWidget {
+class _ReelMushafPage extends StatefulWidget {
   const _ReelMushafPage({required this.surahNumber, required this.pageSpec});
 
   final int surahNumber;
   final ReelPageSpec pageSpec;
 
-  bool _isSelectedVerse(int verseNumber) {
-    return verseNumber >= pageSpec.fromAyah && verseNumber <= pageSpec.toAyah;
+  @override
+  State<_ReelMushafPage> createState() => _ReelMushafPageState();
+}
+
+class _ReelMushafPageState extends State<_ReelMushafPage> {
+  // Stable callback reference — PageContent.didUpdateWidget checks
+  // verseBackgroundColor with reference equality (!=). A new closure on every
+  // build() always compares unequal, which forces a full snapshot invalidation
+  // cycle (disable → re-rasterize → enable) on every parent rebuild.
+  late Color? Function(int, int) _verseBackgroundColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _verseBackgroundColor = _buildVerseBackgroundColor();
+  }
+
+  @override
+  void didUpdateWidget(_ReelMushafPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.surahNumber != widget.surahNumber ||
+        oldWidget.pageSpec.fromAyah != widget.pageSpec.fromAyah ||
+        oldWidget.pageSpec.toAyah != widget.pageSpec.toAyah) {
+      _verseBackgroundColor = _buildVerseBackgroundColor();
+    }
+  }
+
+  Color? Function(int, int) _buildVerseBackgroundColor() {
+    final int surahNumber = widget.surahNumber;
+    final int fromAyah = widget.pageSpec.fromAyah;
+    final int toAyah = widget.pageSpec.toAyah;
+    return (int currentSurah, int verseNumber) {
+      if (currentSurah != surahNumber ||
+          verseNumber < fromAyah ||
+          verseNumber > toAyah) {
+        return null;
+      }
+      return _ReelPalette.gold.withValues(alpha: 0.24);
+    };
   }
 
   @override
@@ -241,17 +281,10 @@ class _ReelMushafPage extends StatelessWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: PageContent(
-                pageNumber: pageSpec.pageNumber,
+                pageNumber: widget.pageSpec.pageNumber,
                 textColor: _ReelPalette.ink.withValues(alpha: 0.96),
                 pageBackgroundColor: const Color(0xFFFFF8ED),
-                verseBackgroundColor: (int currentSurah, int verseNumber) {
-                  if (currentSurah != surahNumber ||
-                      !_isSelectedVerse(verseNumber)) {
-                    return null;
-                  }
-
-                  return _ReelPalette.gold.withValues(alpha: 0.24);
-                },
+                verseBackgroundColor: _verseBackgroundColor,
                 uiTextDirection: TextDirection.rtl,
                 showOverlaysListenable: _hiddenOverlaysListenable,
               ),

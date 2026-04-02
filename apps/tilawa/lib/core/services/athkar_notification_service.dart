@@ -46,6 +46,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
       'last_handled_notification_payload';
   static const String _lastHandledTimestampKey =
       'last_handled_notification_timestamp';
+  static const String _lastScheduledTimestampKey =
+      'last_athkar_schedule_timestamp';
 
   /// Maximum time (in seconds) for a notification to be considered valid for launch handling.
   /// This prevents old sticky intents from triggering navigation on app restart.
@@ -315,6 +317,13 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
 
     try {
+      if (!await _shouldReschedule()) {
+        logger.d(
+          '[AthkarNotificationService] Notification schedule is still valid, skipping re-schedule',
+        );
+        return;
+      }
+
       await cancelAllAthkarNotifications();
 
       final List<_ScheduledAthkarNotification>? dynamicNotifications =
@@ -327,15 +336,24 @@ class AthkarNotificationService implements IAthkarNotificationService {
         await _scheduleMorningAthkarFallback();
         await _scheduleEveningAthkarFallback();
       } else {
-        for (final _ScheduledAthkarNotification notification
-            in dynamicNotifications) {
-          await _scheduleAthkarNotification(notification);
+        for (int i = 0; i < dynamicNotifications.length; i++) {
+          await _scheduleAthkarNotification(dynamicNotifications[i]);
+
+          // Yield to UI thread every 5 notifications to prevent jank
+          if (i > 0 && i % 5 == 0) {
+            await Future<void>.delayed(Duration.zero);
+          }
         }
 
         logger.d(
           '[AthkarNotificationService] Scheduled ${dynamicNotifications.length} dynamic athkar notifications',
         );
       }
+
+      await _prefs.setInt(
+        _lastScheduledTimestampKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
 
       logger.d(
         '[AthkarNotificationService] Scheduled all athkar notifications',
@@ -894,6 +912,29 @@ class AthkarNotificationService implements IAthkarNotificationService {
           sound: 'default',
         ),
       );
+
+  /// Check if it's necessary to re-schedule notifications.
+  /// Re-schedules if:
+  /// 1. Never scheduled before
+  /// 2. Last schedule was more than 7 days ago
+  Future<bool> _shouldReschedule() async {
+    try {
+      final int? lastScheduled = await _prefs.getInt(
+        _lastScheduledTimestampKey,
+      );
+      if (lastScheduled == null) return true;
+
+      final DateTime lastDate = DateTime.fromMillisecondsSinceEpoch(
+        lastScheduled,
+      );
+      final int daysSinceLast = DateTime.now().difference(lastDate).inDays;
+
+      // Re-schedule once a week to keep the 14-day window fresh
+      return daysSinceLast >= 7;
+    } catch (e) {
+      return true;
+    }
+  }
 
   static const String _morningAthkarTitle = 'أذكار الصباح';
   static const String _morningAthkarBody = 'حان وقت أذكار الصباح 🌅';

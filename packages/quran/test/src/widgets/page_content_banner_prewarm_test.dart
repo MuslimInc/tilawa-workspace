@@ -154,7 +154,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 360,
+                viewportHeight: 800,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -214,7 +220,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 360,
+                viewportHeight: 800,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -235,7 +247,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 360,
+                viewportHeight: 800,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -257,6 +275,9 @@ void main() {
             body: SurahHeaderBanner(
               surahNumber: 1,
               lineHeight: 40,
+              viewportWidth: 360,
+              viewportHeight: 800,
+              isLandscape: false,
               headerImageFilter: ColorFilter.mode(Colors.red, BlendMode.srcIn),
             ),
           ),
@@ -280,6 +301,9 @@ void main() {
                 body: SurahHeaderBanner(
                   surahNumber: surahNumber,
                   lineHeight: 40,
+                  viewportWidth: 360,
+                  viewportHeight: 800,
+                  isLandscape: false,
                 ),
               ),
             ),
@@ -309,7 +333,13 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+            body: SurahHeaderBanner(
+              surahNumber: 18,
+              lineHeight: 40,
+              viewportWidth: 0,
+              viewportHeight: 0,
+              isLandscape: false,
+            ),
           ),
         ),
       );
@@ -334,7 +364,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 0,
+                viewportHeight: 0,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -366,7 +402,13 @@ void main() {
             navigatorKey: navigatorKey,
             routes: {
               '/': (_) => const Scaffold(
-                body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+                body: SurahHeaderBanner(
+                  surahNumber: 18,
+                  lineHeight: 40,
+                  viewportWidth: 360,
+                  viewportHeight: 800,
+                  isLandscape: false,
+                ),
               ),
               '/other': (_) => const Scaffold(body: SizedBox()),
             },
@@ -398,7 +440,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 360,
+                viewportHeight: 800,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -412,7 +460,13 @@ void main() {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
-              body: SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
+              body: SurahHeaderBanner(
+                surahNumber: 18,
+                lineHeight: 40,
+                viewportWidth: 360,
+                viewportHeight: 800,
+                isLandscape: false,
+              ),
             ),
           ),
         );
@@ -441,7 +495,13 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: SurahHeaderBanner(surahNumber: 18, lineHeight: 0),
+            body: SurahHeaderBanner(
+              surahNumber: 18,
+              lineHeight: 0,
+              viewportWidth: 360,
+              viewportHeight: 800,
+              isLandscape: false,
+            ),
           ),
         ),
       );
@@ -462,6 +522,9 @@ void main() {
             body: SurahHeaderBanner(
               surahNumber: 18,
               lineHeight: 40,
+              viewportWidth: 360,
+              viewportHeight: 800,
+              isLandscape: false,
               // ignore: avoid_redundant_argument_values
               headerTextColor: null,
             ),
@@ -485,6 +548,9 @@ void main() {
             body: SurahHeaderBanner(
               surahNumber: 18,
               lineHeight: 40,
+              viewportWidth: 360,
+              viewportHeight: 800,
+              isLandscape: false,
               // ignore: avoid_redundant_argument_values
               headerImageFilter: null,
             ),
@@ -507,9 +573,27 @@ void main() {
             home: Scaffold(
               body: Column(
                 children: <Widget>[
-                  SurahHeaderBanner(surahNumber: 1, lineHeight: 40),
-                  SurahHeaderBanner(surahNumber: 18, lineHeight: 40),
-                  SurahHeaderBanner(surahNumber: 114, lineHeight: 40),
+                  SurahHeaderBanner(
+                    surahNumber: 1,
+                    lineHeight: 40,
+                    viewportWidth: 360,
+                    viewportHeight: 800,
+                    isLandscape: false,
+                  ),
+                  SurahHeaderBanner(
+                    surahNumber: 18,
+                    lineHeight: 40,
+                    viewportWidth: 360,
+                    viewportHeight: 800,
+                    isLandscape: false,
+                  ),
+                  SurahHeaderBanner(
+                    surahNumber: 114,
+                    lineHeight: 40,
+                    viewportWidth: 360,
+                    viewportHeight: 800,
+                    isLandscape: false,
+                  ),
                 ],
               ),
             ),

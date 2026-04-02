@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/check_fonts_downloaded_use_case.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/download_quran_fonts_use_case.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/load_quran_fonts_to_engine_use_case.dart';
+import 'package:tilawa/features/quran_reader/domain/usecases/update_current_page_use_case.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 
 class MockCheckFontsDownloadedUseCase extends Mock
@@ -15,20 +16,27 @@ class MockDownloadQuranFontsUseCase extends Mock
 class MockLoadQuranFontsToEngineUseCase extends Mock
     implements LoadQuranFontsToEngineUseCase {}
 
+class MockUpdateCurrentPageUseCase extends Mock
+    implements UpdateCurrentPageUseCase {}
+
 void main() {
   late MockCheckFontsDownloadedUseCase mockCheckFontsDownloadedUseCase;
   late MockDownloadQuranFontsUseCase mockDownloadQuranFontsUseCase;
   late MockLoadQuranFontsToEngineUseCase mockLoadQuranFontsToEngineUseCase;
+  late MockUpdateCurrentPageUseCase mockUpdateCurrentPageUseCase;
   late QuranFontLoaderBloc bloc;
 
   setUp(() {
     mockCheckFontsDownloadedUseCase = MockCheckFontsDownloadedUseCase();
     mockDownloadQuranFontsUseCase = MockDownloadQuranFontsUseCase();
     mockLoadQuranFontsToEngineUseCase = MockLoadQuranFontsToEngineUseCase();
+    mockUpdateCurrentPageUseCase = MockUpdateCurrentPageUseCase();
+
     bloc = QuranFontLoaderBloc(
       mockCheckFontsDownloadedUseCase,
       mockDownloadQuranFontsUseCase,
       mockLoadQuranFontsToEngineUseCase,
+      mockUpdateCurrentPageUseCase,
     );
   });
 

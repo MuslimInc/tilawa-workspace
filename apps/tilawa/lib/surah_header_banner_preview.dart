@@ -22,6 +22,9 @@ Widget previewPortrait() {
       child: SurahHeaderBanner(
         surahNumber: 1, // Al-Fatiha
         lineHeight: 24,
+        viewportWidth: 0,
+        viewportHeight: 0,
+        isLandscape: false,
       ),
     ),
   );
@@ -39,6 +42,9 @@ Widget previewLandscape() {
       child: SurahHeaderBanner(
         surahNumber: 114, // An-Nas
         lineHeight: 24,
+        viewportWidth: 0,
+        viewportHeight: 0,
+        isLandscape: true,
       ),
     ),
   );

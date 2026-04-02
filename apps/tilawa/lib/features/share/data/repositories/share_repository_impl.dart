@@ -122,30 +122,34 @@ class ShareRepositoryImpl implements ShareRepository {
       maxDurationSeconds: maxDurationSeconds,
     );
 
-    // 1. Generate audio clip first (usually faster/more prone to error)
     onProgress?.call(0.1, progressMessages.generatingAudioClip);
-    final audioContent = await generateAudioClip(
-      config: effectiveConfig,
-      progressMessages: progressMessages.audioClip,
-      onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.2, msg),
-      cancelToken: cancelToken,
-    );
 
-    // 2. Capture screenshot
-    onProgress?.call(0.4, progressMessages.capturingReaderVisuals);
+    // 1. Capture screenshots and generate audio clip in parallel.
+    // Screenshots are a GPU readback (~0.5s) and are independent of audio
+    // download/concat, so running them concurrently cuts total wait time.
     await WidgetsBinding.instance.endOfFrame;
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
-    final List<String> screenshotPaths = <String>[];
-    for (int index = 0; index < effectiveBoundaryKeys.length; index++) {
-      screenshotPaths.add(
-        await _screenshotService.captureRaw(
-          boundaryKey: effectiveBoundaryKeys[index],
-          fileName: 'reel_capture_${timestamp}_${index + 1}.png',
-        ),
-      );
-    }
 
-    // 3. Generate reel video
+    final results = await Future.wait<Object>([
+      generateAudioClip(
+        config: effectiveConfig,
+        progressMessages: progressMessages.audioClip,
+        onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.35, msg),
+        cancelToken: cancelToken,
+      ),
+      Future.wait<String>([
+        for (int index = 0; index < effectiveBoundaryKeys.length; index++)
+          _screenshotService.captureRaw(
+            boundaryKey: effectiveBoundaryKeys[index],
+            fileName: 'reel_capture_${timestamp}_${index + 1}.png',
+          ),
+      ]),
+    ]);
+
+    final audioContent = results[0] as ShareContent;
+    final List<String> screenshotPaths = (results[1] as List).cast<String>();
+
+    // 2. Generate reel video
     onProgress?.call(0.6, progressMessages.combiningReelMedia);
     final reelPath = await _reelService.generateReel(
       screenshotPaths: screenshotPaths,

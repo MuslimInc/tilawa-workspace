@@ -7,9 +7,10 @@ List<Shadow> buildQuranBoldShadows(
   double offset = _defaultQuranShadowOffset,
 }) {
   return <Shadow>[
-    Shadow(color: color, offset: Offset(offset, 0)),
-    Shadow(color: color, offset: Offset(-offset, 0)),
-    Shadow(color: color, offset: Offset(0, offset * 0.7)),
-    Shadow(color: color, offset: Offset(0, -offset * 0.7)),
+    Shadow(
+      color: color.withValues(alpha: 0.6),
+      offset: Offset(offset * 0.5, offset * 0.5),
+      blurRadius: 0.1,
+    ),
   ];
 }
