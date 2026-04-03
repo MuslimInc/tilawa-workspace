@@ -3,11 +3,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'helpers/app_logger.dart';
 import 'helpers/convert_to_arabic_number.dart';
 import 'layout/quran_layout_strategy.dart';
+import 'services/idle_scheduler.dart';
 import 'services/page_snapshot_service.dart';
 import 'services/quran_data_service.dart';
 import 'services/quran_page_preparation_service.dart';
@@ -119,6 +119,7 @@ class _PageContentState extends State<PageContent>
   final GlobalKey _snapshotBoundaryKey = GlobalKey();
   bool _snapshotScheduled = false;
   bool _snapshotCaptured = false;
+  IdleTask? _pendingIdleCapture;
 
   static const Color _lightMetaTextColor = Color(0xFF9A7A57);
   static const Color _lightPageNumberBackgroundColor = Color(0xFFE8DDD0);
@@ -208,6 +209,7 @@ class _PageContentState extends State<PageContent>
 
   @override
   void dispose() {
+    _pendingIdleCapture?.cancel();
     widget.currentPageListenable?.removeListener(_handlePageChange);
     widget.preparedWindowListenable?.removeListener(_handleWindowChanged);
     widget.isScrollingListenable?.removeListener(_handleScrollStateChanged);
@@ -253,40 +255,42 @@ class _PageContentState extends State<PageContent>
     setState(() {});
   }
 
-  /// Schedules a bitmap snapshot capture after the next paint.
+  /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
+  /// expensive `toImage()` call runs only when the GPU is idle.
   void _scheduleSnapshotCapture() {
     if (_snapshotScheduled || _snapshotCaptured || widget.isWarming) return;
+    // No scroll guard needed here — IdleScheduler already defers the
+    // expensive toImage() call to a post-frame idle slot, so the GPU
+    // work never competes with live frame rasterization.
     _snapshotScheduled = true;
 
-    // Wait two frames: first for layout, second for paint to complete.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _captureSnapshot();
-      });
-    });
-  }
-
-  /// Captures the page body's render output as a GPU-backed [ui.Image].
-  Future<void> _captureSnapshot() async {
-    if (_snapshotCaptured) return;
-
+    final int centerPage =
+        widget.currentPageListenable?.value ?? widget.pageNumber;
     final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final bool captured = await PageSnapshotService.instance.captureSnapshot(
+
+    _pendingIdleCapture?.cancel();
+    _pendingIdleCapture = PageSnapshotService.instance.scheduleCaptureWhenIdle(
       pageNumber: widget.pageNumber,
       boundaryKey: _snapshotBoundaryKey,
       pixelRatio: pixelRatio,
+      centerPage: centerPage,
     );
 
-    if (captured && mounted) {
-      _snapshotCaptured = true;
-    }
-    _snapshotScheduled = false;
+    _pendingIdleCapture!.future.then((_) {
+      if (!mounted) return;
+      if (!_pendingIdleCapture!.isCancelled &&
+          PageSnapshotService.instance.hasSnapshot(widget.pageNumber)) {
+        _snapshotCaptured = true;
+      }
+      _snapshotScheduled = false;
+      _pendingIdleCapture = null;
+    });
   }
 
   /// Removes the cached snapshot for this page.
   void _invalidateSnapshot() {
+    _pendingIdleCapture?.cancel();
+    _pendingIdleCapture = null;
     PageSnapshotService.instance.evict(widget.pageNumber);
     _snapshotCaptured = false;
     _snapshotScheduled = false;

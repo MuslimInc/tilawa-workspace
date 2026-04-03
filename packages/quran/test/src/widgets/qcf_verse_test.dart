@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran/quran.dart';
+import 'package:quran/src/helpers/quran_text_paint.dart';
 
 void main() {
   testWidgets('QcfVerse renders Quran glyphs bold and verse marker regular', (
@@ -23,5 +24,12 @@ void main() {
     expect(markerSpan.text, getVerseNumberQCF(1, 1));
     expect(markerSpan.style?.color, const Color(0xFF000000));
     expect(markerSpan.style?.shadows, anyOf(isNull, isEmpty));
+  });
+
+  test('buildQuranBoldShadows uses zero blurRadius to avoid GPU shader', () {
+    final List<Shadow> shadows = buildQuranBoldShadows(const Color(0xFF000000));
+
+    expect(shadows, hasLength(1));
+    expect(shadows.first.blurRadius, 0.0);
   });
 }

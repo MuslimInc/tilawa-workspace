@@ -402,7 +402,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
   }
 
-
   List<int> _orderedPageWindow(int centerPage) {
     final List<int> pages = [centerPage];
     for (int distance = 1; distance <= _visiblePageWindowRadius; distance++) {
@@ -432,15 +431,15 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   }
 
   void _restoreCacheExtentIfReady() {
-      if (!_isInteracting &&
-          _hasPreparedCoverageFor(_currentPageNotifier.value) &&
-          (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
-        _cacheExtentNotifier.value = _settledCacheExtent;
+    if (!_isInteracting &&
+        _hasPreparedCoverageFor(_currentPageNotifier.value) &&
+        (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
+      _cacheExtentNotifier.value = _settledCacheExtent;
+      if (!kReleaseMode) {
+        logger.i(
+          '[READER_CACHE] restore cacheExtent=$_settledCacheExtent (prepared coverage)',
+        );
       }
-    if (!kReleaseMode) {
-      logger.i(
-        '[READER_CACHE] restore cacheExtent=$_settledCacheExtent (prepared coverage)',
-      );
     }
   }
 
@@ -1001,7 +1000,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     for (final page in pages) {
       if (!mounted) return;
       final bool wasLoaded = fontLoaderBloc.isFontLoaded(page);
-      await fontLoaderBloc.ensureFontReady(page, timeout: const Duration(seconds: 2));
+      await fontLoaderBloc.ensureFontReady(
+        page,
+        timeout: const Duration(seconds: 2),
+      );
       if (wasLoaded) {
         alreadyLoaded++;
       } else {

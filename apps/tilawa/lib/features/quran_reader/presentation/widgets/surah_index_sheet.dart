@@ -182,9 +182,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
       height: indexTheme.dragHandleHeight,
       decoration: BoxDecoration(
         color: readerTheme.primaryColor.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(
-          indexTheme.dragHandleRadius,
-        ),
+        borderRadius: BorderRadius.circular(indexTheme.dragHandleRadius),
       ),
     );
   }
@@ -231,11 +229,9 @@ class _IndexHeader extends StatelessWidget {
             padding: EdgeInsets.all(indexTheme.headerIconPadding),
             decoration: BoxDecoration(
               color: primaryColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(
-                indexTheme.headerIconRadius,
-              ),
+              borderRadius: BorderRadius.circular(indexTheme.headerIconRadius),
             ),
-          child: Icon(
+            child: Icon(
               Icons.menu_book_rounded,
               color: primaryColor,
               size: indexTheme.headerIconSize,
@@ -246,10 +242,7 @@ class _IndexHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.surahIndex,
-                  style: readerTheme.indexTitleTextStyle,
-                ),
+                Text(l10n.surahIndex, style: readerTheme.indexTitleTextStyle),
                 ValueListenableBuilder<List<int>>(
                   valueListenable: filteredSurahsNotifier,
                   builder: (context, filteredSurahs, _) {
@@ -529,7 +522,10 @@ class _SurahTile extends StatelessWidget {
                   ),
                 ),
                 // Arabic name
-                Text(arabicName, style: readerTheme.surahTileArabicNameTextStyle),
+                Text(
+                  arabicName,
+                  style: readerTheme.surahTileArabicNameTextStyle,
+                ),
               ],
             ),
           ),

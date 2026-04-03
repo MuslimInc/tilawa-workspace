@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import 'quran_line.dart';
@@ -61,6 +63,12 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
   /// Maximum width across all painters.
   late double _maxWidth;
 
+  /// Cached recorded [ui.Picture] from the first paint call.
+  /// Subsequent frames replay this single GPU command instead of
+  /// re-issuing ~15 individual [TextPainter.paint] calls.
+  ui.Picture? _cachedPicture;
+  Size? _cachedPictureSize;
+
   @override
   void initState() {
     super.initState();
@@ -72,8 +80,22 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.painters, widget.painters) ||
         oldWidget.lineSpacing != widget.lineSpacing) {
+      _invalidatePictureCache();
       _computeLayout();
     }
+  }
+
+  @override
+  void dispose() {
+    _cachedPicture?.dispose();
+    _cachedPicture = null;
+    super.dispose();
+  }
+
+  void _invalidatePictureCache() {
+    _cachedPicture?.dispose();
+    _cachedPicture = null;
+    _cachedPictureSize = null;
   }
 
   void _computeLayout() {
@@ -135,6 +157,9 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
               painter: _AllLinesPainter(
                 painters: widget.painters,
                 yOffsets: _yOffsets,
+                cachedPicture: _cachedPicture,
+                cachedPictureSize: _cachedPictureSize,
+                onPictureRecorded: _onPictureRecorded,
               ),
             ),
           ),
@@ -176,26 +201,64 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
     }
     return null;
   }
+
+  /// Stores the [ui.Picture] recorded by [_AllLinesPainter] on its first
+  /// paint call so subsequent frames replay a single GPU command.
+  void _onPictureRecorded(ui.Picture picture, Size size) {
+    _cachedPicture = picture;
+    _cachedPictureSize = size;
+  }
 }
 
 class _AllLinesPainter extends CustomPainter {
-  const _AllLinesPainter({required this.painters, required this.yOffsets});
+  _AllLinesPainter({
+    required this.painters,
+    required this.yOffsets,
+    required this.cachedPicture,
+    required this.cachedPictureSize,
+    required this.onPictureRecorded,
+  });
 
   final List<(TextPainter, List<QuranWordMetadata>)> painters;
   final List<double> yOffsets;
 
+  /// Pre-recorded picture from a previous paint, owned by the State.
+  final ui.Picture? cachedPicture;
+  final Size? cachedPictureSize;
+
+  /// Callback to hand the newly recorded picture back to the State.
+  final void Function(ui.Picture picture, Size size) onPictureRecorded;
+
   @override
   void paint(Canvas canvas, Size size) {
+    // Fast path: replay the cached Picture in a single GPU command.
+    if (cachedPicture != null && cachedPictureSize == size) {
+      canvas.drawPicture(cachedPicture!);
+      return;
+    }
+
+    // Slow path (first paint): record all TextPainter draws into a Picture.
+    final recorder = ui.PictureRecorder();
+    final recordingCanvas = Canvas(recorder);
+
     for (var i = 0; i < painters.length; i++) {
       final TextPainter painter = painters[i].$1;
-      // Center each line horizontally within the available width.
       final double dx = (size.width - painter.width) / 2;
-      painter.paint(canvas, Offset(dx, yOffsets[i]));
+      painter.paint(recordingCanvas, Offset(dx, yOffsets[i]));
     }
+
+    final ui.Picture picture = recorder.endRecording();
+
+    // Replay the just-recorded picture into the real canvas.
+    canvas.drawPicture(picture);
+
+    // Hand the picture to the State for caching — it owns the lifecycle.
+    onPictureRecorded(picture, size);
   }
 
   @override
   bool shouldRepaint(covariant _AllLinesPainter oldDelegate) {
-    return !identical(oldDelegate.painters, painters);
+    return !identical(oldDelegate.painters, painters) ||
+        oldDelegate.cachedPicture != cachedPicture;
   }
 }

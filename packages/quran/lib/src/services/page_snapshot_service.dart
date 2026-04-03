@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../helpers/app_logger.dart';
+import 'idle_scheduler.dart';
 
 /// Caches pre-rendered bitmap snapshots of Quran pages.
 ///
@@ -32,7 +33,14 @@ class PageSnapshotService {
   /// 10 snapshots ≈ 240MB — a safe budget for mid-range devices.
   static const int _maxSnapshots = 10;
 
+  /// Pixel-ratio multiplier for off-center pages. Reduces `toImage()` GPU
+  /// work by ~44% for pages that are only briefly visible during swipe.
+  static const double _offCenterPixelRatioScale = 0.75;
+
   final LinkedHashMap<int, ui.Image> _cache = LinkedHashMap<int, ui.Image>();
+
+  /// Handle for the currently pending idle-scheduled capture, if any.
+  IdleTask? _pendingCapture;
 
   /// Whether a snapshot is available for [pageNumber].
   bool hasSnapshot(int pageNumber) => _cache.containsKey(pageNumber);
@@ -45,6 +53,35 @@ class PageSnapshotService {
       _cache[pageNumber] = image;
     }
     return image;
+  }
+
+  /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
+  /// expensive `toImage()` call never competes with live frame rasterization.
+  ///
+  /// [centerPage] is the currently visible page — used to apply a reduced
+  /// pixel ratio for off-center pages (cheaper GPU work for pages only
+  /// glimpsed during swipe).
+  ///
+  /// Returns an [IdleTask] handle that the caller can cancel if the page
+  /// scrolls away before capture completes.
+  IdleTask scheduleCaptureWhenIdle({
+    required int pageNumber,
+    required GlobalKey boundaryKey,
+    required double pixelRatio,
+    int? centerPage,
+  }) {
+    final double effectiveRatio =
+        (centerPage != null && centerPage != pageNumber)
+        ? pixelRatio * _offCenterPixelRatioScale
+        : pixelRatio;
+
+    return IdleScheduler.instance.runWhenIdle(() async {
+      await captureSnapshot(
+        pageNumber: pageNumber,
+        boundaryKey: boundaryKey,
+        pixelRatio: effectiveRatio,
+      );
+    });
   }
 
   /// Captures a bitmap snapshot from a [RepaintBoundary]'s render object.
@@ -97,13 +134,21 @@ class PageSnapshotService {
     }
   }
 
+  /// Cancels any pending idle-scheduled capture.
+  void cancelPending() {
+    _pendingCapture?.cancel();
+    _pendingCapture = null;
+  }
+
   /// Removes and disposes the snapshot for [pageNumber].
   void evict(int pageNumber) {
     _cache.remove(pageNumber)?.dispose();
   }
 
-  /// Disposes all cached snapshots. Call on reader dispose.
+  /// Disposes all cached snapshots and cancels pending captures.
   void clear() {
+    cancelPending();
+    IdleScheduler.instance.cancelAll();
     for (final ui.Image image in _cache.values) {
       image.dispose();
     }

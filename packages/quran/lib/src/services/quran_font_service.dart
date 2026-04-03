@@ -6,11 +6,11 @@ import 'dart:ui' as ui;
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../helpers/app_logger.dart';
+import 'idle_scheduler.dart';
 import 'quran_data_service.dart';
 import 'quran_page_preparation_service.dart';
 
@@ -196,7 +196,9 @@ class QuranFontService extends ChangeNotifier {
         await _ensureFontFamilyLoaded(family: currentFamily, file: initialFile);
         _fontsLoadedToEngine = true;
       } else {
-        logger.w('[FONT_WARN] Initial page font not found in index: $currentFamily');
+        logger.w(
+          '[FONT_WARN] Initial page font not found in index: $currentFamily',
+        );
       }
 
       final int tEnd = DateTime.now().millisecondsSinceEpoch;
@@ -375,9 +377,10 @@ class QuranFontService extends ChangeNotifier {
   /// glyph atlas before the page is revealed on-screen.
   ///
   /// **Idle-time only**: The expensive `toImage()` call (GPU↔CPU sync) is
-  /// deferred to a post-frame callback so it never competes with swipe
-  /// animation frames. If the user is actively scrolling (`_isWarmUpPaused`),
-  /// the warm-up is skipped entirely and will be retried after resume.
+  /// deferred to the [IdleScheduler] so the `toImage()` call never competes
+  /// with live frame rasterization. If the user is actively scrolling
+  /// (`_isWarmUpPaused`), the warm-up is skipped entirely and will be retried
+  /// after resume.
   Future<void> _precacheGlyphAtlas(
     String family, {
     PreparedQuranPage? preparedPage,
@@ -385,32 +388,29 @@ class QuranFontService extends ChangeNotifier {
     // Skip entirely while the user is actively swiping.
     if (_isWarmUpPaused) return;
 
-    // Defer to post-frame so the current frame's raster work finishes first.
-    final idle = Completer<void>();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      idle.complete();
-    });
-    // Ensure the binding pumps a frame if we're not in one.
-    SchedulerBinding.instance.ensureVisualUpdate();
-    await idle.future;
+    // Use IdleScheduler to serialize with snapshot captures — only one
+    // toImage() runs system-wide at a time.
+    final IdleTask idleTask = IdleScheduler.instance.runWhenIdle(() async {
+      // Re-check pause state after yielding — user may have started swiping.
+      if (_isWarmUpPaused) return;
 
-    // Re-check pause state after yielding — user may have started swiping.
-    if (_isWarmUpPaused) return;
+      final int t0 = DateTime.now().millisecondsSinceEpoch;
 
-    final int t0 = DateTime.now().millisecondsSinceEpoch;
-
-    try {
-      if (preparedPage != null) {
-        await _warmFromPreparedPage(preparedPage);
-      } else {
-        await _warmFromRawData(family);
+      try {
+        if (preparedPage != null) {
+          await _warmFromPreparedPage(preparedPage);
+        } else {
+          await _warmFromRawData(family);
+        }
+        logger.i(
+          '[PERF] [GLYPH_WARM] $family | took=${DateTime.now().millisecondsSinceEpoch - t0}ms',
+        );
+      } catch (e) {
+        logger.e('[GLYPH_WARM_ERR] $family: $e');
       }
-      logger.i(
-        '[PERF] [GLYPH_WARM] $family | took=${DateTime.now().millisecondsSinceEpoch - t0}ms',
-      );
-    } catch (e) {
-      logger.e('[GLYPH_WARM_ERR] $family: $e');
-    }
+    });
+
+    await idleTask.future;
   }
 
   /// Paints all [PreparedTextBlock] painters from [page] into a 1×1 off-screen

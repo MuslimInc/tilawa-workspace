@@ -24,9 +24,8 @@ class QuranFontRepositoryImpl implements QuranFontRepository {
       initialPageNumber: initialPageNumber,
     );
     result.then(
-      (_) => logger.i(
-        '[REPO] loadFontsToEngine exit | page=$initialPageNumber',
-      ),
+      (_) =>
+          logger.i('[REPO] loadFontsToEngine exit | page=$initialPageNumber'),
     );
     return result;
   }
