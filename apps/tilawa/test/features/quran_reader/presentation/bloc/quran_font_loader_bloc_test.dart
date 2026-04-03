@@ -49,14 +49,26 @@ void main() {
       'should throttle progress updates to 1% increments',
       build: () {
         when(
-          () => mockLoadQuranFontsToEngineUseCase.hasLoadedFontsToEngine,
+          () => mockLoadQuranFontsToEngineUseCase.isFontLoaded(any()),
         ).thenReturn(false);
         when(
           () => mockCheckFontsDownloadedUseCase(),
         ).thenAnswer((_) async => false);
         when(
-          () => mockLoadQuranFontsToEngineUseCase(
-            initialPageNumber: any(named: 'initialPageNumber'),
+          () => mockLoadQuranFontsToEngineUseCase.ensureSingleFontLoaded(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.ensureQuranDataLoaded(),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.warmInitialPage(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.batchWarmPages(
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+            pivotPage: any(named: 'pivotPage'),
+            onProgress: any(named: 'onProgress'),
           ),
         ).thenAnswer((_) async {});
 
@@ -85,6 +97,7 @@ void main() {
       act: (bloc) => bloc.add(
         const QuranFontLoaderEvent.initialize(initialPageNumber: 118),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         const QuranFontLoaderState.checking(),
         const QuranFontLoaderState.downloading(0),
@@ -95,6 +108,19 @@ void main() {
         const QuranFontLoaderState.registering(),
         const QuranFontLoaderState.success(),
       ],
+      verify: (_) {
+        verifyNever(
+          () => mockLoadQuranFontsToEngineUseCase.warmInitialPage(any()),
+        );
+        verifyNever(
+          () => mockLoadQuranFontsToEngineUseCase.batchWarmPages(
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+            pivotPage: any(named: 'pivotPage'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        );
+      },
     );
   });
 }

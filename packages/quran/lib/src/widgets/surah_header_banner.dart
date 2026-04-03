@@ -69,7 +69,11 @@ class SurahHeaderBanner extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Image(
-                image: _bannerImage,
+                image: ResizeImage(
+                  _bannerImage,
+                  width: bannerWidth.toInt(),
+                  height: bannerHeight.toInt(),
+                ),
                 fit: BoxFit.fill,
                 filterQuality: FilterQuality.low,
                 color: headerImageFilter == null ? null : Colors.white,

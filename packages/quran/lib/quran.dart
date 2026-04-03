@@ -56,6 +56,8 @@ export 'src/header_widget.dart';
 // HELPERS
 // =============================================================================
 export 'src/helpers/convert_to_arabic_number.dart';
+export 'src/layout/quran_layout_strategy.dart'
+    show QuranLayoutMetrics, StandardQuranLayoutStrategy;
 export 'src/page_content.dart';
 export 'src/qcf_verse.dart';
 // =============================================================================
@@ -83,6 +85,8 @@ export 'src/services/interfaces/verse_service.dart';
 // =============================================================================
 export 'src/services/quran_data_service_impl.dart';
 export 'src/services/quran_font_service.dart';
+export 'src/services/page_snapshot_service.dart';
+export 'src/services/quran_page_preparation_service.dart';
 export 'src/services/quran_service_locator.dart';
 export 'src/services/search_service_impl.dart';
 export 'src/services/surah_service_impl.dart';

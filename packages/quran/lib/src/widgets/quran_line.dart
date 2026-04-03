@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 /// Metadata for a single word within a Quran line block.
 class QuranWordMetadata {
@@ -25,10 +24,10 @@ class QuranWordMetadata {
 
 /// A widget that renders a block of Quran text and handles word-level gestures
 /// without individual recognizer objects for every word.
-class QuranLine extends StatelessWidget {
-  QuranLine({
+class QuranLine extends StatefulWidget {
+  const QuranLine({
     super.key,
-    required this.richText,
+    required this.textPainter,
     required this.metadata,
     this.onLongPress,
     this.onLongPressUp,
@@ -36,7 +35,7 @@ class QuranLine extends StatelessWidget {
     this.onLongPressDown,
   });
 
-  final RichText richText;
+  final TextPainter textPainter;
   final List<QuranWordMetadata> metadata;
   final void Function(int surah, int verse)? onLongPress;
   final void Function(int surah, int verse)? onLongPressUp;
@@ -44,12 +43,19 @@ class QuranLine extends StatelessWidget {
   final void Function(int surah, int verse, LongPressStartDetails details)?
   onLongPressDown;
 
-  final GlobalKey _richTextKey = GlobalKey();
+  @override
+  State<QuranLine> createState() => _QuranLineState();
+}
+
+class _QuranLineState extends State<QuranLine> {
+  // Survives widget rebuilds — created once per element lifecycle, not per
+  // QuranLine instantiation. This prevents GlobalKey registry churn when
+  // _cachedLineWidgets is invalidated and the list is rebuilt.
+  final GlobalKey _paintKey = GlobalKey();
+  QuranWordMetadata? _activeWord;
 
   @override
   Widget build(BuildContext context) {
-    // We use a single GestureDetector for the entire block to minimize
-    // the number of GestureRecognizer objects in memory.
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPressStart: (details) {
@@ -57,48 +63,80 @@ class QuranLine extends StatelessWidget {
           details.globalPosition,
         );
         if (word != null) {
-          onLongPressDown?.call(word.surah, word.verse, details);
+          _activeWord = word;
+          widget.onLongPressDown?.call(word.surah, word.verse, details);
         }
       },
       onLongPress: () {
-        // Unfortunately, onLongPress doesn't provide the offset,
-        // but we can rely on the preceding onLongPressStart logic if needed,
-        // or just handle it here if we want to resolve again.
-        // For simplicity, we assume the user is still over the same word.
+        final QuranWordMetadata? word = _activeWord;
+        if (word != null) {
+          widget.onLongPress?.call(word.surah, word.verse);
+        }
       },
       onLongPressUp: () {
-        // Similarly for Up.
+        final QuranWordMetadata? word = _activeWord;
+        if (word != null) {
+          widget.onLongPressUp?.call(word.surah, word.verse);
+        }
+        _activeWord = null;
+      },
+      onLongPressCancel: () {
+        final QuranWordMetadata? word = _activeWord;
+        if (word != null) {
+          widget.onLongPressCancel?.call(word.surah, word.verse);
+        }
+        _activeWord = null;
       },
       child: Center(
-        child: KeyedSubtree(key: _richTextKey, child: richText),
+        child: SizedBox(
+          width: widget.textPainter.width,
+          height: widget.textPainter.height,
+          child: KeyedSubtree(
+            key: _paintKey,
+            child: CustomPaint(painter: _QuranLinePainter(widget.textPainter)),
+          ),
+        ),
       ),
     );
   }
 
   QuranWordMetadata? _findWordAtOffset(Offset globalPosition) {
-    final BuildContext? context = _richTextKey.currentContext;
-    if (context == null) return null;
+    final BuildContext? ctx = _paintKey.currentContext;
+    if (ctx == null) return null;
 
-    final RenderObject? renderBox = context.findRenderObject();
-    if (renderBox == null || renderBox is! RenderParagraph) return null;
-    final RenderParagraph renderParagraph = renderBox;
+    final RenderObject? renderBox = ctx.findRenderObject();
+    if (renderBox == null || renderBox is! RenderBox) return null;
 
-    // Use globalToLocal to ensure the coordinate is relative to the paragraph itself,
-    // which handles any centering or padding from parent widgets.
     final Offset localPositionInParagraph = renderBox.globalToLocal(
       globalPosition,
     );
 
-    final TextPosition pos = renderParagraph.getPositionForOffset(
+    final TextPosition pos = widget.textPainter.getPositionForOffset(
       localPositionInParagraph,
     );
 
     final int offset = pos.offset;
-    for (final QuranWordMetadata m in metadata) {
+    for (final QuranWordMetadata m in widget.metadata) {
       if (offset >= m.startOffset && offset < m.endOffset) {
         return m;
       }
     }
     return null;
+  }
+}
+
+class _QuranLinePainter extends CustomPainter {
+  const _QuranLinePainter(this.textPainter);
+
+  final TextPainter textPainter;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    textPainter.paint(canvas, Offset.zero);
+  }
+
+  @override
+  bool shouldRepaint(covariant _QuranLinePainter oldDelegate) {
+    return !identical(oldDelegate.textPainter, textPainter);
   }
 }

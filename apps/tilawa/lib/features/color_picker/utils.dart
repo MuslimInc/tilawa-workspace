@@ -83,7 +83,7 @@ HSVColor hslToHsv(HSLColor color) {
 ///
 /// ```dart
 /// final RegExp hexInputValidator = RegExp(kValidHexPattern);
-/// if (hexInputValidator.hasMatch(hex)) print('$hex might be a valid HEX color');
+/// if (hexInputValidator.hasMatch(hex)) logger.d('$hex might be a valid HEX color');
 /// ```
 /// Reference: https://en.wikipedia.org/wiki/Web_colors#Hex_triplet
 const String kValidHexPattern = r'^#?[0-9a-fA-F]{1,8}';
@@ -97,7 +97,7 @@ const String kValidHexPattern = r'^#?[0-9a-fA-F]{1,8}';
 ///
 /// ```dart
 /// final RegExp hexCompleteValidator = RegExp(kCompleteValidHexPattern);
-/// if (hexCompleteValidator.hasMatch(hex)) print('$hex is valid HEX color');
+/// if (hexCompleteValidator.hasMatch(hex)) logger.d('$hex is valid HEX color');
 /// ```
 /// Reference: https://en.wikipedia.org/wiki/Web_colors#Hex_triplet
 const String kCompleteValidHexPattern =

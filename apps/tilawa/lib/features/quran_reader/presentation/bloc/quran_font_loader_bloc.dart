@@ -1,10 +1,10 @@
 import 'dart:async';
-
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../domain/usecases/check_fonts_downloaded_use_case.dart';
 import '../../domain/usecases/download_quran_fonts_use_case.dart';
@@ -57,7 +57,6 @@ class QuranFontLoaderBloc
   final DownloadQuranFontsUseCase _downloadQuranFontsUseCase;
   final LoadQuranFontsToEngineUseCase _loadQuranFontsToEngineUseCase;
   final UpdateCurrentPageUseCase _updateCurrentPageUseCase;
-  bool _backgroundGlobalWarmUpStarted = false;
 
   Future<void> ensurePageWindowLoaded(int pageNumber) {
     return _loadQuranFontsToEngineUseCase.ensurePageWindowLoaded(
@@ -67,6 +66,32 @@ class QuranFontLoaderBloc
 
   Future<void> ensureSingleFontLoaded(int pageNumber) {
     return _loadQuranFontsToEngineUseCase.ensureSingleFontLoaded(pageNumber);
+  }
+
+  Future<void> ensureFontReady(
+    int pageNumber, {
+    Duration timeout = const Duration(seconds: 1),
+  }) async {
+    if (isFontLoaded(pageNumber)) return;
+
+    final Future<void> loadFuture = _loadQuranFontsToEngineUseCase
+        .ensureSingleFontLoaded(pageNumber);
+    var loadCompleted = false;
+    unawaited(
+      loadFuture.whenComplete(() {
+        loadCompleted = true;
+      }),
+    );
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+    while (!isFontLoaded(pageNumber) && !loadCompleted) {
+      if (stopwatch.elapsed >= timeout) {
+        throw TimeoutException(
+          'Font for page $pageNumber did not become ready within $timeout',
+        );
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
   }
 
   bool isFontLoaded(int pageNumber) =>
@@ -85,10 +110,15 @@ class QuranFontLoaderBloc
     final int t0 = DateTime.now().millisecondsSinceEpoch;
     _debugLog(() => '[FONT] _onInitialize start | t=${t0}ms');
 
-    if (_loadQuranFontsToEngineUseCase.hasLoadedFontsToEngine) {
+    if (_loadQuranFontsToEngineUseCase.isFontLoaded(event.initialPageNumber)) {
       _debugLog(
         () =>
-            '[FONT] fonts already loaded to engine → success | t=${DateTime.now().millisecondsSinceEpoch}ms',
+            '[FONT] initial page font already loaded → ensuring Quran data | t=${DateTime.now().millisecondsSinceEpoch}ms',
+      );
+      await _loadQuranFontsToEngineUseCase.ensureQuranDataLoaded();
+      _debugLog(
+        () =>
+            '[FONT] initialize short-circuit success | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
       emit(const QuranFontLoaderState.success());
       return;
@@ -165,11 +195,9 @@ class QuranFontLoaderBloc
       }
 
       emit(const QuranFontLoaderState.registering());
-      // Yield to the event loop so the UI actually renders 'registering' 
-      // before the engine potentially stalls on the first load call.
-      // We use 100ms here instead of zero to give the UI thread a longer breather
-      // during heavy parallel startup (Auth/Database/Notification initialization).
-      await Future.delayed(const Duration(milliseconds: 100));
+      // Let the registering state paint once, but do not introduce an
+      // artificial startup stall.
+      await Future<void>.delayed(Duration.zero);
 
       _debugLog(
         () =>
@@ -178,69 +206,36 @@ class QuranFontLoaderBloc
       final int tRegister = DateTime.now().millisecondsSinceEpoch;
       _debugLog(
         () =>
-            '[FONT] await loadFontsToEngine starting... | page=${event.initialPageNumber}',
+            '[FONT] await ensureSingleFontLoaded starting... | page=${event.initialPageNumber}',
       );
 
-      // Wrap in a hard timeout to ensure the Bloc never hangs forever if the engine stalls
-      // Use a shorter timeout. 5s is more than enough for a 10ms task.
-      // If it hangs longer, the issue is likely microtask queue starvation.
-      await _loadQuranFontsToEngineUseCase(
-        initialPageNumber: event.initialPageNumber,
-      ).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          _debugLog(
-            () =>
-                '[FONT_WARN] loadFontsToEngine TIMEOUT (5s) at Bloc level - proceeding anyway',
-          );
-        },
+      final Future<void> ensureInitialFontFuture = ensureFontReady(
+        event.initialPageNumber,
       );
+
+      _debugLog(() => '[FONT] await ensureQuranDataLoaded starting...');
+      final Future<void> ensureDataFuture = _loadQuranFontsToEngineUseCase
+          .ensureQuranDataLoaded()
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('ensureQuranDataLoaded timed out');
+            },
+          );
+
+      await Future.wait([ensureInitialFontFuture, ensureDataFuture]);
 
       _debugLog(
         () =>
-            '[FONT] await loadFontsToEngine finished | took=${DateTime.now().millisecondsSinceEpoch - tRegister}ms',
-      );
-
-      // Final safety check: if we somehow finished but the registry is still empty,
-      // it might be a silent failure. We'll proceed to success anyway to let the app run.
-
-      // Ensure Quran JSON data is ready before showing the reader.
-      _debugLog(() => '[FONT] await ensureQuranDataLoaded starting...');
-      await _loadQuranFontsToEngineUseCase.ensureQuranDataLoaded().timeout(
-        const Duration(seconds: 5),
-        onTimeout: () =>
-            _debugLog(() => '[FONT_WARN] Quran data loading timeout'),
+            '[FONT] await ensureSingleFontLoaded finished | took=${DateTime.now().millisecondsSinceEpoch - tRegister}ms',
       );
       _debugLog(() => '[FONT] await ensureQuranDataLoaded finished');
-
-      // Now both font and JSON data are ready — pre-warm the initial page atlas
-      // so the very first on-screen frame finds it already built in Impeller.
-      _debugLog(
-        () =>
-            '[FONT] await warmInitialPage p${event.initialPageNumber} starting...',
-      );
-      await _loadQuranFontsToEngineUseCase
-          .warmInitialPage(event.initialPageNumber)
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () => _debugLog(
-              () =>
-                  '[FONT_WARN] warmInitialPage timeout p${event.initialPageNumber}',
-            ),
-          );
-      _debugLog(
-        () =>
-            '[FONT] await warmInitialPage p${event.initialPageNumber} finished',
-      );
 
       emit(const QuranFontLoaderState.success());
       _debugLog(
         () =>
             '[FONT] state=success | total=${DateTime.now().millisecondsSinceEpoch - t0}ms',
       );
-
-      // Run full-page warming in background so reader UI never blocks on it.
-      _startBackgroundGlobalWarmUp(event.initialPageNumber);
     } catch (e) {
       _debugLog(
         () => '[FONT] ERROR: $e | t=${DateTime.now().millisecondsSinceEpoch}ms',
@@ -262,35 +257,10 @@ class QuranFontLoaderBloc
   ) {
     _updateCurrentPageUseCase(event.pageNumber);
   }
-
-  void _startBackgroundGlobalWarmUp(int pivotPage) {
-    if (_backgroundGlobalWarmUpStarted) return;
-    _backgroundGlobalWarmUpStarted = true;
-    unawaited(
-      _loadQuranFontsToEngineUseCase
-          .batchWarmPages(
-            start: 1,
-            end: 604,
-            pivotPage: pivotPage,
-            onProgress: (current) async {
-              if (current % 50 == 0 || current == 604) {
-                _debugLog(() => '[FONT_BG] global warm-up progress: $current/604');
-              }
-            },
-          )
-          .then((_) => _debugLog(() => '[FONT_BG] global warm-up finished'))
-          .catchError(
-            (Object error, StackTrace stackTrace) => _debugLog(
-              () => '[FONT_BG] global warm-up failed: $error',
-            ),
-          ),
-    );
-  }
 }
 
 void _debugLog(String Function() messageBuilder) {
-  assert(() {
-    print(messageBuilder());
-    return true;
-  }());
+  if (!kReleaseMode) {
+    logger.i(messageBuilder());
+  }
 }

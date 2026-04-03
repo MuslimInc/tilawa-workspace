@@ -1,0 +1,160 @@
+diff --git a/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.h b/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.h
+index 70aa1f5..9e46ec4 100644
+--- a/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.h
++++ b/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.h
+@@ -5,8 +5,10 @@
+ #ifndef FLUTTER_TXT_SRC_TXT_TYPEFACE_FONT_ASSET_PROVIDER_H_
+ #define FLUTTER_TXT_SRC_TXT_TYPEFACE_FONT_ASSET_PROVIDER_H_
+ 
++#include <cstdint>
+ #include <string>
+ #include <unordered_map>
++#include <unordered_set>
+ #include <vector>
+ 
+ #include "flutter/fml/macros.h"
+@@ -21,7 +23,7 @@ class TypefaceFontStyleSet : public SkFontStyleSet {
+ 
+   ~TypefaceFontStyleSet() override;
+ 
+-  void registerTypeface(sk_sp<SkTypeface> typeface);
++  bool registerTypeface(sk_sp<SkTypeface> typeface);
+ 
+   // |SkFontStyleSet|
+   int count() override;
+@@ -36,6 +38,7 @@ class TypefaceFontStyleSet : public SkFontStyleSet {
+   sk_sp<SkTypeface> matchStyle(const SkFontStyle& pattern) override;
+ 
+  private:
++  std::unordered_set<uint32_t> registered_typeface_ids_;
+   std::vector<sk_sp<SkTypeface>> typefaces_;
+ 
+   FML_DISALLOW_COPY_AND_ASSIGN(TypefaceFontStyleSet);
+@@ -46,9 +49,9 @@ class TypefaceFontAssetProvider : public FontAssetProvider {
+   TypefaceFontAssetProvider();
+   ~TypefaceFontAssetProvider() override;
+ 
+-  void RegisterTypeface(sk_sp<SkTypeface> typeface);
++  bool RegisterTypeface(sk_sp<SkTypeface> typeface);
+ 
+-  void RegisterTypeface(sk_sp<SkTypeface> typeface,
++  bool RegisterTypeface(sk_sp<SkTypeface> typeface,
+                         const std::string& family_name_alias);
+ 
+   // |FontAssetProvider|
+diff --git a/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.cc b/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.cc
+index de16a6e..f91efdb 100644
+--- a/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.cc
++++ b/engine/src/flutter/txt/src/txt/typeface_font_asset_provider.cc
+@@ -34,23 +34,23 @@ sk_sp<SkFontStyleSet> TypefaceFontAssetProvider::MatchFamily(
+   return found->second;
+ }
+ 
+-void TypefaceFontAssetProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
++bool TypefaceFontAssetProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
+   if (typeface == nullptr) {
+-    return;
++    return false;
+   }
+ 
+   SkString sk_family_name;
+   typeface->getFamilyName(&sk_family_name);
+ 
+   std::string family_name(sk_family_name.c_str(), sk_family_name.size());
+-  RegisterTypeface(std::move(typeface), family_name);
++  return RegisterTypeface(std::move(typeface), family_name);
+ }
+ 
+-void TypefaceFontAssetProvider::RegisterTypeface(
++bool TypefaceFontAssetProvider::RegisterTypeface(
+     sk_sp<SkTypeface> typeface,
+     const std::string& family_name_alias) {
+-  if (family_name_alias.empty()) {
+-    return;
++  if (typeface == nullptr || family_name_alias.empty()) {
++    return false;
+   }
+ 
+   std::string canonical_name = CanonicalFamilyName(family_name_alias);
+@@ -61,18 +61,22 @@ void TypefaceFontAssetProvider::RegisterTypeface(
+         std::make_pair(canonical_name, sk_make_sp<TypefaceFontStyleSet>());
+     family_it = registered_families_.emplace(value).first;
+   }
+-  family_it->second->registerTypeface(std::move(typeface));
++  return family_it->second->registerTypeface(std::move(typeface));
+ }
+ 
+ TypefaceFontStyleSet::TypefaceFontStyleSet() = default;
+ 
+ TypefaceFontStyleSet::~TypefaceFontStyleSet() = default;
+ 
+-void TypefaceFontStyleSet::registerTypeface(sk_sp<SkTypeface> typeface) {
++bool TypefaceFontStyleSet::registerTypeface(sk_sp<SkTypeface> typeface) {
+   if (typeface == nullptr) {
+-    return;
++    return false;
++  }
++  if (!registered_typeface_ids_.insert(typeface->uniqueID()).second) {
++    return false;
+   }
+   typefaces_.emplace_back(std::move(typeface));
++  return true;
+ }
+ 
+ int TypefaceFontStyleSet::count() {
+diff --git a/engine/src/flutter/txt/tests/font_collection_tests.cc b/engine/src/flutter/txt/tests/font_collection_tests.cc
+index 2df88f8..45f0022 100644
+--- a/engine/src/flutter/txt/tests/font_collection_tests.cc
++++ b/engine/src/flutter/txt/tests/font_collection_tests.cc
+@@ -6,7 +6,9 @@
+ 
+ #include <sstream>
+ 
++#include "runtime/test_font_data.h"
+ #include "txt/font_collection.h"
++#include "txt/typeface_font_asset_provider.h"
+ 
+ namespace txt {
+ namespace testing {
+@@ -51,5 +53,20 @@ TEST_F(FontCollectionTests, GetUnicodeReturnsSharedInstance) {
+   EXPECT_EQ(font_collection.GetUnicode().get(), unicode.get());
+   EXPECT_EQ(font_collection.unicode_.get(), unicode.get());
+ }
++
++TEST_F(FontCollectionTests, TypefaceFontAssetProviderDeduplicatesTypeface) {
++  std::vector<sk_sp<SkTypeface>> typefaces = flutter::GetTestFontData();
++  ASSERT_FALSE(typefaces.empty());
++  ASSERT_NE(typefaces.front(), nullptr);
++
++  TypefaceFontAssetProvider provider;
++  EXPECT_TRUE(provider.RegisterTypeface(typefaces.front(), "test_family"));
++  EXPECT_FALSE(provider.RegisterTypeface(typefaces.front(), "test_family"));
++
++  EXPECT_EQ(provider.GetFamilyCount(), 1u);
++  sk_sp<SkFontStyleSet> style_set = provider.MatchFamily("TEST_FAMILY");
++  ASSERT_NE(style_set, nullptr);
++  EXPECT_EQ(style_set->count(), 1);
++}
+ }  // namespace testing
+ }  // namespace txt
+diff --git a/engine/src/flutter/lib/ui/text/font_collection.cc b/engine/src/flutter/lib/ui/text/font_collection.cc
+index 3af2ee6..65a00f5 100644
+--- a/engine/src/flutter/lib/ui/text/font_collection.cc
++++ b/engine/src/flutter/lib/ui/text/font_collection.cc
+@@ -206,10 +206,12 @@ void FontCollection::LoadFontFromList(Dart_Handle font_data_handle,
+     auto& family_fonts =
+         font_collection.registered_dynamic_fonts_[canonical_family_name];
+     if (family_fonts.insert(font_hash).second) {
+-      font_collection.dynamic_font_manager_->font_provider().RegisterTypeface(
+-          typeface, resolved_family_name);
+-      font_collection.collection_->ClearFontFamilyCache();
+-      did_register = true;
++      did_register =
++          font_collection.dynamic_font_manager_->font_provider().RegisterTypeface(
++              typeface, resolved_family_name);
++      if (did_register) {
++        font_collection.collection_->ClearFontFamilyCache();
++      }
+     }
+   }
+ 

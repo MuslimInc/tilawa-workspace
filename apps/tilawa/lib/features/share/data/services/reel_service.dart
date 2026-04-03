@@ -3,6 +3,7 @@ import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/share_progress_messages.dart';
 import 'share_file_manager.dart';
@@ -260,7 +261,7 @@ class ReelService {
 void _reelLog(String message) {
   assert(() {
     // ignore: avoid_print
-    print(message);
+    logger.d(message);
     return true;
   }());
 }

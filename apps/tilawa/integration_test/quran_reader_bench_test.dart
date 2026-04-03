@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:quran/quran.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/main.dart' as app;
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa_core/logger.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +16,7 @@ void main() {
     // 0. Setup error handler restoration to prevent assertion crash
     final originalOnError = FlutterError.onError;
 
-    print('[BENCH] Bootstrapping application...');
+    logger.d('[BENCH] Bootstrapping application...');
     await tester.runAsync(() async {
       await app.main();
     });
@@ -26,47 +28,49 @@ void main() {
     await _skipOnboardingAndAuth(tester);
 
     // 2. Navigate to the Quran Reader
-    print('[BENCH] Navigating to Quran Reader...');
+    logger.d('[BENCH] Navigating to Quran Reader...');
     await _navigateToReader(tester);
-    print('[BENCH] Landed on Quran Reader Screen');
+    logger.d('[BENCH] Landed on Quran Reader Screen');
 
     // 3. Cold Jump Benchmark (Page 1 to 300)
-    print('[BENCH] Starting Cold Jump Benchmark (Page 1 -> 300)...');
+    logger.d('[BENCH] Starting Cold Jump Benchmark (Page 1 -> 300)...');
     final Stopwatch coldJumpStopwatch = Stopwatch()..start();
 
     await _jumpToPage(tester, 300);
 
     // We pump for enough time to see the first frame of the jump
     await tester.pump(const Duration(milliseconds: 16));
-    print('[BENCH] Jump command issued. Waiting for render...');
+    logger.d('[BENCH] Jump command issued. Waiting for render...');
 
     await tester.pumpAndSettle(const Duration(seconds: 5));
     coldJumpStopwatch.stop();
-    print(
+    logger.d(
       '[BENCH] Cold Jump (Page 1 -> 300) completed in ${coldJumpStopwatch.elapsedMilliseconds}ms',
     );
 
     // 4. Repeated Distant Jumps (Stress test warming)
-    print('[BENCH] Starting Stress Test: 3 Distant Jumps...');
+    logger.d('[BENCH] Starting Stress Test: 3 Distant Jumps...');
     final List<int> targets = [150, 450, 10];
     for (final target in targets) {
       final sw = Stopwatch()..start();
-      print('[BENCH] Jumping to page $target...');
+      logger.d('[BENCH] Jumping to page $target...');
       await _jumpToPage(tester, target);
       await tester.pumpAndSettle();
       sw.stop();
-      print(
+      logger.d(
         '[BENCH] Jump to $target took ${sw.elapsedMilliseconds}ms (Warming + Navigation)',
       );
     }
 
     // 4. Swipe Performance Benchmark (Rapid swiping)
-    print('[BENCH] Starting Swipe Performance Benchmark (5 rapid swipes)...');
+    logger.d(
+      '[BENCH] Starting Swipe Performance Benchmark (5 rapid swipes)...',
+    );
     final Stopwatch swipeStopwatch = Stopwatch()..start();
 
-    final pageViewFinder = find.byType(PageView);
+    final pageViewFinder = find.byType(QuranPageView);
     for (int i = 0; i < 5; i++) {
-      print('[BENCH] Swiping to next page... (${i + 1}/5)');
+      logger.d('[BENCH] Swiping to next page... (${i + 1}/5)');
       // Use fling for realistic swipe interaction
       await tester.fling(pageViewFinder, const Offset(-500, 0), 2000);
       await tester.pumpAndSettle();
@@ -75,11 +79,11 @@ void main() {
     }
 
     swipeStopwatch.stop();
-    print(
+    logger.d(
       '[BENCH] 5 Swipes completed in ${swipeStopwatch.elapsedMilliseconds}ms',
     );
 
-    print('[BENCH] ALL BENCHMARKS COMPLETED SUCCESSFULLY');
+    logger.d('[BENCH] ALL BENCHMARKS COMPLETED SUCCESSFULLY');
   });
 }
 
@@ -93,7 +97,7 @@ Future<void> _skipOnboardingAndAuth(WidgetTester tester) async {
   final nextFinder = nextBtn.evaluate().isNotEmpty ? nextBtn : nextBtnAr;
 
   if (nextFinder.evaluate().isNotEmpty) {
-    print('[BENCH] Onboarding detected, clicking through...');
+    logger.d('[BENCH] Onboarding detected, clicking through...');
     for (int i = 0; i < 2; i++) {
       await tester.tap(nextFinder);
       await tester.pumpAndSettle();
@@ -109,7 +113,7 @@ Future<void> _skipOnboardingAndAuth(WidgetTester tester) async {
   final loginBtn = find.text('Continue with Google');
   final loginBtnAr = find.text('الاستمرار باستخدام Google');
   if (loginBtn.evaluate().isNotEmpty || loginBtnAr.evaluate().isNotEmpty) {
-    print('[BENCH] Login screen detected, bypassing to Home...');
+    logger.d('[BENCH] Login screen detected, bypassing to Home...');
     final context = tester.element(find.byType(MaterialApp));
     await tester.runAsync(() async {
       const HomeRoute().go(context);
@@ -117,7 +121,7 @@ Future<void> _skipOnboardingAndAuth(WidgetTester tester) async {
     await tester.pumpAndSettle();
   }
 
-  print('[BENCH] Reached Home screen');
+  logger.d('[BENCH] Reached Home screen');
 }
 
 Future<void> _navigateToReader(WidgetTester tester) async {
@@ -125,7 +129,7 @@ Future<void> _navigateToReader(WidgetTester tester) async {
   // In the real app, it's the middle button in MainScreen
   final quranNavBtn = find.byIcon(Icons.menu_book_rounded);
   if (quranNavBtn.evaluate().isEmpty) {
-    print('[BENCH] Quran icon not found, searching by text labels...');
+    logger.d('[BENCH] Quran icon not found, searching by text labels...');
     final quranLabel = find.text('المصحف');
     final quranLabelEn = find.text('Quran');
     final target = quranLabel.evaluate().isNotEmpty ? quranLabel : quranLabelEn;
@@ -142,7 +146,7 @@ Future<void> _navigateToReader(WidgetTester tester) async {
 Future<void> _jumpToPage(WidgetTester tester, int pageNumber) async {
   final navBarFinder = find.byType(PageNavigationBar);
   if (navBarFinder.evaluate().isEmpty) {
-    print('[BENCH] PageNavigationBar not visible, tapping to reveal...');
+    logger.d('[BENCH] PageNavigationBar not visible, tapping to reveal...');
     await tester.tapAt(const Offset(200, 400));
     await tester.pumpAndSettle();
   }

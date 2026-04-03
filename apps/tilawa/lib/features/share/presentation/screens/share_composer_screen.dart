@@ -9,6 +9,7 @@ import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
@@ -154,7 +155,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   @override
   void initState() {
     final int tInit = DateTime.now().millisecondsSinceEpoch;
-    print(
+    logger.d(
       '[SHARE_SCREEN] initState start | surah=${widget.surahNumber} page=${widget.currentPage} | t=${tInit}ms',
     );
     super.initState();
@@ -180,7 +181,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       boundaryKey: widget.readerBoundaryKey,
     );
 
-    print(
+    logger.d(
       '[SHARE_SCREEN] initState complete | took=${DateTime.now().millisecondsSinceEpoch - tInit}ms',
     );
   }
@@ -405,36 +406,38 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
           buildWhen: (previous, current) {
             // Always rebuild on status transitions.
             if (previous.status != current.status) {
-              print(
+              logger.d(
                 '[SHARE_REBUILD] buildWhen=true | reason=status ${previous.status}→${current.status}',
               );
               return true;
             }
             // Always rebuild when content or reciter changes.
             if (previous.content != current.content) {
-              print('[SHARE_REBUILD] buildWhen=true | reason=content changed');
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=content changed',
+              );
               return true;
             }
             if (previous.reciterName != current.reciterName) {
-              print(
+              logger.d(
                 '[SHARE_REBUILD] buildWhen=true | reason=reciterName changed',
               );
               return true;
             }
             if (previous.reciterServerUrl != current.reciterServerUrl) {
-              print(
+              logger.d(
                 '[SHARE_REBUILD] buildWhen=true | reason=reciterServerUrl changed',
               );
               return true;
             }
             if (previous.errorMessage != current.errorMessage) {
-              print(
+              logger.d(
                 '[SHARE_REBUILD] buildWhen=true | reason=errorMessage changed',
               );
               return true;
             }
             // Skip rebuilds that only carry a progress message update.
-            print(
+            logger.d(
               '[SHARE_REBUILD] buildWhen=false | skipped progress-only emit | msg="${current.progressMessage}"',
             );
             return false;

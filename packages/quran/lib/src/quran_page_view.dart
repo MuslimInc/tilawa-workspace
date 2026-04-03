@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../quran.dart';
+import 'helpers/app_logger.dart';
 
 /// A horizontally swipeable Quran mushaf using internal QCF fonts.
 ///
@@ -35,11 +36,14 @@ class QuranPageView extends StatefulWidget {
     this.onScrollStarted,
     this.onScrollEnded,
     this.cacheExtentListenable,
+    this.preparedWindowListenable,
+    this.isScrollingListenable,
   });
 
   /// Optional listenable to dynamically control the cache extent.
   /// Used to zero-out cache during jumps to eliminate 1st-frame jank.
   final ValueListenable<double>? cacheExtentListenable;
+  final ValueListenable<PreparedQuranPageWindow?>? preparedWindowListenable;
 
   /// Scroll interaction callbacks for the parent to manage background tasks.
   final VoidCallback? onScrollStarted;
@@ -73,6 +77,13 @@ class QuranPageView extends StatefulWidget {
   final Color? headerTextColor;
   final double headerFontSizeMultiplier;
   final TextDirection uiTextDirection;
+
+  /// A listenable that is `true` while the user is actively swiping.
+  ///
+  /// When provided by the parent, [QuranPageView] uses it directly instead
+  /// of managing its own. This allows the reader screen to centrally control
+  /// the scroll state for both this view and the background warming service.
+  final ValueListenable<bool>? isScrollingListenable;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -111,73 +122,70 @@ class _QuranPageViewState extends State<QuranPageView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.cacheExtentListenable != null) {
-      return ValueListenableBuilder<double>(
-        valueListenable: widget.cacheExtentListenable!,
-        builder: (context, cacheExtent, child) {
-          return _buildView(context, cacheExtent);
-        },
-      );
-    }
-    return _buildView(context, 800);
-  }
-
-  Widget _buildView(BuildContext context, double cacheExtent) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: ColoredBox(
-        color: widget.pageBackgroundColor,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollStartNotification) {
-              widget.onScrollStarted?.call();
-            } else if (notification is ScrollEndNotification) {
-              widget.onScrollEnded?.call();
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        final ValueListenable<bool>? listenable = widget.isScrollingListenable;
+        if (listenable is ValueNotifier<bool>) {
+          if (notification is ScrollStartNotification) {
+            listenable.value = true;
+          } else if (notification is ScrollUpdateNotification) {
+            if (!listenable.value) listenable.value = true;
+          } else if (notification is ScrollEndNotification ||
+              notification is UserScrollNotification) {
+            if (notification is ScrollEndNotification) {
+              listenable.value = false;
             }
-            _handleScrollNotification(notification);
-            return false;
-          },
+          }
+        }
+        if (notification is ScrollStartNotification) {
+          widget.onScrollStarted?.call();
+        } else if (notification is ScrollEndNotification) {
+          widget.onScrollEnded?.call();
+        }
+        _handleScrollNotification(notification);
+        return false;
+      },
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ColoredBox(
+          color: widget.pageBackgroundColor,
           child: CustomScrollView(
             scrollDirection: Axis.horizontal,
             reverse: true,
             controller: widget.controller,
             physics: const PageScrollPhysics(),
-            // Pre-rasterize one adjacent page (~800px on phones).
-            // This is dynamically controlled via cacheExtentListenable.
-            cacheExtent: cacheExtent,
+            cacheExtent: widget.cacheExtentListenable?.value ?? 800,
             slivers: [
               SliverFillViewport(
                 padEnds: false,
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final int pageNumber = index + 1;
-                    return PageContent(
-                      key: ValueKey<int>(pageNumber),
-                      pageNumber: pageNumber,
-                      textColor: widget.textColor,
-                      verseBackgroundColor: widget.verseBackgroundColor,
-                      onLongPress: widget.onLongPress,
-                      onLongPressUp: widget.onLongPressUp,
-                      onLongPressCancel: widget.onLongPressCancel,
-                      onLongPressDown: widget.onLongPressDown,
-                      juzLabel: widget.juzLabel,
-                      hizbLabel: widget.hizbLabel,
-                      surahNameBuilder: widget.surahNameBuilder,
-                      onSurahSelected: widget.onSurahSelected,
-                      onShowIndex: widget.onShowIndex,
-                      headerImageFilter: widget.headerImageFilter,
-                      headerTextColor: widget.headerTextColor,
-                      headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
-                      pageBackgroundColor: widget.pageBackgroundColor,
-                      uiTextDirection: widget.uiTextDirection,
-                      currentPageListenable: widget.currentPageListenable,
-                      showOverlaysListenable: widget.showOverlaysListenable,
-                      showShadows: widget.showShadows,
-                    );
-                  },
-                  childCount: QuranConstants.totalPagesCount,
-                  addRepaintBoundaries: false,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final int pageNumber = index + 1;
+                  return PageContent(
+                    key: ValueKey<int>(pageNumber),
+                    pageNumber: pageNumber,
+                    preparedWindowListenable: widget.preparedWindowListenable,
+                    textColor: widget.textColor,
+                    verseBackgroundColor: widget.verseBackgroundColor,
+                    onLongPress: widget.onLongPress,
+                    onLongPressUp: widget.onLongPressUp,
+                    onLongPressCancel: widget.onLongPressCancel,
+                    onLongPressDown: widget.onLongPressDown,
+                    juzLabel: widget.juzLabel,
+                    hizbLabel: widget.hizbLabel,
+                    surahNameBuilder: widget.surahNameBuilder,
+                    onSurahSelected: widget.onSurahSelected,
+                    onShowIndex: widget.onShowIndex,
+                    headerImageFilter: widget.headerImageFilter,
+                    headerTextColor: widget.headerTextColor,
+                    headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+                    pageBackgroundColor: widget.pageBackgroundColor,
+                    uiTextDirection: widget.uiTextDirection,
+                    currentPageListenable: widget.currentPageListenable,
+                    showOverlaysListenable: widget.showOverlaysListenable,
+                    isScrollingListenable: widget.isScrollingListenable,
+                    showShadows: widget.showShadows,
+                  );
+                }, childCount: QuranConstants.totalPagesCount),
               ),
             ],
           ),
@@ -188,8 +196,7 @@ class _QuranPageViewState extends State<QuranPageView> {
 }
 
 void _debugLog(String Function() messageBuilder) {
-  assert(() {
-    print(messageBuilder());
-    return true;
-  }());
+  if (!kReleaseMode) {
+    logger.i(messageBuilder());
+  }
 }

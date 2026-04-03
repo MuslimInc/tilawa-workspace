@@ -36,7 +36,9 @@ class QuranDataService {
 
     _loadCompleter = Completer<void>();
     final startTime = DateTime.now();
-    logger.d('[QuranDataService] Start loading Quran data...');
+    if (!kReleaseMode) {
+      logger.i('[QuranDataService] Start loading Quran data...');
+    }
 
     try {
       // 1. Load the raw bytes from the bundle.
@@ -63,9 +65,11 @@ class QuranDataService {
 
       _loadCompleter!.complete();
       final Duration duration = DateTime.now().difference(startTime);
-      logger.d(
-        '[QuranDataService] Data loaded in ${duration.inMilliseconds}ms',
-      );
+      if (!kReleaseMode) {
+        logger.i(
+          '[QuranDataService] Data loaded in ${duration.inMilliseconds}ms',
+        );
+      }
     } catch (e, s) {
       _loadCompleter?.completeError(e, s);
       _loadCompleter = null; // Allow retry on failure

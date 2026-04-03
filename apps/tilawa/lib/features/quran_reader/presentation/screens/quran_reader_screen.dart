@@ -14,6 +14,7 @@ import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigatio
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/screens/share_composer_screen.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../../core/utils/performance_monitor.dart';
@@ -30,11 +31,17 @@ class QuranReaderScreen extends StatelessWidget {
     required this.surahNumber,
     this.initialAyah,
     this.initialPageNumber,
+    this.initialPreparedWindow,
   });
 
   final int surahNumber;
   final int? initialAyah;
   final int? initialPageNumber;
+
+  /// Pre-computed page window passed from [QuranFontLoaderScreen].
+  /// When provided, [_ReaderScaffoldState] publishes it synchronously in
+  /// [initState] — no async preparation on first mount, no loading gate.
+  final PreparedQuranPageWindow? initialPreparedWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +49,7 @@ class QuranReaderScreen extends StatelessWidget {
       surahNumber: surahNumber,
       initialAyah: initialAyah,
       initialPageNumber: initialPageNumber,
+      initialPreparedWindow: initialPreparedWindow,
     );
   }
 }
@@ -51,11 +59,13 @@ class _ReaderScaffold extends StatefulWidget {
     required this.surahNumber,
     this.initialAyah,
     this.initialPageNumber,
+    this.initialPreparedWindow,
   });
 
   final int surahNumber;
   final int? initialAyah;
   final int? initialPageNumber;
+  final PreparedQuranPageWindow? initialPreparedWindow;
 
   @override
   State<_ReaderScaffold> createState() => _ReaderScaffoldState();
@@ -66,10 +76,14 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   // Ghost/offstage page warming can introduce raster spikes on mid-range
   // devices during rapid swipes. Keep disabled until we add adaptive gating.
   static const bool _enableGhostWarming = false;
+  static final StandardQuranLayoutStrategy _pagePreparationLayoutStrategy =
+      StandardQuranLayoutStrategy();
+  static const int _visiblePageWindowRadius = 2;
 
   late final PageController _pageController;
   late final ValueNotifier<int> _currentPageNotifier;
   late final ValueNotifier<double> _cacheExtentNotifier;
+  late final ValueNotifier<PreparedQuranPageWindow?> _preparedWindowNotifier;
   late final ValueNotifier<bool> _showOverlaysNotifier;
   late final ValueNotifier<_WarmingState> _warmingNotifier;
   late final UiVisibilityCubit _uiVisibilityCubit;
@@ -91,7 +105,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   static const _headerFontSizeMultiplier = 0.57;
   static const double _interactiveCacheExtent = 0;
-  static const double _settledCacheExtent = 0;
+  double _settledCacheExtent = 0;
+  double? _lastPreparedViewportWidth;
+  Orientation? _lastPreparedOrientation;
+  Future<void>? _pendingWindowPreparation;
+  int? _pendingWindowCenterPage;
+  bool _didReportInitialPreparedWindow = false;
+  late final ValueNotifier<bool> _isScrollingNotifier;
 
   ThemeData? _cachedThemeData;
   QuranReaderTheme? _cachedReaderTheme;
@@ -113,6 +133,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
     _uiVisibilityCubit.show();
     _showOverlaysNotifier = ValueNotifier<bool>(!_uiVisibilityCubit.state);
+    _isScrollingNotifier = ValueNotifier<bool>(false);
 
     initSideEffects();
     // precacheQuranAssets moved to didChangeDependencies to avoid MediaQuery warning
@@ -120,9 +141,26 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final bloc = context.read<QuranReaderBloc>();
     final int syncPage = _resolveInitialPage(bloc);
     _currentPageNotifier = ValueNotifier<int>(syncPage);
-    _cacheExtentNotifier = ValueNotifier<double>(_settledCacheExtent);
+    // Start with zero cache extent so the first visible frame lays out only
+    // the current page. We restore the settled extent once the local window
+    // is fully prepared.
+    // Keep cacheExtent at zero. The reader already prepares neighbor pages
+    // explicitly, and restoring a full-viewport cacheExtent causes offscreen
+    // pages to be rasterized eagerly, which shows up as raster-thread jank.
+    _settledCacheExtent = 0.0;
+    _cacheExtentNotifier = ValueNotifier<double>(_interactiveCacheExtent);
+    // Publish the pre-computed window immediately if the caller provided one.
+    // This means PageContent receives a PreparedQuranPage on its very first
+    // build — zero async work, zero loading gate.
+    _preparedWindowNotifier = ValueNotifier<PreparedQuranPageWindow?>(
+      widget.initialPreparedWindow,
+    );
+    if (widget.initialPreparedWindow != null) {
+      _didReportInitialPreparedWindow = true;
+    }
     _warmingNotifier = ValueNotifier<_WarmingState>(const _WarmingState());
     _pageController = PageController(initialPage: syncPage - 1);
+    QuranFontService.instance.addListener(_handleFontRegistryChanged);
 
     if (widget.surahNumber > 0 &&
         bloc.state.currentSurah?.number != widget.surahNumber) {
@@ -148,6 +186,20 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     super.didChangeDependencies();
     final incomingReaderTheme = QuranReaderTheme.of(context);
     final incomingTheme = Theme.of(context);
+    final Orientation currentOrientation = MediaQuery.orientationOf(context);
+    final double viewportWidth = MediaQuery.sizeOf(context).width;
+    final bool didViewportChange =
+        _lastPreparedViewportWidth == null ||
+        (_lastPreparedViewportWidth! - viewportWidth).abs() > 0.5;
+    final bool didOrientationChange =
+        _lastPreparedOrientation != currentOrientation;
+    final bool didThemeChange = _cachedReaderTheme != incomingReaderTheme;
+    _settledCacheExtent = 0.0;
+    if (!_isInteracting &&
+        _hasPreparedCoverageFor(_currentPageNotifier.value) &&
+        (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
+      _cacheExtentNotifier.value = _settledCacheExtent;
+    }
     if (_cachedReaderTheme != incomingReaderTheme || _cachedThemeData == null) {
       _cachedReaderTheme = incomingReaderTheme;
       _cachedThemeData = incomingTheme.copyWith(
@@ -155,6 +207,28 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       );
       // Precache assets once theme and media query info is stable
       unawaited(QuranFontService.precacheQuranAssets(context));
+    }
+    if (didViewportChange || didOrientationChange || didThemeChange) {
+      _lastPreparedViewportWidth = viewportWidth;
+      _lastPreparedOrientation = currentOrientation;
+      QuranPagePreparationService.instance.clear();
+      // Re-seed the LRU cache from the pre-computed initial window so the
+      // clear() call above doesn't evict pages we already prepared before
+      // mount. The TextPainter objects are still valid — we just re-insert
+      // them so _preparePageWindowSync() hits the cache instead of rebuilding.
+      final PreparedQuranPageWindow? seeded = _preparedWindowNotifier.value;
+      if (seeded != null) {
+        seeded.preparedPages.forEach((pageNum, preparedPage) {
+          QuranPagePreparationService.instance.seedPage(
+            pageNumber: pageNum,
+            preparedPage: preparedPage,
+            metrics: preparedPage.metrics,
+            viewportWidth: viewportWidth,
+            textColor:
+                _cachedReaderTheme?.textColor ?? incomingReaderTheme.textColor,
+          );
+        });
+      }
     }
     _cachedAppSystemUiStyle = _buildAppSystemUiOverlayStyle(incomingTheme);
     _cachedReaderSystemUiStyle = _buildReaderSystemUiOverlayStyle(
@@ -164,18 +238,28 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _didInitDependencies = true;
       _updateSystemUiConfig(_uiVisibilityCubit.state);
     }
+    _preparePageWindowSync(_currentPageNotifier.value);
+    if (!_hasPreparedCoverageFor(_currentPageNotifier.value)) {
+      _scheduleVisibleWindowPreparation(_currentPageNotifier.value);
+    } else {
+      _restoreCacheExtentIfReady();
+    }
   }
 
   @override
   void dispose() {
     _debugLog(() => '[READER_EXIT] dispose');
     _warmingCooldownTimer?.cancel();
+    _isScrollingNotifier.dispose();
+    PageSnapshotService.instance.clear();
     _settlementTimer?.cancel();
     _cacheExtentRestoreTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    QuranFontService.instance.removeListener(_handleFontRegistryChanged);
     _pageController.dispose();
     _currentPageNotifier.dispose();
     _cacheExtentNotifier.dispose();
+    _preparedWindowNotifier.dispose();
     _showOverlaysNotifier.dispose();
     _warmingNotifier.dispose();
     SystemChrome.setPreferredOrientations([
@@ -294,6 +378,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
               pageController: _pageController,
               currentPageNotifier: _currentPageNotifier,
               cacheExtentNotifier: _cacheExtentNotifier,
+              preparedWindowNotifier: _preparedWindowNotifier,
               showOverlaysNotifier: _showOverlaysNotifier,
               screenshotBoundaryKey: _screenshotBoundaryKey,
               warmingNotifier: _warmingNotifier,
@@ -309,6 +394,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
               onWarming: _handleOnWarming,
               onPointerDown: _pauseWarming,
               onPointerUp: _resumeWarming,
+              isScrollingNotifier: _isScrollingNotifier,
             ),
           ),
         ),
@@ -316,10 +402,280 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
   }
 
+
+  List<int> _orderedPageWindow(int centerPage) {
+    final List<int> pages = [centerPage];
+    for (int distance = 1; distance <= _visiblePageWindowRadius; distance++) {
+      final int next = centerPage + distance;
+      final int previous = centerPage - distance;
+      if (next <= QuranConstants.totalPagesCount) pages.add(next);
+      if (previous >= 1) pages.add(previous);
+    }
+    return pages;
+  }
+
+  bool _hasPreparedCoverageFor(int centerPage) {
+    final PreparedQuranPageWindow? window = _preparedWindowNotifier.value;
+    if (window == null || window.centerPage != centerPage) {
+      return false;
+    }
+    if (!QuranFontService.instance.isQuranDataLoaded) {
+      return false;
+    }
+
+    for (final int pageNumber in _orderedPageWindow(centerPage)) {
+      if (window.preparedPageFor(pageNumber) == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _restoreCacheExtentIfReady() {
+      if (!_isInteracting &&
+          _hasPreparedCoverageFor(_currentPageNotifier.value) &&
+          (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
+        _cacheExtentNotifier.value = _settledCacheExtent;
+      }
+    if (!kReleaseMode) {
+      logger.i(
+        '[READER_CACHE] restore cacheExtent=$_settledCacheExtent (prepared coverage)',
+      );
+    }
+  }
+
+  Future<void> _yieldForNeighborPreparation() {
+    // `endOfFrame` can stall indefinitely once the current page is stable and
+    // no new frame is scheduled. A small timed yield still gives animation
+    // frames breathing room while ensuring neighbor preparation continues when
+    // the app is otherwise idle.
+    return Future<void>.delayed(const Duration(milliseconds: 16));
+  }
+
+  PreparedQuranPage? _preparePageContentSync(int pageNumber) {
+    if (!mounted || _cachedReaderTheme == null) return null;
+    if (!QuranFontService.instance.isQuranDataLoaded) return null;
+    if (!QuranFontService.instance.isFontLoaded(pageNumber)) return null;
+
+    final Size viewportSize = MediaQuery.sizeOf(context);
+    final QuranLayoutMetrics metrics = _pagePreparationLayoutStrategy
+        .calculateMetrics(
+          context,
+          BoxConstraints(
+            maxWidth: viewportSize.width,
+            maxHeight: viewportSize.height,
+          ),
+          pageNumber,
+        );
+
+    QuranFontService.instance.setRenderFontSize(metrics.fontSize);
+    final int tPrep = DateTime.now().millisecondsSinceEpoch;
+    final PreparedQuranPage page = QuranPagePreparationService.instance
+        .preparePage(
+          pageNumber: pageNumber,
+          metrics: metrics,
+          viewportWidth: viewportSize.width,
+          textColor: _cachedReaderTheme!.textColor,
+        );
+    if (!kReleaseMode) {
+      final int prepMs = DateTime.now().millisecondsSinceEpoch - tPrep;
+      // > 0ms means cache miss (TextPainter.layout() ran); 0ms = cache hit.
+      if (prepMs > 8) {
+        logger.i(
+          '[PERF][PAGE] ⚠ p$pageNumber prepare=${prepMs}ms exceeds 8ms budget (cold)',
+        );
+      } else if (prepMs > 0) {
+        logger.i('[PERF][PAGE] p$pageNumber prepare=${prepMs}ms (cold)');
+      }
+      // prepMs == 0 → cache hit, not logged (zero-cost, nothing to flag)
+    }
+    return page;
+  }
+
+  PreparedQuranPageWindow? _preparePageWindowSync(int centerPage) {
+    if (!mounted) return null;
+    final PreparedQuranPageWindow? previousWindow =
+        _preparedWindowNotifier.value;
+    final List<int> windowPages = _orderedPageWindow(centerPage);
+    final Set<int> desiredPageNumbers = windowPages.toSet();
+    final Set<int> retainedPageNumbers = <int>{
+      ...desiredPageNumbers,
+      if (previousWindow != null) ...previousWindow.pageNumbers,
+    };
+    final Map<int, PreparedQuranPage> preparedPages = <int, PreparedQuranPage>{
+      if (previousWindow != null)
+        for (final MapEntry<int, PreparedQuranPage> entry
+            in previousWindow.preparedPages.entries)
+          if (retainedPageNumbers.contains(entry.key)) entry.key: entry.value,
+    };
+
+    for (final int pageNumber in windowPages) {
+      final PreparedQuranPage? preparedPage = _preparePageContentSync(
+        pageNumber,
+      );
+      if (preparedPage == null) {
+        // Center page is mandatory — bail entirely if it can't be prepared
+        // (font not loaded, data not ready, etc.). Neighbor pages are optional:
+        // skip them here and let _prepareVisibleWindow fill them in later.
+        if (pageNumber == centerPage) return null;
+        continue;
+      }
+      preparedPages[pageNumber] = preparedPage;
+    }
+
+    final PreparedQuranPageWindow nextWindow = PreparedQuranPageWindow(
+      centerPage: centerPage,
+      radius: _visiblePageWindowRadius,
+      visiblePageNumbers: preparedPages.keys.toSet(),
+      preparedPages: preparedPages,
+    );
+    final bool didWindowChange =
+        previousWindow == null ||
+        previousWindow.centerPage != nextWindow.centerPage ||
+        previousWindow.radius != nextWindow.radius ||
+        !setEquals(previousWindow.pageNumbers, nextWindow.pageNumbers) ||
+        !setEquals(
+          previousWindow.preparedPages.keys.toSet(),
+          nextWindow.preparedPages.keys.toSet(),
+        ) ||
+        nextWindow.preparedPages.entries.any(
+          (entry) =>
+              !identical(previousWindow.preparedPages[entry.key], entry.value),
+        );
+    if (didWindowChange) {
+      _preparedWindowNotifier.value = nextWindow;
+    }
+    if (!_didReportInitialPreparedWindow &&
+        nextWindow.preparedPageFor(_currentPageNotifier.value) != null) {
+      _didReportInitialPreparedWindow = true;
+    }
+    _restoreCacheExtentIfReady();
+    return nextWindow;
+  }
+
+  Future<void> _prepareVisibleWindow(int centerPage) async {
+    if (!mounted) return;
+    final int tWindowStart = DateTime.now().millisecondsSinceEpoch;
+    if (!kReleaseMode) {
+      logger.i('[PERF][WINDOW] start p$centerPage');
+    }
+    final QuranFontLoaderBloc fontLoaderBloc = context
+        .read<QuranFontLoaderBloc>();
+    await Future.wait([
+      QuranFontService.instance.ensureQuranDataLoaded(),
+      fontLoaderBloc.ensureFontReady(centerPage),
+    ]);
+    if (!mounted) return;
+    if (!kReleaseMode) {
+      logger.i(
+        '[PERF][WINDOW] center font+data ready p$centerPage | ${DateTime.now().millisecondsSinceEpoch - tWindowStart}ms',
+      );
+    }
+    if (_pendingWindowCenterPage != centerPage) return;
+
+    if (_preparedWindowNotifier.value?.preparedPageFor(centerPage) == null) {
+      _prepareAndPublishPage(centerPage, windowCenterPage: centerPage);
+      if (!mounted || _pendingWindowCenterPage != centerPage) return;
+    }
+
+    final List<int> windowPages = _orderedPageWindow(centerPage);
+    for (final int pageNumber in windowPages) {
+      if (pageNumber == centerPage) continue;
+      if (!mounted || _pendingWindowCenterPage != centerPage) return;
+      if (_preparedWindowNotifier.value?.preparedPageFor(pageNumber) != null) {
+        continue;
+      }
+
+      await fontLoaderBloc.ensureFontReady(pageNumber);
+      if (!mounted || _pendingWindowCenterPage != centerPage) return;
+      await _yieldForNeighborPreparation();
+      if (!mounted || _pendingWindowCenterPage != centerPage) return;
+      _prepareAndPublishPage(pageNumber, windowCenterPage: centerPage);
+    }
+
+    if (mounted && _pendingWindowCenterPage == centerPage) {
+      _preparePageWindowSync(centerPage);
+      if (!kReleaseMode) {
+        logger.i(
+          '[PERF][WINDOW] complete p$centerPage | total=${DateTime.now().millisecondsSinceEpoch - tWindowStart}ms',
+        );
+      }
+    }
+  }
+
+  /// Prepares [pageNumber] via [QuranPagePreparationService] and immediately
+  /// publishes an updated [PreparedQuranPageWindow] so [PageContent] can render
+  /// without waiting for the full window to be complete.
+  ///
+  /// [windowCenterPage] is the center page of the window this preparation
+  /// belongs to — passed explicitly to avoid reading the stale
+  /// [_currentPageNotifier] value after an async gap.
+  void _prepareAndPublishPage(int pageNumber, {required int windowCenterPage}) {
+    if (!mounted) return;
+    final PreparedQuranPage? preparedPage = _preparePageContentSync(pageNumber);
+    if (preparedPage == null) return;
+
+    final PreparedQuranPageWindow? previousWindow =
+        _preparedWindowNotifier.value;
+    final List<int> windowPages = _orderedPageWindow(windowCenterPage);
+    final Set<int> desiredPageNumbers = windowPages.toSet();
+
+    final Map<int, PreparedQuranPage> preparedPages = <int, PreparedQuranPage>{
+      if (previousWindow != null)
+        for (final MapEntry<int, PreparedQuranPage> entry
+            in previousWindow.preparedPages.entries)
+          if (desiredPageNumbers.contains(entry.key)) entry.key: entry.value,
+      pageNumber: preparedPage,
+    };
+
+    _preparedWindowNotifier.value = PreparedQuranPageWindow(
+      centerPage: windowCenterPage,
+      radius: _visiblePageWindowRadius,
+      visiblePageNumbers: preparedPages.keys.toSet(),
+      preparedPages: preparedPages,
+    );
+
+    if (!_didReportInitialPreparedWindow &&
+        preparedPages.containsKey(_currentPageNotifier.value)) {
+      _didReportInitialPreparedWindow = true;
+    }
+    _restoreCacheExtentIfReady();
+  }
+
+  void _scheduleVisibleWindowPreparation(int centerPage) {
+    if (!mounted) return;
+    if (_pendingWindowPreparation != null &&
+        _pendingWindowCenterPage == centerPage) {
+      return;
+    }
+
+    _pendingWindowCenterPage = centerPage;
+    late final Future<void> future;
+    future = _prepareVisibleWindow(centerPage).whenComplete(() {
+      if (identical(_pendingWindowPreparation, future)) {
+        _pendingWindowPreparation = null;
+        _pendingWindowCenterPage = null;
+      }
+    });
+    _pendingWindowPreparation = future;
+    unawaited(future);
+  }
+
+  void _handleFontRegistryChanged() {
+    if (!mounted) return;
+    final int currentPage = _currentPageNotifier.value;
+    if (_hasPreparedCoverageFor(currentPage)) {
+      _restoreCacheExtentIfReady();
+      return;
+    }
+    _scheduleVisibleWindowPreparation(currentPage);
+  }
+
   void _pauseWarming() {
     _resumeWarmingTimer?.cancel();
     _cacheExtentRestoreTimer?.cancel();
     _isInteracting = true;
+    _isScrollingNotifier.value = true;
 
     // Phase 9: Pause global background warming to ensure the UI thread and Raster thread
     // are dedicated entirely to the user's current interaction.
@@ -327,9 +683,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     // Reduce adjacent-page prebuild work while the user is actively dragging.
     // This frees raster budget for the current transition frame.
-    if (_cacheExtentNotifier.value != _interactiveCacheExtent) {
-      _cacheExtentNotifier.value = _interactiveCacheExtent;
-      print('[READER_CACHE] set cacheExtent=$_interactiveCacheExtent (interaction start)');
+    if (!kReleaseMode) {
+      if (_cacheExtentNotifier.value != _interactiveCacheExtent) {
+        _cacheExtentNotifier.value = _interactiveCacheExtent;
+        logger.i(
+          '[READER_CACHE] set cacheExtent=$_interactiveCacheExtent (interaction start)',
+        );
+      }
     }
     _hotPathLog(() => '[GHOST] Pausing all warming');
     _warmingRotationTimer?.cancel();
@@ -344,6 +704,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _resumeWarmingTimer = Timer(const Duration(milliseconds: 500), () {
       if (!mounted) return;
       _isInteracting = false;
+      _isScrollingNotifier.value = false;
       _cacheExtentRestoreTimer?.cancel();
 
       // Resume global background warming only after the interaction has settled.
@@ -353,10 +714,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       // raster spikes from neighboring page builds during active swipe.
       _cacheExtentRestoreTimer = Timer(const Duration(milliseconds: 120), () {
         if (!mounted || _isInteracting) return;
-        if (_cacheExtentNotifier.value != _settledCacheExtent) {
-          _cacheExtentNotifier.value = _settledCacheExtent;
-          print('[READER_CACHE] restore cacheExtent=$_settledCacheExtent (interaction settled)');
-        }
+        _restoreCacheExtentIfReady();
       });
       _hotPathLog(() => '[GHOST] Resuming background warming');
       if (_warmingQueue.isNotEmpty) {
@@ -404,7 +762,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Priority 1: Ensure fonts are registered in the engine's font manager.
     final fontLoader = context.read<QuranFontLoaderBloc>();
     for (final p in uniquePages) {
-      unawaited(fontLoader.ensureSingleFontLoaded(p));
+      unawaited(fontLoader.ensureFontReady(p));
     }
 
     // Priority 2: Force GPU rasterization by rotating through the pages in the ghost layer.
@@ -482,10 +840,12 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _currentPageNotifier.value = pageNumber;
     }
 
-    // Phase 4: Await core font registration BEFORE jumping
-    // This moves the 30ms registration delay to the button click rather than the animation.
-    await fontLoaderBloc.ensureSingleFontLoaded(pageNumber);
-    unawaited(fontLoaderBloc.ensurePageWindowLoaded(pageNumber));
+    await Future.wait([
+      QuranFontService.instance.ensureQuranDataLoaded(),
+      fontLoaderBloc.ensureFontReady(pageNumber),
+    ]);
+    _preparePageWindowSync(pageNumber);
+    _scheduleVisibleWindowPreparation(pageNumber);
 
     void jump() {
       if (!mounted || !_pageController.hasClients) return;
@@ -641,7 +1001,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     for (final page in pages) {
       if (!mounted) return;
       final bool wasLoaded = fontLoaderBloc.isFontLoaded(page);
-      await fontLoaderBloc.ensureSingleFontLoaded(page);
+      await fontLoaderBloc.ensureFontReady(page, timeout: const Duration(seconds: 2));
       if (wasLoaded) {
         alreadyLoaded++;
       } else {
@@ -667,17 +1027,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Pause background warming immediately to keep the frame budget clear for the animation
     fontLoaderBloc.pauseBackgroundWarmUp();
 
-    // Proactively register the font for the NEW current page immediately (fast sync check)
-    // so it's ready as soon as the swap completes.
-    unawaited(fontLoaderBloc.ensureSingleFontLoaded(pageNumber));
+    // Synchronously update the window notifier so the center page is
+    // available to PageContent._handleWindowChanged before the next frame.
+    // If the center page font is loaded and cached this is a sub-ms LRU hit.
+    // The async _scheduleVisibleWindowPreparation below handles neighbors.
+    _preparePageWindowSync(pageNumber);
 
-    // Immediately ghost-warm the next 2 pages ahead so Impeller builds their
-    // glyph atlases during settle time, before the user swipes again.
-    final int direction = pageNumber >= _warmingPageNumber ? 1 : -1;
-    final int next1 = (pageNumber + direction).clamp(1, 604);
-    final int next2 = (pageNumber + direction * 2).clamp(1, 604);
-    unawaited(fontLoaderBloc.ensureSingleFontLoaded(next1));
-    unawaited(fontLoaderBloc.ensureSingleFontLoaded(next2));
+    _scheduleVisibleWindowPreparation(pageNumber);
 
     // Defer the heavy "Window Loading" (neighbors) until we are reasonably
     // sure the user has settled on this page.
@@ -690,7 +1046,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     if (_enableGhostWarming) {
       _warmingNotifier.value = _warmingNotifier.value.copyWith(
-        pageNumber: next1,
+        pageNumber: pageNumber,
         isWarming: true,
         isSettled: false,
       );
@@ -710,7 +1066,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     fontLoaderBloc.add(QuranFontLoaderEvent.updateCurrentPage(pageNumber));
 
     unawaited(
-      fontLoaderBloc.ensurePageWindowLoaded(pageNumber).then((_) {
+      (_pendingWindowPreparation ?? Future<void>.value()).whenComplete(() {
         fontLoaderBloc.resumeBackgroundWarmUp();
 
         // Proactively warm neighbor pages in the ghost layer after current page is ready
@@ -741,19 +1097,16 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final int currentPage = _currentPageNotifier.value;
-    final int direction = pageNumber >= currentPage ? 1 : -1;
-    final int nextNeighbor = (pageNumber + direction).clamp(1, 604);
-    final int secondNeighbor = (pageNumber + (direction * 2)).clamp(1, 604);
 
     // Pause global warming to ensure the jump transition is as smooth as possible.
     fontLoaderBloc.pauseBackgroundWarmUp();
 
-    // Await font registration + atlas warm-up so the first on-screen frame
-    // finds the atlas already built in Impeller (no raster spike).
-    // The current page stays visible during this wait (~50-100ms).
-    await fontLoaderBloc.ensureSingleFontLoaded(pageNumber);
-    unawaited(fontLoaderBloc.ensureSingleFontLoaded(nextNeighbor));
-    unawaited(fontLoaderBloc.ensureSingleFontLoaded(secondNeighbor));
+    await Future.wait([
+      QuranFontService.instance.ensureQuranDataLoaded(),
+      fontLoaderBloc.ensureFontReady(pageNumber),
+    ]);
+    _preparePageWindowSync(pageNumber);
+    _scheduleVisibleWindowPreparation(pageNumber);
 
     if (!mounted) {
       _isProgrammaticJump = false;
@@ -776,7 +1129,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         Timer(const Duration(milliseconds: 400), () {
           if (mounted) {
             _hotPathLog(() => '[JUMP] cache restored for p$pageNumber');
-            _cacheExtentNotifier.value = _settledCacheExtent;
+            _restoreCacheExtentIfReady();
           }
         });
       }
@@ -784,7 +1137,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     if (!mounted) return;
     context.read<QuranReaderBloc>().add(QuranReaderEvent.loadPage(pageNumber));
-    unawaited(fontLoaderBloc.ensurePageWindowLoaded(pageNumber));
+    _pendingWindowPreparation = null;
+    _pendingWindowCenterPage = null;
 
     Timer(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -845,6 +1199,7 @@ class _ReaderStack extends StatelessWidget {
     required this.pageController,
     required this.currentPageNotifier,
     required this.cacheExtentNotifier,
+    required this.preparedWindowNotifier,
     required this.showOverlaysNotifier,
     required this.screenshotBoundaryKey,
     required this.warmingNotifier,
@@ -860,11 +1215,13 @@ class _ReaderStack extends StatelessWidget {
     this.onWarming,
     this.onPointerDown,
     this.onPointerUp,
+    required this.isScrollingNotifier,
   });
 
   final PageController pageController;
   final ValueNotifier<int> currentPageNotifier;
   final ValueNotifier<double> cacheExtentNotifier;
+  final ValueNotifier<PreparedQuranPageWindow?> preparedWindowNotifier;
   final ValueNotifier<bool> showOverlaysNotifier;
   final GlobalKey screenshotBoundaryKey;
   final ValueNotifier<_WarmingState> warmingNotifier;
@@ -880,6 +1237,7 @@ class _ReaderStack extends StatelessWidget {
   final ValueChanged<int>? onWarming;
   final VoidCallback? onPointerDown;
   final VoidCallback? onPointerUp;
+  final ValueNotifier<bool> isScrollingNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -896,10 +1254,16 @@ class _ReaderStack extends StatelessWidget {
             child: Listener(
               onPointerDown: (_) => onPointerDown?.call(),
               onPointerUp: (_) => onPointerUp?.call(),
+              // QuranPageView is always mounted. Each PageContent listens to
+              // preparedWindowNotifier directly and rebuilds when its page
+              // becomes ready. There is no gate here — gating on null caused
+              // QuranPageView to unmount/remount, destroying PageContent state
+              // and missing the first notifier fire after mount.
               child: QuranPageView(
                 controller: pageController,
                 currentPageListenable: currentPageNotifier,
                 cacheExtentListenable: cacheExtentNotifier,
+                preparedWindowListenable: preparedWindowNotifier,
                 pageBackgroundColor: readerTheme.pageBackground,
                 textColor: readerTheme.textColor,
                 headerImageFilter: readerTheme.headerImageFilter,
@@ -916,31 +1280,20 @@ class _ReaderStack extends StatelessWidget {
                     unawaited(jumpToSurah(surahNumber)),
                 onShowIndex: handleShowIndex,
                 showOverlaysListenable: showOverlaysNotifier,
-                showShadows: false, // Hard-disabled for Phase 9 performance
+                isScrollingListenable: isScrollingNotifier,
+                showShadows: false,
               ),
             ),
           ),
         ),
-        // Ghost warming layer — uses ValueListenableBuilder so only this subtree
-        // rebuilds when warming state changes, leaving QuranPageView untouched.
-        ValueListenableBuilder<_WarmingState>(
-          valueListenable: warmingNotifier,
-          builder: (context, warming, _) {
-            if (!warming.isWarming) return const SizedBox.shrink();
-            return Offstage(
-              child: PageContent(
-                key: ValueKey<String>('ghost_${warming.pageNumber}'),
-                pageNumber: warming.pageNumber,
-                textColor: readerTheme.textColor,
-                headerImageFilter: readerTheme.headerImageFilter,
-                headerTextColor: readerTheme.headerTextColor,
-                headerFontSizeMultiplier: headerFontSizeMultiplier,
-                pageBackgroundColor: readerTheme.pageBackground,
-                uiTextDirection: Directionality.of(context),
-                isWarming: true,
-              ),
-            );
-          },
+        // RepaintBoundary isolates the static QuranPageView from the top-level
+        // progress overlays (index card, slider) and the warming ghost layer.
+        RepaintBoundary(
+          child: _WarmingLayer(
+            warmingNotifier: warmingNotifier,
+            readerTheme: readerTheme,
+            headerFontSizeMultiplier: headerFontSizeMultiplier,
+          ),
         ),
         _ReaderOverlay(
           showOverlaysNotifier: showOverlaysNotifier,
@@ -953,6 +1306,41 @@ class _ReaderStack extends StatelessWidget {
           onPointerUp: onPointerUp,
         ),
       ],
+    );
+  }
+}
+
+class _WarmingLayer extends StatelessWidget {
+  const _WarmingLayer({
+    required this.warmingNotifier,
+    required this.readerTheme,
+    required this.headerFontSizeMultiplier,
+  });
+
+  final ValueNotifier<_WarmingState> warmingNotifier;
+  final QuranReaderTheme readerTheme;
+  final double headerFontSizeMultiplier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<_WarmingState>(
+      valueListenable: warmingNotifier,
+      builder: (context, warming, _) {
+        if (!warming.isWarming) return const SizedBox.shrink();
+        return Offstage(
+          child: PageContent(
+            key: ValueKey<String>('ghost_${warming.pageNumber}'),
+            pageNumber: warming.pageNumber,
+            textColor: readerTheme.textColor,
+            headerImageFilter: readerTheme.headerImageFilter,
+            headerTextColor: readerTheme.headerTextColor,
+            headerFontSizeMultiplier: headerFontSizeMultiplier,
+            pageBackgroundColor: readerTheme.pageBackground,
+            uiTextDirection: Directionality.of(context),
+            isWarming: true,
+          ),
+        );
+      },
     );
   }
 }
@@ -1037,18 +1425,16 @@ class _WarmingState {
 }
 
 void _debugLog(String Function() messageBuilder) {
-  assert(() {
+  if (!kReleaseMode) {
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
-    print('${messageBuilder()} | t=${timestamp}ms');
-    return true;
-  }());
+    logger.i('${messageBuilder()} | t=${timestamp}ms');
+  }
 }
 
 void _hotPathLog(String Function() messageBuilder) {
-  assert(() {
-    print(messageBuilder());
-    return true;
-  }());
+  if (!kReleaseMode) {
+    logger.i(messageBuilder());
+  }
 }
 
 class _PerformanceBenchmarkOverlay extends StatefulWidget {

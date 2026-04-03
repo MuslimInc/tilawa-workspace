@@ -1,13 +1,14 @@
 import 'dart:async';
-import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:quran/src/page_content.dart';
 // Note: importing internal services for diagnostic purposes
 // ignore: implementation_imports
 import 'package:quran/src/services/quran_data_service.dart';
 import 'package:quran/src/services/quran_font_service.dart';
-import 'package:quran/src/page_content.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
+import 'package:tilawa_core/logger.dart';
 
 class QuranRenderDemoScreen extends StatefulWidget {
   const QuranRenderDemoScreen({super.key, this.pageNumber = 5});
@@ -46,8 +47,8 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
     final logMessage = '[$timestamp] $message';
     _logs.add(logMessage);
     // Use print logs as requested
-    print('RENDER_DEMO_PRINT: $message');
-    developer.log(message, name: 'RENDER_DEMO');
+    // Use print logs as requested
+    logger.i(message);
     if (mounted) setState(() {});
   }
 

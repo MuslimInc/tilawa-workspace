@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
 import 'package:tilawa/features/downloads/presentation/bloc/download_button/download_button_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../../helpers/mock_helper.mocks.dart';
 
@@ -137,8 +138,8 @@ void main() {
         },
         (error, stack) {
           errorMessage = error.toString();
-          print('Caught expected crash: $error');
-          print('Stack: $stack');
+          logger.d('Caught expected crash: $error');
+          logger.d('Stack: $stack');
           // Verify it's the exact error from Firebase
           didCrash =
               errorMessage!.contains(
@@ -330,7 +331,7 @@ void main() {
             await Future.delayed(const Duration(milliseconds: 100));
           },
           (error, stack) {
-            print('✅ Caught the crash: $error');
+            logger.d('✅ Caught the crash: $error');
             if (error.toString().contains(
                   'Cannot add new events after calling close',
                 ) ||

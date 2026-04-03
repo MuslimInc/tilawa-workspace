@@ -45,6 +45,10 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
   int? _throttledWarmingPage;
   Timer? _warmingThrottleTimer;
 
+  // Measurement Cache
+  final Map<String, double> _textWidthCache = {};
+  double? _lastCachedReaderFontSize;
+
   bool get _showPreviewPill => _isDraggingSlider || _showFocusedPagePreview;
 
   bool get _isDragging => _isDraggingSlider;
@@ -173,12 +177,19 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
     required String text,
     required TextStyle style,
   }) {
+    final double? cachedWidth = _textWidthCache[text];
+    if (cachedWidth != null && _lastCachedReaderFontSize == style.fontSize) {
+      return cachedWidth;
+    }
+
     final TextPainter painter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
       textDirection: Directionality.of(context),
     )..layout();
 
+    _textWidthCache[text] = painter.width;
+    _lastCachedReaderFontSize = style.fontSize;
     return painter.width;
   }
 

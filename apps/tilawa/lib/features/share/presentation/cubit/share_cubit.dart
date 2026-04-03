@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../../quran_reader/domain/entities/entities.dart';
 import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
@@ -262,7 +263,7 @@ class ShareCubit extends Cubit<ShareState> {
     if (config == null) return;
 
     final int tAudio = DateTime.now().millisecondsSinceEpoch;
-    print(
+    logger.d(
       '[AUDIO_GEN] prepareAudioClip start | surah=${config.surahNumber} ${config.fromAyah}-${config.toAyah} | t=${tAudio}ms',
     );
 
@@ -283,14 +284,14 @@ class ShareCubit extends Cubit<ShareState> {
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (progress, message) {
-          print(
+          logger.d(
             '[AUDIO_GEN] progress=${(progress * 100).toStringAsFixed(0)}% | "$message" | elapsed=${DateTime.now().millisecondsSinceEpoch - tAudio}ms',
           );
           emit(state.copyWith(progress: progress, progressMessage: message));
         },
       );
 
-      print(
+      logger.d(
         '[AUDIO_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tAudio}ms | file=${content.filePath}',
       );
       emit(
@@ -300,7 +301,7 @@ class ShareCubit extends Cubit<ShareState> {
         ),
       );
     } catch (e) {
-      print(
+      logger.d(
         '[AUDIO_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tAudio}ms | $e',
       );
       if (e is! DioException || e.type != DioExceptionType.cancel) {
@@ -346,20 +347,20 @@ class ShareCubit extends Cubit<ShareState> {
         boundaryKeys?.where((key) => key.currentContext != null).toList() ??
         const <GlobalKey>[];
 
-    print(
+    logger.d(
       '[REEL_GEN] generateReel called | boundaryKeysTotal=${boundaryKeys?.length ?? 0} | effectiveBoundaryKeys=${effectiveBoundaryKeys.length} | audioConfig=${audioConfig != null}',
     );
 
     if (audioConfig == null ||
         (effectiveBoundaryKey == null && effectiveBoundaryKeys.isEmpty)) {
-      print(
+      logger.d(
         '[REEL_GEN] generateReel ABORTED | audioConfig=$audioConfig | effectiveBoundaryKeys=${effectiveBoundaryKeys.length}',
       );
       return;
     }
 
     final int tReel = DateTime.now().millisecondsSinceEpoch;
-    print(
+    logger.d(
       '[REEL_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${effectiveBoundaryKeys.length} | t=${tReel}ms',
     );
 
@@ -385,14 +386,14 @@ class ShareCubit extends Cubit<ShareState> {
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (p, m) {
-          print(
+          logger.d(
             '[REEL_GEN] progress=${(p * 100).toStringAsFixed(0)}% | "$m" | elapsed=${DateTime.now().millisecondsSinceEpoch - tReel}ms',
           );
           emit(state.copyWith(progress: p, progressMessage: m));
         },
       );
 
-      print(
+      logger.d(
         '[REEL_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tReel}ms | file=${content.filePath}',
       );
       emit(
@@ -402,7 +403,7 @@ class ShareCubit extends Cubit<ShareState> {
         ),
       );
     } catch (e) {
-      print(
+      logger.d(
         '[REEL_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tReel}ms | $e',
       );
       if (e is! DioException || e.type != DioExceptionType.cancel) {

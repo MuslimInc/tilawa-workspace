@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:hive_ce/hive.dart';
@@ -122,6 +123,28 @@ class AppBootstrapper {
     try {
       timeline.startPhase();
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Frame jank detector — profile/debug builds only.
+      // Logs any frame where build or raster exceeds the 16ms budget.
+      if (!kReleaseMode) {
+        SchedulerBinding.instance.addTimingsCallback((
+          List<FrameTiming> timings,
+        ) {
+          for (final timing in timings) {
+            final buildMs = timing.buildDuration.inMilliseconds;
+            final rasterMs = timing.rasterDuration.inMilliseconds;
+            final totalMs = timing.totalSpan.inMilliseconds;
+            if (rasterMs > 16 || buildMs > 16) {
+              debugPrint(
+                '[JANK] build=${buildMs}ms '
+                'raster=${rasterMs}ms '
+                'total=${totalMs}ms',
+              );
+            }
+          }
+        });
+      }
+
       _startupTasks.resetLaunchState();
       timeline.log('WidgetsBinding');
 

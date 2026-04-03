@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:tilawa_core/logger.dart';
 
 /// A utility class for tracking performance metrics and marking timeline events.
 class PerformanceMonitor {
@@ -19,7 +20,7 @@ class PerformanceMonitor {
 
   /// Logs a one-off performance metric.
   void logMetric(String name, dynamic value) {
-    developer.log('PERF_METRIC: $name = $value', name: 'tilawa.perf');
+    logger.i('PERF_METRIC: $name = $value');
   }
 
   /// Tracks the duration of the next frame.
@@ -29,10 +30,7 @@ class PerformanceMonitor {
     final int start = DateTime.now().millisecondsSinceEpoch;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       final int end = DateTime.now().millisecondsSinceEpoch;
-      developer.log(
-        'FRAME_DURATION [$label]: ${end - start}ms',
-        name: 'tilawa.perf',
-      );
+      logger.i('FRAME_DURATION [$label]: ${end - start}ms');
     });
   }
 }

@@ -1,15 +1,18 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../helpers/app_logger.dart';
 import 'quran_data_service.dart';
+import 'quran_page_preparation_service.dart';
 
 /// Service responsible for managing and loading QCF4 Quran fonts dynamically.
 ///
@@ -31,6 +34,7 @@ class QuranFontService extends ChangeNotifier {
   final String _fontZipUrl =
       'https://pub-7f6f6686010343899ba5b2f0ac6cb7b3.r2.dev/quran_fonts.zip';
   final int _totalFonts = 604;
+  static const int _pageWindowRadius = 2;
 
   String? _fontsDirectory;
   Map<String, File>? _fontFilesByFamily;
@@ -38,10 +42,25 @@ class QuranFontService extends ChangeNotifier {
   final Set<String> _warmedGlyphFamilies = <String>{};
   final Map<String, Future<void>> _inFlightFontFamilies =
       <String, Future<void>>{};
+  final Map<String, Future<void>> _inFlightGlyphWarmUps =
+      <String, Future<void>>{};
   Timer? _coalesceTimer;
   bool _fontsLoadedToEngine = false;
   bool _isWarmUpPaused = false;
   bool get hasLoadedFontsToEngine => _fontsLoadedToEngine;
+
+  // The actual font size used by PageContent for rendering — set once after the
+  // first layout metrics are computed. Warm-up uses this size so the Impeller/Skia
+  // atlas entry it builds is the same one the renderer will look up on first draw.
+  // Defaults to 40px (safe fallback if no page has rendered yet).
+  double _renderFontSize = 40.0;
+
+  /// Called by [PageContent] after its first layout to register the actual
+  /// font size used for rendering. Must be called before [warmInitialPage].
+  void setRenderFontSize(double fontSize) {
+    if (fontSize > 0) _renderFontSize = fontSize;
+  }
+
   int get loadedCount => _loadedFontFamilies.length;
 
   bool isFontLoaded(int pageNumber) =>
@@ -55,24 +74,40 @@ class QuranFontService extends ChangeNotifier {
     await precacheImage(surahHeaderBannerImage, context);
   }
 
-  Future<void> ensureQuranDataLoaded() =>
-      QuranDataService.instance.ensureLoaded();
+  Future<void> ensureQuranDataLoaded() async {
+    final bool wasLoaded = QuranDataService.instance.isLoaded;
+    await QuranDataService.instance.ensureLoaded();
+    // If data just became available, notify so the reader can retry page
+    // preparation — _handleFontRegistryChanged guards on isQuranDataLoaded,
+    // which would otherwise never re-fire after a slow data load.
+    if (!wasLoaded && QuranDataService.instance.isLoaded) {
+      _scheduleNotify();
+    }
+  }
+
+  bool get isQuranDataLoaded => QuranDataService.instance.isLoaded;
 
   void pauseBackgroundWarmUp() {
     if (!_isWarmUpPaused) {
       _isWarmUpPaused = true;
-      developer.log('[FONT] Warm-up PAUSED', name: 'tilawa.quran.fonts');
+      logger.i('[FONT] Warm-up PAUSED');
     }
   }
 
   void resumeBackgroundWarmUp() {
     if (_isWarmUpPaused) {
       _isWarmUpPaused = false;
-      developer.log('[FONT] Warm-up RESUMED', name: 'tilawa.quran.fonts');
+      logger.i('[FONT] Warm-up RESUMED');
     }
   }
 
-  /// Loads only the font for [pageNumber]. Use for batch warming.
+  /// Loads only the font for [pageNumber].
+  ///
+  /// This intentionally does not trigger glyph atlas warm-up. Off-screen
+  /// warm-up uses `Picture.toImage()`, which can compete with the raster
+  /// thread and regress swipe smoothness on mid-range devices. Callers that
+  /// explicitly want warm-up must opt into [warmInitialPage] or
+  /// [warmPreparedPage].
   Future<void> ensureSingleFontLoaded(int pageNumber) async {
     final String family = _pageFamily(pageNumber);
     if (_loadedFontFamilies.contains(family)) return;
@@ -80,9 +115,6 @@ class QuranFontService extends ChangeNotifier {
     final File? file = fontFilesByFamily[family];
     if (file != null) {
       await _ensureFontFamilyLoaded(family: family, file: file);
-      // Await atlas warm-up so the caller can show a loading indicator and
-      // guarantee the first on-screen frame finds the atlas already built.
-      await _precacheGlyphAtlas(family);
     }
   }
 
@@ -101,9 +133,10 @@ class QuranFontService extends ChangeNotifier {
     final int maxDist = math.max(pivot - start, end - pivot);
 
     // Zig-zag loop: [pivot, pivot+1, pivot-1, pivot+2, pivot-2, ...]
-    for (int dist = 0; dist <= maxDist; dist++) {
-      final List<int> candidates =
-          dist == 0 ? [pivot] : [pivot + dist, pivot - dist];
+    for (var dist = 0; dist <= maxDist; dist++) {
+      final List<int> candidates = dist == 0
+          ? [pivot]
+          : [pivot + dist, pivot - dist];
 
       for (final p in candidates) {
         if (p < start || p > end) continue;
@@ -118,10 +151,6 @@ class QuranFontService extends ChangeNotifier {
 
         if (file != null) {
           await _ensureFontFamilyLoaded(family: family, file: file);
-          if (!_warmedGlyphFamilies.contains(family)) {
-            await _precacheGlyphAtlas(family);
-            _warmedGlyphFamilies.add(family);
-          }
         }
 
         await onProgress(p);
@@ -148,20 +177,14 @@ class QuranFontService extends ChangeNotifier {
     if (_fontsLoadedToEngine) return;
 
     final int tStart = DateTime.now().millisecondsSinceEpoch;
-    developer.log(
-      '[FONT] loadFontsToEngine START | page=$initialPageNumber',
-      name: 'tilawa.quran.fonts',
-    );
+    logger.i('[FONT] loadFontsToEngine START | page=$initialPageNumber');
 
     _currentPage = initialPageNumber;
 
     try {
       final Map<String, File> fontFilesByFamily = await _getFontFilesByFamily();
       if (fontFilesByFamily.isEmpty) {
-        developer.log(
-          '[FONT_WARN] No fonts found in index',
-          name: 'tilawa.quran.fonts',
-        );
+        logger.w('[FONT_WARN] No fonts found in index');
         return;
       }
 
@@ -173,24 +196,13 @@ class QuranFontService extends ChangeNotifier {
         await _ensureFontFamilyLoaded(family: currentFamily, file: initialFile);
         _fontsLoadedToEngine = true;
       } else {
-        developer.log(
-          '[FONT_WARN] Initial page font not found in index: $currentFamily',
-          name: 'tilawa.quran.fonts',
-        );
+        logger.w('[FONT_WARN] Initial page font not found in index: $currentFamily');
       }
 
       final int tEnd = DateTime.now().millisecondsSinceEpoch;
-      developer.log(
-        '[FONT] loadFontsToEngine DONE | total=${tEnd - tStart}ms',
-        name: 'tilawa.quran.fonts',
-      );
+      logger.i('[FONT] loadFontsToEngine DONE | total=${tEnd - tStart}ms');
     } catch (e, s) {
-      developer.log(
-        'Font Loading Crash',
-        name: 'tilawa.quran.fonts',
-        error: e,
-        stackTrace: s,
-      );
+      logger.e('Font Loading Crash', error: e, stackTrace: s);
       rethrow;
     }
   }
@@ -200,13 +212,30 @@ class QuranFontService extends ChangeNotifier {
   /// Must be called AFTER both [loadFontsToEngine] and [ensureQuranDataLoaded]
   /// have completed — the font must be registered AND the JSON data must be
   /// available for [_precacheGlyphAtlas] to collect the glyph strings.
-  Future<void> warmInitialPage(int pageNumber) async {
-    await _precacheGlyphAtlas(_pageFamily(pageNumber)).timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => developer.log(
-        '[GLYPH_WARM] initial page timeout p$pageNumber',
-        name: 'tilawa.quran.fonts',
-      ),
+  ///
+  /// When [preparedPage] is supplied, the already-laid-out [TextPainter] objects
+  /// are used directly — no additional text shaping occurs.
+  Future<void> warmInitialPage(
+    int pageNumber, {
+    PreparedQuranPage? preparedPage,
+  }) async {
+    _scheduleGlyphWarm(
+      family: _pageFamily(pageNumber),
+      pageNumber: pageNumber,
+      preparedPage: preparedPage,
+    );
+  }
+
+  /// Schedules a glyph atlas warm-up for [preparedPage], reusing its already-laid-out
+  /// [TextPainter] objects instead of re-shaping the text.
+  ///
+  /// Call this immediately after [QuranPagePreparationService.preparePage] returns.
+  /// Safe to call multiple times — subsequent calls for the same page are no-ops.
+  void warmPreparedPage(int pageNumber, PreparedQuranPage preparedPage) {
+    _scheduleGlyphWarm(
+      family: _pageFamily(pageNumber),
+      pageNumber: pageNumber,
+      preparedPage: preparedPage,
     );
   }
 
@@ -215,20 +244,24 @@ class QuranFontService extends ChangeNotifier {
     final Map<String, File> fontFilesByFamily = await _getFontFilesByFamily();
     if (fontFilesByFamily.isEmpty) return;
 
-    // 1. Target Page (Sync)
-    final String targetFamily = _pageFamily(pageNumber);
-    await _ensureFontFamilyLoaded(
-      family: targetFamily,
-      file: fontFilesByFamily[targetFamily]!,
-    );
-    // Await atlas warm-up for the jump target so the first frame is clean.
-    await _precacheGlyphAtlas(targetFamily).timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => developer.log(
-        '[GLYPH_WARM] jump target timeout p$pageNumber',
-        name: 'tilawa.quran.fonts',
-      ),
-    );
+    for (final int candidatePage in _orderedPageWindow(pageNumber)) {
+      final String family = _pageFamily(candidatePage);
+      final File? file = fontFilesByFamily[family];
+      if (file == null) continue;
+
+      await _ensureFontFamilyLoaded(family: family, file: file);
+    }
+  }
+
+  List<int> _orderedPageWindow(int centerPage) {
+    final pages = <int>[centerPage];
+    for (var distance = 1; distance <= _pageWindowRadius; distance++) {
+      final int next = centerPage + distance;
+      final int previous = centerPage - distance;
+      if (next <= _totalFonts) pages.add(next);
+      if (previous >= 1) pages.add(previous);
+    }
+    return pages;
   }
 
   Future<String> get _localPath async {
@@ -330,22 +363,85 @@ class QuranFontService extends ChangeNotifier {
       _loadedFontFamilies.add(family);
       _scheduleNotify(); // Coalesced: batch multiple font loads into one notify
       final int tEnd = DateTime.now().millisecondsSinceEpoch;
-      developer.log(
+      logger.i(
         '[PERF] [FONT_LOAD] $family | read=${tRead - tStart}ms | register=${tEnd - tRead}ms | total=${tEnd - tStart}ms',
-        name: 'tilawa.quran.fonts',
       );
     } catch (e) {
-      developer.log(
-        '[FONT_ERR] $family: $e',
-        name: 'tilawa.quran.fonts',
-        error: e,
-      );
+      logger.e('[FONT_ERR] $family: $e', error: e);
     }
   }
 
   /// Fires an off-screen paint of [family]'s glyphs so Impeller builds the
   /// glyph atlas before the page is revealed on-screen.
-  Future<void> _precacheGlyphAtlas(String family) async {
+  ///
+  /// **Idle-time only**: The expensive `toImage()` call (GPU↔CPU sync) is
+  /// deferred to a post-frame callback so it never competes with swipe
+  /// animation frames. If the user is actively scrolling (`_isWarmUpPaused`),
+  /// the warm-up is skipped entirely and will be retried after resume.
+  Future<void> _precacheGlyphAtlas(
+    String family, {
+    PreparedQuranPage? preparedPage,
+  }) async {
+    // Skip entirely while the user is actively swiping.
+    if (_isWarmUpPaused) return;
+
+    // Defer to post-frame so the current frame's raster work finishes first.
+    final idle = Completer<void>();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      idle.complete();
+    });
+    // Ensure the binding pumps a frame if we're not in one.
+    SchedulerBinding.instance.ensureVisualUpdate();
+    await idle.future;
+
+    // Re-check pause state after yielding — user may have started swiping.
+    if (_isWarmUpPaused) return;
+
+    final int t0 = DateTime.now().millisecondsSinceEpoch;
+
+    try {
+      if (preparedPage != null) {
+        await _warmFromPreparedPage(preparedPage);
+      } else {
+        await _warmFromRawData(family);
+      }
+      logger.i(
+        '[PERF] [GLYPH_WARM] $family | took=${DateTime.now().millisecondsSinceEpoch - t0}ms',
+      );
+    } catch (e) {
+      logger.e('[GLYPH_WARM_ERR] $family: $e');
+    }
+  }
+
+  /// Paints all [PreparedTextBlock] painters from [page] into a 1×1 off-screen
+  /// [ui.Image], causing Impeller/Skia to upload their glyphs to the GPU atlas.
+  ///
+  /// Zero extra text-shaping work: the [TextPainter] objects were already laid
+  /// out by [QuranPagePreparationService.preparePage].
+  Future<void> _warmFromPreparedPage(PreparedQuranPage page) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    for (final PreparedPageBlock block in page.blocks) {
+      if (block is PreparedTextBlock) {
+        block.painter.paint(canvas, Offset.zero);
+      }
+    }
+    final ui.Picture picture = recorder.endRecording();
+    try {
+      final ui.Image image = await picture.toImage(1, 1);
+      image.dispose();
+    } finally {
+      picture.dispose();
+    }
+  }
+
+  /// Fallback warm-up path: builds a single concatenated [TextSpan] from raw
+  /// JSON glyph data and paints it off-screen.
+  ///
+  /// Creates ONE [TextPainter] (not 15), so it is still cheaper than the
+  /// previous implementation which called [precacheTextGlyphs] which also
+  /// built one painter — but now we have explicit control over disposal.
+  Future<void> _warmFromRawData(String family) async {
     // Parse page number from family name, e.g. 'QCF_P042' → 42.
     final int? pageNumber = int.tryParse(
       family.replaceFirst(RegExp(r'^QCF_P0*'), ''),
@@ -356,7 +452,7 @@ class QuranFontService extends ChangeNotifier {
         .getPageData(pageNumber);
     if (pageData == null) return;
 
-    // Collect all word texts for the page into a single string.
+    // Collect all word texts into a single string.
     final buffer = StringBuffer();
     for (final List<Map<String, dynamic>> line in pageData) {
       for (final word in line) {
@@ -367,29 +463,87 @@ class QuranFontService extends ChangeNotifier {
     final glyphs = buffer.toString();
     if (glyphs.isEmpty) return;
 
-    // Use 40px — ensures glyphs remain sharp when scaled up on tablets/large phones.
-    // The atlas is keyed by (fontFamily, fontSize) so size must be consistent.
-    const fontSize = 40.0;
+    final double fontSize = _renderFontSize;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: glyphs,
+        style: TextStyle(fontFamily: family, fontSize: fontSize),
+      ),
+      textDirection: TextDirection.rtl,
+    )..layout(maxWidth: math.max(1.0, glyphs.length * fontSize));
 
     try {
-      final int t0 = DateTime.now().millisecondsSinceEpoch;
-      await precacheTextGlyphs(
-        text: TextSpan(
-          text: glyphs,
-          style: TextStyle(fontFamily: family, fontSize: fontSize),
-        ),
-        textDirection: TextDirection.rtl,
-        maxWidth: math.max(1.0, glyphs.length * fontSize),
-      );
-      developer.log(
-        '[PERF] [GLYPH_WARM] $family | took=${DateTime.now().millisecondsSinceEpoch - t0}ms',
-        name: 'tilawa.quran.fonts',
-      );
-    } catch (e) {
-      // Warm-up failure is non-fatal — the page will still render, just with
-      // the atlas-build cost on the first on-screen frame.
-      developer.log('[GLYPH_WARM_ERR] $family: $e', name: 'tilawa.quran.fonts');
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      painter.paint(canvas, Offset.zero);
+      final ui.Picture picture = recorder.endRecording();
+      try {
+        final ui.Image image = await picture.toImage(1, 1);
+        image.dispose();
+      } finally {
+        picture.dispose();
+      }
+    } finally {
+      painter.dispose();
     }
+  }
+
+  Future<void> _warmGlyphFamily({
+    required String family,
+    required int pageNumber,
+    PreparedQuranPage? preparedPage,
+  }) {
+    if (_warmedGlyphFamilies.contains(family)) {
+      return Future<void>.value();
+    }
+
+    // If a PreparedQuranPage is provided, always use it even if a raw-data
+    // warm-up is already in-flight — it's cheaper (no extra text shaping) and
+    // produces a more accurate atlas entry.
+    if (preparedPage != null || !_inFlightGlyphWarmUps.containsKey(family)) {
+      _inFlightGlyphWarmUps.remove(family); // cancel any in-flight raw warm-up
+      final Future<void> warmFuture =
+          _precacheGlyphAtlas(family, preparedPage: preparedPage)
+              .timeout(
+                const Duration(seconds: 5),
+                onTimeout: () => logger.w('[GLYPH_WARM] timeout p$pageNumber'),
+              )
+              .then((_) {
+                _warmedGlyphFamilies.add(family);
+              })
+              .whenComplete(() => _inFlightGlyphWarmUps.remove(family));
+      _inFlightGlyphWarmUps[family] = warmFuture;
+      return warmFuture;
+    }
+
+    return _inFlightGlyphWarmUps[family]!;
+  }
+
+  void _scheduleGlyphWarm({
+    required String family,
+    required int pageNumber,
+    PreparedQuranPage? preparedPage,
+  }) {
+    if (_warmedGlyphFamilies.contains(family)) return;
+    // If already in-flight with raw data and we now have a prepared page,
+    // still upgrade — the prepared-page path avoids extra text shaping.
+    if (_inFlightGlyphWarmUps.containsKey(family) && preparedPage == null) {
+      return;
+    }
+
+    unawaited(
+      _warmGlyphFamily(
+        family: family,
+        pageNumber: pageNumber,
+        preparedPage: preparedPage,
+      ).catchError((Object error, StackTrace stackTrace) {
+        logger.e(
+          '[GLYPH_WARM_ERR] $family: $error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
   }
 
   /// Coalesce rapid font-load notifications into a single batch.
@@ -439,13 +593,12 @@ class QuranFontService extends ChangeNotifier {
       }
 
       final int tEnd = DateTime.now().millisecondsSinceEpoch;
-      developer.log(
+      logger.i(
         '[PERF] [FONT_INDEX] scanned ${indexed.length} fonts | took=${tEnd - tStart}ms',
-        name: 'tilawa.quran.fonts',
       );
       return indexed;
     } catch (e) {
-      developer.log('[FONT_INDEX_ERR] $e', name: 'tilawa.quran.fonts');
+      logger.e('[FONT_INDEX_ERR] $e');
       return const {};
     } finally {
       // Clear the future so a retry can actually run the indexing again if needed.
@@ -485,4 +638,17 @@ class QuranFontService extends ChangeNotifier {
 
   String _pageFamily(int pageNumber) =>
       'QCF_P${pageNumber.toString().padLeft(3, '0')}';
+
+  @visibleForTesting
+  void debugMarkFontLoaded(int pageNumber) {
+    _loadedFontFamilies.add(_pageFamily(pageNumber));
+  }
+
+  @visibleForTesting
+  void debugResetForTests() {
+    _loadedFontFamilies.clear();
+    _warmedGlyphFamilies.clear();
+    _inFlightGlyphWarmUps.clear();
+    _fontsLoadedToEngine = false;
+  }
 }

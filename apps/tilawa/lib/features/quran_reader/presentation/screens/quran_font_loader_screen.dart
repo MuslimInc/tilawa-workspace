@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/quran_font_loader_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
+import '../theme/quran_reader_theme.dart';
 import 'quran_reader_screen.dart';
 
 /// Screen that ensures QCF4 fonts are downloaded and registered with the
 /// Flutter engine before displaying the actual [QuranReaderScreen].
 ///
 /// States:
-///   initial / checking              → [_LoadingView]
+///   initial / checking              → blank (dispatches init immediately)
 ///   downloading                     → [_DownloadView]
-///   registering                     → [_LoadingView]
-///   success                         → [QuranReaderScreen]
+///   registering                     → blank (fast, ~200ms)
+///   success                         → [QuranReaderScreen] directly, no loading gate
 ///   error                           → [_ErrorView]
 class QuranFontLoaderScreen extends StatefulWidget {
   const QuranFontLoaderScreen({
@@ -34,6 +36,9 @@ class QuranFontLoaderScreen extends StatefulWidget {
 class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
   int? _initialPageNumber;
   bool _didDispatchInit = false;
+  // Pre-computed before the reader is shown — built synchronously once we
+  // have a success state and a valid BuildContext with MediaQuery data.
+  PreparedQuranPageWindow? _initialPreparedWindow;
   Widget? _cachedReaderView;
 
   @override
@@ -50,16 +55,26 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Resolve page number from bloc hint when surahNumber is not provided.
     if (_initialPageNumber == null && widget.surahNumber <= 0) {
       final hint = context.read<QuranReaderBloc>().state.initialPageHint;
       if (hint != null) {
         _initialPageNumber = hint;
       }
     }
-    // Dispatch initialize as soon as we have a page number, but only once.
-    // Done in didChangeDependencies to avoid the BlocListener race: in profile
-    // mode the bloc may already be in 'initial' before the listener registers.
+    final int? initialPageNumber = _initialPageNumber;
+    if (initialPageNumber != null) {
+      final Size viewportSize = MediaQuery.sizeOf(context);
+      final QuranLayoutMetrics metrics = StandardQuranLayoutStrategy()
+          .calculateMetrics(
+            context,
+            BoxConstraints(
+              maxWidth: viewportSize.width,
+              maxHeight: viewportSize.height,
+            ),
+            initialPageNumber,
+          );
+      QuranFontService.instance.setRenderFontSize(metrics.fontSize);
+    }
     _maybeDispatchInit();
   }
 
@@ -74,14 +89,100 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
     });
   }
 
+  /// Builds the initial [PreparedQuranPageWindow] synchronously.
+  ///
+  /// Called once when the Bloc emits success — at this point fonts are
+  /// registered, JSON data is loaded, and the glyph atlas is pre-warmed.
+  /// All 15 [TextPainter.layout()] calls complete in <5ms on any device.
+  PreparedQuranPageWindow? _buildInitialPreparedWindow(int pageNumber) {
+    if (!QuranFontService.instance.isQuranDataLoaded) return null;
+    if (!QuranFontService.instance.isFontLoaded(pageNumber)) return null;
+
+    final Size viewportSize = MediaQuery.sizeOf(context);
+    final strategy = StandardQuranLayoutStrategy();
+
+    // Build a ±2 page window. Only pages whose fonts are already loaded are
+    // included — visiblePageNumbers and preparedPages are kept in sync so
+    // QuranPageView never asks for a page that isn't prepared.
+    const int radius = 2;
+    final Map<int, PreparedQuranPage> preparedPages = {};
+    final Color textColor = QuranReaderTheme.of(context).textColor;
+    final BoxConstraints constraints = BoxConstraints(
+      maxWidth: viewportSize.width,
+      maxHeight: viewportSize.height,
+    );
+
+    final int tWindow = DateTime.now().millisecondsSinceEpoch;
+
+    for (int delta = -radius; delta <= radius; delta++) {
+      final int p = (pageNumber + delta).clamp(
+        1,
+        QuranConstants.totalPagesCount,
+      );
+      if (preparedPages.containsKey(p)) continue;
+      if (!QuranFontService.instance.isFontLoaded(p)) continue;
+
+      final int tPage = DateTime.now().millisecondsSinceEpoch;
+      final QuranLayoutMetrics metrics = strategy.calculateMetrics(
+        context,
+        constraints,
+        p,
+      );
+      preparedPages[p] = QuranPagePreparationService.instance.preparePage(
+        pageNumber: p,
+        metrics: metrics,
+        viewportWidth: viewportSize.width,
+        textColor: textColor,
+      );
+      assert(() {
+        final int tPageDone = DateTime.now().millisecondsSinceEpoch;
+        final int pageMs = tPageDone - tPage;
+        if (pageMs > 8) {
+          logger.d(
+            '[PERF][WINDOW] ⚠ p$p prepare=${pageMs}ms exceeds 8ms budget',
+          );
+        } else {
+          logger.d('[PERF][WINDOW] p$p prepare=${pageMs}ms');
+        }
+        return true;
+      }());
+    }
+
+    if (!preparedPages.containsKey(pageNumber)) {
+      assert(() {
+        logger.d(
+          '[PERF][WINDOW] ✗ center page $pageNumber font not loaded — window aborted',
+        );
+        return true;
+      }());
+      return null;
+    }
+
+    assert(() {
+      final int tWindowDone = DateTime.now().millisecondsSinceEpoch;
+      logger.d(
+        '[PERF][WINDOW] initial window built | center=p$pageNumber '
+        'pages=${preparedPages.keys.toList()} '
+        'total=${tWindowDone - tWindow}ms',
+      );
+      return true;
+    }());
+
+    return PreparedQuranPageWindow(
+      centerPage: pageNumber,
+      radius: radius,
+      // visiblePageNumbers = exactly the pages we prepared — no gaps.
+      visiblePageNumbers: preparedPages.keys.toSet(),
+      preparedPages: preparedPages,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final initialPageNumber = _initialPageNumber;
 
     return MultiBlocListener(
       listeners: [
-        // If surahNumber is 0, the initialPageHint may arrive asynchronously
-        // after this screen is built. When it does, store it and dispatch init.
         BlocListener<QuranReaderBloc, QuranReaderState>(
           listenWhen: (prev, curr) =>
               widget.surahNumber <= 0 &&
@@ -92,7 +193,6 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
             _maybeDispatchInit();
           },
         ),
-        // Error handling
         BlocListener<QuranFontLoaderBloc, QuranFontLoaderState>(
           listenWhen: (_, current) =>
               current.mapOrNull(error: (_) => true) ?? false,
@@ -110,13 +210,10 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
       ],
       child: BlocBuilder<QuranFontLoaderBloc, QuranFontLoaderState>(
         buildWhen: (prev, curr) {
-          // Once success, never rebuild — QuranReaderScreen owns all further state.
           if (prev.maybeMap(success: (_) => true, orElse: () => false)) {
             return false;
           }
-          // Always rebuild on state type change.
           if (prev.runtimeType != curr.runtimeType) return true;
-          // For downloading or warming, only rebuild if progress changed meaningfully.
           return curr.maybeMap(
             downloading: (s) {
               final prevS = prev.maybeMap(
@@ -127,54 +224,75 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               return (s.progress - prevS.progress).abs() > 0.01 ||
                   (s.speedKbps - prevS.speedKbps).abs() > 50;
             },
-            warming: (s) {
-              final prevS = prev.maybeMap(
-                warming: (ps) => ps,
-                orElse: () => null,
-              );
-              if (prevS == null) return true;
-              // Rebuild every 10 pages or exactly at the end.
-              return (s.current - prevS.current).abs() >= 10 ||
-                  s.current == 604;
-            },
             orElse: () => false,
           );
         },
         builder: (context, state) {
-          final warming = state.mapOrNull(warming: (s) => s);
           final downloading = state.mapOrNull(downloading: (s) => s);
           final error = state.mapOrNull(error: (s) => s);
-          final isSuccess = state.mapOrNull(success: (_) => true) ?? false;
-          final isRegistering =
-              state.mapOrNull(registering: (_) => true) ?? false;
-
-          print(
-            '[FONT_UI] build state=${state.runtimeType} | isSuccess=$isSuccess | isRegistering=$isRegistering | warming=$warming',
+          final isSuccess = state.maybeMap(
+            success: (_) => true,
+            orElse: () => false,
           );
 
+          assert(() {
+            logger.d(
+              '[FONT_UI] build state=${state.runtimeType} | isSuccess=$isSuccess',
+            );
+            return true;
+          }());
+
           if (isSuccess) {
-            if (_cachedReaderView != null) {
-              print('[FONT_UI] showing cached ReaderView (Success)');
-              return _cachedReaderView!;
-            }
-            // Readers MUST have a page number. If we don't have it yet, wait.
             if (initialPageNumber == null) {
-              print(
-                '[FONT_UI] showing LoadingView (Success but null initialPageNumber)',
-              );
-              return const _FontLoaderScaffold(child: _LoadingView());
+              // No page yet — blank scaffold while page hint arrives.
+              return const _FontLoaderScaffold(child: SizedBox.shrink());
             }
-            _cachedReaderView = _ReaderView(
+
+            // Build the prepared window once, synchronously. Cached so
+            // subsequent builds (e.g. theme changes) reuse the same object.
+            final bool isFirstBuild = _initialPreparedWindow == null;
+            final int tSuccess = DateTime.now().millisecondsSinceEpoch;
+            _initialPreparedWindow ??= _buildInitialPreparedWindow(
+              initialPageNumber,
+            );
+
+            assert(() {
+              if (isFirstBuild) {
+                final int tDone = DateTime.now().millisecondsSinceEpoch;
+                if (_initialPreparedWindow != null) {
+                  logger.d(
+                    '[PERF][STARTUP] window ready | p=$initialPageNumber '
+                    'preparedCount=${_initialPreparedWindow!.preparedPages.length} '
+                    'windowMs=${tDone - tSuccess}ms',
+                  );
+                } else {
+                  logger.d(
+                    '[PERF][STARTUP] ✗ window null for p=$initialPageNumber '
+                    '— data=${QuranFontService.instance.isQuranDataLoaded} '
+                    'fontLoaded=${QuranFontService.instance.isFontLoaded(initialPageNumber)}',
+                  );
+                }
+              }
+              return true;
+            }());
+
+            _cachedReaderView ??= _ReaderView(
               surahNumber: widget.surahNumber,
               initialAyah: widget.initialAyah,
               initialPageNumber: initialPageNumber,
+              initialPreparedWindow: _initialPreparedWindow,
             );
-            print('[FONT_UI] showing ReaderView (Success)');
+
+            assert(() {
+              logger.d(
+                '[PERF][STARTUP] showing ReaderView p=$initialPageNumber',
+              );
+              return true;
+            }());
             return _cachedReaderView!;
           }
 
           if (error != null) {
-            print('[FONT_UI] showing ErrorView');
             return _FontLoaderScaffold(
               child: _ErrorView(
                 message: error.message,
@@ -190,20 +308,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
             );
           }
 
-          if (warming != null) {
-            print(
-              '[FONT_UI] showing WarmingView: ${warming.current}/${warming.total}',
-            );
-            return _FontLoaderScaffold(
-              child: _WarmingView(
-                current: warming.current,
-                total: warming.total,
-              ),
-            );
-          }
-
           if (downloading != null) {
-            print('[FONT_UI] showing DownloadView');
             return _FontLoaderScaffold(
               child: _DownloadView(
                 progress: downloading.progress,
@@ -213,47 +318,29 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
             );
           }
 
-          if (isRegistering) {
-            print('[FONT_UI] showing LoadingView (Registering)');
-            return const _FontLoaderScaffold(child: _LoadingView());
-          }
-
-          if (error != null) {
-            print('[FONT_UI] showing ErrorView');
-            return _FontLoaderScaffold(
-              child: _ErrorView(
-                message: error.message,
-                onRetry: () {
-                  final page = initialPageNumber;
-                  if (page != null) {
-                    context.read<QuranFontLoaderBloc>().add(
-                      QuranFontLoaderEvent.initialize(initialPageNumber: page),
-                    );
-                  }
-                },
-              ),
-            );
-          }
-
-          return const _FontLoaderScaffold(child: _LoadingView());
+          // initial / checking / registering — show blank branded scaffold.
+          // These states are fast (<500ms). No spinner needed.
+          return const _FontLoaderScaffold(child: SizedBox.shrink());
         },
       ),
     );
   }
 }
 
-// ─── View: reader screen wrapper ──────────────────────────────────────────────
+// ─── View: reader screen wrapper ─────────────────────────────────────────────
 
 class _ReaderView extends StatelessWidget {
   const _ReaderView({
     required this.surahNumber,
     this.initialAyah,
     required this.initialPageNumber,
+    this.initialPreparedWindow,
   });
 
   final int surahNumber;
   final int? initialAyah;
   final int initialPageNumber;
+  final PreparedQuranPageWindow? initialPreparedWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +348,7 @@ class _ReaderView extends StatelessWidget {
       surahNumber: surahNumber,
       initialAyah: initialAyah,
       initialPageNumber: initialPageNumber,
+      initialPreparedWindow: initialPreparedWindow,
     );
   }
 }
@@ -281,7 +369,6 @@ class _FontLoaderScaffold extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Ambient background orbs — purely decorative
           Positioned(
             top: -80,
             right: -80,
@@ -337,44 +424,6 @@ class _BrandIcon extends StatelessWidget {
   }
 }
 
-// ─── View: initial / checking / registering ──────────────────────────────────
-
-class _LoadingView extends StatelessWidget {
-  const _LoadingView();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _BrandIcon(),
-          SizedBox(height: tokens.spaceExtraLarge),
-          Text(
-            context.l10n.loadingQuran,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraLarge),
-          SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: theme.primaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ─── View: downloading ───────────────────────────────────────────────────────
 
 class _DownloadView extends StatelessWidget {
@@ -388,7 +437,6 @@ class _DownloadView extends StatelessWidget {
   final double speedKbps;
   final int etaSeconds;
 
-  // progress 0–0.8 = download, 0.8–1.0 = extraction
   bool get _isExtracting => progress > 0.8;
 
   String _formatSpeed(double kbps) {
@@ -441,7 +489,6 @@ class _DownloadView extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceExtraLarge * 1.5),
-          // Progress bar inside a glass panel
           TilawaGlassPanel(
             padding: EdgeInsets.all(tokens.spaceExtraLarge),
             child: Column(
@@ -505,104 +552,7 @@ class _DownloadView extends StatelessWidget {
   }
 }
 
-// ─── View: warming (Phase 4 Extreme Pre-warm) ────────────────────────────────
-
-class _WarmingView extends StatelessWidget {
-  const _WarmingView({required this.current, required this.total});
-
-  final int current;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final primary = theme.primaryColor;
-
-    final double progress = (current / total).clamp(0.0, 1.0);
-    final int percent = (progress * 100).toInt();
-
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Center(child: _BrandIcon()),
-          SizedBox(height: tokens.spaceExtraLarge),
-          Text(
-            context.l10n.preparingFonts,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            'Building high-performance atlas for all 604 pages...',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(
-                alpha: tokens.opacityEmphasis,
-              ),
-            ),
-          ),
-          SizedBox(height: tokens.spaceExtraLarge * 1.5),
-          TilawaGlassPanel(
-            padding: EdgeInsets.all(tokens.spaceExtraLarge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Warming: Page $current / $total',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '$percent%',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: tokens.spaceMedium),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: tokens.progressHeight * 2,
-                    backgroundColor: theme.colorScheme.outline.withValues(
-                      alpha: tokens.opacitySubtle,
-                    ),
-                    valueColor: AlwaysStoppedAnimation<Color>(primary),
-                  ),
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                Text(
-                  'This only happens once to ensure jank-free reading.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: theme.colorScheme.onSurface.withValues(
-                      alpha: tokens.opacitySubtle * 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Atom: stat chip (speed / ETA) ───────────────────────────────────────────
+// ─── Atom: stat chip ─────────────────────────────────────────────────────────
 
 class _StatChip extends StatelessWidget {
   const _StatChip({required this.icon, required this.label});

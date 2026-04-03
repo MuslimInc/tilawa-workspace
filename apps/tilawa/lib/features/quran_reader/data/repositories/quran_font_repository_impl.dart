@@ -1,7 +1,6 @@
-import 'dart:developer' as developer;
-
 import 'package:injectable/injectable.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../domain/repositories/quran_font_repository.dart';
 
@@ -20,12 +19,12 @@ class QuranFontRepositoryImpl implements QuranFontRepository {
 
   @override
   Future<void> loadFontsToEngine({required int initialPageNumber}) {
-    developer.log('[REPO] loadFontsToEngine entry | page=$initialPageNumber');
+    logger.i('[REPO] loadFontsToEngine entry | page=$initialPageNumber');
     final result = _fontService.loadFontsToEngine(
       initialPageNumber: initialPageNumber,
     );
     result.then(
-      (_) => developer.log(
+      (_) => logger.i(
         '[REPO] loadFontsToEngine exit | page=$initialPageNumber',
       ),
     );
@@ -69,5 +68,6 @@ class QuranFontRepositoryImpl implements QuranFontRepository {
     int end,
     Future<void> Function(int) onProgress, {
     int? pivotPage,
-  }) => _fontService.batchWarmPages(start, end, onProgress, pivotPage: pivotPage);
+  }) =>
+      _fontService.batchWarmPages(start, end, onProgress, pivotPage: pivotPage);
 }

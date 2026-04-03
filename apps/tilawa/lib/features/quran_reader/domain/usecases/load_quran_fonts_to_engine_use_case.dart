@@ -1,5 +1,5 @@
-import 'dart:developer' as developer;
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../repositories/quran_font_repository.dart';
 
@@ -10,9 +10,17 @@ class LoadQuranFontsToEngineUseCase {
   final QuranFontRepository _repository;
 
   Future<void> call({required int initialPageNumber}) async {
-    developer.log('[USE_CASE] LoadQuranFontsToEngineUseCase entry | page=$initialPageNumber');
-    final result = _repository.loadFontsToEngine(initialPageNumber: initialPageNumber);
-    result.then((_) => developer.log('[USE_CASE] LoadQuranFontsToEngineUseCase exit | page=$initialPageNumber'));
+    logger.i(
+      '[USE_CASE] LoadQuranFontsToEngineUseCase entry | page=$initialPageNumber',
+    );
+    final result = _repository.loadFontsToEngine(
+      initialPageNumber: initialPageNumber,
+    );
+    result.then(
+      (_) => logger.i(
+        '[USE_CASE] LoadQuranFontsToEngineUseCase exit | page=$initialPageNumber',
+      ),
+    );
     return result;
   }
 
@@ -28,7 +36,8 @@ class LoadQuranFontsToEngineUseCase {
     required int end,
     required Future<void> Function(int) onProgress,
     int? pivotPage,
-  }) => _repository.batchWarmPages(start, end, onProgress, pivotPage: pivotPage);
+  }) =>
+      _repository.batchWarmPages(start, end, onProgress, pivotPage: pivotPage);
 
   bool get hasLoadedFontsToEngine => _repository.hasLoadedFontsToEngine;
 
