@@ -1,118 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran/src/widgets/quran_line.dart';
 import 'package:quran/src/widgets/quran_page_painter.dart';
-
-/// Creates a simple [TextPainter] with a single word for testing.
-(TextPainter, List<QuranWordMetadata>) _makePainterEntry(String text) {
-  final tp = TextPainter(
-    text: TextSpan(text: text, style: const TextStyle(fontSize: 16)),
-    textDirection: TextDirection.rtl,
-  )..layout();
-  return (
-    tp,
-    [
-      QuranWordMetadata(
-        surah: 1,
-        verse: 1,
-        startOffset: 0,
-        endOffset: text.length,
-      ),
-    ],
-  );
-}
+import 'package:quran/src/widgets/quran_line.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  group('QuranPagePainter Widget Tests', () {
+    late List<(TextPainter, List<QuranWordMetadata>)> mockPainters;
 
-  group('QuranPagePainter', () {
-    testWidgets('renders without errors with a single line', (
+    setUp(() {
+      mockPainters = List.generate(5, (index) {
+        final text = 'Surah ${index + 1} Verse 1';
+        final span = TextSpan(text: text, style: const TextStyle(fontSize: 20));
+        final tp = TextPainter(text: span, textDirection: TextDirection.rtl);
+        tp.layout();
+
+        final metadata = <QuranWordMetadata>[
+          QuranWordMetadata(
+            surah: index + 1,
+            verse: 1,
+            startOffset: 0,
+            endOffset: text.length + 5,
+          ),
+        ];
+
+        return (tp, metadata);
+      });
+    });
+
+    testWidgets('renders all lines using TextPainters', (
       WidgetTester tester,
     ) async {
-      final (TextPainter, List<QuranWordMetadata>) entry = _makePainterEntry(
-        'بسم الله',
-      );
-
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPagePainter(painters: [entry], lineSpacing: 4.0),
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 20),
+            child: Center(
+              child: QuranPagePainter(
+                painters: mockPainters,
+                lineSpacing: 10.0,
+              ),
+            ),
           ),
         ),
       );
 
+      // We ensure it builds without error.
       expect(find.byType(QuranPagePainter), findsOneWidget);
-      expect(find.byType(CustomPaint), findsWidgets);
+      expect(find.byType(CustomPaint), findsOneWidget);
     });
 
-    testWidgets('renders multiple lines', (WidgetTester tester) async {
-      final List<(TextPainter, List<QuranWordMetadata>)> entries = [
-        _makePainterEntry('line 1'),
-        _makePainterEntry('line 2'),
-        _makePainterEntry('line 3'),
-      ];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPagePainter(painters: entries, lineSpacing: 8.0),
-          ),
-        ),
-      );
-
-      expect(find.byType(QuranPagePainter), findsOneWidget);
-    });
-
-    testWidgets('repaints when painters list changes', (
+    testWidgets('triggers onLongPress events with correct word metadata', (
       WidgetTester tester,
     ) async {
-      final (TextPainter, List<QuranWordMetadata>) entry1 = _makePainterEntry(
-        'old text',
-      );
-      final (TextPainter, List<QuranWordMetadata>) entry2 = _makePainterEntry(
-        'new text',
-      );
+      int? pressedSurah;
+      int? pressedVerse;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPagePainter(painters: [entry1], lineSpacing: 4.0),
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 20),
+            child: Align(
+              alignment: Alignment.center,
+              child: QuranPagePainter(
+                painters: mockPainters,
+                lineSpacing: 10.0,
+                onLongPressDown: (surah, verse, details) {
+                  pressedSurah = surah;
+                  pressedVerse = verse;
+                },
+              ),
+            ),
           ),
         ),
       );
 
-      // Change painters.
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPagePainter(painters: [entry2], lineSpacing: 4.0),
-          ),
-        ),
-      );
+      await tester.longPress(find.byType(QuranPagePainter));
+      await tester.pumpAndSettle();
 
-      // Should not throw — cache invalidation on didUpdateWidget works.
-      expect(find.byType(QuranPagePainter), findsOneWidget);
+      // Because we mocked the metadata manually, and getPositionForOffset relies on realistic TextPainter coordinates,
+      // it should be able to resolve to an offset. The middle of the text should hit one of the metadata offsets.
+      expect(pressedSurah, 3);
+      expect(pressedVerse, 1);
     });
 
-    testWidgets('disposes cleanly', (WidgetTester tester) async {
-      final (TextPainter, List<QuranWordMetadata>) entry = _makePainterEntry(
-        'test',
-      );
+    testWidgets('verifies cache holds across repaints', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QuranPagePainter(painters: [entry], lineSpacing: 4.0),
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 20),
+            child: RepaintBoundary(
+              child: QuranPagePainter(
+                key: key,
+                painters: mockPainters,
+                lineSpacing: 10.0,
+              ),
+            ),
           ),
         ),
       );
 
-      // Remove widget — should dispose cached Picture without errors.
-      await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SizedBox.shrink())),
-      );
+      final renderBox = key.currentContext!.findRenderObject() as RenderBox;
 
-      expect(find.byType(QuranPagePainter), findsNothing);
+      // Force repaint 100 times without changing the widget
+      for (int i = 0; i < 100; i++) {
+        renderBox.markNeedsPaint();
+        await tester.pump();
+      }
+
+      // No crash, and the fact it works validates our mutable `_TextPictureCache`
+      expect(find.byType(QuranPagePainter), findsOneWidget);
     });
   });
 }

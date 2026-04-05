@@ -151,7 +151,6 @@ class _QuranPageViewState extends State<QuranPageView> {
           color: widget.pageBackgroundColor,
           child: CustomScrollView(
             scrollDirection: Axis.horizontal,
-            reverse: true,
             controller: widget.controller,
             physics: const PageScrollPhysics(),
             cacheExtent: widget.cacheExtentListenable?.value ?? 800,

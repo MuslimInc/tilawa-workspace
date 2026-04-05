@@ -11,12 +11,12 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
-import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'core/providers/app_providers.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
+import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
@@ -166,6 +166,8 @@ class _PlayerApp extends StatelessWidget {
               return MaterialApp.router(
                 title: AppStrings.appName,
                 debugShowCheckedModeBanner: false,
+                // showPerformanceOverlay: kDebugMode || kProfileMode,
+                // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: DevicePreview.appBuilder,
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,

@@ -166,9 +166,10 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
         (headers * bannerHeight) +
         spacingHeight;
 
-    // We reserve a 32px safety margin to ensure full-page coverage while
+    // We reserve an 8px safety margin to ensure full-page coverage while
     // absorbing Flutter's sub-pixel TextSpan rounding accumulations.
-    final double safeHeightLimit = availableHeight - 32.0;
+    const bottomSafetyBuffer = 8.0;
+    final double safeHeightLimit = availableHeight - bottomSafetyBuffer;
 
     if (usedHeight < safeHeightLimit && pageNumber > 2) {
       final double extraHeight = safeHeightLimit - usedHeight;

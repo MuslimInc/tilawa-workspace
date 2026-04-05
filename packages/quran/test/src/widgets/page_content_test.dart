@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +9,7 @@ import 'package:quran/src/services/quran_data_service.dart';
 import 'package:quran/src/services/quran_font_service.dart';
 import 'package:quran/src/services/quran_page_preparation_service.dart';
 import 'package:quran/src/widgets/page_metadata_strip.dart';
-import 'package:quran/src/widgets/quran_line.dart';
+import 'package:quran/src/widgets/quran_page_painter.dart';
 import 'package:quran/src/widgets/surah_header_banner.dart';
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
@@ -225,13 +226,13 @@ void main() {
   });
 
   testWidgets(
-    'PageContent renders prepared Quran lines once the page font is ready',
+    'PageContent renders prepared Quran page painter once the page font is ready',
     (WidgetTester tester) async {
       QuranFontService.instance.debugMarkFontLoaded(10);
 
       await _pumpPageContent(tester);
 
-      expect(find.byType(QuranLine), findsOneWidget);
+      expect(find.byType(QuranPagePainter), findsOneWidget);
       expect(find.byType(PageMetadataStrip), findsOneWidget);
     },
   );

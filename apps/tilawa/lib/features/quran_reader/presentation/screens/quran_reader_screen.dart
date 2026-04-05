@@ -212,23 +212,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _lastPreparedViewportWidth = viewportWidth;
       _lastPreparedOrientation = currentOrientation;
       QuranPagePreparationService.instance.clear();
-      // Re-seed the LRU cache from the pre-computed initial window so the
-      // clear() call above doesn't evict pages we already prepared before
-      // mount. The TextPainter objects are still valid — we just re-insert
-      // them so _preparePageWindowSync() hits the cache instead of rebuilding.
-      final PreparedQuranPageWindow? seeded = _preparedWindowNotifier.value;
-      if (seeded != null) {
-        seeded.preparedPages.forEach((pageNum, preparedPage) {
-          QuranPagePreparationService.instance.seedPage(
-            pageNumber: pageNum,
-            preparedPage: preparedPage,
-            metrics: preparedPage.metrics,
-            viewportWidth: viewportWidth,
-            textColor:
-                _cachedReaderTheme?.textColor ?? incomingReaderTheme.textColor,
-          );
-        });
-      }
     }
     _cachedAppSystemUiStyle = _buildAppSystemUiOverlayStyle(incomingTheme);
     _cachedReaderSystemUiStyle = _buildReaderSystemUiOverlayStyle(
@@ -476,6 +459,12 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
           viewportWidth: viewportSize.width,
           textColor: _cachedReaderTheme!.textColor,
         );
+
+    // Warm the glyph atlas in the background for the newly prepared page.
+    // This is critical for reducing first-frame raster cost on pages that
+    // are rendered for the first time.
+    QuranFontService.instance.warmPreparedPage(pageNumber, page);
+
     if (!kReleaseMode) {
       final int prepMs = DateTime.now().millisecondsSinceEpoch - tPrep;
       // > 0ms means cache miss (TextPainter.layout() ran); 0ms = cache hit.
@@ -1245,6 +1234,15 @@ class _ReaderStack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // RepaintBoundary isolates the warming ghost layer. Placed BEFORE the Scaffold
+        // so it is rendered underneath the opaque page background, completely hidden from the user.
+        RepaintBoundary(
+          child: _WarmingLayer(
+            warmingNotifier: warmingNotifier,
+            readerTheme: readerTheme,
+            headerFontSizeMultiplier: headerFontSizeMultiplier,
+          ),
+        ),
         Scaffold(
           key: const ValueKey('QuranReaderScaffold'),
           resizeToAvoidBottomInset: false,
@@ -1288,15 +1286,6 @@ class _ReaderStack extends StatelessWidget {
             ),
           ),
         ),
-        // RepaintBoundary isolates the static QuranPageView from the top-level
-        // progress overlays (index card, slider) and the warming ghost layer.
-        RepaintBoundary(
-          child: _WarmingLayer(
-            warmingNotifier: warmingNotifier,
-            readerTheme: readerTheme,
-            headerFontSizeMultiplier: headerFontSizeMultiplier,
-          ),
-        ),
         _ReaderOverlay(
           showOverlaysNotifier: showOverlaysNotifier,
           currentPageNotifier: currentPageNotifier,
@@ -1329,17 +1318,27 @@ class _WarmingLayer extends StatelessWidget {
       valueListenable: warmingNotifier,
       builder: (context, warming, _) {
         if (!warming.isWarming) return const SizedBox.shrink();
-        return Offstage(
-          child: PageContent(
-            key: ValueKey<String>('ghost_${warming.pageNumber}'),
-            pageNumber: warming.pageNumber,
-            textColor: readerTheme.textColor,
-            headerImageFilter: readerTheme.headerImageFilter,
-            headerTextColor: readerTheme.headerTextColor,
-            headerFontSizeMultiplier: headerFontSizeMultiplier,
-            pageBackgroundColor: readerTheme.pageBackground,
-            uiTextDirection: Directionality.of(context),
-            isWarming: true,
+
+        // Use Opacity 0.001 instead of Offstage. Offstage prevents painting,
+        // which prevents RepaintBoundary.toImage() from capturing the texture.
+        // Opacity(0.001) forces a paint operation while remaining virtually invisible,
+        // allowing the background snapshotter to successfully extract the bitmap.
+        return ExcludeSemantics(
+          child: Opacity(
+            opacity: 0.001,
+            child: IgnorePointer(
+              child: PageContent(
+                key: ValueKey<String>('ghost_${warming.pageNumber}'),
+                pageNumber: warming.pageNumber,
+                textColor: readerTheme.textColor,
+                headerImageFilter: readerTheme.headerImageFilter,
+                headerTextColor: readerTheme.headerTextColor,
+                headerFontSizeMultiplier: headerFontSizeMultiplier,
+                pageBackgroundColor: readerTheme.pageBackground,
+                uiTextDirection: Directionality.of(context),
+                isWarming: true,
+              ),
+            ),
           ),
         );
       },

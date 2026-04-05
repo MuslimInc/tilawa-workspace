@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/scheduler.dart';
 
 /// A handle returned by [IdleScheduler.runWhenIdle] that can cancel the
@@ -132,9 +133,12 @@ class IdleScheduler {
   }
 }
 
-class _QueueEntry {
-  _QueueEntry({required this.task, required this.idleTask});
+class _QueueEntry extends Equatable {
+  const _QueueEntry({required this.task, required this.idleTask});
 
   final Future<void> Function() task;
   final IdleTask idleTask;
+
+  @override
+  List<Object?> get props => [task, idleTask];
 }

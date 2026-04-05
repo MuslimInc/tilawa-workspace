@@ -29,7 +29,10 @@ class SurahHeaderBanner extends StatelessWidget {
   final Color? headerTextColor;
   final double headerFontSizeMultiplier;
 
-  static const AssetImage _bannerImage = AssetImage('assets/mainframe.png');
+  static const AssetImage _bannerImage = AssetImage(
+    'assets/mainframe.png',
+    package: 'quran',
+  );
   static const double _bannerHeightToWidthRatio = 0.11228293967474158;
   static const double _portraitWidthRatioBase = 0.97354259;
   static const double _portraitWidthRatioAspectSlope = -0.015786;
@@ -67,19 +70,19 @@ class SurahHeaderBanner extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned.fill(
+            const Positioned.fill(
               child: Image(
-                image: ResizeImage(
-                  _bannerImage,
-                  width: bannerWidth.toInt(),
-                  height: bannerHeight.toInt(),
-                ),
-                fit: BoxFit.fill,
-                filterQuality: FilterQuality.low,
-                color: headerImageFilter == null ? null : Colors.white,
-                colorBlendMode: headerImageFilter == null
-                    ? null
-                    : BlendMode.modulate,
+                image: _bannerImage,
+                // image: ResizeImage(
+                //   _bannerImage,
+                //   width: bannerWidth.toInt(),
+                //   height: bannerHeight.toInt(),
+                // ),
+                // fit: BoxFit.fill,
+                // color: headerImageFilter == null ? null : Colors.white,
+                // colorBlendMode: headerImageFilter == null
+                //     ? null
+                //     : BlendMode.modulate,
               ),
             ),
             // The Surah name calligraphy from QCF_BSML font.

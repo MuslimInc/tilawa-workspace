@@ -72,6 +72,7 @@ export 'src/services/functions/page_functions.dart';
 export 'src/services/functions/search_functions.dart';
 export 'src/services/functions/surah_functions.dart';
 export 'src/services/functions/verse_functions.dart';
+export 'src/services/idle_scheduler.dart';
 // =============================================================================
 // SERVICE INTERFACES (for dependency injection)
 // =============================================================================

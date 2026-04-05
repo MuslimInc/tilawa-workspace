@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 import '../layout/quran_layout_strategy.dart';
@@ -152,9 +153,11 @@ class QuranPagePreparationService {
       forceStrutHeight: true,
     );
 
+    final bool isCenteredPage = pageNumber == 1 || pageNumber == 2;
+
     final List<int> lineIndices = metrics.isScrollable
         ? List.generate(15, (i) => i).where((i) {
-            return pageNumber <= 2 ||
+            return isCenteredPage ||
                 pageLines[i].isNotEmpty ||
                 _isSurahHeader(pageNumber, i + 1) ||
                 _isBismillah(pageNumber, i + 1);
@@ -166,12 +169,16 @@ class QuranPagePreparationService {
     final List<QuranWordMetadata> currentMetadata = [];
     var currentOffset = 0;
 
+    final newlineSpan = TextSpan(text: '\n', style: quranStyle);
+    final nbSpaceSpan = TextSpan(text: '\u00A0', style: quranStyle);
+
     void flushTextBlock() {
       if (currentSpans.isEmpty) return;
 
       final painter = TextPainter(
-        text: TextSpan(children: List<InlineSpan>.from(currentSpans)),
+        text: TextSpan(children: currentSpans.toList(growable: false)),
         textDirection: TextDirection.rtl,
+        textAlign: TextAlign.center,
         textWidthBasis: TextWidthBasis.longestLine,
         strutStyle: pageStrutStyle,
       )..layout(maxWidth: viewportWidth);
@@ -188,19 +195,70 @@ class QuranPagePreparationService {
       currentOffset = 0;
     }
 
-    for (final i in lineIndices) {
-      if (_isSurahHeader(pageNumber, i + 1)) {
-        flushTextBlock();
-        blocks.add(
-          PreparedHeaderBlock(surahNumber: _getSurahAtLine(pageNumber, i + 1)),
-        );
-        continue;
+    // For pages 1 & 2, pre-compute centered positions for header/bismillah.
+    // The _getWordsGroupedByLine centering puts:
+    //   centered[2] = rawLines[0] (header line — empty word data)
+    //   centered[5..11] = rawLines[1..7] (verse text)
+    // The header should visually appear at index 2, and the bismillah just
+    // before the verse block at index 4.
+    //
+    // NOTE: Page 1 (Al-Fatihah) has NO separate bismillah — the Bismillah IS
+    // verse 1 and is already present in the QCF word data. Only pages with an
+    // explicit BISMILLAH special line (e.g. page 2) get a BismillahBlock.
+    int? centeredHeaderSurah;
+    var hasCenteredBismillah = false;
+    if (isCenteredPage) {
+      for (var rawLine = 1; rawLine <= 15; rawLine++) {
+        if (_isSurahHeader(pageNumber, rawLine)) {
+          centeredHeaderSurah = _getSurahAtLine(pageNumber, rawLine);
+        }
+        if (_isBismillah(pageNumber, rawLine)) {
+          hasCenteredBismillah = true;
+        }
       }
+    }
 
-      if (_isBismillah(pageNumber, i + 1)) {
-        flushTextBlock();
-        blocks.add(const PreparedBismillahBlock());
-        continue;
+    // Track whether we've seen the first textual line (for QCF first-line spacing).
+    var hasSeenFirstTextLine = false;
+
+    for (final i in lineIndices) {
+      // --- Centered page layout (pages 1 & 2) ---
+      // Header and bismillah are placed at specific centered positions
+      // instead of at raw line-map positions (which would put them at
+      // the very top, breaking the Madinah Mushaf centered layout).
+      if (isCenteredPage) {
+        if (i == 2 && centeredHeaderSurah != null) {
+          flushTextBlock();
+          blocks.add(PreparedHeaderBlock(surahNumber: centeredHeaderSurah));
+          continue;
+        }
+        if (i == 4 && hasCenteredBismillah) {
+          flushTextBlock();
+          blocks.add(const PreparedBismillahBlock());
+          continue;
+        }
+        // Skip raw special-line positions — they are handled above.
+        if (_isSurahHeader(pageNumber, i + 1) ||
+            _isBismillah(pageNumber, i + 1)) {
+          continue;
+        }
+      } else {
+        // --- Standard page layout (pages 3–604) ---
+        if (_isSurahHeader(pageNumber, i + 1)) {
+          flushTextBlock();
+          blocks.add(
+            PreparedHeaderBlock(
+              surahNumber: _getSurahAtLine(pageNumber, i + 1),
+            ),
+          );
+          continue;
+        }
+
+        if (_isBismillah(pageNumber, i + 1)) {
+          flushTextBlock();
+          blocks.add(const PreparedBismillahBlock());
+          continue;
+        }
       }
 
       final List<_WordSpanGroup> wordSpans = _getWordSpansForLine(
@@ -212,13 +270,30 @@ class QuranPagePreparationService {
       );
 
       if (wordSpans.isEmpty) {
-        const blankLine = '\u0020\n';
+        // Centered pages should NOT have blank lines at the top/bottom,
+        // so the Column can be 'min' sized and perfectly centered.
+        if (isCenteredPage) continue;
+
+        const blankLine = '\u00A0\n';
         currentSpans.add(TextSpan(text: blankLine, style: quranStyle));
         currentOffset += blankLine.length;
         continue;
       }
 
-      for (final group in wordSpans) {
+      final bool isFirstTextLine = !hasSeenFirstTextLine;
+      hasSeenFirstTextLine = true;
+
+      for (var j = 0; j < wordSpans.length; j++) {
+        // QCF standard: insert U+00A0 between the 1st and 2nd glyph
+        // on the first textual line of each page. This triggers the
+        // correct spacing behavior in the QCF font without enabling
+        // Flutter's line-breaking algorithm (which U+0020 would do).
+        if (isFirstTextLine && j == 1) {
+          currentSpans.add(nbSpaceSpan);
+          currentOffset += 1;
+        }
+
+        final _WordSpanGroup group = wordSpans[j];
         currentSpans.addAll(group.spans);
 
         var groupLength = 0;
@@ -240,9 +315,14 @@ class QuranPagePreparationService {
         currentOffset += groupLength;
       }
 
-      const newline = '\n';
-      currentSpans.add(TextSpan(text: newline, style: quranStyle));
-      currentOffset += newline.length;
+      // In portrait mushaf mode (!isScrollable), we flush after every line.
+      // This turns every single line into its own PreparedTextBlock widget.
+      if (!metrics.isScrollable) {
+        flushTextBlock();
+      } else {
+        currentSpans.add(newlineSpan);
+        currentOffset += 1;
+      }
     }
 
     flushTextBlock();
@@ -379,7 +459,7 @@ class PreparedQuranPageWindow {
       preparedPages[pageNumber];
 }
 
-sealed class PreparedPageBlock {
+sealed class PreparedPageBlock extends Equatable {
   const PreparedPageBlock();
 }
 
@@ -388,20 +468,29 @@ class PreparedTextBlock extends PreparedPageBlock {
 
   final TextPainter painter;
   final List<QuranWordMetadata> metadata;
+
+  @override
+  List<Object?> get props => [painter, metadata];
 }
 
 class PreparedHeaderBlock extends PreparedPageBlock {
   const PreparedHeaderBlock({required this.surahNumber});
 
   final int surahNumber;
+
+  @override
+  List<Object?> get props => [surahNumber];
 }
 
 class PreparedBismillahBlock extends PreparedPageBlock {
   const PreparedBismillahBlock();
+
+  @override
+  List<Object?> get props => [];
 }
 
 @immutable
-class _PreparedPageKey {
+class _PreparedPageKey extends Equatable {
   const _PreparedPageKey({
     required this.pageNumber,
     required this.fontSize,
@@ -423,30 +512,17 @@ class _PreparedPageKey {
   int get _viewportWidthKey => (viewportWidth * 100).round();
 
   @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is _PreparedPageKey &&
-            runtimeType == other.runtimeType &&
-            pageNumber == other.pageNumber &&
-            _fontSizeKey == other._fontSizeKey &&
-            _fontHeightKey == other._fontHeightKey &&
-            _viewportWidthKey == other._viewportWidthKey &&
-            textColorValue == other.textColorValue &&
-            hasHighlight == other.hasHighlight;
-  }
-
-  @override
-  int get hashCode => Object.hash(
+  List<Object?> get props => [
     pageNumber,
     _fontSizeKey,
     _fontHeightKey,
     _viewportWidthKey,
     textColorValue,
     hasHighlight,
-  );
+  ];
 }
 
-class _WordSpanGroup {
+class _WordSpanGroup extends Equatable {
   const _WordSpanGroup({
     required this.spans,
     required this.surah,
@@ -456,4 +532,7 @@ class _WordSpanGroup {
   final List<InlineSpan> spans;
   final int surah;
   final int verse;
+
+  @override
+  List<Object?> get props => [spans, surah, verse];
 }

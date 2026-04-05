@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 import 'quran_line.dart';
@@ -8,7 +9,8 @@ import 'quran_line.dart';
 ///
 /// Extends [QuranWordMetadata] with the y-offset so the merged painter
 /// can route hit-tests to the correct line's [TextPainter].
-class PageWordMetadata {
+@immutable
+class PageWordMetadata extends Equatable {
   const PageWordMetadata({
     required this.lineIndex,
     required this.word,
@@ -18,6 +20,9 @@ class PageWordMetadata {
   final int lineIndex;
   final QuranWordMetadata word;
   final double yOffset;
+
+  @override
+  List<Object?> get props => [lineIndex, word, yOffset];
 }
 
 /// A single-pass painter for an entire Quran page's text lines.
@@ -64,10 +69,8 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
   late double _maxWidth;
 
   /// Cached recorded [ui.Picture] from the first paint call.
-  /// Subsequent frames replay this single GPU command instead of
-  /// re-issuing ~15 individual [TextPainter.paint] calls.
-  ui.Picture? _cachedPicture;
-  Size? _cachedPictureSize;
+  /// Wrapped in a mutable cache class so CustomPainter can track it across repaints.
+  _TextPictureCache _pictureCache = _TextPictureCache();
 
   @override
   void initState() {
@@ -87,15 +90,14 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
 
   @override
   void dispose() {
-    _cachedPicture?.dispose();
-    _cachedPicture = null;
+    _pictureCache.picture?.dispose();
+    _pictureCache.picture = null;
     super.dispose();
   }
 
   void _invalidatePictureCache() {
-    _cachedPicture?.dispose();
-    _cachedPicture = null;
-    _cachedPictureSize = null;
+    _pictureCache.picture?.dispose();
+    _pictureCache = _TextPictureCache();
   }
 
   void _computeLayout() {
@@ -157,9 +159,7 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
               painter: _AllLinesPainter(
                 painters: widget.painters,
                 yOffsets: _yOffsets,
-                cachedPicture: _cachedPicture,
-                cachedPictureSize: _cachedPictureSize,
-                onPictureRecorded: _onPictureRecorded,
+                pictureCache: _pictureCache,
               ),
             ),
           ),
@@ -201,39 +201,31 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
     }
     return null;
   }
+}
 
-  /// Stores the [ui.Picture] recorded by [_AllLinesPainter] on its first
-  /// paint call so subsequent frames replay a single GPU command.
-  void _onPictureRecorded(ui.Picture picture, Size size) {
-    _cachedPicture = picture;
-    _cachedPictureSize = size;
-  }
+class _TextPictureCache {
+  ui.Picture? picture;
+  Size? size;
 }
 
 class _AllLinesPainter extends CustomPainter {
   _AllLinesPainter({
     required this.painters,
     required this.yOffsets,
-    required this.cachedPicture,
-    required this.cachedPictureSize,
-    required this.onPictureRecorded,
+    required this.pictureCache,
   });
 
   final List<(TextPainter, List<QuranWordMetadata>)> painters;
   final List<double> yOffsets;
 
-  /// Pre-recorded picture from a previous paint, owned by the State.
-  final ui.Picture? cachedPicture;
-  final Size? cachedPictureSize;
-
-  /// Callback to hand the newly recorded picture back to the State.
-  final void Function(ui.Picture picture, Size size) onPictureRecorded;
+  /// Mutable cache object passed from the state.
+  final _TextPictureCache pictureCache;
 
   @override
   void paint(Canvas canvas, Size size) {
     // Fast path: replay the cached Picture in a single GPU command.
-    if (cachedPicture != null && cachedPictureSize == size) {
-      canvas.drawPicture(cachedPicture!);
+    if (pictureCache.picture != null && pictureCache.size == size) {
+      canvas.drawPicture(pictureCache.picture!);
       return;
     }
 
@@ -252,13 +244,14 @@ class _AllLinesPainter extends CustomPainter {
     // Replay the just-recorded picture into the real canvas.
     canvas.drawPicture(picture);
 
-    // Hand the picture to the State for caching — it owns the lifecycle.
-    onPictureRecorded(picture, size);
+    // Cache the recorded picture globally via the mutable wrapper.
+    pictureCache.picture = picture;
+    pictureCache.size = size;
   }
 
   @override
   bool shouldRepaint(covariant _AllLinesPainter oldDelegate) {
     return !identical(oldDelegate.painters, painters) ||
-        oldDelegate.cachedPicture != cachedPicture;
+        oldDelegate.pictureCache != pictureCache;
   }
 }

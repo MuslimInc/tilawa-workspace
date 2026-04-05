@@ -258,7 +258,7 @@ class _PageContentState extends State<PageContent>
   /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
   /// expensive `toImage()` call runs only when the GPU is idle.
   void _scheduleSnapshotCapture() {
-    if (_snapshotScheduled || _snapshotCaptured || widget.isWarming) return;
+    if (_snapshotScheduled || _snapshotCaptured) return;
     // No scroll guard needed here — IdleScheduler already defers the
     // expensive toImage() call to a post-frame idle slot, so the GPU
     // work never competes with live frame rasterization.
@@ -319,7 +319,7 @@ class _PageContentState extends State<PageContent>
 
   Future<void> _prewarmBannerImage() async {
     if (!mounted) return;
-    const imageProvider = AssetImage('assets/mainframe.png');
+    const imageProvider = AssetImage('assets/mainframe.png', package: 'quran');
     final ImageConfiguration config = createLocalImageConfiguration(context);
     final completer = Completer<void>();
     final ImageStream stream = imageProvider.resolve(config);
@@ -470,7 +470,6 @@ class _PageContentState extends State<PageContent>
       // Fast path: single-texture blit during swipe.
       pageBody = RawImage(
         image: snapshot,
-        alignment: Alignment.topCenter,
         fit: BoxFit.contain,
         width: pageWidth,
         height: pageHeight,
@@ -494,20 +493,22 @@ class _PageContentState extends State<PageContent>
     }
 
     return Stack(
-      alignment: Alignment.topCenter,
+      alignment: metrics.isScrollable ? Alignment.topCenter : Alignment.center,
       children: [
         pageBody,
-        _QuranPageOverlays(
-          pageNumber: widget.pageNumber,
-          showOverlaysListenable: widget.showOverlaysListenable,
-          uiTextDirection: widget.uiTextDirection,
-          metrics: metrics,
-          pageMeta: _cachedPageMeta,
-          metaTextColor: metaTextColor,
-          badgeColor: pageNumberBadgeColor,
-          borderColor: pageNumberBorderColor,
-          textColor: widget.textColor,
-          onShowIndex: widget.onShowIndex,
+        Positioned.fill(
+          child: _QuranPageOverlays(
+            pageNumber: widget.pageNumber,
+            showOverlaysListenable: widget.showOverlaysListenable,
+            uiTextDirection: widget.uiTextDirection,
+            metrics: metrics,
+            pageMeta: _cachedPageMeta,
+            metaTextColor: metaTextColor,
+            badgeColor: pageNumberBadgeColor,
+            borderColor: pageNumberBorderColor,
+            textColor: widget.textColor,
+            onShowIndex: widget.onShowIndex,
+          ),
         ),
       ],
     );
@@ -529,9 +530,12 @@ class _PageContentState extends State<PageContent>
     );
     final markerStyle = quranStyle;
 
+    final bool isCenteredPage =
+        widget.pageNumber == 1 || widget.pageNumber == 2;
+
     final List<int> lineIndices = metrics.isScrollable
         ? List.generate(15, (i) => i).where((i) {
-            return widget.pageNumber <= 2 ||
+            return isCenteredPage ||
                 pageLines[i].isNotEmpty ||
                 _isSurahHeader(widget.pageNumber, i + 1) ||
                 _isBismillah(widget.pageNumber, i + 1);
@@ -548,6 +552,7 @@ class _PageContentState extends State<PageContent>
         final painter = TextPainter(
           text: TextSpan(children: List<InlineSpan>.from(currentSpans)),
           textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
           textWidthBasis: TextWidthBasis.longestLine,
           strutStyle: StrutStyle(
             fontFamily: pageFont,
@@ -572,43 +577,108 @@ class _PageContentState extends State<PageContent>
       }
     }
 
-    for (final i in lineIndices) {
-      if (_isSurahHeader(widget.pageNumber, i + 1)) {
-        flushSpans();
-        final int surahNum = _getSurahAtLine(widget.pageNumber, i + 1);
-        final banner = SurahHeaderBanner(
-          surahNumber: surahNum,
-          lineHeight: metrics.fontSize * metrics.fontHeight,
-          viewportWidth: viewportWidth,
-          viewportHeight: viewportHeight,
-          isLandscape: !isPortrait,
-          headerImageFilter: widget.headerImageFilter,
-          headerTextColor: widget.headerTextColor,
-          headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
-        );
-        blocks.add(
-          widget.onSurahSelected == null
-              ? banner
-              : GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => widget.onSurahSelected!(surahNum),
-                  child: banner,
-                ),
-        );
-        continue;
+    // For pages 1 & 2, pre-compute the header surah number and
+    // whether a separate bismillah block is needed.
+    // Page 1 (Al-Fatihah) has no separate bismillah — it IS verse 1.
+    int? centeredHeaderSurah;
+    var hasCenteredBismillah = false;
+    if (isCenteredPage) {
+      for (var rawLine = 1; rawLine <= 15; rawLine++) {
+        if (_isSurahHeader(widget.pageNumber, rawLine)) {
+          centeredHeaderSurah = _getSurahAtLine(widget.pageNumber, rawLine);
+        }
+        if (_isBismillah(widget.pageNumber, rawLine)) {
+          hasCenteredBismillah = true;
+        }
       }
+    }
 
-      if (_isBismillah(widget.pageNumber, i + 1)) {
-        flushSpans();
-        blocks.add(
-          BismillahWidget(
-            fontSize: metrics.fontSize,
-            pageNumber: widget.pageNumber,
-            color: widget.textColor,
-            fontFamily: pageFont,
-          ),
-        );
-        continue;
+    for (final i in lineIndices) {
+      if (isCenteredPage) {
+        // Centered page: emit header at index 2, bismillah at index 4.
+        if (i == 2 && centeredHeaderSurah != null) {
+          flushSpans();
+          final int surahNum = centeredHeaderSurah;
+          final banner = SurahHeaderBanner(
+            surahNumber: surahNum,
+            lineHeight: metrics.fontSize * metrics.fontHeight,
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: !isPortrait,
+            headerImageFilter: widget.headerImageFilter,
+            headerTextColor: widget.headerTextColor,
+            headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+          );
+          blocks.add(
+            widget.onSurahSelected == null
+                ? banner
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => widget.onSurahSelected!(surahNum),
+                    child: banner,
+                  ),
+          );
+          continue;
+        }
+        if (i == 4 && hasCenteredBismillah) {
+          flushSpans();
+          blocks.add(
+            BismillahWidget(
+              fontSize: metrics.fontSize,
+              pageNumber: widget.pageNumber,
+              color: widget.textColor,
+              fontFamily: pageFont,
+            ),
+          );
+          continue;
+        }
+        // Skip raw special-line positions.
+        if (_isSurahHeader(widget.pageNumber, i + 1) ||
+            _isBismillah(widget.pageNumber, i + 1)) {
+          const char = '\u00A0\n';
+          currentSpans.add(TextSpan(text: char, style: quranStyle));
+          currentOffset += char.length;
+          continue;
+        }
+      } else {
+        // Standard page: use raw special-line positions.
+        if (_isSurahHeader(widget.pageNumber, i + 1)) {
+          flushSpans();
+          final int surahNum = _getSurahAtLine(widget.pageNumber, i + 1);
+          final banner = SurahHeaderBanner(
+            surahNumber: surahNum,
+            lineHeight: metrics.fontSize * metrics.fontHeight,
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: !isPortrait,
+            headerImageFilter: widget.headerImageFilter,
+            headerTextColor: widget.headerTextColor,
+            headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+          );
+          blocks.add(
+            widget.onSurahSelected == null
+                ? banner
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => widget.onSurahSelected!(surahNum),
+                    child: banner,
+                  ),
+          );
+          continue;
+        }
+
+        if (_isBismillah(widget.pageNumber, i + 1)) {
+          flushSpans();
+          blocks.add(
+            BismillahWidget(
+              fontSize: metrics.fontSize,
+              pageNumber: widget.pageNumber,
+              color: widget.textColor,
+              fontFamily: pageFont,
+            ),
+          );
+          continue;
+        }
       }
 
       final List<_WordSpanGroup> wordSpans = _getWordSpansForLine(
@@ -618,7 +688,7 @@ class _PageContentState extends State<PageContent>
         markerStyle,
       );
       if (wordSpans.isEmpty) {
-        const char = '\u0020\n';
+        const char = '\u00A0\n';
         currentSpans.add(TextSpan(text: char, style: quranStyle));
         currentOffset += char.length;
       } else {
@@ -644,9 +714,14 @@ class _PageContentState extends State<PageContent>
 
           currentOffset += groupLength;
         }
-        const newline = '\n';
-        currentSpans.add(TextSpan(text: newline, style: quranStyle));
-        currentOffset += newline.length;
+
+        if (!metrics.isScrollable) {
+          flushSpans();
+        } else {
+          const newline = '\n';
+          currentSpans.add(TextSpan(text: newline, style: quranStyle));
+          currentOffset += newline.length;
+        }
       }
     }
     flushSpans();
@@ -867,6 +942,7 @@ class _QuranPageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     // No manual RepaintBoundary — the sliver auto-inserts one per child.
     final Widget pageBody = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: spacedLines,
@@ -884,7 +960,9 @@ class _QuranPageBody extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [paddedBody, const SizedBox(height: 100)],
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [paddedBody],
           ),
         ),
       );
