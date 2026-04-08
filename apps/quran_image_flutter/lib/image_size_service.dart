@@ -14,21 +14,26 @@ class ImageSizeService {
     if (_cache.containsKey(assetPath)) return _cache[assetPath]!;
 
     final Completer<ImageSize> completer = Completer();
-    final ImageStream stream = AssetImage(assetPath).resolve(ImageConfiguration.empty);
-    
+    final ImageStream stream = AssetImage(
+      assetPath,
+    ).resolve(ImageConfiguration.empty);
+
     late ImageStreamListener listener;
-    listener = ImageStreamListener((ImageInfo info, bool synchronousCall) {
-      final size = ImageSize(
-        info.image.width.toDouble(),
-        info.image.height.toDouble(),
-      );
-      _cache[assetPath] = size;
-      completer.complete(size);
-      stream.removeListener(listener);
-    }, onError: (Object exception, StackTrace? stackTrace) {
-      completer.completeError(exception, stackTrace);
-      stream.removeListener(listener);
-    });
+    listener = ImageStreamListener(
+      (ImageInfo info, bool synchronousCall) {
+        final size = ImageSize(
+          info.image.width.toDouble(),
+          info.image.height.toDouble(),
+        );
+        _cache[assetPath] = size;
+        completer.complete(size);
+        stream.removeListener(listener);
+      },
+      onError: (Object exception, StackTrace? stackTrace) {
+        completer.completeError(exception, stackTrace);
+        stream.removeListener(listener);
+      },
+    );
 
     stream.addListener(listener);
     return completer.future;

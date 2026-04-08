@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran/src/widgets/quran_page_painter.dart';
 import 'package:quran/src/widgets/quran_line.dart';
+import 'package:quran/src/widgets/quran_page_painter.dart';
 
 void main() {
   group('QuranPagePainter Widget Tests', () {
@@ -62,7 +62,6 @@ void main() {
           child: DefaultTextStyle(
             style: const TextStyle(fontSize: 20),
             child: Align(
-              alignment: Alignment.center,
               child: QuranPagePainter(
                 painters: mockPainters,
                 lineSpacing: 10.0,
@@ -88,7 +87,7 @@ void main() {
     testWidgets('verifies cache holds across repaints', (
       WidgetTester tester,
     ) async {
-      final key = GlobalKey();
+      final GlobalKey<State<StatefulWidget>> key = GlobalKey();
 
       await tester.pumpWidget(
         Directionality(
@@ -106,10 +105,10 @@ void main() {
         ),
       );
 
-      final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+      final renderBox = key.currentContext!.findRenderObject()! as RenderBox;
 
       // Force repaint 100 times without changing the widget
-      for (int i = 0; i < 100; i++) {
+      for (var i = 0; i < 100; i++) {
         renderBox.markNeedsPaint();
         await tester.pump();
       }

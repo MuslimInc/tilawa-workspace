@@ -28,10 +28,7 @@ class NavigationLoaded extends NavigationState {
   final PageState pageState;
   final NavigationVisibility visibility;
 
-  const NavigationLoaded({
-    required this.pageState,
-    required this.visibility,
-  });
+  const NavigationLoaded({required this.pageState, required this.visibility});
 
   /// Creates a copy with modified fields
   NavigationLoaded copyWith({

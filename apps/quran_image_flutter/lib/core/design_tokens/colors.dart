@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Color design tokens for the application.
-/// 
+///
 /// All colors are defined as Color constants for consistency.
 class AppColors {
   // Prevent instantiation

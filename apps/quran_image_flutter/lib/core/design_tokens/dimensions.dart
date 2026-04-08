@@ -1,5 +1,5 @@
 /// Design tokens for spacing, sizing, and layout.
-/// 
+///
 /// All dimensions are defined as ratios relative to screen dimensions
 /// to ensure responsive behavior across different device sizes.
 class AppDimensions {

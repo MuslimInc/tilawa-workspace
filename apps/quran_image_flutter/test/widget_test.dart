@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_image_flutter/main.dart';
+import 'package:quran_image_flutter/quran_image_app.dart';
+import 'package:quran_image_flutter/quran_image_reader.dart';
 
 void main() {
   testWidgets('Quran image app smoke test', (WidgetTester tester) async {

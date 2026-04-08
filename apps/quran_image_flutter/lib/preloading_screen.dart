@@ -5,11 +5,8 @@ import 'verse_service.dart';
 /// This ensures users wait until all 604 pages are ready
 class PreloadingScreen extends StatefulWidget {
   final VoidCallback onPreloadComplete;
-  
-  const PreloadingScreen({
-    super.key,
-    required this.onPreloadComplete,
-  });
+
+  const PreloadingScreen({super.key, required this.onPreloadComplete});
 
   @override
   State<PreloadingScreen> createState() => _PreloadingScreenState();
@@ -21,7 +18,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     super.initState();
     _waitForPreload();
   }
-  
+
   Future<void> _waitForPreload() async {
     // Wait for preloading to complete
     if (verseService.isDebugMode && verseService.isPreloading) {
@@ -33,7 +30,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
         }
       }
     }
-    
+
     // Notify parent that preloading is complete
     widget.onPreloadComplete();
   }
@@ -42,7 +39,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
   Widget build(BuildContext context) {
     final progress = verseService.preloadProgress;
     final percentage = (progress * 100).toStringAsFixed(0);
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF4E4),
       body: Center(
@@ -61,10 +58,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
             if (verseService.isDebugMode) ...[
               const Text(
                 'Loading marker coordinates...',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF666666),
-                ),
+                style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
               ),
               const SizedBox(height: 20),
               // Progress bar
@@ -98,10 +92,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               const SizedBox(height: 8),
               Text(
                 'Page ${(progress * 604).toStringAsFixed(0)} of 604',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
               ),
             ] else ...[
               const CircularProgressIndicator(

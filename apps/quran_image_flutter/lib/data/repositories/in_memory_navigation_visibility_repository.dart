@@ -9,7 +9,8 @@ import '../../domain/domain.dart';
 class InMemoryNavigationVisibilityRepository
     implements NavigationVisibilityRepository {
   NavigationVisibility _currentVisibility = NavigationVisibility.initial();
-  final _visibilityController = StreamController<NavigationVisibility>.broadcast();
+  final _visibilityController =
+      StreamController<NavigationVisibility>.broadcast();
 
   @override
   Future<NavigationVisibility> getVisibility() async {
@@ -44,9 +45,7 @@ class InMemoryNavigationVisibilityRepository
 
   @override
   Future<NavigationVisibility> startInteraction() async {
-    final newVisibility = _currentVisibility.copyWith(
-      isInteracting: true,
-    );
+    final newVisibility = _currentVisibility.copyWith(isInteracting: true);
     await saveVisibility(newVisibility);
     return newVisibility;
   }

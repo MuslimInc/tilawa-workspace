@@ -1,5 +1,5 @@
 /// Animation and timing constants for the application.
-/// 
+///
 /// All durations are defined in milliseconds for consistency.
 class AppDurations {
   // Prevent instantiation
