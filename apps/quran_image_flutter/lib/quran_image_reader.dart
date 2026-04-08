@@ -11,11 +11,14 @@ class QuranImageReader extends StatefulWidget {
 }
 
 class _QuranImageReaderState extends State<QuranImageReader> {
-  final PageController _pageController = PageController(initialPage: 603);
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    // Re-read current state to initialize PageController
+    final state = context.read<NavigationBloc>().state as NavigationLoaded;
+    _pageController = PageController(initialPage: state.pageState.pageIndex);
   }
 
   @override
@@ -30,7 +33,7 @@ class _QuranImageReaderState extends State<QuranImageReader> {
       backgroundColor: const Color(0xFFFBF4E4),
       body: BlocListener<NavigationBloc, NavigationState>(
         listenWhen: (previous, current) {
-          // Only listen when page number changes
+          // Only listen when page number changes between loaded states
           if (previous is NavigationLoaded && current is NavigationLoaded) {
             return previous.pageState.currentPage !=
                 current.pageState.currentPage;

@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/design_tokens/design_tokens.dart';
-import '../../../data/data.dart';
+import '../../../core/di/dependency_injection.dart';
 import '../../../domain/domain.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
@@ -15,18 +16,20 @@ import 'navigation_state.dart';
 /// - Navigation visibility (show/hide)
 /// - Auto-hide timer logic
 /// - User interaction tracking
+/// - Persisting last visited page
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   final PageRepository _pageRepository;
   final NavigationVisibilityRepository _visibilityRepository;
+  final SaveLastVisitedPageUseCase _saveLastVisitedPageUseCase;
+  final GetLastVisitedPageUseCase _getLastVisitedPageUseCase;
   Timer? _autoHideTimer;
 
-  NavigationBloc({
-    PageRepository? pageRepository,
-    NavigationVisibilityRepository? visibilityRepository,
-  }) : _pageRepository = pageRepository ?? InMemoryPageRepository(),
-       _visibilityRepository =
-           visibilityRepository ?? InMemoryNavigationVisibilityRepository(),
-       super(const NavigationInitial()) {
+  NavigationBloc()
+    : _pageRepository = sl<PageRepository>(),
+      _visibilityRepository = sl<NavigationVisibilityRepository>(),
+      _saveLastVisitedPageUseCase = sl<SaveLastVisitedPageUseCase>(),
+      _getLastVisitedPageUseCase = sl<GetLastVisitedPageUseCase>(),
+      super(const NavigationInitial()) {
     on<NavigationInitialized>(_onInitialized);
     on<NavigationShown>(_onShown);
     on<NavigationHidden>(_onHidden);
@@ -39,6 +42,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<NextPageRequested>(_onNextPageRequested);
     on<PreviousPageRequested>(_onPreviousPageRequested);
     on<PageChanged>(_onPageChanged);
+    on<LastVisitedPageSaved>(_onLastVisitedPageSaved);
   }
 
   Future<void> _onInitialized(
@@ -47,7 +51,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     emit(const NavigationLoading());
     try {
-      final pageState = await _pageRepository.getCurrentPage();
+      // Get the last visited page or default to page 1
+      final savedPage = await _getLastVisitedPageUseCase.executeOrDefault(1);
+      final pageState = await _pageRepository.navigateToPage(savedPage);
       final visibility = await _visibilityRepository.getVisibility();
       emit(NavigationLoaded(pageState: pageState, visibility: visibility));
       _startAutoHideTimer();
@@ -170,6 +176,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
             pageState: pageState.copyWith(previewPage: null),
           ),
         );
+        // Persist the newly visited page
+        add(LastVisitedPageSaved(pageState.currentPage));
       } catch (e) {
         emit(NavigationError('Invalid page number: ${event.pageNumber}'));
       }
@@ -184,6 +192,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       final pageState = await _pageRepository.nextPage();
       emit(currentState.copyWith(pageState: pageState));
+      // Persist the newly visited page
+      add(LastVisitedPageSaved(pageState.currentPage));
     }
   }
 
@@ -195,6 +205,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       final pageState = await _pageRepository.previousPage();
       emit(currentState.copyWith(pageState: pageState));
+      // Persist the newly visited page
+      add(LastVisitedPageSaved(pageState.currentPage));
     }
   }
 
@@ -210,7 +222,20 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
           event.pageNumber,
         );
         emit(currentState.copyWith(pageState: pageState));
+        // Persist the newly visited page
+        add(LastVisitedPageSaved(event.pageNumber));
       }
+    }
+  }
+
+  Future<void> _onLastVisitedPageSaved(
+    LastVisitedPageSaved event,
+    Emitter<NavigationState> emit,
+  ) async {
+    try {
+      await _saveLastVisitedPageUseCase.execute(event.pageNumber);
+    } catch (e) {
+      debugPrint('Failed to save last visited page: $e');
     }
   }
 

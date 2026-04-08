@@ -84,3 +84,16 @@ class PageChanged extends NavigationEvent {
   @override
   List<Object?> get props => [pageNumber];
 }
+
+/// Event to persist the last visited (or jumped-to) page.
+///
+/// This event is triggered whenever the user navigates to a new page,
+/// ensuring the position is saved for future app launches.
+class LastVisitedPageSaved extends NavigationEvent {
+  final int pageNumber;
+
+  const LastVisitedPageSaved(this.pageNumber);
+
+  @override
+  List<Object?> get props => [pageNumber];
+}

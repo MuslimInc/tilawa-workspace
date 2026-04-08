@@ -1,4 +1,7 @@
-export 'entities/page_state.dart';
 export 'entities/navigation_visibility.dart';
-export 'repositories/page_repository.dart';
+export 'entities/page_state.dart';
+export 'repositories/last_visited_page_repository.dart';
 export 'repositories/navigation_visibility_repository.dart';
+export 'repositories/page_repository.dart';
+export 'usecases/get_last_visited_page.dart';
+export 'usecases/save_last_visited_page.dart';
