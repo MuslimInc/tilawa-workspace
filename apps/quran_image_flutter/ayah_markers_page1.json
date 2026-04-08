@@ -1,0 +1,44 @@
+[
+  {
+    "ayahIndex": 1,
+    "gap_normX": null,
+    "cx_flutter_new": 0.02,
+    "ss_band_leftEdge": 0.0201
+  },
+  {
+    "ayahIndex": 2,
+    "gap_normX": null,
+    "cx_flutter_new": 0.02,
+    "ss_band_leftEdge": 0.2708
+  },
+  {
+    "ayahIndex": 3,
+    "gap_normX": 0.55694,
+    "cx_flutter_new": 0.5,
+    "ss_band_leftEdge": 0.1815
+  },
+  {
+    "ayahIndex": 4,
+    "gap_normX": 0.55694,
+    "cx_flutter_new": 0.02,
+    "ss_band_leftEdge": 0.0893
+  },
+  {
+    "ayahIndex": 5,
+    "gap_normX": 0.27465,
+    "cx_flutter_new": 0.0833,
+    "ss_band_leftEdge": 0.0848
+  },
+  {
+    "ayahIndex": 6,
+    "gap_normX": 0.50035,
+    "cx_flutter_new": 0.4167,
+    "ss_band_leftEdge": 0.1094
+  },
+  {
+    "ayahIndex": 7,
+    "gap_normX": null,
+    "cx_flutter_new": 0.02,
+    "ss_band_leftEdge": 0.1905
+  }
+]
