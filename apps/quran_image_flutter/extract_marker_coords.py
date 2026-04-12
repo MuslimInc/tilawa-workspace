@@ -107,11 +107,27 @@ def is_text_line(tl, tr, min_span: float = 0.35) -> bool:
     return (tr - tl) >= min_span
 
 
+def _is_bismillah_line(tl: float, tr: float) -> bool:
+    """
+    Returns True if the line looks like a Bismillah (بسم الله الرحمن الرحيم).
+    Bismillah lines are centred with a medium span (35-60% of the line width).
+    """
+    if tl is None or tr is None:
+        return False
+    span = tr - tl
+    centre = (tl + tr) / 2
+    return 0.35 <= span <= 0.60 and 0.40 <= centre <= 0.60
+
+
 def compute_page_img_offset(page: int, pi_lines: dict) -> int:
     """
     For a given page, find how many image-file lines precede the first
-    verse-text line.  Surah-header images (narrow span) are skipped.
+    verse-text line.  Surah-header images (narrow span) and Bismillah
+    images (centred, medium span) are skipped.
     Returns 0 for pages where line 1 is already text.
+
+    Bismillah is only counted as a verse on page 1 (Surah Al-Fatiha).
+    Surah At-Tawbah (9) has no Bismillah at all.
     """
     first_content_line = None
     for ln_str in sorted(pi_lines.keys(), key=int):
@@ -121,12 +137,24 @@ def compute_page_img_offset(page: int, pi_lines: dict) -> int:
     if first_content_line is None:
         return 0
 
+    # Determine the surah that starts on this page's first content line.
+    first_word = pi_lines[str(first_content_line)][0]
+    surah_num = int(first_word.split(":")[0])
+
+    # Bismillah is a verse only in Al-Fatiha (surah 1).
+    # On other surah-opening pages we must skip the Bismillah image.
+    has_header = first_content_line > 1
+    skip_bismillah = has_header and surah_num != 1
+
     for offset in range(0, LINE_COUNT):
         img_no = first_content_line + offset
         if img_no > LINE_COUNT:
             break
         gaps, tl, tr = analyse_line_image(page, img_no)
         if is_text_line(tl, tr, min_span=0.35):
+            if skip_bismillah and _is_bismillah_line(tl, tr):
+                skip_bismillah = False  # only skip once
+                continue
             return offset
     return 0
 
