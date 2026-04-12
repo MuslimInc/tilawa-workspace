@@ -22,9 +22,12 @@ class QuranImagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final markers = sl<VerseMarkerRepository>().getMarkersForPage(
-      pageNumber,
-    );
+    debugPrint('[PageViewJumpPerformance] QuranImagePage.build started for page $pageNumber');
+    final start = DateTime.now();
+    final markers = sl<VerseMarkerRepository>().getMarkersForPage(pageNumber);
+    final diff = DateTime.now().difference(start);
+    debugPrint('[PageViewJumpPerformance] Fetched markers for page $pageNumber in ${diff.inMicroseconds}us');
+
 
     return Padding(
       padding: const EdgeInsets.only(top: 19, bottom: 19),
@@ -33,6 +36,11 @@ class QuranImagePage extends StatelessWidget {
           final double pageWidth = constraints.maxWidth;
           final double pageHeight = constraints.maxHeight;
           final double lineHeight = pageWidth * _lineHeightRatio;
+
+          // Calculate the optimal physical width to force the C++ native decoder 
+          // to dramatically scale down the 1440px images BEFORE hitting the GPU VRAM bus.
+          final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+          final int cacheWidth = (pageWidth * devicePixelRatio).round();
 
           const double lastLineIndex = _lineCount - 1;
           final List<double> yOffsets = List.generate(_lineCount, (i) {
@@ -48,23 +56,33 @@ class QuranImagePage extends StatelessWidget {
                   right: 0,
                   top: yOffsets[i],
                   height: lineHeight,
-                  child: RepaintBoundary(
-                    child: Image.asset(
-                      'assets/quran_images/$pageNumber/${i + 1}.png',
-                      fit: BoxFit.fill,
-                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                    ),
+                  child: Image.asset(
+                    'assets/quran_images/$pageNumber/${i + 1}.png',
+                    fit: BoxFit.fill,
+                    gaplessPlayback: true,
+                    cacheWidth: cacheWidth,
+                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                      if (frame != null && !wasSynchronouslyLoaded && frame == 0) {
+                        // Log exactly when the native decoder finishes unpacking an image to VRAM
+                        debugPrint('[PageViewJumpPerformance] Image ${i + 1} for page $pageNumber completed async decode');
+                      }
+                      return child;
+                    },
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
                 ),
 
               for (final marker in markers)
-                _AyahMarkerWidget(
-                  marker: marker,
-                  pageWidth: pageWidth,
-                  pageHeight: pageHeight,
-                  lineHeight: lineHeight,
-                  yOffsets: yOffsets,
-                ),
+                () {
+                  debugPrint('[PageViewJumpPerformance] Laying out AyahMarkerWidget for Ayah ${marker.ayah} on Page $pageNumber');
+                  return _AyahMarkerWidget(
+                    marker: marker,
+                    pageWidth: pageWidth,
+                    pageHeight: pageHeight,
+                    lineHeight: lineHeight,
+                    yOffsets: yOffsets,
+                  );
+                }(),
             ],
           );
         },
@@ -94,9 +112,10 @@ class _AyahMarkerWidget extends StatelessWidget {
     final double markerW = pageWidth * 0.05138889;
     final double markerH = pageWidth * 0.06527778;
 
-    final double xOffset =
-        (marker.centerX * pageWidth - markerW / 2)
-            .clamp(0.0, pageWidth - markerW);
+    final double xOffset = (marker.centerX * pageWidth - markerW / 2).clamp(
+      0.0,
+      pageWidth - markerW,
+    );
 
     // marker.line is the 0-based image-file index (0–14).
     // yCenter = top of that line's slot + half a line height (vertical centre).

@@ -90,20 +90,27 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     );
 
     const totalPages = 604;
+    const batchSize = 25; // Process in small batches to avoid isolate overhead
+    
     int completedCount = 0;
 
-    final futures = <Future<void>>[];
+    for (int i = 1; i <= totalPages; i += batchSize) {
+      final end = (i + batchSize - 1).clamp(1, totalPages);
+      final batchFutures = <Future<void>>[];
 
-    for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
-      futures.add(
-        _loadDebugPageAsync(pageNum).then((_) {
-          completedCount++;
-          _preloadProgress = completedCount / totalPages;
-        }),
-      );
+      for (int pageNum = i; pageNum <= end; pageNum++) {
+        batchFutures.add(
+          _loadDebugPageAsync(pageNum).then((_) {
+            completedCount++;
+            _preloadProgress = completedCount / totalPages;
+          }),
+        );
+      }
+
+      // Wait for the current batch to finish before starting the next one.
+      // This prevents firing 604 isolates (compute() calls) simultaneously.
+      await Future.wait(batchFutures);
     }
-
-    await Future.wait(futures);
 
     _preloadProgress = 1.0;
     _isPreloading = false;
@@ -145,8 +152,20 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
   @override
   List<VerseMarkerData> getMarkersForPage(int pageNumber) {
-    if (_cache.containsKey(pageNumber)) return _cache[pageNumber]!;
+    debugPrint('[PageViewJumpPerformance] getMarkersForPage called for $pageNumber');
+    final start = DateTime.now();
+
+    if (_cache.containsKey(pageNumber)) {
+      debugPrint('[PageViewJumpPerformance] Cache Hit for $pageNumber');
+      return _cache[pageNumber]!;
+    }
+    
+    debugPrint('[PageViewJumpPerformance] Cache Miss for $pageNumber. Building...');
     final result = _buildMarkersForPage(pageNumber);
+    
+    final diff = DateTime.now().difference(start);
+    debugPrint('[PageViewJumpPerformance] Finished _buildMarkersForPage for $pageNumber in ${diff.inMicroseconds}us. Items: ${result.length}');
+
     // Only cache non-empty results; an empty list from a pending
     // debug-mode async load should not prevent future lookups.
     if (result.isNotEmpty) {
@@ -203,7 +222,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       final path =
           'assets/data/quran_marker_debug_coordinates/$pageNumber.json';
       final raw = await rootBundle.loadString(path, cache: false);
-      final decoded = json.decode(raw) as List<dynamic>;
+      final decoded = await compute(jsonDecode, raw) as List<dynamic>;
       _markerData ??= {};
       _markerData![pageNumber.toString()] = decoded;
 

@@ -27,47 +27,49 @@ class VerseMarker extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: Size(width, height),
-            painter: const _QcfMarkerPainter(),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 1.0),
-            child: Text(
-              _getGlyphMarker(verseNumber),
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
-              style: TextStyle(
-                fontFamily: 'QuranNumbers',
-                fontSize: width,
-                color: const Color(0xFF5D4037),
-                fontWeight: FontWeight.bold,
-                height: 1.0,
+      child: RepaintBoundary(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(width, height),
+              painter: _QcfMarkerPainter(verseNumber: verseNumber),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 1.0),
+              child: Text(
+                _getGlyphMarker(verseNumber),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'QuranNumbers',
+                  fontSize: width,
+                  color: const Color(0xFF5D4037),
+                  fontWeight: FontWeight.bold,
+                  height: 1.0,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _QcfMarkerPainter extends CustomPainter {
-  const _QcfMarkerPainter();
+  final int verseNumber;
+  const _QcfMarkerPainter({required this.verseNumber});
 
   @override
   void paint(Canvas canvas, Size size) {
+    debugPrint('[PageViewJumpPerformance] _QcfMarkerPainter executing paint operations for verse $verseNumber');
     final path = getQcfMarkerPath(size);
 
-    // Provide a subtle shadow behind the glyph
+    // Provide a subtle shadow behind the glyph without expensive blurring
     canvas.drawPath(
       path.shift(Offset(size.width * 0.02, size.width * 0.02)),
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.15)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, size.width * 0.05),
+      Paint()..color = Colors.black.withValues(alpha: 0.15),
     );
 
     // Draw the main QCF marker with a premium golden color

@@ -59,6 +59,7 @@ class _QuranImageReaderState extends State<QuranImageReader> {
                   final delta = (targetIndex - currentIndex).abs();
 
                   if (delta > 3) {
+                    debugPrint('[PageViewJumpPerformance] Executing jumpToPage to $targetIndex (delta: $delta)');
                     _pageController.jumpToPage(targetIndex);
                   } else {
                     _pageController.animateToPage(
@@ -81,10 +82,13 @@ class _QuranImageReaderState extends State<QuranImageReader> {
                 allowImplicitScrolling: false,
                 physics: const PageScrollPhysics(),
                 onPageChanged: (index) {
+                  debugPrint('[PageViewJumpPerformance] onPageChanged triggered for page ${index + 1}');
                   context.read<NavigationBloc>().add(PageChanged(index + 1));
                 },
-                itemBuilder: (_, index) =>
-                    QuranImagePage(pageNumber: index + 1),
+                itemBuilder: (_, index) {
+                  debugPrint('[PageViewJumpPerformance] itemBuilder building page ${index + 1}');
+                  return QuranImagePage(pageNumber: index + 1);
+                },
               ),
             ),
           ),
@@ -146,25 +150,31 @@ class _TactileNoiseBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _painter);
+    return RepaintBoundary(
+      child: CustomPaint(painter: _painter),
+    );
   }
 }
 
 class _NoisePainter extends CustomPainter {
+  static List<Offset>? _cachedPoints;
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (_cachedPoints == null) {
+      final random = math.Random(42);
+      _cachedPoints = List.generate(2000, (_) {
+        return Offset(
+            random.nextDouble() * size.width, random.nextDouble() * size.height);
+      });
+    }
+
     final paint =
         Paint()
           ..color = Colors.black.withValues(alpha: 0.02)
           ..strokeWidth = 1.0;
 
-    // Draw sparsely distributed noise dots
-    final random = math.Random(42);
-    final points = List.generate(2000, (_) {
-      return Offset(random.nextDouble() * size.width, random.nextDouble() * size.height);
-    });
-
-    canvas.drawPoints(PointMode.points, points, paint);
+    canvas.drawPoints(PointMode.points, _cachedPoints!, paint);
   }
 
   @override
