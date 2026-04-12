@@ -1,1 +1,20 @@
-[{"sura":2,"ayah":257,"line":3,"centerX":0.72257},{"sura":2,"ayah":258,"line":7,"centerX":0.21424},{"sura":2,"ayah":259,"line":14,"centerX":0.0535}]
+[
+    {
+        "sura": 2,
+        "ayah": 257,
+        "line": 3,
+        "centerX": 0.72257
+    },
+    {
+        "sura": 2,
+        "ayah": 258,
+        "line": 7,
+        "centerX": 0.21424
+    },
+    {
+        "sura": 2,
+        "ayah": 259,
+        "line": 14,
+        "centerX": 0.05611
+    }
+]

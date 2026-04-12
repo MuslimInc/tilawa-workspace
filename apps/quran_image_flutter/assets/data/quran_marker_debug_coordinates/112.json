@@ -1,1 +1,50 @@
-[{"sura":5,"ayah":24,"line":1,"centerX":0.26736},{"sura":5,"ayah":25,"line":3,"centerX":0.7434},{"sura":5,"ayah":26,"line":4,"centerX":0.0535},{"sura":5,"ayah":27,"line":7,"centerX":0.41007},{"sura":5,"ayah":28,"line":9,"centerX":0.72569},{"sura":5,"ayah":29,"line":10,"centerX":0.22083},{"sura":5,"ayah":30,"line":11,"centerX":0.0535},{"sura":5,"ayah":31,"line":14,"centerX":0.0535}]
+[
+    {
+        "sura": 5,
+        "ayah": 24,
+        "line": 1,
+        "centerX": 0.26736
+    },
+    {
+        "sura": 5,
+        "ayah": 25,
+        "line": 3,
+        "centerX": 0.7434
+    },
+    {
+        "sura": 5,
+        "ayah": 26,
+        "line": 4,
+        "centerX": 0.05681
+    },
+    {
+        "sura": 5,
+        "ayah": 27,
+        "line": 7,
+        "centerX": 0.41007
+    },
+    {
+        "sura": 5,
+        "ayah": 28,
+        "line": 9,
+        "centerX": 0.72569
+    },
+    {
+        "sura": 5,
+        "ayah": 29,
+        "line": 10,
+        "centerX": 0.22083
+    },
+    {
+        "sura": 5,
+        "ayah": 30,
+        "line": 11,
+        "centerX": 0.05958
+    },
+    {
+        "sura": 5,
+        "ayah": 31,
+        "line": 14,
+        "centerX": 0.05958
+    }
+]

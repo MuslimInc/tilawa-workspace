@@ -16,9 +16,14 @@ class PageState extends Equatable {
   /// Whether the page is currently being scrolled
   final bool isScrolling;
 
+  final String juzTitle;
+  final String hizbTitle;
+
   const PageState({
     required this.currentPage,
     required this.totalPages,
+    required this.juzTitle,
+    required this.hizbTitle,
     this.previewPage,
     this.isScrolling = false,
   });
@@ -28,6 +33,8 @@ class PageState extends Equatable {
     return const PageState(
       currentPage: 1,
       totalPages: 604,
+      juzTitle: 'Juz 1',
+      hizbTitle: 'Hizb 1',
       previewPage: null,
       isScrolling: false,
     );
@@ -39,12 +46,16 @@ class PageState extends Equatable {
     int? previewPage,
     int? totalPages,
     bool? isScrolling,
+    String? juzTitle,
+    String? hizbTitle,
   }) {
     return PageState(
       currentPage: currentPage ?? this.currentPage,
       previewPage: previewPage ?? this.previewPage,
       totalPages: totalPages ?? this.totalPages,
       isScrolling: isScrolling ?? this.isScrolling,
+      juzTitle: juzTitle ?? this.juzTitle,
+      hizbTitle: hizbTitle ?? this.hizbTitle,
     );
   }
 
@@ -66,5 +77,7 @@ class PageState extends Equatable {
     previewPage,
     totalPages,
     isScrolling,
+    juzTitle,
+    hizbTitle,
   ];
 }

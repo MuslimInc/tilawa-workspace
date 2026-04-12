@@ -1,1 +1,26 @@
-[{"sura":4,"ayah":20,"line":2,"centerX":0.59062},{"sura":4,"ayah":21,"line":3,"centerX":0.0535},{"sura":4,"ayah":22,"line":6,"centerX":0.80347},{"sura":4,"ayah":23,"line":14,"centerX":0.0535}]
+[
+    {
+        "sura": 4,
+        "ayah": 20,
+        "line": 2,
+        "centerX": 0.59062
+    },
+    {
+        "sura": 4,
+        "ayah": 21,
+        "line": 3,
+        "centerX": 0.06028
+    },
+    {
+        "sura": 4,
+        "ayah": 22,
+        "line": 6,
+        "centerX": 0.80347
+    },
+    {
+        "sura": 4,
+        "ayah": 23,
+        "line": 14,
+        "centerX": 0.06583
+    }
+]

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../domain/domain.dart';
+import '../../page_mapping.dart';
 
 /// In-memory implementation of [PageRepository].
 ///
@@ -28,7 +29,13 @@ class InMemoryPageRepository implements PageRepository {
     if (!_currentState.isValidPage(pageNumber)) {
       throw ArgumentError('Invalid page number: $pageNumber');
     }
-    final newState = _currentState.copyWith(currentPage: pageNumber);
+
+    final info = QuranPageMapping.getPageInfo(pageNumber);
+    final newState = _currentState.copyWith(
+      currentPage: pageNumber,
+      juzTitle: info.juzTitle,
+      hizbTitle: info.hizbTitle,
+    );
     await savePageState(newState);
     return newState;
   }

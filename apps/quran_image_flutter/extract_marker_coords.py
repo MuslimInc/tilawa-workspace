@@ -12,6 +12,12 @@ Method:
 
   Verse endings are sourced from quran_page_index.json + qpc-v4.json.
 
+  For lines with no inter-verse gap (last verse on the line):
+    - Full-width justified lines (text_span >= 75%): centerX = text_left
+      (the ۝ glyph sits at the left margin of the text block)
+    - Partial lines (text_span < 75%): centerX = centre of leftmost text run
+      (the ۝ glyph is isolated and its centre is measured directly)
+
 Output format (per page):
   {
     "1": [
@@ -41,23 +47,25 @@ OUT_FILE   = Path("assets/data/verse_marker_coordinates.json")
 
 LINE_IMG_W  = 1440
 LINE_COUNT  = 15
-MARKER_R    = 0.025   # half the marker diameter (5% page width / 2)
-MIN_GAP_PCT = 0.03    # minimum gap width (detects only actual inter-verse gaps, not intra-word gaps)
-TEXT_LEFT_OFFSET = 0.0365  # offset from text_left for left-edge markers (tuned to match Ayah app)
-LEFT_COLUMN_X = 0.0535  # fixed column position for all end-of-line markers (Ayah app column alignment)
+MIN_GAP_PCT          = 0.03   # min gap width to count as inter-verse separator (not intra-word)
+FULL_WIDTH_THRESHOLD = 0.75   # text_span >= this → full-width justified line
+MAX_MARK_GLYPH_W     = 0.08   # leftmost run width <= this → ۝ is isolated (use run centre)
+LEFT_COL_OFFSET      = 0.030  # measured offset: Ayah app places left-col markers 0.030 left of text_left
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def analyse_line_image(page: int, line_1based: int):
     """
-    Returns (gap_centers, text_left, text_right) all normalised 0-1.
-    gap_centers: list of normX values for each inter-verse gap.
+    Returns (gap_centers, text_left, text_right, leftmost_run_center) all normalised 0-1.
+    gap_centers: list of normX values for each inter-verse gap (>= MIN_GAP_PCT wide).
     text_left / text_right: extent of non-transparent content.
-    Returns ([], None, None) for blank lines.
+    leftmost_run_center: centre of the leftmost contiguous text run (the ۝ glyph on
+                         partial lines). None for blank lines.
+    Returns ([], None, None, None) for blank lines.
     """
     path = IMG_ROOT / str(page) / f"{line_1based}.png"
     img  = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
     if img is None or img.ndim < 3 or img.shape[2] < 4:
-        return [], None, None
+        return [], None, None, None, None
 
     alpha     = img[:, :, 3]
     col_alpha = alpha.max(axis=0)            # shape (W,)
@@ -65,7 +73,7 @@ def analyse_line_image(page: int, line_1based: int):
 
     text_cols = np.where(has_text)[0]
     if len(text_cols) == 0:
-        return [], None, None
+        return [], None, None, None, None
 
     text_left  = text_cols[0]  / LINE_IMG_W
     text_right = text_cols[-1] / LINE_IMG_W
@@ -88,7 +96,15 @@ def analyse_line_image(page: int, line_1based: int):
         if (g1 - g0) >= MIN_GAP:
             gap_centers.append(round((g0 + g1) / 2.0 / LINE_IMG_W, 5))
 
-    return gap_centers, round(text_left, 5), round(text_right, 5)
+    # Centre and normalised width of the leftmost individual text run.
+    # When the ۝ glyph is isolated (narrow run) its centre gives pixel-perfect
+    # marker placement.  When it is merged with adjacent words (wide run) we
+    # fall back to text_left in the caller.
+    lr = text_runs[0]
+    leftmost_run_center = round((lr[0] + lr[1]) / 2.0 / LINE_IMG_W, 5)
+    leftmost_run_width  = round((lr[1] - lr[0]) / LINE_IMG_W, 5)
+
+    return gap_centers, round(text_left, 5), round(text_right, 5), leftmost_run_center, leftmost_run_width
 
 
 def is_text_line(tl, tr, min_span: float = 0.35) -> bool:
@@ -120,7 +136,7 @@ def compute_page_img_offset(page: int, pi_lines: dict) -> int:
         img_no = first_content_line + offset
         if img_no > LINE_COUNT:
             break
-        gaps, tl, tr = analyse_line_image(page, img_no)
+        gaps, tl, tr, _lrc, _lrw = analyse_line_image(page, img_no)
         if is_text_line(tl, tr, min_span=0.35):
             return offset
     return 0
@@ -161,24 +177,8 @@ for page in pages:
     # Pre-fetch line analysis for all image files on this page
     line_analysis = {}
     for li in range(1, LINE_COUNT + 1):
-        gaps, tl, tr = analyse_line_image(page, li)
-        line_analysis[li] = (gaps, tl, tr)
-
-    # First pass: determine page-wide left column position from median text_left
-    all_text_lefts = []
-    for ln_str in sorted(pi_lines.keys(), key=int):
-        ln = int(ln_str)
-        img_line = ln + img_offset
-        gaps, text_left, text_right = line_analysis.get(img_line, ([], None, None))
-        if text_left is not None:
-            all_text_lefts.append(text_left)
-    
-    # Use median text_left minus offset, or fallback to LEFT_COLUMN_X
-    if all_text_lefts:
-        median_text_left = sorted(all_text_lefts)[len(all_text_lefts) // 2]
-        page_left_column = max(round(median_text_left - TEXT_LEFT_OFFSET, 5), LEFT_COLUMN_X)
-    else:
-        page_left_column = LEFT_COLUMN_X
+        gaps, tl, tr, lrc, lrw = analyse_line_image(page, li)
+        line_analysis[li] = (gaps, tl, tr, lrc, lrw)
 
     markers = []
 
@@ -204,7 +204,7 @@ for page in pages:
             continue
 
         img_line = ln + img_offset
-        gaps, text_left, text_right = line_analysis.get(img_line, ([], None, None))
+        gaps, text_left, text_right, leftmost_run_center, leftmost_run_width = line_analysis.get(img_line, ([], None, None, None, None))
 
         # Sort verse endings left-to-right in RTL = ascending lastPos
         all_endings = sorted(last_pos.items(), key=lambda x: x[1])
@@ -217,9 +217,25 @@ for page in pages:
                 # is the rightmost verse whose gap is gaps[-1], so reverse index.
                 center_x = gaps[len(gaps) - 1 - rank]
             elif text_left is not None:
-                # Last (or only) verse on this line: snap to fixed left column
-                # This creates the uniform column alignment seen in Ayah app
-                center_x = page_left_column
+                # Last (or only) verse on this line — no gap to a following verse.
+                text_span = (text_right - text_left) if text_right is not None else 0
+                if text_span >= FULL_WIDTH_THRESHOLD:
+                    # Full-width justified line: the ۝ glyph is at text_left, but
+                    # the Ayah app places the ornament marker LEFT_COL_OFFSET to the
+                    # left of text_left (just outside the glyph's left edge).
+                    center_x = round(max(text_left - LEFT_COL_OFFSET, 0.0), 5)
+                else:
+                    # Partial line: determine whether ۝ is isolated or merged.
+                    # A narrow leftmost run (< 8% of line width ≈ 115 px) is the
+                    # ۝ glyph alone → use its centre for pixel-perfect alignment.
+                    # A wide run means ۝ merged with adjacent word(s) → fall back
+                    # to text_left (left edge of the merged group).
+                    if (leftmost_run_center is not None
+                            and leftmost_run_width is not None
+                            and leftmost_run_width <= MAX_MARK_GLYPH_W):
+                        center_x = leftmost_run_center
+                    else:
+                        center_x = text_left
             else:
                 # Fallback: equal-spacing approximation (flipped)
                 center_x = round(max(1.0 - (lp + 1.5) / total, 0.02), 5)

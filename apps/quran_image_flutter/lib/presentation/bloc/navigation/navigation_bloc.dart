@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/di/dependency_injection.dart';
 import '../../../domain/domain.dart';
+import '../../../page_mapping.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
 
@@ -152,9 +153,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      // Only update preview without navigating
+      final info = QuranPageMapping.getPageInfo(event.pageNumber);
       final newPageState = currentState.pageState.copyWith(
         previewPage: event.pageNumber,
+        juzTitle: info.juzTitle,
+        hizbTitle: info.hizbTitle,
       );
       emit(currentState.copyWith(pageState: newPageState));
     }

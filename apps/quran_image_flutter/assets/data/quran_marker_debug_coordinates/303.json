@@ -1,1 +1,86 @@
-[{"sura":18,"ayah":84,"line":0,"centerX":0.12569},{"sura":18,"ayah":85,"line":1,"centerX":0.87049},{"sura":18,"ayah":86,"line":3,"centerX":0.76562},{"sura":18,"ayah":87,"line":4,"centerX":0.63333},{"sura":18,"ayah":88,"line":5,"centerX":0.40799},{"sura":18,"ayah":89,"line":5,"centerX":0.13681},{"sura":18,"ayah":90,"line":7,"centerX":0.75694},{"sura":18,"ayah":91,"line":7,"centerX":0.11771},{"sura":18,"ayah":92,"line":8,"centerX":0.77222},{"sura":18,"ayah":93,"line":9,"centerX":0.52847},{"sura":18,"ayah":94,"line":11,"centerX":0.59965},{"sura":18,"ayah":95,"line":12,"centerX":0.50972},{"sura":18,"ayah":96,"line":14,"centerX":0.85938},{"sura":18,"ayah":97,"line":14,"centerX":0.0535}]
+[
+    {
+        "sura": 18,
+        "ayah": 84,
+        "line": 0,
+        "centerX": 0.12569
+    },
+    {
+        "sura": 18,
+        "ayah": 85,
+        "line": 1,
+        "centerX": 0.87049
+    },
+    {
+        "sura": 18,
+        "ayah": 86,
+        "line": 3,
+        "centerX": 0.76562
+    },
+    {
+        "sura": 18,
+        "ayah": 87,
+        "line": 4,
+        "centerX": 0.63333
+    },
+    {
+        "sura": 18,
+        "ayah": 88,
+        "line": 5,
+        "centerX": 0.40799
+    },
+    {
+        "sura": 18,
+        "ayah": 89,
+        "line": 5,
+        "centerX": 0.13681
+    },
+    {
+        "sura": 18,
+        "ayah": 90,
+        "line": 7,
+        "centerX": 0.75694
+    },
+    {
+        "sura": 18,
+        "ayah": 91,
+        "line": 7,
+        "centerX": 0.11771
+    },
+    {
+        "sura": 18,
+        "ayah": 92,
+        "line": 8,
+        "centerX": 0.77222
+    },
+    {
+        "sura": 18,
+        "ayah": 93,
+        "line": 9,
+        "centerX": 0.52847
+    },
+    {
+        "sura": 18,
+        "ayah": 94,
+        "line": 11,
+        "centerX": 0.59965
+    },
+    {
+        "sura": 18,
+        "ayah": 95,
+        "line": 12,
+        "centerX": 0.50972
+    },
+    {
+        "sura": 18,
+        "ayah": 96,
+        "line": 14,
+        "centerX": 0.85938
+    },
+    {
+        "sura": 18,
+        "ayah": 97,
+        "line": 14,
+        "centerX": 0.04986
+    }
+]
