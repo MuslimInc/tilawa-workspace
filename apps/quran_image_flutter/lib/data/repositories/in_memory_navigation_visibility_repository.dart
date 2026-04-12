@@ -37,7 +37,7 @@ class InMemoryNavigationVisibilityRepository
   Future<NavigationVisibility> hide() async {
     final newVisibility = _currentVisibility.copyWith(
       isVisible: false,
-      lastShownAt: null,
+      clearLastShownAt: true,
     );
     await saveVisibility(newVisibility);
     return newVisibility;
@@ -70,7 +70,7 @@ class InMemoryNavigationVisibilityRepository
     return _currentVisibility.shouldAutoHide(idleDurationSeconds);
   }
 
-  /// Disposes the repository resources
+  @override
   void dispose() {
     _visibilityController.close();
   }

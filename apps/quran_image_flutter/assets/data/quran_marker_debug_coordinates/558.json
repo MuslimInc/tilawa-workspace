@@ -3,13 +3,13 @@
         "sura": 65,
         "ayah": 1,
         "line": 5,
-        "centerX": 0.04847
+        "centerX": 0.05194
     },
     {
         "sura": 65,
         "ayah": 2,
         "line": 8,
-        "centerX": 0.04917
+        "centerX": 0.05194
     },
     {
         "sura": 65,
@@ -27,6 +27,6 @@
         "sura": 65,
         "ayah": 5,
         "line": 14,
-        "centerX": 0.04778
+        "centerX": 0.05194
     }
 ]

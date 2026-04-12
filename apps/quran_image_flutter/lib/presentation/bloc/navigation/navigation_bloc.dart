@@ -25,12 +25,19 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   final GetLastVisitedPageUseCase _getLastVisitedPageUseCase;
   Timer? _autoHideTimer;
 
-  NavigationBloc()
-    : _pageRepository = sl<PageRepository>(),
-      _visibilityRepository = sl<NavigationVisibilityRepository>(),
-      _saveLastVisitedPageUseCase = sl<SaveLastVisitedPageUseCase>(),
-      _getLastVisitedPageUseCase = sl<GetLastVisitedPageUseCase>(),
-      super(const NavigationInitial()) {
+  NavigationBloc({
+    PageRepository? pageRepository,
+    NavigationVisibilityRepository? visibilityRepository,
+    SaveLastVisitedPageUseCase? saveLastVisitedPageUseCase,
+    GetLastVisitedPageUseCase? getLastVisitedPageUseCase,
+  }) : _pageRepository = pageRepository ?? sl<PageRepository>(),
+       _visibilityRepository =
+           visibilityRepository ?? sl<NavigationVisibilityRepository>(),
+       _saveLastVisitedPageUseCase =
+           saveLastVisitedPageUseCase ?? sl<SaveLastVisitedPageUseCase>(),
+       _getLastVisitedPageUseCase =
+           getLastVisitedPageUseCase ?? sl<GetLastVisitedPageUseCase>(),
+       super(const NavigationInitial()) {
     on<NavigationInitialized>(_onInitialized);
     on<NavigationShown>(_onShown);
     on<NavigationHidden>(_onHidden);
@@ -54,7 +61,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     try {
       // Get the last visited page or default to page 1
       final savedPage = await _getLastVisitedPageUseCase.executeOrDefault(1);
-      final pageState = await _pageRepository.navigateToPage(savedPage);
+      final pageState = _pageRepository.navigateToPage(savedPage);
       final visibility = await _visibilityRepository.getVisibility();
       emit(NavigationLoaded(pageState: pageState, visibility: visibility));
       _startAutoHideTimer();
@@ -143,6 +150,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       if (shouldHide) {
         final visibility = await _visibilityRepository.hide();
         emit(currentState.copyWith(visibility: visibility));
+        _cancelAutoHideTimer();
       }
     }
   }
@@ -170,13 +178,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final currentState = state;
     if (currentState is NavigationLoaded) {
       try {
-        final pageState = await _pageRepository.navigateToPage(
+        final pageState = _pageRepository.navigateToPage(
           event.pageNumber,
         );
         // Clear preview after actual navigation
         emit(
           currentState.copyWith(
-            pageState: pageState.copyWith(previewPage: null),
+            pageState: pageState.copyWith(clearPreviewPage: true),
           ),
         );
         // Persist the newly visited page
@@ -193,7 +201,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final pageState = await _pageRepository.nextPage();
+      final pageState = _pageRepository.nextPage();
       emit(currentState.copyWith(pageState: pageState));
       // Persist the newly visited page
       add(LastVisitedPageSaved(pageState.currentPage));
@@ -206,7 +214,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final pageState = await _pageRepository.previousPage();
+      final pageState = _pageRepository.previousPage();
       emit(currentState.copyWith(pageState: pageState));
       // Persist the newly visited page
       add(LastVisitedPageSaved(pageState.currentPage));
@@ -221,7 +229,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       // Only update if page actually changed
       if (currentState.pageState.currentPage != event.pageNumber) {
-        final pageState = await _pageRepository.navigateToPage(
+        final pageState = _pageRepository.navigateToPage(
           event.pageNumber,
         );
         emit(currentState.copyWith(pageState: pageState));

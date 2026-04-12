@@ -9,7 +9,7 @@
         "sura": 16,
         "ayah": 66,
         "line": 2,
-        "centerX": 0.0575
+        "centerX": 0.05194
     },
     {
         "sura": 16,
@@ -33,7 +33,7 @@
         "sura": 16,
         "ayah": 70,
         "line": 9,
-        "centerX": 0.04639
+        "centerX": 0.05194
     },
     {
         "sura": 16,
@@ -45,6 +45,6 @@
         "sura": 16,
         "ayah": 72,
         "line": 14,
-        "centerX": 0.05681
+        "centerX": 0.05194
     }
 ]

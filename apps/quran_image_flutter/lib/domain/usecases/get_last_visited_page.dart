@@ -1,4 +1,5 @@
 import '../repositories/last_visited_page_repository.dart';
+import '../entities/page_state.dart';
 
 /// Use case for retrieving the last visited page.
 ///
@@ -24,7 +25,9 @@ class GetLastVisitedPageUseCase {
   /// otherwise returns the [defaultPage].
   Future<int> executeOrDefault(int defaultPage) async {
     final savedPage = await execute();
-    if (savedPage != null && savedPage >= 1 && savedPage <= 604) {
+    if (savedPage != null &&
+        savedPage >= 1 &&
+        savedPage <= PageState.quranPageCount) {
       return savedPage;
     }
     return defaultPage;

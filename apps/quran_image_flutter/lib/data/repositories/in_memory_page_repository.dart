@@ -14,18 +14,18 @@ class InMemoryPageRepository implements PageRepository {
   final _pageController = StreamController<PageState>.broadcast();
 
   @override
-  Future<PageState> getCurrentPage() async {
+  PageState getCurrentPage() {
     return _currentState;
   }
 
   @override
-  Future<void> savePageState(PageState state) async {
+  void savePageState(PageState state) {
     _currentState = state;
     _pageController.add(state);
   }
 
   @override
-  Future<PageState> navigateToPage(int pageNumber) async {
+  PageState navigateToPage(int pageNumber) {
     if (!_currentState.isValidPage(pageNumber)) {
       throw ArgumentError('Invalid page number: $pageNumber');
     }
@@ -36,12 +36,12 @@ class InMemoryPageRepository implements PageRepository {
       juzTitle: info.juzTitle,
       hizbTitle: info.hizbTitle,
     );
-    await savePageState(newState);
+    savePageState(newState);
     return newState;
   }
 
   @override
-  Future<PageState> nextPage() async {
+  PageState nextPage() {
     final next = _currentState.currentPage + 1;
     if (!_currentState.isValidPage(next)) {
       return _currentState; // Already at last page
@@ -50,7 +50,7 @@ class InMemoryPageRepository implements PageRepository {
   }
 
   @override
-  Future<PageState> previousPage() async {
+  PageState previousPage() {
     final prev = _currentState.currentPage - 1;
     if (!_currentState.isValidPage(prev)) {
       return _currentState; // Already at first page
@@ -63,7 +63,7 @@ class InMemoryPageRepository implements PageRepository {
     return _pageController.stream;
   }
 
-  /// Disposes the repository resources
+  @override
   void dispose() {
     _pageController.close();
   }

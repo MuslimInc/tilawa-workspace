@@ -30,15 +30,21 @@ class NavigationVisibility extends Equatable {
   }
 
   /// Creates a copy with modified fields
+  /// Creates a copy with modified fields.
+  ///
+  /// Set [clearLastShownAt] to `true` to explicitly reset
+  /// [lastShownAt] to `null` (the `??` operator cannot do this).
   NavigationVisibility copyWith({
     bool? isVisible,
     bool? isInteracting,
     DateTime? lastShownAt,
+    bool clearLastShownAt = false,
   }) {
     return NavigationVisibility(
       isVisible: isVisible ?? this.isVisible,
       isInteracting: isInteracting ?? this.isInteracting,
-      lastShownAt: lastShownAt ?? this.lastShownAt,
+      lastShownAt:
+          clearLastShownAt ? null : (lastShownAt ?? this.lastShownAt),
     );
   }
 

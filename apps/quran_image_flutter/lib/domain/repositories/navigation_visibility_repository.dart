@@ -28,4 +28,7 @@ abstract class NavigationVisibilityRepository {
 
   /// Checks if controls should auto-hide based on idle duration
   Future<bool> shouldAutoHide(int idleDurationSeconds);
+
+  /// Releases resources held by this repository.
+  void dispose();
 }

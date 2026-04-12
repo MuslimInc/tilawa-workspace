@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:quran_image_flutter/quran_image_app.dart';
 
 import 'core/di/dependency_injection.dart';
-import 'verse_service.dart';
+import 'data/repositories/asset_verse_marker_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,10 @@ void main() async {
   await initDependencies();
 
   // Initialize with debug mode and preloading
-  await verseService.init(forceDebugSource: true, preloadAllPages: true);
+  await sl<AssetVerseMarkerRepository>().init(
+    forceDebugSource: true,
+    preloadAllPages: true,
+  );
 
   runApp(const QuranImageApp());
 }

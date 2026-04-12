@@ -33,7 +33,7 @@
         "sura": 55,
         "ayah": 24,
         "line": 2,
-        "centerX": 0.04986
+        "centerX": 0.05194
     },
     {
         "sura": 55,
@@ -57,7 +57,7 @@
         "sura": 55,
         "ayah": 28,
         "line": 4,
-        "centerX": 0.05403
+        "centerX": 0.05194
     },
     {
         "sura": 55,
@@ -111,7 +111,7 @@
         "sura": 55,
         "ayah": 37,
         "line": 11,
-        "centerX": 0.05819
+        "centerX": 0.05194
     },
     {
         "sura": 55,
@@ -129,12 +129,12 @@
         "sura": 55,
         "ayah": 40,
         "line": 13,
-        "centerX": 0.05819
+        "centerX": 0.05194
     },
     {
         "sura": 55,
         "ayah": 41,
         "line": 14,
-        "centerX": 0.06097
+        "centerX": 0.05194
     }
 ]

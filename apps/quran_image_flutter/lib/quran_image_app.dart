@@ -5,7 +5,9 @@ import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_bloc
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image_flutter/quran_image_reader.dart';
-import 'package:quran_image_flutter/verse_service.dart';
+
+import 'core/di/dependency_injection.dart';
+import 'domain/repositories/verse_marker_repository.dart';
 
 class QuranImageApp extends StatefulWidget {
   const QuranImageApp({super.key});
@@ -20,8 +22,9 @@ class _QuranImageAppState extends State<QuranImageApp> {
   @override
   void initState() {
     super.initState();
+    final repo = sl<VerseMarkerRepository>();
     // Check if already preloaded (production mode) or needs waiting
-    _isPreloaded = !verseService.isDebugMode || verseService.isPreloaded;
+    _isPreloaded = !repo.isDebugMode || repo.isPreloaded;
   }
 
   @override

@@ -6,20 +6,23 @@ import '../entities/page_state.dart';
 /// following the Repository Pattern from Clean Architecture.
 abstract class PageRepository {
   /// Gets the current page state
-  Future<PageState> getCurrentPage();
+  PageState getCurrentPage();
 
   /// Saves the current page state
-  Future<void> savePageState(PageState state);
+  void savePageState(PageState state);
 
   /// Navigates to a specific page
-  Future<PageState> navigateToPage(int pageNumber);
+  PageState navigateToPage(int pageNumber);
 
   /// Navigates to the next page
-  Future<PageState> nextPage();
+  PageState nextPage();
 
   /// Navigates to the previous page
-  Future<PageState> previousPage();
+  PageState previousPage();
 
   /// Stream of page state changes for reactive UI updates
   Stream<PageState> watchPageState();
+
+  /// Releases resources held by this repository.
+  void dispose();
 }

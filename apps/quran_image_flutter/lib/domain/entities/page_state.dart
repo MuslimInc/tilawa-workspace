@@ -4,6 +4,9 @@ import 'package:equatable/equatable.dart';
 ///
 /// This entity is immutable and uses Equatable for value equality.
 class PageState extends Equatable {
+  /// Total number of pages in the Quran (Mushaf).
+  static const int quranPageCount = 604;
+
   /// Current page number (1-604)
   final int currentPage;
 
@@ -32,7 +35,7 @@ class PageState extends Equatable {
   factory PageState.initial() {
     return const PageState(
       currentPage: 1,
-      totalPages: 604,
+      totalPages: quranPageCount,
       juzTitle: 'Juz 1',
       hizbTitle: 'Hizb 1',
       previewPage: null,
@@ -41,9 +44,14 @@ class PageState extends Equatable {
   }
 
   /// Creates a copy of this state with modified fields
+  /// Creates a copy of this state with modified fields.
+  ///
+  /// Set [clearPreviewPage] to `true` to explicitly reset
+  /// [previewPage] to `null` (the `??` operator cannot do this).
   PageState copyWith({
     int? currentPage,
     int? previewPage,
+    bool clearPreviewPage = false,
     int? totalPages,
     bool? isScrolling,
     String? juzTitle,
@@ -51,7 +59,8 @@ class PageState extends Equatable {
   }) {
     return PageState(
       currentPage: currentPage ?? this.currentPage,
-      previewPage: previewPage ?? this.previewPage,
+      previewPage:
+          clearPreviewPage ? null : (previewPage ?? this.previewPage),
       totalPages: totalPages ?? this.totalPages,
       isScrolling: isScrolling ?? this.isScrolling,
       juzTitle: juzTitle ?? this.juzTitle,

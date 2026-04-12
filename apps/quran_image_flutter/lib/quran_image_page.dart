@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image_flutter/core/di/dependency_injection.dart';
+import 'package:quran_image_flutter/domain/domain.dart';
 import 'package:quran_image_flutter/verse_marker.dart';
-import 'package:quran_image_flutter/verse_service.dart';
 
 /// Renders a full Quran page using the same layout algorithm as the Ayah app.
 ///
@@ -21,7 +22,9 @@ class QuranImagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final markers = verseService.getMarkersForPage(pageNumber);
+    final markers = sl<VerseMarkerRepository>().getMarkersForPage(
+      pageNumber,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(top: 19, bottom: 19),
@@ -91,7 +94,9 @@ class _AyahMarkerWidget extends StatelessWidget {
     final double markerW = pageWidth * 0.05138889;
     final double markerH = pageWidth * 0.06527778;
 
-    final double xOffset = marker.centerX * pageWidth - markerW / 2;
+    final double xOffset =
+        (marker.centerX * pageWidth - markerW / 2)
+            .clamp(0.0, pageWidth - markerW);
 
     // marker.line is the 0-based image-file index (0–14).
     // yCenter = top of that line's slot + half a line height (vertical centre).

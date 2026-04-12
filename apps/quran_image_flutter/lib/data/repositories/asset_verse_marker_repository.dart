@@ -3,62 +3,41 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Data source type for marker coordinates
-enum MarkerDataSource {
-  /// Production: Single JSON file with all pages
-  production,
+import '../../domain/entities/verse_marker_data.dart';
+import '../../domain/repositories/verse_marker_repository.dart';
 
-  /// Debug: Individual JSON files per page for precise debugging
-  debug,
-}
-
-class VerseMarkerData {
-  final int sura;
-  final int ayah;
-
-  /// 0-based index into the 15-slot line grid (matches image file N = line+1).
-  /// Used with the yOffsets formula: yCenter = yOffsets[line] + lineHeight/2.
-  final int line;
-
-  /// Normalized X in [0.0, 1.0] from the left page edge.
-  /// Derived from gap-center (multi-verse lines) or text_left−r (single-verse).
-  final double centerX;
-
-  VerseMarkerData({
-    required this.sura,
-    required this.ayah,
-    required this.line,
-    required this.centerX,
-  });
-}
-
-class VerseService {
+/// Loads verse-marker coordinates from bundled JSON assets.
+///
+/// Supports two modes:
+///   - **Production**: single `verse_marker_coordinates.json` file.
+///   - **Debug**: per-page files under `quran_marker_debug_coordinates/`.
+class AssetVerseMarkerRepository implements VerseMarkerRepository {
   Map<String, List<dynamic>>? _markerData;
   final Map<int, List<VerseMarkerData>> _cache = {};
 
-  /// Current data source mode
   MarkerDataSource _dataSource = MarkerDataSource.production;
 
-  /// Loading progress for debug mode preloading
   double _preloadProgress = 0.0;
   bool _isPreloading = false;
 
-  /// Get current preload progress (0.0 to 1.0)
+  @override
   double get preloadProgress => _preloadProgress;
 
-  /// Check if currently preloading
+  @override
   bool get isPreloading => _isPreloading;
 
-  /// Check if all pages are preloaded
+  @override
   bool get isPreloaded => _preloadProgress >= 1.0;
 
-  /// Flag to enable debug mode (per-page files)
+  @override
   bool get isDebugMode => _dataSource == MarkerDataSource.debug;
 
-  /// Initialize the service with optional data source override
+  /// Initialises the repository.
   ///
-  /// [forceDebugSource] - When true, loads per-page files from debug directory
-  /// [preloadAllPages] - When true (default in debug mode), preloads all 604 pages
+  /// [forceDebugSource] selects per-page debug files instead of the
+  /// single production JSON.
+  /// [preloadAllPages] eagerly loads every page into the cache
+  /// (defaults to `true` in debug mode).
   Future<void> init({
     bool forceDebugSource = false,
     bool? preloadAllPages,
@@ -67,13 +46,14 @@ class VerseService {
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
 
-    // In debug mode, default to preloading all pages unless specified otherwise
     final shouldPreload =
         preloadAllPages ?? (_dataSource == MarkerDataSource.debug);
 
     try {
       if (_dataSource == MarkerDataSource.debug) {
-        debugPrint('VerseService: DEBUG mode - per-page files');
+        debugPrint(
+          'AssetVerseMarkerRepository: DEBUG mode – per-page files',
+        );
         _markerData = {};
 
         if (shouldPreload) {
@@ -85,48 +65,58 @@ class VerseService {
           cache: false,
         );
         final decoded = json.decode(raw) as Map<String, dynamic>;
-        _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
-        debugPrint('VerseService: Loaded ${_markerData!.length} pages');
+        _markerData = decoded.map(
+          (k, v) => MapEntry(k, v as List<dynamic>),
+        );
+        debugPrint(
+          'AssetVerseMarkerRepository: '
+          'Loaded ${_markerData!.length} pages',
+        );
       }
     } catch (e) {
-      debugPrint('VerseService init error: $e');
+      debugPrint('AssetVerseMarkerRepository init error: $e');
     }
   }
 
-  /// Preload all 604 debug page files
-  /// This ensures smooth page jumping and slider navigation
+  /// Preloads all 604 debug page files in parallel.
+  ///
+  /// Progress tracks *completed* loads so the UI shows accurate data.
   Future<void> _preloadAllDebugPages() async {
     _isPreloading = true;
     _preloadProgress = 0.0;
 
-    debugPrint('VerseService: Preloading all 604 debug pages...');
+    debugPrint(
+      'AssetVerseMarkerRepository: Preloading all 604 debug pages...',
+    );
 
     const totalPages = 604;
+    int completedCount = 0;
+
     final futures = <Future<void>>[];
 
-    // Load pages in batches to avoid overwhelming the asset system
     for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
-      futures.add(_loadDebugPageAsync(pageNum));
-
-      // Update progress every 10 pages
-      if (pageNum % 10 == 0) {
-        _preloadProgress = pageNum / totalPages;
-        debugPrint(
-          'VerseService: Preloading progress ${(_preloadProgress * 100).toStringAsFixed(1)}%',
-        );
-      }
+      futures.add(
+        _loadDebugPageAsync(pageNum).then((_) {
+          completedCount++;
+          _preloadProgress = completedCount / totalPages;
+        }),
+      );
     }
 
-    // Wait for all pages to load
     await Future.wait(futures);
 
     _preloadProgress = 1.0;
     _isPreloading = false;
 
-    debugPrint('VerseService: ✓ Preloaded all $totalPages debug pages');
-    debugPrint('VerseService: Cached ${_cache.length} pages');
+    debugPrint(
+      'AssetVerseMarkerRepository: ✓ Preloaded all $totalPages pages',
+    );
+    debugPrint(
+      'AssetVerseMarkerRepository: Cached ${_cache.length} pages',
+    );
   }
 
+  /// Switches between production and debug data sources.
   Future<void> setDataSource(
     MarkerDataSource source, {
     bool preloadAllPages = true,
@@ -142,7 +132,9 @@ class VerseService {
         cache: false,
       );
       final decoded = json.decode(raw) as Map<String, dynamic>;
-      _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
+      _markerData = decoded.map(
+        (k, v) => MapEntry(k, v as List<dynamic>),
+      );
     } else {
       _markerData = {};
       if (preloadAllPages) {
@@ -151,10 +143,15 @@ class VerseService {
     }
   }
 
+  @override
   List<VerseMarkerData> getMarkersForPage(int pageNumber) {
     if (_cache.containsKey(pageNumber)) return _cache[pageNumber]!;
     final result = _buildMarkersForPage(pageNumber);
-    _cache[pageNumber] = result;
+    // Only cache non-empty results; an empty list from a pending
+    // debug-mode async load should not prevent future lookups.
+    if (result.isNotEmpty) {
+      _cache[pageNumber] = result;
+    }
     return result;
   }
 
@@ -165,7 +162,9 @@ class VerseService {
     return _buildMarkersFromProductionSource(pageNumber);
   }
 
-  List<VerseMarkerData> _buildMarkersFromProductionSource(int pageNumber) {
+  List<VerseMarkerData> _buildMarkersFromProductionSource(
+    int pageNumber,
+  ) {
     final entries = _markerData?[pageNumber.toString()];
     if (entries == null) return [];
 
@@ -180,7 +179,9 @@ class VerseService {
     }).toList();
   }
 
-  List<VerseMarkerData> _buildMarkersFromDebugSource(int pageNumber) {
+  List<VerseMarkerData> _buildMarkersFromDebugSource(
+    int pageNumber,
+  ) {
     final cached = _markerData?[pageNumber.toString()];
     if (cached != null) {
       return cached.map((entry) {
@@ -222,14 +223,16 @@ class VerseService {
     }
   }
 
-  Future<List<VerseMarkerData>> getMarkersForPageAsync(int pageNumber) async {
+  @override
+  Future<List<VerseMarkerData>> getMarkersForPageAsync(
+    int pageNumber,
+  ) async {
     if (_dataSource == MarkerDataSource.debug) {
       await _loadDebugPageAsync(pageNumber);
     }
     return getMarkersForPage(pageNumber);
   }
 
-  void close() {}
+  @override
+  void dispose() {}
 }
-
-final verseService = VerseService();

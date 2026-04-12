@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image_flutter/domain/entities/page_state.dart';
 import 'package:quran_image_flutter/presentation/presentation.dart';
 import 'package:quran_image_flutter/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image_flutter/quran_image_page.dart';
@@ -19,9 +20,11 @@ class _QuranImageReaderState extends State<QuranImageReader> {
   @override
   void initState() {
     super.initState();
-    // Re-read current state to initialize PageController
-    final state = context.read<NavigationBloc>().state as NavigationLoaded;
-    _pageController = PageController(initialPage: state.pageState.pageIndex);
+    final currentState = context.read<NavigationBloc>().state;
+    final initialIndex = currentState is NavigationLoaded
+        ? currentState.pageState.pageIndex
+        : 0;
+    _pageController = PageController(initialPage: initialIndex);
   }
 
   @override
@@ -74,7 +77,7 @@ class _QuranImageReaderState extends State<QuranImageReader> {
                   context.read<NavigationBloc>().add(const NavigationShown()),
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: 604,
+                itemCount: PageState.quranPageCount,
                 allowImplicitScrolling: false,
                 physics: const PageScrollPhysics(),
                 onPageChanged: (index) {
@@ -137,11 +140,13 @@ class _QuranImageReaderState extends State<QuranImageReader> {
 }
 
 class _TactileNoiseBackground extends StatelessWidget {
+  static final _painter = _NoisePainter();
+
   const _TactileNoiseBackground();
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _NoisePainter());
+    return CustomPaint(painter: _painter);
   }
 }
 

@@ -25,6 +25,16 @@ class NavigationSliderOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBloc, NavigationState>(
+      buildWhen: (previous, current) {
+        if (previous is NavigationLoaded && current is NavigationLoaded) {
+          return previous.visibility != current.visibility ||
+              previous.pageState.displayPage !=
+                  current.pageState.displayPage ||
+              previous.pageState.currentPage !=
+                  current.pageState.currentPage;
+        }
+        return previous != current;
+      },
       builder: (context, state) {
         if (state is! NavigationLoaded) {
           return const SizedBox.shrink();

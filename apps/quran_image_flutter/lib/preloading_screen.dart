@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'verse_service.dart';
 
-/// Loading screen shown while preloading debug marker files
-/// This ensures users wait until all 604 pages are ready
+import 'core/di/dependency_injection.dart';
+import 'domain/entities/page_state.dart';
+import 'domain/repositories/verse_marker_repository.dart';
+
+/// Loading screen shown while preloading debug marker files.
+///
+/// This ensures users wait until all pages are ready before reading.
 class PreloadingScreen extends StatefulWidget {
   final VoidCallback onPreloadComplete;
 
@@ -20,10 +24,12 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
   }
 
   Future<void> _waitForPreload() async {
+    final repo = sl<VerseMarkerRepository>();
+
     // Wait for preloading to complete
-    if (verseService.isDebugMode && verseService.isPreloading) {
+    if (repo.isDebugMode && repo.isPreloading) {
       // Poll until preloading is complete
-      while (verseService.isPreloading) {
+      while (repo.isPreloading) {
         await Future.delayed(const Duration(milliseconds: 100));
         if (mounted) {
           setState(() {});
@@ -37,7 +43,8 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = verseService.preloadProgress;
+    final repo = sl<VerseMarkerRepository>();
+    final progress = repo.preloadProgress;
     final percentage = (progress * 100).toStringAsFixed(0);
 
     return Scaffold(
@@ -55,7 +62,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            if (verseService.isDebugMode) ...[
+            if (repo.isDebugMode) ...[
               const Text(
                 'Loading marker coordinates...',
                 style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
@@ -91,12 +98,18 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Page ${(progress * 604).toStringAsFixed(0)} of 604',
-                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
+                'Page '
+                '${(progress * PageState.quranPageCount).toStringAsFixed(0)}'
+                ' of ${PageState.quranPageCount}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF999999),
+                ),
               ),
             ] else ...[
               const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
               ),
             ],
           ],

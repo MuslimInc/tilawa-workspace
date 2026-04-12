@@ -1,7 +1,9 @@
 export 'entities/navigation_visibility.dart';
 export 'entities/page_state.dart';
+export 'entities/verse_marker_data.dart';
 export 'repositories/last_visited_page_repository.dart';
 export 'repositories/navigation_visibility_repository.dart';
 export 'repositories/page_repository.dart';
+export 'repositories/verse_marker_repository.dart';
 export 'usecases/get_last_visited_page.dart';
 export 'usecases/save_last_visited_page.dart';

@@ -47,9 +47,17 @@ OUT_FILE   = Path("assets/data/verse_marker_coordinates.json")
 
 LINE_IMG_W  = 1440
 LINE_COUNT  = 15
-MIN_GAP_PCT     = 0.03   # min gap width to count as inter-verse separator (not intra-word)
-LEFT_COL_OFFSET = 0.030  # Ayah app places last-verse ornament this far LEFT of text_left
-                         # (text_left = left edge of ۝ glyph on every line type)
+MIN_GAP_PCT         = 0.03   # min gap width to count as inter-verse separator (not intra-word)
+LEFT_COL_OFFSET     = 0.030  # Ayah app places last-verse ornament this far LEFT of text_left
+                             # (text_left = left edge of ۝ glyph on every line type)
+ALPHA_THRESHOLD     = 12     # threshold for detecting text pixels
+MIN_VERSE_TEXT_SPAN = 0.35   # min text span for a verse line
+BISMILLAH_MIN_SPAN  = 0.35   # min span for Bismillah
+BISMILLAH_MAX_SPAN  = 0.60   # max span for Bismillah
+BISMILLAH_CENTRE_MIN = 0.40  # min centre for Bismillah
+BISMILLAH_CENTRE_MAX = 0.60  # max centre for Bismillah
+FULL_LINE_THRESHOLD = 0.75   # min text span to count as a full-width justified line
+FULL_LINE_CENTER_X  = 0.05194 # fixed centerX for markers at the end of a full line
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def analyse_line_image(page: int, line_1based: int):
@@ -66,7 +74,7 @@ def analyse_line_image(page: int, line_1based: int):
 
     alpha     = img[:, :, 3]
     col_alpha = alpha.max(axis=0)            # shape (W,)
-    has_text  = (col_alpha > 12).astype(np.uint8)
+    has_text  = (col_alpha > ALPHA_THRESHOLD).astype(np.uint8)
 
     text_cols = np.where(has_text)[0]
     if len(text_cols) == 0:
@@ -96,7 +104,7 @@ def analyse_line_image(page: int, line_1based: int):
     return gap_centers, round(text_left, 5), round(text_right, 5)
 
 
-def is_text_line(tl, tr, min_span: float = 0.35) -> bool:
+def is_text_line(tl, tr, min_span: float = MIN_VERSE_TEXT_SPAN) -> bool:
     """
     Returns True if the text span is wide enough to be a verse text line.
     Surah headers are centered/narrow (span < 35%).
@@ -116,7 +124,7 @@ def _is_bismillah_line(tl: float, tr: float) -> bool:
         return False
     span = tr - tl
     centre = (tl + tr) / 2
-    return 0.35 <= span <= 0.60 and 0.40 <= centre <= 0.60
+    return BISMILLAH_MIN_SPAN <= span <= BISMILLAH_MAX_SPAN and BISMILLAH_CENTRE_MIN <= centre <= BISMILLAH_CENTRE_MAX
 
 
 def compute_page_img_offset(page: int, pi_lines: dict) -> int:
@@ -151,7 +159,7 @@ def compute_page_img_offset(page: int, pi_lines: dict) -> int:
         if img_no > LINE_COUNT:
             break
         gaps, tl, tr = analyse_line_image(page, img_no)
-        if is_text_line(tl, tr, min_span=0.35):
+        if is_text_line(tl, tr, min_span=MIN_VERSE_TEXT_SPAN):
             if skip_bismillah and _is_bismillah_line(tl, tr):
                 skip_bismillah = False  # only skip once
                 continue
@@ -235,10 +243,10 @@ for page in pages:
                 center_x = gaps[len(gaps) - 1 - rank]
             elif text_left is not None:
                 # Last (or only) verse on this line — no gap to a following verse.
-                # text_left = left edge of the ۝ glyph on every line type
-                # (full-width justified or partial/centred).  The Ayah app places
-                # the ornament LEFT_COL_OFFSET to the left of that edge.
-                center_x = round(max(text_left - LEFT_COL_OFFSET, 0.0), 5)
+                if (text_right - text_left) >= FULL_LINE_THRESHOLD:
+                    center_x = FULL_LINE_CENTER_X
+                else:
+                    center_x = round(max(text_left - LEFT_COL_OFFSET, 0.0), 5)
             else:
                 # Fallback: equal-spacing approximation (flipped)
                 center_x = round(max(1.0 - (lp + 1.5) / total, 0.02), 5)

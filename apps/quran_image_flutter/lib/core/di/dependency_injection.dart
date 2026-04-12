@@ -4,26 +4,44 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/data.dart';
 import '../../domain/domain.dart';
 
-/// Global service locator instance
+/// Global service locator instance.
 final GetIt sl = GetIt.instance;
 
-/// Initializes the dependency injection container.
+/// Initialises the dependency injection container.
 ///
 /// Registers all repositories and use cases as lazy singletons.
 /// Must be called before running the app.
 Future<void> initDependencies() async {
   // Persistence
-  sl.registerLazySingleton<SharedPreferencesAsync>(() => SharedPreferencesAsync());
+  sl.registerLazySingleton<SharedPreferencesAsync>(
+    SharedPreferencesAsync.new,
+  );
 
   // Repositories
-  sl.registerLazySingleton<PageRepository>(() => InMemoryPageRepository());
+  sl.registerLazySingleton<PageRepository>(
+    InMemoryPageRepository.new,
+    dispose: (repo) => (repo as InMemoryPageRepository).dispose(),
+  );
 
   sl.registerLazySingleton<NavigationVisibilityRepository>(
-    () => InMemoryNavigationVisibilityRepository(),
+    InMemoryNavigationVisibilityRepository.new,
+    dispose: (repo) =>
+        (repo as InMemoryNavigationVisibilityRepository).dispose(),
   );
 
   sl.registerLazySingleton<LastVisitedPageRepository>(
-    () => SharedPreferencesLastVisitedPageRepository(sl<SharedPreferencesAsync>()),
+    () => SharedPreferencesLastVisitedPageRepository(
+      sl<SharedPreferencesAsync>(),
+    ),
+  );
+
+  // Verse Marker Repository
+  sl.registerLazySingleton<AssetVerseMarkerRepository>(
+    AssetVerseMarkerRepository.new,
+    dispose: (repo) => repo.dispose(),
+  );
+  sl.registerLazySingleton<VerseMarkerRepository>(
+    () => sl<AssetVerseMarkerRepository>(),
   );
 
   // Use Cases
