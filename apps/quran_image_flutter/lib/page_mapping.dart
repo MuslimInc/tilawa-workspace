@@ -8,18 +8,17 @@ import 'domain/entities/page_state.dart';
 class QuranPageMapping {
   QuranPageMapping._();
 
-  static final List<PageInfo> pages = List.generate(
-    PageState.quranPageCount,
-    (index) {
-      final pageNum = index + 1;
-      return PageInfo(
-        pageNumber: pageNum,
-        juzNumber: _getJuzForPage(pageNum),
-        hizbNumber: _getHizbForPage(pageNum),
-        surahNumber: _getSurahForPage(pageNum),
-      );
-    },
-  );
+  static final List<PageInfo> pages = List.generate(PageState.quranPageCount, (
+    index,
+  ) {
+    final pageNum = index + 1;
+    return PageInfo(
+      pageNumber: pageNum,
+      juzNumber: _getJuzForPage(pageNum),
+      hizbNumber: _getHizbForPage(pageNum),
+      surahNumber: _getSurahForPage(pageNum),
+    );
+  });
 
   /// Returns the primary surah number for the given page.
   ///
@@ -120,9 +119,36 @@ class QuranPageMapping {
 
   /// Juz starting pages for the standard Uthmani mushaf.
   static const List<int> _juzStartPages = [
-    1, 22, 42, 62, 82, 102, 121, 142, 162, 182,
-    201, 222, 242, 262, 282, 302, 322, 342, 362, 382,
-    402, 422, 442, 462, 482, 502, 522, 542, 562, 582,
+    1,
+    22,
+    42,
+    62,
+    82,
+    102,
+    121,
+    142,
+    162,
+    182,
+    201,
+    222,
+    242,
+    262,
+    282,
+    302,
+    322,
+    342,
+    362,
+    382,
+    402,
+    422,
+    442,
+    462,
+    482,
+    502,
+    522,
+    542,
+    562,
+    582,
   ];
 
   /// Returns the juz number (1-30) for the given page.
@@ -135,12 +161,66 @@ class QuranPageMapping {
 
   /// Hizb starting pages for the standard Uthmani mushaf.
   static const List<int> _hizbStartPages = [
-    1, 12, 22, 32, 42, 52, 62, 72, 82, 92,
-    102, 112, 121, 132, 142, 152, 162, 173, 182, 192,
-    201, 212, 222, 232, 242, 252, 262, 272, 282, 292,
-    302, 312, 322, 332, 342, 352, 362, 372, 382, 392,
-    402, 413, 422, 432, 442, 452, 462, 472, 482, 492,
-    502, 513, 522, 532, 542, 553, 562, 572, 582, 591,
+    1,
+    12,
+    22,
+    32,
+    42,
+    52,
+    62,
+    72,
+    82,
+    92,
+    102,
+    112,
+    121,
+    132,
+    142,
+    152,
+    162,
+    173,
+    182,
+    192,
+    201,
+    212,
+    222,
+    232,
+    242,
+    252,
+    262,
+    272,
+    282,
+    292,
+    302,
+    312,
+    322,
+    332,
+    342,
+    352,
+    362,
+    372,
+    382,
+    392,
+    402,
+    413,
+    422,
+    432,
+    442,
+    452,
+    462,
+    472,
+    482,
+    492,
+    502,
+    513,
+    522,
+    532,
+    542,
+    553,
+    562,
+    572,
+    582,
+    591,
   ];
 
   /// Returns the hizb number (1-60) for the given page.

@@ -43,8 +43,7 @@ class NavigationVisibility extends Equatable {
     return NavigationVisibility(
       isVisible: isVisible ?? this.isVisible,
       isInteracting: isInteracting ?? this.isInteracting,
-      lastShownAt:
-          clearLastShownAt ? null : (lastShownAt ?? this.lastShownAt),
+      lastShownAt: clearLastShownAt ? null : (lastShownAt ?? this.lastShownAt),
     );
   }
 

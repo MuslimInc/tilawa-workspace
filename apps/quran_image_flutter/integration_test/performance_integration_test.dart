@@ -15,7 +15,7 @@ void main() {
     // Reset DI to ensure clean state for performance measurement
     await sl.reset();
     await initDependencies();
-    
+
     // Ensure repository is initialized with debug mode for test predictability
     await sl<AssetVerseMarkerRepository>().init(
       forceDebugSource: true,
@@ -52,6 +52,8 @@ void main() {
       }
     }, reportKey: 'random_jumps');
 
-    debugPrint('Performance test complete. Check results in the timeline summary.');
+    debugPrint(
+      'Performance test complete. Check results in the timeline summary.',
+    );
   });
 }

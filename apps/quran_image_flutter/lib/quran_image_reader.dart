@@ -93,17 +93,17 @@ class _QuranImageReaderState extends State<QuranImageReader> {
                     onVerticalDragStart: isLandscape
                         ? null
                         : (_) => context.read<NavigationBloc>().add(
-                              const NavigationShown(),
-                            ),
+                            const NavigationShown(),
+                          ),
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: PageState.quranPageCount,
                       allowImplicitScrolling: false,
                       physics: const PageScrollPhysics(),
                       onPageChanged: (index) {
-                        context
-                            .read<NavigationBloc>()
-                            .add(PageChanged(index + 1));
+                        context.read<NavigationBloc>().add(
+                          PageChanged(index + 1),
+                        );
                       },
                       itemBuilder: (_, index) {
                         return QuranImagePage(pageNumber: index + 1);

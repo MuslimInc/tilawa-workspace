@@ -66,10 +66,7 @@ class PremiumBottomBar extends StatelessWidget {
               ),
               Text(
                 state.hizbTitle,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFFC5A358),
-                ),
+                style: const TextStyle(fontSize: 10, color: Color(0xFFC5A358)),
               ),
             ],
           ),

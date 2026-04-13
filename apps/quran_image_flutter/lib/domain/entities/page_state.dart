@@ -59,8 +59,7 @@ class PageState extends Equatable {
   }) {
     return PageState(
       currentPage: currentPage ?? this.currentPage,
-      previewPage:
-          clearPreviewPage ? null : (previewPage ?? this.previewPage),
+      previewPage: clearPreviewPage ? null : (previewPage ?? this.previewPage),
       totalPages: totalPages ?? this.totalPages,
       isScrolling: isScrolling ?? this.isScrolling,
       juzTitle: juzTitle ?? this.juzTitle,
