@@ -41,7 +41,12 @@ class _QuranImageReaderState extends State<QuranImageReader> {
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       body: Padding(
-        padding: EdgeInsets.only(top: padding.top, bottom: padding.bottom),
+        padding: EdgeInsets.only(
+          top: padding.top,
+          bottom: padding.bottom,
+          left: padding.left,
+          right: padding.right,
+        ),
         child: Stack(
           children: [
             // Background Noise Texture
@@ -76,24 +81,36 @@ class _QuranImageReaderState extends State<QuranImageReader> {
                   }
                 }
               },
-              child: GestureDetector(
-                onTap: () => context.read<NavigationBloc>().add(
-                  const NavigationToggled(),
-                ),
-                onVerticalDragStart: (_) =>
-                    context.read<NavigationBloc>().add(const NavigationShown()),
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: PageState.quranPageCount,
-                  allowImplicitScrolling: false,
-                  physics: const PageScrollPhysics(),
-                  onPageChanged: (index) {
-                    context.read<NavigationBloc>().add(PageChanged(index + 1));
-                  },
-                  itemBuilder: (_, index) {
-                    return QuranImagePage(pageNumber: index + 1);
-                  },
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool isLandscape =
+                      constraints.maxWidth > constraints.maxHeight;
+                  return GestureDetector(
+                    onTap: () => context.read<NavigationBloc>().add(
+                      const NavigationToggled(),
+                    ),
+                    // In landscape, vertical drags scroll page content.
+                    onVerticalDragStart: isLandscape
+                        ? null
+                        : (_) => context.read<NavigationBloc>().add(
+                              const NavigationShown(),
+                            ),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: PageState.quranPageCount,
+                      allowImplicitScrolling: false,
+                      physics: const PageScrollPhysics(),
+                      onPageChanged: (index) {
+                        context
+                            .read<NavigationBloc>()
+                            .add(PageChanged(index + 1));
+                      },
+                      itemBuilder: (_, index) {
+                        return QuranImagePage(pageNumber: index + 1);
+                      },
+                    ),
+                  );
+                },
               ),
             ),
 

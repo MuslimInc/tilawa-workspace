@@ -9,8 +9,14 @@ class PremiumBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      margin: EdgeInsets.fromLTRB(
+        size.width * 0.04,
+        0,
+        size.width * 0.04,
+        size.height * 0.015,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF9F2),

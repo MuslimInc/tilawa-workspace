@@ -132,6 +132,11 @@ class QuranImagePage extends StatelessWidget {
       builder: (context, constraints) {
         final double pageWidth = constraints.maxWidth;
         final double pageHeight = constraints.maxHeight;
+        final bool isLandscape = pageWidth > pageHeight;
+
+        // Always use the Ayah app formula: lineHeight derives from width.
+        // In landscape the total content height exceeds the viewport,
+        // so we wrap in a scroll view.
         final double lineHeight = pageWidth * 174 / 1080;
 
         // Calculate the optimal physical width to force the C++ native decoder
@@ -139,56 +144,71 @@ class QuranImagePage extends StatelessWidget {
         final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
         final int cacheWidth = (pageWidth * devicePixelRatio).round();
 
+        // In landscape, content overflows — use total content height for layout.
+        final double layoutHeight = isLandscape
+            ? lineHeight *
+                  _lineCount // no gaps, lines fill tightly
+            : pageHeight;
+
         const double lastLineIndex = _lineCount - 1;
         final List<double> yOffsets = List.generate(_lineCount, (i) {
-          return ((pageHeight - lineHeight) / lastLineIndex * i);
+          return ((layoutHeight - lineHeight) / lastLineIndex * i);
         });
 
         final headerIndices = _surahHeaderMapping[pageNumber] ?? [];
 
-        return Stack(
-          children: [
-            // Surah header banner behind the surah name lines.
-            // Some pages have multiple Surahs (e.g. page 604 has 3).
-            for (final headerIndex in headerIndices)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: yOffsets[headerIndex],
-                height: lineHeight,
-                child: _SurahHeaderBanner(
-                  pageNumber: pageNumber,
-                  lineIndex: headerIndex,
-                  lineHeight: lineHeight,
+        final content = SizedBox(
+          width: pageWidth,
+          height: layoutHeight,
+          child: Stack(
+            children: [
+              // Surah header banner behind the surah name lines.
+              for (final headerIndex in headerIndices)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: yOffsets[headerIndex],
+                  height: lineHeight,
+                  child: _SurahHeaderBanner(
+                    pageNumber: pageNumber,
+                    lineIndex: headerIndex,
+                    lineHeight: lineHeight,
+                    pageWidth: pageWidth,
+                    pageHeight: pageHeight,
+                  ),
+                ),
+
+              for (var i = 0; i < _lineCount; i++)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: yOffsets[i],
+                  child: Image.asset(
+                    'assets/quran_images/$pageNumber/${i + 1}.png',
+                    fit: BoxFit.fill,
+                    gaplessPlayback: true,
+                    cacheWidth: cacheWidth,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+
+              for (final marker in markers)
+                _AyahMarkerWidget(
+                  marker: marker,
                   pageWidth: pageWidth,
-                  pageHeight: pageHeight,
+                  pageHeight: layoutHeight,
+                  lineHeight: lineHeight,
+                  yOffsets: yOffsets,
                 ),
-              ),
-
-            for (var i = 0; i < _lineCount; i++)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: yOffsets[i],
-                child: Image.asset(
-                  'assets/quran_images/$pageNumber/${i + 1}.png',
-                  fit: BoxFit.fill,
-                  gaplessPlayback: true,
-                  cacheWidth: cacheWidth,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-              ),
-
-            for (final marker in markers)
-              _AyahMarkerWidget(
-                marker: marker,
-                pageWidth: pageWidth,
-                pageHeight: pageHeight,
-                lineHeight: lineHeight,
-                yOffsets: yOffsets,
-              ),
-          ],
+            ],
+          ),
         );
+
+        // In landscape, content is taller than the viewport — scroll vertically.
+        if (isLandscape) {
+          return SingleChildScrollView(child: content);
+        }
+        return content;
       },
     );
   }
@@ -331,6 +351,8 @@ class _SurahHeaderBanner extends StatelessWidget {
     final double longSide = math.max(pageWidth, pageHeight);
     final double aspectRatio = longSide > 0 ? shortSide / longSide : 0;
 
+    // Line images always fill pageWidth in both orientations,
+    // so the banner always uses the portrait regression model.
     final double widthRatio =
         (_portraitWidthRatioBase +
                 (_portraitWidthRatioAspectSlope * aspectRatio) +

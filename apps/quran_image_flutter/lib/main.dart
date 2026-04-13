@@ -10,6 +10,8 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
   ]);
   // Full-screen immersive mode (hides status bar and navigation bar)
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);

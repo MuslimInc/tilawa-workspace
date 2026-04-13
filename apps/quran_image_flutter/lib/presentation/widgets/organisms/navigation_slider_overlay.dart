@@ -40,7 +40,11 @@ class NavigationSliderOverlay extends StatelessWidget {
 
         final pageState = state.pageState;
 
-        final sliderHeight = screenHeight * AppDimensions.sliderHeightRatio;
+        final bool isLandscape = screenWidth > screenHeight;
+        final double effectiveHeight = isLandscape
+            ? screenWidth  // use longer side for sizing in landscape
+            : screenHeight;
+        final sliderHeight = effectiveHeight * AppDimensions.sliderHeightRatio;
         final horizontalPadding =
             screenWidth * AppDimensions.sliderHorizontalPaddingRatio;
         final bottomMargin =
