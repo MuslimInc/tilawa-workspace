@@ -13,9 +13,7 @@ final GetIt sl = GetIt.instance;
 /// Must be called before running the app.
 Future<void> initDependencies() async {
   // Persistence
-  sl.registerLazySingleton<SharedPreferencesAsync>(
-    SharedPreferencesAsync.new,
-  );
+  sl.registerLazySingleton<SharedPreferencesAsync>(SharedPreferencesAsync.new);
 
   // Repositories
   sl.registerLazySingleton<PageRepository>(
@@ -49,9 +47,18 @@ Future<void> initDependencies() async {
     StaticSurahHeaderRepository.new,
   );
 
+  // Quran Image Cache Repository
+  sl.registerLazySingleton<QuranImageCacheRepository>(
+    CloudflareQuranImageCacheRepository.new,
+  );
+
   // Use Cases
   sl.registerLazySingleton<GetLastVisitedPageUseCase>(
     () => GetLastVisitedPageUseCase(sl<LastVisitedPageRepository>()),
+  );
+
+  sl.registerLazySingleton<PrepareQuranImageCacheUseCase>(
+    () => PrepareQuranImageCacheUseCase(sl<QuranImageCacheRepository>()),
   );
 
   sl.registerLazySingleton<SaveLastVisitedPageUseCase>(

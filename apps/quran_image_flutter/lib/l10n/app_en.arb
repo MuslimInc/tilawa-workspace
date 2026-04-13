@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "networkError": "No internet connection. Please check your network and try again.",
+  "unexpectedError": "An unexpected error occurred. Please try again.",
+  "retry": "Retry",
+  "quranImage": "Quran Image",
+  "loadingMarkerCoordinates": "Loading marker coordinates...",
+  "pageIndicator": "Page {current} of {total}",
+  "@pageIndicator": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
+}

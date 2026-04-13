@@ -9,9 +9,6 @@
 class SurahHeaderConstants {
   SurahHeaderConstants._();
 
-  /// Asset path for the decorative Surah header banner.
-  static const String assetPath = 'assets/images/sura_header_banner.png';
-
   /// Number of line slots used by each Quran page image layout.
   static const int lineCount = 15;
 
@@ -24,7 +21,7 @@ class SurahHeaderConstants {
   /// Reference line image width used by the Ayah page layout formula.
   static const double lineHeightReferenceWidth = 1080;
 
-  /// Aspect ratio constraint inherently mapping to the `sura_header_banner.png` asset.
+  /// Aspect ratio constraint inherently mapping to the Surah header asset.
   static const double bannerHeightToWidthRatio = 0.11228293967474158;
 
   /// The static multiplier for portrait layouts at base resolutions.

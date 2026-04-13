@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:quran_image_flutter/core/constants/quran_image_asset_constants.dart';
 import 'package:quran_image_flutter/core/constants/surah_header_constants.dart';
 import 'package:quran_image_flutter/core/di/dependency_injection.dart';
 import 'package:quran_image_flutter/domain/domain.dart';
@@ -28,6 +31,7 @@ class QuranImagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final markers = sl<VerseMarkerRepository>().getMarkersForPage(pageNumber);
     final headers = sl<SurahHeaderRepository>().getHeadersForPage(pageNumber);
+    final imageCacheRepository = sl<QuranImageCacheRepository>();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -79,6 +83,7 @@ class QuranImagePage extends StatelessWidget {
                     pageWidth: pageWidth,
                     pageHeight: pageHeight,
                     layoutPolicy: surahHeaderLayoutPolicy,
+                    imageCacheRepository: imageCacheRepository,
                   ),
                 ),
 
@@ -87,12 +92,12 @@ class QuranImagePage extends StatelessWidget {
                   left: 0,
                   right: 0,
                   top: yOffsets[i],
-                  child: Image.asset(
-                    'assets/quran_images/$pageNumber/${i + 1}.png',
-                    fit: BoxFit.fill,
-                    gaplessPlayback: true,
+                  child: _QuranLineImage(
+                    imagePath: imageCacheRepository.lineImageFilePath(
+                      pageNumber: pageNumber,
+                      oneBasedLineNumber: i + 1,
+                    ),
                     cacheWidth: cacheWidth,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
                 ),
 
@@ -130,6 +135,7 @@ class _SurahHeaderBanner extends StatelessWidget {
     required this.pageWidth,
     required this.pageHeight,
     required this.layoutPolicy,
+    required this.imageCacheRepository,
   });
 
   final SurahHeaderData header;
@@ -137,6 +143,7 @@ class _SurahHeaderBanner extends StatelessWidget {
   final double pageWidth;
   final double pageHeight;
   final SurahHeaderBannerLayoutPolicy layoutPolicy;
+  final QuranImageCacheRepository imageCacheRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -157,14 +164,72 @@ class _SurahHeaderBanner extends StatelessWidget {
           child: SizedBox(
             height: metrics.bannerHeight,
             width: metrics.bannerWidth,
-            child: Image.asset(
-              SurahHeaderConstants.assetPath,
+            child: _CachedOrRemoteImage(
+              localPath: imageCacheRepository.surahHeaderBannerFilePath(),
+              remoteUrl: QuranImageAssetConstants.remoteSurahHeaderBannerUrl,
               gaplessPlayback: true,
               fit: BoxFit.fill,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _QuranLineImage extends StatelessWidget {
+  const _QuranLineImage({required this.imagePath, required this.cacheWidth});
+
+  final String? imagePath;
+  final int cacheWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = imagePath;
+    if (path == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Image.file(
+      File(path),
+      fit: BoxFit.fill,
+      gaplessPlayback: true,
+      cacheWidth: cacheWidth,
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _CachedOrRemoteImage extends StatelessWidget {
+  const _CachedOrRemoteImage({
+    required this.localPath,
+    required this.remoteUrl,
+    required this.fit,
+    required this.gaplessPlayback,
+  });
+
+  final String? localPath;
+  final String remoteUrl;
+  final BoxFit fit;
+  final bool gaplessPlayback;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = localPath;
+    if (path != null) {
+      return Image.file(
+        File(path),
+        fit: fit,
+        gaplessPlayback: gaplessPlayback,
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      );
+    }
+
+    return Image.network(
+      remoteUrl,
+      fit: fit,
+      gaplessPlayback: gaplessPlayback,
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
     );
   }
 }

@@ -60,7 +60,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       } else {
         final raw = await rootBundle.loadString(
           'assets/data/verse_marker_coordinates.json',
-          cache: false,
+          // cache: false,
         );
         final decoded = json.decode(raw) as Map<String, dynamic>;
         _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
@@ -127,7 +127,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     if (source == MarkerDataSource.production) {
       final raw = await rootBundle.loadString(
         'assets/data/verse_marker_coordinates.json',
-        cache: false,
+        // cache: false,
       );
       final decoded = json.decode(raw) as Map<String, dynamic>;
       _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
@@ -198,7 +198,11 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     try {
       final path =
           'assets/data/quran_marker_debug_coordinates/$pageNumber.json';
-      final raw = await rootBundle.loadString(path, cache: false);
+      final raw = await rootBundle.loadString(
+        path,
+
+        // cache: false
+      );
       final decoded = await compute(jsonDecode, raw) as List<dynamic>;
       _markerData ??= {};
       _markerData![pageNumber.toString()] = decoded;

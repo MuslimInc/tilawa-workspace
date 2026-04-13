@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image_flutter/core/design_tokens/colors.dart';
+import 'package:quran_image_flutter/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image_flutter/preloading_screen.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_event.dart';
@@ -24,8 +25,11 @@ class _QuranImageAppState extends State<QuranImageApp> {
   void initState() {
     super.initState();
     final repo = sl<VerseMarkerRepository>();
+    final imageCacheRepository = sl<QuranImageCacheRepository>();
     // Check if already preloaded (production mode) or needs waiting
-    _isPreloaded = !repo.isDebugMode || repo.isPreloaded;
+    _isPreloaded =
+        (!repo.isDebugMode || repo.isPreloaded) &&
+        imageCacheRepository.status.isReady;
   }
 
   @override
