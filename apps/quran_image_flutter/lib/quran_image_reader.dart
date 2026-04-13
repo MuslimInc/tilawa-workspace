@@ -37,10 +37,11 @@ class _QuranImageReaderState extends State<QuranImageReader> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 86.33333333),
+        padding: EdgeInsets.only(top: padding.top, bottom: padding.bottom),
         child: Stack(
           children: [
             // Background Noise Texture
