@@ -51,9 +51,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
     try {
       if (_dataSource == MarkerDataSource.debug) {
-        debugPrint(
-          'AssetVerseMarkerRepository: DEBUG mode – per-page files',
-        );
+        debugPrint('AssetVerseMarkerRepository: DEBUG mode – per-page files');
         _markerData = {};
 
         if (shouldPreload) {
@@ -65,9 +63,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
           cache: false,
         );
         final decoded = json.decode(raw) as Map<String, dynamic>;
-        _markerData = decoded.map(
-          (k, v) => MapEntry(k, v as List<dynamic>),
-        );
+        _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
         debugPrint(
           'AssetVerseMarkerRepository: '
           'Loaded ${_markerData!.length} pages',
@@ -75,6 +71,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       }
     } catch (e) {
       debugPrint('AssetVerseMarkerRepository init error: $e');
+      rethrow;
     }
   }
 
@@ -85,13 +82,11 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     _isPreloading = true;
     _preloadProgress = 0.0;
 
-    debugPrint(
-      'AssetVerseMarkerRepository: Preloading all 604 debug pages...',
-    );
+    debugPrint('AssetVerseMarkerRepository: Preloading all 604 debug pages...');
 
     const totalPages = 604;
     const batchSize = 25; // Process in small batches to avoid isolate overhead
-    
+
     int completedCount = 0;
 
     for (int i = 1; i <= totalPages; i += batchSize) {
@@ -115,12 +110,8 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     _preloadProgress = 1.0;
     _isPreloading = false;
 
-    debugPrint(
-      'AssetVerseMarkerRepository: ✓ Preloaded all $totalPages pages',
-    );
-    debugPrint(
-      'AssetVerseMarkerRepository: Cached ${_cache.length} pages',
-    );
+    debugPrint('AssetVerseMarkerRepository: ✓ Preloaded all $totalPages pages');
+    debugPrint('AssetVerseMarkerRepository: Cached ${_cache.length} pages');
   }
 
   /// Switches between production and debug data sources.
@@ -139,9 +130,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
         cache: false,
       );
       final decoded = json.decode(raw) as Map<String, dynamic>;
-      _markerData = decoded.map(
-        (k, v) => MapEntry(k, v as List<dynamic>),
-      );
+      _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
     } else {
       _markerData = {};
       if (preloadAllPages) {
@@ -152,19 +141,11 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
   @override
   List<VerseMarkerData> getMarkersForPage(int pageNumber) {
-    debugPrint('[PageViewJumpPerformance] getMarkersForPage called for $pageNumber');
-    final start = DateTime.now();
-
     if (_cache.containsKey(pageNumber)) {
-      debugPrint('[PageViewJumpPerformance] Cache Hit for $pageNumber');
       return _cache[pageNumber]!;
     }
-    
-    debugPrint('[PageViewJumpPerformance] Cache Miss for $pageNumber. Building...');
+
     final result = _buildMarkersForPage(pageNumber);
-    
-    final diff = DateTime.now().difference(start);
-    debugPrint('[PageViewJumpPerformance] Finished _buildMarkersForPage for $pageNumber in ${diff.inMicroseconds}us. Items: ${result.length}');
 
     // Only cache non-empty results; an empty list from a pending
     // debug-mode async load should not prevent future lookups.
@@ -181,9 +162,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     return _buildMarkersFromProductionSource(pageNumber);
   }
 
-  List<VerseMarkerData> _buildMarkersFromProductionSource(
-    int pageNumber,
-  ) {
+  List<VerseMarkerData> _buildMarkersFromProductionSource(int pageNumber) {
     final entries = _markerData?[pageNumber.toString()];
     if (entries == null) return [];
 
@@ -198,9 +177,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     }).toList();
   }
 
-  List<VerseMarkerData> _buildMarkersFromDebugSource(
-    int pageNumber,
-  ) {
+  List<VerseMarkerData> _buildMarkersFromDebugSource(int pageNumber) {
     final cached = _markerData?[pageNumber.toString()];
     if (cached != null) {
       return cached.map((entry) {
@@ -243,9 +220,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
   }
 
   @override
-  Future<List<VerseMarkerData>> getMarkersForPageAsync(
-    int pageNumber,
-  ) async {
+  Future<List<VerseMarkerData>> getMarkersForPageAsync(int pageNumber) async {
     if (_dataSource == MarkerDataSource.debug) {
       await _loadDebugPageAsync(pageNumber);
     }

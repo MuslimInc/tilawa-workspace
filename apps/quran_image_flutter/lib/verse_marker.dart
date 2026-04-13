@@ -17,8 +17,9 @@ class VerseMarker extends StatelessWidget {
   String _getGlyphMarker(int number) {
     // quran_numbers.ttf contains exactly 286 pre-composed ligatures starting from U+E900.
     // 1 -> U+E900, 2 -> U+E901 ... 286 -> U+EA1D.
+    final int clamped = number.clamp(1, 286);
     final int baseCodepoint = 0xE900;
-    final int targetCodepoint = baseCodepoint + number - 1;
+    final int targetCodepoint = baseCodepoint + clamped - 1;
     return String.fromCharCode(targetCodepoint);
   }
 
@@ -63,7 +64,6 @@ class _QcfMarkerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    debugPrint('[PageViewJumpPerformance] _QcfMarkerPainter executing paint operations for verse $verseNumber');
     final path = getQcfMarkerPath(size);
 
     // Provide a subtle shadow behind the glyph without expensive blurring

@@ -17,11 +17,8 @@ void main() async {
   // Initialize dependency injection container
   await initDependencies();
 
-  // Initialize with debug mode and preloading
-  await sl<AssetVerseMarkerRepository>().init(
-    forceDebugSource: true,
-    preloadAllPages: true,
-  );
+  // Initialize verse marker repository (production: single JSON file)
+  await sl<AssetVerseMarkerRepository>().init(preloadAllPages: true);
 
   runApp(const QuranImageApp());
 }

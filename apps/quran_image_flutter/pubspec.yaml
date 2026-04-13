@@ -75,6 +75,7 @@ flutter:
     - assets/databases/
     - assets/data/
     - assets/data/quran_marker_debug_coordinates/
+    - assets/images/sura_header_banner.png
     - assets/quran_images/1/
     - assets/quran_images/2/
     - assets/quran_images/3/

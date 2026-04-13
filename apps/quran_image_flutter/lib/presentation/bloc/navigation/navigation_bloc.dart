@@ -24,6 +24,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   final SaveLastVisitedPageUseCase _saveLastVisitedPageUseCase;
   final GetLastVisitedPageUseCase _getLastVisitedPageUseCase;
   Timer? _autoHideTimer;
+  Timer? _saveDebounceTimer;
 
   NavigationBloc({
     PageRepository? pageRepository,
@@ -51,6 +52,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<PreviousPageRequested>(_onPreviousPageRequested);
     on<PageChanged>(_onPageChanged);
     on<LastVisitedPageSaved>(_onLastVisitedPageSaved);
+    on<NavigationRetryRequested>(_onRetryRequested);
   }
 
   Future<void> _onInitialized(
@@ -178,9 +180,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final currentState = state;
     if (currentState is NavigationLoaded) {
       try {
-        final pageState = _pageRepository.navigateToPage(
-          event.pageNumber,
-        );
+        final pageState = _pageRepository.navigateToPage(event.pageNumber);
         // Clear preview after actual navigation
         emit(
           currentState.copyWith(
@@ -190,7 +190,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         // Persist the newly visited page
         add(LastVisitedPageSaved(pageState.currentPage));
       } catch (e) {
-        emit(NavigationError('Invalid page number: ${event.pageNumber}'));
+        debugPrint(
+          'NavigationBloc: Invalid page number ${event.pageNumber}: $e',
+        );
       }
     }
   }
@@ -229,9 +231,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       // Only update if page actually changed
       if (currentState.pageState.currentPage != event.pageNumber) {
-        final pageState = _pageRepository.navigateToPage(
-          event.pageNumber,
-        );
+        final pageState = _pageRepository.navigateToPage(event.pageNumber);
         emit(currentState.copyWith(pageState: pageState));
         // Persist the newly visited page
         add(LastVisitedPageSaved(event.pageNumber));
@@ -243,11 +243,23 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     LastVisitedPageSaved event,
     Emitter<NavigationState> emit,
   ) async {
-    try {
-      await _saveLastVisitedPageUseCase.execute(event.pageNumber);
-    } catch (e) {
-      debugPrint('Failed to save last visited page: $e');
-    }
+    // Debounce: during animateToPage, onPageChanged fires for each
+    // intermediate page. Only persist the final settled page.
+    _saveDebounceTimer?.cancel();
+    _saveDebounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        await _saveLastVisitedPageUseCase.execute(event.pageNumber);
+      } catch (e) {
+        debugPrint('Failed to save last visited page: $e');
+      }
+    });
+  }
+
+  Future<void> _onRetryRequested(
+    NavigationRetryRequested event,
+    Emitter<NavigationState> emit,
+  ) async {
+    await _onInitialized(const NavigationInitialized(), emit);
   }
 
   void _startAutoHideTimer() {
@@ -266,6 +278,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   @override
   Future<void> close() {
     _cancelAutoHideTimer();
+    _saveDebounceTimer?.cancel();
     return super.close();
   }
 }

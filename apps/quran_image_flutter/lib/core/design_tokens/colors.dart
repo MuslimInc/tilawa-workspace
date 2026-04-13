@@ -13,7 +13,7 @@ class AppColors {
   static const Color primaryDark = Color(0xFF5C440E);
 
   /// Background colors
-  static const Color pageBackground = Color(0xFFFBF4E4);
+  static const Color pageBackground = Color(0xFFFFF9F2);
   static const Color sliderBackground = Color(0xFFFFFFFF);
   static const Color sliderBackgroundDark = Color(0xFF2D2D2D);
 

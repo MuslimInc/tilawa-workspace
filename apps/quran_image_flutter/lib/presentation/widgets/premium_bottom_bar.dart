@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/domain.dart';
 
 class PremiumBottomBar extends StatelessWidget {
@@ -12,7 +13,7 @@ class PremiumBottomBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFBF4E4),
+        color: const Color(0xFFFFF9F2),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
           color: const Color(0xFFC5A358).withValues(alpha: 0.3),

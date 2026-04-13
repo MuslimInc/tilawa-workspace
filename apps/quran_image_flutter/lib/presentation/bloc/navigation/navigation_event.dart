@@ -89,6 +89,11 @@ class PageChanged extends NavigationEvent {
 ///
 /// This event is triggered whenever the user navigates to a new page,
 /// ensuring the position is saved for future app launches.
+/// Event to retry initialization after a failure.
+class NavigationRetryRequested extends NavigationEvent {
+  const NavigationRetryRequested();
+}
+
 class LastVisitedPageSaved extends NavigationEvent {
   final int pageNumber;
 

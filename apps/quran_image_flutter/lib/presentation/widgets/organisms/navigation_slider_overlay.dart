@@ -27,11 +27,9 @@ class NavigationSliderOverlay extends StatelessWidget {
     return BlocBuilder<NavigationBloc, NavigationState>(
       buildWhen: (previous, current) {
         if (previous is NavigationLoaded && current is NavigationLoaded) {
-          return previous.visibility != current.visibility ||
-              previous.pageState.displayPage !=
+          return previous.pageState.displayPage !=
                   current.pageState.displayPage ||
-              previous.pageState.currentPage !=
-                  current.pageState.currentPage;
+              previous.pageState.currentPage != current.pageState.currentPage;
         }
         return previous != current;
       },
@@ -40,7 +38,6 @@ class NavigationSliderOverlay extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final isVisible = state.visibility.isVisible;
         final pageState = state.pageState;
 
         final sliderHeight = screenHeight * AppDimensions.sliderHeightRatio;
@@ -51,70 +48,60 @@ class NavigationSliderOverlay extends StatelessWidget {
         final borderRadius =
             screenWidth * AppDimensions.sliderBorderRadiusRatio;
 
-        return AnimatedOpacity(
-          opacity: isVisible ? 1.0 : 0.0,
-          duration: isVisible
-              ? const Duration(milliseconds: AppDurations.sliderFadeIn)
-              : const Duration(milliseconds: AppDurations.sliderFadeOut),
-          child: IgnorePointer(
-            ignoring: !isVisible,
-            child: GestureDetector(
-              onTapDown: (_) => _onInteractionStart(context),
-              onTapUp: (_) => _onInteractionEnd(context),
-              onHorizontalDragStart: (_) => _onInteractionStart(context),
-              onHorizontalDragEnd: (_) => _onInteractionEnd(context),
-              child: Container(
-                margin: EdgeInsets.only(
-                  left: horizontalPadding,
-                  right: horizontalPadding,
-                  bottom: bottomMargin,
+        return GestureDetector(
+          onTapDown: (_) => _onInteractionStart(context),
+          onTapUp: (_) => _onInteractionEnd(context),
+          onHorizontalDragStart: (_) => _onInteractionStart(context),
+          onHorizontalDragEnd: (_) => _onInteractionEnd(context),
+          child: Container(
+            margin: EdgeInsets.only(
+              left: horizontalPadding,
+              right: horizontalPadding,
+              bottom: bottomMargin,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: sliderHeight * 0.1,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.sliderBackground.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(borderRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: sliderHeight * 0.1,
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Page Slider - uses displayPage for real-time updates
+                PageSlider(
+                  currentPage: pageState.displayPage,
+                  totalPages: pageState.totalPages,
+                  onChanged: (value) {
+                    final page = value.round();
+                    context.read<NavigationBloc>().add(PagePreviewed(page));
+                  },
+                  onChangeEnd: (value) => _onSliderChangeEnd(context, value),
+                  screenWidth: screenWidth,
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.sliderBackground.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(borderRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow.withValues(alpha: 0.15),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                SizedBox(height: sliderHeight * 0.15),
+                // Navigation Buttons - shows displayPage for preview
+                NavigationButtonGroup(
+                  currentPage: pageState.displayPage,
+                  totalPages: pageState.totalPages,
+                  onPrevious: pageState.currentPage > 1
+                      ? () => _onPreviousPage(context)
+                      : null,
+                  onNext: pageState.currentPage < pageState.totalPages
+                      ? () => _onNextPage(context)
+                      : null,
+                  screenWidth: screenWidth,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Page Slider - uses displayPage for real-time updates
-                    PageSlider(
-                      currentPage: pageState.displayPage,
-                      totalPages: pageState.totalPages,
-                      onChanged: (value) {
-                        final page = value.round();
-                        context.read<NavigationBloc>().add(PagePreviewed(page));
-                      },
-                      onChangeEnd: (value) =>
-                          _onSliderChangeEnd(context, value),
-                      screenWidth: screenWidth,
-                    ),
-                    SizedBox(height: sliderHeight * 0.15),
-                    // Navigation Buttons - shows displayPage for preview
-                    NavigationButtonGroup(
-                      currentPage: pageState.displayPage,
-                      totalPages: pageState.totalPages,
-                      onPrevious: pageState.currentPage > 1
-                          ? () => _onPreviousPage(context)
-                          : null,
-                      onNext: pageState.currentPage < pageState.totalPages
-                          ? () => _onNextPage(context)
-                          : null,
-                      screenWidth: screenWidth,
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
         );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image_flutter/core/design_tokens/colors.dart';
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/page_state.dart';
@@ -38,7 +39,9 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     }
 
     // Notify parent that preloading is complete
-    widget.onPreloadComplete();
+    if (mounted) {
+      widget.onPreloadComplete();
+    }
   }
 
   @override
@@ -48,7 +51,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     final percentage = (progress * 100).toStringAsFixed(0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF4E4),
+      backgroundColor: AppColors.pageBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -101,15 +104,11 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
                 'Page '
                 '${(progress * PageState.quranPageCount).toStringAsFixed(0)}'
                 ' of ${PageState.quranPageCount}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
               ),
             ] else ...[
               const CircularProgressIndicator(
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
               ),
             ],
           ],

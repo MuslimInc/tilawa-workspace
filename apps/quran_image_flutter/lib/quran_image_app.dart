@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image_flutter/core/design_tokens/colors.dart';
 import 'package:quran_image_flutter/preloading_screen.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_event.dart';
@@ -42,8 +43,11 @@ class _QuranImageAppState extends State<QuranImageApp> {
                   NavigationBloc()..add(const NavigationInitialized()),
               child: BlocBuilder<NavigationBloc, NavigationState>(
                 buildWhen: (previous, current) {
-                  // Only rebuild when transitioning to a loaded/error state for the first time
-                  if (previous is NavigationLoaded) return false;
+                  // Rebuild on initial load, error, or recovery from error
+                  if (previous is NavigationLoaded &&
+                      current is NavigationLoaded) {
+                    return false;
+                  }
                   return current is NavigationLoaded ||
                       current is NavigationError;
                 },
@@ -52,10 +56,37 @@ class _QuranImageAppState extends State<QuranImageApp> {
                     return const QuranImageReader();
                   }
                   if (state is NavigationError) {
-                    return Scaffold(body: Center(child: Text(state.message)));
+                    return Scaffold(
+                      backgroundColor: AppColors.pageBackground,
+                      body: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF5D4037),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () => context
+                                    .read<NavigationBloc>()
+                                    .add(const NavigationRetryRequested()),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
                   }
                   // Silent loading state with matching background
-                  return const Scaffold(backgroundColor: Color(0xFFFBF4E4));
+                  return const Scaffold(backgroundColor: Color(0xFFFFF9F2));
                 },
               ),
             )
