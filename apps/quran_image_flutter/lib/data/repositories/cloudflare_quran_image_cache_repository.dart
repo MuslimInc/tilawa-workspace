@@ -169,9 +169,8 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
             : (receivedBytes / totalBytes).clamp(0.0, 1.0) * 0.7;
         _emit(
           QuranImageCacheStatus(
-            phase: QuranImageCachePhase.downloading,
+            phase: QuranImageCachePhase.downloadingImages,
             progress: progress,
-            message: 'Downloading Quran images...',
           ),
           onProgress,
         );
@@ -193,7 +192,6 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
         QuranImageCacheStatus(
           phase: QuranImageCachePhase.extracting,
           progress: 0.7 + extractionProgress * 0.25,
-          message: 'Preparing Quran images...',
         ),
         onProgress,
       );
@@ -217,9 +215,8 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
 
     _emit(
       QuranImageCacheStatus(
-        phase: QuranImageCachePhase.downloading,
+        phase: QuranImageCachePhase.downloadingHeader,
         progress: 0.97,
-        message: 'Downloading Surah header banner...',
       ),
       onProgress,
     );

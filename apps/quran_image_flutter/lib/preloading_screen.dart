@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:quran_image_flutter/core/design_tokens/colors.dart';
 
 import 'core/di/dependency_injection.dart';
+import 'domain/entities/app_message.dart';
 import 'domain/entities/page_state.dart';
 import 'domain/entities/quran_image_cache_status.dart';
 import 'domain/repositories/verse_marker_repository.dart';
 import 'domain/usecases/prepare_quran_image_cache.dart';
+import 'l10n/app_localizations.dart';
+import 'presentation/mappers/app_message_mapper.dart';
 
 /// Loading screen shown while preloading debug marker files.
 ///
@@ -21,7 +24,7 @@ class PreloadingScreen extends StatefulWidget {
 
 class _PreloadingScreenState extends State<PreloadingScreen> {
   QuranImageCacheStatus _cacheStatus = const QuranImageCacheStatus.checking();
-  String? _errorMessage;
+  AppMessage? _errorAppMessage;
   bool _isPreparing = false;
 
   @override
@@ -36,7 +39,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     }
 
     setState(() {
-      _errorMessage = null;
+      _errorAppMessage = null;
       _isPreparing = true;
     });
 
@@ -55,7 +58,9 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
       if (mounted) {
         setState(() {
           _cacheStatus = cacheStatus;
-          _errorMessage = cacheStatus.errorMessage ?? cacheStatus.message;
+          _errorAppMessage =
+              cacheStatus.errorMessage?.toAppMessage() ??
+              const CachePreparationFailedMessage();
           _isPreparing = false;
         });
       }
@@ -81,28 +86,16 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     }
   }
 
-  String _getFriendlyErrorMessage(String rawMessage) {
-    if (rawMessage.contains('SocketException') ||
-        rawMessage.contains('Failed host lookup') ||
-        rawMessage.contains('No address associated with hostname') ||
-        rawMessage.contains('Connection refused')) {
-      return 'No internet connection. Please check your network and try again.';
-    }
-    if (rawMessage.contains('OS Error') || rawMessage.contains('Exception:')) {
-      return 'An unexpected error occurred. Please try again.';
-    }
-    return rawMessage;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final repo = sl<VerseMarkerRepository>();
     final markerProgress = repo.preloadProgress;
     final progress = _cacheStatus.isReady
         ? markerProgress
         : _cacheStatus.progress;
     final percentage = (progress * 100).toStringAsFixed(0);
-    final errorMessage = _errorMessage;
+    final errorAppMessage = _errorAppMessage;
 
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
@@ -110,20 +103,20 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Quran Image',
-              style: TextStyle(
+            Text(
+              const AppTitleMessage().localize(l10n),
+              style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
               ),
             ),
             const SizedBox(height: 40),
-            if (errorMessage != null) ...[
+            if (errorAppMessage != null) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Text(
-                  _getFriendlyErrorMessage(errorMessage),
+                  errorAppMessage.localize(l10n),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -134,11 +127,11 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _waitForPreload,
-                child: const Text('Retry'),
+                child: Text(const RetryMessage().localize(l10n)),
               ),
             ] else if (!_cacheStatus.isReady) ...[
               Text(
-                _cacheStatus.message,
+                _cacheStatus.phase.toAppMessage().localize(l10n),
                 style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
               ),
               const SizedBox(height: 20),
@@ -172,9 +165,12 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
               ),
             ] else ...[
               if (repo.isDebugMode) ...[
-                const Text(
-                  'Loading marker coordinates...',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
+                Text(
+                  const PreparingQuranMessage().localize(l10n),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF666666),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // Progress bar
@@ -207,9 +203,11 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Page '
-                  '${(progress * PageState.quranPageCount).toStringAsFixed(0)}'
-                  ' of ${PageState.quranPageCount}',
+                  PageIndicatorMessage(
+                    current: (progress * PageState.quranPageCount)
+                        .toStringAsFixed(0),
+                    total: PageState.quranPageCount.toString(),
+                  ).localize(l10n),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF999999),

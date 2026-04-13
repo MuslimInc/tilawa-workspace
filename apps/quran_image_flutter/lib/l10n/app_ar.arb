@@ -1,10 +1,11 @@
 {
   "@@locale": "ar",
-  "networkError": "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-  "unexpectedError": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+  "preparingQuran": "جارٍ تجهيز القرآن لك…",
+  "quranReady": "القرآن جاهز.",
+  "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "networkError": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "appTitle": "القرآن",
   "retry": "إعادة المحاولة",
-  "quranImage": "صورة القرآن",
-  "loadingMarkerCoordinates": "جاري تحميل إحداثيات العلامات...",
   "pageIndicator": "صفحة {current} من {total}",
   "@pageIndicator": {
     "placeholders": {

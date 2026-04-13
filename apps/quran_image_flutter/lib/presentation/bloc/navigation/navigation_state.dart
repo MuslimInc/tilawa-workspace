@@ -47,10 +47,10 @@ class NavigationLoaded extends NavigationState {
 
 /// State when navigation encounters an error
 class NavigationError extends NavigationState {
-  final String message;
+  final AppMessage appMessage;
 
-  const NavigationError(this.message);
+  const NavigationError(this.appMessage);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [appMessage];
 }

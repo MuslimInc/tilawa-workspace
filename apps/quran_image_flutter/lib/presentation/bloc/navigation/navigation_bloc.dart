@@ -68,7 +68,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       emit(NavigationLoaded(pageState: pageState, visibility: visibility));
       _startAutoHideTimer();
     } catch (e) {
-      emit(NavigationError('Failed to initialize navigation: $e'));
+      emit(const NavigationError(NavigationInitFailedMessage()));
     }
   }
 

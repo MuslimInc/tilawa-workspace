@@ -1,3 +1,4 @@
+export 'entities/app_message.dart';
 export 'entities/navigation_visibility.dart';
 export 'entities/page_state.dart';
 export 'entities/quran_image_cache_status.dart';

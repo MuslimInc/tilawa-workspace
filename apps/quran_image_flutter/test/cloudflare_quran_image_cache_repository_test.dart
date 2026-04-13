@@ -34,7 +34,7 @@ void main() {
     expect(
       statuses.map((status) => status.phase),
       containsAll([
-        QuranImageCachePhase.downloading,
+        QuranImageCachePhase.downloadingImages,
         QuranImageCachePhase.extracting,
         QuranImageCachePhase.ready,
       ]),

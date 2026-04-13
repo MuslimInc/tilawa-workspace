@@ -9,21 +9,23 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get networkError =>
-      'No internet connection. Please check your network and try again.';
+  String get preparingQuran => 'Preparing the Quran for you…';
 
   @override
-  String get unexpectedError =>
-      'An unexpected error occurred. Please try again.';
+  String get quranReady => 'The Quran is ready.';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get networkError =>
+      'Please check your internet connection and try again.';
+
+  @override
+  String get appTitle => 'AlQuran';
 
   @override
   String get retry => 'Retry';
-
-  @override
-  String get quranImage => 'Quran Image';
-
-  @override
-  String get loadingMarkerCoordinates => 'Loading marker coordinates...';
 
   @override
   String pageIndicator(String current, String total) {

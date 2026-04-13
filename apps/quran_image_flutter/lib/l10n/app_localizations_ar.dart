@@ -9,20 +9,23 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get networkError =>
-      'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.';
+  String get preparingQuran => 'جارٍ تجهيز القرآن لك…';
 
   @override
-  String get unexpectedError => 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+  String get quranReady => 'القرآن جاهز.';
+
+  @override
+  String get somethingWentWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get networkError =>
+      'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.';
+
+  @override
+  String get appTitle => 'القرآن';
 
   @override
   String get retry => 'إعادة المحاولة';
-
-  @override
-  String get quranImage => 'صورة القرآن';
-
-  @override
-  String get loadingMarkerCoordinates => 'جاري تحميل إحداثيات العلامات...';
 
   @override
   String pageIndicator(String current, String total) {

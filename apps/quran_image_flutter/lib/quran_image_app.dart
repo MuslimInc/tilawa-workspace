@@ -6,10 +6,13 @@ import 'package:quran_image_flutter/preloading_screen.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_state.dart';
+import 'package:quran_image_flutter/presentation/mappers/app_message_mapper.dart';
 import 'package:quran_image_flutter/quran_image_reader.dart';
 
 import 'core/di/dependency_injection.dart';
+import 'domain/entities/app_message.dart';
 import 'domain/repositories/verse_marker_repository.dart';
+import 'l10n/app_localizations.dart';
 
 class QuranImageApp extends StatefulWidget {
   const QuranImageApp({super.key});
@@ -37,6 +40,9 @@ class _QuranImageAppState extends State<QuranImageApp> {
     return MaterialApp(
       title: 'Quran Image',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ar'),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
@@ -60,6 +66,7 @@ class _QuranImageAppState extends State<QuranImageApp> {
                     return const QuranImageReader();
                   }
                   if (state is NavigationError) {
+                    final l10n = AppLocalizations.of(context)!;
                     return Scaffold(
                       backgroundColor: AppColors.pageBackground,
                       body: Center(
@@ -69,7 +76,7 @@ class _QuranImageAppState extends State<QuranImageApp> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                state.message,
+                                state.appMessage.localize(l10n),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 16,
@@ -81,7 +88,9 @@ class _QuranImageAppState extends State<QuranImageApp> {
                                 onPressed: () => context
                                     .read<NavigationBloc>()
                                     .add(const NavigationRetryRequested()),
-                                child: const Text('Retry'),
+                                child: Text(
+                                  const RetryMessage().localize(l10n),
+                                ),
                               ),
                             ],
                           ),

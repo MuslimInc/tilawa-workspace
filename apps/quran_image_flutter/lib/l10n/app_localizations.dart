@@ -98,35 +98,41 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @preparingQuran.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the Quran for you…'**
+  String get preparingQuran;
+
+  /// No description provided for @quranReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The Quran is ready.'**
+  String get quranReady;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get somethingWentWrong;
+
   /// No description provided for @networkError.
   ///
   /// In en, this message translates to:
-  /// **'No internet connection. Please check your network and try again.'**
+  /// **'Please check your internet connection and try again.'**
   String get networkError;
 
-  /// No description provided for @unexpectedError.
+  /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'An unexpected error occurred. Please try again.'**
-  String get unexpectedError;
+  /// **'AlQuran'**
+  String get appTitle;
 
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
-
-  /// No description provided for @quranImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Quran Image'**
-  String get quranImage;
-
-  /// No description provided for @loadingMarkerCoordinates.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading marker coordinates...'**
-  String get loadingMarkerCoordinates;
 
   /// No description provided for @pageIndicator.
   ///
