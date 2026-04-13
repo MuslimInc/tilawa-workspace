@@ -3,7 +3,10 @@ import 'dart:math' as math;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
+import '../constants/quran_constants.dart';
+import '../constants/surah_header_banner_constants.dart';
 import '../services/quran_data_service.dart';
+import '../services/quran_special_line.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
 ///
@@ -146,19 +149,20 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
 
     // We dynamically calculate height consumption using exact counts of
     // headers and bismillahs instead of blindly assuming 15 normal verses.
-    final Map<String, int> specialCounts = QuranDataService.instance
-        .getSpecialLineCounts(pageNumber);
-    final int headers = specialCounts['headers'] ?? 0;
-    final int bismillahs = specialCounts['bismillahs'] ?? 0;
-    final int normalLines = 15 - headers - bismillahs;
+    final QuranSpecialLineCounts specialCounts = QuranDataService.instance
+        .getSpecialLineCountSummary(pageNumber);
+    final int headers = specialCounts.headers;
+    final int bismillahs = specialCounts.bismillahs;
+    final int normalLines = QuranConstants.linesPerPage - headers - bismillahs;
 
     // Fixed math parameters based on Ayah bounds
-    final double bannerHeight = availableWidth * 0.11228293967474158;
+    final double bannerHeight =
+        availableWidth * SurahHeaderBannerConstants.heightToWidthRatio;
     final double bismillahHeight = fontSize * 0.8 * 1.8;
 
     // Use uniform gaps (1.0x spacing) between all lines to calculate the
     // baseline height consumption on the page.
-    final double spacingHeight = 14 * lineSpacing;
+    final double spacingHeight = QuranConstants.lineGapCount * lineSpacing;
 
     final double usedHeight =
         (normalLines * fontSize * _fontHeight) +
@@ -173,7 +177,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
 
     if (usedHeight < safeHeightLimit && pageNumber > 2) {
       final double extraHeight = safeHeightLimit - usedHeight;
-      final double delta = extraHeight / 14;
+      final double delta = extraHeight / QuranConstants.lineGapCount;
       lineSpacing += delta;
     }
 

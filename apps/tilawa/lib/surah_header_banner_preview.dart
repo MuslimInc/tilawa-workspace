@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:quran/src/widgets/surah_header_banner.dart';
+import 'package:quran/quran.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 PreviewThemeData themeData() {

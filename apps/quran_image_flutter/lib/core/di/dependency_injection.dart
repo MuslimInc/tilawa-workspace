@@ -44,6 +44,11 @@ Future<void> initDependencies() async {
     () => sl<AssetVerseMarkerRepository>(),
   );
 
+  // Surah Header Repository
+  sl.registerLazySingleton<SurahHeaderRepository>(
+    StaticSurahHeaderRepository.new,
+  );
+
   // Use Cases
   sl.registerLazySingleton<GetLastVisitedPageUseCase>(
     () => GetLastVisitedPageUseCase(sl<LastVisitedPageRepository>()),

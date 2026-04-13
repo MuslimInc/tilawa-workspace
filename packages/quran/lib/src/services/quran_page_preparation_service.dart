@@ -3,9 +3,11 @@ import 'dart:collection';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/quran_constants.dart';
 import '../layout/quran_layout_strategy.dart';
 import '../widgets/quran_line.dart';
 import 'quran_data_service.dart';
+import 'quran_special_line.dart';
 
 class QuranPagePreparationService {
   QuranPagePreparationService._();
@@ -153,16 +155,18 @@ class QuranPagePreparationService {
       forceStrutHeight: true,
     );
 
-    final bool isCenteredPage = pageNumber == 1 || pageNumber == 2;
+    final bool isCenteredPage = QuranConstants.centeredPageNumbers.contains(
+      pageNumber,
+    );
 
     final List<int> lineIndices = metrics.isScrollable
-        ? List.generate(15, (i) => i).where((i) {
+        ? List.generate(QuranConstants.linesPerPage, (int i) => i).where((i) {
             return isCenteredPage ||
                 pageLines[i].isNotEmpty ||
                 _isSurahHeader(pageNumber, i + 1) ||
                 _isBismillah(pageNumber, i + 1);
           }).toList()
-        : List.generate(15, (i) => i);
+        : List.generate(QuranConstants.linesPerPage, (int i) => i);
 
     final List<PreparedPageBlock> blocks = [];
     final List<InlineSpan> currentSpans = [];
@@ -208,7 +212,7 @@ class QuranPagePreparationService {
     int? centeredHeaderSurah;
     var hasCenteredBismillah = false;
     if (isCenteredPage) {
-      for (var rawLine = 1; rawLine <= 15; rawLine++) {
+      for (var rawLine = 1; rawLine <= QuranConstants.linesPerPage; rawLine++) {
         if (_isSurahHeader(pageNumber, rawLine)) {
           centeredHeaderSurah = _getSurahAtLine(pageNumber, rawLine);
         }
@@ -227,12 +231,14 @@ class QuranPagePreparationService {
       // instead of at raw line-map positions (which would put them at
       // the very top, breaking the Madinah Mushaf centered layout).
       if (isCenteredPage) {
-        if (i == 2 && centeredHeaderSurah != null) {
+        if (i == QuranConstants.centeredHeaderLineIndex &&
+            centeredHeaderSurah != null) {
           flushTextBlock();
           blocks.add(PreparedHeaderBlock(surahNumber: centeredHeaderSurah));
           continue;
         }
-        if (i == 4 && hasCenteredBismillah) {
+        if (i == QuranConstants.centeredBismillahLineIndex &&
+            hasCenteredBismillah) {
           flushTextBlock();
           blocks.add(const PreparedBismillahBlock());
           continue;
@@ -333,15 +339,25 @@ class QuranPagePreparationService {
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
     final List<List<Map<String, dynamic>>> rawLines =
         QuranDataService.instance.getPageData(pageNumber) ??
-        List.generate(15, (_) => <Map<String, dynamic>>[]);
-    if (pageNumber == 1 || pageNumber == 2) {
+        List.generate(
+          QuranConstants.linesPerPage,
+          (_) => <Map<String, dynamic>>[],
+        );
+    if (QuranConstants.centeredPageNumbers.contains(pageNumber)) {
       final List<List<Map<String, dynamic>>> centered = List.generate(
-        15,
+        QuranConstants.linesPerPage,
         (_) => <Map<String, dynamic>>[],
       );
-      centered[2] = rawLines[0];
-      for (var i = 0; i < 7 && (1 + i) < rawLines.length; i++) {
-        centered[5 + i] = rawLines[1 + i];
+      centered[QuranConstants.centeredHeaderLineIndex] = rawLines[0];
+      for (
+        var i = 0;
+        i < QuranConstants.centeredTextLineCount &&
+            (QuranConstants.centeredTextRawStartLineIndex + i) <
+                rawLines.length;
+        i++
+      ) {
+        centered[QuranConstants.centeredTextStartLineIndex + i] =
+            rawLines[QuranConstants.centeredTextRawStartLineIndex + i];
       }
       return centered;
     }
@@ -355,7 +371,9 @@ class QuranPagePreparationService {
     TextStyle markerStyle,
     Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor,
   ) {
-    if (lineIndex < 0 || lineIndex >= 15) return const [];
+    if (lineIndex < 0 || lineIndex >= QuranConstants.linesPerPage) {
+      return const <_WordSpanGroup>[];
+    }
     final List<Map<String, dynamic>> words = lines[lineIndex];
     if (words.isEmpty) return const [];
 
@@ -411,21 +429,17 @@ class QuranPagePreparationService {
   }
 
   bool _isSurahHeader(int page, int line) =>
-      _getSpecialType(page, line)?.startsWith('HEADER') ?? false;
+      _getSpecialLine(page, line)?.isSurahHeader ?? false;
 
   bool _isBismillah(int page, int line) =>
-      _getSpecialType(page, line)?.startsWith('BISMILLAH') ?? false;
+      _getSpecialLine(page, line)?.isBismillah ?? false;
 
   int _getSurahAtLine(int page, int line) {
-    final String? type = _getSpecialType(page, line);
-    if (type == null) return 0;
-    final List<String> parts = type.split(':');
-    if (parts.length < 2) return 0;
-    return int.tryParse(parts[1]) ?? 0;
+    return _getSpecialLine(page, line)?.surahNumber ?? 0;
   }
 
-  String? _getSpecialType(int page, int line) {
-    return QuranDataService.instance.getSpecialType(page, line);
+  QuranSpecialLine? _getSpecialLine(int page, int line) {
+    return QuranDataService.instance.getSpecialLine(page, line);
   }
 }
 

@@ -28,7 +28,8 @@ class QuranPageView extends StatefulWidget {
     this.onShowIndex,
     this.headerImageFilter,
     this.headerTextColor,
-    this.headerFontSizeMultiplier = 0.45,
+    this.headerFontSizeMultiplier =
+        SurahHeaderBannerConstants.defaultFontSizeMultiplier,
     this.currentPageListenable,
     this.uiTextDirection = TextDirection.ltr,
     this.showOverlaysListenable,

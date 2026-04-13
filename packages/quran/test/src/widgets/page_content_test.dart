@@ -125,7 +125,7 @@ void _registerFakeAssets() {
       return ByteData.sublistView(bytes);
     }
 
-    if (key.endsWith('mainframe.png')) {
+    if (key.endsWith('sura_header_banner.png')) {
       return ByteData.sublistView(_k1x1TransparentPng);
     }
 

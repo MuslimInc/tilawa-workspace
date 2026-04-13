@@ -7,12 +7,7 @@ import 'data/repositories/asset_verse_marker_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
+
   // Full-screen immersive mode (hides status bar and navigation bar)
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 

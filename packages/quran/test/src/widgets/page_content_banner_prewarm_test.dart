@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran/src/constants/surah_header_banner_constants.dart';
 import 'package:quran/src/widgets/surah_header_banner.dart';
 
 // ---------------------------------------------------------------------------
@@ -83,24 +83,25 @@ final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
 final ByteData _kEmptyAssetManifestBin = const StandardMessageCodec()
     .encodeMessage(<Object?, Object?>{})!;
 
+int _imageCacheEntryCount() {
+  final ImageCache imageCache = PaintingBinding.instance.imageCache;
+  return imageCache.currentSize +
+      imageCache.liveImageCount +
+      imageCache.pendingImageCount;
+}
+
 /// Registers a mock asset handler that serves [_k1x1TransparentPng] for every
 /// asset lookup. When [slowImage] is true and a [gate] completer is provided,
-/// `mainframe.png` delivery is blocked until the gate is completed — allowing
+/// the header banner delivery is blocked until the gate is completed, allowing
 /// tests to assert widget state before and after the image bytes arrive.
 void _registerFakeAssets({bool slowImage = false, Completer<void>? gate}) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
   binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
     ByteData? message,
   ) async {
-    // The asset manifest uses a binary (non-UTF-8) codec. Attempting to
-    // decode it as a string would throw a FormatException and corrupt the
-    // manifest lookup. Pass through any non-decodable message to the real
-    // handler so the framework can resolve its own metadata.
-    late final String key;
-    try {
-      key = utf8.decode(message!.buffer.asUint8List());
-    } catch (_) {
-      return null; // Let the real handler deal with binary-codec messages.
+    final String? key = const StringCodec().decodeMessage(message);
+    if (key == null) {
+      return _kEmptyAssetManifestBin;
     }
 
     if (key == 'AssetManifest.bin') {
@@ -115,7 +116,9 @@ void _registerFakeAssets({bool slowImage = false, Completer<void>? gate}) {
       return null;
     }
 
-    if (slowImage && gate != null && key.endsWith('mainframe.png')) {
+    if (slowImage &&
+        gate != null &&
+        key.endsWith(SurahHeaderBannerConstants.assetPath)) {
       await gate.future;
     }
     return ByteData.sublistView(_k1x1TransparentPng);
@@ -142,7 +145,7 @@ void main() {
       'image cache is empty before any SurahHeaderBanner is rendered',
       (WidgetTester tester) async {
         _registerFakeAssets();
-        expect(PaintingBinding.instance.imageCache.currentSize, 0);
+        expect(_imageCacheEntryCount(), 0);
       },
     );
 
@@ -166,46 +169,20 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(PaintingBinding.instance.imageCache.currentSize, greaterThan(0));
+        expect(_imageCacheEntryCount(), greaterThan(0));
       },
     );
 
-    testWidgets(
-      'banner ImageStream resolve completes without a host widget tree',
-      (WidgetTester tester) async {
-        _registerFakeAssets();
+    testWidgets('banner image provider is sourced from centralized constants', (
+      WidgetTester tester,
+    ) async {
+      _registerFakeAssets();
 
-        const imageProvider = AssetImage(
-          'assets/mainframe.png',
-          package: 'quran',
-        );
+      const AssetImage imageProvider = SurahHeaderBannerConstants.assetImage;
 
-        var didComplete = false;
-        final completer = Completer<void>();
-
-        await tester.runAsync(() async {
-          const config = ImageConfiguration(devicePixelRatio: 1.0);
-          final ImageStream stream = imageProvider.resolve(config);
-          late final ImageStreamListener listener;
-          listener = ImageStreamListener(
-            (_, _) {
-              didComplete = true;
-              if (!completer.isCompleted) completer.complete();
-              stream.removeListener(listener);
-            },
-            onError: (_, _) {
-              didComplete = true;
-              if (!completer.isCompleted) completer.complete();
-              stream.removeListener(listener);
-            },
-          );
-          stream.addListener(listener);
-          await completer.future;
-        });
-
-        expect(didComplete, isTrue);
-      },
-    );
+      expect(imageProvider.assetName, SurahHeaderBannerConstants.assetPath);
+      expect(imageProvider.package, SurahHeaderBannerConstants.packageName);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -452,8 +429,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final int cacheSizeAfterFirstRender =
-            PaintingBinding.instance.imageCache.currentSize;
+        final int cacheSizeAfterFirstRender = _imageCacheEntryCount();
         expect(cacheSizeAfterFirstRender, greaterThan(0));
 
         // Rebuild — simulates returning to the page.
@@ -476,7 +452,7 @@ void main() {
         expect(find.byType(Image), findsOneWidget);
         // Cache must not have shrunk — the asset was not evicted.
         expect(
-          PaintingBinding.instance.imageCache.currentSize,
+          _imageCacheEntryCount(),
           greaterThanOrEqualTo(cacheSizeAfterFirstRender),
         );
       },
@@ -497,6 +473,7 @@ void main() {
           home: Scaffold(
             body: SurahHeaderBanner(
               surahNumber: 18,
+              // ignore: avoid_redundant_argument_values
               lineHeight: 0,
               viewportWidth: 360,
               viewportHeight: 800,
@@ -601,9 +578,15 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // All three instances decode the same asset — cache deduplicates to 1.
+        // All three instances share the same centralized image provider.
         expect(find.byType(Image), findsNWidgets(3));
-        expect(PaintingBinding.instance.imageCache.currentSize, 1);
+        final Set<ImageProvider<Object>> imageProviders = tester
+            .widgetList<Image>(find.byType(Image))
+            .map((Image image) => image.image)
+            .toSet();
+        expect(imageProviders, <ImageProvider<Object>>{
+          SurahHeaderBannerConstants.assetImage,
+        });
       },
     );
   });

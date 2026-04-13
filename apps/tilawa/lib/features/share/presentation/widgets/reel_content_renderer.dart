@@ -357,6 +357,9 @@ class _SurahHero extends StatelessWidget {
   final String mushafPageLabel;
   final String? reciterName;
 
+  static const SurahHeaderGlyphProvider _glyphProvider =
+      QcfSurahHeaderGlyphProvider();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -375,10 +378,10 @@ class _SurahHero extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            String.fromCharCode(0xF100 + surahNumber - 1),
+            _glyphProvider.glyphForSurah(surahNumber),
             style: const TextStyle(
-              fontFamily: 'QCF_BSML',
-              package: 'quran',
+              fontFamily: SurahHeaderBannerConstants.fontFamily,
+              package: SurahHeaderBannerConstants.packageName,
               fontSize: 78,
               color: _ReelPalette.deepGreen,
             ),

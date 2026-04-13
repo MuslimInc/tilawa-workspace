@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../constants/quran_constants.dart';
+import '../constants/surah_header_banner_constants.dart';
 import '../helpers/app_logger.dart';
 import 'idle_scheduler.dart';
 import 'quran_data_service.dart';
@@ -33,7 +35,7 @@ class QuranFontService extends ChangeNotifier {
 
   final String _fontZipUrl =
       'https://pub-7f6f6686010343899ba5b2f0ac6cb7b3.r2.dev/quran_fonts.zip';
-  final int _totalFonts = 604;
+  static const int _totalFonts = QuranConstants.totalPagesCount;
   static const int _pageWindowRadius = 2;
 
   String? _fontsDirectory;
@@ -67,10 +69,8 @@ class QuranFontService extends ChangeNotifier {
       _loadedFontFamilies.contains(_pageFamily(pageNumber));
 
   static Future<void> precacheQuranAssets(BuildContext context) async {
-    const surahHeaderBannerImage = AssetImage(
-      'assets/mainframe.png',
-      package: 'quran',
-    );
+    const AssetImage surahHeaderBannerImage =
+        SurahHeaderBannerConstants.assetImage;
     await precacheImage(surahHeaderBannerImage, context);
   }
 

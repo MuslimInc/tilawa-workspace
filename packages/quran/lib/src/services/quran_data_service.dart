@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../constants/quran_constants.dart';
 import '../helpers/app_logger.dart';
+import 'quran_special_line.dart';
 
 /// A singleton service to manage Quran data loading and caching.
 class QuranDataService {
@@ -16,8 +18,8 @@ class QuranDataService {
   /// Format: pageNumber -> SurahNumber -> LineNumber -> [Verses]
   Map<int, List<List<Map<String, dynamic>>>>? _processedPageIndex;
   Map<String, int>? _verseLastWordIndexByVerse;
-  final Map<int, Map<String, int>> _specialLineCountsCache = {};
-  final Map<int, Map<int, String>> _specialLinesCache = {};
+  final Map<int, QuranSpecialLineCounts> _specialLineCountsCache = {};
+  final Map<int, Map<int, QuranSpecialLine>> _specialLinesCache = {};
 
   Completer<void>? _loadCompleter;
 
@@ -135,12 +137,15 @@ class QuranDataService {
       final lineMap = pageEntry.value as Map<String, dynamic>;
 
       final List<List<Map<String, dynamic>>> lines = List.generate(
-        15,
+        QuranConstants.linesPerPage,
         (_) => <Map<String, dynamic>>[],
       );
 
       for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
-        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
+        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(
+          0,
+          QuranConstants.linesPerPage - 1,
+        );
         final List<String> wordKeys = (lineEntry.value as List<dynamic>)
             .cast<String>();
         for (final key in wordKeys) {
@@ -158,31 +163,41 @@ class QuranDataService {
 
   /// Returns counts of [headers, bismillahs] for a specific page.
   Map<String, int> getSpecialLineCounts(int pageNumber) {
+    return getSpecialLineCountSummary(pageNumber).toLegacyMap();
+  }
+
+  QuranSpecialLineCounts getSpecialLineCountSummary(int pageNumber) {
     if (_specialLineCountsCache.containsKey(pageNumber)) {
       return _specialLineCountsCache[pageNumber]!;
     }
-    final Map<int, String> special = _calculateSpecialLines(pageNumber);
+    final Map<int, QuranSpecialLine> special = _calculateSpecialLines(
+      pageNumber,
+    );
     var headers = 0;
     var bismillahs = 0;
-    for (final String type in special.values) {
-      if (type.startsWith('HEADER')) headers++;
-      if (type.startsWith('BISMILLAH')) bismillahs++;
+    for (final QuranSpecialLine line in special.values) {
+      if (line.isSurahHeader) {
+        headers++;
+      }
+      if (line.isBismillah) {
+        bismillahs++;
+      }
     }
-    return _specialLineCountsCache[pageNumber] = {
-      'headers': headers,
-      'bismillahs': bismillahs,
-    };
+    return _specialLineCountsCache[pageNumber] = QuranSpecialLineCounts(
+      headers: headers,
+      bismillahs: bismillahs,
+    );
   }
 
   /// Calculates which lines on a page should be headers or bismillahs.
   /// Logic moved from PageContent for centralized layout management.
-  Map<int, String> _calculateSpecialLines(int pageNumber) {
+  Map<int, QuranSpecialLine> _calculateSpecialLines(int pageNumber) {
     if (_specialLinesCache.containsKey(pageNumber)) {
       return _specialLinesCache[pageNumber]!;
     }
-    final Map<int, String> special = {};
+    final Map<int, QuranSpecialLine> special = {};
     final List<List<Map<String, dynamic>>> lines =
-        getPageData(pageNumber) ?? [];
+        getPageData(pageNumber) ?? <List<Map<String, dynamic>>>[];
 
     for (var i = 0; i < lines.length; i++) {
       final List<Map<String, dynamic>> lineWords = lines[i];
@@ -195,15 +210,19 @@ class QuranDataService {
         if (ayah == 1 && word == 1) {
           final int lineNum = i + 1;
           if (surah == 1) {
-            if (pageNumber == 1) special[1] = 'HEADER:1';
+            if (pageNumber == QuranConstants.minPageNumber) {
+              special[1] = const QuranSpecialLine.surahHeader(1);
+            }
           } else if (surah == 9) {
-            if (lineNum > 1) special[lineNum - 1] = 'HEADER:9';
+            if (lineNum > 1) {
+              special[lineNum - 1] = const QuranSpecialLine.surahHeader(9);
+            }
           } else {
             if (lineNum > 2) {
-              special[lineNum - 2] = 'HEADER:$surah';
-              special[lineNum - 1] = 'BISMILLAH:$surah';
+              special[lineNum - 2] = QuranSpecialLine.surahHeader(surah);
+              special[lineNum - 1] = QuranSpecialLine.bismillah(surah);
             } else if (lineNum == 2) {
-              special[1] = 'BISMILLAH:$surah';
+              special[1] = QuranSpecialLine.bismillah(surah);
             }
           }
         }
@@ -212,16 +231,39 @@ class QuranDataService {
     return _specialLinesCache[pageNumber] = special;
   }
 
+  QuranSpecialLine? getSpecialLine(int page, int line) {
+    if (!isLoaded) {
+      return null;
+    }
+    return _calculateSpecialLines(page)[line];
+  }
+
+  bool pageHasSurahHeader(int pageNumber) {
+    if (!isLoaded) {
+      return false;
+    }
+    return getSpecialLineCountSummary(pageNumber).hasSurahHeader;
+  }
+
   /// Returns the special type (HEADER, BISMILLAH) for a given page and line.
   String? getSpecialType(int page, int line) {
-    if (!isLoaded) return null;
-    return _calculateSpecialLines(page)[line];
+    final QuranSpecialLine? specialLine = getSpecialLine(page, line);
+    if (specialLine == null) {
+      return null;
+    }
+    return switch (specialLine.type) {
+      QuranSpecialLineType.surahHeader => 'HEADER:${specialLine.surahNumber}',
+      QuranSpecialLineType.bismillah => 'BISMILLAH:${specialLine.surahNumber}',
+    };
   }
 
   /// Returns metadata for a given page (surah numbers, juz, hizb).
   Map<String, dynamic> getPageMetadata(int page) {
-    if (!isLoaded) return {'surahNumbers': <int>[], 'juz': 0, 'hizb': 0};
-    final List<dynamic> lines = getPageData(page) ?? [];
+    if (!isLoaded) {
+      return <String, dynamic>{'surahNumbers': <int>[], 'juz': 0, 'hizb': 0};
+    }
+    final List<List<Map<String, dynamic>>> lines =
+        getPageData(page) ?? <List<Map<String, dynamic>>>[];
     final Set<int> surahs = {};
     var juz = 0;
     var hizb = 0;
