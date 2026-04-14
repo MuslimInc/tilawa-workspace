@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:quran_image_flutter/quran_image_app.dart';
 
 import 'core/di/dependency_injection.dart';
-import 'data/repositories/asset_verse_marker_repository.dart';
+import 'core/perf_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _configureImageCache();
+  PerfLogger.startFrameWatcher();
 
   // Full-screen immersive mode (hides status bar and navigation bar)
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -14,8 +16,16 @@ void main() async {
   // Initialize dependency injection container
   await initDependencies();
 
-  // Initialize verse marker repository (production: single JSON file)
-  await sl<AssetVerseMarkerRepository>().init(preloadAllPages: true);
-
   runApp(const QuranImageApp());
+}
+
+void _configureImageCache() {
+  const bytesPerMb = 1024 * 1024;
+  final imageCache = PaintingBinding.instance.imageCache;
+
+  // The reader keeps several page-line images warm ahead of the current page.
+  // The default 100 MB cache is too small for that working set at ~3x DPR,
+  // which causes evictions and repeated texture uploads during swipes.
+  imageCache.maximumSizeBytes = 192 * bytesPerMb;
+  imageCache.maximumSize = 200;
 }

@@ -14,11 +14,15 @@ import '../../domain/repositories/verse_marker_repository.dart';
 class AssetVerseMarkerRepository implements VerseMarkerRepository {
   Map<String, List<dynamic>>? _markerData;
   final Map<int, List<VerseMarkerData>> _cache = {};
+  Future<void>? _initFuture;
 
   MarkerDataSource _dataSource = MarkerDataSource.production;
 
   double _preloadProgress = 0.0;
   bool _isPreloading = false;
+  bool _isInitialized = false;
+
+  bool get isInitialized => _isInitialized;
 
   @override
   double get preloadProgress => _preloadProgress;
@@ -42,6 +46,31 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     bool forceDebugSource = false,
     bool? preloadAllPages,
   }) async {
+    final targetSource = forceDebugSource
+        ? MarkerDataSource.debug
+        : MarkerDataSource.production;
+    if (_isInitialized && _dataSource == targetSource) {
+      return;
+    }
+    if (_initFuture != null) {
+      return _initFuture;
+    }
+
+    _initFuture = _init(
+      forceDebugSource: forceDebugSource,
+      preloadAllPages: preloadAllPages,
+    );
+    try {
+      await _initFuture;
+    } finally {
+      _initFuture = null;
+    }
+  }
+
+  Future<void> _init({
+    required bool forceDebugSource,
+    required bool? preloadAllPages,
+  }) async {
     _dataSource = forceDebugSource
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
@@ -53,6 +82,9 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       if (_dataSource == MarkerDataSource.debug) {
         debugPrint('AssetVerseMarkerRepository: DEBUG mode – per-page files');
         _markerData = {};
+        _cache.clear();
+        _preloadProgress = 0.0;
+        _isPreloading = false;
 
         if (shouldPreload) {
           await _preloadAllDebugPages();
@@ -60,16 +92,19 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       } else {
         final raw = await rootBundle.loadString(
           'assets/data/verse_marker_coordinates.json',
-          // cache: false,
         );
-        final decoded = json.decode(raw) as Map<String, dynamic>;
-        _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
+        _markerData = await compute(_decodeMarkerDataMap, raw);
+        _cache.clear();
+        _preloadProgress = 1.0;
+        _isPreloading = false;
         debugPrint(
           'AssetVerseMarkerRepository: '
           'Loaded ${_markerData!.length} pages',
         );
       }
+      _isInitialized = true;
     } catch (e) {
+      _isInitialized = false;
       debugPrint('AssetVerseMarkerRepository init error: $e');
       rethrow;
     }
@@ -127,12 +162,14 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     if (source == MarkerDataSource.production) {
       final raw = await rootBundle.loadString(
         'assets/data/verse_marker_coordinates.json',
-        // cache: false,
       );
-      final decoded = json.decode(raw) as Map<String, dynamic>;
-      _markerData = decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
+      _markerData = await compute(_decodeMarkerDataMap, raw);
+      _isInitialized = true;
+      _preloadProgress = 1.0;
+      _isPreloading = false;
     } else {
       _markerData = {};
+      _isInitialized = true;
       if (preloadAllPages) {
         await _preloadAllDebugPages();
       }
@@ -198,11 +235,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     try {
       final path =
           'assets/data/quran_marker_debug_coordinates/$pageNumber.json';
-      final raw = await rootBundle.loadString(
-        path,
-
-        // cache: false
-      );
+      final raw = await rootBundle.loadString(path);
       final decoded = await compute(jsonDecode, raw) as List<dynamic>;
       _markerData ??= {};
       _markerData![pageNumber.toString()] = decoded;
@@ -233,4 +266,9 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
   @override
   void dispose() {}
+}
+
+Map<String, List<dynamic>> _decodeMarkerDataMap(String raw) {
+  final decoded = json.decode(raw) as Map<String, dynamic>;
+  return decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image_flutter/core/design_tokens/colors.dart';
+import 'package:quran_image_flutter/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image_flutter/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image_flutter/preloading_screen.dart';
 import 'package:quran_image_flutter/presentation/bloc/navigation/navigation_bloc.dart';
@@ -11,7 +12,6 @@ import 'package:quran_image_flutter/quran_image_reader.dart';
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/app_message.dart';
-import 'domain/repositories/verse_marker_repository.dart';
 import 'l10n/app_localizations.dart';
 
 class QuranImageApp extends StatefulWidget {
@@ -27,12 +27,9 @@ class _QuranImageAppState extends State<QuranImageApp> {
   @override
   void initState() {
     super.initState();
-    final repo = sl<VerseMarkerRepository>();
+    final repo = sl<AssetVerseMarkerRepository>();
     final imageCacheRepository = sl<QuranImageCacheRepository>();
-    // Check if already preloaded (production mode) or needs waiting
-    _isPreloaded =
-        (!repo.isDebugMode || repo.isPreloaded) &&
-        imageCacheRepository.status.isReady;
+    _isPreloaded = repo.isInitialized && imageCacheRepository.status.isReady;
   }
 
   @override

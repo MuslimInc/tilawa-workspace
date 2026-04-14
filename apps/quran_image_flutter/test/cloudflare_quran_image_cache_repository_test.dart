@@ -15,7 +15,7 @@ void main() {
   });
 
   tearDown(() async {
-    if (await tempDirectory.exists()) {
+    if (tempDirectory.existsSync()) {
       await tempDirectory.delete(recursive: true);
     }
   });

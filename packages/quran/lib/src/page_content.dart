@@ -477,7 +477,6 @@ class _PageContentState extends State<PageContent>
         fit: BoxFit.contain,
         width: pageWidth,
         height: pageHeight,
-        filterQuality: FilterQuality.low,
       );
     } else {
       // Live path: full interactive widget tree.

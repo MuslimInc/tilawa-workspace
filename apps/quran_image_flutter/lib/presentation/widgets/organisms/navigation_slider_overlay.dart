@@ -14,16 +14,12 @@ import '../molecules/molecules.dart';
 /// - Gesture detection for interaction
 class NavigationSliderOverlay extends StatelessWidget {
   final double screenWidth;
-  final double screenHeight;
 
-  const NavigationSliderOverlay({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
+  const NavigationSliderOverlay({super.key, required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
     return BlocBuilder<NavigationBloc, NavigationState>(
       buildWhen: (previous, current) {
         if (previous is NavigationLoaded && current is NavigationLoaded) {
@@ -70,13 +66,9 @@ class NavigationSliderOverlay extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.sliderBackground.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(borderRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow.withValues(alpha: 0.15),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.12),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

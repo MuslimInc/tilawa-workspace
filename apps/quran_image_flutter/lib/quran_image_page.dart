@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_image_flutter/core/constants/quran_image_asset_constants.dart';
 import 'package:quran_image_flutter/core/constants/surah_header_constants.dart';
 import 'package:quran_image_flutter/core/di/dependency_injection.dart';
+import 'package:quran_image_flutter/core/perf_logger.dart';
 import 'package:quran_image_flutter/domain/domain.dart';
 import 'package:quran_image_flutter/verse_marker.dart';
 
@@ -29,6 +30,7 @@ class QuranImagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sw = PerfLogger.startTimer();
     final markers = sl<VerseMarkerRepository>().getMarkersForPage(pageNumber);
     final headers = sl<SurahHeaderRepository>().getHeadersForPage(pageNumber);
     final imageCacheRepository = sl<QuranImageCacheRepository>();
@@ -50,6 +52,14 @@ class QuranImagePage extends StatelessWidget {
         final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
         final int cacheWidth = (pageWidth * devicePixelRatio).round();
 
+        PerfLogger.logElapsed(
+          sw,
+          '[Page $pageNumber] build  '
+          'cacheWidth=$cacheWidth  '
+          'dpr=${devicePixelRatio.toStringAsFixed(2)}  '
+          '${isLandscape ? "landscape" : "portrait"}',
+        );
+
         // In landscape, content overflows — use total content height for layout.
         // There are no gaps; lines fill tightly.
         final double layoutHeight = isLandscape
@@ -69,6 +79,7 @@ class QuranImagePage extends StatelessWidget {
           width: pageWidth,
           height: layoutHeight,
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               // Surah header banner behind the surah name lines.
               for (final header in headers)
@@ -101,13 +112,14 @@ class QuranImagePage extends StatelessWidget {
                   ),
                 ),
 
-              for (final marker in markers)
-                _AyahMarkerWidget(
-                  marker: marker,
-                  pageWidth: pageWidth,
-                  pageHeight: layoutHeight,
-                  lineHeight: lineHeight,
-                  yOffsets: yOffsets,
+              if (markers.isNotEmpty)
+                Positioned.fill(
+                  child: VerseMarkersOverlay(
+                    markers: markers,
+                    pageWidth: pageWidth,
+                    lineHeight: lineHeight,
+                    yOffsets: yOffsets,
+                  ),
                 ),
             ],
           ),
@@ -190,14 +202,27 @@ class _QuranLineImage extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Image.file(
-      File(path),
+    return Image(
+      image: buildQuranLineImageProvider(
+        imagePath: path,
+        cacheWidth: cacheWidth,
+      ),
       fit: BoxFit.fill,
       gaplessPlayback: true,
-      cacheWidth: cacheWidth,
       errorBuilder: (_, _, _) => const SizedBox.shrink(),
     );
   }
+}
+
+ImageProvider<Object> buildQuranLineImageProvider({
+  required String imagePath,
+  required int cacheWidth,
+}) {
+  return ResizeImage.resizeIfNeeded(
+    cacheWidth,
+    null,
+    FileImage(File(imagePath)),
+  );
 }
 
 class _CachedOrRemoteImage extends StatelessWidget {
@@ -220,6 +245,7 @@ class _CachedOrRemoteImage extends StatelessWidget {
       return Image.file(
         File(path),
         fit: fit,
+
         gaplessPlayback: gaplessPlayback,
         errorBuilder: (_, _, _) => const SizedBox.shrink(),
       );
@@ -228,51 +254,9 @@ class _CachedOrRemoteImage extends StatelessWidget {
     return Image.network(
       remoteUrl,
       fit: fit,
+
       gaplessPlayback: gaplessPlayback,
       errorBuilder: (_, _, _) => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _AyahMarkerWidget extends StatelessWidget {
-  final VerseMarkerData marker;
-  final double pageWidth;
-  final double pageHeight;
-  final double lineHeight;
-  final List<double> yOffsets;
-
-  const _AyahMarkerWidget({
-    required this.marker,
-    required this.pageWidth,
-    required this.pageHeight,
-    required this.lineHeight,
-    required this.yOffsets,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Precise: Based on Ayah app measurement of 37x47 px on a 720 px-wide screen.
-    final double markerW = pageWidth * 0.05138889;
-    final double markerH = pageWidth * 0.06527778;
-
-    final double xOffset = (marker.centerX * pageWidth - markerW / 2).clamp(
-      0.0,
-      pageWidth - markerW,
-    );
-
-    // marker.line is the 0-based image-file index (0–14).
-    // yCenter = top of that line's slot + half a line height (vertical centre).
-    final int idx = marker.line.clamp(0, SurahHeaderConstants.lastLineIndex);
-    final double yCenter = yOffsets[idx] + lineHeight / 2;
-
-    return Positioned(
-      left: xOffset,
-      top: yCenter - markerH / 2,
-      child: VerseMarker(
-        verseNumber: marker.ayah,
-        width: markerW,
-        height: markerH,
-      ),
     );
   }
 }

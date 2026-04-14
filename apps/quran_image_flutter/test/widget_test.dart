@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_image_flutter/core/di/dependency_injection.dart';
+import 'package:quran_image_flutter/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image_flutter/domain/domain.dart';
 import 'package:quran_image_flutter/quran_image_app.dart';
 import 'package:quran_image_flutter/quran_image_reader.dart';
@@ -29,6 +30,13 @@ void main() {
     sl.registerLazySingleton<QuranImageCacheRepository>(
       () => _ReadyQuranImageCacheRepository(headerPath),
     );
+    await sl.unregister<AssetVerseMarkerRepository>();
+    final markerRepository = _ReadyAssetVerseMarkerRepository();
+    sl.registerLazySingleton<AssetVerseMarkerRepository>(
+      () => markerRepository,
+    );
+    await sl.unregister<VerseMarkerRepository>();
+    sl.registerLazySingleton<VerseMarkerRepository>(() => markerRepository);
     await sl.unregister<PrepareQuranImageCacheUseCase>();
     sl.registerLazySingleton<PrepareQuranImageCacheUseCase>(
       () => PrepareQuranImageCacheUseCase(sl<QuranImageCacheRepository>()),
@@ -37,7 +45,7 @@ void main() {
 
   tearDown(() async {
     await sl.reset();
-    if (await tempDirectory.exists()) {
+    if (tempDirectory.existsSync()) {
       await tempDirectory.delete(recursive: true);
     }
   });
@@ -79,6 +87,36 @@ class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
 
   @override
   String? surahHeaderBannerFilePath() => _headerPath;
+}
+
+class _ReadyAssetVerseMarkerRepository extends AssetVerseMarkerRepository {
+  @override
+  bool get isInitialized => true;
+
+  @override
+  bool get isDebugMode => false;
+
+  @override
+  bool get isPreloaded => true;
+
+  @override
+  bool get isPreloading => false;
+
+  @override
+  double get preloadProgress => 1.0;
+
+  @override
+  List<VerseMarkerData> getMarkersForPage(int pageNumber) => const [];
+
+  @override
+  Future<List<VerseMarkerData>> getMarkersForPageAsync(int pageNumber) async =>
+      const [];
+
+  @override
+  Future<void> init({
+    bool forceDebugSource = false,
+    bool? preloadAllPages,
+  }) async {}
 }
 
 class _InMemoryLastVisitedPageRepository implements LastVisitedPageRepository {

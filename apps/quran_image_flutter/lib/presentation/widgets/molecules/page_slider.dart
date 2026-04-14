@@ -33,7 +33,8 @@ class PageSlider extends StatelessWidget {
         thumbColor: AppColors.sliderThumb,
         thumbShape: RoundSliderThumbShape(
           enabledThumbRadius: thumbSize / 2,
-          elevation: 4,
+          elevation: 0,
+          pressedElevation: 0,
         ),
         overlayColor: AppColors.sliderThumb.withValues(alpha: 0.2),
         overlayShape: RoundSliderOverlayShape(overlayRadius: thumbSize),

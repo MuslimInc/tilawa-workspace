@@ -35,13 +35,9 @@ class NavigationIconButton extends StatelessWidget {
                 ? AppColors.sliderBackground
                 : AppColors.divider,
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.12),
+            ),
           ),
           child: Icon(
             icon,
