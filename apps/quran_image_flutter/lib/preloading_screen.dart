@@ -147,9 +147,8 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
 
     // ── Step 3: prewarm initial page images ──────────────────────────────────
     // Resolve and decode all 15 line images for the page the reader will open
-    // on. The reader only becomes visible once every image is keepAlive/live
-    // in Flutter's image cache — matching the native Ayah approach where pages
-    // are fully ready before they appear.
+    // on. The reader only becomes visible once the initial page images have
+    // been decoded into Flutter's image cache.
     if (!mounted) return;
     await _prewarmInitialPage(
       initialPage: await initialPageFuture,
@@ -166,8 +165,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     }
   }
 
-  /// Prewarms all 15 line images for the initial page and waits until every
-  /// image is fully decoded (keepAlive or live) in Flutter's image cache.
+  /// Prewarms all 15 line images for the initial page before the reader opens.
   Future<void> _prewarmInitialPage({
     required int initialPage,
     required AssetVerseMarkerRepository markerRepo,
@@ -180,7 +178,14 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     // Resolve physical pixel width from the platform dispatcher's implicit view.
     final flutterView = WidgetsBinding.instance.platformDispatcher.implicitView;
     if (flutterView == null) return;
-    final cacheWidth = flutterView.physicalSize.width.round();
+    // Use the minimum of physical width and height so cacheWidth is the
+    // portrait-page width regardless of orientation at startup. This must
+    // match the formula used in QuranImageReader and QuranImagePage so all
+    // three agree on the same cacheWidth key.
+    final cacheWidth =
+        flutterView.physicalSize.width < flutterView.physicalSize.height
+        ? flutterView.physicalSize.width.round()
+        : flutterView.physicalSize.height.round();
     if (cacheWidth <= 0) return;
 
     // Collect paths for all 15 line images.
@@ -214,12 +219,13 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
       }
     }
 
-    // Fire resolve() for all 15 images first so decode/upload work can overlap
-    // with the marker warm-up below instead of starting afterwards.
+    // Fire decode for all 15 images first so that image work can overlap with
+    // the marker warm-up below instead of starting afterwards.
     final resolveTimer = PerfLogger.startTimer();
-    for (final path in paths) {
-      decodedCache.prewarmLineImage(imagePath: path, cacheWidth: cacheWidth);
-    }
+    final imageWarmFutures = <Future<void>>[
+      for (final path in paths)
+        decodedCache.prewarmLineImage(imagePath: path, cacheWidth: cacheWidth),
+    ];
     PerfLogger.logElapsed(
       resolveTimer,
       widgetName: _logSource,
@@ -250,57 +256,12 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
           'markerWidth=${markerWidth.toStringAsFixed(1)} '
           'glyphs=${warmUpMarkerNumbers.length}',
     );
-
-    // Poll until all images are fully decoded (keepAlive/live).
-    // 3000 ms is a generous ceiling; on cache-warm launches images decode in
-    // < 500 ms; on first launch the codec may need up to ~2 s on slow devices.
-    const pollInterval = Duration(milliseconds: 16);
-    const timeout = Duration(milliseconds: 3000);
-    final deadline = DateTime.now().add(timeout);
-    var pollCount = 0;
-
-    while (true) {
-      if (!mounted) return;
-
-      final statuses = await Future.wait(
-        paths.map(
-          (p) => decodedCache.isLineImageCached(
-            imagePath: p,
-            cacheWidth: cacheWidth,
-          ),
-        ),
-      );
-      pollCount++;
-      final readyCount = statuses.where((r) => r).length;
-
-      if (readyCount == paths.length) {
-        PerfLogger.logElapsed(
-          prewarmTimer,
-          widgetName: _logSource,
-          message:
-              'initial page prewarm ready '
-              'page=$safeInitialPage '
-              'polls=$pollCount',
-        );
-        return;
-      }
-
-      if (DateTime.now().isAfter(deadline)) {
-        PerfLogger.logElapsed(
-          prewarmTimer,
-          widgetName: _logSource,
-          message:
-              'initial page prewarm timeout '
-              'page=$safeInitialPage '
-              'timeoutMs=${timeout.inMilliseconds} '
-              'readyImages=$readyCount/${paths.length} '
-              'polls=$pollCount',
-        );
-        return;
-      }
-
-      await Future<void>.delayed(pollInterval);
-    }
+    await Future.wait(imageWarmFutures);
+    PerfLogger.logElapsed(
+      prewarmTimer,
+      widgetName: _logSource,
+      message: 'initial page prewarm ready page=$safeInitialPage',
+    );
   }
 
   static void _log(String message) {

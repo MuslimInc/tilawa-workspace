@@ -89,21 +89,21 @@ class _QuranImageAppState extends State<QuranImageApp> {
   @override
   Widget build(BuildContext context) {
     final sw = PerfLogger.startTimer();
-    final home = _isPreloaded
-        ? BlocProvider.value(
-            value: _ensureNavigationBlocInitialized(reason: 'build-preloaded'),
-            child: const _QuranReaderHome(),
-          )
-        : PreloadingScreen(onPreloadComplete: _handlePreloadComplete);
+    final bloc = _ensureNavigationBlocInitialized(reason: 'app-build');
 
-    final app = MaterialApp(
-      title: 'Quran Image',
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ar'),
-      theme: _appTheme,
-      home: home,
+    final app = BlocProvider.value(
+      value: bloc,
+      child: MaterialApp(
+        title: 'Quran Image',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ar'),
+        theme: _appTheme,
+        home: _isPreloaded
+            ? const _QuranReaderHome()
+            : PreloadingScreen(onPreloadComplete: _handlePreloadComplete),
+      ),
     );
 
     PerfLogger.logElapsed(

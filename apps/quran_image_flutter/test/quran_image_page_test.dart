@@ -65,34 +65,23 @@ void main() {
     }
   });
 
-  testWidgets(
-    'QuranImagePage keeps a loading surface until line images are ready',
-    (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 3.0;
-      addTearDown(tester.view.reset);
+  testWidgets('QuranImagePage builds synchronously without a loading surface', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: QuranImagePage(pageNumber: 1))),
-      );
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: QuranImagePage(pageNumber: 1))),
+    );
 
-      expect(
-        find.byKey(const ValueKey<String>('quran-image-page-loading-surface')),
-        findsOneWidget,
-      );
-      expect(decodedCache.prewarmedLinePaths.length, 15);
-      expect(find.byType(Image).evaluate().length, greaterThanOrEqualTo(15));
-
-      decodedCache.ready = true;
-      await tester.pump(const Duration(milliseconds: 32));
-      await tester.pump();
-
-      expect(
-        find.byKey(const ValueKey<String>('quran-image-page-loading-surface')),
-        findsNothing,
-      );
-    },
-  );
+    expect(
+      find.byKey(const ValueKey<String>('quran-image-page-loading-surface')),
+      findsNothing,
+    );
+    expect(find.byType(Image).evaluate().length, greaterThanOrEqualTo(15));
+  });
 }
 
 class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
@@ -132,25 +121,22 @@ class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
 }
 
 class _FakeDecodedQuranImageCache implements DecodedQuranImageCache {
-  bool ready = false;
   final List<String> prewarmedLinePaths = <String>[];
   final List<String> prewarmedFilePaths = <String>[];
 
   @override
-  Future<bool> isLineImageCached({
-    required String imagePath,
-    required int cacheWidth,
-  }) async {
-    return ready;
-  }
+  void handleMemoryPressure() {}
 
   @override
-  void prewarmFileImage(String imagePath) {
+  Future<void> prewarmFileImage(String imagePath) async {
     prewarmedFilePaths.add(imagePath);
   }
 
   @override
-  void prewarmLineImage({required String imagePath, required int cacheWidth}) {
+  Future<void> prewarmLineImage({
+    required String imagePath,
+    required int cacheWidth,
+  }) async {
     prewarmedLinePaths.add(imagePath);
   }
 }

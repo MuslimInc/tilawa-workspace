@@ -24,14 +24,14 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   // 32ms (2 frames at 60Hz) between batches gives the event loop time to
   // process vsync callbacks between decode-completion bursts.
   static const Duration _prewarmBatchDelay = Duration(milliseconds: 32);
-  static const Duration _previewImmediateDelay = Duration(milliseconds: 100);
-  static const Duration _previewPrewarmDelay = Duration(milliseconds: 80);
+  static const Duration _previewTargetDebounce = Duration(milliseconds: 180);
   static const Duration _settledWindowPrewarmDelay = Duration(
     milliseconds: 220,
   );
   static const Duration _initialWindowPrewarmDelay = Duration(
     milliseconds: 1500,
   );
+  static const int _maxReadyPages = 6;
 
   final QuranImageCacheRepository _imageCacheRepository;
   final DecodedQuranImageCache _decodedImageCache;
@@ -40,28 +40,20 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
 
   Timer? _prewarmDrainTimer;
   Timer? _previewImmediateTimer;
-  Timer? _previewPrewarmTimer;
   Timer? _windowPrewarmTimer;
   bool _prewarmDrainScheduled = false;
   int _lastPrewarmedCenter = -1;
   int _lastPrewarmedCacheWidth = -1;
   int _lastPrewarmedRadius = -1;
-
-  // Generation token for jump-wait cancellation. Each call to
-  // prewarmJumpTargetAndWait increments this before entering the poll loop.
-  // The loop compares its captured value against the current token every tick;
-  // a mismatch means a newer jump superseded it and the loop exits immediately.
-  int _jumpWaitGeneration = 0;
+  final LinkedHashMap<String, Future<void>> _pageWarmFutures =
+      LinkedHashMap<String, Future<void>>();
+  final LinkedHashSet<String> _readyPageKeys = LinkedHashSet<String>();
 
   // Tracks the last page for which preview prewarm actually fired.
   int _lastPreviewImmediatePage = -1;
   int _lastPreviewImmediateCacheWidth = -1;
   int _pendingPreviewImmediatePage = -1;
   int _pendingPreviewImmediateCacheWidth = -1;
-
-  // Poll interval for the decode-completion check. One frame (16 ms) is the
-  // right granularity: checking faster wastes CPU, checking slower adds latency.
-  static const Duration _jumpPollInterval = Duration(milliseconds: 16);
 
   @override
   void startInitialPrewarm({
@@ -93,7 +85,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     required int cacheWidth,
   }) {
     _previewImmediateTimer?.cancel();
-    _previewPrewarmTimer?.cancel();
+    unawaited(ensurePageReady(pageNumber: pageNumber, cacheWidth: cacheWidth));
     _prewarmAround(
       pageNumber,
       cacheWidth: cacheWidth,
@@ -107,39 +99,27 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     required int pageNumber,
     required int cacheWidth,
   }) {
-    // Keep preview prewarm latest-only. Rapid slider scrubs should not decode
-    // every page the thumb crosses; that created the raster spikes seen in the
-    // profile logs. The final hovered page still gets warmed quickly, and the
-    // jump path remains protected by prewarmJumpTargetAndWait().
+    // Keep preview prewarm latest-only. Rapid scrubs should not schedule
+    // preview windows or decode every intermediate page the thumb crosses.
+    // The final jump path explicitly awaits target readiness before commit.
     _pendingPreviewImmediatePage = pageNumber;
     _pendingPreviewImmediateCacheWidth = cacheWidth;
     _previewImmediateTimer?.cancel();
     _previewImmediateTimer = Timer(
-      _previewImmediateDelay,
+      _previewTargetDebounce,
       _flushPreviewImmediate,
     );
-
-    _previewPrewarmTimer?.cancel();
-    _previewPrewarmTimer = Timer(_previewPrewarmDelay, () {
-      _prewarmAround(
-        pageNumber,
-        cacheWidth: cacheWidth,
-        radius: _prewarmRadius,
-        reason: 'preview-window',
-      );
-    });
   }
 
   @override
   void prewarmJumpTarget({required int pageNumber, required int cacheWidth}) {
     _previewImmediateTimer?.cancel();
-    _previewPrewarmTimer?.cancel();
     _windowPrewarmTimer?.cancel();
 
     // Reset dedup state unconditionally. Without this reset, a page that was
     // previously visited via slider preview keeps _lastPrewarmedCenter == target,
-    // causing _prewarmAround to skip the enqueue entirely — and the jump renders
-    // with gray placeholders even though no decode has started.
+    // causing _prewarmAround to skip the enqueue entirely — and the jump path
+    // loses its chance to start decode work immediately.
     _lastPrewarmedCenter = -1;
     _lastPrewarmedCacheWidth = -1;
     _lastPrewarmedRadius = -1;
@@ -148,13 +128,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _pendingPreviewImmediatePage = -1;
     _pendingPreviewImmediateCacheWidth = -1;
 
-    // Fire resolve() for all 15 line images of the target page IMMEDIATELY —
-    // before jumpToPage triggers the first build frame.  The queue drain uses
-    // Timer(Duration.zero, …) which fires on the next event-loop tick, i.e.
-    // AFTER jumpToPage already built the page with empty placeholders.  By
-    // calling _resolve() synchronously here we give the image codec maximum
-    // lead time to finish decoding before the raster thread needs to upload.
-    _prewarmPageImmediate(pageNumber, cacheWidth, reason: 'jump-target');
+    unawaited(ensurePageReady(pageNumber: pageNumber, cacheWidth: cacheWidth));
 
     // Also enqueue via the normal drain path as a safety net (e.g. if the
     // LRU cache evicts an entry between resolve and paint on a low-memory device).
@@ -167,135 +141,136 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   }
 
   @override
-  Future<void> prewarmJumpTargetAndWait({
+  Future<void> ensurePageReady({
     required int pageNumber,
     required int cacheWidth,
-    required Duration timeout,
   }) async {
-    // Bump the generation before any async gap so a concurrent call to this
-    // method (a second jump while we're polling) immediately cancels this one.
-    _jumpWaitGeneration++;
-    final myGeneration = _jumpWaitGeneration;
-
-    // Start decoding immediately — reuses the existing synchronous resolve path
-    // so both the dedup reset and the _prewarmPageImmediate call happen here.
-    prewarmJumpTarget(pageNumber: pageNumber, cacheWidth: cacheWidth);
-
     if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
-
     final safeTarget = pageNumber.clamp(1, PageState.quranPageCount).toInt();
+    final pageKey = '$cacheWidth:$safeTarget';
+    if (_readyPageKeys.remove(pageKey)) {
+      _readyPageKeys.add(pageKey);
+      return;
+    }
 
-    // Collect the paths we need to check — mirrors _prewarmPageImmediate.
+    final pending = _pageWarmFutures.remove(pageKey);
+    if (pending != null) {
+      _pageWarmFutures[pageKey] = pending;
+      await pending;
+      return;
+    }
+
+    final future = _warmPageImmediate(
+      safeTarget,
+      cacheWidth,
+      reason: 'ensure-page',
+    );
+    _pageWarmFutures[pageKey] = future;
+    try {
+      await future;
+      _rememberReadyPageKey(pageKey);
+    } catch (error) {
+      PerfLogger.log(
+        widgetName: 'QuranImagePrewarmService',
+        message:
+            'page warm failed '
+            'page=$safeTarget '
+            'cacheWidth=$cacheWidth '
+            'error=$error',
+      );
+    } finally {
+      final current = _pageWarmFutures[pageKey];
+      if (identical(current, future)) {
+        _pageWarmFutures.remove(pageKey);
+      }
+    }
+  }
+
+  // Maximum line images resolved concurrently per batch inside _warmPageImmediate.
+  // Firing all 15 at once causes a burst of ~15 ImageStreamListener callbacks
+  // arriving simultaneously on the main isolate ~110-130ms later, which lands
+  // during a vsync window and pushes raster time over the 20ms budget.
+  // Batching at 5 spreads the burst across 3 groups; each group's callbacks
+  // complete and fire before the next group starts, so no single frame sees
+  // more than ~5 concurrent decode completions.
+  static const int _warmBatchSize = 5;
+
+  Future<void> _warmPageImmediate(
+    int pageNumber,
+    int cacheWidth, {
+    required String reason,
+  }) async {
     final paths = <String>[];
     for (var line = 1; line <= SurahHeaderConstants.lineCount; line++) {
       final path = _imageCacheRepository.lineImageFilePath(
-        pageNumber: safeTarget,
+        pageNumber: pageNumber,
         oneBasedLineNumber: line,
       );
       if (path != null) paths.add(path);
     }
     if (paths.isEmpty) return;
 
-    final deadline = DateTime.now().add(timeout);
-    final waitTimer = Stopwatch()..start();
-    var pollCount = 0;
+    final bannerPath = _imageCacheRepository.surahHeaderBannerFilePath();
 
-    while (true) {
-      // A newer jump superseded us — abandon without jumping.
-      if (_jumpWaitGeneration != myGeneration) {
-        PerfLogger.log(
-          widgetName: 'QuranImagePrewarmService',
-          message:
-              'jump-wait cancelled page=$safeTarget '
-              'gen=$myGeneration '
-              'supersededBy=$_jumpWaitGeneration '
-              'elapsedMs=${waitTimer.elapsedMilliseconds} '
-              'polls=$pollCount',
-        );
-        return;
+    final sw = Stopwatch()..start();
+    var failedCount = 0;
+    Object? firstError;
+    StackTrace? firstStackTrace;
+
+    Future<void> runFuture(Future<void> future) async {
+      try {
+        await future;
+      } catch (error, stackTrace) {
+        failedCount++;
+        firstError ??= error;
+        firstStackTrace ??= stackTrace;
       }
+    }
 
-      // Check all paths concurrently — each obtainCacheStatus() call resolves
-      // the provider key asynchronously; running them in parallel avoids
-      // paying N serial round-trips per poll tick.
-      final statuses = await Future.wait(
-        paths.map(
-          (p) => _decodedImageCache.isLineImageCached(
-            imagePath: p,
-            cacheWidth: cacheWidth,
+    // Resolve line images in batches of _warmBatchSize. Each batch is awaited
+    // before starting the next so that callback bursts are spread across
+    // separate event-loop turns rather than all arriving in the same vsync.
+    for (var i = 0; i < paths.length; i += _warmBatchSize) {
+      final end = (i + _warmBatchSize).clamp(0, paths.length);
+      final batch = paths.sublist(i, end);
+      await Future.wait(
+        batch.map(
+          (path) => runFuture(
+            _decodedImageCache.prewarmLineImage(
+              imagePath: path,
+              cacheWidth: cacheWidth,
+            ),
           ),
         ),
       );
-      pollCount++;
-      final readyCount = statuses.where((r) => r).length;
-      final allReady = readyCount == paths.length;
-
-      if (allReady) {
-        PerfLogger.log(
-          widgetName: 'QuranImagePrewarmService',
-          message:
-              'jump-wait ready page=$safeTarget '
-              'gen=$myGeneration '
-              'elapsedMs=${waitTimer.elapsedMilliseconds} '
-              'polls=$pollCount',
-        );
-        // Settle delay: give Impeller time to upload textures to GPU before
-        // the jump triggers raster work. Without this, jump-wait reports 0ms
-        // but the subsequent frame still has slow raster (21-42ms) due to
-        // on-demand GPU upload during the first paint. 150ms allows upload
-        // to complete on mid-range devices (OPPO A98).
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        return;
-      }
-
-      if (DateTime.now().isAfter(deadline)) {
-        PerfLogger.log(
-          widgetName: 'QuranImagePrewarmService',
-          message:
-              'jump-wait timeout page=$safeTarget '
-              'gen=$myGeneration '
-              'timeoutMs=${timeout.inMilliseconds} '
-              'readyImages=$readyCount/${paths.length} '
-              'polls=$pollCount',
-        );
-        return;
-      }
-
-      // Yield one frame to the event loop without blocking the UI thread.
-      await Future<void>.delayed(_jumpPollInterval);
     }
-  }
 
-  /// Calls [DecodedQuranImageCache.prewarmLineImage] for every line of
-  /// [pageNumber] **without** going through the queue or any timer.
-  ///
-  /// Each call fires [ImageProvider.resolve] synchronously, starting the
-  /// image-codec decode pipeline immediately on the current event-loop tick.
-  void _prewarmPageImmediate(
-    int pageNumber,
-    int cacheWidth, {
-    String reason = 'immediate',
-  }) {
-    if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
-    final safeCenter = pageNumber.clamp(1, PageState.quranPageCount).toInt();
-    for (var line = 1; line <= SurahHeaderConstants.lineCount; line++) {
-      final path = _imageCacheRepository.lineImageFilePath(
-        pageNumber: safeCenter,
-        oneBasedLineNumber: line,
+    // Banner is a single file image — resolve it last, outside the line batches.
+    if (bannerPath != null) {
+      await runFuture(_decodedImageCache.prewarmFileImage(bannerPath));
+    }
+
+    if (firstError != null) {
+      PerfLogger.log(
+        widgetName: 'QuranImagePrewarmService',
+        message:
+            'page warm incomplete '
+            'reason=$reason '
+            'page=$pageNumber '
+            'images=${paths.length} '
+            'failed=$failedCount '
+            'elapsedMs=${sw.elapsedMilliseconds}',
       );
-      if (path == null) continue;
-      _decodedImageCache.prewarmLineImage(
-        imagePath: path,
-        cacheWidth: cacheWidth,
-      );
+      Error.throwWithStackTrace(firstError!, firstStackTrace!);
     }
     PerfLogger.log(
       widgetName: 'QuranImagePrewarmService',
       message:
-          'immediate resolve '
+          'page ready '
           'reason=$reason '
-          'page=$safeCenter '
-          'images=${SurahHeaderConstants.lineCount}',
+          'page=$pageNumber '
+          'images=${paths.length} '
+          'elapsedMs=${sw.elapsedMilliseconds}',
     );
   }
 
@@ -315,11 +290,9 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   @override
   void cancel() {
     _previewImmediateTimer?.cancel();
-    _previewPrewarmTimer?.cancel();
     _windowPrewarmTimer?.cancel();
     _prewarmDrainTimer?.cancel();
     _previewImmediateTimer = null;
-    _previewPrewarmTimer = null;
     _windowPrewarmTimer = null;
     _prewarmDrainTimer = null;
     _prewarmDrainScheduled = false;
@@ -331,6 +304,18 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _lastPreviewImmediateCacheWidth = -1;
     _pendingPreviewImmediatePage = -1;
     _pendingPreviewImmediateCacheWidth = -1;
+    _pageWarmFutures.clear();
+    _readyPageKeys.clear();
+  }
+
+  @override
+  void handleMemoryPressure() {
+    cancel();
+    _decodedImageCache.handleMemoryPressure();
+    PerfLogger.log(
+      widgetName: 'QuranImagePrewarmService',
+      message: 'memory pressure handled readyPagesCleared=true',
+    );
   }
 
   @override
@@ -339,7 +324,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   void _prewarmSurahHeaderBanner() {
     final bannerPath = _imageCacheRepository.surahHeaderBannerFilePath();
     if (bannerPath == null) return;
-    _decodedImageCache.prewarmFileImage(bannerPath);
+    unawaited(_decodedImageCache.prewarmFileImage(bannerPath));
   }
 
   void _flushPreviewImmediate() {
@@ -354,7 +339,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
 
     _lastPreviewImmediatePage = pageNumber;
     _lastPreviewImmediateCacheWidth = cacheWidth;
-    _prewarmPageImmediate(pageNumber, cacheWidth, reason: 'preview-target');
+    unawaited(ensurePageReady(pageNumber: pageNumber, cacheWidth: cacheWidth));
   }
 
   void _scheduleWindowPrewarm(
@@ -462,9 +447,11 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
         scheduled < _prewarmImagesPerBatch &&
         sw.elapsedMilliseconds < _prewarmBatchBudgetMs) {
       final request = _prewarmQueue.removeFirst();
-      _decodedImageCache.prewarmLineImage(
-        imagePath: request.imagePath,
-        cacheWidth: request.cacheWidth,
+      unawaited(
+        _decodedImageCache.prewarmLineImage(
+          imagePath: request.imagePath,
+          cacheWidth: request.cacheWidth,
+        ),
       );
       scheduled++;
     }
@@ -472,6 +459,14 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     if (_prewarmQueue.isNotEmpty) {
       _prewarmDrainScheduled = true;
       _prewarmDrainTimer = Timer(_prewarmBatchDelay, _drainBatch);
+    }
+  }
+
+  void _rememberReadyPageKey(String key) {
+    _readyPageKeys.remove(key);
+    _readyPageKeys.add(key);
+    while (_readyPageKeys.length > _maxReadyPages) {
+      _readyPageKeys.remove(_readyPageKeys.first);
     }
   }
 }

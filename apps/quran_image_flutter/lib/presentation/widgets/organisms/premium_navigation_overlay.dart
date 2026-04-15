@@ -6,7 +6,6 @@ import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
 import '../../bloc/bloc.dart';
-import '../premium_bottom_bar.dart';
 import 'navigation_slider_overlay.dart';
 
 class PremiumNavigationOverlay extends StatefulWidget {
@@ -38,6 +37,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _slideAnimation;
+  bool _hasBeenShown = false;
 
   @override
   void initState() {
@@ -54,6 +54,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
     final navState = context.read<NavigationBloc>().state;
     if (navState is NavigationLoaded && navState.visibility.isVisible) {
       _controller.value = 1.0;
+      _hasBeenShown = true;
     }
   }
 
@@ -64,11 +65,12 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
   }
 
   void _onVisibilityChanged(bool isVisible) {
-    PerfLogger.log(
-      widgetName: 'PremiumNavigationOverlay',
-      message: 'visibility=$isVisible',
-    );
     if (isVisible) {
+      if (!_hasBeenShown) {
+        setState(() {
+          _hasBeenShown = true;
+        });
+      }
       _controller.forward();
     } else {
       _controller.reverse();
@@ -104,14 +106,19 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
                 child: child,
               );
             },
-            child: _PremiumNavigationControls(
-              previewStateListenable: widget.previewStateListenable,
-              onPreviewPageChanged: widget.onPreviewPageChanged,
-              onPageNavigationRequested: widget.onPageNavigationRequested,
-              onPreviousPageRequested: widget.onPreviousPageRequested,
-              onNextPageRequested: widget.onNextPageRequested,
-              onInteractionStart: widget.onInteractionStart,
-              onInteractionEnd: widget.onInteractionEnd,
+            child: RepaintBoundary(
+              child: _hasBeenShown
+                  ? _PremiumNavigationControls(
+                      previewStateListenable: widget.previewStateListenable,
+                      onPreviewPageChanged: widget.onPreviewPageChanged,
+                      onPageNavigationRequested:
+                          widget.onPageNavigationRequested,
+                      onPreviousPageRequested: widget.onPreviousPageRequested,
+                      onNextPageRequested: widget.onNextPageRequested,
+                      onInteractionStart: widget.onInteractionStart,
+                      onInteractionEnd: widget.onInteractionEnd,
+                    )
+                  : const SizedBox.shrink(),
             ),
           ),
         ),
@@ -177,10 +184,6 @@ class _PremiumNavigationControls extends StatelessWidget {
                       );
                     },
                   ),
-                ),
-                const SizedBox(height: 8),
-                RepaintBoundary(
-                  child: PremiumBottomBar(state: effectivePageState),
                 ),
               ],
             );
