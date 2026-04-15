@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quran_image_flutter/quran_image_app.dart';
@@ -10,22 +12,24 @@ void main() async {
   _configureImageCache();
   PerfLogger.startFrameWatcher();
 
-  // Full-screen immersive mode (hides status bar and navigation bar)
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
   // Initialize dependency injection container
   await initDependencies();
 
   runApp(const QuranImageApp());
+
+  // Apply immersive mode after runApp so it does not block the first usable
+  // frame. Reader behavior is unchanged; the system UI still transitions away
+  // immediately after startup.
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky));
 }
 
 void _configureImageCache() {
   const bytesPerMb = 1024 * 1024;
   final imageCache = PaintingBinding.instance.imageCache;
 
-  // The reader keeps several page-line images warm ahead of the current page.
-  // The default 100 MB cache is too small for that working set at ~3x DPR,
-  // which causes evictions and repeated texture uploads during swipes.
-  imageCache.maximumSizeBytes = 192 * bytesPerMb;
-  imageCache.maximumSize = 200;
+  // The reader keeps nearby pages warm around the current page and may also
+  // hold recently previewed slider targets. This is still a bounded LRU cache,
+  // not a decoded cache of all 9,060 Quran line images.
+  imageCache.maximumSizeBytes = 180 * bytesPerMb;
+  imageCache.maximumSize = 300;
 }

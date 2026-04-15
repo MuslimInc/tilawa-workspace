@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/perf_logger.dart';
 import '../../domain/domain.dart';
 
 class PremiumBottomBar extends StatelessWidget {
@@ -9,8 +10,9 @@ class PremiumBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sw = PerfLogger.startTimer();
     final size = MediaQuery.sizeOf(context);
-    return Container(
+    final bottomBar = Container(
       margin: EdgeInsets.fromLTRB(
         size.width * 0.04,
         0,
@@ -66,5 +68,11 @@ class PremiumBottomBar extends StatelessWidget {
         ],
       ),
     );
+    PerfLogger.logElapsed(
+      sw,
+      widgetName: 'PremiumBottomBar',
+      message: 'build displayPage=${state.displayPage}',
+    );
+    return bottomBar;
   }
 }

@@ -10,6 +10,8 @@ export 'repositories/page_repository.dart';
 export 'repositories/quran_image_cache_repository.dart';
 export 'repositories/surah_header_repository.dart';
 export 'repositories/verse_marker_repository.dart';
+export 'services/decoded_quran_image_cache.dart';
+export 'services/quran_image_prewarmer.dart';
 export 'services/surah_header_banner_layout_policy.dart';
 export 'usecases/get_last_visited_page.dart';
 export 'usecases/prepare_quran_image_cache.dart';

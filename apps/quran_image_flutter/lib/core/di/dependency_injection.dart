@@ -52,6 +52,17 @@ Future<void> initDependencies() async {
     CloudflareQuranImageCacheRepository.new,
   );
 
+  sl.registerLazySingleton<DecodedQuranImageCache>(
+    FlutterDecodedQuranImageCache.new,
+  );
+
+  sl.registerFactory<QuranImagePrewarmer>(
+    () => QuranImagePrewarmService(
+      imageCacheRepository: sl<QuranImageCacheRepository>(),
+      decodedImageCache: sl<DecodedQuranImageCache>(),
+    ),
+  );
+
   // Use Cases
   sl.registerLazySingleton<GetLastVisitedPageUseCase>(
     () => GetLastVisitedPageUseCase(sl<LastVisitedPageRepository>()),

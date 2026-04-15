@@ -6,14 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/di/dependency_injection.dart';
 import '../../../domain/domain.dart';
-import '../../../page_mapping.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
 
 /// BLoC for managing navigation state and visibility.
 ///
 /// This BLoC handles:
-/// - Page navigation (next, previous, jump to page)
+/// - Page state synchronization after PageView settles
 /// - Navigation visibility (show/hide)
 /// - Auto-hide timer logic
 /// - User interaction tracking
@@ -46,10 +45,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<NavigationInteractionStarted>(_onInteractionStarted);
     on<NavigationInteractionEnded>(_onInteractionEnded);
     on<NavigationAutoHideChecked>(_onAutoHideChecked);
-    on<PagePreviewed>(_onPagePreviewed);
-    on<PageNavigated>(_onPageNavigated);
-    on<NextPageRequested>(_onNextPageRequested);
-    on<PreviousPageRequested>(_onPreviousPageRequested);
     on<PageChanged>(_onPageChanged);
     on<LastVisitedPageSaved>(_onLastVisitedPageSaved);
     on<NavigationRetryRequested>(_onRetryRequested);
@@ -72,154 +67,99 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     }
   }
 
-  Future<void> _onShown(
-    NavigationShown event,
-    Emitter<NavigationState> emit,
-  ) async {
+  // Visibility handlers are intentionally non-async.
+  //
+  // InMemoryNavigationVisibilityRepository returns SynchronousFuture from all
+  // methods. SynchronousFuture delivers its value synchronously to .then()
+  // callbacks — no microtask is scheduled. Using `await` inside an `async`
+  // function always suspends and posts a microtask resumption even when the
+  // awaited future is already complete. For rapid tap sequences that enqueue
+  // many NavigationToggled events, those microtask resumptions back up and
+  // delay the next vsync callback by 50-100ms.
+  //
+  // By using .then() in a non-async handler we avoid the async suspension
+  // entirely: the repository call, emit, and timer call all happen on the
+  // same event-loop turn as the BLoC event dispatch.
+
+  void _onShown(NavigationShown event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final visibility = await _visibilityRepository.show();
-      emit(currentState.copyWith(visibility: visibility));
-      _startAutoHideTimer();
+      _visibilityRepository.show().then((visibility) {
+        emit(currentState.copyWith(visibility: visibility));
+        _startAutoHideTimer();
+      });
     }
   }
 
-  Future<void> _onHidden(
-    NavigationHidden event,
-    Emitter<NavigationState> emit,
-  ) async {
+  void _onHidden(NavigationHidden event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final visibility = await _visibilityRepository.hide();
-      emit(currentState.copyWith(visibility: visibility));
-      _cancelAutoHideTimer();
+      _visibilityRepository.hide().then((visibility) {
+        emit(currentState.copyWith(visibility: visibility));
+        _cancelAutoHideTimer();
+      });
     }
   }
 
-  Future<void> _onToggled(
-    NavigationToggled event,
-    Emitter<NavigationState> emit,
-  ) async {
+  void _onToggled(NavigationToggled event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
       if (currentState.visibility.isVisible) {
-        // Hide if currently visible
-        final visibility = await _visibilityRepository.hide();
-        emit(currentState.copyWith(visibility: visibility));
-        _cancelAutoHideTimer();
+        _visibilityRepository.hide().then((visibility) {
+          emit(currentState.copyWith(visibility: visibility));
+          _cancelAutoHideTimer();
+        });
       } else {
-        // Show if currently hidden
-        final visibility = await _visibilityRepository.show();
-        emit(currentState.copyWith(visibility: visibility));
-        _startAutoHideTimer();
+        _visibilityRepository.show().then((visibility) {
+          emit(currentState.copyWith(visibility: visibility));
+          _startAutoHideTimer();
+        });
       }
     }
   }
 
-  Future<void> _onInteractionStarted(
+  void _onInteractionStarted(
     NavigationInteractionStarted event,
     Emitter<NavigationState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final visibility = await _visibilityRepository.startInteraction();
-      emit(currentState.copyWith(visibility: visibility));
-      _cancelAutoHideTimer(); // Pause timer during interaction
-    }
-  }
-
-  Future<void> _onInteractionEnded(
-    NavigationInteractionEnded event,
-    Emitter<NavigationState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is NavigationLoaded) {
-      final visibility = await _visibilityRepository.endInteraction();
-      emit(currentState.copyWith(visibility: visibility));
-      _startAutoHideTimer(); // Resume timer after interaction
-    }
-  }
-
-  Future<void> _onAutoHideChecked(
-    NavigationAutoHideChecked event,
-    Emitter<NavigationState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is NavigationLoaded) {
-      final shouldHide = await _visibilityRepository.shouldAutoHide(
-        AppDurations.sliderAutoHideSeconds,
-      );
-      if (shouldHide) {
-        final visibility = await _visibilityRepository.hide();
+      _visibilityRepository.startInteraction().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
         _cancelAutoHideTimer();
-      }
+      });
     }
   }
 
-  Future<void> _onPagePreviewed(
-    PagePreviewed event,
+  void _onInteractionEnded(
+    NavigationInteractionEnded event,
     Emitter<NavigationState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      final info = QuranPageMapping.getPageInfo(event.pageNumber);
-      final newPageState = currentState.pageState.copyWith(
-        previewPage: event.pageNumber,
-        juzTitle: info.juzTitle,
-        hizbTitle: info.hizbTitle,
-      );
-      emit(currentState.copyWith(pageState: newPageState));
+      _visibilityRepository.endInteraction().then((visibility) {
+        emit(currentState.copyWith(visibility: visibility));
+        _startAutoHideTimer();
+      });
     }
   }
 
-  Future<void> _onPageNavigated(
-    PageNavigated event,
+  void _onAutoHideChecked(
+    NavigationAutoHideChecked event,
     Emitter<NavigationState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
-      try {
-        final pageState = _pageRepository.navigateToPage(event.pageNumber);
-        // Clear preview after actual navigation
-        emit(
-          currentState.copyWith(
-            pageState: pageState.copyWith(clearPreviewPage: true),
-          ),
-        );
-        // Persist the newly visited page
-        add(LastVisitedPageSaved(pageState.currentPage));
-      } catch (e) {
-        debugPrint(
-          'NavigationBloc: Invalid page number ${event.pageNumber}: $e',
-        );
-      }
-    }
-  }
-
-  Future<void> _onNextPageRequested(
-    NextPageRequested event,
-    Emitter<NavigationState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is NavigationLoaded) {
-      final pageState = _pageRepository.nextPage();
-      emit(currentState.copyWith(pageState: pageState));
-      // Persist the newly visited page
-      add(LastVisitedPageSaved(pageState.currentPage));
-    }
-  }
-
-  Future<void> _onPreviousPageRequested(
-    PreviousPageRequested event,
-    Emitter<NavigationState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is NavigationLoaded) {
-      final pageState = _pageRepository.previousPage();
-      emit(currentState.copyWith(pageState: pageState));
-      // Persist the newly visited page
-      add(LastVisitedPageSaved(pageState.currentPage));
+      _visibilityRepository
+          .shouldAutoHide(AppDurations.sliderAutoHideSeconds)
+          .then((shouldHide) {
+            if (shouldHide) {
+              _visibilityRepository.hide().then((visibility) {
+                emit(currentState.copyWith(visibility: visibility));
+                _cancelAutoHideTimer();
+              });
+            }
+          });
     }
   }
 
@@ -250,7 +190,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       try {
         await _saveLastVisitedPageUseCase.execute(event.pageNumber);
       } catch (e) {
-        debugPrint('Failed to save last visited page: $e');
+        debugPrint('[NavigationBloc] failed to save last visited page: $e');
       }
     });
   }

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_image_flutter/core/constants/surah_header_constants.dart';
@@ -6,6 +8,9 @@ import 'package:quran_image_flutter/domain/entities/verse_marker_data.dart';
 import 'qcf_marker_path.dart';
 
 class VerseMarker extends StatelessWidget {
+  static const int _maxVerseNumber = 286;
+  static const int _warmUpBatchSize = 20;
+  static final Set<int> _warmedMarkerSizes = <int>{};
   static final Map<int, String> _glyphCache = <int, String>{};
   static final Map<int, TextPainter> _textPainterCache = <int, TextPainter>{};
 
@@ -23,7 +28,7 @@ class VerseMarker extends StatelessWidget {
   static String _glyphFor(int number) {
     // quran_numbers.ttf contains exactly 286 pre-composed ligatures starting from U+E900.
     // 1 -> U+E900, 2 -> U+E901 ... 286 -> U+EA1D.
-    final int clamped = number.clamp(1, 286);
+    final int clamped = number.clamp(1, _maxVerseNumber);
     return _glyphCache.putIfAbsent(clamped, () {
       const int baseCodepoint = 0xE900;
       final int targetCodepoint = baseCodepoint + clamped - 1;
@@ -31,9 +36,80 @@ class VerseMarker extends StatelessWidget {
     });
   }
 
+  static Future<void> warmUpAll({
+    required double markerWidth,
+    int batchSize = _warmUpBatchSize,
+    Duration yieldDelay = Duration.zero,
+  }) async {
+    await warmUpNumbers(
+      markerWidth: markerWidth,
+      verseNumbers: Iterable<int>.generate(_maxVerseNumber, (i) => i + 1),
+      batchSize: batchSize,
+      yieldDelay: yieldDelay,
+    );
+  }
+
+  /// Warms a targeted set of ayah markers at the actual render size.
+  ///
+  /// This is used on startup to cover only the initial page and the immediate
+  /// swipe target. The remaining ayah numbers are warmed in the background once
+  /// the reader is already interactive.
+  static Future<void> warmUpNumbers({
+    required double markerWidth,
+    required Iterable<int> verseNumbers,
+    int batchSize = _warmUpBatchSize,
+    Duration yieldDelay = Duration.zero,
+  }) async {
+    final markerHeight = markerWidth * (0.06527778 / 0.05138889);
+    final markerSize = Size(markerWidth, markerHeight);
+
+    // Pre-compute paths (keyed by size) — triggers Impeller tessellation.
+    final paths = _QcfMarkerPainter._pathsFor(markerSize);
+    final numbers =
+        verseNumbers
+            .map((number) => number.clamp(1, _maxVerseNumber))
+            .toSet()
+            .toList()
+          ..sort();
+
+    // Pre-populate TextPainters for the requested verse numbers at this size.
+    // _textPainterFor calls layout() on first creation. We yield every
+    // _warmUpBatchSize iterations so the UI thread never blocks for more than
+    // one frame budget at a time (~8 ms per batch at 60 Hz).
+    for (var i = 0; i < numbers.length; i++) {
+      _textPainterFor(numbers[i], markerWidth);
+      if ((i + 1) % batchSize == 0) {
+        await Future<void>.delayed(yieldDelay);
+      }
+    }
+
+    final markerSizeKey =
+        (markerWidth * 1000).round() ^ ((markerHeight * 1000).round() << 1);
+    if (_warmedMarkerSizes.add(markerSizeKey)) {
+      // Draw one marker on an offscreen canvas so Impeller compiles render
+      // pipelines and tessellates the path before the first real paint.
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(
+        recorder,
+        Rect.fromLTWH(0, 0, markerWidth * 2, markerHeight * 2),
+      );
+      canvas.drawPath(paths.shadow, _VerseMarkersPainter._shadowPaint);
+      canvas.drawPath(paths.main, _VerseMarkersPainter._fillPaint);
+      _textPainterFor(
+        numbers.isEmpty ? 1 : numbers.first,
+        markerWidth,
+      ).paint(canvas, Offset.zero);
+      recorder.endRecording().dispose();
+    }
+  }
+
+  /// Deprecated warm-up that only pre-loads ayah #1. Use [warmUpAll] instead.
+  static Future<void> warmUpFont({double markerWidth = 20.0}) =>
+      warmUpAll(markerWidth: markerWidth);
+
   static TextPainter _textPainterFor(int verseNumber, double width) {
     final widthKey = (width * 100).round();
-    final cacheKey = (widthKey << 9) ^ verseNumber.clamp(1, 286);
+    final cacheKey = (widthKey << 9) ^ verseNumber.clamp(1, _maxVerseNumber);
     return _textPainterCache.putIfAbsent(cacheKey, () {
       final painter = TextPainter(
         text: TextSpan(

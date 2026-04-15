@@ -1,17 +1,14 @@
-import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_image_flutter/core/constants/surah_header_constants.dart';
 import 'package:quran_image_flutter/core/design_tokens/design_tokens.dart';
 import 'package:quran_image_flutter/core/di/dependency_injection.dart';
 import 'package:quran_image_flutter/core/perf_logger.dart';
-import 'package:quran_image_flutter/domain/entities/page_state.dart';
-import 'package:quran_image_flutter/domain/repositories/quran_image_cache_repository.dart';
+import 'package:quran_image_flutter/domain/domain.dart';
+import 'package:quran_image_flutter/page_mapping.dart';
 import 'package:quran_image_flutter/presentation/presentation.dart';
-import 'package:quran_image_flutter/presentation/widgets/premium_bottom_bar.dart';
-import 'package:quran_image_flutter/quran_image_page.dart';
+import 'package:quran_image_flutter/verse_marker.dart';
 
 class QuranImageReader extends StatefulWidget {
   const QuranImageReader({super.key});
@@ -24,17 +21,25 @@ class _QuranImageReaderState extends State<QuranImageReader> {
   late final PageController _pageController;
   late int _lastSettledPageIndex;
 
-  // How many pages ahead/behind to pre-warm into Flutter's image cache.
-  static const int _prewarmRadius = 1;
+  // Stable cacheWidth resolved from device metrics — updated in didChangeDependencies.
+  int _cacheWidth = 0;
+  late final QuranImagePrewarmer _imagePrewarmer;
+  late final ValueNotifier<PageState?> _previewPageStateNotifier;
+  bool _backgroundMarkerWarmUpStarted = false;
+  Timer? _backgroundMarkerWarmUpTimer;
 
-  // Track the last center page we pre-warmed to avoid redundant work on every
-  // scroll tick when the nearest page hasn't changed.
-  int _lastPrewarmedCenter = -1;
-  int _lastPrewarmedCacheWidth = -1;
+  // Throttle slider preview updates to avoid excessive rebuilds during drags.
+  // 50ms limit = max 20 updates/second, down from 30-60 updates/second.
+  DateTime _lastPreviewUpdateTime = DateTime(2000);
+  static const _previewUpdateThrottle = Duration(milliseconds: 50);
 
   @override
   void initState() {
+    final sw = PerfLogger.startTimer();
     super.initState();
+    _imagePrewarmer = sl<QuranImagePrewarmer>();
+    _previewPageStateNotifier = ValueNotifier<PageState?>(null);
+
     final currentState = context.read<NavigationBloc>().state;
     final initialIndex = currentState is NavigationLoaded
         ? currentState.pageState.pageIndex
@@ -46,15 +51,39 @@ class _QuranImageReaderState extends State<QuranImageReader> {
     // page images *during* the swipe, not only after it settles.
     _pageController.addListener(_onScrollPositionChanged);
 
-    // Pre-warm the initial page and its neighbours after the first frame so we
-    // don't block the initial build.
+    // Pre-warm images after the first frame so we don't block the initial build.
+    // Verse marker warm-up (TextPainters + Impeller paths) was already done
+    // during PreloadingScreen._prewarmInitialPage before the reader opened.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _prewarmAround(initialIndex + 1);
+      if (!mounted) return;
+      _imagePrewarmer.startInitialPrewarm(
+        currentPageNumber: initialIndex + 1,
+        cacheWidth: _cacheWidth,
+      );
+      _scheduleBackgroundMarkerWarmUp();
     });
+
+    PerfLogger.logElapsed(
+      sw,
+      widgetName: 'QuranImageReader',
+      message: 'initState initialPage=${initialIndex + 1}',
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final view = View.of(context);
+    final dpr = view.devicePixelRatio;
+    final screenWidth = view.physicalSize.width / dpr;
+    _cacheWidth = (screenWidth * dpr).round();
   }
 
   @override
   void dispose() {
+    _backgroundMarkerWarmUpTimer?.cancel();
+    _previewPageStateNotifier.dispose();
+    _imagePrewarmer.dispose();
     _pageController.removeListener(_onScrollPositionChanged);
     _pageController.dispose();
     super.dispose();
@@ -67,68 +96,191 @@ class _QuranImageReaderState extends State<QuranImageReader> {
     if (page == null) return;
     // Round to nearest page index (0-based) then convert to 1-based page number.
     final nearest = page.round() + 1;
-    _prewarmAround(nearest);
+    _imagePrewarmer.prewarmCurrentTarget(
+      pageNumber: nearest,
+      cacheWidth: _cacheWidth,
+    );
   }
 
-  /// Pre-warms [_prewarmRadius] pages on each side of [centerPageNumber] by
-  /// pushing all their line images into Flutter's [ImageCache] ahead of time.
-  ///
-  /// Decoding happens off the raster thread (Impeller/Skia's image decoder)
-  /// while the current page is already visible, so the next page arrives
-  /// pre-decoded and renders in a single frame instead of 15+ frames.
-  void _prewarmAround(int centerPageNumber) {
-    final repo = sl<QuranImageCacheRepository>();
-    if (!repo.status.isReady) return;
+  void _scheduleBackgroundMarkerWarmUp() {
+    if (_backgroundMarkerWarmUpStarted) return;
+    _backgroundMarkerWarmUpStarted = true;
 
-    // Compute cacheWidth from the current device pixel ratio and screen width.
-    // This must match the cacheWidth used in _QuranLineImage exactly, otherwise
-    // Flutter will decode a second copy at a different resolution.
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message: 'background verse marker warm-up scheduled delayMs=700',
+    );
+    _backgroundMarkerWarmUpTimer = Timer(const Duration(milliseconds: 700), () {
+      _backgroundMarkerWarmUpTimer = null;
+      unawaited(_warmRemainingVerseMarkersInBackground());
+    });
+  }
+
+  Future<void> _warmRemainingVerseMarkersInBackground() async {
+    if (!mounted) return;
+
     final view = View.of(context);
-    final dpr = view.devicePixelRatio;
-    final screenWidth = view.physicalSize.width / dpr;
-    final cacheWidth = (screenWidth * dpr).round();
-    if (_lastPrewarmedCenter == centerPageNumber &&
-        _lastPrewarmedCacheWidth == cacheWidth) {
+    final markerWidth =
+        (view.physicalSize.width / view.devicePixelRatio) * 0.05138889;
+    final warmUpTimer = PerfLogger.startTimer();
+    // batchSize=50 with yieldDelay=zero: ~6 yields total, minimal overhead.
+    // Previous: batchSize=8, yieldDelay=16ms → 36 yields × 16ms = 576ms delay alone.
+    await VerseMarker.warmUpAll(
+      markerWidth: markerWidth,
+      batchSize: 50,
+      yieldDelay: Duration.zero,
+    );
+    PerfLogger.logElapsed(
+      warmUpTimer,
+      widgetName: 'QuranImageReader',
+      message:
+          'background verse marker warm-up completed '
+          'markerWidth=${markerWidth.toStringAsFixed(1)} '
+          'glyphs=286',
+    );
+  }
+
+  void _updatePreviewPage(int displayPage) {
+    // Throttle: max 20 updates/second (50ms interval) to reduce rebuild pressure.
+    final now = DateTime.now();
+    if (now.difference(_lastPreviewUpdateTime) < _previewUpdateThrottle) {
+      return;
+    }
+    _lastPreviewUpdateTime = now;
+
+    final currentState = context.read<NavigationBloc>().state;
+    if (currentState is! NavigationLoaded) return;
+
+    final currentPreviewState = _previewPageStateNotifier.value;
+    if (displayPage == currentState.pageState.currentPage &&
+        currentPreviewState == null) {
+      return;
+    }
+    if (currentPreviewState?.displayPage == displayPage) {
       return;
     }
 
-    _lastPrewarmedCenter = centerPageNumber;
-    _lastPrewarmedCacheWidth = cacheWidth;
-
-    final first = (centerPageNumber - _prewarmRadius).clamp(
-      1,
-      PageState.quranPageCount,
+    final pageInfo = QuranPageMapping.getPageInfo(displayPage);
+    _previewPageStateNotifier.value = currentState.pageState.copyWith(
+      previewPage: displayPage,
+      juzTitle: pageInfo.juzTitle,
+      hizbTitle: pageInfo.hizbTitle,
     );
-    final last = (centerPageNumber + _prewarmRadius).clamp(
-      1,
-      PageState.quranPageCount,
+    _imagePrewarmer.prewarmPreviewTarget(
+      pageNumber: displayPage,
+      cacheWidth: _cacheWidth,
     );
+  }
 
-    PerfLogger.log('[Prewarm] pages $first–$last  cacheWidth=$cacheWidth');
+  void _clearPreviewPage() {
+    if (_previewPageStateNotifier.value == null) return;
+    _previewPageStateNotifier.value = null;
+  }
 
-    for (var page = first; page <= last; page++) {
-      for (var line = 1; line <= SurahHeaderConstants.lineCount; line++) {
-        final path = repo.lineImageFilePath(
-          pageNumber: page,
-          oneBasedLineNumber: line,
-        );
-        if (path == null) continue;
-
-        // precacheImage pushes the image through Flutter's codec pipeline and
-        // into the ImageCache. Errors are silently swallowed — a missing file
-        // will just fall through to the normal error handler in _QuranLineImage.
-        precacheImage(
-          buildQuranLineImageProvider(imagePath: path, cacheWidth: cacheWidth),
-          context,
-        );
-      }
+  void _navigateToPage(int pageNumber) {
+    final safePageNumber = pageNumber
+        .clamp(1, PageState.quranPageCount)
+        .toInt();
+    final targetIndex = safePageNumber - 1;
+    if (targetIndex == _lastSettledPageIndex) {
+      _clearPreviewPage();
+      return;
     }
+
+    if (!_pageController.hasClients) {
+      return;
+    }
+
+    final currentIndex = _pageController.page?.round() ?? 0;
+    final delta = (targetIndex - currentIndex).abs();
+
+    if (delta > 3) {
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'slider jump delta=$delta '
+            'from=${currentIndex + 1} to=$safePageNumber',
+      );
+      unawaited(
+        _imagePrewarmer
+            .prewarmJumpTargetAndWait(
+              pageNumber: safePageNumber,
+              cacheWidth: _cacheWidth,
+              timeout: const Duration(milliseconds: 1500),
+            )
+            .then((_) {
+              if (!mounted) return;
+              _pageController.jumpToPage(targetIndex);
+            }),
+      );
+      return;
+    }
+
+    _imagePrewarmer.prewarmJumpTarget(
+      pageNumber: safePageNumber,
+      cacheWidth: _cacheWidth,
+    );
+    _pageController.animateToPage(
+      targetIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onReaderPageChanged(int pageNumber) {
+    final pageIndex = pageNumber - 1;
+    _lastSettledPageIndex = pageIndex;
+    _clearPreviewPage();
+    PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
+    context.read<NavigationBloc>().add(PageChanged(pageNumber));
+    _imagePrewarmer.prewarmSettledWindow(
+      pageNumber: pageNumber,
+      cacheWidth: _cacheWidth,
+    );
+  }
+
+  void _navigateToPreviousPage() {
+    final currentState = context.read<NavigationBloc>().state;
+    if (currentState is! NavigationLoaded ||
+        currentState.pageState.currentPage <= 1) {
+      return;
+    }
+    _clearPreviewPage();
+    _navigateToPage(currentState.pageState.currentPage - 1);
+  }
+
+  void _navigateToNextPage() {
+    final currentState = context.read<NavigationBloc>().state;
+    if (currentState is! NavigationLoaded ||
+        currentState.pageState.currentPage >=
+            currentState.pageState.totalPages) {
+      return;
+    }
+    _clearPreviewPage();
+    _navigateToPage(currentState.pageState.currentPage + 1);
+  }
+
+  void _toggleNavigation() {
+    context.read<NavigationBloc>().add(const NavigationToggled());
+  }
+
+  void _showNavigation() {
+    context.read<NavigationBloc>().add(const NavigationShown());
+  }
+
+  void _onNavigationInteractionStarted() {
+    context.read<NavigationBloc>().add(const NavigationInteractionStarted());
+  }
+
+  void _onNavigationInteractionEnded() {
+    context.read<NavigationBloc>().add(const NavigationInteractionEnded());
   }
 
   @override
   Widget build(BuildContext context) {
+    final sw = PerfLogger.startTimer();
     final padding = MediaQuery.paddingOf(context);
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: AppColors.pageBackground,
       body: Padding(
         padding: EdgeInsets.only(
@@ -139,204 +291,28 @@ class _QuranImageReaderState extends State<QuranImageReader> {
         ),
         child: Stack(
           children: [
-            // Background Noise Texture
-            const Positioned.fill(child: _TactileNoiseBackground()),
-
-            BlocListener<NavigationBloc, NavigationState>(
-              listenWhen: (previous, current) {
-                if (previous is NavigationLoaded &&
-                    current is NavigationLoaded) {
-                  return previous.pageState.currentPage !=
-                      current.pageState.currentPage;
-                }
-                return false;
-              },
-              listener: (context, state) {
-                if (state is NavigationLoaded) {
-                  final targetIndex = state.pageState.pageIndex;
-                  if (targetIndex == _lastSettledPageIndex) {
-                    return;
-                  }
-
-                  if (_pageController.hasClients) {
-                    final currentIndex = _pageController.page?.round() ?? 0;
-                    final delta = (targetIndex - currentIndex).abs();
-
-                    if (delta > 3) {
-                      _pageController.jumpToPage(targetIndex);
-                    } else {
-                      _pageController.animateToPage(
-                        targetIndex,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  }
-                }
-              },
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final bool isLandscape =
-                      constraints.maxWidth > constraints.maxHeight;
-                  return GestureDetector(
-                    onTap: () => context.read<NavigationBloc>().add(
-                      const NavigationToggled(),
-                    ),
-                    // In landscape, vertical drags scroll page content.
-                    onVerticalDragStart: isLandscape
-                        ? null
-                        : (_) => context.read<NavigationBloc>().add(
-                            const NavigationShown(),
-                          ),
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: PageState.quranPageCount,
-                      allowImplicitScrolling: false,
-                      physics: const PageScrollPhysics(),
-                      onPageChanged: (index) {
-                        _lastSettledPageIndex = index;
-                        PerfLogger.log(
-                          '[PageView] swiped to page ${index + 1}',
-                        );
-                        context.read<NavigationBloc>().add(
-                          PageChanged(index + 1),
-                        );
-                        // Pre-warm the pages around the newly settled page.
-                        _prewarmAround(index + 1);
-                      },
-                      itemBuilder: (_, index) =>
-                          _KeepAliveQuranPage(pageNumber: index + 1),
-                    ),
-                  );
-                },
-              ),
+            QuranReaderViewport(
+              pageController: _pageController,
+              onToggleNavigation: _toggleNavigation,
+              onShowNavigation: _showNavigation,
+              onPageChanged: _onReaderPageChanged,
             ),
 
-            const _PremiumNavigationOverlay(),
+            PremiumNavigationOverlay(
+              previewStateListenable: _previewPageStateNotifier,
+              onPreviewPageChanged: _updatePreviewPage,
+              onPageNavigationRequested: _navigateToPage,
+              onPreviousPageRequested: _navigateToPreviousPage,
+              onNextPageRequested: _navigateToNextPage,
+              onInteractionStart: _onNavigationInteractionStarted,
+              onInteractionEnd: _onNavigationInteractionEnded,
+            ),
           ],
         ),
       ),
     );
+
+    PerfLogger.logElapsed(sw, widgetName: 'QuranImageReader', message: 'build');
+    return scaffold;
   }
-}
-
-class _PremiumNavigationOverlay extends StatelessWidget {
-  const _PremiumNavigationOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: BlocSelector<NavigationBloc, NavigationState, bool>(
-        selector: (state) {
-          return state is NavigationLoaded && state.visibility.isVisible;
-        },
-        builder: (context, isVisible) {
-          return AnimatedSlide(
-            offset: isVisible ? Offset.zero : const Offset(0, 1),
-            duration: const Duration(milliseconds: AppDurations.sliderShowHide),
-            curve: Curves.easeOutCubic,
-            child: IgnorePointer(
-              ignoring: !isVisible,
-              child: const RepaintBoundary(child: _PremiumNavigationControls()),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _PremiumNavigationControls extends StatelessWidget {
-  const _PremiumNavigationControls();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            return NavigationSliderOverlay(screenWidth: constraints.maxWidth);
-          },
-        ),
-        const SizedBox(height: 8),
-        BlocSelector<NavigationBloc, NavigationState, PageState?>(
-          selector: (state) {
-            return state is NavigationLoaded ? state.pageState : null;
-          },
-          builder: (context, pageState) {
-            if (pageState == null) {
-              return const SizedBox.shrink();
-            }
-            return PremiumBottomBar(state: pageState);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _TactileNoiseBackground extends StatelessWidget {
-  static final _painter = _NoisePainter();
-
-  const _TactileNoiseBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(painter: _painter, isComplex: true, willChange: false),
-    );
-  }
-}
-
-class _KeepAliveQuranPage extends StatefulWidget {
-  const _KeepAliveQuranPage({required this.pageNumber});
-
-  final int pageNumber;
-
-  @override
-  State<_KeepAliveQuranPage> createState() => _KeepAliveQuranPageState();
-}
-
-class _KeepAliveQuranPageState extends State<_KeepAliveQuranPage>
-    with AutomaticKeepAliveClientMixin<_KeepAliveQuranPage> {
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return QuranImagePage(pageNumber: widget.pageNumber);
-  }
-}
-
-class _NoisePainter extends CustomPainter {
-  static List<Offset>? _cachedPoints;
-  static Size? _cachedSize;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (_cachedPoints == null || _cachedSize != size) {
-      final random = math.Random(42);
-      _cachedPoints = List.generate(2000, (_) {
-        return Offset(
-          random.nextDouble() * size.width,
-          random.nextDouble() * size.height,
-        );
-      });
-      _cachedSize = size;
-    }
-
-    final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.02)
-      ..strokeWidth = 1.0;
-
-    canvas.drawPoints(PointMode.points, _cachedPoints!, paint);
-  }
-
-  @override
-  bool shouldRepaint(oldDelegate) => false;
 }

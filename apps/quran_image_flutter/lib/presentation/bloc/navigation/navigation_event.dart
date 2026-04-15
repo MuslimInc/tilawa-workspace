@@ -45,36 +45,6 @@ class NavigationAutoHideChecked extends NavigationEvent {
   const NavigationAutoHideChecked();
 }
 
-/// Event to preview a page during slider drag (no navigation)
-class PagePreviewed extends NavigationEvent {
-  final int pageNumber;
-
-  const PagePreviewed(this.pageNumber);
-
-  @override
-  List<Object?> get props => [pageNumber];
-}
-
-/// Event to navigate to a specific page
-class PageNavigated extends NavigationEvent {
-  final int pageNumber;
-
-  const PageNavigated(this.pageNumber);
-
-  @override
-  List<Object?> get props => [pageNumber];
-}
-
-/// Event to navigate to next page
-class NextPageRequested extends NavigationEvent {
-  const NextPageRequested();
-}
-
-/// Event to navigate to previous page
-class PreviousPageRequested extends NavigationEvent {
-  const PreviousPageRequested();
-}
-
 /// Event triggered when page changes from PageView
 class PageChanged extends NavigationEvent {
   final int pageNumber;
@@ -89,11 +59,11 @@ class PageChanged extends NavigationEvent {
 ///
 /// This event is triggered whenever the user navigates to a new page,
 /// ensuring the position is saved for future app launches.
-/// Event to retry initialization after a failure.
 class NavigationRetryRequested extends NavigationEvent {
   const NavigationRetryRequested();
 }
 
+/// Event to persist the last committed page after debounce.
 class LastVisitedPageSaved extends NavigationEvent {
   final int pageNumber;
 

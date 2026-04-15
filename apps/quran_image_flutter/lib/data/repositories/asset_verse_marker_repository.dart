@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/perf_logger.dart';
 import '../../domain/entities/verse_marker_data.dart';
 import '../../domain/repositories/verse_marker_repository.dart';
 
@@ -12,8 +13,18 @@ import '../../domain/repositories/verse_marker_repository.dart';
 ///   - **Production**: single `verse_marker_coordinates.json` file.
 ///   - **Debug**: per-page files under `quran_marker_debug_coordinates/`.
 class AssetVerseMarkerRepository implements VerseMarkerRepository {
+  static const String _logSource = 'AssetVerseMarkerRepository';
+
   Map<String, List<dynamic>>? _markerData;
   final Map<int, List<VerseMarkerData>> _cache = {};
+
+  // Production-mode flat buffer and page-offset index for lazy decoding.
+  // Storing the raw Float64List avoids a 60ms unpack-all spike on init;
+  // individual pages are decoded on first access (~0.1ms each).
+  Float64List? _flatBuffer;
+  // Maps pageKey → offset in _flatBuffer where that page's marker data starts
+  // (points to the markerCount slot, not the pageKey slot).
+  Map<int, int>? _pageOffsets;
   Future<void>? _initFuture;
 
   MarkerDataSource _dataSource = MarkerDataSource.production;
@@ -21,6 +32,12 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
   double _preloadProgress = 0.0;
   bool _isPreloading = false;
   bool _isInitialized = false;
+
+  /// Notified once when the repository transitions to initialized.
+  ///
+  /// Individual page widgets can listen to this instead of the whole reader
+  /// calling setState, avoiding a full tree rebuild on marker ready.
+  final ValueNotifier<bool> initializedNotifier = ValueNotifier(false);
 
   bool get isInitialized => _isInitialized;
 
@@ -50,12 +67,18 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
     if (_isInitialized && _dataSource == targetSource) {
+      _log('init skipped alreadyInitialized=true source=${targetSource.name}');
       return;
     }
     if (_initFuture != null) {
+      _log('init joined inFlight=true source=${_dataSource.name}');
       return _initFuture;
     }
 
+    _log(
+      'init requested source=${targetSource.name} '
+      'preloadAllPages=${preloadAllPages ?? (_dataSource == MarkerDataSource.debug)}',
+    );
     _initFuture = _init(
       forceDebugSource: forceDebugSource,
       preloadAllPages: preloadAllPages,
@@ -71,6 +94,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     required bool forceDebugSource,
     required bool? preloadAllPages,
   }) async {
+    final timer = PerfLogger.startTimer();
     _dataSource = forceDebugSource
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
@@ -79,8 +103,12 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
         preloadAllPages ?? (_dataSource == MarkerDataSource.debug);
 
     try {
+      _log(
+        'init started source=${_dataSource.name} '
+        'shouldPreload=$shouldPreload',
+      );
       if (_dataSource == MarkerDataSource.debug) {
-        debugPrint('AssetVerseMarkerRepository: DEBUG mode – per-page files');
+        debugPrint('[AssetVerseMarkerRepository] DEBUG mode - per-page files');
         _markerData = {};
         _cache.clear();
         _preloadProgress = 0.0;
@@ -90,22 +118,71 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
           await _preloadAllDebugPages();
         }
       } else {
-        final raw = await rootBundle.loadString(
+        final loadTimer = PerfLogger.startTimer();
+        // Use load() instead of loadString() — returns ByteData without
+        // the ~70ms UTF-16 string conversion on the main thread.
+        final byteData = await rootBundle.load(
           'assets/data/verse_marker_coordinates.json',
         );
-        _markerData = await compute(_decodeMarkerDataMap, raw);
-        _cache.clear();
+        final bytes = byteData.buffer.asUint8List(
+          byteData.offsetInBytes,
+          byteData.lengthInBytes,
+        );
+        PerfLogger.logElapsed(
+          loadTimer,
+          widgetName: _logSource,
+          message: 'production marker asset loaded bytes=${bytes.length}',
+        );
+        final decodeTimer = PerfLogger.startTimer();
+        // JSON decode + flat-pack both run on the isolate.
+        // Uint8List transfers zero-copy across isolate boundary.
+        final flat = await compute(_decodeMarkersFlatPackedFromBytes, bytes);
+        PerfLogger.logElapsed(
+          decodeTimer,
+          widgetName: _logSource,
+          message: 'production marker data decoded (flat packed)',
+        );
+        // Build a lightweight page-offset index on the UI thread.
+        // This is O(pageCount) integer reads — ~0.1ms for 604 pages.
+        // Individual pages are decoded lazily in getMarkersForPage(), so
+        // the 60ms "unpack all 6000 VerseMarkerData objects at once" spike
+        // (frame #52 pattern) is eliminated entirely.
+        _markerData = {};
+        _flatBuffer = flat;
+        final offsets = <int, int>{};
+        var i = 0;
+        final pageCount = flat[i++].toInt();
+        for (var p = 0; p < pageCount; p++) {
+          final pageKey = flat[i++].toInt();
+          final markerCount = flat[i++].toInt();
+          offsets[pageKey] = i; // points to first sura field of first marker
+          i += markerCount * 4; // skip past this page's marker data
+        }
+        _pageOffsets = offsets;
         _preloadProgress = 1.0;
         _isPreloading = false;
         debugPrint(
-          'AssetVerseMarkerRepository: '
-          'Loaded ${_markerData!.length} pages',
+          '[AssetVerseMarkerRepository] '
+          'Indexed ${offsets.length} pages (lazy decode)',
         );
       }
       _isInitialized = true;
+      initializedNotifier.value = true;
+      PerfLogger.logElapsed(
+        timer,
+        widgetName: _logSource,
+        message:
+            'init completed source=${_dataSource.name} '
+            'pages=${_pageOffsets?.length ?? _markerData?.length ?? 0}',
+      );
     } catch (e) {
       _isInitialized = false;
-      debugPrint('AssetVerseMarkerRepository init error: $e');
+      PerfLogger.logElapsed(
+        timer,
+        widgetName: _logSource,
+        message: 'init failed source=${_dataSource.name}',
+      );
+      debugPrint('[AssetVerseMarkerRepository] init error: $e');
       rethrow;
     }
   }
@@ -114,10 +191,11 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
   ///
   /// Progress tracks *completed* loads so the UI shows accurate data.
   Future<void> _preloadAllDebugPages() async {
+    final timer = PerfLogger.startTimer();
     _isPreloading = true;
     _preloadProgress = 0.0;
 
-    debugPrint('AssetVerseMarkerRepository: Preloading all 604 debug pages...');
+    debugPrint('[AssetVerseMarkerRepository] preloading all 604 debug pages');
 
     const totalPages = 604;
     const batchSize = 25; // Process in small batches to avoid isolate overhead
@@ -145,8 +223,13 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     _preloadProgress = 1.0;
     _isPreloading = false;
 
-    debugPrint('AssetVerseMarkerRepository: ✓ Preloaded all $totalPages pages');
-    debugPrint('AssetVerseMarkerRepository: Cached ${_cache.length} pages');
+    debugPrint('[AssetVerseMarkerRepository] preloaded all $totalPages pages');
+    debugPrint('[AssetVerseMarkerRepository] cached ${_cache.length} pages');
+    PerfLogger.logElapsed(
+      timer,
+      widgetName: _logSource,
+      message: 'debug preload completed pages=${_cache.length}',
+    );
   }
 
   /// Switches between production and debug data sources.
@@ -155,6 +238,9 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     bool preloadAllPages = true,
   }) async {
     if (_dataSource == source) return;
+    _log(
+      'setDataSource source=${source.name} preloadAllPages=$preloadAllPages',
+    );
     _dataSource = source;
     _cache.clear();
     _preloadProgress = 0.0;
@@ -163,7 +249,27 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       final raw = await rootBundle.loadString(
         'assets/data/verse_marker_coordinates.json',
       );
-      _markerData = await compute(_decodeMarkerDataMap, raw);
+      final flat = await compute(_decodeMarkersFlatPacked, raw);
+      _markerData = {};
+      var i = 0;
+      final pageCount = flat[i++].toInt();
+      for (var p = 0; p < pageCount; p++) {
+        final pageKey = flat[i++].toInt();
+        final markerCount = flat[i++].toInt();
+        final markers = <VerseMarkerData>[];
+        for (var m = 0; m < markerCount; m++) {
+          markers.add(
+            VerseMarkerData(
+              sura: flat[i++].toInt(),
+              ayah: flat[i++].toInt(),
+              line: flat[i++].toInt(),
+              centerX: flat[i++].toDouble(),
+            ),
+          );
+        }
+        _cache[pageKey] = markers;
+      }
+      _log('setDataSource production loaded pages=${_cache.length}');
       _isInitialized = true;
       _preloadProgress = 1.0;
       _isPreloading = false;
@@ -200,6 +306,32 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
   }
 
   List<VerseMarkerData> _buildMarkersFromProductionSource(int pageNumber) {
+    // Lazy flat-buffer decode: read only this page's slice.
+    final flat = _flatBuffer;
+    final offsets = _pageOffsets;
+    if (flat != null && offsets != null) {
+      final offset = offsets[pageNumber];
+      if (offset == null) return [];
+      // At offset-1 is the markerCount (we stored offset pointing past it,
+      // but the index stores the position of the first sura field).
+      // Re-derive markerCount from the buffer: it's at offset-1.
+      final markerCount = flat[offset - 1].toInt();
+      final markers = <VerseMarkerData>[];
+      var i = offset;
+      for (var m = 0; m < markerCount; m++) {
+        markers.add(
+          VerseMarkerData(
+            sura: flat[i++].toInt(),
+            ayah: flat[i++].toInt(),
+            line: flat[i++].toInt(),
+            centerX: flat[i++],
+          ),
+        );
+      }
+      return markers;
+    }
+
+    // Fallback: legacy _markerData path (debug mode / setDataSource).
     final entries = _markerData?[pageNumber.toString()];
     if (entries == null) return [];
 
@@ -252,7 +384,9 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
       _cache[pageNumber] = markers;
     } catch (e) {
-      debugPrint('Error loading debug page $pageNumber: $e');
+      debugPrint(
+        '[AssetVerseMarkerRepository] error loading page $pageNumber: $e',
+      );
     }
   }
 
@@ -266,9 +400,53 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
   @override
   void dispose() {}
+
+  static void _log(String message) {
+    PerfLogger.log(widgetName: _logSource, message: message);
+  }
 }
 
-Map<String, List<dynamic>> _decodeMarkerDataMap(String raw) {
+/// Decodes the production marker JSON into a [Float64List] for zero-copy
+/// transfer across the isolate boundary. [Float64List] is a typed-data buffer
+/// that Dart transfers by moving the underlying memory block rather than
+/// copying each element — critical for ~24 000-element payloads.
+///
+/// Format (all values stored as doubles):
+///   [pageCount, page1Key, page1MarkerCount, sura, ayah, line, centerX, ...]
+/// Variant that accepts raw [Uint8List] bytes so the caller can use
+/// [rootBundle.load] (ByteData) instead of [rootBundle.loadString] — avoiding
+/// a ~70ms UTF-16 string allocation on the main thread.
+///
+/// UTF-8 decode + JSON parse + flat-pack all execute on the isolate.
+Float64List _decodeMarkersFlatPackedFromBytes(Uint8List bytes) {
+  return _decodeMarkersFlatPacked(utf8.decode(bytes));
+}
+
+Float64List _decodeMarkersFlatPacked(String raw) {
   final decoded = json.decode(raw) as Map<String, dynamic>;
-  return decoded.map((k, v) => MapEntry(k, v as List<dynamic>));
+
+  // First pass: count total elements so we can allocate exactly once.
+  var totalElements = 1; // pageCount header
+  for (final entry in decoded.entries) {
+    final markerCount = (entry.value as List<dynamic>).length;
+    totalElements +=
+        2 + markerCount * 4; // pageKey + markerCount + 4 fields each
+  }
+
+  final result = Float64List(totalElements);
+  var i = 0;
+  result[i++] = decoded.length.toDouble(); // pageCount
+  for (final entry in decoded.entries) {
+    result[i++] = int.parse(entry.key).toDouble(); // pageKey
+    final markers = entry.value as List<dynamic>;
+    result[i++] = markers.length.toDouble(); // markerCount
+    for (final marker in markers) {
+      final m = marker as Map<String, dynamic>;
+      result[i++] = (m['sura'] as num).toDouble();
+      result[i++] = (m['ayah'] as num).toDouble();
+      result[i++] = (m['line'] as num).toDouble();
+      result[i++] = (m['centerX'] as num).toDouble();
+    }
+  }
+  return result;
 }
