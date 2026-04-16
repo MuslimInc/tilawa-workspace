@@ -58,3 +58,18 @@ final class PageIndicatorMessage extends AppMessage {
   final String current;
   final String total;
 }
+
+final class PageNumberMessage extends AppMessage {
+  const PageNumberMessage(this.number);
+  final int number;
+}
+
+final class JuzMessage extends AppMessage {
+  const JuzMessage(this.number);
+  final int number;
+}
+
+final class HizbMessage extends AppMessage {
+  const HizbMessage(this.number);
+  final int number;
+}

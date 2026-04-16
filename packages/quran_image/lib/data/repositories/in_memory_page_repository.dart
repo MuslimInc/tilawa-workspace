@@ -33,8 +33,8 @@ class InMemoryPageRepository implements PageRepository {
     final info = QuranPageMapping.getPageInfo(pageNumber);
     final newState = _currentState.copyWith(
       currentPage: pageNumber,
-      juzTitle: info.juzTitle,
-      hizbTitle: info.hizbTitle,
+      juzNumber: info.juzNumber,
+      hizbNumber: info.hizbNumber,
     );
     savePageState(newState);
     return newState;

@@ -116,6 +116,7 @@ class VerseMarker extends StatelessWidget {
           text: _glyphFor(verseNumber),
           style: TextStyle(
             fontFamily: 'QuranNumbers',
+            package: 'quran_image',
             fontSize: width,
             color: const Color(0xFF5D4037),
             fontWeight: FontWeight.bold,
@@ -152,6 +153,7 @@ class VerseMarker extends StatelessWidget {
               textDirection: TextDirection.rtl,
               style: TextStyle(
                 fontFamily: 'QuranNumbers',
+                package: 'quran_image',
                 fontSize: width,
                 color: const Color(0xFF5D4037),
                 fontWeight: FontWeight.bold,

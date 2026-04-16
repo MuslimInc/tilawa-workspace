@@ -13,7 +13,9 @@ void main() {
     test('initializes with saved page and visibility state', () async {
       final bloc = NavigationBloc(
         pageRepository: InMemoryPageRepository(),
-        visibilityRepository: _TestNavigationVisibilityRepository(),
+        visibilityRepository: _TestNavigationVisibilityRepository(
+          shouldAutoHideResult: true,
+        ),
         saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
           _TestLastVisitedPageRepository(),
         ),
@@ -34,7 +36,9 @@ void main() {
     });
 
     test('shows, hides, toggles, and tracks interaction', () async {
-      final visibilityRepository = _TestNavigationVisibilityRepository();
+      final visibilityRepository = _TestNavigationVisibilityRepository(
+        shouldAutoHideResult: true,
+      );
       final bloc = NavigationBloc(
         pageRepository: InMemoryPageRepository(),
         visibilityRepository: visibilityRepository,
@@ -88,7 +92,9 @@ void main() {
       final lastVisitedRepository = _TestLastVisitedPageRepository();
       final bloc = NavigationBloc(
         pageRepository: InMemoryPageRepository(),
-        visibilityRepository: _TestNavigationVisibilityRepository(),
+        visibilityRepository: _TestNavigationVisibilityRepository(
+          shouldAutoHideResult: true,
+        ),
         saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
           lastVisitedRepository,
         ),
@@ -111,38 +117,6 @@ void main() {
       expect(lastVisitedRepository.savedPages, <int>[9]);
     });
 
-    test(
-      'auto hide check hides controls when repository requests it',
-      () async {
-        final visibilityRepository = _TestNavigationVisibilityRepository(
-          shouldAutoHideResult: true,
-        );
-        final bloc = NavigationBloc(
-          pageRepository: InMemoryPageRepository(),
-          visibilityRepository: visibilityRepository,
-          saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
-            _TestLastVisitedPageRepository(),
-          ),
-          getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
-            _TestLastVisitedPageRepository(initialPage: 3),
-          ),
-        );
-        addTearDown(bloc.close);
-
-        bloc.add(const NavigationInitialized());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const NavigationShown());
-        await Future<void>.delayed(Duration.zero);
-
-        expect((bloc.state as NavigationLoaded).visibility.isVisible, isTrue);
-
-        bloc.add(const NavigationAutoHideChecked());
-        await Future<void>.delayed(Duration.zero);
-
-        expect((bloc.state as NavigationLoaded).visibility.isVisible, isFalse);
-      },
-    );
-
     test('emits error on init failure and recovers on retry', () async {
       final repository = _TestLastVisitedPageRepository(
         throwOnGetCount: 1,
@@ -150,7 +124,9 @@ void main() {
       );
       final bloc = NavigationBloc(
         pageRepository: InMemoryPageRepository(),
-        visibilityRepository: _TestNavigationVisibilityRepository(),
+        visibilityRepository: _TestNavigationVisibilityRepository(
+          shouldAutoHideResult: true,
+        ),
         saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(repository),
         getLastVisitedPageUseCase: GetLastVisitedPageUseCase(repository),
       );
@@ -172,7 +148,7 @@ void main() {
 
 class _TestNavigationVisibilityRepository
     implements NavigationVisibilityRepository {
-  _TestNavigationVisibilityRepository({this.shouldAutoHideResult = false});
+  _TestNavigationVisibilityRepository({required this.shouldAutoHideResult});
 
   final bool shouldAutoHideResult;
   final List<String> events = <String>[];

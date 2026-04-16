@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-
+import '../../../l10n/app_localizations.dart';
 import '../../../core/design_tokens/design_tokens.dart';
+import 'package:flutter/material.dart';
 
 /// Atomic component for displaying the current page number.
 ///
@@ -20,9 +20,10 @@ class PageIndicatorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = screenWidth * AppDimensions.pageNumberTextSizeRatio;
+    final l10n = AppLocalizations.of(context)!;
 
     return Text(
-      'Page $pageNumber',
+      l10n.page(pageNumber.toString()),
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,

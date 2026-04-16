@@ -122,7 +122,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
         // Use load() instead of loadString() — returns ByteData without
         // the ~70ms UTF-16 string conversion on the main thread.
         final byteData = await rootBundle.load(
-          'assets/data/verse_marker_coordinates.json',
+          'packages/quran_image/assets/data/verse_marker_coordinates.json',
         );
         final bytes = byteData.buffer.asUint8List(
           byteData.offsetInBytes,

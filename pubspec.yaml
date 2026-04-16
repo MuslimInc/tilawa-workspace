@@ -10,9 +10,10 @@ workspace:
   - packages/qibla
   - packages/ui_kit
   - packages/quran
+  - packages/quran_image
 
 dev_dependencies:
-  melos: ^7.4.0
+  melos: ^7.5.1
 
 melos:
   command:

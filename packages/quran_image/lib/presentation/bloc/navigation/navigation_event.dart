@@ -13,7 +13,12 @@ abstract class NavigationEvent extends Equatable {
 
 /// Event to initialize navigation state
 class NavigationInitialized extends NavigationEvent {
-  const NavigationInitialized();
+  final int? initialPage;
+
+  const NavigationInitialized({this.initialPage});
+
+  @override
+  List<Object?> get props => [initialPage];
 }
 
 /// Event to show navigation controls
@@ -41,10 +46,6 @@ class NavigationToggled extends NavigationEvent {
   const NavigationToggled();
 }
 
-class NavigationAutoHideChecked extends NavigationEvent {
-  const NavigationAutoHideChecked();
-}
-
 /// Event triggered when page changes from PageView
 class PageChanged extends NavigationEvent {
   final int pageNumber;
@@ -55,15 +56,7 @@ class PageChanged extends NavigationEvent {
   List<Object?> get props => [pageNumber];
 }
 
-/// Event to persist the last visited (or jumped-to) page.
-///
-/// This event is triggered whenever the user navigates to a new page,
-/// ensuring the position is saved for future app launches.
-class NavigationRetryRequested extends NavigationEvent {
-  const NavigationRetryRequested();
-}
-
-/// Event to persist the last committed page after debounce.
+/// Event to persist the last visited page.
 class LastVisitedPageSaved extends NavigationEvent {
   final int pageNumber;
 
@@ -71,4 +64,9 @@ class LastVisitedPageSaved extends NavigationEvent {
 
   @override
   List<Object?> get props => [pageNumber];
+}
+
+/// Event triggered when a page navigation retry is requested.
+class NavigationRetryRequested extends NavigationEvent {
+  const NavigationRetryRequested();
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image/presentation/mappers/app_message_mapper.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../core/perf_logger.dart';
 import '../../domain/domain.dart';
 
@@ -12,6 +14,8 @@ class PremiumBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final sw = PerfLogger.startTimer();
     final size = MediaQuery.sizeOf(context);
+    final l10n = AppLocalizations.of(context)!;
+
     final bottomBar = Container(
       margin: EdgeInsets.fromLTRB(
         size.width * 0.04,
@@ -51,17 +55,21 @@ class PremiumBottomBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Text(
+              //   JuzMessage(state.juzNumber).localize(l10n),
+              //   style: const TextStyle(
+              //     fontSize: 12,
+              //     fontWeight: FontWeight.bold,
+              //     color: Color(0xFF5D4037),
+              //   ),
+              // ),
               Text(
-                state.juzTitle,
+                HizbMessage(state.hizbNumber).localize(l10n),
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF5D4037),
                 ),
-              ),
-              Text(
-                state.hizbTitle,
-                style: const TextStyle(fontSize: 10, color: Color(0xFFC5A358)),
               ),
             ],
           ),

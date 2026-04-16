@@ -6,6 +6,30 @@
   "networkError": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
   "appTitle": "القرآن",
   "retry": "إعادة المحاولة",
+  "juz": "الجزء {number}",
+  "@juz": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizb": "الحزب {number}",
+  "@hizb": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "page": "صفحة {number}",
+  "@page": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "pageIndicator": "صفحة {current} من {total}",
   "@pageIndicator": {
     "placeholders": {

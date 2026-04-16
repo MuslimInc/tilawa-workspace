@@ -94,7 +94,8 @@ class _QuranImageAppState extends State<QuranImageApp> {
     final app = BlocProvider.value(
       value: bloc,
       child: MaterialApp(
-        title: 'Quran Image',
+        onGenerateTitle: (context) =>
+            const AppTitleMessage().localize(AppLocalizations.of(context)!),
         debugShowCheckedModeBanner: false,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

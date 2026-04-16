@@ -28,6 +28,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
+  String juz(int number) {
+    return 'الجزء $number';
+  }
+
+  @override
+  String hizb(int number) {
+    return 'الحزب $number';
+  }
+
+  @override
+  String page(String number) {
+    return 'صفحة $number';
+  }
+
+  @override
   String pageIndicator(String current, String total) {
     return 'صفحة $current من $total';
   }

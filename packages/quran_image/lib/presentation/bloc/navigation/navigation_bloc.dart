@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/di/dependency_injection.dart';
 import '../../../domain/domain.dart';
 import 'navigation_event.dart';
@@ -22,8 +21,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   final NavigationVisibilityRepository _visibilityRepository;
   final SaveLastVisitedPageUseCase _saveLastVisitedPageUseCase;
   final GetLastVisitedPageUseCase _getLastVisitedPageUseCase;
-  Timer? _autoHideTimer;
-  Timer? _saveDebounceTimer;
 
   NavigationBloc({
     PageRepository? pageRepository,
@@ -44,7 +41,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<NavigationToggled>(_onToggled);
     on<NavigationInteractionStarted>(_onInteractionStarted);
     on<NavigationInteractionEnded>(_onInteractionEnded);
-    on<NavigationAutoHideChecked>(_onAutoHideChecked);
     on<PageChanged>(_onPageChanged);
     on<LastVisitedPageSaved>(_onLastVisitedPageSaved);
     on<NavigationRetryRequested>(_onRetryRequested);
@@ -56,12 +52,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     emit(const NavigationLoading());
     try {
-      // Get the last visited page or default to page 1
-      final savedPage = await _getLastVisitedPageUseCase.executeOrDefault(1);
+      // Get the requested initial page or fall back to last visited page (or page 1)
+      final savedPage =
+          event.initialPage ??
+          await _getLastVisitedPageUseCase.executeOrDefault(1);
       final pageState = _pageRepository.navigateToPage(savedPage);
       final visibility = await _visibilityRepository.getVisibility();
       emit(NavigationLoaded(pageState: pageState, visibility: visibility));
-      _startAutoHideTimer();
     } catch (e) {
       emit(const NavigationError(NavigationInitFailedMessage()));
     }
@@ -86,7 +83,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       _visibilityRepository.show().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
-        _startAutoHideTimer();
       });
     }
   }
@@ -96,7 +92,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       _visibilityRepository.hide().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
-        _cancelAutoHideTimer();
       });
     }
   }
@@ -107,12 +102,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       if (currentState.visibility.isVisible) {
         _visibilityRepository.hide().then((visibility) {
           emit(currentState.copyWith(visibility: visibility));
-          _cancelAutoHideTimer();
         });
       } else {
         _visibilityRepository.show().then((visibility) {
           emit(currentState.copyWith(visibility: visibility));
-          _startAutoHideTimer();
         });
       }
     }
@@ -126,7 +119,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       _visibilityRepository.startInteraction().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
-        _cancelAutoHideTimer();
       });
     }
   }
@@ -139,27 +131,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       _visibilityRepository.endInteraction().then((visibility) {
         emit(currentState.copyWith(visibility: visibility));
-        _startAutoHideTimer();
       });
-    }
-  }
-
-  void _onAutoHideChecked(
-    NavigationAutoHideChecked event,
-    Emitter<NavigationState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is NavigationLoaded) {
-      _visibilityRepository
-          .shouldAutoHide(AppDurations.sliderAutoHideSeconds)
-          .then((shouldHide) {
-            if (shouldHide) {
-              _visibilityRepository.hide().then((visibility) {
-                emit(currentState.copyWith(visibility: visibility));
-                _cancelAutoHideTimer();
-              });
-            }
-          });
     }
   }
 
@@ -183,16 +155,12 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     LastVisitedPageSaved event,
     Emitter<NavigationState> emit,
   ) async {
-    // Debounce: during animateToPage, onPageChanged fires for each
-    // intermediate page. Only persist the final settled page.
-    _saveDebounceTimer?.cancel();
-    _saveDebounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      try {
-        await _saveLastVisitedPageUseCase.execute(event.pageNumber);
-      } catch (e) {
-        debugPrint('[NavigationBloc] failed to save last visited page: $e');
-      }
-    });
+    // Persistence is now immediate as timers are removed.
+    try {
+      await _saveLastVisitedPageUseCase.execute(event.pageNumber);
+    } catch (e) {
+      debugPrint('[NavigationBloc] failed to save last visited page: $e');
+    }
   }
 
   Future<void> _onRetryRequested(
@@ -200,25 +168,5 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     Emitter<NavigationState> emit,
   ) async {
     await _onInitialized(const NavigationInitialized(), emit);
-  }
-
-  void _startAutoHideTimer() {
-    _cancelAutoHideTimer();
-    _autoHideTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) => add(const NavigationAutoHideChecked()),
-    );
-  }
-
-  void _cancelAutoHideTimer() {
-    _autoHideTimer?.cancel();
-    _autoHideTimer = null;
-  }
-
-  @override
-  Future<void> close() {
-    _cancelAutoHideTimer();
-    _saveDebounceTimer?.cancel();
-    return super.close();
   }
 }

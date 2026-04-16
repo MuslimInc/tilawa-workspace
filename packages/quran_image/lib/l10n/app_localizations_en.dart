@@ -28,6 +28,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String juz(int number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String hizb(int number) {
+    return 'Hizb $number';
+  }
+
+  @override
+  String page(String number) {
+    return 'Page $number';
+  }
+
+  @override
   String pageIndicator(String current, String total) {
     return 'Page $current of $total';
   }

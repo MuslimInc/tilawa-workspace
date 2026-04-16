@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran/quran.dart' as quran;
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
@@ -9,6 +10,8 @@ import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_image/verse_marker.dart';
 
 import 'core/constants/surah_header_constants.dart';
+import 'core/constants/surah_names.dart';
+import 'l10n/app_localizations.dart';
 
 /// Renders a full Quran page using the same layout algorithm as the Ayah app.
 ///
@@ -196,12 +199,13 @@ class _QuranImagePageState extends State<QuranImagePage> {
     final pageInfo = QuranPageMapping.getPageInfo(widget.pageNumber);
     final pageState = PageState.initial().copyWith(
       currentPage: widget.pageNumber,
-      juzTitle: pageInfo.juzTitle,
-      hizbTitle: pageInfo.hizbTitle,
+      juzNumber: pageInfo.juzNumber,
+      hizbNumber: pageInfo.hizbNumber,
     );
 
     return Column(
       children: [
+        QuranAppBar(pageNumber: widget.pageNumber),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -286,6 +290,57 @@ class _QuranImagePageState extends State<QuranImagePage> {
         ),
         PremiumBottomBar(state: pageState),
       ],
+    );
+  }
+}
+
+class QuranAppBar extends StatelessWidget {
+  final int pageNumber;
+
+  const QuranAppBar({super.key, required this.pageNumber});
+
+  @override
+  Widget build(BuildContext context) {
+    final pageInfo = QuranPageMapping.getPageInfo(pageNumber);
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context);
+
+    final pageData = quran.getPageData(pageNumber);
+    final surahNumbers = pageData.map((e) => e['surah']!).toSet().toList();
+    final surahNames = surahNumbers
+        .map((s) => SurahNames.getSurahName(s, locale.languageCode))
+        .join(' ');
+    final height = MediaQuery.sizeOf(context).height * 0.04;
+
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                surahNames,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF6B5B4F),
+                ),
+              ),
+            ),
+            Text(
+              l10n?.juz(pageInfo.juzNumber) ?? 'Part ${pageInfo.juzNumber}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF8B7355),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -19,14 +19,14 @@ class PageState extends Equatable {
   /// Whether the page is currently being scrolled
   final bool isScrolling;
 
-  final String juzTitle;
-  final String hizbTitle;
+  final int juzNumber;
+  final int hizbNumber;
 
   const PageState({
     required this.currentPage,
     required this.totalPages,
-    required this.juzTitle,
-    required this.hizbTitle,
+    required this.juzNumber,
+    required this.hizbNumber,
     this.previewPage,
     this.isScrolling = false,
   });
@@ -36,8 +36,8 @@ class PageState extends Equatable {
     return const PageState(
       currentPage: 1,
       totalPages: quranPageCount,
-      juzTitle: 'Juz 1',
-      hizbTitle: 'Hizb 1',
+      juzNumber: 1,
+      hizbNumber: 1,
       previewPage: null,
       isScrolling: false,
     );
@@ -54,16 +54,16 @@ class PageState extends Equatable {
     bool clearPreviewPage = false,
     int? totalPages,
     bool? isScrolling,
-    String? juzTitle,
-    String? hizbTitle,
+    int? juzNumber,
+    int? hizbNumber,
   }) {
     return PageState(
       currentPage: currentPage ?? this.currentPage,
       previewPage: clearPreviewPage ? null : (previewPage ?? this.previewPage),
       totalPages: totalPages ?? this.totalPages,
       isScrolling: isScrolling ?? this.isScrolling,
-      juzTitle: juzTitle ?? this.juzTitle,
-      hizbTitle: hizbTitle ?? this.hizbTitle,
+      juzNumber: juzNumber ?? this.juzNumber,
+      hizbNumber: hizbNumber ?? this.hizbNumber,
     );
   }
 
@@ -85,7 +85,7 @@ class PageState extends Equatable {
     previewPage,
     totalPages,
     isScrolling,
-    juzTitle,
-    hizbTitle,
+    juzNumber,
+    hizbNumber,
   ];
 }

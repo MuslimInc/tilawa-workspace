@@ -36,6 +36,9 @@ void main() {
         const PageIndicatorMessage(current: '12', total: '604').localize(l10n),
         'Page 12 of 604',
       );
+      expect(const PageNumberMessage(12).localize(l10n), 'Page 12');
+      expect(const JuzMessage(1).localize(l10n), 'Juz 1');
+      expect(const HizbMessage(1).localize(l10n), 'Hizb 1');
     });
 
     test('localizes messages in Arabic', () {
@@ -47,6 +50,9 @@ void main() {
         const PageIndicatorMessage(current: '3', total: '604').localize(l10n),
         'صفحة 3 من 604',
       );
+      expect(const PageNumberMessage(3).localize(l10n), 'صفحة 3');
+      expect(const JuzMessage(1).localize(l10n), 'الجزء 1');
+      expect(const HizbMessage(1).localize(l10n), 'الحزب 1');
     });
   });
 

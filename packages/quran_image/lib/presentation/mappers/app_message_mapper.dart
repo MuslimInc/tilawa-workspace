@@ -26,6 +26,9 @@ extension AppMessageL10n on AppMessage {
       current,
       total,
     ),
+    PageNumberMessage(:final number) => l10n.page(number.toString()),
+    JuzMessage(:final number) => l10n.juz(number),
+    HizbMessage(:final number) => l10n.hizb(number),
   };
 }
 

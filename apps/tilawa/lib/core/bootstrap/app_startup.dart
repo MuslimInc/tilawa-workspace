@@ -14,6 +14,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quran/src/services/quran_data_service.dart' as quran_loader;
+import '../di/quran_image_dependencies_module.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
@@ -196,6 +197,10 @@ class AppBootstrapper {
       timeline.log('DI configureDependencies');
 
       timeline.resetPhase();
+      await QuranImageDependenciesModule.initialize();
+      timeline.log('DI quran_image dependencies');
+
+      timeline.resetPhase();
       _startupTasks.initializeBlocObserver();
 
       final Future<void> crashFuture = _startupTasks
@@ -278,10 +283,7 @@ class AppStartupTasks {
   Future<void> configureSystemChrome() {
     return Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]),
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
     ]).timeout(const Duration(milliseconds: 1000));
   }
 

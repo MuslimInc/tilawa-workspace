@@ -33,15 +33,15 @@ void main() {
         currentPage: 5,
         previewPage: 7,
         isScrolling: true,
-        juzTitle: 'Juz 2',
-        hizbTitle: 'Hizb 3',
+        juzNumber: 2,
+        hizbNumber: 3,
       );
       expect(preview.currentPage, 5);
       expect(preview.previewPage, 7);
       expect(preview.displayPage, 7);
       expect(preview.isScrolling, isTrue);
-      expect(preview.juzTitle, 'Juz 2');
-      expect(preview.hizbTitle, 'Hizb 3');
+      expect(preview.juzNumber, 2);
+      expect(preview.hizbNumber, 3);
 
       final cleared = preview.copyWith(clearPreviewPage: true);
       expect(cleared.previewPage, isNull);
@@ -78,8 +78,8 @@ void main() {
       const pageState = PageState(
         currentPage: 4,
         totalPages: 604,
-        juzTitle: 'Juz 1',
-        hizbTitle: 'Hizb 1',
+        juzNumber: 1,
+        hizbNumber: 1,
       );
       final visibility = NavigationVisibility.initial().copyWith(
         isVisible: true,
@@ -122,8 +122,8 @@ void main() {
               state: const PageState(
                 currentPage: 20,
                 totalPages: 604,
-                juzTitle: 'Juz 2',
-                hizbTitle: 'Hizb 4',
+                juzNumber: 2,
+                hizbNumber: 4,
               ),
               canGoToPreviousPage: true,
               canGoToNextPage: true,
@@ -268,8 +268,8 @@ void main() {
       currentPage: 8,
       previewPage: 22,
       totalPages: 604,
-      juzTitle: 'Juz 5',
-      hizbTitle: 'Hizb 10',
+      juzNumber: 5,
+      hizbNumber: 10,
     );
     await tester.pump();
     expect(find.text('Page 22'), findsOneWidget);

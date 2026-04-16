@@ -13,7 +13,11 @@ final GetIt sl = GetIt.instance;
 /// Must be called before running the app.
 Future<void> initDependencies() async {
   // Persistence
-  sl.registerLazySingleton<SharedPreferencesAsync>(SharedPreferencesAsync.new);
+  if (!sl.isRegistered<SharedPreferencesAsync>()) {
+    sl.registerLazySingleton<SharedPreferencesAsync>(
+      SharedPreferencesAsync.new,
+    );
+  }
 
   // Repositories
   sl.registerLazySingleton<PageRepository>(

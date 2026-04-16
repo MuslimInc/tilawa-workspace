@@ -6,6 +6,30 @@
   "networkError": "Please check your internet connection and try again.",
   "appTitle": "AlQuran",
   "retry": "Retry",
+  "juz": "Juz {number}",
+  "@juz": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizb": "Hizb {number}",
+  "@hizb": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "page": "Page {number}",
+  "@page": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "pageIndicator": "Page {current} of {total}",
   "@pageIndicator": {
     "placeholders": {

@@ -483,9 +483,6 @@ class PageInfo {
     required this.hizbNumber,
   });
 
-  String get juzTitle => 'Juz $juzNumber';
-  String get hizbTitle => 'Hizb $hizbNumber';
-
   @override
   String toString() => 'Page $pageNumber: Juz $juzNumber, Hizb $hizbNumber';
 }

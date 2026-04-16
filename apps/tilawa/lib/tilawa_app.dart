@@ -18,6 +18,7 @@ import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
+import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
 
@@ -185,7 +186,10 @@ class _PlayerApp extends StatelessWidget {
                     : AppStrings.restorationScopeId,
                 locale: locState.locale,
                 supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                localizationsDelegates: const [
+                  ...AppLocalizations.localizationsDelegates,
+                  quran_image_l10n.AppLocalizations.delegate,
+                ],
               );
             },
           );

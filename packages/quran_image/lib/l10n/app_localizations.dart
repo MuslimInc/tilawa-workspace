@@ -134,6 +134,24 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @juz.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String juz(int number);
+
+  /// No description provided for @hizb.
+  ///
+  /// In en, this message translates to:
+  /// **'Hizb {number}'**
+  String hizb(int number);
+
+  /// No description provided for @page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number}'**
+  String page(String number);
+
   /// No description provided for @pageIndicator.
   ///
   /// In en, this message translates to:
