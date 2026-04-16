@@ -1,5 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran/src/constants/quran_constants.dart';
+import 'package:quran/src/constants/surah_header_banner_constants.dart';
+import 'package:quran/src/layout/surah_header_banner_layout.dart';
 import 'package:quran/src/widgets/surah_header_banner.dart';
+import 'package:quran/src/widgets/surah_header_glyph_provider.dart';
 
 void main() {
   group('SurahHeaderBanner sizing', () {
@@ -10,7 +14,7 @@ void main() {
           viewportHeight: 1280,
           isLandscape: false,
         ),
-        closeTo(77, 0.8),
+        closeTo(78, 0.6),
       );
     });
 
@@ -132,6 +136,65 @@ void main() {
           isLandscape: true,
         ),
         closeTo(242, 8.0),
+      );
+    });
+  });
+
+  group('SurahHeaderBanner centralized collaborators', () {
+    test('calculates all banner metrics through the layout policy', () {
+      final SurahHeaderBannerLayoutMetrics metrics =
+          SurahHeaderBanner.calculateLayout(
+            viewportWidth: 720,
+            viewportHeight: 1280,
+            isLandscape: false,
+          );
+
+      expect(metrics.width, closeTo(691, 1.0));
+      expect(metrics.height, closeTo(78, 0.6));
+      expect(metrics.horizontalPadding, closeTo(14, 1.0));
+      expect(
+        metrics.fontSize,
+        closeTo(
+          metrics.height * SurahHeaderBannerConstants.defaultFontSizeMultiplier,
+          0.01,
+        ),
+      );
+      expect(
+        metrics.titleVerticalOffset,
+        closeTo(
+          metrics.height * SurahHeaderBannerConstants.titleVerticalOffsetRatio,
+          0.01,
+        ),
+      );
+    });
+
+    test('uses O(1) indexed QCF glyph lookup for boundary surahs', () {
+      const SurahHeaderGlyphProvider glyphProvider =
+          QcfSurahHeaderGlyphProvider();
+
+      expect(
+        glyphProvider.glyphForSurah(QuranConstants.minSurahNumber).runes.single,
+        SurahHeaderBannerConstants.glyphBaseCodePoint,
+      );
+      expect(
+        glyphProvider.glyphForSurah(QuranConstants.maxSurahNumber).runes.single,
+        SurahHeaderBannerConstants.glyphBaseCodePoint +
+            QuranConstants.totalSurahCount -
+            1,
+      );
+    });
+
+    test('rejects invalid surah numbers before glyph lookup', () {
+      const SurahHeaderGlyphProvider glyphProvider =
+          QcfSurahHeaderGlyphProvider();
+
+      expect(
+        () => glyphProvider.glyphForSurah(QuranConstants.minSurahNumber - 1),
+        throwsRangeError,
+      );
+      expect(
+        () => glyphProvider.glyphForSurah(QuranConstants.maxSurahNumber + 1),
+        throwsRangeError,
       );
     });
   });

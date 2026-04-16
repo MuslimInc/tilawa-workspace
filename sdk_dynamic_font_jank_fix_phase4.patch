@@ -1,0 +1,261 @@
+diff --git a/engine/src/flutter/txt/src/skia/paragraph_skia.h b/engine/src/flutter/txt/src/skia/paragraph_skia.h
+index 0d44145..b284a9d 100644
+--- a/engine/src/flutter/txt/src/skia/paragraph_skia.h
++++ b/engine/src/flutter/txt/src/skia/paragraph_skia.h
+@@ -5,14 +5,23 @@
+ #ifndef FLUTTER_TXT_SRC_SKIA_PARAGRAPH_SKIA_H_
+ #define FLUTTER_TXT_SRC_SKIA_PARAGRAPH_SKIA_H_
+ 
++#include <memory>
+ #include <optional>
++#include <unordered_map>
+ 
++#include "include/core/SkTextBlob.h"
+ #include "txt/paragraph.h"
+ 
+ #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
+ 
++namespace impeller {
++class TextFrame;
++}
++
+ namespace txt {
+ 
++class DisplayListParagraphPainter;
++
+ // Implementation of Paragraph based on Skia's text layout module.
+ class ParagraphSkia : public Paragraph {
+  public:
+@@ -75,12 +84,18 @@ class ParagraphSkia : public Paragraph {
+   Range<size_t> GetWordBoundary(size_t offset) override;
+ 
+  private:
++  friend class DisplayListParagraphPainter;
++
+   TextStyle SkiaToTxt(const skia::textlayout::TextStyle& skia);
++  std::shared_ptr<impeller::TextFrame> GetOrCreateTextFrame(
++      const sk_sp<SkTextBlob>& blob);
+ 
+   std::unique_ptr<skia::textlayout::Paragraph> paragraph_;
+   std::vector<flutter::DlPaint> dl_paints_;
+   std::optional<std::vector<LineMetrics>> line_metrics_;
+   std::vector<TextStyle> line_metrics_styles_;
++  std::unordered_map<const SkTextBlob*, std::shared_ptr<impeller::TextFrame>>
++      text_frame_cache_;
+   const bool impeller_enabled_;
+ };
+ 
+diff --git a/engine/src/flutter/txt/src/skia/paragraph_skia.cc b/engine/src/flutter/txt/src/skia/paragraph_skia.cc
+index c7995ef..34afaef 100644
+--- a/engine/src/flutter/txt/src/skia/paragraph_skia.cc
++++ b/engine/src/flutter/txt/src/skia/paragraph_skia.cc
+@@ -30,6 +30,8 @@ txt::FontStyle GetTxtFontStyle(SkFontStyle::Slant font_slant) {
+              : txt::FontStyle::italic;
+ }
+ 
++}  // anonymous namespace
++
+ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+  public:
+   //----------------------------------------------------------------------------
+@@ -51,10 +53,12 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+   ///             decision (i.e. with `#ifdef`) instead of a runtime option.
+   DisplayListParagraphPainter(DisplayListBuilder* builder,
+                               const std::vector<DlPaint>& dl_paints,
+-                              bool impeller_enabled)
++                              bool impeller_enabled,
++                              ParagraphSkia* paragraph)
+       : builder_(builder),
+         dl_paints_(dl_paints),
+-        impeller_enabled_(impeller_enabled) {}
++        impeller_enabled_(impeller_enabled),
++        paragraph_(paragraph) {}
+ 
+   void drawTextBlob(const sk_sp<SkTextBlob>& blob,
+                     SkScalar x,
+@@ -74,9 +78,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+         // If there is no path, this is an emoji and should be drawn as is,
+         // ignoring the color source.
+         if (path.isEmpty()) {
+-          builder_->DrawText(DlTextImpeller::Make(
+-                                 impeller::MakeTextFrameFromTextBlobSkia(blob)),
+-                             x, y, dl_paints_[paint_id]);
++          builder_->DrawText(
++              DlTextImpeller::Make(paragraph_->GetOrCreateTextFrame(blob)), x,
++              y, dl_paints_[paint_id]);
+ 
+           return;
+         }
+@@ -86,9 +90,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+         builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
+         return;
+       }
+-      builder_->DrawText(
+-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob)),
+-          x, y, dl_paints_[paint_id]);
++      builder_->DrawText(DlTextImpeller::Make(
++                             paragraph_->GetOrCreateTextFrame(blob)),
++                         x, y, dl_paints_[paint_id]);
+       return;
+     }
+ #endif  // IMPELLER_SUPPORTS_RENDERING
+@@ -112,8 +116,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+     std::shared_ptr<DlText> text;
+ #if IMPELLER_SUPPORTS_RENDERING
+     if (impeller_enabled_) {
+-      text =
+-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
++      text = DlTextImpeller::Make(paragraph_->GetOrCreateTextFrame(blob));
+     } else {
+       text = DlTextSkia::Make(blob);
+     }
+@@ -199,10 +202,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
+   DisplayListBuilder* builder_;
+   const std::vector<DlPaint>& dl_paints_;
+   const bool impeller_enabled_;
++  ParagraphSkia* paragraph_;
+ };
+ 
+-}  // anonymous namespace
+-
+ ParagraphSkia::ParagraphSkia(std::unique_ptr<skt::Paragraph> paragraph,
+                              std::vector<flutter::DlPaint>&& dl_paints,
+                              bool impeller_enabled)
+@@ -291,15 +293,33 @@ bool ParagraphSkia::DidExceedMaxLines() {
+ void ParagraphSkia::Layout(double width) {
+   line_metrics_.reset();
+   line_metrics_styles_.clear();
++  text_frame_cache_.clear();
+   paragraph_->layout(width);
+ }
+ 
+ bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
+-  DisplayListParagraphPainter painter(builder, dl_paints_, impeller_enabled_);
++  DisplayListParagraphPainter painter(builder, dl_paints_, impeller_enabled_,
++                                      this);
+   paragraph_->paint(&painter, x, y);
+   return true;
+ }
+ 
++std::shared_ptr<impeller::TextFrame> ParagraphSkia::GetOrCreateTextFrame(
++    const sk_sp<SkTextBlob>& blob) {
++  if (!blob) {
++    return nullptr;
++  }
++  const SkTextBlob* blob_key = blob.get();
++  auto cached = text_frame_cache_.find(blob_key);
++  if (cached != text_frame_cache_.end()) {
++    return cached->second;
++  }
++
++  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
++  text_frame_cache_[blob_key] = frame;
++  return frame;
++}
++
+ std::vector<Paragraph::TextBox> ParagraphSkia::GetRectsForRange(
+     size_t start,
+     size_t end,
+diff --git a/engine/src/flutter/txt/tests/paragraph_unittests.cc b/engine/src/flutter/txt/tests/paragraph_unittests.cc
+index 39fc0a6..8cdaba7 100644
+--- a/engine/src/flutter/txt/tests/paragraph_unittests.cc
++++ b/engine/src/flutter/txt/tests/paragraph_unittests.cc
+@@ -49,6 +49,9 @@ class DlOpRecorder final : public virtual DlOpReceiver,
+   int pathCount() const { return paths_.size(); }
+   int textFrameCount() const { return text_frames_.size(); }
+   int blobCount() const { return blobs_.size(); }
++  std::shared_ptr<impeller::TextFrame> textFrameAt(size_t index) const {
++    return text_frames_.at(index);
++  }
+ 
+  private:
+   void drawLine(const DlPoint& p0, const DlPoint& p1) override {
+@@ -127,27 +130,29 @@ class PainterTestBase : public CanvasTestBase<T> {
+ 
+   sk_sp<DisplayList> drawText(const txt::TextStyle& style,
+                               const std::u16string& text) const {
+-    auto pb_skia = makeParagraphBuilder();
+-    pb_skia.PushStyle(style);
+-    pb_skia.AddText(text);
+-    pb_skia.Pop();
++    auto paragraph = makeParagraph(style, text);
+ 
+     auto builder = DisplayListBuilder();
+-    auto paragraph = pb_skia.Build();
+     paragraph->Layout(10000);
+     paragraph->Paint(&builder, 0, 0);
+ 
+     return builder.Build();
+   }
+ 
+-  sk_sp<DisplayList> draw(const txt::TextStyle& style) const {
++  std::unique_ptr<txt::Paragraph> makeParagraph(
++      const txt::TextStyle& style,
++      const std::u16string& text) const {
+     auto pb_skia = makeParagraphBuilder();
+     pb_skia.PushStyle(style);
+-    pb_skia.AddText(u"Hello World!");
++    pb_skia.AddText(text);
+     pb_skia.Pop();
+ 
++    return pb_skia.Build();
++  }
++
++  sk_sp<DisplayList> draw(const txt::TextStyle& style) const {
++    auto paragraph = makeParagraph(style, u"Hello World!");
+     auto builder = DisplayListBuilder();
+-    auto paragraph = pb_skia.Build();
+     paragraph->Layout(10000);
+     paragraph->Paint(&builder, 0, 0);
+ 
+@@ -245,6 +250,50 @@ TEST_F(PainterTest, DrawTextImpeller) {
+   EXPECT_EQ(recorder.blobCount(), 0);
+ }
+ 
++TEST_F(PainterTest, ReusesTextFrameAcrossPaintsImpeller) {
++  PretendImpellerIsEnabled(true);
++
++  auto paragraph = makeParagraph(makeStyle(), u"Hello World!");
++
++  auto first_builder = DisplayListBuilder();
++  paragraph->Layout(10000);
++  paragraph->Paint(&first_builder, 0, 0);
++  auto first_recorder = DlOpRecorder();
++  first_builder.Build()->Dispatch(first_recorder);
++
++  auto second_builder = DisplayListBuilder();
++  paragraph->Paint(&second_builder, 0, 0);
++  auto second_recorder = DlOpRecorder();
++  second_builder.Build()->Dispatch(second_recorder);
++
++  EXPECT_EQ(first_recorder.textFrameCount(), 1);
++  EXPECT_EQ(second_recorder.textFrameCount(), 1);
++  EXPECT_EQ(first_recorder.textFrameAt(0), second_recorder.textFrameAt(0));
++}
++
++TEST_F(PainterTest, ClearsTextFrameCacheWhenLayoutChangesImpeller) {
++  PretendImpellerIsEnabled(true);
++
++  auto paragraph =
++      makeParagraph(makeStyle(), u"Hello World! Hello World! Hello World!");
++
++  auto first_builder = DisplayListBuilder();
++  paragraph->Layout(10000);
++  paragraph->Paint(&first_builder, 0, 0);
++  auto first_recorder = DlOpRecorder();
++  first_builder.Build()->Dispatch(first_recorder);
++
++  auto second_builder = DisplayListBuilder();
++  paragraph->Layout(20);
++  paragraph->Paint(&second_builder, 0, 0);
++  auto second_recorder = DlOpRecorder();
++  second_builder.Build()->Dispatch(second_recorder);
++
++  EXPECT_EQ(first_recorder.textFrameCount(), 1);
++  EXPECT_EQ(second_recorder.textFrameCount(), 1);
++  EXPECT_NE(first_recorder.textFrameAt(0), second_recorder.textFrameAt(0));
++}
++
+ TEST_F(PainterTest, DrawStrokedTextImpeller) {
+   PretendImpellerIsEnabled(true);
+ 

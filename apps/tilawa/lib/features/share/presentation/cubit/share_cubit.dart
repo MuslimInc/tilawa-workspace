@@ -1,9 +1,13 @@
 import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/logger.dart';
 
+import '../../../quran_reader/domain/entities/entities.dart';
+import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
 import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_content.dart';
@@ -12,8 +16,6 @@ import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
 import '../../domain/usecases/generate_reel_use_case.dart';
 import '../../domain/usecases/share_content_use_case.dart';
-import '../../../quran_reader/domain/entities/entities.dart';
-import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'share_state.dart';
 
 @injectable
@@ -260,6 +262,11 @@ class ShareCubit extends Cubit<ShareState> {
     final config = _buildAudioConfig();
     if (config == null) return;
 
+    final int tAudio = DateTime.now().millisecondsSinceEpoch;
+    logger.d(
+      '[AUDIO_GEN] prepareAudioClip start | surah=${config.surahNumber} ${config.fromAyah}-${config.toAyah} | t=${tAudio}ms',
+    );
+
     _cancelToken = CancelToken();
     emit(
       state.copyWith(
@@ -277,10 +284,16 @@ class ShareCubit extends Cubit<ShareState> {
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
         onProgress: (progress, message) {
+          logger.d(
+            '[AUDIO_GEN] progress=${(progress * 100).toStringAsFixed(0)}% | "$message" | elapsed=${DateTime.now().millisecondsSinceEpoch - tAudio}ms',
+          );
           emit(state.copyWith(progress: progress, progressMessage: message));
         },
       );
 
+      logger.d(
+        '[AUDIO_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tAudio}ms | file=${content.filePath}',
+      );
       emit(
         state.copyWith(
           status: ShareStatus.reviewing,
@@ -288,6 +301,9 @@ class ShareCubit extends Cubit<ShareState> {
         ),
       );
     } catch (e) {
+      logger.d(
+        '[AUDIO_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tAudio}ms | $e',
+      );
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
           state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
@@ -331,10 +347,22 @@ class ShareCubit extends Cubit<ShareState> {
         boundaryKeys?.where((key) => key.currentContext != null).toList() ??
         const <GlobalKey>[];
 
+    logger.d(
+      '[REEL_GEN] generateReel called | boundaryKeysTotal=${boundaryKeys?.length ?? 0} | effectiveBoundaryKeys=${effectiveBoundaryKeys.length} | audioConfig=${audioConfig != null}',
+    );
+
     if (audioConfig == null ||
         (effectiveBoundaryKey == null && effectiveBoundaryKeys.isEmpty)) {
+      logger.d(
+        '[REEL_GEN] generateReel ABORTED | audioConfig=$audioConfig | effectiveBoundaryKeys=${effectiveBoundaryKeys.length}',
+      );
       return;
     }
+
+    final int tReel = DateTime.now().millisecondsSinceEpoch;
+    logger.d(
+      '[REEL_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${effectiveBoundaryKeys.length} | t=${tReel}ms',
+    );
 
     _cancelToken = CancelToken();
     emit(
@@ -357,10 +385,17 @@ class ShareCubit extends Cubit<ShareState> {
         progressMessages: progressMessages,
         maxDurationSeconds: maxDurationSeconds,
         cancelToken: _cancelToken,
-        onProgress: (p, m) =>
-            emit(state.copyWith(progress: p, progressMessage: m)),
+        onProgress: (p, m) {
+          logger.d(
+            '[REEL_GEN] progress=${(p * 100).toStringAsFixed(0)}% | "$m" | elapsed=${DateTime.now().millisecondsSinceEpoch - tReel}ms',
+          );
+          emit(state.copyWith(progress: p, progressMessage: m));
+        },
       );
 
+      logger.d(
+        '[REEL_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tReel}ms | file=${content.filePath}',
+      );
       emit(
         state.copyWith(
           status: ShareStatus.reviewing,
@@ -368,6 +403,9 @@ class ShareCubit extends Cubit<ShareState> {
         ),
       );
     } catch (e) {
+      logger.d(
+        '[REEL_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tReel}ms | $e',
+      );
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
           state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),

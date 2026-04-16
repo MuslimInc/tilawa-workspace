@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:hive_ce/hive.dart';
@@ -122,12 +123,35 @@ class AppBootstrapper {
     try {
       timeline.startPhase();
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Frame jank detector — profile/debug builds only.
+      // Logs any frame where build or raster exceeds the 16ms budget.
+      if (!kReleaseMode) {
+        SchedulerBinding.instance.addTimingsCallback((
+          List<FrameTiming> timings,
+        ) {
+          for (final timing in timings) {
+            final buildMs = timing.buildDuration.inMilliseconds;
+            final rasterMs = timing.rasterDuration.inMilliseconds;
+            final totalMs = timing.totalSpan.inMilliseconds;
+            if (rasterMs > 16 || buildMs > 16) {
+              debugPrint(
+                '[JANK] build=${buildMs}ms '
+                'raster=${rasterMs}ms '
+                'total=${totalMs}ms',
+              );
+            }
+          }
+        });
+      }
+
       _startupTasks.resetLaunchState();
       timeline.log('WidgetsBinding');
 
       timeline.resetPhase();
       bool firebaseOk = false;
 
+      // 1. Initialize Firebase first
       final Future<void> firebaseFuture = _startupTasks
           .initializeFirebase()
           .then((_) {
@@ -142,20 +166,17 @@ class AppBootstrapper {
             );
           });
 
+      // 2. Small delay to prevent native initialization contention
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // 3. Initialize HydratedStorage next
       final Future<void> hydratedFuture = _startupTasks
           .initializeHydratedStorage()
           .then((_) => timeline.log('HydratedStorage'))
           .catchError((Object e) => timeline.log('HydratedStorage FAILED'));
 
-      // Kick off Quran JSON parsing in a background isolate immediately —
-      // it takes ~300-800ms and has no dependencies, so running it in parallel
-      // with Firebase + HydratedStorage hides the cost entirely.
-      final Future<void> quranDataFuture = quran_loader.QuranDataService.instance
-          .ensureLoaded()
-          .then((_) => timeline.log('QuranDataService'))
-          .catchError((Object e) => timeline.log('QuranDataService FAILED'));
-
-      await Future.wait([firebaseFuture, hydratedFuture, quranDataFuture]);
+      // Wait for only the strictly required services before runApp
+      await Future.wait([firebaseFuture, hydratedFuture]);
       timeline.log('Phase1 parallel done');
 
       if (firebaseOk) {
@@ -329,33 +350,42 @@ class AppStartupTasks {
   Future<void> _initializeNonCriticalServicesInBackground() async {
     final LaunchTimeline timeline = LaunchTimeline()..startPhase();
 
+    // Staggered initialization to prevent main thread starvation
+    // on mid-range devices like OPPO A98.
+
     try {
       await initializeHive();
       timeline.log('Phase0 hive');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
-      logger.d(
-        '[LaunchApp] Phase0 error after ${timeline.phaseElapsedMs}ms: $e',
-      );
+      logger.d('[LaunchApp] Phase0 error: $e');
     }
 
     try {
       timeline.resetPhase();
-      await (
+      // Parallelize independent startup tasks to reduce sequential blocking.
+      // Small 100ms staggering prevents massive platform channel congestion.
+      await Future.wait([
         initializeCredentialManager(),
-        initializeAnalytics(),
-        initializeAudioService(),
-      ).wait;
+        Future<void>.delayed(
+          const Duration(milliseconds: 100),
+        ).then((_) => initializeAnalytics()),
+        Future<void>.delayed(
+          const Duration(milliseconds: 200),
+        ).then((_) => initializeAudioService()),
+      ]);
+
       timeline.log('Phase1 (credential+analytics+audio)');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
-      logger.d(
-        '[LaunchApp] Phase1 error after ${timeline.phaseElapsedMs}ms: $e',
-      );
+      logger.d('[LaunchApp] Phase1 error: $e');
     }
 
     try {
       timeline.resetPhase();
       await requestNotificationPermission();
       timeline.log('Phase2 notificationPermission');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d('[LaunchApp] Phase2 error: $e');
     }
@@ -363,25 +393,27 @@ class AppStartupTasks {
     try {
       timeline.resetPhase();
       await initializeNotificationService();
-      timeline.log('Phase3 notificationService');
-
-      timeline.resetPhase();
+      await Future<void>.delayed(const Duration(milliseconds: 250));
       await initializeAthkarNotifications();
-      timeline.log('Phase3 athkarNotifications');
-
-      timeline.resetPhase();
+      await Future<void>.delayed(const Duration(milliseconds: 250));
       await initializeDownloads();
-      timeline.log('Phase3 downloads');
+      timeline.log('Phase3 notificationService+athkar+downloads');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d('[LaunchApp] Phase3 error: $e');
     }
 
     try {
       timeline.resetPhase();
+      await quran_loader.QuranDataService.instance.ensureLoaded();
+      timeline.log('Phase4 quranData');
+
+      // Stagger second wave of background data
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      timeline.resetPhase();
       await initializeFirebaseDataAsync();
       timeline.log('Phase4 firebaseData');
-
-      // QuranDataService is already loaded from Phase1 — no-op here.
     } catch (e) {
       logger.d('[LaunchApp] Phase4 error: $e');
     }

@@ -5,9 +5,9 @@ void main() async {
   try {
     final file = File('../../packages/quran/assets/quran_fonts/qpc-v4.json');
     final jsonString = await file.readAsString();
-    print('Read file, length: ${jsonString.length}');
+    logger.d('Read file, length: ${jsonString.length}');
     final Map<String, dynamic> data = jsonDecode(jsonString);
-    print('Decoded json, keys: ${data.keys.length}');
+    logger.d('Decoded json, keys: ${data.keys.length}');
 
     // Map of surah:ayah -> list of words
     final Map<String, List<Map<String, dynamic>>> verses = {};
@@ -25,7 +25,7 @@ void main() async {
       verses[verseKey]!.add(entry);
     }
 
-    print('Total verses: ${verses.length}');
+    logger.d('Total verses: ${verses.length}');
     final firstKey = '1:1';
     final firstVerse = verses[firstKey]!;
     firstVerse.sort(
@@ -33,7 +33,7 @@ void main() async {
         a['word'].toString(),
       ).compareTo(int.parse(b['word'].toString())),
     );
-    print('Surah 1 Ayah 1: ${firstVerse.map((e) => e['text']).join('')}');
+    logger.d('Surah 1 Ayah 1: ${firstVerse.map((e) => e['text']).join('')}');
 
     // Create new dart code
     final StringBuffer sb = StringBuffer();
@@ -60,8 +60,8 @@ void main() async {
     await File(
       '../../packages/quran/lib/src/data/qcf_v4_data.dart',
     ).writeAsString(sb.toString());
-    print('Wrote qcf_v4_data.dart');
+    logger.d('Wrote qcf_v4_data.dart');
   } catch (e, st) {
-    print('Error: $e\n$st');
+    logger.d('Error: $e\n$st');
   }
 }

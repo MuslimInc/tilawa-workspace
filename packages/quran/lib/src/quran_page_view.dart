@@ -2,19 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../quran.dart';
-import 'constants/quran_constants.dart';
-import 'page_content.dart';
+import 'helpers/app_logger.dart';
 
 /// A horizontally swipeable Quran mushaf using internal QCF fonts.
 ///
-/// - Uses `pageData` to determine surah/verse ranges for each page.
-/// - Renders each verse with `QcfVerse`, which applies the correct per-page font.
-/// - Supports RTL page order via `reverse: true` and `Directionality.rtl`.
+/// Refactored to use a sliver-based architecture permitting `cacheExtent`.
+/// This ensures adjacent pages are pre-rasterized on the GPU, eliminating
+/// jank during the swipe gesture.
 class QuranPageView extends StatefulWidget {
   const QuranPageView({
     super.key,
-    this.initialPageNumber = 1,
-    this.controller,
+    required this.controller,
     this.onPageChanged,
     this.textColor = const Color(0xFF000000),
     this.pageBackgroundColor = const Color(0xFFFFF9F1),
@@ -30,45 +28,38 @@ class QuranPageView extends StatefulWidget {
     this.onShowIndex,
     this.headerImageFilter,
     this.headerTextColor,
-    this.headerFontSizeMultiplier = 0.45,
+    this.headerFontSizeMultiplier =
+        SurahHeaderBannerConstants.defaultFontSizeMultiplier,
     this.currentPageListenable,
     this.uiTextDirection = TextDirection.ltr,
     this.showOverlaysListenable,
-  }) : assert(
-         initialPageNumber >= 1 &&
-             initialPageNumber <= QuranConstants.totalPagesCount,
-       );
+    this.showShadows = true,
+    this.onScrollStarted,
+    this.onScrollEnded,
+    this.cacheExtentListenable,
+    this.preparedWindowListenable,
+    this.isScrollingListenable,
+  });
 
-  /// Controls visibility of the internal page metadata strips and badges.
-  /// Use a [ValueNotifier<bool>] so that tap-to-toggle rebuilds only the
-  /// chrome widgets, not the entire [QuranPageView] + [PageContent] tree.
+  /// Optional listenable to dynamically control the cache extent.
+  /// Used to zero-out cache during jumps to eliminate 1st-frame jank.
+  final ValueListenable<double>? cacheExtentListenable;
+  final ValueListenable<PreparedQuranPageWindow?>? preparedWindowListenable;
+
+  /// Scroll interaction callbacks for the parent to manage background tasks.
+  final VoidCallback? onScrollStarted;
+  final VoidCallback? onScrollEnded;
+
+  /// Whether to render bold text shadows in [PageContent].
+  final bool showShadows;
+
   final ValueListenable<bool>? showOverlaysListenable;
-
-  /// 1-based initial page number (1..604)
-  final int initialPageNumber;
-
-  /// Optional external controller. If not provided, an internal one is created.
-  final PageController? controller;
-
-  /// Optional listenable for the current page number.
-  /// Used for smart keep-alive logic in [PageContent].
+  final PageController controller;
   final ValueListenable<int>? currentPageListenable;
-
-  /// Optional callback when page changes. Provides 1-based page number.
   final ValueChanged<int>? onPageChanged;
-
-  /// Verse text color.
   final Color textColor;
-
-  /// Background color for the whole page container.
   final Color pageBackgroundColor;
-
-  /// Optional callback to get background color for individual verses.
-  /// Returns a Color for the verse, or null for no background color.
-  /// Useful for highlighting selected verses.
   final Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor;
-
-  /// Long-press callbacks that include the pressed verse info.
   final void Function(int surahNumber, int verseNumber)? onLongPress;
   final void Function(int surahNumber, int verseNumber)? onLongPressUp;
   final void Function(int surahNumber, int verseNumber)? onLongPressCancel;
@@ -88,99 +79,124 @@ class QuranPageView extends StatefulWidget {
   final double headerFontSizeMultiplier;
   final TextDirection uiTextDirection;
 
+  /// A listenable that is `true` while the user is actively swiping.
+  ///
+  /// When provided by the parent, [QuranPageView] uses it directly instead
+  /// of managing its own. This allows the reader screen to centrally control
+  /// the scroll state for both this view and the background warming service.
+  final ValueListenable<bool>? isScrollingListenable;
+
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
 }
 
 class _QuranPageViewState extends State<QuranPageView> {
-  PageController? _internalController;
-
-  PageController get _controller => widget.controller ?? _internalController!;
-
-  bool get _ownsController => widget.controller == null;
+  int _lastReportedPage = 0;
 
   @override
   void initState() {
     super.initState();
-    if (_ownsController) {
-      _internalController = PageController(
-        initialPage: widget.initialPageNumber - 1,
-      );
-    }
+    _lastReportedPage = widget.controller.initialPage;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Precache the Surah header banner image to avoid jank during swiping.
-    precacheImage(
-      const AssetImage('assets/mainframe.png', package: 'quran'),
-      context,
-    );
-  }
+  void _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification ||
+        notification is ScrollEndNotification) {
+      final double? offset = widget.controller.hasClients
+          ? widget.controller.page
+          : widget.controller.initialPage.toDouble();
 
-  @override
-  void dispose() {
-    if (_ownsController) {
-      _internalController?.dispose();
+      if (offset == null) return;
+
+      final int currentPage = offset.round();
+      if (currentPage != _lastReportedPage) {
+        _lastReportedPage = currentPage;
+        final int pageNumber = currentPage + 1;
+        _debugLog(
+          () =>
+              '[PERF] Page changed to $pageNumber at ${DateTime.now().millisecondsSinceEpoch}ms',
+        );
+        widget.onPageChanged?.call(pageNumber);
+      }
     }
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: ColoredBox(
-        color: widget.pageBackgroundColor,
-        child: PageView.builder(
-          controller: _controller,
-          itemCount: QuranConstants.totalPagesCount,
-          // Keep adjacent pages in the render tree so they are pre-built before
-          // the user swipes, eliminating the loading spinner flash on mid-range
-          // hardware (Snapdragon 695).
-          allowImplicitScrolling: true,
-          onPageChanged: (index) {
-            final int pageNumber = index + 1;
-            _debugLog(
-              '[PERF] onPageChanged → page $pageNumber at ${DateTime.now().millisecondsSinceEpoch}ms',
-            );
-            widget.onPageChanged?.call(pageNumber);
-          },
-          itemBuilder: (context, index) {
-            final int pageNumber = index + 1; // 1-based page
-            return PageContent(
-              key: ValueKey<int>(pageNumber),
-              pageNumber: pageNumber,
-              textColor: widget.textColor,
-              verseBackgroundColor: widget.verseBackgroundColor,
-              onLongPress: widget.onLongPress,
-              onLongPressUp: widget.onLongPressUp,
-              onLongPressCancel: widget.onLongPressCancel,
-              onLongPressDown: widget.onLongPressDown,
-              juzLabel: widget.juzLabel,
-              hizbLabel: widget.hizbLabel,
-              surahNameBuilder: widget.surahNameBuilder,
-              onSurahSelected: widget.onSurahSelected,
-              onShowIndex: widget.onShowIndex,
-              headerImageFilter: widget.headerImageFilter,
-              headerTextColor: widget.headerTextColor,
-              headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
-              pageBackgroundColor: widget.pageBackgroundColor,
-              uiTextDirection: widget.uiTextDirection,
-              currentPageListenable: widget.currentPageListenable,
-              showOverlaysListenable: widget.showOverlaysListenable,
-            );
-          },
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        final ValueListenable<bool>? listenable = widget.isScrollingListenable;
+        if (listenable is ValueNotifier<bool>) {
+          if (notification is ScrollStartNotification) {
+            listenable.value = true;
+          } else if (notification is ScrollUpdateNotification) {
+            if (!listenable.value) listenable.value = true;
+          } else if (notification is ScrollEndNotification ||
+              notification is UserScrollNotification) {
+            if (notification is ScrollEndNotification) {
+              listenable.value = false;
+            }
+          }
+        }
+        if (notification is ScrollStartNotification) {
+          widget.onScrollStarted?.call();
+        } else if (notification is ScrollEndNotification) {
+          widget.onScrollEnded?.call();
+        }
+        _handleScrollNotification(notification);
+        return false;
+      },
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ColoredBox(
+          color: widget.pageBackgroundColor,
+          child: CustomScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: widget.controller,
+            physics: const PageScrollPhysics(),
+            cacheExtent: widget.cacheExtentListenable?.value ?? 800,
+            slivers: [
+              SliverFillViewport(
+                padEnds: false,
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final int pageNumber = index + 1;
+                  return PageContent(
+                    key: ValueKey<int>(pageNumber),
+                    pageNumber: pageNumber,
+                    preparedWindowListenable: widget.preparedWindowListenable,
+                    textColor: widget.textColor,
+                    verseBackgroundColor: widget.verseBackgroundColor,
+                    onLongPress: widget.onLongPress,
+                    onLongPressUp: widget.onLongPressUp,
+                    onLongPressCancel: widget.onLongPressCancel,
+                    onLongPressDown: widget.onLongPressDown,
+                    juzLabel: widget.juzLabel,
+                    hizbLabel: widget.hizbLabel,
+                    surahNameBuilder: widget.surahNameBuilder,
+                    onSurahSelected: widget.onSurahSelected,
+                    onShowIndex: widget.onShowIndex,
+                    headerImageFilter: widget.headerImageFilter,
+                    headerTextColor: widget.headerTextColor,
+                    headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+                    pageBackgroundColor: widget.pageBackgroundColor,
+                    uiTextDirection: widget.uiTextDirection,
+                    currentPageListenable: widget.currentPageListenable,
+                    showOverlaysListenable: widget.showOverlaysListenable,
+                    isScrollingListenable: widget.isScrollingListenable,
+                    showShadows: widget.showShadows,
+                  );
+                }, childCount: QuranConstants.totalPagesCount),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-void _debugLog(String message) {
-  assert(() {
-    debugPrint(message);
-    return true;
-  }());
+void _debugLog(String Function() messageBuilder) {
+  if (!kReleaseMode) {
+    logger.i(messageBuilder());
+  }
 }

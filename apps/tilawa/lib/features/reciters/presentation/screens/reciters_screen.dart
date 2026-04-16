@@ -7,9 +7,9 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
@@ -225,6 +225,29 @@ class _RecitersScreenState extends State<RecitersScreen> {
             ),
           ],
           child: BlocBuilder<RecitersBloc, RecitersState>(
+            buildWhen: (previous, current) {
+              // Skip rebuild when only favoriteIds changed — _FavoriteButton
+              // handles that independently via context.select<FavoritesCubit>.
+              if (previous is RecitersLoaded && current is RecitersLoaded) {
+                // Check if only favoriteIds changed (filteredReciters gets
+                // re-sorted by _filterReciters but we don't need to rebuild)
+                final onlyFavoritesChanged =
+                    previous.favoriteIds != current.favoriteIds &&
+                    previous.searchQuery == current.searchQuery &&
+                    previous.selectedLetter == current.selectedLetter &&
+                    previous.showFavoritesOnly == current.showFavoritesOnly;
+
+                if (onlyFavoritesChanged) {
+                  return false;
+                }
+
+                return previous.filteredReciters != current.filteredReciters ||
+                    previous.searchQuery != current.searchQuery ||
+                    previous.selectedLetter != current.selectedLetter ||
+                    previous.showFavoritesOnly != current.showFavoritesOnly;
+              }
+              return true;
+            },
             builder: (context, state) {
               final l10n = context.l10n;
 
@@ -350,13 +373,7 @@ class _RecitersSurface extends StatelessWidget {
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primaryColor.withValues(alpha: 0.04),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        // Removed expensive boxShadow to reduce raster jank
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -385,25 +402,25 @@ class _RecitersSurface extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _ResultsSummary(state: state),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    child: switch (state) {
-                      final RecitersLoaded loadedState
-                          when _hasActiveFilters(loadedState) =>
-                        Padding(
-                          key: const ValueKey('active_filters'),
-                          padding: const EdgeInsets.only(top: 10),
-                          child: _ActiveFiltersBar(
-                            state: loadedState,
-                            onClearSearch: onClearSearch,
-                            onClearLetter: onClearLetter,
-                            onClearFavorites: onClearFavorites,
-                            onClearAll: onClearAll,
-                          ),
+                  Builder(
+                    builder: (context) {
+                      if (state is! RecitersLoaded) {
+                        return const SizedBox.shrink();
+                      }
+                      final loadedState = state as RecitersLoaded;
+                      if (!_hasActiveFilters(loadedState)) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: _ActiveFiltersBar(
+                          state: loadedState,
+                          onClearSearch: onClearSearch,
+                          onClearLetter: onClearLetter,
+                          onClearFavorites: onClearFavorites,
+                          onClearAll: onClearAll,
                         ),
-                      _ => const SizedBox.shrink(
-                        key: ValueKey('inactive_filters'),
-                      ),
+                      );
                     },
                   ),
                 ],
@@ -651,10 +668,8 @@ class _ResultsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: _buildChild(context),
-    );
+    // Skip AnimatedSwitcher for loaded state to avoid jank when filtering
+    return _buildChild(context);
   }
 
   Widget _buildChild(BuildContext context) {
@@ -738,15 +753,21 @@ class _LoadedResults extends StatelessWidget {
         state.filteredReciters.isNotEmpty && state.searchQuery.isEmpty;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
+    // Memoize scrollbar with stable identity to prevent rebuilds during filtering
+    final scrollbar = showScrollbar
+        ? ReciterAlphabetScrollbar(
+            key: const ValueKey('alphabet_scrollbar'),
+            // Use allReciters (unfiltered) so letters stay stable during filtering
+            allReciters: state.reciters,
+            scrollController: scrollController,
+            onLetterSelected: onLetterSelected,
+          )
+        : const SizedBox.shrink();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isRtl && showScrollbar)
-          ReciterAlphabetScrollbar(
-            reciters: state.filteredReciters,
-            scrollController: scrollController,
-            onLetterSelected: onLetterSelected,
-          ),
+        if (isRtl && showScrollbar) scrollbar,
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -774,12 +795,7 @@ class _LoadedResults extends StatelessWidget {
             },
           ),
         ),
-        if (!isRtl && showScrollbar)
-          ReciterAlphabetScrollbar(
-            reciters: state.filteredReciters,
-            scrollController: scrollController,
-            onLetterSelected: onLetterSelected,
-          ),
+        if (!isRtl && showScrollbar) scrollbar,
       ],
     );
   }
@@ -940,104 +956,118 @@ class _ReciterGridView extends StatelessWidget {
   }
 }
 
-class ReciterAlphabetScrollbar extends StatelessWidget {
+class ReciterAlphabetScrollbar extends StatefulWidget {
   const ReciterAlphabetScrollbar({
     super.key,
-    required this.reciters,
+    required this.allReciters,
     required this.scrollController,
     required this.onLetterSelected,
   });
-  final List<ReciterEntity> reciters;
+  final List<ReciterEntity> allReciters;
   final ScrollController scrollController;
   final Function(String? letter) onLetterSelected;
 
   @override
-  Widget build(BuildContext context) {
-    // Get unique letters from reciters, sorted
-    final List<String> letters =
-        reciters.map((reciter) => reciter.letter).toSet().toList()..sort();
+  State<ReciterAlphabetScrollbar> createState() =>
+      _ReciterAlphabetScrollbarState();
+}
 
-    if (letters.isEmpty) {
+class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
+  late List<String> _letters;
+
+  @override
+  void initState() {
+    super.initState();
+    _letters = _extractLetters(widget.allReciters);
+  }
+
+  @override
+  void didUpdateWidget(covariant ReciterAlphabetScrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only recalculate letters if reciters actually changed
+    if (widget.allReciters.length != oldWidget.allReciters.length ||
+        widget.allReciters.isEmpty != oldWidget.allReciters.isEmpty) {
+      _letters = _extractLetters(widget.allReciters);
+    }
+  }
+
+  List<String> _extractLetters(List<ReciterEntity> reciters) {
+    return reciters.map((r) => r.letter).toSet().toList()..sort();
+  }
+
+  void _handleLetterTap(String letter, AlphabetScrollbarState currentState) {
+    if (currentState.selectedLetter == letter) {
+      context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+      widget.onLetterSelected(null);
+      return;
+    }
+
+    context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
+
+    final int index = widget.allReciters.indexWhere(
+      (item) => item.letter == letter,
+    );
+    if (index != -1) {
+      widget.scrollController.jumpTo(0.0);
+    }
+
+    widget.onLetterSelected(letter);
+  }
+
+  void _handlePanUpdate(
+    DragUpdateDetails details,
+    AlphabetScrollbarState currentState,
+  ) {
+    if (!currentState.isDragging) return;
+
+    final box = context.findRenderObject()! as RenderBox;
+    final localPosition = box.globalToLocal(details.globalPosition);
+    final letterHeight = box.size.height / _letters.length;
+    final letterIndex = (localPosition.dy / letterHeight)
+        .clamp(0, _letters.length - 1)
+        .floor();
+
+    if (letterIndex >= 0 && letterIndex < _letters.length) {
+      final String letter = _letters[letterIndex];
+      if (currentState.selectedLetter != letter) {
+        context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
+
+        final int index = widget.allReciters.indexWhere(
+          (item) => item.letter == letter,
+        );
+        if (index != -1) {
+          widget.scrollController.jumpTo(0.0);
+        }
+
+        widget.onLetterSelected(letter);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_letters.isEmpty) {
       return const SizedBox.shrink();
     }
 
+    final selectedLetter = context
+        .watch<AlphabetScrollbarBloc>()
+        .state
+        .selectedLetter;
+
     return ArabicAlphabetScrollbar(
-      letters: letters,
-      selectedLetter: context
-          .watch<AlphabetScrollbarBloc>()
-          .state
-          .selectedLetter,
-      onLetterSelected: (letter) {
-        final AlphabetScrollbarState currentState = context
-            .read<AlphabetScrollbarBloc>()
-            .state;
-
-        if (currentState.selectedLetter == letter) {
-          // Toggle off
-          context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
-          onLetterSelected(null);
-          return;
-        }
-
-        context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
-
-        // Find the first item that starts with this letter
-        final int index = reciters.indexWhere((item) {
-          return item.letter == letter;
-        });
-
-        if (index != -1) {
-          // Scroll to the top of the list when a letter is selected
-          scrollController.animateTo(
-            0.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-
-        onLetterSelected(letter);
-      },
-      onPanStart: (details) =>
+      key: const ValueKey('alphabet_scrollbar'),
+      letters: _letters,
+      selectedLetter: selectedLetter,
+      onLetterSelected: (letter) =>
+          _handleLetterTap(letter, context.read<AlphabetScrollbarBloc>().state),
+      onPanStart: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
-      onPanUpdate: (details) {
-        final AlphabetScrollbarState currentState = context
-            .read<AlphabetScrollbarBloc>()
-            .state;
-        if (!currentState.isDragging) {
-          return;
-        }
-
-        final box = context.findRenderObject()! as RenderBox;
-        final Offset localPosition = box.globalToLocal(details.globalPosition);
-        final double letterHeight = box.size.height / letters.length;
-        final int letterIndex = (localPosition.dy / letterHeight)
-            .clamp(0, letters.length - 1)
-            .floor();
-
-        if (letterIndex >= 0 && letterIndex < letters.length) {
-          final String letter = letters[letterIndex];
-          if (currentState.selectedLetter != letter) {
-            context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
-
-            // Find the first item that starts with this letter
-            final int index = reciters.indexWhere((item) {
-              return item.letter == letter;
-            });
-
-            if (index != -1) {
-              // Scroll to the top of the list when a letter is selected
-              scrollController.animateTo(
-                0.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
-
-            onLetterSelected(letter);
-          }
-        }
-      },
-      onPanEnd: (details) =>
+      onPanUpdate: (details) => _handlePanUpdate(
+        details,
+        context.read<AlphabetScrollbarBloc>().state,
+      ),
+      onPanEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
     );
   }

@@ -1,0 +1,64 @@
+diff --git a/engine/src/flutter/lib/ui/text.dart b/engine/src/flutter/lib/ui/text.dart
+index e7fa3a8..719b1a7 100644
+--- a/engine/src/flutter/lib/ui/text.dart
++++ b/engine/src/flutter/lib/ui/text.dart
+@@ -3789,7 +3789,7 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
+   return _futurize((_Callback<void> callback) {
+     _loadFontFromList(list, callback, fontFamily ?? '');
+     return null;
+-  }).then((_) => _sendFontChangeMessage());
++  }).then((_) => _scheduleFontChangeMessage());
+ }
+ 
+ final ByteData _fontChangeMessage = utf8
+@@ -3797,6 +3797,20 @@ final ByteData _fontChangeMessage = utf8
+     .buffer
+     .asByteData();
+ 
++// Runtime font loading often registers several fonts in one async burst.
++// Collapse those into a single system notification to avoid redundant relayout.
++Future<void>? _pendingFontChangeMessage;
++
++Future<void> _scheduleFontChangeMessage() {
++  return _pendingFontChangeMessage ??= Future<void>.microtask(() async {
++    try {
++      await _sendFontChangeMessage();
++    } finally {
++      _pendingFontChangeMessage = null;
++    }
++  });
++}
++
+ FutureOr<void> _sendFontChangeMessage() async {
+   const kSystemChannelName = 'flutter/system';
+   if (PlatformDispatcher.instance.onPlatformMessage != null) {
+diff --git a/engine/src/flutter/testing/dart/text_test.dart b/engine/src/flutter/testing/dart/text_test.dart
+index f806acd..0df5595 100644
+--- a/engine/src/flutter/testing/dart/text_test.dart
++++ b/engine/src/flutter/testing/dart/text_test.dart
+@@ -297,6 +297,25 @@ void testLoadFontFromList() {
+     expect(message, '{"type":"fontsChange"}');
+     channelBuffers.clearListener('flutter/system');
+   });
++
++  test('loadFontFromList coalesces platform messages for batched font loads', () async {
++    final List<String> messages = <String>[];
++    channelBuffers.setListener('flutter/system', (
++      ByteData? data,
++      PlatformMessageResponseCallback? callback,
++    ) {
++      assert(data != null);
++      final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
++      messages.add(utf8.decode(list));
++    });
++    final fontData = Uint8List(0);
++    await Future.wait(<Future<void>>[
++      loadFontFromList(fontData, fontFamily: 'fake_a'),
++      loadFontFromList(fontData, fontFamily: 'fake_b'),
++    ]);
++    expect(messages, <String>['{"type":"fontsChange"}']);
++    channelBuffers.clearListener('flutter/system');
++  });
+ }
+ 
+ void testFontFeatureClass() {

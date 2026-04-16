@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "preparingQuran": "Preparing the Quran for you…",
+  "quranReady": "The Quran is ready.",
+  "somethingWentWrong": "Something went wrong. Please try again.",
+  "networkError": "Please check your internet connection and try again.",
+  "appTitle": "AlQuran",
+  "retry": "Retry",
+  "pageIndicator": "Page {current} of {total}",
+  "@pageIndicator": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
+}

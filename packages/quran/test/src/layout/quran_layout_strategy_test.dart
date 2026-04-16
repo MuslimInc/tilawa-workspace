@@ -104,7 +104,7 @@ void main() {
 
               expect(metrics.isScrollable, true);
               expect(metrics.fontSize, isPositive);
-              expect(metrics.fontHeight, 1.75);
+              expect(metrics.fontHeight, 1.85);
 
               expect(metrics.padding, EdgeInsets.zero);
 

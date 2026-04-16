@@ -34,6 +34,7 @@ library;
 // CONSTANTS
 // =============================================================================
 export 'src/constants/quran_constants.dart';
+export 'src/constants/surah_header_banner_constants.dart';
 // =============================================================================
 // DATA (for advanced usage)
 // =============================================================================
@@ -56,6 +57,10 @@ export 'src/header_widget.dart';
 // HELPERS
 // =============================================================================
 export 'src/helpers/convert_to_arabic_number.dart';
+export 'src/layout/quran_layout_strategy.dart'
+    show QuranLayoutMetrics, StandardQuranLayoutStrategy;
+export 'src/layout/surah_header_banner_layout.dart';
+export 'src/page_content.dart';
 export 'src/qcf_verse.dart';
 // =============================================================================
 // EXCEPTIONS
@@ -69,6 +74,7 @@ export 'src/services/functions/page_functions.dart';
 export 'src/services/functions/search_functions.dart';
 export 'src/services/functions/surah_functions.dart';
 export 'src/services/functions/verse_functions.dart';
+export 'src/services/idle_scheduler.dart';
 // =============================================================================
 // SERVICE INTERFACES (for dependency injection)
 // =============================================================================
@@ -77,13 +83,18 @@ export 'src/services/interfaces/search_service.dart';
 export 'src/services/interfaces/surah_service.dart';
 export 'src/services/interfaces/text_normalization_service.dart';
 export 'src/services/interfaces/verse_service.dart';
+export 'src/services/page_snapshot_service.dart';
 // =============================================================================
 // SERVICE IMPLEMENTATIONS
 // =============================================================================
 export 'src/services/quran_data_service_impl.dart';
 export 'src/services/quran_font_service.dart';
+export 'src/services/quran_page_preparation_service.dart';
 export 'src/services/quran_service_locator.dart';
+export 'src/services/quran_special_line.dart';
 export 'src/services/search_service_impl.dart';
 export 'src/services/surah_service_impl.dart';
 export 'src/services/text_normalization_service_impl.dart';
 export 'src/services/verse_service_impl.dart';
+export 'src/widgets/surah_header_banner.dart';
+export 'src/widgets/surah_header_glyph_provider.dart';

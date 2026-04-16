@@ -29,6 +29,30 @@ class QuranConstants {
   /// Maximum valid page number.
   static const int maxPageNumber = 604;
 
+  /// Standard Madinah mushaf line count per page.
+  static const int linesPerPage = 15;
+
+  /// Number of gaps between [linesPerPage] lines.
+  static const int lineGapCount = linesPerPage - 1;
+
+  /// Pages whose content is vertically centered rather than full-page fitted.
+  static const Set<int> centeredPageNumbers = <int>{1, 2};
+
+  /// Zero-based visual line index for centered-page Surah headers.
+  static const int centeredHeaderLineIndex = 2;
+
+  /// Zero-based visual line index for centered-page bismillah blocks.
+  static const int centeredBismillahLineIndex = 4;
+
+  /// Zero-based visual line index where centered-page text starts.
+  static const int centeredTextStartLineIndex = 5;
+
+  /// Zero-based raw line index where centered-page text starts.
+  static const int centeredTextRawStartLineIndex = 1;
+
+  /// Number of raw text lines copied into the centered-page text block.
+  static const int centeredTextLineCount = 7;
+
   /// Minimum valid surah number.
   static const int minSurahNumber = 1;
 

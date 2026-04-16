@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../constants/quran_constants.dart';
 import '../helpers/app_logger.dart';
+import 'quran_special_line.dart';
 
 /// A singleton service to manage Quran data loading and caching.
 class QuranDataService {
@@ -12,20 +14,18 @@ class QuranDataService {
   static final QuranDataService instance = QuranDataService._internal();
 
   /// Raw structure of the Mushaf after V4 JSON decoding.
-  Map<String, dynamic>? _qpcV4Data;
-
   /// A map for fast indexing of pages containing surahs and lines.
   /// Format: pageNumber -> SurahNumber -> LineNumber -> [Verses]
   Map<int, List<List<Map<String, dynamic>>>>? _processedPageIndex;
   Map<String, int>? _verseLastWordIndexByVerse;
+  final Map<int, QuranSpecialLineCounts> _specialLineCountsCache = {};
+  final Map<int, Map<int, QuranSpecialLine>> _specialLinesCache = {};
 
   Completer<void>? _loadCompleter;
 
   /// Returns true if the data is already loaded.
   bool get isLoaded =>
-      _qpcV4Data != null &&
-      _processedPageIndex != null &&
-      _verseLastWordIndexByVerse != null;
+      _processedPageIndex != null && _verseLastWordIndexByVerse != null;
 
   /// Returns a future that completes when data is loaded.
   Future<void> ensureLoaded() async {
@@ -38,18 +38,21 @@ class QuranDataService {
 
     _loadCompleter = Completer<void>();
     final startTime = DateTime.now();
-    logger.d('[QuranDataService] Start loading Quran data...');
+    if (!kReleaseMode) {
+      logger.i('[QuranDataService] Start loading Quran data...');
+    }
 
     try {
-      // 1. Load the raw JSON asset from the bundle.
-      // We load two files if needed, but the original PageContent logic
-      // was a bit different. Let's stick to the dual-file loading
-      // seen in the recent PageContent.
-      final List<String> responses = await Future.wait([
-        rootBundle.loadString('packages/quran/assets/quran_fonts/qpc-v4.json'),
-        rootBundle.loadString(
-          'packages/quran/assets/quran_fonts/quran_page_index.json',
-        ),
+      // 1. Load the raw bytes from the bundle.
+      // Loading bytes is faster on the main thread than loadString
+      // because it avoids synchronous utf8 decoding of large strings.
+      final List<Uint8List> responses = await Future.wait([
+        rootBundle
+            .load('packages/quran/assets/quran_fonts/qpc-v4.json')
+            .then((d) => d.buffer.asUint8List()),
+        rootBundle
+            .load('packages/quran/assets/quran_fonts/quran_page_index.json')
+            .then((d) => d.buffer.asUint8List()),
       ]);
 
       // 2. Offload decoding and heavy processing to a background isolate.
@@ -58,16 +61,17 @@ class QuranDataService {
         responses,
       );
 
-      _qpcV4Data = decoded[0] as Map<String, dynamic>;
       _processedPageIndex =
-          decoded[1] as Map<int, List<List<Map<String, dynamic>>>>;
-      _verseLastWordIndexByVerse = decoded[2] as Map<String, int>;
+          decoded[0] as Map<int, List<List<Map<String, dynamic>>>>;
+      _verseLastWordIndexByVerse = decoded[1] as Map<String, int>;
 
       _loadCompleter!.complete();
       final Duration duration = DateTime.now().difference(startTime);
-      logger.d(
-        '[QuranDataService] Data loaded in ${duration.inMilliseconds}ms',
-      );
+      if (!kReleaseMode) {
+        logger.i(
+          '[QuranDataService] Data loaded in ${duration.inMilliseconds}ms',
+        );
+      }
     } catch (e, s) {
       _loadCompleter?.completeError(e, s);
       _loadCompleter = null; // Allow retry on failure
@@ -107,20 +111,21 @@ class QuranDataService {
   }
 
   /// Heavy lifting: decode JSON and pre-build the O(1) page lookup map.
-  static List<dynamic> _decodeAndProcessData(List<String> jsonStrings) {
-    final qpc = json.decode(jsonStrings[0]) as Map<String, dynamic>;
-    final pageIndexRaw = json.decode(jsonStrings[1]) as Map<String, dynamic>;
+  static List<dynamic> _decodeAndProcessData(List<Uint8List> bytes) {
+    // Decoding large strings is done here in the background isolate.
+    final qpc = json.decode(utf8.decode(bytes[0])) as Map<String, dynamic>;
+    final pageIndexRaw =
+        json.decode(utf8.decode(bytes[1])) as Map<String, dynamic>;
 
     final processedIndex = <int, List<List<Map<String, dynamic>>>>{};
     final verseLastWordIndexByVerse = <String, int>{};
 
     for (final MapEntry<String, dynamic> wordEntry in qpc.entries) {
-      final Map<String, dynamic> wordData =
-          wordEntry.value as Map<String, dynamic>;
-      final String surah = wordData['surah'].toString();
-      final String ayah = wordData['ayah'].toString();
+      final wordData = wordEntry.value as Map<String, dynamic>;
+      final surah = wordData['surah'].toString();
+      final ayah = wordData['ayah'].toString();
       final int wordIndex = int.tryParse(wordData['word'].toString()) ?? 0;
-      final String verseKey = '$surah:$ayah';
+      final verseKey = '$surah:$ayah';
       final int previousMax = verseLastWordIndexByVerse[verseKey] ?? 0;
       if (wordIndex > previousMax) {
         verseLastWordIndexByVerse[verseKey] = wordIndex;
@@ -132,12 +137,15 @@ class QuranDataService {
       final lineMap = pageEntry.value as Map<String, dynamic>;
 
       final List<List<Map<String, dynamic>>> lines = List.generate(
-        15,
+        QuranConstants.linesPerPage,
         (_) => <Map<String, dynamic>>[],
       );
 
       for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
-        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(0, 14);
+        final int lineIndex = (int.parse(lineEntry.key) - 1).clamp(
+          0,
+          QuranConstants.linesPerPage - 1,
+        );
         final List<String> wordKeys = (lineEntry.value as List<dynamic>)
             .cast<String>();
         for (final key in wordKeys) {
@@ -150,27 +158,46 @@ class QuranDataService {
       processedIndex[pageNum] = lines;
     }
 
-    return [qpc, processedIndex, verseLastWordIndexByVerse];
+    return [processedIndex, verseLastWordIndexByVerse];
   }
 
   /// Returns counts of [headers, bismillahs] for a specific page.
   Map<String, int> getSpecialLineCounts(int pageNumber) {
-    final Map<int, String> special = _calculateSpecialLines(pageNumber);
+    return getSpecialLineCountSummary(pageNumber).toLegacyMap();
+  }
+
+  QuranSpecialLineCounts getSpecialLineCountSummary(int pageNumber) {
+    if (_specialLineCountsCache.containsKey(pageNumber)) {
+      return _specialLineCountsCache[pageNumber]!;
+    }
+    final Map<int, QuranSpecialLine> special = _calculateSpecialLines(
+      pageNumber,
+    );
     var headers = 0;
     var bismillahs = 0;
-    for (final String type in special.values) {
-      if (type.startsWith('HEADER')) headers++;
-      if (type.startsWith('BISMILLAH')) bismillahs++;
+    for (final QuranSpecialLine line in special.values) {
+      if (line.isSurahHeader) {
+        headers++;
+      }
+      if (line.isBismillah) {
+        bismillahs++;
+      }
     }
-    return {'headers': headers, 'bismillahs': bismillahs};
+    return _specialLineCountsCache[pageNumber] = QuranSpecialLineCounts(
+      headers: headers,
+      bismillahs: bismillahs,
+    );
   }
 
   /// Calculates which lines on a page should be headers or bismillahs.
   /// Logic moved from PageContent for centralized layout management.
-  Map<int, String> _calculateSpecialLines(int pageNumber) {
-    final Map<int, String> special = {};
+  Map<int, QuranSpecialLine> _calculateSpecialLines(int pageNumber) {
+    if (_specialLinesCache.containsKey(pageNumber)) {
+      return _specialLinesCache[pageNumber]!;
+    }
+    final Map<int, QuranSpecialLine> special = {};
     final List<List<Map<String, dynamic>>> lines =
-        getPageData(pageNumber) ?? [];
+        getPageData(pageNumber) ?? <List<Map<String, dynamic>>>[];
 
     for (var i = 0; i < lines.length; i++) {
       final List<Map<String, dynamic>> lineWords = lines[i];
@@ -183,20 +210,77 @@ class QuranDataService {
         if (ayah == 1 && word == 1) {
           final int lineNum = i + 1;
           if (surah == 1) {
-            if (pageNumber == 1) special[1] = 'HEADER:1';
+            if (pageNumber == QuranConstants.minPageNumber) {
+              special[1] = const QuranSpecialLine.surahHeader(1);
+            }
           } else if (surah == 9) {
-            if (lineNum > 1) special[lineNum - 1] = 'HEADER:9';
+            if (lineNum > 1) {
+              special[lineNum - 1] = const QuranSpecialLine.surahHeader(9);
+            }
           } else {
             if (lineNum > 2) {
-              special[lineNum - 2] = 'HEADER:$surah';
-              special[lineNum - 1] = 'BISMILLAH:$surah';
+              special[lineNum - 2] = QuranSpecialLine.surahHeader(surah);
+              special[lineNum - 1] = QuranSpecialLine.bismillah(surah);
             } else if (lineNum == 2) {
-              special[1] = 'BISMILLAH:$surah';
+              special[1] = QuranSpecialLine.bismillah(surah);
             }
           }
         }
       }
     }
-    return special;
+    return _specialLinesCache[pageNumber] = special;
+  }
+
+  QuranSpecialLine? getSpecialLine(int page, int line) {
+    if (!isLoaded) {
+      return null;
+    }
+    return _calculateSpecialLines(page)[line];
+  }
+
+  bool pageHasSurahHeader(int pageNumber) {
+    if (!isLoaded) {
+      return false;
+    }
+    return getSpecialLineCountSummary(pageNumber).hasSurahHeader;
+  }
+
+  /// Returns the special type (HEADER, BISMILLAH) for a given page and line.
+  String? getSpecialType(int page, int line) {
+    final QuranSpecialLine? specialLine = getSpecialLine(page, line);
+    if (specialLine == null) {
+      return null;
+    }
+    return switch (specialLine.type) {
+      QuranSpecialLineType.surahHeader => 'HEADER:${specialLine.surahNumber}',
+      QuranSpecialLineType.bismillah => 'BISMILLAH:${specialLine.surahNumber}',
+    };
+  }
+
+  /// Returns metadata for a given page (surah numbers, juz, hizb).
+  Map<String, dynamic> getPageMetadata(int page) {
+    if (!isLoaded) {
+      return <String, dynamic>{'surahNumbers': <int>[], 'juz': 0, 'hizb': 0};
+    }
+    final List<List<Map<String, dynamic>>> lines =
+        getPageData(page) ?? <List<Map<String, dynamic>>>[];
+    final Set<int> surahs = {};
+    var juz = 0;
+    var hizb = 0;
+
+    for (final line in lines) {
+      for (final word in line) {
+        final int s = int.tryParse(word['surah'].toString()) ?? 0;
+        if (s > 0) surahs.add(s);
+        // Juz/Hizb are usually constant per page in standard Uthmani Mushaf,
+        // but we can extract them from the first word.
+        if (juz == 0) {
+          juz = int.tryParse(word['juz']?.toString() ?? '') ?? 0;
+          hizb = int.tryParse(word['hizb']?.toString() ?? '') ?? 0;
+        }
+      }
+    }
+
+    return {'surahNumbers': surahs.toList()..sort(), 'juz': juz, 'hizb': hizb};
   }
 }

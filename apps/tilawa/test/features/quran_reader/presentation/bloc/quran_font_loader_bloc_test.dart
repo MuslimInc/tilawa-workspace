@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/check_fonts_downloaded_use_case.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/download_quran_fonts_use_case.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/load_quran_fonts_to_engine_use_case.dart';
+import 'package:tilawa/features/quran_reader/domain/usecases/update_current_page_use_case.dart';
 import 'package:tilawa/features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 
 class MockCheckFontsDownloadedUseCase extends Mock
@@ -15,20 +16,27 @@ class MockDownloadQuranFontsUseCase extends Mock
 class MockLoadQuranFontsToEngineUseCase extends Mock
     implements LoadQuranFontsToEngineUseCase {}
 
+class MockUpdateCurrentPageUseCase extends Mock
+    implements UpdateCurrentPageUseCase {}
+
 void main() {
   late MockCheckFontsDownloadedUseCase mockCheckFontsDownloadedUseCase;
   late MockDownloadQuranFontsUseCase mockDownloadQuranFontsUseCase;
   late MockLoadQuranFontsToEngineUseCase mockLoadQuranFontsToEngineUseCase;
+  late MockUpdateCurrentPageUseCase mockUpdateCurrentPageUseCase;
   late QuranFontLoaderBloc bloc;
 
   setUp(() {
     mockCheckFontsDownloadedUseCase = MockCheckFontsDownloadedUseCase();
     mockDownloadQuranFontsUseCase = MockDownloadQuranFontsUseCase();
     mockLoadQuranFontsToEngineUseCase = MockLoadQuranFontsToEngineUseCase();
+    mockUpdateCurrentPageUseCase = MockUpdateCurrentPageUseCase();
+
     bloc = QuranFontLoaderBloc(
       mockCheckFontsDownloadedUseCase,
       mockDownloadQuranFontsUseCase,
       mockLoadQuranFontsToEngineUseCase,
+      mockUpdateCurrentPageUseCase,
     );
   });
 
@@ -41,14 +49,26 @@ void main() {
       'should throttle progress updates to 1% increments',
       build: () {
         when(
-          () => mockLoadQuranFontsToEngineUseCase.hasLoadedFontsToEngine,
+          () => mockLoadQuranFontsToEngineUseCase.isFontLoaded(any()),
         ).thenReturn(false);
         when(
           () => mockCheckFontsDownloadedUseCase(),
         ).thenAnswer((_) async => false);
         when(
-          () => mockLoadQuranFontsToEngineUseCase(
-            initialPageNumber: any(named: 'initialPageNumber'),
+          () => mockLoadQuranFontsToEngineUseCase.ensureSingleFontLoaded(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.ensureQuranDataLoaded(),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.warmInitialPage(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockLoadQuranFontsToEngineUseCase.batchWarmPages(
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+            pivotPage: any(named: 'pivotPage'),
+            onProgress: any(named: 'onProgress'),
           ),
         ).thenAnswer((_) async {});
 
@@ -77,6 +97,7 @@ void main() {
       act: (bloc) => bloc.add(
         const QuranFontLoaderEvent.initialize(initialPageNumber: 118),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         const QuranFontLoaderState.checking(),
         const QuranFontLoaderState.downloading(0),
@@ -87,6 +108,19 @@ void main() {
         const QuranFontLoaderState.registering(),
         const QuranFontLoaderState.success(),
       ],
+      verify: (_) {
+        verifyNever(
+          () => mockLoadQuranFontsToEngineUseCase.warmInitialPage(any()),
+        );
+        verifyNever(
+          () => mockLoadQuranFontsToEngineUseCase.batchWarmPages(
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+            pivotPage: any(named: 'pivotPage'),
+            onProgress: any(named: 'onProgress'),
+          ),
+        );
+      },
     );
   });
 }

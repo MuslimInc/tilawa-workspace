@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Global test configuration that registers a fake image decoder so that
-/// [AssetImage] lookups for package assets (e.g. `mainframe.png`) do not
+/// [AssetImage] lookups for package assets (e.g. `sura_header_banner.png`) do not
 /// throw during widget tests.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();

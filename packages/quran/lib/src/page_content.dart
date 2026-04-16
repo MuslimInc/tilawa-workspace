@@ -1,24 +1,32 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'constants/quran_constants.dart';
+import 'constants/surah_header_banner_constants.dart';
+import 'helpers/app_logger.dart';
 import 'helpers/convert_to_arabic_number.dart';
-import 'helpers/quran_text_paint.dart';
 import 'layout/quran_layout_strategy.dart';
-import 'services/functions/page_functions.dart' as page_functions;
+import 'services/idle_scheduler.dart';
+import 'services/page_snapshot_service.dart';
 import 'services/quran_data_service.dart';
+import 'services/quran_page_preparation_service.dart';
+import 'services/quran_special_line.dart';
 import 'widgets/bismillah_widget.dart';
 import 'widgets/page_metadata_strip.dart';
 import 'widgets/page_number_badge.dart';
 import 'widgets/quran_line.dart';
+import 'widgets/quran_page_painter.dart';
 import 'widgets/surah_header_banner.dart';
 
 class PageContent extends StatefulWidget {
   const PageContent({
     super.key,
     required this.pageNumber,
+    this.preparedPage,
+    this.preparedWindowListenable,
     required this.textColor,
     this.verseBackgroundColor,
     this.onLongPress,
@@ -32,22 +40,42 @@ class PageContent extends StatefulWidget {
     this.onShowIndex,
     this.headerImageFilter,
     this.headerTextColor,
-    this.headerFontSizeMultiplier = 0.45,
+    this.headerFontSizeMultiplier =
+        SurahHeaderBannerConstants.defaultFontSizeMultiplier,
     required this.pageBackgroundColor,
     this.uiTextDirection = TextDirection.ltr,
     this.currentPageListenable,
     this.showOverlaysListenable,
+    this.isScrollingListenable,
+    this.isWarming = false,
+    this.showShadows = true,
   });
 
+  /// Whether to render bold text shadows.
+  final bool showShadows;
+
+  /// Whether this page is currently being "warmed up" offstage.
+  final bool isWarming;
+
   /// Controls visibility of the page metadata strip and page number badge.
-  /// Passed as a [ValueListenable] so tap-to-toggle only rebuilds the chrome
-  /// widgets, not the full [PageContent] tree.
   final ValueListenable<bool>? showOverlaysListenable;
+
+  /// Controls snapshot mode: when `true`, displays a pre-rendered bitmap
+  /// instead of the full widget tree to reduce raster thread cost.
+  final ValueListenable<bool>? isScrollingListenable;
 
   final int pageNumber;
 
+  /// Static prepared page — used when [preparedWindowListenable] is null.
+  final PreparedQuranPage? preparedPage;
+
+  /// Live window notifier — when provided, [PageContent] subscribes to it and
+  /// re-renders whenever the window contains a [PreparedQuranPage] for this
+  /// page. This guarantees the widget rebuilds even when reused by a sliver
+  /// (sliver children are not rebuilt on parent widget changes).
+  final ValueListenable<PreparedQuranPageWindow?>? preparedWindowListenable;
+
   /// Optional listenable for the current page number in the PageView.
-  /// Used for smart keep-alive logic.
   final ValueListenable<int>? currentPageListenable;
   final Color textColor;
   final Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor;
@@ -75,72 +103,53 @@ class PageContent extends StatefulWidget {
   State<PageContent> createState() => _PageContentState();
 }
 
-// Page caching is now managed by QuranDataService.
-
 class _PageContentState extends State<PageContent>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  /// Shared layout strategy strategy instance (stateless — no need to recreate).
-  static final StandardQuranLayoutStrategy _layoutStrategy =
-      StandardQuranLayoutStrategy();
-
-  bool _isLoading = true;
+    with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
-  final Map<String, LongPressGestureRecognizer> _wordRecognizers =
-      <String, LongPressGestureRecognizer>{};
-
-  // Cached once after data loads; invalidated when pageNumber changes.
   _PageMetaInfo? _cachedPageMeta;
-
-  // Line data is deterministic for a given pageNumber — cache to avoid
-  // re-querying QuranDataService on every build() call.
   List<List<Map<String, dynamic>>>? _cachedPageLines;
-  int _cachedFirstLineIdx = 0;
-
-  /// Caches the rendered page as a raster image after first paint so that
-  /// subsequent frames during swipe animation composite a cached bitmap
-  /// instead of re-rasterizing 15 FittedBox+RichText widgets (~25ms saving).
-  final SnapshotController _snapshotController = SnapshotController();
   Orientation? _lastOrientation;
-  int _lastCurrentPage = 0;
-  bool _snapshotRestoreScheduled = false;
-  bool _pendingSnapshotRefresh = false;
-  bool _pendingBannerPrewarm = false;
 
-  static const double _portraitPageHorizontalPadding = 6;
-  static const double _portraitPageBottomPadding = 2;
-  static const double _pageChromeSpacing = 0;
+  // Luminance cache — recomputed only when pageBackgroundColor changes.
+  Color? _cachedLuminanceColor;
+  bool _cachedIsLightPage = false;
+
+  // Spaced lines cache
+  List<Widget>? _cachedSpacedLines;
+  double? _cachedSpacedLinesLineSpacing;
+
+  // Bitmap snapshot support — captures the rendered page body as a GPU
+  // texture for fast blitting during swipe animations.
+  final GlobalKey _snapshotBoundaryKey = GlobalKey();
+  bool _snapshotScheduled = false;
+  bool _snapshotCaptured = false;
+  IdleTask? _pendingIdleCapture;
+
   static const Color _lightMetaTextColor = Color(0xFF9A7A57);
   static const Color _lightPageNumberBackgroundColor = Color(0xFFE8DDD0);
   static const Color _lightPageNumberBorderColor = Color(0xFFD2C0AE);
 
-  /// Process-wide cache: shadow list is identical for the same color value,
-  /// so we share a single list instance across all pages and builds.
-  static final Map<int, List<Shadow>> _shadowCache = {};
-
-  List<Shadow> _shadowsForColor(Color color) {
-    final int key = color.toARGB32();
-    return _shadowCache.putIfAbsent(key, () => buildQuranBoldShadows(color));
-  }
-
   @override
   bool get wantKeepAlive {
-    if (widget.currentPageListenable == null) {
-      return false;
-    }
-    // Keep alive if within 2 pages of the current page
+    if (widget.isWarming) return true;
+    if (widget.currentPageListenable == null) return false;
     final int distance =
         (widget.pageNumber - widget.currentPageListenable!.value).abs();
-    return distance <= 2;
+    // Keep a tighter active window to reduce retained raster layers and
+    // compositing pressure on mid-range devices during rapid page flips.
+    return distance <= 1;
   }
+
+  bool _hasFirstLayout = false;
+  int _buildStartMs = 0;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _initQuranData();
-
+    _primePageData();
     widget.currentPageListenable?.addListener(_handlePageChange);
-    _lastCurrentPage = widget.currentPageListenable?.value ?? widget.pageNumber;
+    widget.preparedWindowListenable?.addListener(_handleWindowChanged);
+    widget.isScrollingListenable?.addListener(_handleScrollStateChanged);
   }
 
   @override
@@ -149,336 +158,172 @@ class _PageContentState extends State<PageContent>
     if (oldWidget.currentPageListenable != widget.currentPageListenable) {
       oldWidget.currentPageListenable?.removeListener(_handlePageChange);
       widget.currentPageListenable?.addListener(_handlePageChange);
-      _lastCurrentPage =
-          widget.currentPageListenable?.value ?? widget.pageNumber;
       updateKeepAlive();
     }
 
-    final bool pageMetaInputsChanged = _didPageMetaInputsChange(oldWidget);
-    final bool snapshotInputsChanged = _didSnapshotInputsChange(oldWidget);
-    final bool longPressInputsChanged =
-        oldWidget.onLongPress != widget.onLongPress ||
-        oldWidget.onLongPressUp != widget.onLongPressUp ||
-        oldWidget.onLongPressCancel != widget.onLongPressCancel ||
-        oldWidget.onLongPressDown != widget.onLongPressDown;
+    if (oldWidget.preparedWindowListenable != widget.preparedWindowListenable) {
+      oldWidget.preparedWindowListenable?.removeListener(_handleWindowChanged);
+      widget.preparedWindowListenable?.addListener(_handleWindowChanged);
+    }
 
-    if (longPressInputsChanged && !_hasLongPressHandlers) {
-      _disposeWordRecognizers();
+    if (oldWidget.isScrollingListenable != widget.isScrollingListenable) {
+      oldWidget.isScrollingListenable?.removeListener(
+        _handleScrollStateChanged,
+      );
+      widget.isScrollingListenable?.addListener(_handleScrollStateChanged);
     }
 
     if (oldWidget.pageNumber != widget.pageNumber) {
-      // Invalidate all page-specific cached state.
       _cachedPageMeta = null;
       _cachedPageLines = null;
-      _cachedFirstLineIdx = 0;
-      _specialLinesCache.remove(oldWidget.pageNumber);
-      _specialLinesCache.remove(widget.pageNumber);
-      _disposeWordRecognizers();
-      _pendingSnapshotRefresh = false;
-      _pendingBannerPrewarm = false;
-      setState(() => _isLoading = true);
-      _initQuranData();
+      _snapshotCaptured = false;
+      _snapshotScheduled = false;
+      _primePageData();
       return;
     }
 
-    if (pageMetaInputsChanged) {
-      _cachedPageMeta = null;
-    }
-
-    if (snapshotInputsChanged) {
-      _debugLog(
-        '[PERF] page ${widget.pageNumber} snapshot invalidated by didUpdateWidget',
-      );
-      _requestSnapshotRefresh(
-        reason: 'visual inputs changed for page ${widget.pageNumber}',
-        prewarmBanner: _pageHasSurahHeader(widget.pageNumber),
-      );
+    if (oldWidget.textColor != widget.textColor ||
+        oldWidget.headerTextColor != widget.headerTextColor ||
+        oldWidget.headerImageFilter != widget.headerImageFilter ||
+        oldWidget.headerFontSizeMultiplier != widget.headerFontSizeMultiplier ||
+        (oldWidget.onSurahSelected == null) !=
+            (widget.onSurahSelected == null)) {
+      _invalidateLineCaches();
+      // Visual change → invalidate the cached snapshot.
+      _invalidateSnapshot();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     final Orientation orientation = MediaQuery.orientationOf(context);
     final bool didOrientationChange =
         _lastOrientation != null && _lastOrientation != orientation;
 
-    if (didOrientationChange || orientation == Orientation.landscape) {
-      // Don't log if it's already disabled (common in landscape).
-      if (_snapshotController.allowSnapshotting) {
-        _disableSnapshot(
-          reason:
-              'orientation change or landscape mode for page ${widget.pageNumber}',
-        );
-      }
+    if (didOrientationChange) {
+      _invalidateLineCaches();
     }
 
-    if (orientation == Orientation.portrait &&
-        !_snapshotController.allowSnapshotting) {
-      _debugLog(
-        '[PERF] page ${widget.pageNumber} didChangeDependencies → requesting snapshot refresh',
-      );
-      _requestSnapshotRefresh(
-        reason: 'portrait snapshot restore for page ${widget.pageNumber}',
-        prewarmBanner: _pageHasSurahHeader(widget.pageNumber),
-      );
+    if (orientation == Orientation.portrait) {
+      _prewarmBannerImage();
     }
-
     _lastOrientation = orientation;
   }
 
   @override
-  void reassemble() {
-    super.reassemble();
-    _requestSnapshotRefresh(
-      reason: 'reassemble for page ${widget.pageNumber}',
-      prewarmBanner: _pageHasSurahHeader(widget.pageNumber),
-    );
-  }
-
-  @override
   void dispose() {
+    _pendingIdleCapture?.cancel();
     widget.currentPageListenable?.removeListener(_handlePageChange);
-    WidgetsBinding.instance.removeObserver(this);
+    widget.preparedWindowListenable?.removeListener(_handleWindowChanged);
+    widget.isScrollingListenable?.removeListener(_handleScrollStateChanged);
     _scrollController.dispose();
-    _disposeWordRecognizers();
-    _snapshotController.dispose();
     super.dispose();
   }
 
   void _handlePageChange() {
-    if (!mounted) {
-      return;
-    }
-    final int currentPage = widget.currentPageListenable!.value;
-    final int previousPage = _lastCurrentPage;
-    // Only update keep-alive if the distance state changed for this page
-    final bool currentlyKeep = (widget.pageNumber - currentPage).abs() <= 2;
-    final bool previouslyKeep = (widget.pageNumber - previousPage).abs() <= 2;
-    final bool becameCurrent =
-        currentPage == widget.pageNumber && previousPage != widget.pageNumber;
+    if (!mounted) return;
+    updateKeepAlive();
+  }
 
-    _lastCurrentPage = currentPage;
-
-    if (currentlyKeep != previouslyKeep) {
-      updateKeepAlive();
-    }
-
-    if (becameCurrent && _pendingSnapshotRefresh) {
-      _scheduleSnapshotRestore(
-        reason: 'page became current: ${widget.pageNumber}',
+  /// Called when [preparedWindowListenable] fires. If the window now contains
+  /// a [PreparedQuranPage] for this page, trigger a rebuild so the content
+  /// appears immediately without waiting for the sliver to be recreated.
+  void _handleWindowChanged() {
+    if (!mounted) return;
+    final PreparedQuranPageWindow? window =
+        widget.preparedWindowListenable?.value;
+    final PreparedQuranPage? resolved = window?.preparedPageFor(
+      widget.pageNumber,
+    );
+    if (!kReleaseMode) {
+      debugPrint(
+        '[CORRECTNESS] p${widget.pageNumber} window update: '
+        '${resolved != null ? "READY" : "still null"} '
+        '| window=${window?.preparedPages.keys.toList()}',
       );
     }
-  }
-
-  bool get _hasLongPressHandlers {
-    return widget.onLongPress != null ||
-        widget.onLongPressUp != null ||
-        widget.onLongPressCancel != null ||
-        widget.onLongPressDown != null;
-  }
-
-  bool _didPageMetaInputsChange(PageContent oldWidget) {
-    return oldWidget.juzLabel != widget.juzLabel ||
-        oldWidget.surahNameBuilder != widget.surahNameBuilder ||
-        oldWidget.uiTextDirection != widget.uiTextDirection;
-  }
-
-  bool _didSnapshotInputsChange(PageContent oldWidget) {
-    final bool metaChanged = _didPageMetaInputsChange(oldWidget);
-    final textColorChanged =
-        oldWidget.textColor.toARGB32() != widget.textColor.toARGB32();
-    final verseBgChanged =
-        oldWidget.verseBackgroundColor != widget.verseBackgroundColor;
-    final filterChanged =
-        oldWidget.headerImageFilter != widget.headerImageFilter;
-    final headerTextColorChanged =
-        oldWidget.headerTextColor?.toARGB32() !=
-        widget.headerTextColor?.toARGB32();
-    final fontSizeChanged =
-        oldWidget.headerFontSizeMultiplier != widget.headerFontSizeMultiplier;
-    final pageBgChanged =
-        oldWidget.pageBackgroundColor.toARGB32() !=
-        widget.pageBackgroundColor.toARGB32();
-    // showOverlays only affects AnimatedOpacity on the chrome widgets — it does
-    // not change the Quran text content, so it must NOT invalidate the snapshot.
-    // Including it caused a full re-rasterize of 15 RichText widgets on every
-    // chrome visibility toggle and on every page swipe rebuild.
-    return metaChanged ||
-        textColorChanged ||
-        verseBgChanged ||
-        filterChanged ||
-        headerTextColorChanged ||
-        fontSizeChanged ||
-        pageBgChanged;
-  }
-
-  void _disposeWordRecognizers() {
-    for (final LongPressGestureRecognizer recognizer
-        in _wordRecognizers.values) {
-      recognizer.dispose();
-    }
-    _wordRecognizers.clear();
-  }
-
-  void _disableSnapshot({required String reason}) {
-    if (!_snapshotController.allowSnapshotting) {
-      return;
-    }
-    _debugLog('[PageContent] Disabling snapshot: $reason');
-    _snapshotController.allowSnapshotting = false;
-    _snapshotController.clear();
-  }
-
-  void _requestSnapshotRefresh({
-    required String reason,
-    bool prewarmBanner = false,
-  }) {
-    if (!mounted) {
-      return;
-    }
-
-    _pendingSnapshotRefresh = true;
-    _pendingBannerPrewarm = _pendingBannerPrewarm || prewarmBanner;
-
-    if (_isCurrentPage) {
-      _scheduleSnapshotRestore(reason: reason);
+    if (resolved != null) {
+      setState(() {});
     }
   }
 
-  void _scheduleSnapshotRestore({required String reason}) {
-    if (!mounted || !_pendingSnapshotRefresh) {
-      return;
-    }
+  void _invalidateLineCaches() {
+    _cachedSpacedLines = null;
+    _cachedSpacedLinesLineSpacing = null;
+  }
 
-    if (_snapshotRestoreScheduled) {
-      return;
-    }
+  /// Called when the scroll state changes (start/end).
+  void _handleScrollStateChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
 
-    _disableSnapshot(reason: reason);
-    _snapshotRestoreScheduled = true;
+  /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
+  /// expensive `toImage()` call runs only when the GPU is idle.
+  void _scheduleSnapshotCapture() {
+    if (_snapshotScheduled || _snapshotCaptured) return;
+    // No scroll guard needed here — IdleScheduler already defers the
+    // expensive toImage() call to a post-frame idle slot, so the GPU
+    // work never competes with live frame rasterization.
+    _snapshotScheduled = true;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _snapshotRestoreScheduled = false;
-      if (!mounted) {
-        return;
+    final int centerPage =
+        widget.currentPageListenable?.value ?? widget.pageNumber;
+    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    _pendingIdleCapture?.cancel();
+    _pendingIdleCapture = PageSnapshotService.instance.scheduleCaptureWhenIdle(
+      pageNumber: widget.pageNumber,
+      boundaryKey: _snapshotBoundaryKey,
+      pixelRatio: pixelRatio,
+      centerPage: centerPage,
+    );
+
+    _pendingIdleCapture!.future.then((_) {
+      if (!mounted) return;
+      if (!_pendingIdleCapture!.isCancelled &&
+          PageSnapshotService.instance.hasSnapshot(widget.pageNumber)) {
+        _snapshotCaptured = true;
       }
-
-      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
-      if (mediaQuery == null ||
-          mediaQuery.orientation != Orientation.portrait ||
-          !_isCurrentPage) {
-        return;
-      }
-
-      final bool shouldPrewarmBanner = _pendingBannerPrewarm;
-      _pendingSnapshotRefresh = false;
-      _pendingBannerPrewarm = false;
-
-      if (shouldPrewarmBanner) {
-        final prewarmStart = DateTime.now();
-        await _prewarmBannerImage();
-        _debugLog(
-          '[PERF] page ${widget.pageNumber} banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
-        );
-        if (!mounted) {
-          return;
-        }
-      }
-
-      _debugLog('[PERF] page ${widget.pageNumber} snapshot ENABLED');
-      _snapshotController.allowSnapshotting = true;
+      _snapshotScheduled = false;
+      _pendingIdleCapture = null;
     });
   }
 
-  Future<void> _initQuranData() async {
-    final startTime = DateTime.now();
-    final QuranDataService dataService = QuranDataService.instance;
-
-    if (dataService.isLoaded) {
-      if (mounted) {
-        _cachedPageMeta = _buildPageMeta(widget.pageNumber);
-        _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
-        _cachedFirstLineIdx = _firstContentLineIndexFromLines(
-          _cachedPageLines!,
-        );
-        final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
-        if (!hasBanner) {
-          // Data is ready and no banner image decode needed — mark ready and
-          // enable snapshotting synchronously so the very first build() sees
-          // isLoading=false and renders directly into the snapshot cache.
-          // This avoids the double-rasterize (render tree → snapshot capture)
-          // that causes jank on non-banner pages on mid-range hardware.
-          _isLoading = false;
-          _snapshotController.allowSnapshotting = true;
-          _debugLog(
-            '[PERF] page ${widget.pageNumber} READY synchronously | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
-          );
-        } else {
-          // Banner pages still need context for image pre-warming, which is
-          // not safe to call during initState — defer to the next frame.
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await _completeInitialPageLoad(startTime);
-          });
-        }
-      }
-      return;
-    }
-
-    try {
-      await dataService.ensureLoaded();
-      if (!mounted) {
-        return;
-      }
-
-      _cachedPageMeta = _buildPageMeta(widget.pageNumber);
-      _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
-      _cachedFirstLineIdx = _firstContentLineIndexFromLines(_cachedPageLines!);
-      // Same deferral for the async-load path.
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _completeInitialPageLoad(startTime);
-      });
-    } catch (e) {
-      if (mounted) {
-        _debugLog('Error loading Quran data: $e');
-        setState(() => _isLoading = false);
-      }
-    }
+  /// Removes the cached snapshot for this page.
+  void _invalidateSnapshot() {
+    _pendingIdleCapture?.cancel();
+    _pendingIdleCapture = null;
+    PageSnapshotService.instance.evict(widget.pageNumber);
+    _snapshotCaptured = false;
+    _snapshotScheduled = false;
   }
 
-  Future<void> _completeInitialPageLoad(DateTime startTime) async {
-    final bool hasBanner = _pageHasSurahHeader(widget.pageNumber);
-    _debugLog(
-      '[PERF] page ${widget.pageNumber} _completeInitialPageLoad | hasBanner=$hasBanner | elapsed so far=${DateTime.now().difference(startTime).inMilliseconds}ms',
+  void _primePageData() {
+    final QuranDataService dataService = QuranDataService.instance;
+    assert(
+      dataService.isLoaded,
+      'PageContent requires QuranDataService to be loaded before it builds.',
     );
-    if (hasBanner) {
-      final prewarmStart = DateTime.now();
-      await _prewarmBannerImage();
-      _debugLog(
-        '[PERF] page ${widget.pageNumber} initial banner prewarm took ${DateTime.now().difference(prewarmStart).inMilliseconds}ms',
+    if (!dataService.isLoaded) return;
+    _handleDataLoaded();
+  }
+
+  void _handleDataLoaded() {
+    _cachedPageMeta = _buildPageMeta(widget.pageNumber);
+    _cachedPageLines = _getWordsGroupedByLine(widget.pageNumber);
+    _invalidateLineCaches();
+    if (_pageHasSurahHeader(widget.pageNumber)) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _prewarmBannerImage(),
       );
     }
-    if (!mounted) {
-      return;
-    }
-    setState(() => _isLoading = false);
-    _debugLog(
-      '[PERF] page ${widget.pageNumber} READY (setState _isLoading=false) | total=${DateTime.now().difference(startTime).inMilliseconds}ms',
-    );
   }
 
-  /// Pre-resolves the banner image into Flutter's image cache so that
-  /// [SnapshotController] captures a fully painted frame instead of a blank one.
-  ///
-  /// On initial load the asset hasn't been decoded yet. The snapshot is taken
-  /// on the first post-frame callback, which races the async image decode and
-  /// wins — producing a blank banner. Awaiting [ImageProvider.resolve] here
-  /// ensures the image is in the cache before [_isLoading] is cleared and the
-  /// [SnapshotWidget] is first built.
   Future<void> _prewarmBannerImage() async {
     if (!mounted) return;
-    const imageProvider = AssetImage('assets/mainframe.png', package: 'quran');
+    const AssetImage imageProvider = SurahHeaderBannerConstants.assetImage;
     final ImageConfiguration config = createLocalImageConfiguration(context);
     final completer = Completer<void>();
     final ImageStream stream = imageProvider.resolve(config);
@@ -497,199 +342,114 @@ class _PageContentState extends State<PageContent>
     await completer.future;
   }
 
-  /// Returns words for [pageNumber] grouped into 15 lines (O(1) lookup).
-  List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
-    final List<List<Map<String, dynamic>>> rawLines =
-        QuranDataService.instance.getPageData(pageNumber) ??
-        List.generate(15, (_) => []);
-
-    // The backend JSON packs Fatiha and Baqarah tightly against the top of the grid
-    // leaving ~7 empty lines at the very bottom. To match the perfectly centered
-    // Ayah app Mushaf visual spacing (2 blank lines above, 2 blank lines between
-    // header and Bismillah, and 3 below), we intercept and dynamically remap the arrays.
-    if (pageNumber == 1 || pageNumber == 2) {
-      // Create a fresh 15-line empty grid
-      final List<List<Map<String, dynamic>>> centeredLines = List.generate(
-        15,
-        (_) => [],
-      );
-
-      // Page 1: Header takes index 0, Bismillah takes 1, verses take 2 through 7.
-      // Page 2: Header takes 0, Bismillah takes 1, verses take 2 through 7.
-      // We will map the content to start lower down the grid.
-      // Shift Header to line 3 (index 2).
-      // Shift Bismillah and Verses to start at line 6 (index 5).
-      centeredLines[0] = [];
-      centeredLines[1] = [];
-      centeredLines[2] =
-          rawLines[0]; // Header index (the logic in _calculateSpecialLines targets this)
-      centeredLines[3] = [];
-      centeredLines[4] = [];
-
-      // Map the 7 lines of actual content (Bismillah + Verses) down.
-      // Guard against rawLines being shorter than expected (e.g. partial data).
-      for (var i = 0; i < 7 && (1 + i) < rawLines.length; i++) {
-        centeredLines[5 + i] = rawLines[1 + i];
-      }
-      return centeredLines;
-    }
-
-    return rawLines;
-  }
-
-  /// Returns the logical word spans to render for [lineIndex] from pre-fetched [lines].
-  List<_WordSpanGroup> _getWordSpansForLine(
-    List<List<Map<String, dynamic>>> lines,
-    int lineIndex,
-    TextStyle quranTextStyle,
-    TextStyle markerTextStyle,
-  ) {
-    if (lineIndex < 0 || lineIndex >= 15) {
-      return [];
-    }
-    final List<Map<String, dynamic>> lineWords = lines[lineIndex];
-    if (lineWords.isEmpty) {
-      return [];
-    }
-
-    final hasVerseColorCallback = widget.verseBackgroundColor != null;
-    final QuranDataService quranDataService = QuranDataService.instance;
-    final wordSpans = <_WordSpanGroup>[];
-
-    for (final word in lineWords) {
-      final text = word['text'] as String;
-      final int surahNumber = int.tryParse(word['surah'].toString()) ?? 0;
-      final int verseNumber = int.tryParse(word['ayah'].toString()) ?? 0;
-      final int wordNumber = int.tryParse(word['word'].toString()) ?? 0;
-      Color? bgColor;
-
-      if (hasVerseColorCallback) {
-        bgColor = widget.verseBackgroundColor!(surahNumber, verseNumber);
-      }
-
-      final TextStyle effectiveQuranStyle = bgColor != null
-          ? quranTextStyle.copyWith(backgroundColor: bgColor)
-          : quranTextStyle;
-      final TextStyle effectiveMarkerStyle = bgColor != null
-          ? markerTextStyle.copyWith(backgroundColor: bgColor)
-          : markerTextStyle;
-
-      wordSpans.add(
-        _WordSpanGroup(
-          spans: _buildWordSpans(
-            text: text,
-            isVerseEndWord: quranDataService.isVerseEndWord(word),
-            quranTextStyle: effectiveQuranStyle,
-            markerTextStyle: effectiveMarkerStyle,
-            recognizer: _recognizerForWord(
-              surahNumber: surahNumber,
-              verseNumber: verseNumber,
-              wordNumber: wordNumber,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return wordSpans;
-  }
-
-  List<InlineSpan> _buildWordSpans({
-    required String text,
-    required bool isVerseEndWord,
-    required TextStyle quranTextStyle,
-    required TextStyle markerTextStyle,
-    GestureRecognizer? recognizer,
-  }) {
-    if (!isVerseEndWord || text.isEmpty) {
-      return [
-        TextSpan(text: text, style: quranTextStyle, recognizer: recognizer),
-      ];
-    }
-
-    final List<int> runes = text.runes.toList();
-    if (runes.length == 1) {
-      return [
-        TextSpan(text: text, style: markerTextStyle, recognizer: recognizer),
-      ];
-    }
-
-    return [
-      TextSpan(
-        text: String.fromCharCodes(runes.take(runes.length - 1)),
-        style: quranTextStyle,
-        recognizer: recognizer,
-      ),
-      TextSpan(
-        text: String.fromCharCodes(runes.skip(runes.length - 1)),
-        style: markerTextStyle,
-        recognizer: recognizer,
-      ),
-    ];
-  }
-
-  LongPressGestureRecognizer? _recognizerForWord({
-    required int surahNumber,
-    required int verseNumber,
-    required int wordNumber,
-  }) {
-    if (!_hasLongPressHandlers ||
-        surahNumber <= 0 ||
-        verseNumber <= 0 ||
-        wordNumber <= 0) {
-      return null;
-    }
-
-    final key = '${widget.pageNumber}:$surahNumber:$verseNumber:$wordNumber';
-    final LongPressGestureRecognizer recognizer = _wordRecognizers.putIfAbsent(
-      key,
-      LongPressGestureRecognizer.new,
-    );
-
-    recognizer.onLongPress = widget.onLongPress == null
-        ? null
-        : () {
-            widget.onLongPress!(surahNumber, verseNumber);
-          };
-    recognizer.onLongPressStart = widget.onLongPressDown == null
-        ? null
-        : (LongPressStartDetails details) {
-            widget.onLongPressDown!(surahNumber, verseNumber, details);
-          };
-    recognizer.onLongPressUp = widget.onLongPressUp == null
-        ? null
-        : () {
-            widget.onLongPressUp!(surahNumber, verseNumber);
-          };
-    recognizer.onLongPressCancel = widget.onLongPressCancel == null
-        ? null
-        : () {
-            widget.onLongPressCancel!(surahNumber, verseNumber);
-          };
-
-    return recognizer;
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final buildStart = DateTime.now();
-    _debugLog(
-      '[PERF] build() called for page ${widget.pageNumber} | isLoading=$_isLoading | snapshot=${_snapshotController.allowSnapshotting}',
-    );
+    _buildStartMs = DateTime.now().millisecondsSinceEpoch;
 
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    final Size mediaSize = MediaQuery.sizeOf(context);
+    final double pageWidth = mediaSize.width;
+    final double pageHeight = mediaSize.height;
+    final Orientation currentOrientation = MediaQuery.orientationOf(context);
+    final int t0 = DateTime.now().millisecondsSinceEpoch;
+
+    final PreparedQuranPage? preparedPage =
+        widget.preparedWindowListenable?.value?.preparedPageFor(
+          widget.pageNumber,
+        ) ??
+        widget.preparedPage;
+
+    if (!kReleaseMode) {
+      debugPrint(
+        '[CORRECTNESS] p${widget.pageNumber} build: '
+        '${preparedPage != null ? "READY" : "NO DATA — showing blank"}',
+      );
     }
 
-    final List<List<Map<String, dynamic>>> pageLines = _cachedPageLines!;
-    final _PageMetaInfo pageMeta =
-        _cachedPageMeta ?? _buildPageMeta(widget.pageNumber);
-    final int firstLineIdx = _cachedFirstLineIdx;
-    final isPortrait =
-        MediaQuery.orientationOf(context) == Orientation.portrait;
-    final bool isLightPage =
-        widget.pageBackgroundColor.computeLuminance() > 0.8;
+    if (preparedPage == null) {
+      return ColoredBox(color: widget.pageBackgroundColor);
+    }
+
+    final QuranLayoutMetrics metrics = preparedPage.metrics;
+    final hasHighlight = widget.verseBackgroundColor != null;
+
+    final List<Widget> lineWidgets;
+    final String lineBuildMode;
+    if (hasHighlight) {
+      lineWidgets = _buildLineWidgets(
+        metrics: metrics,
+        viewportWidth: pageWidth,
+        viewportHeight: pageHeight,
+        pageFont: 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}',
+        isPortrait: currentOrientation == Orientation.portrait,
+      );
+      lineBuildMode = 'HIGHLIGHT';
+    } else {
+      lineWidgets = _buildPreparedLineWidgets(
+        preparedPage: preparedPage,
+        metrics: metrics,
+        viewportWidth: pageWidth,
+        viewportHeight: pageHeight,
+        isPortrait: currentOrientation == Orientation.portrait,
+      );
+      lineBuildMode = 'PREPARED';
+    }
+
+    // For the PREPARED path, lineWidgets may contain a single
+    // QuranPagePainter (which internally handles spacing). For the
+    // HIGHLIGHT path, we still interleave SizedBox spacers.
+    final List<Widget> spacedLines;
+    if (lineBuildMode == 'PREPARED') {
+      spacedLines = lineWidgets;
+    } else {
+      final bool spacedCacheHit =
+          _cachedSpacedLines != null &&
+          _cachedSpacedLinesLineSpacing == metrics.lineSpacing;
+      if (spacedCacheHit) {
+        spacedLines = _cachedSpacedLines!;
+      } else {
+        final List<Widget> built = [];
+        for (var i = 0; i < lineWidgets.length; i++) {
+          if (i > 0) built.add(SizedBox(height: metrics.lineSpacing));
+          built.add(lineWidgets[i]);
+        }
+        spacedLines = built;
+        _cachedSpacedLines = spacedLines;
+        _cachedSpacedLinesLineSpacing = metrics.lineSpacing;
+      }
+    }
+
+    if (!kReleaseMode) {
+      final int t3 = DateTime.now().millisecondsSinceEpoch;
+      final int buildMs = t3 - t0;
+      if (buildMs > 2) {
+        logger.i(
+          '[PERF][PAGE] ⚠ p${widget.pageNumber} build=${buildMs}ms '
+          '(lines=$lineBuildMode)',
+        );
+      }
+      final int buildStart = _buildStartMs;
+      final int pageNum = widget.pageNumber;
+      final bool isFirst = !_hasFirstLayout;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final int frameMs = DateTime.now().millisecondsSinceEpoch - buildStart;
+        final tag = isFirst ? 'FIRST_FRAME' : 'FRAME';
+        if (frameMs > 16) {
+          logger.i(
+            '[PERF][PAGE] ⚠ p$pageNum $tag build→paint=${frameMs}ms exceeds 16ms budget',
+          );
+        } else if (isFirst) {
+          logger.i('[PERF][PAGE] p$pageNum $tag build→paint=${frameMs}ms');
+        }
+      });
+    }
+    if (!_hasFirstLayout) _hasFirstLayout = true;
+
+    if (_cachedLuminanceColor != widget.pageBackgroundColor) {
+      _cachedLuminanceColor = widget.pageBackgroundColor;
+      _cachedIsLightPage = widget.pageBackgroundColor.computeLuminance() > 0.8;
+    }
+    final bool isLightPage = _cachedIsLightPage;
     final Color metaTextColor = isLightPage
         ? _lightMetaTextColor
         : Color.lerp(widget.textColor, widget.pageBackgroundColor, 0.45)!;
@@ -699,554 +459,658 @@ class _PageContentState extends State<PageContent>
     final Color pageNumberBorderColor = isLightPage
         ? _lightPageNumberBorderColor
         : Color.lerp(widget.pageBackgroundColor, widget.textColor, 0.22)!;
-    final String pageNumberLabel = widget.uiTextDirection == TextDirection.rtl
-        ? convertToArabicNumber(widget.pageNumber.toString())
-        : widget.pageNumber.toString();
 
-    final pageBody = LayoutBuilder(
-      builder: (context, constraints) {
-        final metricsStart = DateTime.now();
-        final QuranLayoutMetrics metrics = _layoutStrategy.calculateMetrics(
-          context,
-          constraints,
-          widget.pageNumber,
+    // --- Snapshot swap logic ---
+    // During swipe animations, display a pre-rendered bitmap snapshot
+    // instead of the full widget tree. This reduces raster cost from
+    // ~25ms (15 TextPainters) to ~2ms (single texture blit).
+    final bool isScrolling = widget.isScrollingListenable?.value ?? false;
+    final ui.Image? snapshot = isScrolling
+        ? PageSnapshotService.instance.getSnapshot(widget.pageNumber)
+        : null;
+
+    final Widget pageBody;
+    if (snapshot != null) {
+      // Fast path: single-texture blit during swipe.
+      pageBody = RawImage(
+        image: snapshot,
+        fit: BoxFit.contain,
+        width: pageWidth,
+        height: pageHeight,
+      );
+    } else {
+      // Live path: full interactive widget tree.
+      pageBody = RepaintBoundary(
+        key: _snapshotBoundaryKey,
+        child: _QuranPageBody(
+          metrics: metrics,
+          spacedLines: spacedLines,
+          scrollController: _scrollController,
+        ),
+      );
+
+      // Schedule a snapshot capture after the first successful paint.
+      if (!_snapshotCaptured && !_snapshotScheduled) {
+        _scheduleSnapshotCapture();
+      }
+    }
+
+    return Stack(
+      alignment: metrics.isScrollable ? Alignment.topCenter : Alignment.center,
+      children: [
+        pageBody,
+        Positioned.fill(
+          child: _QuranPageOverlays(
+            pageNumber: widget.pageNumber,
+            showOverlaysListenable: widget.showOverlaysListenable,
+            uiTextDirection: widget.uiTextDirection,
+            metrics: metrics,
+            pageMeta: _cachedPageMeta,
+            metaTextColor: metaTextColor,
+            badgeColor: pageNumberBadgeColor,
+            borderColor: pageNumberBorderColor,
+            textColor: widget.textColor,
+            onShowIndex: widget.onShowIndex,
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildLineWidgets({
+    required QuranLayoutMetrics metrics,
+    required double viewportWidth,
+    required double viewportHeight,
+    required String pageFont,
+    required bool isPortrait,
+  }) {
+    final List<List<Map<String, dynamic>>> pageLines = _cachedPageLines!;
+    final quranStyle = TextStyle(
+      fontFamily: pageFont,
+      fontSize: metrics.fontSize,
+      height: metrics.fontHeight,
+      color: widget.textColor,
+    );
+    final markerStyle = quranStyle;
+
+    final bool isCenteredPage = QuranConstants.centeredPageNumbers.contains(
+      widget.pageNumber,
+    );
+
+    final List<int> lineIndices = metrics.isScrollable
+        ? List.generate(QuranConstants.linesPerPage, (int i) => i).where((i) {
+            return isCenteredPage ||
+                pageLines[i].isNotEmpty ||
+                _isSurahHeader(widget.pageNumber, i + 1) ||
+                _isBismillah(widget.pageNumber, i + 1);
+          }).toList()
+        : List.generate(QuranConstants.linesPerPage, (int i) => i);
+
+    final List<Widget> blocks = [];
+    final List<InlineSpan> currentSpans = [];
+    final List<QuranWordMetadata> currentMetadata = [];
+    var currentOffset = 0;
+
+    void flushSpans() {
+      if (currentSpans.isNotEmpty) {
+        final painter = TextPainter(
+          text: TextSpan(children: List<InlineSpan>.from(currentSpans)),
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+          textWidthBasis: TextWidthBasis.longestLine,
+          strutStyle: StrutStyle(
+            fontFamily: pageFont,
+            fontSize: metrics.fontSize,
+            height: metrics.fontHeight,
+            forceStrutHeight: true,
+          ),
+        )..layout(maxWidth: viewportWidth);
+        blocks.add(
+          QuranLine(
+            textPainter: painter,
+            metadata: List.from(currentMetadata),
+            onLongPress: widget.onLongPress,
+            onLongPressUp: widget.onLongPressUp,
+            onLongPressDown: widget.onLongPressDown,
+            onLongPressCancel: widget.onLongPressCancel,
+          ),
         );
-        _debugLog(
-          '[PERF] page ${widget.pageNumber} LayoutBuilder fired | calculateMetrics=${DateTime.now().difference(metricsStart).inMilliseconds}ms | size=${constraints.maxWidth.toStringAsFixed(0)}x${constraints.maxHeight.toStringAsFixed(0)}',
-        );
-        final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+        currentSpans.clear();
+        currentMetadata.clear();
+        currentOffset = 0;
+      }
+    }
 
-        final double lineHeight = metrics.fontSize * metrics.fontHeight;
+    // For pages 1 & 2, pre-compute the header surah number and
+    // whether a separate bismillah block is needed.
+    // Page 1 (Al-Fatihah) has no separate bismillah — it IS verse 1.
+    int? centeredHeaderSurah;
+    var hasCenteredBismillah = false;
+    if (isCenteredPage) {
+      for (var rawLine = 1; rawLine <= QuranConstants.linesPerPage; rawLine++) {
+        if (_isSurahHeader(widget.pageNumber, rawLine)) {
+          centeredHeaderSurah = _getSurahAtLine(widget.pageNumber, rawLine);
+        }
+        if (_isBismillah(widget.pageNumber, rawLine)) {
+          hasCenteredBismillah = true;
+        }
+      }
+    }
 
-        final baseGlyphStyle = TextStyle(
-          fontFamily: pageFont,
-          fontSize: metrics.fontSize,
-          height: metrics.fontHeight,
-        );
-        final TextStyle quranTextStyle = baseGlyphStyle.copyWith(
-          color: widget.textColor,
-          shadows: _shadowsForColor(widget.textColor),
-        );
-        final TextStyle markerTextStyle = baseGlyphStyle.copyWith(
-          color: widget.textColor,
-        );
-
-        final spaceStyle = TextStyle(
-          fontFamily: pageFont,
-          fontSize: metrics.fontSize,
-          height: metrics.fontHeight,
-        );
-
-        final List<int> lineIndices = metrics.isScrollable
-            ? List<int>.generate(15, (index) => index).where((lineIndex) {
-                // For Fatiha and Baqarah, our structured empty [] lines functionally
-                // represent native gaps layout margins, so they MUST be preserved
-                // visibly on the screen even during landscape scroll configurations.
-                if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-                  return true;
-                }
-
-                return pageLines[lineIndex].isNotEmpty ||
-                    _isSurahHeader(widget.pageNumber, lineIndex + 1) ||
-                    _isBismillah(widget.pageNumber, lineIndex + 1);
-              }).toList()
-            : List<int>.generate(15, (index) => index);
-
-        final List<Widget> lineWidgets = lineIndices.map((lineIndex) {
-          final bool isHeader = _isSurahHeader(
-            widget.pageNumber,
-            lineIndex + 1,
+    for (final i in lineIndices) {
+      if (isCenteredPage) {
+        // Centered page: emit header at index 2, bismillah at index 4.
+        if (i == QuranConstants.centeredHeaderLineIndex &&
+            centeredHeaderSurah != null) {
+          flushSpans();
+          final int surahNum = centeredHeaderSurah;
+          final banner = SurahHeaderBanner(
+            surahNumber: surahNum,
+            lineHeight: metrics.fontSize * metrics.fontHeight,
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: !isPortrait,
+            headerImageFilter: widget.headerImageFilter,
+            headerTextColor: widget.headerTextColor,
+            headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
           );
-          final bool isBismillah = _isBismillah(
-            widget.pageNumber,
-            lineIndex + 1,
+          blocks.add(
+            widget.onSurahSelected == null
+                ? banner
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => widget.onSurahSelected!(surahNum),
+                    child: banner,
+                  ),
           );
-
-          if (isHeader) {
-            final int surahNum = _getSurahAtLine(
-              widget.pageNumber,
-              lineIndex + 1,
-            );
-            final Widget headerWidget = SurahHeaderBanner(
-              surahNumber: surahNum,
-              lineHeight: lineHeight,
-              headerImageFilter: widget.headerImageFilter,
-              headerTextColor: widget.headerTextColor,
-              headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
-            );
-
-            if (widget.onSurahSelected == null) {
-              return headerWidget;
-            }
-
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => widget.onSurahSelected!(surahNum),
-              child: headerWidget,
-            );
-          }
-
-          if (isBismillah) {
-            final String pageStr = widget.pageNumber.toString().padLeft(3, '0');
-            final Widget bismillahWidget = BismillahWidget(
+          continue;
+        }
+        if (i == QuranConstants.centeredBismillahLineIndex &&
+            hasCenteredBismillah) {
+          flushSpans();
+          blocks.add(
+            BismillahWidget(
               fontSize: metrics.fontSize,
               pageNumber: widget.pageNumber,
               color: widget.textColor,
-              fontFamily: 'QCF_P$pageStr',
-            );
-
-            return bismillahWidget;
-          }
-
-          final List<_WordSpanGroup> wordSpans = _getWordSpansForLine(
-            pageLines,
-            lineIndex,
-            quranTextStyle,
-            markerTextStyle,
+              fontFamily: pageFont,
+            ),
           );
-          final spans = <InlineSpan>[];
+          continue;
+        }
+        // Skip raw special-line positions.
+        if (_isSurahHeader(widget.pageNumber, i + 1) ||
+            _isBismillah(widget.pageNumber, i + 1)) {
+          const char = '\u00A0\n';
+          currentSpans.add(TextSpan(text: char, style: quranStyle));
+          currentOffset += char.length;
+          continue;
+        }
+      } else {
+        // Standard page: use raw special-line positions.
+        if (_isSurahHeader(widget.pageNumber, i + 1)) {
+          flushSpans();
+          final int surahNum = _getSurahAtLine(widget.pageNumber, i + 1);
+          final banner = SurahHeaderBanner(
+            surahNumber: surahNum,
+            lineHeight: metrics.fontSize * metrics.fontHeight,
+            viewportWidth: viewportWidth,
+            viewportHeight: viewportHeight,
+            isLandscape: !isPortrait,
+            headerImageFilter: widget.headerImageFilter,
+            headerTextColor: widget.headerTextColor,
+            headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+          );
+          blocks.add(
+            widget.onSurahSelected == null
+                ? banner
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => widget.onSurahSelected!(surahNum),
+                    child: banner,
+                  ),
+          );
+          continue;
+        }
 
-          // Insert a thin space after the first word on the first content line
-          final isFirstContentLine = lineIndex == firstLineIdx;
-          for (var wordIndex = 0; wordIndex < wordSpans.length; wordIndex++) {
-            spans.addAll(wordSpans[wordIndex].spans);
-            if (isFirstContentLine && wordIndex == 0 && wordSpans.length > 1) {
-              spans.add(TextSpan(text: '\u200A', style: spaceStyle));
+        if (_isBismillah(widget.pageNumber, i + 1)) {
+          flushSpans();
+          blocks.add(
+            BismillahWidget(
+              fontSize: metrics.fontSize,
+              pageNumber: widget.pageNumber,
+              color: widget.textColor,
+              fontFamily: pageFont,
+            ),
+          );
+          continue;
+        }
+      }
+
+      final List<_WordSpanGroup> wordSpans = _getWordSpansForLine(
+        pageLines,
+        i,
+        quranStyle,
+        markerStyle,
+      );
+      if (wordSpans.isEmpty) {
+        const char = '\u00A0\n';
+        currentSpans.add(TextSpan(text: char, style: quranStyle));
+        currentOffset += char.length;
+      } else {
+        for (var idx = 0; idx < wordSpans.length; idx++) {
+          final _WordSpanGroup group = wordSpans[idx];
+          currentSpans.addAll(group.spans);
+
+          var groupLength = 0;
+          for (final InlineSpan span in group.spans) {
+            if (span is TextSpan) {
+              groupLength += span.text?.length ?? 0;
             }
           }
 
-          if (spans.isEmpty) {
-            // Render an empty space using the native font family so empty lines
-            // share the exact baseline and physical line height as verses.
-            spans.add(TextSpan(text: '\u0020', style: quranTextStyle));
-          }
-
-          final richText = RichText(
-            textDirection: TextDirection.rtl,
-            overflow: TextOverflow.visible,
-            maxLines: 1,
-            text: TextSpan(children: spans),
-          );
-
-          final Widget lineWidget = QuranLine(richText: richText);
-
-          // For Page 1 (Fatiha), Ayah 1 (Bismillah) is at lineIndex 1.
-          // Add extra space below it to separate it from the remaining verses.
-          if (widget.pageNumber == 1 && lineIndex == 1) {
-            return lineWidget;
-          }
-
-          return lineWidget;
-        }).toList();
-
-        final List<Widget> spacedLineWidgets = [];
-        for (var i = 0; i < lineWidgets.length; i++) {
-          if (i > 0) {
-            final double gap = metrics.lineSpacing;
-            spacedLineWidgets.add(SizedBox(height: gap));
-          }
-          spacedLineWidgets.add(lineWidgets[i]);
-        }
-
-        final lines = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: spacedLineWidgets,
-        );
-
-        final paddedLines = Padding(padding: metrics.padding, child: lines);
-
-        if (metrics.isScrollable) {
-          final Widget scrollChild;
-          if (pageMeta.surahNames.isNotEmpty) {
-            scrollChild = Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildMetadataStrip(pageMeta, metaTextColor),
-                  paddedLines,
-                ],
-              ),
-            );
-          } else {
-            scrollChild = paddedLines;
-          }
-          return Scrollbar(
-            controller: _scrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              primary: false,
-              physics: const BouncingScrollPhysics(),
-              child: scrollChild,
+          currentMetadata.add(
+            QuranWordMetadata(
+              surah: group.surah,
+              verse: group.verse,
+              startOffset: currentOffset,
+              endOffset: currentOffset + groupLength,
             ),
           );
+
+          currentOffset += groupLength;
         }
 
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.topCenter,
-          child: SizedBox(width: constraints.maxWidth, child: paddedLines),
+        if (!metrics.isScrollable) {
+          flushSpans();
+        } else {
+          const newline = '\n';
+          currentSpans.add(TextSpan(text: newline, style: quranStyle));
+          currentOffset += newline.length;
+        }
+      }
+    }
+    flushSpans();
+    return blocks;
+  }
+
+  /// Builds line widgets from pre-laid-out [PreparedQuranPage] data.
+  ///
+  /// Consecutive [PreparedTextBlock]s are merged into a single
+  /// [QuranPagePainter] that paints all of them in one `paint()` call,
+  /// dramatically reducing raster-thread render-object traversal
+  /// (from ~15 CustomPaint ops to 1 per page).
+  List<Widget> _buildPreparedLineWidgets({
+    required PreparedQuranPage preparedPage,
+    required QuranLayoutMetrics metrics,
+    required double viewportWidth,
+    required double viewportHeight,
+    required bool isPortrait,
+  }) {
+    final List<Widget> result = [];
+    final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+
+    // Accumulate consecutive text blocks.
+    final List<(TextPainter, List<QuranWordMetadata>)> textRun = [];
+
+    void flushTextRun() {
+      if (textRun.isEmpty) return;
+      result.add(
+        QuranPagePainter(
+          painters: List.of(textRun),
+          lineSpacing: metrics.lineSpacing,
+          onLongPress: widget.onLongPress,
+          onLongPressUp: widget.onLongPressUp,
+          onLongPressDown: widget.onLongPressDown,
+          onLongPressCancel: widget.onLongPressCancel,
+        ),
+      );
+      textRun.clear();
+    }
+
+    for (final PreparedPageBlock block in preparedPage.blocks) {
+      if (block is PreparedTextBlock) {
+        textRun.add((block.painter, block.metadata));
+        continue;
+      }
+
+      // Non-text block: flush any accumulated text run first.
+      flushTextRun();
+
+      if (block is PreparedHeaderBlock) {
+        final Widget banner = SurahHeaderBanner(
+          surahNumber: block.surahNumber,
+          lineHeight: metrics.fontSize * metrics.fontHeight,
+          viewportWidth: viewportWidth,
+          viewportHeight: viewportHeight,
+          isLandscape: !isPortrait,
+          headerImageFilter: widget.headerImageFilter,
+          headerTextColor: widget.headerTextColor,
+          headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
         );
-      },
-    );
+        result.add(
+          widget.onSurahSelected == null
+              ? banner
+              : GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => widget.onSurahSelected!(block.surahNumber),
+                  child: banner,
+                ),
+        );
+        continue;
+      }
 
-    final Widget pageNumberBadge = ValueListenableBuilder<bool>(
-      valueListenable:
-          widget.showOverlaysListenable ?? const _AlwaysTrueListenable(),
-      builder: (context, showOverlays, child) => AnimatedOpacity(
-        opacity: showOverlays ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 300),
-        child: child,
-      ),
-      child: PageNumberBadge(
-        label: pageNumberLabel,
-        backgroundColor: pageNumberBadgeColor,
-        borderColor: pageNumberBorderColor,
-        textColor: metaTextColor,
-      ),
-    );
-
-    final Widget pageChrome;
-    if (isPortrait) {
-      pageChrome = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (pageMeta.surahNames.isNotEmpty)
-            _buildMetadataStrip(pageMeta, metaTextColor),
-          Expanded(child: pageBody),
-          const SizedBox(height: _pageChromeSpacing),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              _portraitPageHorizontalPadding,
-              0,
-              _portraitPageHorizontalPadding,
-              _portraitPageBottomPadding,
-            ),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: pageNumberBadge,
-            ),
+      if (block is PreparedBismillahBlock) {
+        result.add(
+          BismillahWidget(
+            fontSize: metrics.fontSize,
+            pageNumber: widget.pageNumber,
+            color: widget.textColor,
+            fontFamily: pageFont,
           ),
-        ],
-      );
-    } else {
-      // Landscape: scroll body fills edge-to-edge (strip scrolls with content);
-      // only the page number badge is fixed.
-      pageChrome = Stack(
-        children: [
-          Positioned.fill(child: pageBody),
-          Positioned(
-            bottom: _portraitPageBottomPadding,
-            left: _portraitPageHorizontalPadding,
-            child: pageNumberBadge,
-          ),
-        ],
-      );
-    }
-
-    // SnapshotWidget caches a static bitmap — never use it for scrollable
-    // (landscape) pages, as it freezes scroll input and can capture the banner
-    // before its asset image has loaded.
-    final Widget result = isPortrait
-        ? SnapshotWidget(
-            key: ValueKey<Orientation>(
-              _lastOrientation ?? Orientation.portrait,
-            ),
-            autoresize: true,
-            controller: _snapshotController,
-            child: pageChrome,
-          )
-        : pageChrome;
-
-    _debugLog(
-      '[PERF] build() done for page ${widget.pageNumber} in ${DateTime.now().difference(buildStart).inMilliseconds}ms',
-    );
-    return SafeArea(maintainBottomViewPadding: true, child: result);
-  }
-
-  /// Returns the 0-based line index of the first line that has content.
-  int _firstContentLineIndexFromLines(List<List<Map<String, dynamic>>> lines) {
-    for (var i = 0; i < lines.length; i++) {
-      if (lines[i].isNotEmpty) {
-        return i;
+        );
       }
     }
-    return 0;
+
+    // Flush any remaining text lines.
+    flushTextRun();
+    return result;
   }
 
-  bool _isSurahHeader(int page, int line) {
-    return _getSpecialType(page, line)?.startsWith('HEADER') ?? false;
-  }
-
-  bool _isBismillah(int page, int line) {
-    return _getSpecialType(page, line)?.startsWith('BISMILLAH') ?? false;
-  }
-
-  bool get _isCurrentPage {
-    final ValueListenable<int>? listenable = widget.currentPageListenable;
-    return listenable == null || listenable.value == widget.pageNumber;
-  }
-
-  bool _pageHasSurahHeader(int pageNumber) {
-    for (var lineNumber = 1; lineNumber <= 15; lineNumber++) {
-      if (_isSurahHeader(pageNumber, lineNumber)) {
-        return true;
+  List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
+    final List<List<Map<String, dynamic>>> rawLines =
+        QuranDataService.instance.getPageData(pageNumber) ??
+        List.generate(
+          QuranConstants.linesPerPage,
+          (_) => <Map<String, dynamic>>[],
+        );
+    if (QuranConstants.centeredPageNumbers.contains(pageNumber)) {
+      final List<List<Map<String, dynamic>>> centered = List.generate(
+        QuranConstants.linesPerPage,
+        (_) => <Map<String, dynamic>>[],
+      );
+      centered[QuranConstants.centeredHeaderLineIndex] = rawLines[0];
+      for (
+        var i = 0;
+        i < QuranConstants.centeredTextLineCount &&
+            (QuranConstants.centeredTextRawStartLineIndex + i) <
+                rawLines.length;
+        i++
+      ) {
+        centered[QuranConstants.centeredTextStartLineIndex + i] =
+            rawLines[QuranConstants.centeredTextRawStartLineIndex + i];
       }
+      return centered;
     }
-    return false;
+    return rawLines;
   }
 
-  Widget _buildMetadataStrip(_PageMetaInfo pageMeta, Color textColor) {
+  List<_WordSpanGroup> _getWordSpansForLine(
+    List<List<Map<String, dynamic>>> lines,
+    int lineIndex,
+    TextStyle quranStyle,
+    TextStyle markerStyle,
+  ) {
+    if (lineIndex < 0 || lineIndex >= QuranConstants.linesPerPage) {
+      return <_WordSpanGroup>[];
+    }
+    final List<Map<String, dynamic>> words = lines[lineIndex];
+    if (words.isEmpty) return [];
+    final QuranDataService qData = QuranDataService.instance;
+    return words.map((word) {
+      final text = word['text'] as String;
+      final int surah = int.tryParse(word['surah'].toString()) ?? 0;
+      final int ayah = int.tryParse(word['ayah'].toString()) ?? 0;
+      final Color? bgColor = widget.verseBackgroundColor?.call(surah, ayah);
+      return _WordSpanGroup(
+        surah: surah,
+        verse: ayah,
+        spans: _buildWordSpans(
+          text: text,
+          isVerseEndWord: qData.isVerseEndWord(word),
+          quranTextStyle: bgColor != null
+              ? quranStyle.copyWith(backgroundColor: bgColor)
+              : quranStyle,
+          markerTextStyle: bgColor != null
+              ? markerStyle.copyWith(backgroundColor: bgColor)
+              : markerStyle,
+        ),
+      );
+    }).toList();
+  }
+
+  List<InlineSpan> _buildWordSpans({
+    required String text,
+    required bool isVerseEndWord,
+    required TextStyle quranTextStyle,
+    required TextStyle markerTextStyle,
+  }) {
+    if (!isVerseEndWord || text.isEmpty) {
+      return [TextSpan(text: text, style: quranTextStyle)];
+    }
+    final List<int> runes = text.runes.toList();
+    if (runes.length == 1) {
+      return [TextSpan(text: text, style: markerTextStyle)];
+    }
+    return [
+      TextSpan(
+        text: String.fromCharCodes(runes.take(runes.length - 1)),
+        style: quranTextStyle,
+      ),
+      TextSpan(
+        text: String.fromCharCodes(runes.skip(runes.length - 1)),
+        style: markerTextStyle,
+      ),
+    ];
+  }
+
+  bool _isSurahHeader(int page, int line) =>
+      _getSpecialLine(page, line)?.isSurahHeader ?? false;
+
+  bool _isBismillah(int page, int line) =>
+      _getSpecialLine(page, line)?.isBismillah ?? false;
+
+  bool _pageHasSurahHeader(int page) =>
+      QuranDataService.instance.pageHasSurahHeader(page);
+
+  int _getSurahAtLine(int page, int line) {
+    return _getSpecialLine(page, line)?.surahNumber ?? 0;
+  }
+
+  QuranSpecialLine? _getSpecialLine(int page, int line) {
+    return QuranDataService.instance.getSpecialLine(page, line);
+  }
+
+  _PageMetaInfo _buildPageMeta(int page) {
+    final Map<String, dynamic> rawMeta = QuranDataService.instance
+        .getPageMetadata(page);
+    final surahNumbers = rawMeta['surahNumbers'] as List<int>;
+    final List<String> surahNames = surahNumbers
+        .map((n) => widget.surahNameBuilder?.call(n) ?? 'Surah $n')
+        .toList();
+    final int juz = rawMeta['juz'] as int? ?? 0;
+    return _PageMetaInfo(
+      surahNames: surahNames,
+      juzLabel: widget.juzLabel ?? 'Juz $juz',
+      hizbNumber: rawMeta['hizb'] as int? ?? 0,
+    );
+  }
+}
+
+class _QuranPageBody extends StatelessWidget {
+  const _QuranPageBody({
+    required this.metrics,
+    required this.spacedLines,
+    required this.scrollController,
+  });
+
+  final QuranLayoutMetrics metrics;
+  final List<Widget> spacedLines;
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    // No manual RepaintBoundary — the sliver auto-inserts one per child.
+    final Widget pageBody = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: spacedLines,
+    );
+
+    final paddedBody = Padding(padding: metrics.padding, child: pageBody);
+
+    if (metrics.isScrollable) {
+      return Scrollbar(
+        controller: scrollController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          primary: false,
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [paddedBody],
+          ),
+        ),
+      );
+    }
+    return paddedBody;
+  }
+}
+
+class _QuranPageOverlays extends StatelessWidget {
+  const _QuranPageOverlays({
+    required this.pageNumber,
+    required this.showOverlaysListenable,
+    required this.uiTextDirection,
+    required this.metrics,
+    required this.pageMeta,
+    required this.metaTextColor,
+    required this.badgeColor,
+    required this.borderColor,
+    required this.textColor,
+    this.onShowIndex,
+  });
+
+  final int pageNumber;
+  final ValueListenable<bool>? showOverlaysListenable;
+  final TextDirection uiTextDirection;
+  final QuranLayoutMetrics metrics;
+  final _PageMetaInfo? pageMeta;
+  final Color metaTextColor;
+  final Color badgeColor;
+  final Color borderColor;
+  final Color textColor;
+  final VoidCallback? onShowIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    if (showOverlaysListenable == null) return const SizedBox.shrink();
+
+    final String pageNumberLabel = uiTextDirection == TextDirection.rtl
+        ? convertToArabicNumber(pageNumber.toString())
+        : pageNumber.toString();
+
+    return Stack(
+      children: [
+        Positioned(
+          top: metrics.padding.top,
+          left: 0,
+          right: 0,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: showOverlaysListenable!,
+            builder: (context, show, child) {
+              // Use Visibility instead of AnimatedOpacity to avoid
+              // saveLayer() calls that stall the raster thread.
+              return Visibility(visible: show, child: child!);
+            },
+            child: _MetadataStrip(
+              surahNames: pageMeta?.surahNames.join(', ') ?? '',
+              juzLabel: pageMeta?.juzLabel ?? '',
+              uiTextDirection: uiTextDirection,
+              textColor: metaTextColor,
+              onShowIndex: onShowIndex,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          left: 6, // Portrait horizontal padding
+          child: ValueListenableBuilder<bool>(
+            valueListenable: showOverlaysListenable!,
+            builder: (context, show, child) {
+              // Use Visibility instead of AnimatedOpacity to avoid
+              // saveLayer() calls that stall the raster thread.
+              return Visibility(visible: show, child: child!);
+            },
+            child: PageNumberBadge(
+              label: pageNumberLabel,
+              backgroundColor: badgeColor,
+              borderColor: borderColor,
+              textColor: textColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MetadataStrip extends StatelessWidget {
+  const _MetadataStrip({
+    required this.surahNames,
+    required this.juzLabel,
+    required this.uiTextDirection,
+    required this.textColor,
+    this.onShowIndex,
+  });
+  final String surahNames;
+  final String juzLabel;
+  final TextDirection uiTextDirection;
+  final Color textColor;
+  final VoidCallback? onShowIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    if (surahNames.isEmpty) return const SizedBox.shrink();
     Widget strip = PageMetadataStrip(
-      surahNames: pageMeta.surahNames,
-      juzLabel: pageMeta.juzLabel(widget.juzLabel),
-      uiTextDirection: widget.uiTextDirection,
+      surahNames: surahNames,
+      juzLabel: juzLabel,
+      uiTextDirection: uiTextDirection,
       textColor: textColor,
     );
-
-    if (widget.onShowIndex != null) {
+    if (onShowIndex != null) {
       strip = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: widget.onShowIndex,
+        onTap: onShowIndex,
         child: strip,
       );
     }
-
-    return ValueListenableBuilder<bool>(
-      valueListenable:
-          widget.showOverlaysListenable ?? const _AlwaysTrueListenable(),
-      builder: (context, showOverlays, child) => IgnorePointer(
-        ignoring: !showOverlays,
-        child: AnimatedOpacity(
-          opacity: showOverlays ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          child: child,
-        ),
-      ),
-      child: strip,
-    );
+    return strip;
   }
-
-  int _getSurahAtLine(int page, int line) {
-    final String? type = _getSpecialType(page, line);
-    if (type != null) {
-      final List<String> parts = type.split(':');
-      if (parts.length > 1) {
-        return int.tryParse(parts[1]) ?? 1;
-      }
-    }
-
-    final List<List<Map<String, dynamic>>> wordsByLine = _getWordsGroupedByLine(
-      page,
-    );
-    final int lineIdx = line - 1;
-    if (lineIdx >= 0 && lineIdx < wordsByLine.length) {
-      final List<Map<String, dynamic>> words = wordsByLine[lineIdx];
-      if (words.isNotEmpty) {
-        return int.tryParse(words.first['surah']?.toString() ?? '1') ?? 1;
-      }
-    }
-    return 1;
-  }
-
-  static final Map<int, Map<int, String>> _specialLinesCache = {};
-
-  String? _getSpecialType(int page, int line) {
-    if (!_specialLinesCache.containsKey(page)) {
-      _specialLinesCache[page] = _calculateSpecialLines(page);
-    }
-    return _specialLinesCache[page]![line];
-  }
-
-  Map<int, String> _calculateSpecialLines(int pageNumber) {
-    final Map<int, String> special = {};
-    final List<List<Map<String, dynamic>>> lines = _getWordsGroupedByLine(
-      pageNumber,
-    );
-
-    // Standard Quran Mushaf layout logic for headers and bismillah:
-    // 1. Scan for Verse 1 of any Surah starting on this page.
-    for (var i = 0; i < lines.length; i++) {
-      final List<Map<String, dynamic>> lineWords = lines[i];
-      if (lineWords.isNotEmpty) {
-        final Map<String, dynamic> firstWord = lineWords.first;
-        final int surah = int.tryParse(firstWord['surah'].toString()) ?? 0;
-        final int ayah = int.tryParse(firstWord['ayah'].toString()) ?? 0;
-        final int word = int.tryParse(firstWord['word'].toString()) ?? 0;
-
-        if (ayah == 1 && word == 1) {
-          final int lineNum = i + 1;
-          if (surah == 1) {
-            // Fatiha Page 1 special logic.
-            // After remapping, Fatiha's Ayah 1 is always at lineNum 6,
-            // so Header sits at lineNum - 3 = line 3. The previous fallback
-            // to line 1 was dead code given the fixed remapping.
-            if (pageNumber == 1) {
-              special[lineNum - 3] = 'HEADER:1';
-            }
-          } else if (surah == 9) {
-            // At-Tawbah has no Bismillah — Header only.
-            // Place header on the preceding line, or line 1 if at the top.
-            special[lineNum > 1 ? lineNum - 1 : 1] = 'HEADER:9';
-          } else if (surah == 2 && pageNumber == 2) {
-            // Baqarah Page 2 special logic.
-            // Header at line 3 (index 2), Bismillah at line 6 (index 5).
-            special[3] = 'HEADER:2';
-            special[6] = 'BISMILLAH:2';
-          } else {
-            // Other surahs: Header then Bismillah on the two lines preceding verse 1.
-            if (lineNum > 2) {
-              special[lineNum - 2] = 'HEADER:$surah';
-              special[lineNum - 1] = 'BISMILLAH:$surah';
-            } else if (lineNum == 2) {
-              // Verse 1 on line 2: Bismillah on line 1, no room for a header.
-              special[1] = 'BISMILLAH:$surah';
-            } else {
-              // Verse 1 on line 1: place header above if possible, else skip.
-              // Nothing can be placed above line 1 — header is omitted gracefully.
-            }
-          }
-        }
-      }
-    }
-    return special;
-  }
-
-  _PageMetaInfo _buildPageMeta(int pageNumber) {
-    final List<Map<String, int>> pageEntries = page_functions.getPageData(
-      pageNumber,
-    );
-    if (pageEntries.isEmpty) {
-      return const _PageMetaInfo(surahNames: '', juzNumber: null);
-    }
-
-    final surahNumbers = <int>[];
-    for (final entry in pageEntries) {
-      final int? surahNumber = entry['surah'];
-      if (surahNumber == null) {
-        continue;
-      }
-      if (surahNumbers.isEmpty || surahNumbers.last != surahNumber) {
-        surahNumbers.add(surahNumber);
-      }
-    }
-
-    final int firstSurahNumber = pageEntries.first['surah'] ?? 1;
-    final int firstVerseNumber = pageEntries.first['start'] ?? 1;
-    final int juzNumber = page_functions.getJuzNumber(
-      firstSurahNumber,
-      firstVerseNumber,
-    );
-    final separator = widget.uiTextDirection == TextDirection.rtl ? ' ' : ' · ';
-    final String surahNames = surahNumbers
-        .map((surahNumber) => _buildSurahName(surahNumber))
-        .where((name) => name.isNotEmpty)
-        .join(separator);
-
-    return _PageMetaInfo(
-      surahNames: surahNames,
-      juzNumber: juzNumber > 0 ? juzNumber : null,
-    );
-  }
-
-  String _buildSurahName(int surahNumber) {
-    final String Function(int surahNumber)? builder = widget.surahNameBuilder;
-    if (builder != null) {
-      return builder(surahNumber);
-    }
-    return surahNumber.toString();
-  }
-}
-
-void _debugLog(String message) {
-  assert(() {
-    debugPrint(message);
-    return true;
-  }());
 }
 
 class _WordSpanGroup {
-  const _WordSpanGroup({required this.spans});
-
+  const _WordSpanGroup({
+    required this.spans,
+    required this.surah,
+    required this.verse,
+  });
   final List<InlineSpan> spans;
+  final int surah;
+  final int verse;
 }
 
 class _PageMetaInfo {
-  const _PageMetaInfo({required this.surahNames, required this.juzNumber});
-
-  final String surahNames;
-  final int? juzNumber;
-
-  String juzLabel(String? prefix) {
-    if (juzNumber == null || prefix == null || prefix.isEmpty) {
-      return '';
-    }
-    if (_isArabicText(prefix)) {
-      return '$prefix ${_arabicOrdinalForJuz(juzNumber!)}';
-    }
-    return '$prefix $juzNumber';
-  }
-
-  bool _isArabicText(String value) {
-    return RegExp(r'[\u0600-\u06FF]').hasMatch(value);
-  }
-
-  String _arabicOrdinalForJuz(int juzNumber) {
-    const arabicOrdinals = <String>[
-      'الأول',
-      'الثاني',
-      'الثالث',
-      'الرابع',
-      'الخامس',
-      'السادس',
-      'السابع',
-      'الثامن',
-      'التاسع',
-      'العاشر',
-      'الحادي عشر',
-      'الثاني عشر',
-      'الثالث عشر',
-      'الرابع عشر',
-      'الخامس عشر',
-      'السادس عشر',
-      'السابع عشر',
-      'الثامن عشر',
-      'التاسع عشر',
-      'العشرون',
-      'الحادي والعشرون',
-      'الثاني والعشرون',
-      'الثالث والعشرون',
-      'الرابع والعشرون',
-      'الخامس والعشرون',
-      'السادس والعشرون',
-      'السابع والعشرون',
-      'الثامن والعشرون',
-      'التاسع والعشرون',
-      'الثلاثون',
-    ];
-
-    if (juzNumber < 1 || juzNumber > arabicOrdinals.length) {
-      return convertToArabicNumber(juzNumber.toString());
-    }
-
-    return arabicOrdinals[juzNumber - 1];
-  }
-}
-
-/// A constant [ValueListenable<bool>] that always yields `true`.
-/// Used as a fallback when no [showOverlaysListenable] is provided,
-/// so overlays are visible by default without needing a nullable check
-/// at every usage site.
-class _AlwaysTrueListenable implements ValueListenable<bool> {
-  const _AlwaysTrueListenable();
-
-  @override
-  bool get value => true;
-
-  @override
-  void addListener(VoidCallback listener) {}
-
-  @override
-  void removeListener(VoidCallback listener) {}
+  _PageMetaInfo({
+    required this.surahNames,
+    required this.juzLabel,
+    required this.hizbNumber,
+  });
+  final List<String> surahNames;
+  final String juzLabel;
+  final int hizbNumber;
 }

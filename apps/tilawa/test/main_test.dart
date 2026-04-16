@@ -1,6 +1,5 @@
 import 'package:credential_manager/credential_manager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -13,6 +12,7 @@ import 'package:tilawa/core/services/firebase_initialization_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 
 // Mocks
@@ -304,7 +304,7 @@ void main() {
         await firebaseMessagingBackgroundHandler(const RemoteMessage());
       } catch (e) {
         // Expected if platform is not supported or Firebase already initialized with different options
-        debugPrint(
+        logger.d(
           'Handled expected error in firebaseMessagingBackgroundHandler test: $e',
         );
       }

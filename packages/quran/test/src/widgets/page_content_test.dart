@@ -1,11 +1,15 @@
 import 'dart:convert';
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran/src/layout/quran_layout_strategy.dart';
 import 'package:quran/src/page_content.dart';
 import 'package:quran/src/services/quran_data_service.dart';
+import 'package:quran/src/services/quran_font_service.dart';
+import 'package:quran/src/services/quran_page_preparation_service.dart';
 import 'package:quran/src/widgets/page_metadata_strip.dart';
+import 'package:quran/src/widgets/quran_page_painter.dart';
 import 'package:quran/src/widgets/surah_header_banner.dart';
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
@@ -121,7 +125,7 @@ void _registerFakeAssets() {
       return ByteData.sublistView(bytes);
     }
 
-    if (key.endsWith('mainframe.png')) {
+    if (key.endsWith('sura_header_banner.png')) {
       return ByteData.sublistView(_k1x1TransparentPng);
     }
 
@@ -130,16 +134,8 @@ void _registerFakeAssets() {
 }
 
 Widget _buildPageContent({
+  required PreparedQuranPage preparedPage,
   ValueNotifier<int>? currentPage,
-  void Function(int surahNumber, int verseNumber)? onLongPress,
-  void Function(int surahNumber, int verseNumber)? onLongPressUp,
-  void Function(int surahNumber, int verseNumber)? onLongPressCancel,
-  void Function(
-    int surahNumber,
-    int verseNumber,
-    LongPressStartDetails details,
-  )?
-  onLongPressDown,
   ValueChanged<int>? onSurahSelected,
   VoidCallback? onShowIndex,
 }) {
@@ -147,14 +143,12 @@ Widget _buildPageContent({
     home: Scaffold(
       body: PageContent(
         pageNumber: 10,
+        preparedPage: preparedPage,
         textColor: Colors.black,
         pageBackgroundColor: Colors.white,
         currentPageListenable: currentPage ?? ValueNotifier<int>(10),
+        showOverlaysListenable: ValueNotifier<bool>(true),
         surahNameBuilder: (surahNumber) => 'Surah $surahNumber',
-        onLongPress: onLongPress,
-        onLongPressUp: onLongPressUp,
-        onLongPressCancel: onLongPressCancel,
-        onLongPressDown: onLongPressDown,
         onSurahSelected: onSurahSelected,
         onShowIndex: onShowIndex,
       ),
@@ -162,7 +156,7 @@ Widget _buildPageContent({
   );
 }
 
-Future<void> _pumpPageContent(WidgetTester tester, Widget widget) async {
+Future<PreparedQuranPage> _preparePageContent(WidgetTester tester) async {
   await tester.binding.setSurfaceSize(const Size(400, 800));
   addTearDown(() {
     tester.binding.setSurfaceSize(null);
@@ -172,94 +166,74 @@ Future<void> _pumpPageContent(WidgetTester tester, Widget widget) async {
     await QuranDataService.instance.ensureLoaded();
   });
 
-  await tester.pumpWidget(widget);
-  for (var attempt = 0; attempt < 20; attempt++) {
-    await tester.runAsync(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-    });
-    await tester.pump(const Duration(milliseconds: 50));
-    if (find.byType(CircularProgressIndicator).evaluate().isEmpty) {
-      await tester.pump(const Duration(milliseconds: 300));
-      return;
-    }
-  }
-
-  fail('PageContent did not finish loading in the widget test.');
+  late final PreparedQuranPage preparedPage;
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) {
+            final Size viewportSize = MediaQuery.sizeOf(context);
+            final QuranLayoutMetrics metrics = StandardQuranLayoutStrategy()
+                .calculateMetrics(
+                  context,
+                  BoxConstraints(
+                    maxWidth: viewportSize.width,
+                    maxHeight: viewportSize.height,
+                  ),
+                  10,
+                );
+            preparedPage = QuranPagePreparationService.instance.preparePage(
+              pageNumber: 10,
+              metrics: metrics,
+              viewportWidth: viewportSize.width,
+              textColor: Colors.black,
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+  return preparedPage;
 }
 
-RichText _findVerseRichText(WidgetTester tester) {
-  return tester.widgetList<RichText>(find.byType(RichText)).firstWhere((
-    RichText richText,
-  ) {
-    final InlineSpan text = richText.text;
-    if (text is! TextSpan) {
-      return false;
-    }
-    final List<InlineSpan>? children = text.children;
-    if (children == null) {
-      return false;
-    }
-    final String joinedText = children.whereType<TextSpan>().map((span) {
-      return span.text ?? '';
-    }).join();
-    return joinedText == 'AB\u200ACD';
-  });
+Future<void> _pumpPageContent(
+  WidgetTester tester, {
+  ValueNotifier<int>? currentPage,
+  ValueChanged<int>? onSurahSelected,
+  VoidCallback? onShowIndex,
+}) async {
+  final PreparedQuranPage preparedPage = await _preparePageContent(tester);
+  await tester.pumpWidget(
+    _buildPageContent(
+      preparedPage: preparedPage,
+      currentPage: currentPage,
+      onSurahSelected: onSurahSelected,
+      onShowIndex: onShowIndex,
+    ),
+  );
+  await tester.pump(const Duration(milliseconds: 300));
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(_registerFakeAssets);
+  setUp(() {
+    QuranFontService.instance.debugResetForTests();
+    QuranPagePreparationService.instance.clear();
+  });
 
   testWidgets(
-    'PageContent keeps the thin space after the full first word and wires long-press callbacks',
+    'PageContent renders prepared Quran page painter once the page font is ready',
     (WidgetTester tester) async {
-      final events = <String>[];
+      QuranFontService.instance.debugMarkFontLoaded(10);
 
-      await _pumpPageContent(
-        tester,
-        _buildPageContent(
-          onLongPress: (surahNumber, verseNumber) {
-            events.add('press:$surahNumber:$verseNumber');
-          },
-          onLongPressUp: (surahNumber, verseNumber) {
-            events.add('up:$surahNumber:$verseNumber');
-          },
-          onLongPressCancel: (surahNumber, verseNumber) {
-            events.add('cancel:$surahNumber:$verseNumber');
-          },
-          onLongPressDown: (surahNumber, verseNumber, _) {
-            events.add('start:$surahNumber:$verseNumber');
-          },
-        ),
-      );
+      await _pumpPageContent(tester);
 
-      final RichText verseRichText = _findVerseRichText(tester);
-      final rootSpan = verseRichText.text as TextSpan;
-      final List<TextSpan> spans = rootSpan.children!.cast<TextSpan>();
-
-      expect(spans.map((span) => span.text).toList(), const <String?>[
-        'A',
-        'B',
-        '\u200A',
-        'C',
-        'D',
-      ]);
-      expect(identical(spans[0].recognizer, spans[1].recognizer), isTrue);
-
-      final firstWordRecognizer =
-          spans.first.recognizer! as LongPressGestureRecognizer;
-      firstWordRecognizer.onLongPressStart?.call(const LongPressStartDetails());
-      firstWordRecognizer.onLongPress?.call();
-      firstWordRecognizer.onLongPressUp?.call();
-      firstWordRecognizer.onLongPressCancel?.call();
-
-      expect(events, const <String>[
-        'start:5:1',
-        'press:5:1',
-        'up:5:1',
-        'cancel:5:1',
-      ]);
+      expect(find.byType(QuranPagePainter), findsOneWidget);
+      expect(find.byType(PageMetadataStrip), findsOneWidget);
     },
   );
 
@@ -268,17 +242,16 @@ void main() {
     (WidgetTester tester) async {
       int? selectedSurah;
       var showIndexCalls = 0;
+      QuranFontService.instance.debugMarkFontLoaded(10);
 
       await _pumpPageContent(
         tester,
-        _buildPageContent(
-          onSurahSelected: (surahNumber) {
-            selectedSurah = surahNumber;
-          },
-          onShowIndex: () {
-            showIndexCalls++;
-          },
-        ),
+        onSurahSelected: (surahNumber) {
+          selectedSurah = surahNumber;
+        },
+        onShowIndex: () {
+          showIndexCalls++;
+        },
       );
 
       await tester.tap(find.byType(SurahHeaderBanner));

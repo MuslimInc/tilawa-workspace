@@ -1,14 +1,20 @@
+import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:quran/quran.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
+import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_limits.dart';
 import '../cubit/share_cubit.dart';
@@ -17,6 +23,7 @@ import '../share_progress_messages_l10n.dart';
 import '../utils/quran_share_text_formatter.dart';
 import '../utils/reel_page_specs.dart';
 import '../utils/share_ayah_range_utils.dart';
+import '../utils/share_reciter_options.dart';
 import '../widgets/page_passage_card_renderer.dart';
 import '../widgets/reader_page_content_renderer.dart';
 import '../widgets/reel_content_renderer.dart';
@@ -47,7 +54,7 @@ class ShareComposerScreen extends StatefulWidget {
     required this.reciterName,
     required this.reciterServerUrl,
     required this.readerBoundaryKey,
-    this.readerPreviewBytes,
+    this.readerPreviewBytesNotifier,
   });
 
   final int surahNumber;
@@ -57,7 +64,10 @@ class ShareComposerScreen extends StatefulWidget {
   final String reciterName;
   final String reciterServerUrl;
   final GlobalKey readerBoundaryKey;
-  final Uint8List? readerPreviewBytes;
+
+  /// Notifier that delivers the blurred backdrop preview bytes asynchronously
+  /// so the route push is not blocked by GPU readback + PNG encoding.
+  final ValueListenable<Uint8List?>? readerPreviewBytesNotifier;
 
   static Route<void> route({
     required ShareCubit cubit,
@@ -68,7 +78,7 @@ class ShareComposerScreen extends StatefulWidget {
     required String reciterName,
     required String reciterServerUrl,
     required GlobalKey readerBoundaryKey,
-    Uint8List? readerPreviewBytes,
+    ValueListenable<Uint8List?>? readerPreviewBytesNotifier,
   }) {
     return PageRouteBuilder<void>(
       transitionDuration: const Duration(milliseconds: 320),
@@ -84,7 +94,7 @@ class ShareComposerScreen extends StatefulWidget {
               reciterName: reciterName,
               reciterServerUrl: reciterServerUrl,
               readerBoundaryKey: readerBoundaryKey,
-              readerPreviewBytes: readerPreviewBytes,
+              readerPreviewBytesNotifier: readerPreviewBytesNotifier,
             ),
           ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -122,9 +132,32 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   final GlobalKey _posterBoundaryKey = GlobalKey();
   final GlobalKey _readerPageBoundaryKey = GlobalKey();
   final List<GlobalKey> _reelBoundaryKeys = <GlobalKey>[];
+  List<ShareReciterOption> _reciterOptions = const <ShareReciterOption>[];
+  bool _isLoadingReciters = false;
+  Future<void>? _reciterOptionsLoadTask;
+  bool _singleReelCaptureSurfaceVisible = false;
+
+  // Cached reel page specs — recomputed only when fromAyah/toAyah change, not
+  // on every bloc emission. Previously this getter was called on each
+  // BlocConsumer rebuild (including every progress tick), wasting CPU.
+  late List<ReelPageSpec> _cachedReelPageSpecs;
+
+  // Stable backdrop widget — built once and reused. Previously _buildBackdrop()
+  // was called inside BlocConsumer.builder, allocating a new widget instance on
+  // every ShareCubit emission.
+  Widget? _backdropWidget;
+
+  // Mirrors the cubit's effective reciter name so off-screen renderers (which
+  // live outside BlocConsumer) can reflect reciter changes without needing to
+  // read bloc state from a StatelessWidget.
+  late String _currentReciterName;
 
   @override
   void initState() {
+    final int tInit = DateTime.now().millisecondsSinceEpoch;
+    logger.d(
+      '[SHARE_SCREEN] initState start | surah=${widget.surahNumber} page=${widget.currentPage} | t=${tInit}ms',
+    );
     super.initState();
     _maxAyah = getVerseCount(widget.surahNumber);
     final ayahRange = normalizeShareAyahRange(
@@ -134,7 +167,10 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
     );
     _fromAyah = ayahRange.fromAyah;
     _toAyah = ayahRange.toAyah;
+    _currentReciterName = widget.reciterName;
+    _cachedReelPageSpecs = _buildReelPageSpecs();
     _syncReelBoundaryKeys();
+    _backdropWidget = _buildBackdrop();
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
@@ -143,6 +179,10 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       reciterName: widget.reciterName,
       serverUrl: widget.reciterServerUrl,
       boundaryKey: widget.readerBoundaryKey,
+    );
+
+    logger.d(
+      '[SHARE_SCREEN] initState complete | took=${DateTime.now().millisecondsSinceEpoch - tInit}ms',
     );
   }
 
@@ -191,7 +231,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   String get _effectiveShareArabicSurahName =>
       _usesPagePassageCard ? _currentPageArabicSurahNames : _arabicSurahName;
 
-  List<ReelPageSpec> get _reelPageSpecs => buildReelPageSpecs(
+  List<ReelPageSpec> _buildReelPageSpecs() => buildReelPageSpecs(
     surahNumber: widget.surahNumber,
     fromAyah: _fromAyah,
     toAyah: _toAyah,
@@ -207,7 +247,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
       (!_enforcesVerseLimit || _verseCount <= ShareLimits.maxVersesPerClip);
 
   void _syncReelBoundaryKeys() {
-    final int requiredCount = _reelPageSpecs.length;
+    final int requiredCount = _cachedReelPageSpecs.length;
 
     while (_reelBoundaryKeys.length < requiredCount) {
       _reelBoundaryKeys.add(GlobalKey());
@@ -218,86 +258,204 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
     }
   }
 
+  Future<void> _loadReciterOptions() async {
+    setState(() => _isLoadingReciters = true);
+
+    final result = await getIt<GetRecitersUseCase>()();
+    if (!mounted) return;
+
+    final List<ShareReciterOption> options = result.fold(
+      (_) => const <ShareReciterOption>[],
+      (List<ReciterEntity> reciters) => buildShareReciterOptions(
+        reciters: reciters,
+        surahNumber: widget.surahNumber,
+        selectedReciterName: widget.reciterName,
+        selectedServerUrl: widget.reciterServerUrl,
+      ),
+    );
+
+    setState(() {
+      _reciterOptions = options;
+      _isLoadingReciters = false;
+    });
+
+    final ShareCubit cubit = context.read<ShareCubit>();
+    final ShareState currentState = cubit.state;
+    final String currentReciterName =
+        currentState.reciterName ?? widget.reciterName;
+    final String currentReciterServerUrl =
+        currentState.reciterServerUrl ?? widget.reciterServerUrl;
+    ShareReciterOption? resolvedOption;
+    for (final ShareReciterOption option in options) {
+      if (matchesShareReciterOption(
+        option,
+        selectedReciterName: currentReciterName,
+        selectedServerUrl: currentReciterServerUrl,
+      )) {
+        resolvedOption = option;
+        break;
+      }
+    }
+
+    resolvedOption ??= _preferredFallbackReciterOption(options);
+    if (resolvedOption == null) {
+      return;
+    }
+
+    final bool hasExactSelection =
+        currentReciterName.trim() == resolvedOption.name &&
+        currentReciterServerUrl.trim() == resolvedOption.serverUrl;
+    if (!hasExactSelection) {
+      cubit.updateReciter(
+        name: resolvedOption.name,
+        serverUrl: resolvedOption.serverUrl,
+      );
+    }
+    if (mounted) {
+      setState(() => _currentReciterName = resolvedOption!.name);
+    }
+  }
+
+  Future<void> _ensureReciterOptionsLoaded() {
+    if (_reciterOptions.isNotEmpty || _isLoadingReciters) {
+      return _reciterOptionsLoadTask ?? Future<void>.value();
+    }
+
+    return _reciterOptionsLoadTask ??= _loadReciterOptions().whenComplete(() {
+      _reciterOptionsLoadTask = null;
+    });
+  }
+
+  ShareReciterOption? _preferredFallbackReciterOption(
+    List<ShareReciterOption> options,
+  ) {
+    for (final ShareReciterOption option in options) {
+      if (ReciterAudioMapping.resolveFolder(option.serverUrl) ==
+          ReciterAudioMapping.defaultReciterFolder) {
+        return option;
+      }
+    }
+    return options.isEmpty ? null : options.first;
+  }
+
+  Future<void> _showReciterPicker() async {
+    await _ensureReciterOptionsLoaded();
+    if (!mounted || _reciterOptions.isEmpty) {
+      return;
+    }
+
+    final ShareCubit cubit = context.read<ShareCubit>();
+    final ShareState currentState = cubit.state;
+    final ShareReciterOption? selection =
+        await showModalBottomSheet<ShareReciterOption>(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => _ReciterPickerSheet(
+            options: _reciterOptions,
+            selectedReciterName: currentState.reciterName ?? widget.reciterName,
+            selectedServerUrl:
+                currentState.reciterServerUrl ?? widget.reciterServerUrl,
+          ),
+        );
+
+    if (!mounted || selection == null) {
+      return;
+    }
+
+    cubit.discardPreparedContent();
+    cubit.updateReciter(name: selection.name, serverUrl: selection.serverUrl);
+    setState(() {
+      _currentReciterName = selection.name;
+      _singleReelCaptureSurfaceVisible = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    // Off-screen capture renderers and the backdrop are independent of
+    // ShareCubit state — hoisted outside BlocConsumer so they are not
+    // rebuilt on every cubit emission (progress ticks, reciter updates, etc.).
+    return Stack(
+      children: [
+        if (_mode == ShareComposerMode.reel &&
+            (_cachedReelPageSpecs.length > 1 ||
+                _singleReelCaptureSurfaceVisible))
+          _OffScreenRenderers(
+            reelBoundaryKeys: _reelBoundaryKeys,
+            reelPageSpecs: _cachedReelPageSpecs,
+            surahNumber: widget.surahNumber,
+            reciterName: _currentReciterName,
+          ),
 
-    return BlocConsumer<ShareCubit, ShareState>(
-      listenWhen: (previous, current) =>
-          previous.status == ShareStatus.sharing &&
-          current.status == ShareStatus.idle &&
-          current.content == null,
-      listener: (context, state) {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-      },
-      builder: (context, state) {
-        final List<ReelPageSpec> reelPageSpecs = _reelPageSpecs;
-        final isBusy =
-            state.status == ShareStatus.capturing ||
-            state.status == ShareStatus.generating ||
-            state.status == ShareStatus.sharing;
-        final isReviewing =
-            state.status == ShareStatus.reviewing && state.content != null;
-        final reviewContent = isReviewing ? state.content! : null;
-        final isReelReview = reviewContent is ShareReel;
+        // --- Main composer UI driven by ShareCubit ---
+        BlocConsumer<ShareCubit, ShareState>(
+          listenWhen: (previous, current) =>
+              previous.status == ShareStatus.sharing &&
+              current.status == ShareStatus.idle &&
+              current.content == null,
+          listener: (context, state) {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          },
+          // Skip rebuilds that only change progressMessage/progress during
+          // generation — the progress strip reads directly from state so it
+          // still updates, but the heavy scaffold subtree is not re-laid-out.
+          buildWhen: (previous, current) {
+            // Always rebuild on status transitions.
+            if (previous.status != current.status) {
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=status ${previous.status}→${current.status}',
+              );
+              return true;
+            }
+            // Always rebuild when content or reciter changes.
+            if (previous.content != current.content) {
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=content changed',
+              );
+              return true;
+            }
+            if (previous.reciterName != current.reciterName) {
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=reciterName changed',
+              );
+              return true;
+            }
+            if (previous.reciterServerUrl != current.reciterServerUrl) {
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=reciterServerUrl changed',
+              );
+              return true;
+            }
+            if (previous.errorMessage != current.errorMessage) {
+              logger.d(
+                '[SHARE_REBUILD] buildWhen=true | reason=errorMessage changed',
+              );
+              return true;
+            }
+            // Skip rebuilds that only carry a progress message update.
+            logger.d(
+              '[SHARE_REBUILD] buildWhen=false | skipped progress-only emit | msg="${current.progressMessage}"',
+            );
+            return false;
+          },
+          builder: (context, state) {
+            final isBusy =
+                state.status == ShareStatus.capturing ||
+                state.status == ShareStatus.generating ||
+                state.status == ShareStatus.sharing;
+            final isReviewing =
+                state.status == ShareStatus.reviewing && state.content != null;
+            final reviewContent = isReviewing ? state.content! : null;
+            final isReelReview = reviewContent is ShareReel;
+            final theme = Theme.of(context);
+            final tokens = theme.tokens;
+            final reciterName = state.reciterName ?? widget.reciterName;
 
-        return Stack(
-          children: [
-            Positioned(
-              left: -3000,
-              top: -3000,
-              child: RepaintBoundary(
-                key: _posterBoundaryKey,
-                child: _usesPagePassageCard
-                    ? PagePassageCardRenderer(
-                        pageNumber: widget.currentPage,
-                        arabicSurahNames: _currentPageArabicSurahNames,
-                        englishSurahNames: _currentPageEnglishSurahNames,
-                        reciterName: state.reciterName ?? widget.reciterName,
-                        uiTextDirection: Directionality.of(context),
-                      )
-                    : SharePosterRenderer(
-                        surahNumber: widget.surahNumber,
-                        fromAyah: _fromAyah,
-                        toAyah: _toAyah,
-                        reciterName: state.reciterName ?? widget.reciterName,
-                      ),
-              ),
-            ),
-            Positioned(
-              left: -4200,
-              top: -3000,
-              child: RepaintBoundary(
-                key: _readerPageBoundaryKey,
-                child: SizedBox(
-                  width: 1080,
-                  height: 1440,
-                  child: ReaderPageContentRenderer(
-                    pageNumber: widget.currentPage,
-                    uiTextDirection: Directionality.of(context),
-                  ),
-                ),
-              ),
-            ),
-            for (int index = 0; index < reelPageSpecs.length; index++)
-              Positioned(
-                left: -3000 - (index * 1200),
-                top: -3000,
-                child: RepaintBoundary(
-                  key: _reelBoundaryKeys[index],
-                  child: ReelContentPage(
-                    surahNumber: widget.surahNumber,
-                    pageSpec: reelPageSpecs[index],
-                    pageIndex: index,
-                    totalPages: reelPageSpecs.length,
-                    reciterName: state.reciterName ?? widget.reciterName,
-                  ),
-                ),
-              ),
-            ImmersiveComposerScaffold(
+            return ImmersiveComposerScaffold(
               title: isReviewing
                   ? context.l10n.shareReadyTitle
                   : context.l10n.createShare,
@@ -305,7 +463,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                   ? (isReelReview ? null : context.l10n.shareReviewSubtitle)
                   : context.l10n.shareComposerSubtitle,
               onClose: () => Navigator.of(context).maybePop(),
-              background: _buildBackdrop(),
+              background: _backdropWidget,
               backgroundGradient: const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -327,7 +485,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                 switchOutCurve: Curves.easeInCubic,
                 child: isReviewing
                     ? _buildReviewPreview(reviewContent!)
-                    : _buildLivePreview(state),
+                    : _buildLivePreview(reciterName),
               ),
               bottomPanel: AnimatedSwitcher(
                 duration: tokens.durationFast,
@@ -355,7 +513,9 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                         isBusy: isBusy,
                         rangeIsValid: _isValidRange,
                         showVerseLimit: _enforcesVerseLimit,
-                        reciterName: state.reciterName ?? widget.reciterName,
+                        reciterName: reciterName,
+                        isLoadingReciters: _isLoadingReciters,
+                        canSelectReciter: _reciterOptions.isNotEmpty,
                         arabicSurahName: _effectivePreviewArabicSurahName,
                         currentPage: widget.currentPage,
                         showVerseRangeControls: !_usesPagePassageCard,
@@ -363,50 +523,68 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                             ? state.errorMessage
                             : null,
                         progressLabel: _progressLabelForState(context, state),
+                        onReciterTap: _showReciterPicker,
                         onModeChanged: (mode) {
-                          setState(() => _mode = mode);
+                          setState(() {
+                            _mode = mode;
+                            _singleReelCaptureSurfaceVisible = false;
+                          });
+                          if (mode != ShareComposerMode.screenshot) {
+                            unawaited(_ensureReciterOptionsLoaded());
+                          }
                           context.read<ShareCubit>().discardPreparedContent();
                         },
                         onLayoutChanged: (layout) {
-                          setState(() => _screenshotLayout = layout);
+                          setState(() {
+                            _screenshotLayout = layout;
+                            _singleReelCaptureSurfaceVisible = false;
+                          });
                           context.read<ShareCubit>().discardPreparedContent();
                         },
                         onDurationChanged: (preset) {
-                          setState(() => _durationPreset = preset);
+                          setState(() {
+                            _durationPreset = preset;
+                            _singleReelCaptureSurfaceVisible = false;
+                          });
                           context.read<ShareCubit>().discardPreparedContent();
                         },
                         onFromChanged: _handleFromAyahChanged,
                         onToChanged: _handleToAyahChanged,
                         onPrimaryAction: _handlePrimaryAction,
-                        onShareText: () => _handleShareText(
-                          reciterName: state.reciterName ?? widget.reciterName,
-                        ),
+                        onShareText: () =>
+                            _handleShareText(reciterName: reciterName),
                       ),
               ),
-            ),
-          ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget? _buildBackdrop() {
+    final notifier = widget.readerPreviewBytesNotifier;
+    if (notifier == null) return null;
+
+    return ValueListenableBuilder<Uint8List?>(
+      valueListenable: notifier,
+      builder: (context, bytes, _) {
+        if (bytes == null) return const SizedBox.shrink();
+        return Opacity(
+          opacity: 0.16,
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
         );
       },
     );
   }
 
-  Widget? _buildBackdrop() {
-    final bytes = widget.readerPreviewBytes;
-    if (bytes == null) return null;
-
-    return Opacity(
-      opacity: 0.16,
-      child: Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-      ),
-    );
-  }
-
-  Widget _buildLivePreview(ShareState state) {
-    final reciterName = state.reciterName ?? widget.reciterName;
+  Widget _buildLivePreview(String reciterName) {
+    final TextDirection textDirection = Directionality.of(context);
 
     return Column(
       key: ValueKey(
@@ -453,26 +631,10 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
             child: _PreviewFrame(
               aspectRatio: _previewAspectRatio,
               child: switch (_mode) {
-                ShareComposerMode.screenshot =>
-                  _screenshotLayout == ShareScreenshotLayout.readerPage
-                      ? ReaderPageContentRenderer(
-                          pageNumber: widget.currentPage,
-                          uiTextDirection: Directionality.of(context),
-                        )
-                      : _usesPagePassageCard
-                      ? PagePassageCardRenderer(
-                          pageNumber: widget.currentPage,
-                          arabicSurahNames: _currentPageArabicSurahNames,
-                          englishSurahNames: _currentPageEnglishSurahNames,
-                          reciterName: reciterName,
-                          uiTextDirection: Directionality.of(context),
-                        )
-                      : SharePosterRenderer(
-                          surahNumber: widget.surahNumber,
-                          fromAyah: _fromAyah,
-                          toAyah: _toAyah,
-                          reciterName: reciterName,
-                        ),
+                ShareComposerMode.screenshot => _buildScreenshotPreview(
+                  reciterName: reciterName,
+                  uiTextDirection: textDirection,
+                ),
                 ShareComposerMode.audio => _AudioArtworkPreview(
                   surahNumber: widget.surahNumber,
                   fromAyah: _fromAyah,
@@ -480,10 +642,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
                   reciterName: reciterName,
                   durationPreset: _durationPreset,
                 ),
-                ShareComposerMode.reel => ReelContentRenderer(
-                  surahNumber: widget.surahNumber,
-                  fromAyah: _fromAyah,
-                  toAyah: _toAyah,
+                ShareComposerMode.reel => _buildReelPreview(
                   reciterName: reciterName,
                 ),
               },
@@ -491,6 +650,49 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildScreenshotPreview({
+    required String reciterName,
+    required TextDirection uiTextDirection,
+  }) {
+    if (_screenshotLayout == ShareScreenshotLayout.readerPage) {
+      return RepaintBoundary(
+        key: _readerPageBoundaryKey,
+        child: ReaderPageContentRenderer(
+          pageNumber: widget.currentPage,
+          uiTextDirection: uiTextDirection,
+        ),
+      );
+    }
+
+    return RepaintBoundary(
+      key: _posterBoundaryKey,
+      child: _usesPagePassageCard
+          ? PagePassageCardRenderer(
+              pageNumber: widget.currentPage,
+              arabicSurahNames: _currentPageArabicSurahNames,
+              englishSurahNames: _currentPageEnglishSurahNames,
+              reciterName: reciterName,
+              uiTextDirection: uiTextDirection,
+            )
+          : SharePosterRenderer(
+              surahNumber: widget.surahNumber,
+              fromAyah: _fromAyah,
+              toAyah: _toAyah,
+              reciterName: reciterName,
+            ),
+    );
+  }
+
+  Widget _buildReelPreview({required String reciterName}) {
+    return ReelContentRenderer(
+      surahNumber: widget.surahNumber,
+      fromAyah: _fromAyah,
+      toAyah: _toAyah,
+      reciterName: reciterName,
+      pageSpecs: _cachedReelPageSpecs,
     );
   }
 
@@ -586,6 +788,9 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
 
   Future<void> _handlePrimaryAction() async {
     final cubit = context.read<ShareCubit>();
+    final progressMessages = context.shareProgressMessages;
+    final appName = context.l10n.appTitle;
+    final sharedViaLabel = context.l10n.sharedViaTilawa;
 
     switch (_mode) {
       case ShareComposerMode.screenshot:
@@ -597,28 +802,49 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
               : _posterBoundaryKey,
           surahName: _effectiveShareSurahName,
           pageNumber: widget.currentPage,
-          appName: context.l10n.appTitle,
-          sharedViaLabel: context.l10n.sharedViaTilawa,
-          preparingImageLabel: context.shareProgressMessages.preparingImage,
+          appName: appName,
+          sharedViaLabel: sharedViaLabel,
+          preparingImageLabel: progressMessages.preparingImage,
           brandCapture: useReaderCapture,
         );
         return;
       case ShareComposerMode.audio:
+        await _ensureReciterOptionsLoaded();
         await cubit.prepareAudioClip(
           surahName: _surahName,
-          progressMessages: context.shareProgressMessages,
+          progressMessages: progressMessages,
           maxDurationSeconds: _durationPreset.maxDurationSeconds,
         );
         return;
       case ShareComposerMode.reel:
-        await cubit.generateReel(
-          surahName: _surahName,
-          progressMessages: context.shareProgressMessages,
-          appName: context.l10n.appTitle,
-          sharedViaLabel: context.l10n.sharedViaTilawa,
-          boundaryKeys: _reelBoundaryKeys,
-          maxDurationSeconds: _durationPreset.maxDurationSeconds,
-        );
+        await _ensureReciterOptionsLoaded();
+        final bool requiresSingleCaptureSurface =
+            _cachedReelPageSpecs.length == 1;
+        if (requiresSingleCaptureSurface &&
+            !_singleReelCaptureSurfaceVisible &&
+            mounted) {
+          setState(() => _singleReelCaptureSurfaceVisible = true);
+          await WidgetsBinding.instance.endOfFrame;
+          if (!mounted) {
+            return;
+          }
+        }
+        try {
+          await cubit.generateReel(
+            surahName: _surahName,
+            progressMessages: progressMessages,
+            appName: appName,
+            sharedViaLabel: sharedViaLabel,
+            boundaryKeys: _reelBoundaryKeys,
+            maxDurationSeconds: _durationPreset.maxDurationSeconds,
+          );
+        } finally {
+          if (requiresSingleCaptureSurface &&
+              mounted &&
+              _singleReelCaptureSurfaceVisible) {
+            setState(() => _singleReelCaptureSurfaceVisible = false);
+          }
+        }
         return;
     }
   }
@@ -630,6 +856,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
         _toAyah = _fromAyah;
       }
       _syncReelBoundaryKeys();
+      _singleReelCaptureSurfaceVisible = false;
     });
     context.read<ShareCubit>().updateVerseRange(
       fromAyah: _fromAyah,
@@ -644,6 +871,7 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
         _fromAyah = _toAyah;
       }
       _syncReelBoundaryKeys();
+      _singleReelCaptureSurfaceVisible = false;
     });
     context.read<ShareCubit>().updateVerseRange(
       fromAyah: _fromAyah,
@@ -699,6 +927,50 @@ class _ShareComposerScreenState extends State<ShareComposerScreen> {
   }
 }
 
+/// Holds off-screen capture surfaces for reel export.
+///
+/// Extracted from `_ShareComposerScreenState.build()` so it lives outside
+/// [BlocConsumer] and is not rebuilt on every [ShareCubit] emission. The state
+/// parent rebuilds this widget only when ayah range, reciter, or page changes —
+/// not on progress ticks.
+class _OffScreenRenderers extends StatelessWidget {
+  const _OffScreenRenderers({
+    required this.reelBoundaryKeys,
+    required this.reelPageSpecs,
+    required this.surahNumber,
+    required this.reciterName,
+  });
+
+  final List<GlobalKey> reelBoundaryKeys;
+  final List<ReelPageSpec> reelPageSpecs;
+  final int surahNumber;
+  final String reciterName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Reel page capture surfaces
+        for (int index = 0; index < reelPageSpecs.length; index++)
+          Positioned(
+            left: -3000 - (index * 1200),
+            top: -3000,
+            child: RepaintBoundary(
+              key: reelBoundaryKeys[index],
+              child: ReelContentPage(
+                surahNumber: surahNumber,
+                pageSpec: reelPageSpecs[index],
+                pageIndex: index,
+                totalPages: reelPageSpecs.length,
+                reciterName: reciterName,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _ComposerControls extends StatelessWidget {
   const _ComposerControls({
     super.key,
@@ -713,11 +985,14 @@ class _ComposerControls extends StatelessWidget {
     required this.rangeIsValid,
     required this.showVerseLimit,
     required this.reciterName,
+    required this.isLoadingReciters,
+    required this.canSelectReciter,
     required this.arabicSurahName,
     required this.currentPage,
     required this.showVerseRangeControls,
     required this.errorMessage,
     required this.progressLabel,
+    required this.onReciterTap,
     required this.onModeChanged,
     required this.onLayoutChanged,
     required this.onDurationChanged,
@@ -738,11 +1013,14 @@ class _ComposerControls extends StatelessWidget {
   final bool rangeIsValid;
   final bool showVerseLimit;
   final String reciterName;
+  final bool isLoadingReciters;
+  final bool canSelectReciter;
   final String arabicSurahName;
   final int currentPage;
   final bool showVerseRangeControls;
   final String? errorMessage;
   final String? progressLabel;
+  final Future<void> Function() onReciterTap;
   final ValueChanged<ShareComposerMode> onModeChanged;
   final ValueChanged<ShareScreenshotLayout> onLayoutChanged;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
@@ -893,6 +1171,24 @@ class _ComposerControls extends StatelessWidget {
         ],
         if (mode != ShareComposerMode.screenshot) ...[
           const SizedBox(height: 16),
+          TilawaSectionTitle(title: context.l10n.reciters),
+          const SizedBox(height: 10),
+          _ReciterSelectorButton(
+            reciterName: reciterName,
+            isLoading: isLoadingReciters,
+            enabled: !isBusy && canSelectReciter,
+            onTap: onReciterTap,
+          ),
+          if (!isLoadingReciters && !canSelectReciter) ...[
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.reciterInfoNotAvailable,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
           TilawaSectionTitle(title: context.l10n.shareDuration),
           const SizedBox(height: 10),
           Wrap(
@@ -997,6 +1293,247 @@ class _ComposerControls extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ReciterSelectorButton extends StatelessWidget {
+  const _ReciterSelectorButton({
+    required this.reciterName,
+    required this.isLoading,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String reciterName;
+  final bool isLoading;
+  final bool enabled;
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return OutlinedButton(
+      onPressed: enabled ? () => onTap() : null,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.multitrack_audio_rounded, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              reciterName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFF7F1E1),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          if (isLoading)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            const Icon(Icons.expand_more_rounded),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReciterPickerSheet extends StatefulWidget {
+  const _ReciterPickerSheet({
+    required this.options,
+    required this.selectedReciterName,
+    required this.selectedServerUrl,
+  });
+
+  final List<ShareReciterOption> options;
+  final String selectedReciterName;
+  final String selectedServerUrl;
+
+  @override
+  State<_ReciterPickerSheet> createState() => _ReciterPickerSheetState();
+}
+
+class _ReciterPickerSheetState extends State<_ReciterPickerSheet> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  List<ShareReciterOption> get _filteredOptions {
+    final String query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      return widget.options;
+    }
+
+    return widget.options
+        .where((option) => option.name.toLowerCase().contains(query))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final List<ShareReciterOption> filteredOptions = _filteredOptions;
+
+    return FractionallySizedBox(
+      heightFactor: 0.84,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 26,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                const TilawaSheetHandle(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.recitersList,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                        tooltip: context.l10n.close,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                  child: TilawaSearchField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    hintText: context.l10n.searchReciters,
+                    onChanged: (_) => setState(() {}),
+                    onClear: () => setState(_searchController.clear),
+                    onTapOutside: (_) => _searchFocusNode.unfocus(),
+                    showShadow: true,
+                    borderRadius: BorderRadius.circular(18),
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+                Expanded(
+                  child: filteredOptions.isEmpty
+                      ? Center(
+                          child: Text(
+                            context.l10n.noResultsFound,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                          itemCount: filteredOptions.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final ShareReciterOption option =
+                                filteredOptions[index];
+                            final bool isSelected = matchesShareReciterOption(
+                              option,
+                              selectedReciterName: widget.selectedReciterName,
+                              selectedServerUrl: widget.selectedServerUrl,
+                            );
+
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(18),
+                                onTap: () => Navigator.of(context).pop(option),
+                                child: Ink(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(18),
+                                    color: isSelected
+                                        ? const Color(
+                                            0xFFE1C17B,
+                                          ).withValues(alpha: 0.18)
+                                        : theme
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFFE1C17B)
+                                          : theme.colorScheme.outlineVariant,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          option.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Icon(
+                                        isSelected
+                                            ? Icons.check_circle_rounded
+                                            : Icons.chevron_right_rounded,
+                                        color: isSelected
+                                            ? const Color(0xFF0B342E)
+                                            : theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

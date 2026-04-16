@@ -1,0 +1,20 @@
+{
+  "@@locale": "ar",
+  "preparingQuran": "جارٍ تجهيز القرآن لك…",
+  "quranReady": "القرآن جاهز.",
+  "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "networkError": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "appTitle": "القرآن",
+  "retry": "إعادة المحاولة",
+  "pageIndicator": "صفحة {current} من {total}",
+  "@pageIndicator": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
+}

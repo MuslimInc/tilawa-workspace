@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +10,6 @@ import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/navi
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/page_slider_section.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/slider_preview_pill.dart';
 
-/// A bottom bar Organism for Quran page navigation and surah indexing.
 class PageNavigationBar extends StatefulWidget {
   const PageNavigationBar({
     super.key,
@@ -19,12 +17,18 @@ class PageNavigationBar extends StatefulWidget {
     required this.onPageChanged,
     required this.onShowIndex,
     required this.onShare,
+    this.onWarming,
+    this.onPointerDown,
+    this.onPointerUp,
   });
 
   final int currentPage;
   final ValueChanged<int> onPageChanged;
   final VoidCallback onShowIndex;
   final VoidCallback onShare;
+  final ValueChanged<int>? onWarming;
+  final VoidCallback? onPointerDown;
+  final VoidCallback? onPointerUp;
 
   @override
   State<PageNavigationBar> createState() => _PageNavigationBarState();
@@ -38,6 +42,12 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
   Timer? _previewHideTimer;
   bool _showFocusedPagePreview = false;
   bool _isDraggingSlider = false;
+  int? _throttledWarmingPage;
+  Timer? _warmingThrottleTimer;
+
+  // Measurement Cache
+  final Map<String, double> _textWidthCache = {};
+  double? _lastCachedReaderFontSize;
 
   bool get _showPreviewPill => _isDraggingSlider || _showFocusedPagePreview;
 
@@ -96,6 +106,7 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
 
   void _handleSliderChangeStart(double value) {
     _previewHideTimer?.cancel();
+    widget.onPointerDown?.call();
 
     setState(() {
       _showFocusedPagePreview = false;
@@ -116,9 +127,31 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
       _sliderValueOverride = value;
       _lastPreviewPage = previewPage;
     });
+
+    if (previewPage != widget.currentPage) {
+      _throttleWarming(previewPage);
+    }
+  }
+
+  void _throttleWarming(int pageNumber) {
+    _throttledWarmingPage = pageNumber;
+    if (_warmingThrottleTimer != null) return;
+
+    // Use a 300ms throttle for warming while dragging.
+    // This allows the slider to remain buttery smooth while still
+    // letting the engine know about the intended destination.
+    _warmingThrottleTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted && _isDraggingSlider && _throttledWarmingPage != null) {
+        widget.onWarming?.call(_throttledWarmingPage!);
+      }
+      _warmingThrottleTimer = null;
+    });
   }
 
   void _handleSliderChangeEnd(double value) {
+    _warmingThrottleTimer?.cancel();
+    _warmingThrottleTimer = null;
+
     final int targetPage = value.round().clamp(1, _totalPages);
     final bool shouldNavigate = targetPage != widget.currentPage;
 
@@ -132,6 +165,11 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
     if (shouldNavigate) {
       widget.onPageChanged(targetPage);
     }
+
+    // Delay the resume slightly to avoid collision with the jump build
+    Timer(const Duration(milliseconds: 50), () {
+      if (mounted) widget.onPointerUp?.call();
+    });
   }
 
   double _measureTextWidth({
@@ -139,12 +177,19 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
     required String text,
     required TextStyle style,
   }) {
+    final double? cachedWidth = _textWidthCache[text];
+    if (cachedWidth != null && _lastCachedReaderFontSize == style.fontSize) {
+      return cachedWidth;
+    }
+
     final TextPainter painter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
       textDirection: Directionality.of(context),
     )..layout();
 
+    _textWidthCache[text] = painter.width;
+    _lastCachedReaderFontSize = style.fontSize;
     return painter.width;
   }
 
@@ -256,85 +301,79 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(navTheme.barBorderRadius),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: navTheme.blurSigma,
-                    sigmaY: navTheme.blurSigma,
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      padding: navTheme.barPadding,
-                      decoration: BoxDecoration(
-                        color: barColor,
-                        borderRadius: BorderRadius.circular(
-                          navTheme.barBorderRadius,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    padding: navTheme.barPadding,
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: BorderRadius.circular(
+                        navTheme.barBorderRadius,
+                      ),
+                      border: Border.all(color: borderColor, width: 0.8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.35 : 0.08,
+                          ),
+                          blurRadius: 24,
+                          spreadRadius: -4,
+                          offset: const Offset(0, 12),
                         ),
-                        border: Border.all(color: borderColor, width: 0.8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.08,
-                            ),
-                            blurRadius: 24,
-                            spreadRadius: -4,
-                            offset: const Offset(0, 12),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 8,
-                        children: [
-                          PageSliderSection(
-                            totalPages: _totalPages,
-                            sliderValue: _sliderValue,
-                            primaryColor: primaryColor,
-                            textColor: textColor,
-                            borderColor: borderColor,
-                            isDark: isDark,
-                            onChanged: _handleSliderChanged,
-                            onChangeStart: _handleSliderChangeStart,
-                            onChangeEnd: _handleSliderChangeEnd,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: NavigationIndexCard(
-                                    pageNumber: displayPage,
-                                    surahNumber: getPageData(
-                                      displayPage,
-                                    ).first['surah']!,
-                                    surahName: displayInfo.surahName,
-                                    juzNumber: displayInfo.juzNumber,
-                                    hizbLabel: displayInfo.hizbLabel,
-                                    primaryColor: primaryColor,
-                                    textColor: textColor,
-                                    mutedTextColor: mutedTextColor,
-                                    surfaceColor: colorScheme.surface,
-                                    outlineColor: borderColor,
-                                    isDark: isDark,
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      widget.onShowIndex();
-                                    },
-                                  ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 8,
+                      children: [
+                        PageSliderSection(
+                          totalPages: _totalPages,
+                          sliderValue: _sliderValue,
+                          primaryColor: primaryColor,
+                          textColor: textColor,
+                          borderColor: borderColor,
+                          isDark: isDark,
+                          onChanged: _handleSliderChanged,
+                          onChangeStart: _handleSliderChangeStart,
+                          onChangeEnd: _handleSliderChangeEnd,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: NavigationIndexCard(
+                                  pageNumber: displayPage,
+                                  surahNumber: getPageData(
+                                    displayPage,
+                                  ).first['surah']!,
+                                  surahName: displayInfo.surahName,
+                                  juzNumber: displayInfo.juzNumber,
+                                  hizbLabel: displayInfo.hizbLabel,
+                                  primaryColor: primaryColor,
+                                  textColor: textColor,
+                                  mutedTextColor: mutedTextColor,
+                                  surfaceColor: colorScheme.surface,
+                                  outlineColor: borderColor,
+                                  isDark: isDark,
+                                  onTap: () {
+                                    HapticFeedback.selectionClick();
+                                    widget.onShowIndex();
+                                  },
                                 ),
-                                const SizedBox(width: 10),
-                                NavActionButton(
-                                  icon: Icons.share_rounded,
-                                  onTap: widget.onShare,
-                                  tooltip: MaterialLocalizations.of(
-                                    context,
-                                  ).shareButtonLabel,
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 10),
+                              NavActionButton(
+                                icon: Icons.share_rounded,
+                                onTap: widget.onShare,
+                                tooltip: MaterialLocalizations.of(
+                                  context,
+                                ).shareButtonLabel,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

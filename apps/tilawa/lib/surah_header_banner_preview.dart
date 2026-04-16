@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:quran/src/widgets/surah_header_banner.dart';
+import 'package:quran/quran.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 PreviewThemeData themeData() {
@@ -22,6 +22,9 @@ Widget previewPortrait() {
       child: SurahHeaderBanner(
         surahNumber: 1, // Al-Fatiha
         lineHeight: 24,
+        viewportWidth: 0,
+        viewportHeight: 0,
+        isLandscape: false,
       ),
     ),
   );
@@ -39,6 +42,9 @@ Widget previewLandscape() {
       child: SurahHeaderBanner(
         surahNumber: 114, // An-Nas
         lineHeight: 24,
+        viewportWidth: 0,
+        viewportHeight: 0,
+        isLandscape: true,
       ),
     ),
   );

@@ -6,5 +6,6 @@
     "tilawa",
     "usecases"
   ],
-  "chatgpt.openOnStartup": false
+  "chatgpt.openOnStartup": false,
+  "kiroAgent.configureMCP": "Disabled"
 }
