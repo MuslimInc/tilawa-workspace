@@ -87,6 +87,11 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
   double _lastDeliveredStatusProgress = -1;
   int _lastDeliveredStatusMs = -_statusCallbackMaxInterval.inMilliseconds;
 
+  // Flat key: (pageNumber - 1) * lineCount + (oneBasedLineNumber - 1)
+  // Populated once on the first call for each entry after status.isReady.
+  final Map<int, String> _linePathCache = {};
+  String? _bannerPathCache;
+
   // -- public API -----------------------------------------------------------
 
   @override
@@ -99,19 +104,25 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
   }) {
     final cacheRoot = _cacheRoot;
     if (!_status.isReady || cacheRoot == null) return null;
-    return _lineImageFile(
-      cacheRoot: cacheRoot,
-      extractedRootRelativePath: _extractedRootRelativePath,
-      pageNumber: pageNumber,
-      oneBasedLineNumber: oneBasedLineNumber,
-    ).path;
+    final key =
+        (pageNumber - 1) * SurahHeaderConstants.lineCount +
+        (oneBasedLineNumber - 1);
+    return _linePathCache.putIfAbsent(
+      key,
+      () => _lineImageFile(
+        cacheRoot: cacheRoot,
+        extractedRootRelativePath: _extractedRootRelativePath,
+        pageNumber: pageNumber,
+        oneBasedLineNumber: oneBasedLineNumber,
+      ).path,
+    );
   }
 
   @override
   String? surahHeaderBannerFilePath() {
     final cacheRoot = _cacheRoot;
     if (!_status.isReady || cacheRoot == null) return null;
-    return _headerBannerFile(cacheRoot).path;
+    return _bannerPathCache ??= _headerBannerFile(cacheRoot).path;
   }
 
   @override

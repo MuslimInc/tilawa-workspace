@@ -284,8 +284,9 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
 
   @override
   List<VerseMarkerData> getMarkersForPage(int pageNumber) {
-    if (_cache.containsKey(pageNumber)) {
-      return _cache[pageNumber]!;
+    final cached = _cache[pageNumber];
+    if (cached != null) {
+      return cached;
     }
 
     final result = _buildMarkersForPage(pageNumber);

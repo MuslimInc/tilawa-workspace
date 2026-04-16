@@ -29,6 +29,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   // Stable cacheWidth resolved from device metrics — updated in didChangeDependencies.
   int _cacheWidth = 0;
   String _warmViewportKey = '';
+  bool _isLandscape = false;
   late final QuranImagePrewarmer _imagePrewarmer;
   late final ValueNotifier<PageState?> _previewPageStateNotifier;
   late final ValueNotifier<Set<int>> _hiddenWarmupPagesNotifier;
@@ -44,6 +45,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
       LinkedHashMap<String, ui.Image>();
   static const int _maxSnapshotEntries = 1;
   static const int _maxSnapshotAttempts = 8;
+
+  // Tracks whether the app is in the foreground. Set to false on
+  // AppLifecycleState.paused/hidden so that memory pressure events arriving
+  // during a lock/background cycle do not evict the image cache. OEM layers
+  // (e.g. OPPO) fire didHaveMemoryPressure on every lock even when RAM is
+  // plentiful; evicting while invisible only hurts the unlock frame.
+  bool _isAppVisible = true;
 
   // Throttle slider preview updates to avoid excessive rebuilds during drags.
   // 50ms limit = max 20 updates/second, down from 30-60 updates/second.
@@ -118,17 +126,88 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final newWarmViewportKey =
         '${view.physicalSize.width.round()}x${view.physicalSize.height.round()}'
         '@${dpr.toStringAsFixed(2)}';
+    final newIsLandscape = view.physicalSize.width > view.physicalSize.height;
+    final orientationChanged = _isLandscape != newIsLandscape;
+
     if (_warmViewportKey != newWarmViewportKey) {
+      final cacheWidthChanged = _cacheWidth != newCacheWidth;
       _warmViewportKey = newWarmViewportKey;
       _clearSnapshotState();
       // Cancel in-flight prewarm work so the old-dimension decode batches do
       // not continue running against a now-stale cacheWidth.
-      if (_cacheWidth != newCacheWidth) {
+      if (cacheWidthChanged) {
         _imagePrewarmer.cancel();
         _lastScrollPrewarmPage = -1;
       }
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'didChangeDependencies viewportChanged '
+            'viewport=$newWarmViewportKey '
+            'cacheWidth=$newCacheWidth '
+            'cacheWidthChanged=$cacheWidthChanged '
+            'orientationChanged=$orientationChanged',
+      );
     }
     _cacheWidth = newCacheWidth;
+    _isLandscape = newIsLandscape;
+
+    // When the orientation flips, Impeller must re-composite all visible page
+    // images at the new layout dimensions (lineHeight changes from ~58px to
+    // ~123px in landscape). This causes a 100–140ms raster stall on the first
+    // landscape frame. Pre-rasterize the current page off-screen so Impeller
+    // can upload textures at the new size before the visible frame is due.
+    if (orientationChanged) {
+      _scheduleOrientationPrewarm();
+    }
+  }
+
+  /// Schedules an off-screen warmup of the current page at the new orientation
+  /// dimensions so Impeller can upload textures before the user notices jank.
+  ///
+  /// The warmup page is added in a post-frame callback (after the rotation
+  /// frame has been committed), not during didChangeDependencies. Adding it
+  /// synchronously in didChangeDependencies put the hidden QuranImagePage build
+  /// inside the rotation frame's build pass, contributing ~3ms of extra build
+  /// time and ~16ms of extra paint time to an already-expensive frame.
+  /// Deferring to the next frame lets the rotation frame complete unencumbered,
+  /// then the warmup runs when the GPU is idle.
+  void _scheduleOrientationPrewarm() {
+    final currentPage = _lastSettledPageIndex + 1;
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message:
+          'orientation prewarm scheduled '
+          'page=$currentPage '
+          'landscape=$_isLandscape',
+    );
+
+    // Wait until the rotation frame has been committed before adding the
+    // hidden page. This avoids polluting the rotation frame's build pass.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final pages = Set<int>.from(_hiddenWarmupPagesNotifier.value)
+        ..add(currentPage);
+      _hiddenWarmupPagesNotifier.value = pages;
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message: 'orientation prewarm started page=$currentPage',
+      );
+
+      // Remove after 2 additional frames — enough for the raster thread to
+      // finish uploading textures at the new orientation dimensions.
+      for (var i = 0; i < 2; i++) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted) return;
+      }
+      final updated = Set<int>.from(_hiddenWarmupPagesNotifier.value)
+        ..remove(currentPage);
+      _hiddenWarmupPagesNotifier.value = updated;
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message: 'orientation prewarm done page=$currentPage',
+      );
+    });
   }
 
   @override
@@ -146,12 +225,53 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final wasVisible = _isAppVisible;
+    // Mark invisible on inactive (window loses focus — fires before surface
+    // destroy on OPPO/Android lock). This ensures the memory pressure guard
+    // is active before didHaveMemoryPressure arrives during the lock sequence.
+    // resumed is the only state where we are fully visible and interactive.
+    _isAppVisible = state == AppLifecycleState.resumed;
+    if (_isAppVisible && !wasVisible) {
+      // App returned to foreground — restart prewarm for the current page so
+      // the unlock frame has warm images if the cache survived.
+      _imagePrewarmer.prewarmCurrentTarget(
+        pageNumber: _lastSettledPageIndex + 1,
+        cacheWidth: _cacheWidth,
+      );
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'app foregrounded page=${_lastSettledPageIndex + 1} '
+            'cacheWidth=$_cacheWidth',
+      );
+    }
+  }
+
+  @override
   void didHaveMemoryPressure() {
+    // Skip eviction while the app is in the background. OEM layers (e.g. OPPO)
+    // fire this on every lock screen event regardless of actual RAM pressure.
+    // Evicting while invisible forces a full re-decode on the unlock frame,
+    // causing unnecessary raster jank. Flutter's imageCache already responds
+    // to real OS memory pressure via its own MemoryAllocations listener.
+    if (!_isAppVisible) {
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'memory pressure ignored reason=app-in-background '
+            'page=${_lastSettledPageIndex + 1}',
+      );
+      return;
+    }
     _clearSnapshotState();
     _imagePrewarmer.handleMemoryPressure();
     PerfLogger.log(
       widgetName: 'QuranImageReader',
-      message: 'memory pressure handled snapshotsCleared=true',
+      message:
+          'memory pressure handled '
+          'snapshotsCleared=true '
+          'page=${_lastSettledPageIndex + 1}',
     );
   }
 

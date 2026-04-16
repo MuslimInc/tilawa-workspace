@@ -45,7 +45,12 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
     }
     _providerCache.clear();
     _warmKeys.clear();
-    PaintingBinding.instance.imageCache.clear();
+    // Do NOT call PaintingBinding.instance.imageCache.clear() here.
+    // Flutter's imageCache already responds to memory pressure via its own
+    // MemoryAllocations listener. Clearing it manually evicts images that
+    // other widgets may be actively displaying, causing a re-decode burst on
+    // the next frame — the exact opposite of what memory pressure handling
+    // should achieve. Our per-provider evict() calls above are sufficient.
     PerfLogger.log(
       widgetName: 'FlutterDecodedQuranImageCache',
       message:

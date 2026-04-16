@@ -44,9 +44,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
   double _pageWidth = 0;
   double _pageHeight = 0;
   double _lineHeight = 0;
-  double _layoutHeight = 0;
   bool _isLandscape = false;
-  List<double> _yOffsets = const <double>[];
 
   List<VerseMarkerData> _markers = const <VerseMarkerData>[];
   List<SurahHeaderData> _headers = const <SurahHeaderData>[];
@@ -78,12 +76,19 @@ class _QuranImagePageState extends State<QuranImagePage> {
       _rebuildLineProviders();
     }
 
-    if (_pageWidth > 0 && _pageHeight > 0) {
+    if (_pageWidth > 0) {
       _lineHeight = widget.surahHeaderLayoutPolicy.lineHeightForPageWidth(
         _pageWidth,
       );
-      _calculateLayoutMetrics(_pageHeight);
     }
+
+    PerfLogger.log(
+      widgetName: 'QuranImagePage',
+      message:
+          'didUpdateWidget page=${widget.pageNumber} '
+          'pageChanged=$pageChanged '
+          'policyChanged=$layoutPolicyChanged',
+    );
   }
 
   @override
@@ -144,17 +149,20 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _headers = _headerRepository.getHeadersForPage(widget.pageNumber);
   }
 
-  void _calculateLayoutMetrics(double availableHeight) {
-    _layoutHeight = _isLandscape
+  ({double layoutHeight, List<double> yOffsets}) _calculateLayoutMetrics(
+    double availableHeight,
+  ) {
+    final layoutHeight = _isLandscape
         ? _lineHeight * SurahHeaderConstants.lineCount
         : availableHeight;
 
     final lastLineIndex = SurahHeaderConstants.lastLineIndex.toDouble();
-    _yOffsets = List<double>.generate(
+    final yOffsets = List<double>.generate(
       SurahHeaderConstants.lineCount,
-      (index) => (_layoutHeight - _lineHeight) / lastLineIndex * index,
+      (index) => (layoutHeight - _lineHeight) / lastLineIndex * index,
       growable: false,
     );
+    return (layoutHeight: layoutHeight, yOffsets: yOffsets);
   }
 
   void _rebuildLineProviders() {
@@ -197,7 +205,9 @@ class _QuranImagePageState extends State<QuranImagePage> {
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              _calculateLayoutMetrics(constraints.maxHeight);
+              final (:layoutHeight, :yOffsets) = _calculateLayoutMetrics(
+                constraints.maxHeight,
+              );
 
               final children = <Widget>[
                 for (final header in _headers)
@@ -205,7 +215,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                     key: ValueKey<String>('header:${header.lineIndex}'),
                     left: 0,
                     right: 0,
-                    top: _yOffsets[header.lineIndex],
+                    top: yOffsets[header.lineIndex],
                     height: _lineHeight,
                     child: SurahHeaderBanner(
                       header: header,
@@ -227,7 +237,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                     key: ValueKey<int>(index),
                     left: 0,
                     right: 0,
-                    top: _yOffsets[index],
+                    top: yOffsets[index],
                     height: _lineHeight,
                     child: QuranLineImage(provider: _lineProviders[index]),
                   ),
@@ -239,7 +249,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                         markers: _markers,
                         pageWidth: _pageWidth,
                         lineHeight: _lineHeight,
-                        yOffsets: _yOffsets,
+                        yOffsets: yOffsets,
                       ),
                     ),
                   ),
@@ -247,7 +257,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
               final stack = SizedBox(
                 width: _pageWidth,
-                height: _layoutHeight,
+                height: layoutHeight,
                 child: Stack(clipBehavior: Clip.none, children: children),
               );
 
@@ -264,6 +274,8 @@ class _QuranImagePageState extends State<QuranImagePage> {
                     'page=${widget.pageNumber} build '
                     'cacheWidth=$_cacheWidth '
                     '${_isLandscape ? "landscape" : "portrait"} '
+                    'layoutHeight=${layoutHeight.toStringAsFixed(1)} '
+                    'lineHeight=${_lineHeight.toStringAsFixed(1)} '
                     'headers=${_headers.length} '
                     'markers=${_markers.length}',
               );
