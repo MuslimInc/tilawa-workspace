@@ -79,10 +79,20 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
 
   @override
   Widget build(BuildContext context) {
+    // Extend the positioned region downward by the bottom safe-area inset.
+    // The Stack lives inside a Padding that consumes safe-area insets, so
+    // bottom: 0 places the overlay's bottom edge at the top of the home
+    // indicator gap — not the physical screen edge. SlideTransition(Offset(0,1))
+    // translates by the widget's own height, which on a device with a 34pt home
+    // indicator is not enough to push the overlay fully off-screen; the top
+    // portion remains visible in the safe-area gap. Extending the bottom by the
+    // inset makes the widget taller by exactly that gap, so the slide-off target
+    // reaches the physical screen edge with no clip layer needed.
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Positioned(
       left: 0,
       right: 0,
-      bottom: 0,
+      bottom: -bottomInset,
       child: BlocListener<NavigationBloc, NavigationState>(
         listenWhen: (previous, current) {
           if (previous is NavigationLoaded && current is NavigationLoaded) {

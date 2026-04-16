@@ -42,6 +42,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   Timer? _previewImmediateTimer;
   Timer? _windowPrewarmTimer;
   bool _prewarmDrainScheduled = false;
+  int _generation = 0;
   int _lastPrewarmedCenter = -1;
   int _lastPrewarmedCacheWidth = -1;
   int _lastPrewarmedRadius = -1;
@@ -146,6 +147,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     required int cacheWidth,
   }) async {
     if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
+    final requestGeneration = _generation;
     final safeTarget = pageNumber.clamp(1, PageState.quranPageCount).toInt();
     final pageKey = '$cacheWidth:$safeTarget';
     if (_readyPageKeys.remove(pageKey)) {
@@ -168,7 +170,9 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _pageWarmFutures[pageKey] = future;
     try {
       await future;
-      _rememberReadyPageKey(pageKey);
+      if (requestGeneration == _generation) {
+        _rememberReadyPageKey(pageKey);
+      }
     } catch (error) {
       PerfLogger.log(
         widgetName: 'QuranImagePrewarmService',
@@ -289,6 +293,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
 
   @override
   void cancel() {
+    _generation++;
     _previewImmediateTimer?.cancel();
     _windowPrewarmTimer?.cancel();
     _prewarmDrainTimer?.cancel();

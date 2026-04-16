@@ -20,6 +20,7 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   final LinkedHashSet<String> _warmKeys = LinkedHashSet<String>();
   final LinkedHashMap<String, Future<void>> _pendingWarmups =
       LinkedHashMap<String, Future<void>>();
+  int _generation = 0;
 
   @override
   Future<void> prewarmLineImage({
@@ -38,6 +39,7 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
 
   @override
   void handleMemoryPressure() {
+    _generation++;
     final providerCount = _providerCache.length;
     final warmCount = _warmKeys.length;
     for (final provider in _providerCache.values) {
@@ -123,6 +125,7 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
     required String cacheKey,
   }) {
     final completer = Completer<void>();
+    final generation = _generation;
     try {
       final stream = provider.resolve(ImageConfiguration.empty);
       late final ImageStreamListener listener;
@@ -135,7 +138,9 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
           image.dispose();
           stream.removeListener(listener);
           _pendingWarmups.remove(cacheKey);
-          _rememberWarmKey(cacheKey);
+          if (generation == _generation) {
+            _rememberWarmKey(cacheKey);
+          }
           if (!completer.isCompleted) {
             completer.complete();
           }

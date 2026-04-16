@@ -267,7 +267,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
             ),
           );
         }
-        _cache[pageKey] = markers;
+        _cache[pageKey] = List<VerseMarkerData>.unmodifiable(markers);
       }
       _log('setDataSource production loaded pages=${_cache.length}');
       _isInitialized = true;
@@ -329,28 +329,15 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
           ),
         );
       }
-      return markers;
+      return List<VerseMarkerData>.unmodifiable(markers);
     }
 
     // Fallback: legacy _markerData path (debug mode / setDataSource).
     final entries = _markerData?[pageNumber.toString()];
     if (entries == null) return [];
 
-    return entries.map((entry) {
-      final m = entry as Map<String, dynamic>;
-      return VerseMarkerData(
-        sura: (m['sura'] as num).toInt(),
-        ayah: (m['ayah'] as num).toInt(),
-        line: (m['line'] as num).toInt(),
-        centerX: (m['centerX'] as num).toDouble(),
-      );
-    }).toList();
-  }
-
-  List<VerseMarkerData> _buildMarkersFromDebugSource(int pageNumber) {
-    final cached = _markerData?[pageNumber.toString()];
-    if (cached != null) {
-      return cached.map((entry) {
+    return List<VerseMarkerData>.unmodifiable(
+      entries.map((entry) {
         final m = entry as Map<String, dynamic>;
         return VerseMarkerData(
           sura: (m['sura'] as num).toInt(),
@@ -358,7 +345,24 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
           line: (m['line'] as num).toInt(),
           centerX: (m['centerX'] as num).toDouble(),
         );
-      }).toList();
+      }),
+    );
+  }
+
+  List<VerseMarkerData> _buildMarkersFromDebugSource(int pageNumber) {
+    final cached = _markerData?[pageNumber.toString()];
+    if (cached != null) {
+      return List<VerseMarkerData>.unmodifiable(
+        cached.map((entry) {
+          final m = entry as Map<String, dynamic>;
+          return VerseMarkerData(
+            sura: (m['sura'] as num).toInt(),
+            ayah: (m['ayah'] as num).toInt(),
+            line: (m['line'] as num).toInt(),
+            centerX: (m['centerX'] as num).toDouble(),
+          );
+        }),
+      );
     }
     _loadDebugPageAsync(pageNumber);
     return [];
@@ -373,15 +377,17 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
       _markerData ??= {};
       _markerData![pageNumber.toString()] = decoded;
 
-      final markers = decoded.map((entry) {
-        final m = entry as Map<String, dynamic>;
-        return VerseMarkerData(
-          sura: (m['sura'] as num).toInt(),
-          ayah: (m['ayah'] as num).toInt(),
-          line: (m['line'] as num).toInt(),
-          centerX: (m['centerX'] as num).toDouble(),
-        );
-      }).toList();
+      final markers = List<VerseMarkerData>.unmodifiable(
+        decoded.map((entry) {
+          final m = entry as Map<String, dynamic>;
+          return VerseMarkerData(
+            sura: (m['sura'] as num).toInt(),
+            ayah: (m['ayah'] as num).toInt(),
+            line: (m['line'] as num).toInt(),
+            centerX: (m['centerX'] as num).toDouble(),
+          );
+        }),
+      );
 
       _cache[pageNumber] = markers;
     } catch (e) {
@@ -400,7 +406,14 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
   }
 
   @override
-  void dispose() {}
+  void dispose() {
+    initializedNotifier.dispose();
+    _cache.clear();
+    _markerData = null;
+    _flatBuffer = null;
+    _pageOffsets = null;
+    _initFuture = null;
+  }
 
   static void _log(String message) {
     PerfLogger.log(widgetName: _logSource, message: message);

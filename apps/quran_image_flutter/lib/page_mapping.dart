@@ -411,16 +411,52 @@ class QuranPageMapping {
     60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
   ];
 
-  static final List<PageInfo> pages = List.generate(PageState.quranPageCount, (
-    index,
-  ) {
-    return PageInfo(
-      pageNumber: index + 1,
-      juzNumber: _juzByPage[index],
-      hizbNumber: _hizbByPage[index],
-      surahNumber: _surahByPage[index],
+  static final List<PageInfo> pages = _buildPages();
+
+  static List<PageInfo> _buildPages() {
+    _validateLookupTableLengths();
+    return List<PageInfo>.unmodifiable(
+      List<PageInfo>.generate(PageState.quranPageCount, (index) {
+        return PageInfo(
+          pageNumber: index + 1,
+          juzNumber: _juzByPage[index],
+          hizbNumber: _hizbByPage[index],
+          surahNumber: _surahByPage[index],
+        );
+      }),
     );
-  });
+  }
+
+  static void _validateLookupTableLengths() {
+    const expectedLength = PageState.quranPageCount;
+    _validateLookupTable(
+      tableName: '_surahByPage',
+      actualLength: _surahByPage.length,
+      expectedLength: expectedLength,
+    );
+    _validateLookupTable(
+      tableName: '_juzByPage',
+      actualLength: _juzByPage.length,
+      expectedLength: expectedLength,
+    );
+    _validateLookupTable(
+      tableName: '_hizbByPage',
+      actualLength: _hizbByPage.length,
+      expectedLength: expectedLength,
+    );
+  }
+
+  static void _validateLookupTable({
+    required String tableName,
+    required int actualLength,
+    required int expectedLength,
+  }) {
+    if (actualLength != expectedLength) {
+      throw StateError(
+        '$tableName has $actualLength entries; expected $expectedLength.',
+      );
+    }
+  }
 
   /// Gets the [PageInfo] for a given page number.
   ///
