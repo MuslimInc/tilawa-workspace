@@ -13,11 +13,11 @@ import 'package:tilawa/core/extensions.dart';
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
 import '../share_progress_messages_l10n.dart';
-import '../utils/reel_page_specs.dart';
+import '../utils/video_page_specs.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
-import 'reel_content_renderer.dart';
+import 'video_content_renderer.dart';
 
 /// Bottom sheet for configuring and generating an audio clip or reel.
 class ShareAudioConfigSheet extends StatefulWidget {
@@ -46,7 +46,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _fromAyah;
   late int _toAyah;
   late int _maxAyah;
-  final List<GlobalKey> _reelContentKeys = <GlobalKey>[];
+  final List<GlobalKey> _videoContentKeys = <GlobalKey>[];
 
   @override
   void initState() {
@@ -59,7 +59,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
     );
     _fromAyah = ayahRange.fromAyah;
     _toAyah = ayahRange.toAyah;
-    _syncReelContentKeys();
+    _syncVideoContentKeys();
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
@@ -67,7 +67,6 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
       toAyah: _toAyah,
       reciterName: widget.reciterName,
       serverUrl: widget.reciterServerUrl,
-      boundaryKey: widget.boundaryKey,
     );
   }
 
@@ -81,7 +80,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
 
   int get _verseCount => _toAyah - _fromAyah + 1;
 
-  List<ReelPageSpec> get _reelPageSpecs => buildReelPageSpecs(
+  List<VideoPageSpec> get _videoPageSpecs => buildVideoPageSpecs(
     surahNumber: widget.surahNumber,
     fromAyah: _fromAyah,
     toAyah: _toAyah,
@@ -93,15 +92,15 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
       _toAyah <= _maxAyah &&
       _verseCount <= AudioClipService.maxVerses;
 
-  void _syncReelContentKeys() {
-    final int requiredCount = _reelPageSpecs.length;
+  void _syncVideoContentKeys() {
+    final int requiredCount = _videoPageSpecs.length;
 
-    while (_reelContentKeys.length < requiredCount) {
-      _reelContentKeys.add(GlobalKey());
+    while (_videoContentKeys.length < requiredCount) {
+      _videoContentKeys.add(GlobalKey());
     }
 
-    if (_reelContentKeys.length > requiredCount) {
-      _reelContentKeys.removeRange(requiredCount, _reelContentKeys.length);
+    if (_videoContentKeys.length > requiredCount) {
+      _videoContentKeys.removeRange(requiredCount, _videoContentKeys.length);
     }
   }
 
@@ -118,27 +117,28 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
         }
       },
       builder: (context, state) {
-        final List<ReelPageSpec> reelPageSpecs = _reelPageSpecs;
+        final List<VideoPageSpec> videoPageSpecs = _videoPageSpecs;
         final isGenerating = state.status == ShareStatus.generating;
         final isSharing = state.status == ShareStatus.sharing;
         final isReviewing =
-            state.status == ShareStatus.reviewing && state.content is ShareReel;
+            state.status == ShareStatus.reviewing &&
+            state.content is ShareVideo;
         final isBusy = isGenerating || isSharing;
         final reciterName = state.reciterName ?? widget.reciterName;
 
         return Stack(
           children: [
-            for (int index = 0; index < reelPageSpecs.length; index++)
+            for (int index = 0; index < videoPageSpecs.length; index++)
               Positioned(
                 left: -2400 - (index * 1200),
                 top: 0,
                 child: RepaintBoundary(
-                  key: _reelContentKeys[index],
-                  child: ReelContentPage(
+                  key: _videoContentKeys[index],
+                  child: VideoContentPage(
                     surahNumber: widget.surahNumber,
-                    pageSpec: reelPageSpecs[index],
+                    pageSpec: videoPageSpecs[index],
                     pageIndex: index,
-                    totalPages: reelPageSpecs.length,
+                    totalPages: videoPageSpecs.length,
                     reciterName: reciterName,
                   ),
                 ),
@@ -212,18 +212,18 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                               AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 240),
                                 child: isReviewing
-                                    ? _ReelPreview(
-                                        key: const ValueKey('generated_reel'),
+                                    ? _VideoReviewPreview(
+                                        key: const ValueKey('generated_video'),
                                         filePath: state.content!.filePath,
                                         onShare: () => context
                                             .read<ShareCubit>()
                                             .shareContent(),
                                       )
-                                    : _LiveReelPreview(
+                                    : _LiveVideoPreview(
                                         key: ValueKey(
                                           'live_preview_${widget.surahNumber}_${_fromAyah}_${_toAyah}_$reciterName',
                                         ),
-                                        child: ReelContentRenderer(
+                                        child: VideoContentRenderer(
                                           surahNumber: widget.surahNumber,
                                           fromAyah: _fromAyah,
                                           toAyah: _toAyah,
@@ -244,7 +244,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                     if (_toAyah < _fromAyah) {
                                       _toAyah = _fromAyah;
                                     }
-                                    _syncReelContentKeys();
+                                    _syncVideoContentKeys();
                                   });
                                   context.read<ShareCubit>().updateVerseRange(
                                     fromAyah: _fromAyah,
@@ -257,7 +257,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                     if (_fromAyah > _toAyah) {
                                       _fromAyah = _toAyah;
                                     }
-                                    _syncReelContentKeys();
+                                    _syncVideoContentKeys();
                                   });
                                   context.read<ShareCubit>().updateVerseRange(
                                     fromAyah: _fromAyah,
@@ -291,15 +291,17 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                               FilledButton.icon(
                                 onPressed: _isValid && !isBusy
                                     ? () {
-                                        context.read<ShareCubit>().generateReel(
-                                          surahName: _surahName,
-                                          progressMessages:
-                                              context.shareProgressMessages,
-                                          appName: context.l10n.appTitle,
-                                          sharedViaLabel:
-                                              context.l10n.sharedViaTilawa,
-                                          boundaryKeys: _reelContentKeys,
-                                        );
+                                        context
+                                            .read<ShareCubit>()
+                                            .generateVideo(
+                                              surahName: _surahName,
+                                              progressMessages:
+                                                  context.shareProgressMessages,
+                                              appName: context.l10n.appTitle,
+                                              sharedViaLabel:
+                                                  context.l10n.sharedViaTilawa,
+                                              boundaryKeys: _videoContentKeys,
+                                            );
                                       }
                                     : null,
                                 icon: const Icon(Icons.movie_creation_outlined),
@@ -644,8 +646,8 @@ class _VerseDropdown extends StatelessWidget {
   }
 }
 
-class _LiveReelPreview extends StatelessWidget {
-  const _LiveReelPreview({super.key, required this.child});
+class _LiveVideoPreview extends StatelessWidget {
+  const _LiveVideoPreview({super.key, required this.child});
 
   final Widget child;
 
@@ -942,8 +944,8 @@ class _SelectionBadge extends StatelessWidget {
   }
 }
 
-class _ReelPreview extends StatefulWidget {
-  const _ReelPreview({
+class _VideoReviewPreview extends StatefulWidget {
+  const _VideoReviewPreview({
     super.key,
     required this.filePath,
     required this.onShare,
@@ -953,10 +955,10 @@ class _ReelPreview extends StatefulWidget {
   final VoidCallback onShare;
 
   @override
-  State<_ReelPreview> createState() => _ReelPreviewState();
+  State<_VideoReviewPreview> createState() => _VideoReviewPreviewState();
 }
 
-class _ReelPreviewState extends State<_ReelPreview> {
+class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
 

@@ -3,29 +3,30 @@ import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
 import '../services/audio_clip_service.dart';
-import '../services/reel_service.dart';
-import '../services/screenshot_service.dart';
 import '../services/share_file_manager.dart';
+import '../services/screenshot_service.dart';
+import '../services/video_service.dart';
 
 @LazySingleton(as: ShareRepository)
 class ShareRepositoryImpl implements ShareRepository {
   ShareRepositoryImpl(
     this._screenshotService,
     this._audioClipService,
-    this._reelService,
+    this._videoService,
     this._fileManager,
     this._downloadQueryRepository,
   );
 
   final ScreenshotService _screenshotService;
   final AudioClipService _audioClipService;
-  final ReelService _reelService;
+  final VideoService _videoService;
   final ShareFileManager _fileManager;
   final DownloadQueryRepository _downloadQueryRepository;
 
@@ -71,11 +72,14 @@ class ShareRepositoryImpl implements ShareRepository {
       config: config,
       maxDurationSeconds: maxDurationSeconds,
     );
-    final allDownloads = await _downloadQueryRepository.getAllDownloads();
-    final localDownload = allDownloads.cast<dynamic>().firstWhere(
-      (d) => d.url == effectiveConfig.serverUrl,
-      orElse: () => null,
-    );
+    final List<DownloadItem> allDownloads = await _downloadQueryRepository
+        .getAllDownloads();
+    // Build a URL→item map for O(1) lookup instead of a linear scan.
+    final Map<String, DownloadItem> downloadsByUrl = {
+      for (final d in allDownloads) d.url: d,
+    };
+    final DownloadItem? localDownload =
+        downloadsByUrl[effectiveConfig.serverUrl];
 
     final filePath = await _audioClipService.generateAudioClip(
       effectiveConfig,
@@ -94,9 +98,8 @@ class ShareRepositoryImpl implements ShareRepository {
   }
 
   @override
-  Future<ShareContent> generateReel({
-    GlobalKey? boundaryKey,
-    List<GlobalKey>? boundaryKeys,
+  Future<ShareContent> generateVideo({
+    required List<GlobalKey> boundaryKeys,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
@@ -105,15 +108,12 @@ class ShareRepositoryImpl implements ShareRepository {
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
-    final List<GlobalKey> effectiveBoundaryKeys =
-        boundaryKeys?.where((key) => key.currentContext != null).toList() ??
-        <GlobalKey>[
-          if (boundaryKey != null && boundaryKey.currentContext != null)
-            boundaryKey,
-        ];
+    final List<GlobalKey> effectiveBoundaryKeys = boundaryKeys
+        .where((key) => key.currentContext != null)
+        .toList();
     if (effectiveBoundaryKeys.isEmpty) {
       throw StateError(
-        'RepaintBoundary not found. Reel pages may still be loading.',
+        'RepaintBoundary not found. Video pages may still be loading.',
       );
     }
 
@@ -141,7 +141,14 @@ class ShareRepositoryImpl implements ShareRepository {
         for (int index = 0; index < effectiveBoundaryKeys.length; index++)
           _screenshotService.captureRaw(
             boundaryKey: effectiveBoundaryKeys[index],
-            fileName: 'reel_capture_${timestamp}_${index + 1}.png',
+            fileName: 'video_capture_${timestamp}_${index + 1}.png',
+            // Capture at the exact FFmpeg output resolution so the encoder
+            // streams frames straight into x264 — no per-frame scale/crop.
+            // pixelRatio is still honored as a fallback if the boundary has
+            // no measurable size yet.
+            pixelRatio: 1.0,
+            targetWidth: VideoService.outputVideoWidth,
+            targetHeight: VideoService.outputVideoHeight,
           ),
       ]),
     ]);
@@ -149,19 +156,20 @@ class ShareRepositoryImpl implements ShareRepository {
     final audioContent = results[0] as ShareContent;
     final List<String> screenshotPaths = (results[1] as List).cast<String>();
 
-    // 2. Generate reel video
-    onProgress?.call(0.6, progressMessages.combiningReelMedia);
-    final reelPath = await _reelService.generateReel(
+    // 2. Generate video
+    onProgress?.call(0.6, progressMessages.combiningVideoMedia);
+    final videoPath = await _videoService.generateVideo(
       screenshotPaths: screenshotPaths,
       audioPath: audioContent.filePath,
       surahName: '', // Metadata
       reciterName: effectiveConfig.reciterName,
-      progressMessages: progressMessages.reel,
+      progressMessages: progressMessages.video,
       onProgress: (p, msg) => onProgress?.call(0.6 + p * 0.4, msg),
+      cancelToken: cancelToken,
     );
 
-    return ShareContent.reel(
-      filePath: reelPath,
+    return ShareContent.video(
+      filePath: videoPath,
       surahName: '',
       fromAyah: effectiveConfig.fromAyah,
       toAyah: effectiveConfig.toAyah,
@@ -194,7 +202,7 @@ class ShareRepositoryImpl implements ShareRepository {
           '$surahName ($fromAyah-$toAyah) — $reciterName',
           'audio/mpeg',
         ),
-      ShareReel(
+      ShareVideo(
         :final filePath,
         :final surahName,
         :final fromAyah,

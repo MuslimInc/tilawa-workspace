@@ -80,6 +80,7 @@ class SubscriptionPlanCard extends StatelessWidget {
 
             // Price
             Row(
+              spacing: 8,
               children: [
                 Text(
                   plan.formattedPrice,
@@ -88,13 +89,11 @@ class SubscriptionPlanCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 8),
                 Text(
                   plan.durationText,
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
-                if (plan.discountText.isNotEmpty) ...[
-                  const SizedBox(width: 8),
+                if (plan.discountText.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,
@@ -113,7 +112,6 @@ class SubscriptionPlanCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -123,13 +121,13 @@ class SubscriptionPlanCard extends StatelessWidget {
               (feature) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Row(
+                  spacing: 8,
                   children: [
                     const Icon(
                       Icons.check_circle,
                       size: 16,
                       color: Colors.green,
                     ),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         feature,

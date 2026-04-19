@@ -25,36 +25,36 @@ class AudioClipProgressMessages {
   final String done;
 }
 
-class ReelProgressMessages {
-  const ReelProgressMessages({
+class VideoProgressMessages {
+  const VideoProgressMessages({
     required this.preparingVideoEncoding,
     required this.encodingVerticalVideo,
-    required this.reelGenerated,
+    required this.videoGenerated,
   });
 
   final String preparingVideoEncoding;
   final String encodingVerticalVideo;
-  final String reelGenerated;
+  final String videoGenerated;
 }
 
 class ShareProgressMessages {
   const ShareProgressMessages({
     required this.preparingImage,
     required this.preparingAudioClip,
-    required this.preparingReel,
+    required this.preparingVideo,
     required this.generatingAudioClip,
     required this.capturingReaderVisuals,
-    required this.combiningReelMedia,
+    required this.combiningVideoMedia,
     required this.audioClip,
-    required this.reel,
+    required this.video,
   });
 
   final String preparingImage;
   final String preparingAudioClip;
-  final String preparingReel;
+  final String preparingVideo;
   final String generatingAudioClip;
   final String capturingReaderVisuals;
-  final String combiningReelMedia;
+  final String combiningVideoMedia;
   final AudioClipProgressMessages audioClip;
-  final ReelProgressMessages reel;
+  final VideoProgressMessages video;
 }

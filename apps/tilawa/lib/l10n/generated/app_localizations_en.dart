@@ -1457,6 +1457,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareModeReel => 'Reel';
 
   @override
+  String get shareStepConfigure => 'Configure';
+
+  @override
+  String get shareStepGenerating => 'Generating';
+
+  @override
+  String get shareStepReview => 'Review';
+
+  @override
   String get shareContentLayout => 'Visual Layout';
 
   @override

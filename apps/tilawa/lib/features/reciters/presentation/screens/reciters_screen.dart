@@ -373,7 +373,6 @@ class _RecitersSurface extends StatelessWidget {
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
         ),
-        // Removed expensive boxShadow to reduce raster jank
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),

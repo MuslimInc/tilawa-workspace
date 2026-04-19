@@ -171,65 +171,17 @@ class _MainScreenState extends State<MainScreen> {
                   );
                 },
               ),
-              bottomNavigationBar: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withValues(alpha: 0.98),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.22,
-                        ),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      child: Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Row(
-                          children: [
-                            for (final _NavDestination destination
-                                in destinations)
-                              Expanded(
-                                child: _BottomNavButton(
-                                  icon: destination.icon,
-                                  activeIcon:
-                                      destination.activeIcon ??
-                                      destination.icon,
-                                  svgPath: destination.svgPath,
-                                  label: destination.label,
-                                  isSelected: destination.index != null
-                                      ? _currentIndex == destination.index
-                                      : false,
-                                  onTap: () {
-                                    if (destination.index != null) {
-                                      _selectTab(context, destination.index!);
-                                      return;
-                                    }
+              bottomNavigationBar: _BottomNavigationBar(
+                destinations: destinations,
+                currentIndex: _currentIndex,
+                onTap: (destination) {
+                  if (destination.index != null) {
+                    _selectTab(context, destination.index!);
+                    return;
+                  }
 
-                                    const QuranLastReadRoute().push(context);
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                  const QuranLastReadRoute().push(context);
+                },
               ),
             ),
           );
@@ -285,76 +237,129 @@ class _BottomNavButton extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? activeColor.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.14),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedScale(
-                  duration: const Duration(milliseconds: 200),
-                  scale: isSelected ? 1 : 0.95,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    child: svgPath != null
-                        ? SvgPicture.asset(
-                            svgPath!,
-                            key: ValueKey('${svgPath}_$isSelected'),
-                            width: 22,
-                            height: 22,
-                            colorFilter: ColorFilter.mode(
-                              isSelected ? activeColor : inactiveColor,
-                              BlendMode.srcIn,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              constraints: const BoxConstraints(minHeight: 70),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? activeColor.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: .min,
+                mainAxisAlignment: .center,
+                spacing: 4,
+                children: [
+                  AnimatedScale(
+                    duration: const Duration(milliseconds: 200),
+                    scale: isSelected ? 1 : 0.95,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 180),
+                      child: svgPath != null
+                          ? SvgPicture.asset(
+                              svgPath!,
+                              key: ValueKey('${svgPath}_$isSelected'),
+                              width: 22,
+                              height: 22,
+                              colorFilter: ColorFilter.mode(
+                                isSelected ? activeColor : inactiveColor,
+                                BlendMode.srcIn,
+                              ),
+                            )
+                          : Icon(
+                              isSelected ? activeIcon : icon,
+                              key: ValueKey('${icon.hashCode}_$isSelected'),
+                              size: 22,
+                              color: isSelected ? activeColor : inactiveColor,
                             ),
-                          )
-                        : Icon(
-                            isSelected ? activeIcon : icon,
-                            key: ValueKey('${icon.hashCode}_$isSelected'),
-                            size: 22,
-                            color: isSelected ? activeColor : inactiveColor,
-                          ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 200),
-                  style: baseLabelStyle.copyWith(
-                    fontSize: 10.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? activeColor : inactiveColor,
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: baseLabelStyle.copyWith(
+                      fontSize: 10.5,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: isSelected ? activeColor : inactiveColor,
+                    ),
+                    child: Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavigationBar extends StatelessWidget {
+  const _BottomNavigationBar({
+    required this.destinations,
+    required this.onTap,
+    required this.currentIndex,
+  });
+  final List<_NavDestination> destinations;
+  final int currentIndex;
+  final ValueChanged<_NavDestination> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        12,
+        8,
+        12,
+        MediaQuery.viewPaddingOf(context).bottom + 8,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.98),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                for (final _NavDestination destination in destinations)
+                  Expanded(
+                    child: _BottomNavButton(
+                      icon: destination.icon,
+                      activeIcon: destination.activeIcon ?? destination.icon,
+                      svgPath: destination.svgPath,
+                      label: destination.label,
+                      isSelected: destination.index != null
+                          ? currentIndex == destination.index
+                          : false,
+                      onTap: () => onTap(destination),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

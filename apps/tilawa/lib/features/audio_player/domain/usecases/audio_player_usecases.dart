@@ -86,8 +86,15 @@ class SkipToQueueItemUseCase {
 class PlayFromQueueUseCase {
   const PlayFromQueueUseCase(this._repository);
   final AudioPlayerRepository _repository;
-  ResultVoid call(List<AudioEntity> queue, int index) =>
-      _repository.playFromQueue(queue, index);
+  ResultVoid call(
+    List<AudioEntity> queue,
+    int index, {
+    Duration? initialPosition,
+  }) => _repository.playFromQueue(
+    queue,
+    index,
+    initialPosition: initialPosition,
+  );
 }
 
 @injectable

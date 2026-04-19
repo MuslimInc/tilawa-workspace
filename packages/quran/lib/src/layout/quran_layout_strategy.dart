@@ -68,7 +68,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   // Width divisor to determine base font size relative to screen width.
   // Higher values produce a smaller font to prevent horizontal wrapping.
   // Set to 16.8 to match the Ayah app's larger text density.
-  static const double _widthDivisor = 16.5;
+  static const double _widthDivisor = 16.8;
   // Explicit line inset measured from the Ayah reference on a 720px capture.
   static const double _verseHorizontalPaddingRatio = 25 / 720;
   // Explicit bismillah inset measured from the Ayah reference on a 720px capture.
@@ -142,7 +142,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     final double maxFontSizeByWidth = availableWidth / _widthDivisor;
 
     final double availableHeight = constraints.maxHeight - _topPadding;
-    final double idealFontSizeByHeight = availableHeight / 27.762;
+    final double idealFontSizeByHeight = availableHeight / 28.5;
 
     final double fontSize = math.min(idealFontSizeByHeight, maxFontSizeByWidth);
     double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);

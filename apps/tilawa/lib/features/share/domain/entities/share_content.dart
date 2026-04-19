@@ -19,13 +19,13 @@ sealed class ShareContent with _$ShareContent {
     required String reciterName,
   }) = ShareAudioClip;
 
-  const factory ShareContent.reel({
+  const factory ShareContent.video({
     required String filePath,
     required String surahName,
     required int fromAyah,
     required int toAyah,
     required String reciterName,
-  }) = ShareReel;
+  }) = ShareVideo;
 
   const factory ShareContent.text({
     @Default('') String filePath,

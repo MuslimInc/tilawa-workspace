@@ -13,7 +13,8 @@ import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_the
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
-import 'package:tilawa/features/share/presentation/screens/share_composer_screen.dart';
+import 'package:tilawa/features/share/presentation/screens/screenshot_composer_screen.dart';
+import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
@@ -899,17 +900,42 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
     fontLoaderBloc.pauseBackgroundWarmUp();
     try {
-      await navigator.push(
-        ShareComposerScreen.route(
-          cubit: shareCubit,
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => ShareOptionsSheet(
           surahNumber: primarySurahNumber,
-          currentPage: currentPage,
-          initialFromAyah: firstAyah,
-          initialToAyah: lastAyah,
-          reciterName: reciterName,
-          reciterServerUrl: serverUrl,
-          readerBoundaryKey: _screenshotBoundaryKey,
-          readerPreviewBytesNotifier: previewNotifier,
+          pageNumber: currentPage,
+          onShareScreenshot: () {
+            navigator.push(
+              ScreenshotComposerScreen.route(
+                cubit: shareCubit,
+                surahNumber: primarySurahNumber,
+                currentPage: currentPage,
+                initialFromAyah: firstAyah,
+                initialToAyah: lastAyah,
+                reciterName: reciterName,
+                readerBoundaryKey: _screenshotBoundaryKey,
+                readerPreviewBytesNotifier: previewNotifier,
+              ),
+            );
+          },
+          onShareVideoReel: () {
+            // navigator.push(
+            //   VideoReelComposerScreen.route(
+            //     cubit: shareCubit,
+            //     surahNumber: primarySurahNumber,
+            //     currentPage: currentPage,
+            //     initialFromAyah: firstAyah,
+            //     initialToAyah: lastAyah,
+            //     reciterName: reciterName,
+            //     reciterServerUrl: serverUrl,
+            //     readerBoundaryKey: _screenshotBoundaryKey,
+            //     readerPreviewBytesNotifier: previewNotifier,
+            //   ),
+            // );
+          },
         ),
       );
     } finally {

@@ -26,10 +26,9 @@ abstract class ShareRepository {
     CancelToken? cancelToken,
   });
 
-  /// Captures a screenshot AND generates an audio clip, then merges them into a reel (vertical video).
-  Future<ShareContent> generateReel({
-    GlobalKey? boundaryKey,
-    List<GlobalKey>? boundaryKeys,
+  /// Captures screenshots AND generates an audio clip, then merges them into a video (vertical format).
+  Future<ShareContent> generateVideo({
+    required List<GlobalKey> boundaryKeys,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,

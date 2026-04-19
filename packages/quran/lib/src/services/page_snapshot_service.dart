@@ -106,6 +106,16 @@ class PageSnapshotService {
     }
 
     try {
+      // Safety check: if the boundary is marked as dirty (needs paint),
+      // attempting to capture it via toImage() will trigger a Flutter assertion
+      // error. We skip the capture and let it be retried on the next idle cycle.
+      if (renderObject.debugNeedsPaint) {
+        if (!kReleaseMode) {
+          logger.w('[SNAPSHOT_SKIP] p$pageNumber: boundary is dirty');
+        }
+        return false;
+      }
+
       final int t0 = DateTime.now().millisecondsSinceEpoch;
       final ui.Image image = await renderObject.toImage(pixelRatio: pixelRatio);
       final int t1 = DateTime.now().millisecondsSinceEpoch;

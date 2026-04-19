@@ -4,12 +4,14 @@ import '../atoms/atoms.dart';
 
 /// Molecular component grouping navigation buttons and page indicator.
 ///
-/// Combines previous/next buttons with page number display.
+/// Combines previous/next buttons with page number display, and an optional
+/// share/reel button shown when [onShare] is provided.
 class NavigationButtonGroup extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
+  final VoidCallback? onShare;
   final double screenWidth;
 
   const NavigationButtonGroup({
@@ -19,6 +21,7 @@ class NavigationButtonGroup extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.screenWidth,
+    this.onShare,
   });
 
   @override
@@ -31,6 +34,12 @@ class NavigationButtonGroup extends StatelessWidget {
           onPressed: onPrevious,
           screenWidth: screenWidth,
         ),
+        if (onShare != null)
+          NavigationIconButton(
+            icon: Icons.video_camera_back_outlined,
+            onPressed: onShare,
+            screenWidth: screenWidth,
+          ),
         PageIndicatorText(
           pageNumber: currentPage,
           totalPages: totalPages,

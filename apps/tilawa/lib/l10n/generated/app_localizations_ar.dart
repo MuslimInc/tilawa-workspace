@@ -1450,6 +1450,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareModeReel => 'ريل';
 
   @override
+  String get shareStepConfigure => 'الإعداد';
+
+  @override
+  String get shareStepGenerating => 'جاري الإنشاء';
+
+  @override
+  String get shareStepReview => 'المراجعة';
+
+  @override
   String get shareContentLayout => 'نمط المحتوى';
 
   @override

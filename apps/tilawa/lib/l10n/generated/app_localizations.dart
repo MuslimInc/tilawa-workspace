@@ -2702,6 +2702,24 @@ abstract class AppLocalizations {
   /// **'Reel'**
   String get shareModeReel;
 
+  /// Step indicator label for the configuration step
+  ///
+  /// In en, this message translates to:
+  /// **'Configure'**
+  String get shareStepConfigure;
+
+  /// Step indicator label for the generation step
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get shareStepGenerating;
+
+  /// Step indicator label for the review step
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get shareStepReview;
+
   /// Section title for screenshot layout selection
   ///
   /// In en, this message translates to:

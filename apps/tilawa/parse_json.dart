@@ -1,9 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:logger/logger.dart';
+
+final logger = Logger(
+  printer: PrettyPrinter(
+    methodCount: 0,
+    errorMethodCount: 8,
+    lineLength: 120,
+    colors: true,
+    printEmojis: true,
+    dateTimeFormat: DateTimeFormat.dateAndTime,
+  ),
+);
+
 void main() async {
   try {
     final file = File('../../packages/quran/assets/quran_fonts/qpc-v4.json');
+    if (!await file.exists()) {
+      logger.e('Source file not found: ${file.path}');
+      return;
+    }
     final jsonString = await file.readAsString();
     logger.d('Read file, length: ${jsonString.length}');
     final Map<String, dynamic> data = jsonDecode(jsonString);
@@ -16,7 +33,6 @@ void main() async {
       final entry = data[key];
       final surah = entry['surah'];
       final ayah = entry['ayah'];
-      final wordText = entry['text'];
 
       final verseKey = '$surah:$ayah';
       if (!verses.containsKey(verseKey)) {
@@ -26,7 +42,7 @@ void main() async {
     }
 
     logger.d('Total verses: ${verses.length}');
-    final firstKey = '1:1';
+    const firstKey = '1:1';
     final firstVerse = verses[firstKey]!;
     firstVerse.sort(
       (a, b) => int.parse(
@@ -57,11 +73,11 @@ void main() async {
     }
     sb.writeln('};');
 
-    await File(
-      '../../packages/quran/lib/src/data/qcf_v4_data.dart',
-    ).writeAsString(sb.toString());
-    logger.d('Wrote qcf_v4_data.dart');
+    final outputFile = File('../../packages/quran/lib/src/data/qcf_v4_data.dart');
+    await outputFile.parent.create(recursive: true);
+    await outputFile.writeAsString(sb.toString());
+    logger.d('Wrote ${outputFile.path}');
   } catch (e, st) {
-    logger.d('Error: $e\n$st');
+    logger.e('Error generating data', error: e, stackTrace: st);
   }
 }

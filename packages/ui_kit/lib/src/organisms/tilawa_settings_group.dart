@@ -182,16 +182,17 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
             child: Padding(
               padding: tokens.switchTileContentPadding,
               child: Row(
+                spacing: tokens.tileItemGap,
                 children: [
                   _SettingsLeadingIcon(
                     icon: icon,
                     color: effectiveIconColor,
                     tokens: tokens,
                   ),
-                  SizedBox(width: tokens.tileItemGap),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: tokens.tileSubtitleSpacing,
                       children: [
                         Text(
                           title,
@@ -200,8 +201,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if (subtitle != null) ...[
-                          SizedBox(height: tokens.tileSubtitleSpacing),
+                        if (subtitle != null)
                           Text(
                             subtitle!,
                             style: TextStyle(
@@ -212,7 +212,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                                   ),
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ),

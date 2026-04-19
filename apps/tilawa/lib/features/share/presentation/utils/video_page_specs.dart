@@ -6,8 +6,8 @@ import 'package:quran/quran.dart';
 import 'share_ayah_range_utils.dart';
 
 @immutable
-class ReelPageSpec {
-  const ReelPageSpec({
+class VideoPageSpec {
+  const VideoPageSpec({
     required this.pageNumber,
     required this.fromAyah,
     required this.toAyah,
@@ -18,7 +18,7 @@ class ReelPageSpec {
   final int toAyah;
 }
 
-List<ReelPageSpec> buildReelPageSpecs({
+List<VideoPageSpec> buildVideoPageSpecs({
   required int surahNumber,
   required int fromAyah,
   required int toAyah,
@@ -30,7 +30,7 @@ List<ReelPageSpec> buildReelPageSpecs({
   );
   final int startPage = getPageNumber(surahNumber, ayahRange.fromAyah);
   final int endPage = getPageNumber(surahNumber, ayahRange.toAyah);
-  final List<ReelPageSpec> specs = <ReelPageSpec>[];
+  final List<VideoPageSpec> specs = <VideoPageSpec>[];
 
   for (int pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
     final List<Map<String, int>> pageEntries = getPageData(pageNumber);
@@ -47,7 +47,7 @@ List<ReelPageSpec> buildReelPageSpecs({
 
       if (pageFromAyah <= pageToAyah) {
         specs.add(
-          ReelPageSpec(
+          VideoPageSpec(
             pageNumber: pageNumber,
             fromAyah: pageFromAyah,
             toAyah: pageToAyah,

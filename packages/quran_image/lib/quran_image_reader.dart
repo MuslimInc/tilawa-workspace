@@ -22,6 +22,7 @@ class QuranImageReader extends StatefulWidget {
     this.restoreSystemUiMode,
     this.preferredOrientations,
     this.restoreOrientations,
+    this.onShareRequested,
   });
 
   /// The system UI mode to enable when the reader enters the screen.
@@ -35,6 +36,10 @@ class QuranImageReader extends StatefulWidget {
 
   /// The orientations to restore when the reader leaves the screen.
   final List<DeviceOrientation>? restoreOrientations;
+
+  /// Called when the user taps the share/reel button in the navigation overlay.
+  /// The host app is responsible for opening its share composer.
+  final void Function(int currentPage)? onShareRequested;
 
   @override
   State<QuranImageReader> createState() => _QuranImageReaderState();
@@ -878,6 +883,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
                 onNextPageRequested: _navigateToNextPage,
                 onInteractionStart: _onNavigationInteractionStarted,
                 onInteractionEnd: _onNavigationInteractionEnded,
+                onShareRequested: widget.onShareRequested != null
+                    ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
+                    : null,
               ),
             ],
           ),

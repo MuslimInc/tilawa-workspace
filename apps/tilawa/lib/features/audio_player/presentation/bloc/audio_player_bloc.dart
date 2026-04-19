@@ -576,7 +576,11 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
           ),
         );
         // Playback allowed - proceed normally
-        await _playFromQueue(event.queue, event.index);
+        await _playFromQueue(
+          event.queue,
+          event.index,
+          initialPosition: event.initialPosition,
+        );
       },
     );
   }

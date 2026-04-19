@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa/features/share/presentation/utils/reel_page_specs.dart';
+import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 
 void main() {
-  group('buildReelPageSpecs', () {
+  group('buildVideoPageSpecs', () {
     test(
       'returns one page spec when the selected range fits a single page',
       () {
-        final List<ReelPageSpec> specs = buildReelPageSpecs(
+        final List<VideoPageSpec> specs = buildVideoPageSpecs(
           surahNumber: 1,
           fromAyah: 1,
           toAyah: 7,
@@ -20,7 +20,7 @@ void main() {
     );
 
     test('splits the selected range across Mushaf pages', () {
-      final List<ReelPageSpec> specs = buildReelPageSpecs(
+      final List<VideoPageSpec> specs = buildVideoPageSpecs(
         surahNumber: 2,
         fromAyah: 1,
         toAyah: 16,
@@ -40,7 +40,7 @@ void main() {
     test(
       'trims the first and last Mushaf pages to the selected ayah range',
       () {
-        final List<ReelPageSpec> specs = buildReelPageSpecs(
+        final List<VideoPageSpec> specs = buildVideoPageSpecs(
           surahNumber: 2,
           fromAyah: 4,
           toAyah: 10,

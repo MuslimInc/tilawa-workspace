@@ -14,14 +14,23 @@ class ScreenshotService {
   final ShareFileManager _fileManager;
 
   /// Captures the widget behind [boundaryKey] and stores it as a raw PNG.
+  ///
+  /// [targetWidth] / [targetHeight] let callers pin the PNG to an exact pixel
+  /// resolution (e.g. 720x1280 for the video pipeline). When provided, the
+  /// pixel ratio is derived from the boundary's logical size so FFmpeg can
+  /// skip an expensive `-vf scale,crop` pass on every frame.
   Future<String> captureRaw({
     required GlobalKey boundaryKey,
     String fileName = 'share_capture.png',
     double pixelRatio = 2.0,
+    int? targetWidth,
+    int? targetHeight,
   }) async {
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
       pixelRatio: pixelRatio,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
     );
 
     try {
@@ -88,14 +97,39 @@ class ScreenshotService {
   Future<ui.Image> _captureBoundaryImage({
     required GlobalKey boundaryKey,
     required double pixelRatio,
+    int? targetWidth,
+    int? targetHeight,
   }) async {
     final boundary = boundaryKey.currentContext?.findRenderObject();
     if (boundary is! RenderRepaintBoundary) {
       throw StateError('RepaintBoundary not found. Page may still be loading.');
     }
 
+    // If the caller asked for an explicit output pixel resolution, derive the
+    // pixel ratio from the boundary's actual logical size. This produces the
+    // exact PNG dimensions we want without a second downscale pass later.
+    double effectivePixelRatio = pixelRatio;
+    if ((targetWidth != null || targetHeight != null) && boundary.hasSize) {
+      final Size logicalSize = boundary.size;
+      if (logicalSize.width > 0 && logicalSize.height > 0) {
+        final double widthRatio = targetWidth != null
+            ? targetWidth / logicalSize.width
+            : double.infinity;
+        final double heightRatio = targetHeight != null
+            ? targetHeight / logicalSize.height
+            : double.infinity;
+        // Pick the smaller ratio so neither dimension overshoots the target.
+        final double derived = widthRatio < heightRatio
+            ? widthRatio
+            : heightRatio;
+        if (derived.isFinite && derived > 0) {
+          effectivePixelRatio = derived;
+        }
+      }
+    }
+
     try {
-      return await boundary.toImage(pixelRatio: pixelRatio);
+      return await boundary.toImage(pixelRatio: effectivePixelRatio);
     } catch (_) {
       return boundary.toImage(pixelRatio: 1.0);
     }

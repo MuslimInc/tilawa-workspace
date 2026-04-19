@@ -232,9 +232,8 @@ class AudioClipService {
     final semaphore = _Semaphore(_maxConcurrency);
     final futures = <Future<String>>[];
 
+    var completedCount = 0;
     for (var ayah = config.fromAyah; ayah <= config.toAyah; ayah++) {
-      final ayahIndex = ayah - config.fromAyah;
-
       futures.add(
         semaphore.run(() async {
           if (cancelToken?.isCancelled == true) {
@@ -244,17 +243,20 @@ class AudioClipService {
             );
           }
 
-          onProgress?.call(
-            ayahIndex / totalVerses * 0.9, // 90% for downloads
-            progressMessages.downloadingVerse(ayahIndex + 1, totalVerses),
-          );
-
-          return _downloadVerseWithRetry(
+          final path = await _downloadVerseWithRetry(
             reciterFolder: config.reciterFolder,
             surahNumber: config.surahNumber,
             ayahNumber: ayah,
             cancelToken: cancelToken,
           );
+
+          completedCount++;
+          onProgress?.call(
+            completedCount / totalVerses * 0.9, // 90% for downloads
+            progressMessages.downloadingVerse(completedCount, totalVerses),
+          );
+
+          return path;
         }),
       );
     }

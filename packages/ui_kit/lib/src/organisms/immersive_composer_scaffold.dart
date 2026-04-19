@@ -24,6 +24,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
     this.regularPreviewHeightFactor,
     this.panelMinHeight,
     this.previewMaxHeight,
+    this.floatingActionButton,
   });
 
   final String title;
@@ -41,6 +42,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
   final double? regularPreviewHeightFactor;
   final double? panelMinHeight;
   final double? previewMaxHeight;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +52,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      floatingActionButton: floatingActionButton,
       body: DecoratedBox(
         decoration: BoxDecoration(
           gradient:
@@ -131,16 +134,17 @@ class ImmersiveComposerScaffold extends StatelessWidget {
 
                     Widget buildHeader() {
                       return Row(
+                        spacing: designTokens.spaceMedium,
                         children: [
                           leading ??
                               _RoundHeaderButton(
                                 icon: Icons.close_rounded,
                                 onPressed: onClose,
                               ),
-                          SizedBox(width: designTokens.spaceMedium),
                           Expanded(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
+                              spacing: designTokens.spaceExtraSmall,
                               children: [
                                 Text(
                                   title,
@@ -149,10 +153,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                                if (subtitle != null) ...[
-                                  SizedBox(
-                                    height: designTokens.spaceExtraSmall,
-                                  ),
+                                if (subtitle != null)
                                   Text(
                                     subtitle!,
                                     textAlign: TextAlign.center,
@@ -160,11 +161,9 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                ],
                               ],
                             ),
                           ),
-                          SizedBox(width: designTokens.spaceMedium),
                           trailing ??
                               SizedBox(
                                 width: componentTokens.headerButtonSize,
@@ -194,11 +193,10 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: verticalSpacing,
                             children: [
                               buildHeader(),
-                              SizedBox(height: verticalSpacing),
                               SizedBox(height: previewHeight, child: preview),
-                              SizedBox(height: verticalSpacing),
                               buildBottomPanel(scrollInternally: false),
                             ],
                           ),
@@ -208,15 +206,15 @@ class ImmersiveComposerScaffold extends StatelessWidget {
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: verticalSpacing,
                       children: [
                         buildHeader(),
-                        SizedBox(height: verticalSpacing),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: verticalSpacing,
                             children: [
                               Expanded(child: preview),
-                              SizedBox(height: verticalSpacing),
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: Align(

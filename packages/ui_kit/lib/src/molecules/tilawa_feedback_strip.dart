@@ -39,6 +39,7 @@ class TilawaFeedbackStrip extends StatelessWidget {
         border: borderColor == null ? null : Border.all(color: borderColor!),
       ),
       child: Row(
+        spacing: componentTokens.contentGap,
         children: [
           if (showSpinner)
             SizedBox(
@@ -51,7 +52,6 @@ class TilawaFeedbackStrip extends StatelessWidget {
             )
           else
             Icon(icon, color: foregroundColor),
-          SizedBox(width: componentTokens.contentGap),
           Expanded(
             child: Text(
               message,

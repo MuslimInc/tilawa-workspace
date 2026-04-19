@@ -11,10 +11,10 @@ extension ShareProgressMessagesL10nX on BuildContext {
     return ShareProgressMessages(
       preparingImage: l10n.preparingScreenshot,
       preparingAudioClip: l10n.preparingAudioClip,
-      preparingReel: l10n.preparingReelStatus,
+      preparingVideo: l10n.preparingReelStatus,
       generatingAudioClip: l10n.generatingAudioClipStatus,
       capturingReaderVisuals: l10n.capturingReaderVisuals,
-      combiningReelMedia: l10n.combiningReelMedia,
+      combiningVideoMedia: l10n.combiningReelMedia,
       audioClip: AudioClipProgressMessages(
         preparingToTrimLocalAudio: l10n.preparingToTrimLocalAudio,
         reciterNotSupportedForLocalTrim: l10n.reciterNotSupportedForLocalTrim,
@@ -26,10 +26,10 @@ extension ShareProgressMessagesL10nX on BuildContext {
         assemblingAudioClip: l10n.assemblingAudioClip,
         done: l10n.done,
       ),
-      reel: ReelProgressMessages(
+      video: VideoProgressMessages(
         preparingVideoEncoding: l10n.preparingVideoEncoding,
         encodingVerticalVideo: l10n.encodingVerticalVideo,
-        reelGenerated: l10n.reelGenerated,
+        videoGenerated: l10n.reelGenerated,
       ),
     );
   }

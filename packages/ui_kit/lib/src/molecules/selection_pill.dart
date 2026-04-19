@@ -73,11 +73,10 @@ class SelectionPill extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceSmall,
             children: [
-              if (icon != null) ...[
+              if (icon != null)
                 Icon(icon, size: tokens.iconSizeSmall, color: foreground),
-                SizedBox(width: tokens.spaceSmall),
-              ],
               Text(
                 label,
                 style: theme.textTheme.labelLarge?.copyWith(

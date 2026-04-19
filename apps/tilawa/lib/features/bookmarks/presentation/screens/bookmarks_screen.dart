@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/entities/audio.dart';
 
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
 import '../widgets/bookmark_card.dart';
@@ -242,9 +244,28 @@ class BookmarksScreen extends StatelessWidget {
   }
 
   void _playFromBookmark(BuildContext context, BookmarkEntity bookmark) {
-    // TODO: Implement play from bookmark position
-    // This will be connected to AudioPlayerBloc
-    ToastUtils.showToast(msg: 'Playing from ${bookmark.formattedPosition}');
+    final audio = AudioEntity(
+      id: bookmark.audioUrl,
+      title: bookmark.surahName,
+      url: bookmark.audioUrl,
+      duration: bookmark.duration,
+      artist: bookmark.reciterName,
+      album: bookmark.moshafName,
+      artUri: bookmark.artworkUrl,
+      extras: {
+        'surahId': bookmark.surahId,
+        'reciterId': bookmark.reciterId,
+        'moshafId': bookmark.moshafId,
+      },
+    );
+
+    context.read<AudioPlayerBloc>().add(
+      AudioPlayerEvent.playFromQueue(
+        [audio],
+        0,
+        initialPosition: bookmark.position,
+      ),
+    );
   }
 
   void _showEditLabelDialog(BuildContext context, BookmarkEntity bookmark) {

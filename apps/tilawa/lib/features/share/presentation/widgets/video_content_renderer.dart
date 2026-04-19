@@ -4,46 +4,56 @@ import 'package:quran/quran.dart';
 // ignore: implementation_imports
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../utils/reel_page_specs.dart';
+import '../utils/video_page_specs.dart';
 
-final ValueNotifier<bool> _hiddenOverlaysListenable = ValueNotifier<bool>(
+// A single static notifier is safe here: overlays are always hidden during
+// off-screen video capture and this value never changes at runtime.
+final ValueNotifier<bool> _kHiddenOverlaysListenable = ValueNotifier<bool>(
   false,
 );
 
-/// A Quran-focused 9:16 canvas used for reel generation.
-class ReelContentRenderer extends StatelessWidget {
-  const ReelContentRenderer({
+/// A Quran-focused 9:16 canvas used for video generation.
+class VideoContentRenderer extends StatelessWidget {
+  const VideoContentRenderer({
     super.key,
     required this.surahNumber,
     required this.fromAyah,
     required this.toAyah,
     this.reciterName,
     this.pageSpecs,
+    this.isCapturing = false,
   });
 
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
   final String? reciterName;
-  final List<ReelPageSpec>? pageSpecs;
+  final List<VideoPageSpec>? pageSpecs;
+
+  /// When `true`, the render tree drops animated/cosmetic layers (ambient
+  /// orbs, drop shadow) because those costs are wasted on a still-image
+  /// capture — they add build/raster time without any visual payoff in a
+  /// 1-frame snapshot.
+  final bool isCapturing;
 
   @override
   Widget build(BuildContext context) {
-    final List<ReelPageSpec> effectivePageSpecs =
+    final List<VideoPageSpec> effectivePageSpecs =
         pageSpecs ??
-        buildReelPageSpecs(
+        buildVideoPageSpecs(
           surahNumber: surahNumber,
           fromAyah: fromAyah,
           toAyah: toAyah,
         );
 
     if (effectivePageSpecs.length == 1) {
-      return ReelContentPage(
+      return VideoContentPage(
         surahNumber: surahNumber,
         pageSpec: effectivePageSpecs.single,
         pageIndex: 0,
         totalPages: 1,
         reciterName: reciterName,
+        isCapturing: isCapturing,
       );
     }
 
@@ -53,12 +63,13 @@ class ReelContentRenderer extends StatelessWidget {
       child: PageView.builder(
         itemCount: effectivePageSpecs.length,
         itemBuilder: (context, index) {
-          return ReelContentPage(
+          return VideoContentPage(
             surahNumber: surahNumber,
             pageSpec: effectivePageSpecs[index],
             pageIndex: index,
             totalPages: effectivePageSpecs.length,
             reciterName: reciterName,
+            isCapturing: isCapturing,
           );
         },
       ),
@@ -66,32 +77,37 @@ class ReelContentRenderer extends StatelessWidget {
   }
 }
 
-class ReelContentPage extends StatelessWidget {
-  const ReelContentPage({
+class VideoContentPage extends StatelessWidget {
+  const VideoContentPage({
     super.key,
     required this.surahNumber,
     required this.pageSpec,
     required this.pageIndex,
     required this.totalPages,
     this.reciterName,
+    this.isCapturing = false,
   });
 
   final int surahNumber;
-  final ReelPageSpec pageSpec;
+  final VideoPageSpec pageSpec;
   final int pageIndex;
   final int totalPages;
   final String? reciterName;
+
+  /// Mirrors [VideoContentRenderer.isCapturing] — disables ambient orbs and
+  /// the heavy BoxShadow while capturing a frozen frame for FFmpeg.
+  final bool isCapturing;
 
   String get _arabicSurahName => getSurahNameArabic(surahNumber);
   String get _englishSurahName => getSurahNameEnglish(surahNumber);
 
   String get _ayahRangeLabel => pageSpec.fromAyah == pageSpec.toAyah
-      ? 'آية ${pageSpec.fromAyah}'
-      : 'الآيات ${pageSpec.fromAyah} - ${pageSpec.toAyah}';
+      ? '${_VideoStrings.ayah} ${pageSpec.fromAyah}'
+      : '${_VideoStrings.ayahs} ${pageSpec.fromAyah} - ${pageSpec.toAyah}';
 
   String get _mushafPageLabel => totalPages == 1
-      ? 'صفحة المصحف ${pageSpec.pageNumber}'
-      : 'صفحة المصحف ${pageSpec.pageNumber} • ${pageIndex + 1}/$totalPages';
+      ? '${_VideoStrings.mushafPage} ${pageSpec.pageNumber}'
+      : '${_VideoStrings.mushafPage} ${pageSpec.pageNumber} • ${pageIndex + 1}/$totalPages';
 
   @override
   Widget build(BuildContext context) {
@@ -106,32 +122,36 @@ class ReelContentPage extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              _ReelPalette.deepGreen,
-              _ReelPalette.forestGreen,
-              _ReelPalette.tealGreen,
+              _VideoPalette.deepGreen,
+              _VideoPalette.forestGreen,
+              _VideoPalette.tealGreen,
             ],
           ),
         ),
         child: Stack(
           children: [
-            const Positioned(
-              top: -140,
-              right: -60,
-              child: TilawaAmbientOrb(
-                size: 320,
-                color: _ReelPalette.mint,
-                opacity: 0.12,
+            // Ambient orbs are animated and only add cost to a single-frame
+            // capture — skip them during offscreen encode.
+            if (!isCapturing)
+              const Positioned(
+                top: -140,
+                right: -60,
+                child: TilawaAmbientOrb(
+                  size: 320,
+                  color: _VideoPalette.mint,
+                  opacity: 0.12,
+                ),
               ),
-            ),
-            const Positioned(
-              bottom: -120,
-              left: -50,
-              child: TilawaAmbientOrb(
-                size: 260,
-                color: _ReelPalette.gold,
-                opacity: 0.12,
+            if (!isCapturing)
+              const Positioned(
+                bottom: -120,
+                left: -50,
+                child: TilawaAmbientOrb(
+                  size: 260,
+                  color: _VideoPalette.gold,
+                  opacity: 0.12,
+                ),
               ),
-            ),
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -139,7 +159,7 @@ class ReelContentPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(60),
                     border: Border.all(
-                      color: _ReelPalette.gold.withValues(alpha: 0.18),
+                      color: _VideoPalette.gold.withValues(alpha: 0.18),
                     ),
                   ),
                 ),
@@ -157,24 +177,29 @@ class ReelContentPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(48),
                         border: Border.all(
-                          color: _ReelPalette.gold.withValues(alpha: 0.58),
+                          color: _VideoPalette.gold.withValues(alpha: 0.58),
                           width: 2,
                         ),
                         gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            _ReelPalette.parchment,
-                            _ReelPalette.warmParchment,
+                            _VideoPalette.parchment,
+                            _VideoPalette.warmParchment,
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.16),
-                            blurRadius: 28,
-                            offset: const Offset(0, 16),
-                          ),
-                        ],
+                        // A 28px blur on a 1080-wide surface is a significant
+                        // per-frame cost; it also falls behind an opaque card
+                        // so the visual delta on capture is minimal.
+                        boxShadow: isCapturing
+                            ? const <BoxShadow>[]
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.16),
+                                  blurRadius: 28,
+                                  offset: const Offset(0, 16),
+                                ),
+                              ],
                       ),
                       child: Column(
                         children: [
@@ -188,13 +213,13 @@ class ReelContentPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 32),
                           Expanded(
-                            child: _ReelMushafPage(
+                            child: _VideoMushafPage(
                               surahNumber: surahNumber,
                               pageSpec: pageSpec,
                             ),
                           ),
                           const SizedBox(height: 24),
-                          _ReelFooter(reciterName: normalizedReciterName),
+                          _VideoFooter(reciterName: normalizedReciterName),
                         ],
                       ),
                     ),
@@ -209,17 +234,17 @@ class ReelContentPage extends StatelessWidget {
   }
 }
 
-class _ReelMushafPage extends StatefulWidget {
-  const _ReelMushafPage({required this.surahNumber, required this.pageSpec});
+class _VideoMushafPage extends StatefulWidget {
+  const _VideoMushafPage({required this.surahNumber, required this.pageSpec});
 
   final int surahNumber;
-  final ReelPageSpec pageSpec;
+  final VideoPageSpec pageSpec;
 
   @override
-  State<_ReelMushafPage> createState() => _ReelMushafPageState();
+  State<_VideoMushafPage> createState() => _VideoMushafPageState();
 }
 
-class _ReelMushafPageState extends State<_ReelMushafPage> {
+class _VideoMushafPageState extends State<_VideoMushafPage> {
   // Stable callback reference — PageContent.didUpdateWidget checks
   // verseBackgroundColor with reference equality (!=). A new closure on every
   // build() always compares unequal, which forces a full snapshot invalidation
@@ -233,7 +258,7 @@ class _ReelMushafPageState extends State<_ReelMushafPage> {
   }
 
   @override
-  void didUpdateWidget(_ReelMushafPage oldWidget) {
+  void didUpdateWidget(_VideoMushafPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.surahNumber != widget.surahNumber ||
         oldWidget.pageSpec.fromAyah != widget.pageSpec.fromAyah ||
@@ -252,7 +277,7 @@ class _ReelMushafPageState extends State<_ReelMushafPage> {
           verseNumber > toAyah) {
         return null;
       }
-      return _ReelPalette.gold.withValues(alpha: 0.24);
+      return _VideoPalette.gold.withValues(alpha: 0.24);
     };
   }
 
@@ -266,29 +291,63 @@ class _ReelMushafPageState extends State<_ReelMushafPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
         color: Colors.white.withValues(alpha: 0.42),
-        border: Border.all(color: _ReelPalette.gold.withValues(alpha: 0.26)),
+        border: Border.all(color: _VideoPalette.gold.withValues(alpha: 0.26)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
         child: DecoratedBox(
           decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
-          child: MediaQuery(
-            data: mediaQuery.copyWith(
-              padding: EdgeInsets.zero,
-              viewPadding: EdgeInsets.zero,
-              viewInsets: EdgeInsets.zero,
-            ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: PageContent(
-                pageNumber: widget.pageSpec.pageNumber,
-                textColor: _ReelPalette.ink.withValues(alpha: 0.96),
-                pageBackgroundColor: const Color(0xFFFFF8ED),
-                verseBackgroundColor: _verseBackgroundColor,
-                uiTextDirection: TextDirection.rtl,
-                showOverlaysListenable: _hiddenOverlaysListenable,
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final metrics = StandardQuranLayoutStrategy().calculateMetrics(
+                context,
+                constraints,
+                widget.pageSpec.pageNumber,
+              );
+
+              return ListenableBuilder(
+                listenable: QuranFontService.instance,
+                builder: (context, _) {
+                  final bool isFontLoaded = QuranFontService.instance
+                      .isFontLoaded(widget.pageSpec.pageNumber);
+
+                  if (!isFontLoaded) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  }
+
+                  final preparedPage = QuranPagePreparationService.instance
+                      .preparePage(
+                        pageNumber: widget.pageSpec.pageNumber,
+                        metrics: metrics,
+                        viewportWidth: constraints.maxWidth,
+                        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
+                        verseBackgroundColor: _verseBackgroundColor,
+                      );
+
+                  return MediaQuery(
+                    data: mediaQuery.copyWith(
+                      padding: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                      viewInsets: EdgeInsets.zero,
+                    ),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: PageContent(
+                        pageNumber: widget.pageSpec.pageNumber,
+                        preparedPage: preparedPage,
+                        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
+                        pageBackgroundColor: const Color(0xFFFFF8ED),
+                        verseBackgroundColor: _verseBackgroundColor,
+                        uiTextDirection: TextDirection.rtl,
+                        showOverlaysListenable: _kHiddenOverlaysListenable,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),
@@ -316,11 +375,11 @@ class _BrandSeal extends StatelessWidget {
             height: 28,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _ReelPalette.gold.withValues(alpha: 0.18),
+              color: _VideoPalette.gold.withValues(alpha: 0.18),
             ),
             child: const Icon(
               Icons.auto_stories_rounded,
-              color: _ReelPalette.gold,
+              color: _VideoPalette.gold,
               size: 18,
             ),
           ),
@@ -331,7 +390,7 @@ class _BrandSeal extends StatelessWidget {
               fontSize: 24,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
-              color: _ReelPalette.cream,
+              color: _VideoPalette.cream,
             ),
           ),
         ],
@@ -373,7 +432,7 @@ class _SurahHero extends StatelessWidget {
             Colors.white.withValues(alpha: 0.42),
           ],
         ),
-        border: Border.all(color: _ReelPalette.gold.withValues(alpha: 0.36)),
+        border: Border.all(color: _VideoPalette.gold.withValues(alpha: 0.36)),
       ),
       child: Column(
         children: [
@@ -383,7 +442,7 @@ class _SurahHero extends StatelessWidget {
               fontFamily: SurahHeaderBannerConstants.fontFamily,
               package: SurahHeaderBannerConstants.packageName,
               fontSize: 78,
-              color: _ReelPalette.deepGreen,
+              color: _VideoPalette.deepGreen,
             ),
           ),
           const SizedBox(height: 14),
@@ -394,7 +453,7 @@ class _SurahHero extends StatelessWidget {
               fontSize: 46,
               height: 1.15,
               fontWeight: FontWeight.w700,
-              color: _ReelPalette.deepGreen,
+              color: _VideoPalette.deepGreen,
             ),
           ),
           const SizedBox(height: 8),
@@ -405,7 +464,7 @@ class _SurahHero extends StatelessWidget {
               fontSize: 22,
               fontWeight: FontWeight.w600,
               letterSpacing: 2.4,
-              color: _ReelPalette.deepGreen.withValues(alpha: 0.7),
+              color: _VideoPalette.deepGreen.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 18),
@@ -446,15 +505,15 @@ class _HeroPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          color: _ReelPalette.deepGreen.withValues(alpha: 0.08),
+          color: _VideoPalette.deepGreen.withValues(alpha: 0.08),
           border: Border.all(
-            color: _ReelPalette.deepGreen.withValues(alpha: 0.08),
+            color: _VideoPalette.deepGreen.withValues(alpha: 0.08),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: _ReelPalette.gold),
+            Icon(icon, size: 16, color: _VideoPalette.gold),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -464,7 +523,7 @@ class _HeroPill extends StatelessWidget {
                 style: GoogleFonts.alexandria(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: _ReelPalette.deepGreen,
+                  color: _VideoPalette.deepGreen,
                 ),
               ),
             ),
@@ -475,8 +534,8 @@ class _HeroPill extends StatelessWidget {
   }
 }
 
-class _ReelFooter extends StatelessWidget {
-  const _ReelFooter({required this.reciterName});
+class _VideoFooter extends StatelessWidget {
+  const _VideoFooter({required this.reciterName});
 
   final String? reciterName;
 
@@ -512,15 +571,14 @@ class _FooterPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          color: _ReelPalette.deepGreen.withValues(alpha: 0.1),
+          color: _VideoPalette.deepGreen.withValues(alpha: 0.1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: _ReelPalette.gold),
+            Icon(icon, size: 16, color: _VideoPalette.gold),
             const SizedBox(width: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
+            Flexible(
               child: Text(
                 label,
                 maxLines: 1,
@@ -528,7 +586,7 @@ class _FooterPill extends StatelessWidget {
                 style: GoogleFonts.alexandria(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
-                  color: _ReelPalette.deepGreen.withValues(alpha: 0.78),
+                  color: _VideoPalette.deepGreen.withValues(alpha: 0.78),
                 ),
               ),
             ),
@@ -539,7 +597,14 @@ class _FooterPill extends StatelessWidget {
   }
 }
 
-abstract final class _ReelPalette {
+// Video card labels are always Arabic — the Mushaf is an Arabic artifact.
+abstract final class _VideoStrings {
+  static const String ayah = 'آية';
+  static const String ayahs = 'الآيات';
+  static const String mushafPage = 'صفحة المصحف';
+}
+
+abstract final class _VideoPalette {
   static const Color deepGreen = Color(0xFF0B342E);
   static const Color forestGreen = Color(0xFF145247);
   static const Color tealGreen = Color(0xFF1E6558);

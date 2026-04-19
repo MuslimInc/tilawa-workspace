@@ -18,6 +18,7 @@ class PremiumNavigationOverlay extends StatefulWidget {
     required this.onNextPageRequested,
     required this.onInteractionStart,
     required this.onInteractionEnd,
+    this.onShareRequested,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -27,6 +28,7 @@ class PremiumNavigationOverlay extends StatefulWidget {
   final VoidCallback onNextPageRequested;
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
+  final VoidCallback? onShareRequested;
 
   @override
   State<PremiumNavigationOverlay> createState() =>
@@ -127,6 +129,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
                       onNextPageRequested: widget.onNextPageRequested,
                       onInteractionStart: widget.onInteractionStart,
                       onInteractionEnd: widget.onInteractionEnd,
+                      onShareRequested: widget.onShareRequested,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -146,6 +149,7 @@ class _PremiumNavigationControls extends StatelessWidget {
     required this.onNextPageRequested,
     required this.onInteractionStart,
     required this.onInteractionEnd,
+    this.onShareRequested,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -155,6 +159,7 @@ class _PremiumNavigationControls extends StatelessWidget {
   final VoidCallback onNextPageRequested;
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
+  final VoidCallback? onShareRequested;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +196,7 @@ class _PremiumNavigationControls extends StatelessWidget {
                         onNextPageRequested: onNextPageRequested,
                         onInteractionStart: onInteractionStart,
                         onInteractionEnd: onInteractionEnd,
+                        onShare: onShareRequested,
                       );
                     },
                   ),

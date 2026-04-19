@@ -25,6 +25,7 @@ class NavigationSliderOverlay extends StatelessWidget {
     required this.onNextPageRequested,
     required this.onInteractionStart,
     required this.onInteractionEnd,
+    this.onShare,
   });
 
   final double screenWidth;
@@ -37,6 +38,7 @@ class NavigationSliderOverlay extends StatelessWidget {
   final VoidCallback onNextPageRequested;
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +97,7 @@ class NavigationSliderOverlay extends StatelessWidget {
                       ? onPreviousPageRequested
                       : null,
                   onNext: canGoToNextPage ? onNextPageRequested : null,
+                  onShare: onShare,
                   screenWidth: screenWidth,
                 ),
               ],

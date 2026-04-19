@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' show GlobalKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
@@ -14,8 +14,9 @@ import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
-import '../../domain/usecases/generate_reel_use_case.dart';
+import '../../domain/usecases/generate_video_use_case.dart';
 import '../../domain/usecases/share_content_use_case.dart';
+import 'package:quran/quran.dart';
 import 'share_state.dart';
 
 @injectable
@@ -23,14 +24,14 @@ class ShareCubit extends Cubit<ShareState> {
   ShareCubit(
     this._captureScreenshot,
     this._generateAudioClip,
-    this._generateReel,
+    this._generateVideo,
     this._quranRepository,
     this._shareContent,
   ) : super(const ShareState());
 
   final CaptureScreenshotUseCase _captureScreenshot;
   final GenerateAudioClipUseCase _generateAudioClip;
-  final GenerateReelUseCase _generateReel;
+  final GenerateVideoUseCase _generateVideo;
   final QuranReaderRepository _quranRepository;
   final ShareContentUseCase _shareContent;
 
@@ -44,7 +45,6 @@ class ShareCubit extends Cubit<ShareState> {
     required String reciterName,
     required String serverUrl,
     String? reciterFolder,
-    GlobalKey? boundaryKey,
   }) {
     emit(
       state.copyWith(
@@ -54,7 +54,6 @@ class ShareCubit extends Cubit<ShareState> {
         toAyah: toAyah,
         reciterName: reciterName,
         reciterServerUrl: serverUrl,
-        boundaryKey: boundaryKey,
         content: null,
         progress: 0,
         progressMessage: '',
@@ -108,8 +107,10 @@ class ShareCubit extends Cubit<ShareState> {
           .toList();
 
       emit(state.copyWith(ayahs: rangeAyahs));
-    } catch (e) {
-      // Handle error silently
+      unawaited(_preheatSelectionFonts(surahNumber, fromAyah, toAyah));
+    } catch (e, st) {
+      logger.e('[SHARE_CUBIT] _fetchAyahs failed', error: e, stackTrace: st);
+      // Non-fatal: ayah list is supplementary metadata; generation can proceed.
     }
   }
 
@@ -144,6 +145,28 @@ class ShareCubit extends Cubit<ShareState> {
     );
   }
 
+  /// Automatically registers required QCF fonts in the engine as soon as a
+  /// selection is made. This ensures the share preview and generation renderers
+  /// don't get stuck on a loading spinner.
+  Future<void> _preheatSelectionFonts(
+    int surahNumber,
+    int fromAyah,
+    int toAyah,
+  ) async {
+    try {
+      final Set<int> uniquePages = {};
+      for (int i = fromAyah; i <= toAyah; i++) {
+        uniquePages.add(getPageNumber(surahNumber, i));
+      }
+
+      for (final page in uniquePages) {
+        await QuranFontService.instance.ensureSingleFontLoaded(page);
+      }
+    } catch (e) {
+      logger.w('[SHARE_CUBIT] _preheatSelectionFonts failed: $e');
+    }
+  }
+
   ShareContent _withLocalizedSurahName(
     ShareContent content, {
     required String surahName,
@@ -168,13 +191,13 @@ class ShareCubit extends Cubit<ShareState> {
           toAyah: toAyah,
           reciterName: reciterName,
         ),
-      ShareReel(
+      ShareVideo(
         :final filePath,
         :final fromAyah,
         :final toAyah,
         :final reciterName,
       ) =>
-        ShareContent.reel(
+        ShareContent.video(
           filePath: filePath,
           surahName: surahName,
           fromAyah: fromAyah,
@@ -202,7 +225,6 @@ class ShareCubit extends Cubit<ShareState> {
     emit(
       state.copyWith(
         status: ShareStatus.capturing,
-        boundaryKey: boundaryKey,
         content: null,
         progress: 0,
         progressMessage: preparingImageLabel,
@@ -211,6 +233,10 @@ class ShareCubit extends Cubit<ShareState> {
     );
 
     try {
+      // Ensure the font for the page is loaded to prevent fallback to system fonts,
+      // which would cause incorrect text metrics and layout overflows.
+      await QuranFontService.instance.ensureSingleFontLoaded(pageNumber);
+
       final content = await _captureScreenshot(
         boundaryKey: boundaryKey,
         surahName: surahName,
@@ -220,9 +246,17 @@ class ShareCubit extends Cubit<ShareState> {
         brandCapture: brandCapture,
       );
       emit(state.copyWith(status: ShareStatus.reviewing, content: content));
-    } catch (e) {
+    } catch (e, st) {
+      logger.e(
+        '[SHARE_CUBIT] prepareScreenshot failed',
+        error: e,
+        stackTrace: st,
+      );
       emit(
-        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        state.copyWith(
+          status: ShareStatus.error,
+          errorMessage: _userFacingError(e),
+        ),
       );
     }
   }
@@ -235,8 +269,9 @@ class ShareCubit extends Cubit<ShareState> {
     required String appName,
     required String sharedViaLabel,
   }) async {
-    emit(state.copyWith(status: ShareStatus.sharing, boundaryKey: boundaryKey));
+    emit(state.copyWith(status: ShareStatus.sharing));
     try {
+      await QuranFontService.instance.ensureSingleFontLoaded(pageNumber);
       final content = await _captureScreenshot(
         boundaryKey: boundaryKey,
         surahName: surahName,
@@ -246,9 +281,17 @@ class ShareCubit extends Cubit<ShareState> {
       );
       await _shareContent(content);
       emit(state.copyWith(status: ShareStatus.idle));
-    } catch (e) {
+    } catch (e, st) {
+      logger.e(
+        '[SHARE_CUBIT] captureAndShareScreenshot failed',
+        error: e,
+        stackTrace: st,
+      );
       emit(
-        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        state.copyWith(
+          status: ShareStatus.error,
+          errorMessage: _userFacingError(e),
+        ),
       );
     }
   }
@@ -267,6 +310,7 @@ class ShareCubit extends Cubit<ShareState> {
       '[AUDIO_GEN] prepareAudioClip start | surah=${config.surahNumber} ${config.fromAyah}-${config.toAyah} | t=${tAudio}ms',
     );
 
+    _cancelToken?.cancel();
     _cancelToken = CancelToken();
     emit(
       state.copyWith(
@@ -300,13 +344,18 @@ class ShareCubit extends Cubit<ShareState> {
           content: _withLocalizedSurahName(content, surahName: surahName),
         ),
       );
-    } catch (e) {
-      logger.d(
-        '[AUDIO_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tAudio}ms | $e',
+    } catch (e, st) {
+      logger.e(
+        '[AUDIO_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tAudio}ms',
+        error: e,
+        stackTrace: st,
       );
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
-          state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+          state.copyWith(
+            status: ShareStatus.error,
+            errorMessage: _userFacingError(e),
+          ),
         );
       } else {
         emit(state.copyWith(status: ShareStatus.idle));
@@ -332,53 +381,50 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   /// Generates a vertical video (9:16) for social media.
-  Future<void> generateReel({
+  Future<void> generateVideo({
     required String surahName,
     required ShareProgressMessages progressMessages,
     required String appName,
     required String sharedViaLabel,
-    GlobalKey? boundaryKey,
-    List<GlobalKey>? boundaryKeys,
+    required List<GlobalKey> boundaryKeys,
     int? maxDurationSeconds,
   }) async {
     final audioConfig = _buildAudioConfig();
-    final effectiveBoundaryKey = boundaryKey ?? state.boundaryKey;
-    final List<GlobalKey> effectiveBoundaryKeys =
-        boundaryKeys?.where((key) => key.currentContext != null).toList() ??
-        const <GlobalKey>[];
+    final List<GlobalKey> activeBoundaryKeys = boundaryKeys
+        .where((key) => key.currentContext != null)
+        .toList();
 
     logger.d(
-      '[REEL_GEN] generateReel called | boundaryKeysTotal=${boundaryKeys?.length ?? 0} | effectiveBoundaryKeys=${effectiveBoundaryKeys.length} | audioConfig=${audioConfig != null}',
+      '[VIDEO_GEN] generateVideo called | boundaryKeysTotal=${boundaryKeys.length} | active=${activeBoundaryKeys.length} | audioConfig=${audioConfig != null}',
     );
 
-    if (audioConfig == null ||
-        (effectiveBoundaryKey == null && effectiveBoundaryKeys.isEmpty)) {
+    if (audioConfig == null || activeBoundaryKeys.isEmpty) {
       logger.d(
-        '[REEL_GEN] generateReel ABORTED | audioConfig=$audioConfig | effectiveBoundaryKeys=${effectiveBoundaryKeys.length}',
+        '[VIDEO_GEN] generateVideo ABORTED | audioConfig=$audioConfig | active=${activeBoundaryKeys.length}',
       );
       return;
     }
 
-    final int tReel = DateTime.now().millisecondsSinceEpoch;
+    final int tVideo = DateTime.now().millisecondsSinceEpoch;
     logger.d(
-      '[REEL_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${effectiveBoundaryKeys.length} | t=${tReel}ms',
+      '[VIDEO_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${activeBoundaryKeys.length} | t=${tVideo}ms',
     );
 
+    _cancelToken?.cancel();
     _cancelToken = CancelToken();
     emit(
       state.copyWith(
         status: ShareStatus.generating,
         progress: 0,
-        progressMessage: progressMessages.preparingReel,
+        progressMessage: progressMessages.preparingVideo,
         errorMessage: null,
         content: null,
       ),
     );
 
     try {
-      final content = await _generateReel(
-        boundaryKey: effectiveBoundaryKey,
-        boundaryKeys: effectiveBoundaryKeys,
+      final content = await _generateVideo(
+        boundaryKeys: activeBoundaryKeys,
         config: audioConfig,
         appName: appName,
         sharedViaLabel: sharedViaLabel,
@@ -387,14 +433,14 @@ class ShareCubit extends Cubit<ShareState> {
         cancelToken: _cancelToken,
         onProgress: (p, m) {
           logger.d(
-            '[REEL_GEN] progress=${(p * 100).toStringAsFixed(0)}% | "$m" | elapsed=${DateTime.now().millisecondsSinceEpoch - tReel}ms',
+            '[VIDEO_GEN] progress=${(p * 100).toStringAsFixed(0)}% | "$m" | elapsed=${DateTime.now().millisecondsSinceEpoch - tVideo}ms',
           );
           emit(state.copyWith(progress: p, progressMessage: m));
         },
       );
 
       logger.d(
-        '[REEL_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tReel}ms | file=${content.filePath}',
+        '[VIDEO_GEN] complete | took=${DateTime.now().millisecondsSinceEpoch - tVideo}ms | file=${content.filePath}',
       );
       emit(
         state.copyWith(
@@ -402,13 +448,18 @@ class ShareCubit extends Cubit<ShareState> {
           content: _withLocalizedSurahName(content, surahName: surahName),
         ),
       );
-    } catch (e) {
-      logger.d(
-        '[REEL_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tReel}ms | $e',
+    } catch (e, st) {
+      logger.e(
+        '[VIDEO_GEN] ERROR after ${DateTime.now().millisecondsSinceEpoch - tVideo}ms',
+        error: e,
+        stackTrace: st,
       );
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         emit(
-          state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+          state.copyWith(
+            status: ShareStatus.error,
+            errorMessage: _userFacingError(e),
+          ),
         );
       } else {
         emit(state.copyWith(status: ShareStatus.idle));
@@ -435,9 +486,13 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       await _shareContent(state.content!);
       emit(state.copyWith(status: ShareStatus.idle, content: null));
-    } catch (e) {
+    } catch (e, st) {
+      logger.e('[SHARE_CUBIT] shareContent failed', error: e, stackTrace: st);
       emit(
-        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        state.copyWith(
+          status: ShareStatus.error,
+          errorMessage: _userFacingError(e),
+        ),
       );
     }
   }
@@ -455,11 +510,23 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       await _shareContent(ShareContent.text(surahName: surahName, text: text));
       emit(state.copyWith(status: ShareStatus.idle));
-    } catch (e) {
+    } catch (e, st) {
+      logger.e('[SHARE_CUBIT] shareText failed', error: e, stackTrace: st);
       emit(
-        state.copyWith(status: ShareStatus.error, errorMessage: e.toString()),
+        state.copyWith(
+          status: ShareStatus.error,
+          errorMessage: _userFacingError(e),
+        ),
       );
     }
+  }
+
+  /// Returns a clean, user-facing error string without internal stack details.
+  String _userFacingError(Object e) {
+    if (e is StateError) return e.message;
+    final msg = e.toString();
+    // Strip "Exception:" / "StateError:" prefixes that leak implementation detail.
+    return msg.replaceFirst(RegExp(r'^[\w]+:\s*'), '');
   }
 
   void cancelGeneration() {

@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/entities/share_content.dart';
@@ -23,8 +22,6 @@ abstract class ShareState with _$ShareState {
     @Default('') String progressMessage,
     // Generated content
     ShareContent? content,
-    // Video capture
-    GlobalKey? boundaryKey,
     // Error
     String? errorMessage,
     List<PageAyahInfo>? ayahs,

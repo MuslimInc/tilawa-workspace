@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:term_glyph/term_glyph.dart' as glyph;
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
-enum QuranShareTextKind { screenshotPage, screenshotPassage, audio, reel }
+enum QuranShareTextKind { screenshotPage, screenshotPassage, audio, video }
 
 String buildQuranShareText({
   required AppLocalizations l10n,
@@ -41,7 +41,7 @@ String buildQuranShareText({
         lines.add('${glyphs.bullet} $reciterName');
       }
       lines.add('${glyphs.bullet} ${l10n.shareModeAudio}');
-    case QuranShareTextKind.reel:
+    case QuranShareTextKind.video:
       lines.add(
         '${glyphs.bullet} ${_buildAyahRange(l10n, glyphs, fromAyah, toAyah)}',
       );

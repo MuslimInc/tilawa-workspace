@@ -1973,6 +1973,18 @@
     "@shareModeReel": {
         "description": "Reel share mode label"
     },
+    "shareStepConfigure": "الإعداد",
+    "@shareStepConfigure": {
+        "description": "Step indicator label for the configuration step"
+    },
+    "shareStepGenerating": "جاري الإنشاء",
+    "@shareStepGenerating": {
+        "description": "Step indicator label for the generation step"
+    },
+    "shareStepReview": "المراجعة",
+    "@shareStepReview": {
+        "description": "Step indicator label for the review step"
+    },
     "shareContentLayout": "نمط المحتوى",
     "@shareContentLayout": {
         "description": "Section title for screenshot layout selection"
