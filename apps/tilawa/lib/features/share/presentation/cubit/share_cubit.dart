@@ -10,6 +10,7 @@ import '../../../quran_reader/domain/entities/entities.dart';
 import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
 import '../../data/services/reciter_audio_mapping.dart';
 import '../../domain/entities/audio_clip_config.dart';
+import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/usecases/capture_screenshot_use_case.dart';
@@ -117,6 +118,13 @@ class ShareCubit extends Cubit<ShareState> {
   /// Updates the selected reciter.
   void updateReciter({required String name, required String serverUrl}) {
     emit(state.copyWith(reciterName: name, reciterServerUrl: serverUrl));
+  }
+
+  /// Updates the mushaf rendering style. Discards any prepared content so the
+  /// next generation uses the new style.
+  void updateMushafStyle(MushafRenderStyle style) {
+    if (state.mushafStyle == style) return;
+    emit(state.copyWith(mushafStyle: style, content: null));
   }
 
   AudioClipConfig? _buildAudioConfig() {
@@ -389,13 +397,14 @@ class ShareCubit extends Cubit<ShareState> {
     required List<GlobalKey> boundaryKeys,
     int? maxDurationSeconds,
   }) async {
+    final mushafStyle = state.mushafStyle;
     final audioConfig = _buildAudioConfig();
     final List<GlobalKey> activeBoundaryKeys = boundaryKeys
         .where((key) => key.currentContext != null)
         .toList();
 
     logger.d(
-      '[VIDEO_GEN] generateVideo called | boundaryKeysTotal=${boundaryKeys.length} | active=${activeBoundaryKeys.length} | audioConfig=${audioConfig != null}',
+      '[VIDEO_GEN] generateVideo called | boundaryKeysTotal=${boundaryKeys.length} | active=${activeBoundaryKeys.length} | audioConfig=${audioConfig != null} | style=${mushafStyle.name}',
     );
 
     if (audioConfig == null || activeBoundaryKeys.isEmpty) {
@@ -407,7 +416,7 @@ class ShareCubit extends Cubit<ShareState> {
 
     final int tVideo = DateTime.now().millisecondsSinceEpoch;
     logger.d(
-      '[VIDEO_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${activeBoundaryKeys.length} | t=${tVideo}ms',
+      '[VIDEO_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${activeBoundaryKeys.length} | style=${mushafStyle.name} | t=${tVideo}ms',
     );
 
     _cancelToken?.cancel();
@@ -430,12 +439,16 @@ class ShareCubit extends Cubit<ShareState> {
         sharedViaLabel: sharedViaLabel,
         progressMessages: progressMessages,
         maxDurationSeconds: maxDurationSeconds,
+        mushafStyle: mushafStyle,
         cancelToken: _cancelToken,
         onProgress: (p, m) {
           logger.d(
             '[VIDEO_GEN] progress=${(p * 100).toStringAsFixed(0)}% | "$m" | elapsed=${DateTime.now().millisecondsSinceEpoch - tVideo}ms',
           );
           emit(state.copyWith(progress: p, progressMessage: m));
+        },
+        onFrameCaptureStarted: (index) {
+          emit(state.copyWith(capturingIndex: index));
         },
       );
 
@@ -445,6 +458,7 @@ class ShareCubit extends Cubit<ShareState> {
       emit(
         state.copyWith(
           status: ShareStatus.reviewing,
+          capturingIndex: null,
           content: _withLocalizedSurahName(content, surahName: surahName),
         ),
       );
@@ -458,11 +472,12 @@ class ShareCubit extends Cubit<ShareState> {
         emit(
           state.copyWith(
             status: ShareStatus.error,
+            capturingIndex: null,
             errorMessage: _userFacingError(e),
           ),
         );
       } else {
-        emit(state.copyWith(status: ShareStatus.idle));
+        emit(state.copyWith(status: ShareStatus.idle, capturingIndex: null));
       }
     }
   }

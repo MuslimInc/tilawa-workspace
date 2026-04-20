@@ -2,14 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 
-/// The outer size of the compass widget including text labels.
-const double _kCompassOuterSize = 380;
+// /// The outer size of the compass widget including text labels.
+// const double _kCompassOuterSize = 380;
 
-/// The inner dial circle size.
-const double _kCompassDialSize = 300;
+// /// The inner dial circle size.
+// const double _kCompassDialSize = 300;
 
 class QiblaCompassWidget extends StatelessWidget {
   const QiblaCompassWidget({super.key, required this.qiblaDirection});
@@ -38,12 +39,15 @@ class QiblaCompassWidget extends StatelessWidget {
     // 2. We place the Qibla arrow on the dial at the Qibla angle.
     // Result: Qibla arrow points to Qibla.
 
+    final tokens = theme.tokens;
+    final size = MediaQuery.sizeOf(context);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: _kCompassOuterSize,
-          height: _kCompassOuterSize,
+          width: size.width * 0.9,
+          height: size.width * 0.9,
           child: Semantics(
             label: 'Qibla Compass',
             hint: 'Rotate your device to align the arrow with the Qibla',
@@ -53,106 +57,170 @@ class QiblaCompassWidget extends StatelessWidget {
                 // The Dial (Rotates with device heading)
                 Transform.rotate(
                   angle: qiblaDirection.direction * (math.pi / 180) * -1,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // 1. The Dial Circle and Ticks (Constrained to 300)
-                      SizedBox(
-                        width: _kCompassDialSize,
-                        height: _kCompassDialSize,
-                        child: CustomPaint(
-                          size: const Size(
-                            _kCompassDialSize,
-                            _kCompassDialSize,
-                          ),
-                          painter: _CompassDialPainter(
-                            colorScheme: colorScheme,
-                            tickInset: 5,
-                            majorTickLength: 12,
-                            minorTickLength: 8,
-                            smallTickLength: 5,
-                            borderWidth: 2,
-                          ),
-                        ),
-                      ),
-                      // 2. Cardinal Directions (Static relative to Dial)
-                      _CompassText(
-                        text: context.l10n.north,
-                        angleDeg: 0,
-                        heading: qiblaDirection.direction,
-                      ), // N
-                      _CompassText(
-                        text: context.l10n.east,
-                        angleDeg: 90,
-                        heading: qiblaDirection.direction,
-                      ), // E
-                      _CompassText(
-                        text: context.l10n.south,
-                        angleDeg: 180,
-                        heading: qiblaDirection.direction,
-                      ), // S
-                      _CompassText(
-                        text: context.l10n.west,
-                        angleDeg: 270,
-                        heading: qiblaDirection.direction,
-                      ), // W
-                    ],
-                  ),
+                  child: _CompassDial(qiblaDirection: qiblaDirection),
                 ),
 
                 // Center Indicator (Fixed on Screen) - Acts as the cap
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isAligned ? alignedColor : unalignedColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: (isAligned ? alignedColor : unalignedColor)
-                            .withValues(alpha: 0.5),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
+                _CenterIndicator(isAligned: isAligned),
 
-                // 3. Qibla Pointer (Central Arrow) - Independent rotation based on manual calculation
+                // 3. Qibla Pointer (Central Arrow)
                 Transform.rotate(
                   angle:
                       (qiblaDirection.offset - qiblaDirection.direction) *
                       (math.pi / 180),
-                  child: _QiblaPointer(isAligned: qiblaDirection.isAligned),
+                  child: _QiblaPointer(isAligned: isAligned),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 24),
+        SizedBox(height: tokens.spaceExtraLarge),
+        _AngleDisplay(
+          angle: qiblaDirection.direction,
+          isAligned: isAligned,
+          alignedColor: alignedColor,
+          unalignedColor: unalignedColor,
+        ),
+      ],
+    );
+  }
+}
+
+class _CompassDial extends StatelessWidget {
+  const _CompassDial({required this.qiblaDirection});
+
+  final QiblaDirectionEntity qiblaDirection;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final size = MediaQuery.sizeOf(context);
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // 1. The Dial Circle and Ticks
+        SizedBox(
+          width: size.width * 0.7,
+          height: size.width * 0.7,
+          child: CustomPaint(
+            size: Size(size.width * 0.7, size.width * 0.7),
+            painter: _CompassDialPainter(
+              colorScheme: colorScheme,
+              tokens: tokens,
+              tickInset: tokens.spaceExtraSmall + 1,
+              majorTickLength: tokens.spaceMedium,
+              minorTickLength: tokens.spaceSmall,
+              smallTickLength: tokens.spaceExtraSmall + 1,
+              borderWidth: tokens.borderWidthThin * 4,
+            ),
+          ),
+        ),
+        // 2. Cardinal Directions
+        _CompassText(
+          text: context.l10n.north,
+          angleDeg: 0,
+          heading: qiblaDirection.direction,
+          isVertical: true,
+        ),
+        _CompassText(
+          text: context.l10n.east,
+          angleDeg: 90,
+          heading: qiblaDirection.direction,
+          isVertical: false,
+        ),
+        _CompassText(
+          text: context.l10n.south,
+          angleDeg: 180,
+          heading: qiblaDirection.direction,
+          isVertical: true,
+        ),
+        _CompassText(
+          text: context.l10n.west,
+          angleDeg: 270,
+          heading: qiblaDirection.direction,
+          isVertical: false,
+        ),
+      ],
+    );
+  }
+}
+
+class _CenterIndicator extends StatelessWidget {
+  const _CenterIndicator({required this.isAligned});
+
+  final bool isAligned;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final Color color = isAligned ? colorScheme.primary : colorScheme.onSurface;
+
+    return Container(
+      width: tokens.spaceSmall + 2,
+      height: tokens.spaceSmall + 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: tokens.opacityEmphasis),
+            blurRadius: tokens.blurShadow,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AngleDisplay extends StatelessWidget {
+  const _AngleDisplay({
+    required this.angle,
+    required this.isAligned,
+    required this.alignedColor,
+    required this.unalignedColor,
+  });
+
+  final double angle;
+  final bool isAligned;
+  final Color alignedColor;
+  final Color unalignedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Column(
+      children: [
         Text(
-          '${(qiblaDirection.direction % 360).toStringAsFixed(0)}°',
+          '${(angle % 360).toStringAsFixed(0)}°',
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 48,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             color: isAligned ? alignedColor : unalignedColor,
             shadows: [
               Shadow(
                 color: (isAligned ? alignedColor : Colors.black).withValues(
-                  alpha: 0.5,
+                  alpha: tokens.opacityMedium,
                 ),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: tokens.blurShadow,
+                offset: tokens.shadowOffsetMedium,
               ),
             ],
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: tokens.spaceSmall),
         Text(
           context.l10n.toQibla,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontSize: 16,
-            color: unalignedColor.withValues(alpha: 0.7),
+            color: unalignedColor.withValues(alpha: tokens.opacityEmphasis),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -165,31 +233,35 @@ class _CompassText extends StatelessWidget {
     required this.text,
     required this.angleDeg,
     required this.heading,
+    required this.isVertical,
   });
 
   final String text;
   final double angleDeg;
   final double heading;
+  final bool isVertical;
 
   @override
   Widget build(BuildContext context) {
-    // Position text around circle
-    // We use a Container located at the top center, then rotated
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     return Transform.rotate(
       angle: angleDeg * (math.pi / 180),
-      child: Container(
+      child: Align(
         alignment: Alignment.topCenter,
-        height: _kCompassOuterSize,
         child: Padding(
-          padding: EdgeInsets.only(top: 10),
+          padding: isVertical
+              ? EdgeInsets.symmetric(vertical: tokens.spaceSmall)
+              : EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
           child: Transform.rotate(
-            angle: (heading - angleDeg) * (math.pi / 180), // Counter-rotate
+            angle: (heading - angleDeg) * (math.pi / 180),
             child: Text(
               text,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
               ),
             ),
           ),
@@ -206,16 +278,17 @@ class _QiblaPointer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final Color alignedColor = colorScheme.primary;
-    // Using tertiary for the gold-ish accent if available, otherwise secondary
     final Color unalignedColor = colorScheme.tertiary;
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(tokens.spaceLarge),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.onSecondary,
+        color: colorScheme.surface.withValues(alpha: tokens.opacitySubtle),
       ),
       child: Icon(
         Icons.arrow_upward_rounded,
@@ -224,9 +297,9 @@ class _QiblaPointer extends StatelessWidget {
         shadows: [
           Shadow(
             color: (isAligned ? alignedColor : unalignedColor).withValues(
-              alpha: 0.5,
+              alpha: tokens.opacityEmphasis,
             ),
-            blurRadius: 20,
+            blurRadius: tokens.blurShadow * 1.5,
           ),
         ],
       ),
@@ -237,6 +310,7 @@ class _QiblaPointer extends StatelessWidget {
 class _CompassDialPainter extends CustomPainter {
   _CompassDialPainter({
     required this.colorScheme,
+    required this.tokens,
     required this.tickInset,
     required this.majorTickLength,
     required this.minorTickLength,
@@ -245,6 +319,7 @@ class _CompassDialPainter extends CustomPainter {
   });
 
   final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
   final double tickInset;
   final double majorTickLength;
   final double minorTickLength;
@@ -265,7 +340,7 @@ class _CompassDialPainter extends CustomPainter {
 
     // Border
     final borderPaint = Paint()
-      ..color = colorScheme.onSurface.withValues(alpha: 0.1)
+      ..color = colorScheme.onSurface.withValues(alpha: tokens.opacitySubtle)
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth;
 
@@ -273,7 +348,7 @@ class _CompassDialPainter extends CustomPainter {
 
     // Ticks
     final tickPaint = Paint()
-      ..color = colorScheme.outline.withValues(alpha: 0.5)
+      ..color = colorScheme.outline.withValues(alpha: tokens.opacityEmphasis)
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;
 

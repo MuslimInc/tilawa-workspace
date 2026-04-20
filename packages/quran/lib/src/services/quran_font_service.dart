@@ -13,7 +13,7 @@ import '../constants/quran_constants.dart';
 import '../constants/surah_header_banner_constants.dart';
 import '../helpers/app_logger.dart';
 import 'idle_scheduler.dart';
-import 'quran_data_service.dart';
+import 'mushaf_service.dart';
 import 'quran_page_preparation_service.dart';
 
 /// Service responsible for managing and loading QCF4 Quran fonts dynamically.
@@ -75,17 +75,17 @@ class QuranFontService extends ChangeNotifier {
   }
 
   Future<void> ensureQuranDataLoaded() async {
-    final bool wasLoaded = QuranDataService.instance.isLoaded;
-    await QuranDataService.instance.ensureLoaded();
+    final bool wasLoaded = MushafService.instance.isLoaded;
+    await MushafService.instance.ensureLoaded();
     // If data just became available, notify so the reader can retry page
     // preparation — _handleFontRegistryChanged guards on isQuranDataLoaded,
     // which would otherwise never re-fire after a slow data load.
-    if (!wasLoaded && QuranDataService.instance.isLoaded) {
+    if (!wasLoaded && MushafService.instance.isLoaded) {
       _scheduleNotify();
     }
   }
 
-  bool get isQuranDataLoaded => QuranDataService.instance.isLoaded;
+  bool get isQuranDataLoaded => MushafService.instance.isLoaded;
 
   void pauseBackgroundWarmUp() {
     if (!_isWarmUpPaused) {
@@ -448,7 +448,7 @@ class QuranFontService extends ChangeNotifier {
     );
     if (pageNumber == null) return;
 
-    final List<List<Map<String, dynamic>>>? pageData = QuranDataService.instance
+    final List<List<Map<String, dynamic>>>? pageData = MushafService.instance
         .getPageData(pageNumber);
     if (pageData == null) return;
 

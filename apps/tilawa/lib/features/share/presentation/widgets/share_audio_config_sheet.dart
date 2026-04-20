@@ -5,19 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:tilawa/core/extensions.dart';
-
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
-import '../share_progress_messages_l10n.dart';
-import '../utils/video_page_specs.dart';
-import '../utils/share_ayah_range_utils.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
+import '../share_progress_messages_l10n.dart';
+import '../utils/share_ayah_range_utils.dart';
+import '../utils/video_page_specs.dart';
+import 'mushaf_page_renderer.dart';
 import 'video_content_renderer.dart';
+import 'package:tilawa/features/share/domain/entities/mushaf_render_style.dart';
 
 /// Bottom sheet for configuring and generating an audio clip or reel.
 class ShareAudioConfigSheet extends StatefulWidget {
@@ -47,6 +48,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _toAyah;
   late int _maxAyah;
   final List<GlobalKey> _videoContentKeys = <GlobalKey>[];
+  final MushafPageRenderer _pageRenderer = MushafPageRenderer.forStyle(
+    MushafRenderStyle.highFidelity,
+  );
 
   @override
   void initState() {
@@ -128,18 +132,21 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
 
         return Stack(
           children: [
-            for (int index = 0; index < videoPageSpecs.length; index++)
+            if (state.status == ShareStatus.generating &&
+                state.capturingIndex != null)
               Positioned(
-                left: -2400 - (index * 1200),
+                left: -2400,
                 top: 0,
                 child: RepaintBoundary(
-                  key: _videoContentKeys[index],
+                  key: _videoContentKeys[state.capturingIndex!],
                   child: VideoContentPage(
                     surahNumber: widget.surahNumber,
-                    pageSpec: videoPageSpecs[index],
-                    pageIndex: index,
+                    pageSpec: videoPageSpecs[state.capturingIndex!],
+                    pageIndex: state.capturingIndex!,
                     totalPages: videoPageSpecs.length,
                     reciterName: reciterName,
+                    isCapturing: true,
+                    pageRenderer: _pageRenderer,
                   ),
                 ),
               ),
@@ -150,7 +157,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                   12,
                   8,
                   12,
-                  12 + MediaQuery.of(context).viewInsets.bottom,
+                  12 + MediaQuery.viewInsetsOf(context).bottom,
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -228,6 +235,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                           fromAyah: _fromAyah,
                                           toAyah: _toAyah,
                                           reciterName: reciterName,
+                                          style: MushafRenderStyle.highFidelity,
                                         ),
                                       ),
                               ),

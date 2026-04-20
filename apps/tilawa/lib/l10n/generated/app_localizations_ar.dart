@@ -1583,4 +1583,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get edit => 'تعديل';
+
+  @override
+  String get mushafRenderStyle => 'نمط المصحف';
+
+  @override
+  String get mushafRenderStyleHighFidelity => 'صورة';
+
+  @override
+  String get mushafRenderStyleDynamicLayout => 'نص';
 }

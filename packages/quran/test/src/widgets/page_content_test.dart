@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran/src/layout/quran_layout_strategy.dart';
 import 'package:quran/src/page_content.dart';
-import 'package:quran/src/services/quran_data_service.dart';
+import 'package:quran/src/services/mushaf_service.dart';
 import 'package:quran/src/services/quran_font_service.dart';
 import 'package:quran/src/services/quran_page_preparation_service.dart';
 import 'package:quran/src/widgets/page_metadata_strip.dart';
@@ -163,7 +163,7 @@ Future<PreparedQuranPage> _preparePageContent(WidgetTester tester) async {
   });
 
   await tester.runAsync(() async {
-    await QuranDataService.instance.ensureLoaded();
+    await MushafService.instance.ensureLoaded();
   });
 
   late final PreparedQuranPage preparedPage;

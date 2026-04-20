@@ -10,9 +10,9 @@ import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../widgets/reader_page_content_renderer.dart';
+import '../widgets/share_composer_widgets.dart';
 import '../widgets/share_poster_renderer.dart';
 import '../widgets/share_preview_widgets.dart';
-import '../widgets/share_composer_widgets.dart';
 
 enum ShareScreenshotLayout { readerPage, passageCard }
 
@@ -290,7 +290,14 @@ class _ReviewPanel extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onShare,
                 icon: const Icon(Icons.share_rounded),
-                label: Text(context.l10n.shareScreenshot),
+                label: Text(
+                  context.l10n.share,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                style: FilledButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+                ),
               ),
             ),
           ),
@@ -332,10 +339,7 @@ class _ComposerControls extends StatelessWidget {
         children: [
           ShareControlsCard(
             children: [
-              _LayoutTile(
-                layout: layout,
-                onLayoutChanged: onLayoutChanged,
-              ),
+              _LayoutTile(layout: layout, onLayoutChanged: onLayoutChanged),
               if (layout == ShareScreenshotLayout.passageCard) ...[
                 const ShareTileDivider(),
                 _AyahRangeTile(
@@ -422,31 +426,35 @@ class _AyahRangeTile extends StatelessWidget {
     return ShareControlTileShell(
       icon: Icons.format_list_numbered_rounded,
       label: context.l10n.ayah,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          AyahStepper(
-            value: fromAyah,
-            min: 1,
-            max: maxAyah,
-            onChanged: onFromChanged,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-            child: Text(
-              '-',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AyahStepper(
+              value: fromAyah,
+              min: 1,
+              max: maxAyah,
+              onChanged: onFromChanged,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              child: Text(
+                '-',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-          ),
-          AyahStepper(
-            value: toAyah,
-            min: 1,
-            max: maxAyah,
-            onChanged: onToChanged,
-          ),
-        ],
+            AyahStepper(
+              value: toAyah,
+              min: 1,
+              max: maxAyah,
+              onChanged: onToChanged,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -83,10 +83,11 @@ export 'src/services/interfaces/search_service.dart';
 export 'src/services/interfaces/surah_service.dart';
 export 'src/services/interfaces/text_normalization_service.dart';
 export 'src/services/interfaces/verse_service.dart';
-export 'src/services/page_snapshot_service.dart';
 // =============================================================================
 // SERVICE IMPLEMENTATIONS
 // =============================================================================
+export 'src/services/mushaf_service.dart';
+export 'src/services/page_snapshot_service.dart';
 export 'src/services/quran_data_service_impl.dart';
 export 'src/services/quran_font_service.dart';
 export 'src/services/quran_page_preparation_service.dart';

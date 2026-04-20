@@ -7,13 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A YouTube/Spotify-style sliding player panel.
 ///
@@ -113,7 +113,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       return;
     }
 
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
     // Negative primaryDelta = dragging up = expanding
     final delta = -primaryDelta / screenHeight;
     _expandController.value = (_expandController.value + delta * 1.5).clamp(
@@ -205,7 +205,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         }
 
         final double progress = _expandController.value;
-        final double screenHeight = MediaQuery.of(context).size.height;
+        final double screenHeight = MediaQuery.sizeOf(context).height;
         // When collapsed (progress=0), the height must be
         // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
         final double currentHeight = lerpDouble(
@@ -381,109 +381,117 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             // gracefully during the expand/collapse animation.
             Positioned.fill(
               child: SafeArea(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: constraints.maxHeight,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildExpandedAppBar(context, state),
+                child: TilawaContentBounds(
+                  kind: TilawaContentKind.media,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildExpandedAppBar(context, state),
 
-                            // Artwork — flexible via ConstrainedBox
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Container(
-                                width: 280,
-                                height: (constraints.maxHeight * 0.35).clamp(
-                                  0.0,
-                                  280,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.3,
+                              // Artwork — flexible via ConstrainedBox
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Container(
+                                  width: 280,
+                                  height: (constraints.maxHeight * 0.35).clamp(
+                                    0.0,
+                                    280,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 15),
                                       ),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 15),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: audio.artUri != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: audio.artUri!,
+                                            fit: BoxFit.cover,
+                                            errorWidget: (_, _, _) =>
+                                                _buildDefaultArt(context),
+                                          )
+                                        : _buildDefaultArt(context),
+                                  ),
+                                ),
+                              ),
+
+                              // Title & Artist
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      audio.title,
+                                      style: context
+                                          .responsiveStyle(
+                                            (t) => t.headlineMedium,
+                                          )
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      audio.artist ?? 'Unknown',
+                                      style: context
+                                          .responsiveStyle((t) => t.bodyLarge)
+                                          ?.copyWith(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.7,
+                                            ),
+                                          ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: audio.artUri != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: audio.artUri!,
-                                          fit: BoxFit.cover,
-                                          errorWidget: (_, _, _) =>
-                                              _buildDefaultArt(context),
-                                        )
-                                      : _buildDefaultArt(context),
-                                ),
                               ),
-                            ),
 
-                            // Title & Artist
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    audio.title,
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      color: Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    audio.artist ?? 'Unknown',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
+                              SizedBox(height: 16),
 
-                            SizedBox(height: 16),
+                              // Seek bar
+                              const _ExpandedProgressBar(),
 
-                            // Seek bar
-                            const _ExpandedProgressBar(),
+                              SizedBox(height: 16),
 
-                            SizedBox(height: 16),
+                              // Controls
+                              _buildControls(context, state),
 
-                            // Controls
-                            _buildControls(context, state),
-
-                            SizedBox(height: 24),
-                          ],
+                              SizedBox(height: 24),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
 
             // Drag handle at top
             Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
+              top: MediaQuery.paddingOf(context).top + 8,
               left: 0,
               right: 0,
               child: Center(

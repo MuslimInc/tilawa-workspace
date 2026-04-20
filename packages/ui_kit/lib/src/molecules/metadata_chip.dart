@@ -45,7 +45,8 @@ class MetadataChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: tokens.spaceSmall,
         children: [
-          if (icon != null) Icon(icon, size: tokens.iconSizeSmall, color: color),
+          if (icon != null)
+            Icon(icon, size: tokens.iconSizeSmall, color: color),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 220),
             child: Text(

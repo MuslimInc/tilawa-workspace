@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 
+/// A view displaying prayer times for an entire month in a table format.
 class MonthlyPrayerTimesView extends StatefulWidget {
   const MonthlyPrayerTimesView({
     super.key,
@@ -70,51 +72,19 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Column(
       children: [
-        // Month selector
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                onPressed: _goToPreviousMonth,
-                icon: const Icon(Icons.chevron_left),
-              ),
-              Text(
-                '${_getMonthName(_currentMonth)} $_currentYear',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                onPressed: _goToNextMonth,
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
+        _MonthSelector(
+          year: _currentYear,
+          month: _currentMonth,
+          onPrevious: _goToPreviousMonth,
+          onNext: _goToNextMonth,
         ),
-
-        // Table header
-        Container(
-          color: theme.colorScheme.surfaceContainerHighest,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Row(
-            children: [
-              _buildHeaderCell(context.l10n.day),
-              _buildHeaderCell(context.l10n.fajr, flex: 2),
-              _buildHeaderCell(context.l10n.dhuhr, flex: 2),
-              _buildHeaderCell(context.l10n.asr, flex: 2),
-              _buildHeaderCell(context.l10n.maghrib, flex: 2),
-              _buildHeaderCell(context.l10n.isha, flex: 2),
-            ],
-          ),
-        ),
-
-        // Prayer times list
+        SizedBox(height: tokens.spaceSmall),
+        const _TableHeader(),
         Expanded(
           child: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
             buildWhen: (previous, current) =>
@@ -126,67 +96,19 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
 
               return ListView.builder(
                 itemCount: state.monthlyPrayerTimes.length,
+                padding: EdgeInsets.only(
+                  top: tokens.spaceExtraSmall,
+                  bottom: TilawaShellPadding.of(context) + tokens.spaceLarge,
+                ),
                 itemBuilder: (context, index) {
-                  final PrayerTimeEntity prayerTimes =
-                      state.monthlyPrayerTimes[index];
+                  final prayerTimes = state.monthlyPrayerTimes[index];
                   final bool isToday = _isToday(prayerTimes.date);
-                  final isArabic =
-                      Localizations.localeOf(context).languageCode == 'ar';
 
-                  return Container(
-                    color: isToday
-                        ? theme.colorScheme.primaryContainer.withValues(
-                            alpha: 0.3,
-                          )
-                        : (index.isEven
-                              ? theme.colorScheme.surface
-                              : theme.colorScheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.3)),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        _buildDataCell(
-                          prayerTimes.date.day.toString(),
-                          isToday: isToday,
-                        ),
-                        _buildDataCell(
-                          widget.settings.use24HourFormat
-                              ? _formatTime(prayerTimes.fajr)
-                              : _formatTime12Hour(prayerTimes.fajr, isArabic),
-                          flex: 2,
-                        ),
-                        _buildDataCell(
-                          widget.settings.use24HourFormat
-                              ? _formatTime(prayerTimes.dhuhr)
-                              : _formatTime12Hour(prayerTimes.dhuhr, isArabic),
-                          flex: 2,
-                        ),
-                        _buildDataCell(
-                          widget.settings.use24HourFormat
-                              ? _formatTime(prayerTimes.asr)
-                              : _formatTime12Hour(prayerTimes.asr, isArabic),
-                          flex: 2,
-                        ),
-                        _buildDataCell(
-                          widget.settings.use24HourFormat
-                              ? _formatTime(prayerTimes.maghrib)
-                              : _formatTime12Hour(
-                                  prayerTimes.maghrib,
-                                  isArabic,
-                                ),
-                          flex: 2,
-                        ),
-                        _buildDataCell(
-                          widget.settings.use24HourFormat
-                              ? _formatTime(prayerTimes.isha)
-                              : _formatTime12Hour(prayerTimes.isha, isArabic),
-                          flex: 2,
-                        ),
-                      ],
-                    ),
+                  return _TableRow(
+                    prayerTimes: prayerTimes,
+                    isToday: isToday,
+                    index: index,
+                    use24HourFormat: widget.settings.use24HourFormat,
                   );
                 },
               );
@@ -197,37 +119,227 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
     );
   }
 
-  Widget _buildHeaderCell(String text, {int flex = 1}) {
-    return Expanded(
-      flex: flex,
-      child: Text(
-        text,
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildDataCell(String text, {bool isToday = false, int flex = 1}) {
-    return Expanded(
-      flex: flex,
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontWeight: isToday ? FontWeight.bold : null,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
   bool _isToday(DateTime date) {
     final now = DateTime.now();
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+  }
+}
+
+class _MonthSelector extends StatelessWidget {
+  const _MonthSelector({
+    required this.year,
+    required this.month,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  final int year;
+  final int month;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    final String monthName = _getMonthName(context, month);
+
+    return Container(
+      margin: EdgeInsets.all(tokens.spaceLarge),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: onPrevious,
+            icon: const Icon(Icons.chevron_left_rounded),
+            color: colorScheme.primary,
+          ),
+          Text(
+            '$monthName $year',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          IconButton(
+            onPressed: onNext,
+            icon: const Icon(Icons.chevron_right_rounded),
+            color: colorScheme.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getMonthName(BuildContext context, int month) {
+    final DateTime date = DateTime(DateTime.now().year, month, 1);
+    final String languageCode = Localizations.localeOf(context).languageCode;
+    return DateFormat.MMMM(languageCode).format(date);
+  }
+}
+
+class _TableHeader extends StatelessWidget {
+  const _TableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      padding: EdgeInsets.symmetric(
+        vertical: tokens.spaceSmall,
+        horizontal: tokens.spaceExtraSmall,
+      ),
+      child: Row(
+        children: [
+          _buildHeaderCell(context, context.l10n.day),
+          _buildHeaderCell(context, context.l10n.fajr, flex: 2),
+          _buildHeaderCell(context, context.l10n.dhuhr, flex: 2),
+          _buildHeaderCell(context, context.l10n.asr, flex: 2),
+          _buildHeaderCell(context, context.l10n.maghrib, flex: 2),
+          _buildHeaderCell(context, context.l10n.isha, flex: 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderCell(BuildContext context, String text, {int flex = 1}) {
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _TableRow extends StatelessWidget {
+  const _TableRow({
+    required this.prayerTimes,
+    required this.isToday,
+    required this.index,
+    required this.use24HourFormat,
+  });
+
+  final PrayerTimeEntity prayerTimes;
+  final bool isToday;
+  final int index;
+  final bool use24HourFormat;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
+    return Container(
+      color: isToday
+          ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+          : (index.isEven
+                ? Colors.transparent
+                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.2)),
+      padding: EdgeInsets.symmetric(
+        vertical: tokens.spaceSmall,
+        horizontal: tokens.spaceExtraSmall,
+      ),
+      child: Row(
+        children: [
+          _buildDataCell(
+            context,
+            prayerTimes.date.day.toString(),
+            isToday: isToday,
+          ),
+          _buildDataCell(
+            context,
+            use24HourFormat
+                ? _formatTime(prayerTimes.fajr)
+                : _formatTime12Hour(prayerTimes.fajr, isArabic),
+            flex: 2,
+            isToday: isToday,
+          ),
+          _buildDataCell(
+            context,
+            use24HourFormat
+                ? _formatTime(prayerTimes.dhuhr)
+                : _formatTime12Hour(prayerTimes.dhuhr, isArabic),
+            flex: 2,
+            isToday: isToday,
+          ),
+          _buildDataCell(
+            context,
+            use24HourFormat
+                ? _formatTime(prayerTimes.asr)
+                : _formatTime12Hour(prayerTimes.asr, isArabic),
+            flex: 2,
+            isToday: isToday,
+          ),
+          _buildDataCell(
+            context,
+            use24HourFormat
+                ? _formatTime(prayerTimes.maghrib)
+                : _formatTime12Hour(prayerTimes.maghrib, isArabic),
+            flex: 2,
+            isToday: isToday,
+          ),
+          _buildDataCell(
+            context,
+            use24HourFormat
+                ? _formatTime(prayerTimes.isha)
+                : _formatTime12Hour(prayerTimes.isha, isArabic),
+            flex: 2,
+            isToday: isToday,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataCell(
+    BuildContext context,
+    String text, {
+    bool isToday = false,
+    int flex = 1,
+  }) {
+    final theme = Theme.of(context);
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: isToday ? FontWeight.w900 : FontWeight.w500,
+          color: isToday
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
   String _formatTime(DateTime time) {
@@ -239,12 +351,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
     final period = time.hour >= 12
         ? (isArabic ? 'م' : 'PM')
         : (isArabic ? 'ص' : 'AM');
-    return '${hour == 0 ? 12 : hour}:${time.minute.toString().padLeft(2, '0')} $period';
-  }
-
-  String _getMonthName(int month) {
-    final DateTime date = DateTime(DateTime.now().year, month, 1);
-    final String languageCode = Localizations.localeOf(context).languageCode;
-    return DateFormat.MMMM(languageCode).format(date);
+    final String formattedHour = hour == 0 ? '12' : hour.toString();
+    return '$formattedHour:${time.minute.toString().padLeft(2, '0')} $period';
   }
 }

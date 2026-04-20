@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/location_row.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class PrayerTimesLocationHeader extends StatelessWidget {
   const PrayerTimesLocationHeader({
@@ -38,8 +39,15 @@ class PrayerTimesLocationHeader extends StatelessWidget {
       }
     }
 
+    final tokens = theme.tokens;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceExtraSmall,
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -52,22 +60,22 @@ class PrayerTimesLocationHeader extends StatelessWidget {
                   children: [
                     Text(
                       context.l10n.today,
-                      style: theme.textTheme.labelLarge?.copyWith(
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       dayName,
-                      style: theme.textTheme.headlineSmall?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       fullDate,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -75,20 +83,21 @@ class PrayerTimesLocationHeader extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 52,
-                height: 52,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
                 ),
                 child: Icon(
                   Icons.calendar_month_rounded,
+                  size: 20,
                   color: theme.colorScheme.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: tokens.spaceMedium),
           LocationRow(
             locationName: locationName,
             isLoading: isLoading,

@@ -48,7 +48,6 @@ class BismillahWidget extends StatelessWidget {
   final Color? color;
   final String? fontFamily;
 
-  static const double _lineHeight = 1.8;
   static const double _calligraphyFontScale = 0.8;
 
   @override

@@ -10,8 +10,8 @@ import 'helpers/app_logger.dart';
 import 'helpers/convert_to_arabic_number.dart';
 import 'layout/quran_layout_strategy.dart';
 import 'services/idle_scheduler.dart';
+import 'services/mushaf_service.dart';
 import 'services/page_snapshot_service.dart';
-import 'services/quran_data_service.dart';
 import 'services/quran_page_preparation_service.dart';
 import 'services/quran_special_line.dart';
 import 'widgets/bismillah_widget.dart';
@@ -301,7 +301,7 @@ class _PageContentState extends State<PageContent>
   }
 
   void _primePageData() {
-    final QuranDataService dataService = QuranDataService.instance;
+    final MushafService dataService = MushafService.instance;
     assert(
       dataService.isLoaded,
       'PageContent requires QuranDataService to be loaded before it builds.',
@@ -819,7 +819,7 @@ class _PageContentState extends State<PageContent>
 
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
     final List<List<Map<String, dynamic>>> rawLines =
-        QuranDataService.instance.getPageData(pageNumber) ??
+        MushafService.instance.getPageData(pageNumber) ??
         List.generate(
           QuranConstants.linesPerPage,
           (_) => <Map<String, dynamic>>[],
@@ -856,7 +856,7 @@ class _PageContentState extends State<PageContent>
     }
     final List<Map<String, dynamic>> words = lines[lineIndex];
     if (words.isEmpty) return [];
-    final QuranDataService qData = QuranDataService.instance;
+    final MushafService qData = MushafService.instance;
     return words.map((word) {
       final text = word['text'] as String;
       final int surah = int.tryParse(word['surah'].toString()) ?? 0;
@@ -911,19 +911,20 @@ class _PageContentState extends State<PageContent>
       _getSpecialLine(page, line)?.isBismillah ?? false;
 
   bool _pageHasSurahHeader(int page) =>
-      QuranDataService.instance.pageHasSurahHeader(page);
+      MushafService.instance.pageHasSurahHeader(page);
 
   int _getSurahAtLine(int page, int line) {
     return _getSpecialLine(page, line)?.surahNumber ?? 0;
   }
 
   QuranSpecialLine? _getSpecialLine(int page, int line) {
-    return QuranDataService.instance.getSpecialLine(page, line);
+    return MushafService.instance.getSpecialLine(page, line);
   }
 
   _PageMetaInfo _buildPageMeta(int page) {
-    final Map<String, dynamic> rawMeta = QuranDataService.instance
-        .getPageMetadata(page);
+    final Map<String, dynamic> rawMeta = MushafService.instance.getPageMetadata(
+      page,
+    );
     final surahNumbers = rawMeta['surahNumbers'] as List<int>;
     final List<String> surahNames = surahNumbers
         .map((n) => widget.surahNameBuilder?.call(n) ?? 'Surah $n')

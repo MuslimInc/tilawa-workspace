@@ -9,9 +9,9 @@ import '../helpers/app_logger.dart';
 import 'quran_special_line.dart';
 
 /// A singleton service to manage Quran data loading and caching.
-class QuranDataService {
-  QuranDataService._internal();
-  static final QuranDataService instance = QuranDataService._internal();
+class MushafService {
+  MushafService._internal();
+  static final MushafService instance = MushafService._internal();
 
   /// Raw structure of the Mushaf after V4 JSON decoding.
   /// A map for fast indexing of pages containing surahs and lines.
@@ -39,7 +39,7 @@ class QuranDataService {
     _loadCompleter = Completer<void>();
     final startTime = DateTime.now();
     if (!kReleaseMode) {
-      logger.i('[QuranDataService] Start loading Quran data...');
+      logger.i('[MushafService] Start loading Quran data...');
     }
 
     try {
@@ -68,15 +68,13 @@ class QuranDataService {
       _loadCompleter!.complete();
       final Duration duration = DateTime.now().difference(startTime);
       if (!kReleaseMode) {
-        logger.i(
-          '[QuranDataService] Data loaded in ${duration.inMilliseconds}ms',
-        );
+        logger.i('[MushafService] Data loaded in ${duration.inMilliseconds}ms');
       }
     } catch (e, s) {
       _loadCompleter?.completeError(e, s);
       _loadCompleter = null; // Allow retry on failure
       logger.e(
-        '[QuranDataService] Error loading Quran data',
+        '[MushafService] Error loading Quran data',
         error: e,
         stackTrace: s,
       );

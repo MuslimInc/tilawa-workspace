@@ -73,7 +73,9 @@ void main() async {
     }
     sb.writeln('};');
 
-    final outputFile = File('../../packages/quran/lib/src/data/qcf_v4_data.dart');
+    final outputFile = File(
+      '../../packages/quran/lib/src/data/qcf_v4_data.dart',
+    );
     await outputFile.parent.create(recursive: true);
     await outputFile.writeAsString(sb.toString());
     logger.d('Wrote ${outputFile.path}');

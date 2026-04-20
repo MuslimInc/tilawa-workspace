@@ -2149,5 +2149,17 @@
     "edit": "Edit",
     "@edit": {
         "description": "Button label to go back and edit the share"
+    },
+    "mushafRenderStyle": "Mushaf Style",
+    "@mushafRenderStyle": {
+        "description": "Label for the Mushaf render style selector in the reel composer"
+    },
+    "mushafRenderStyleHighFidelity": "Image",
+    "@mushafRenderStyleHighFidelity": {
+        "description": "Label for the high-fidelity (pre-rendered page image) render option"
+    },
+    "mushafRenderStyleDynamicLayout": "Text",
+    "@mushafRenderStyleDynamicLayout": {
+        "description": "Label for the dynamic-layout (QCF/QCP fonts) render option"
     }
 }

@@ -169,7 +169,17 @@ class _PlayerApp extends StatelessWidget {
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
-                builder: DevicePreview.appBuilder,
+                builder: (context, child) {
+                  final Widget app = DevicePreview.appBuilder(context, child);
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: MediaQuery.textScalerOf(
+                        context,
+                      ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
+                    ),
+                    child: app,
+                  );
+                },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
                   extensions: [QuranReaderTheme.light],

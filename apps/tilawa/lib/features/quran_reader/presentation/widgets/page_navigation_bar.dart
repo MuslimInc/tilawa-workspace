@@ -221,7 +221,7 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
         pageWidth;
     final double maxWidth = availableWidth.clamp(
       navTheme.previewPillMinWidth,
-      MediaQuery.sizeOf(context).width * navTheme.previewPillMaxWidthFactor,
+      availableWidth * navTheme.previewPillMaxWidthFactor,
     );
 
     return desiredWidth.clamp(navTheme.previewPillMinWidth, maxWidth);

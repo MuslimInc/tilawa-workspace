@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quran/quran.dart';
+import 'package:quran/quran.dart' as quran;
 // ignore: implementation_imports
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/mushaf_render_style.dart';
 import '../utils/video_page_specs.dart';
-
-// A single static notifier is safe here: overlays are always hidden during
-// off-screen video capture and this value never changes at runtime.
-final ValueNotifier<bool> _kHiddenOverlaysListenable = ValueNotifier<bool>(
-  false,
-);
+import 'mushaf_page_renderer.dart';
 
 /// A Quran-focused 9:16 canvas used for video generation.
-class VideoContentRenderer extends StatelessWidget {
+class VideoContentRenderer extends StatefulWidget {
   const VideoContentRenderer({
     super.key,
     required this.surahNumber,
@@ -22,6 +18,7 @@ class VideoContentRenderer extends StatelessWidget {
     this.reciterName,
     this.pageSpecs,
     this.isCapturing = false,
+    this.style = MushafRenderStyle.highFidelity,
   });
 
   final int surahNumber;
@@ -29,6 +26,7 @@ class VideoContentRenderer extends StatelessWidget {
   final int toAyah;
   final String? reciterName;
   final List<VideoPageSpec>? pageSpecs;
+  final MushafRenderStyle style;
 
   /// When `true`, the render tree drops animated/cosmetic layers (ambient
   /// orbs, drop shadow) because those costs are wasted on a still-image
@@ -37,23 +35,45 @@ class VideoContentRenderer extends StatelessWidget {
   final bool isCapturing;
 
   @override
+  State<VideoContentRenderer> createState() => _VideoContentRendererState();
+}
+
+class _VideoContentRendererState extends State<VideoContentRenderer> {
+  late MushafPageRenderer _pageRenderer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageRenderer = MushafPageRenderer.forStyle(widget.style);
+  }
+
+  @override
+  void didUpdateWidget(VideoContentRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.style != widget.style) {
+      _pageRenderer = MushafPageRenderer.forStyle(widget.style);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<VideoPageSpec> effectivePageSpecs =
-        pageSpecs ??
+        widget.pageSpecs ??
         buildVideoPageSpecs(
-          surahNumber: surahNumber,
-          fromAyah: fromAyah,
-          toAyah: toAyah,
+          surahNumber: widget.surahNumber,
+          fromAyah: widget.fromAyah,
+          toAyah: widget.toAyah,
         );
 
     if (effectivePageSpecs.length == 1) {
       return VideoContentPage(
-        surahNumber: surahNumber,
+        surahNumber: widget.surahNumber,
         pageSpec: effectivePageSpecs.single,
         pageIndex: 0,
         totalPages: 1,
-        reciterName: reciterName,
-        isCapturing: isCapturing,
+        reciterName: widget.reciterName,
+        isCapturing: widget.isCapturing,
+        pageRenderer: _pageRenderer,
       );
     }
 
@@ -64,12 +84,13 @@ class VideoContentRenderer extends StatelessWidget {
         itemCount: effectivePageSpecs.length,
         itemBuilder: (context, index) {
           return VideoContentPage(
-            surahNumber: surahNumber,
+            surahNumber: widget.surahNumber,
             pageSpec: effectivePageSpecs[index],
             pageIndex: index,
             totalPages: effectivePageSpecs.length,
-            reciterName: reciterName,
-            isCapturing: isCapturing,
+            reciterName: widget.reciterName,
+            isCapturing: widget.isCapturing,
+            pageRenderer: _pageRenderer,
           );
         },
       ),
@@ -86,6 +107,7 @@ class VideoContentPage extends StatelessWidget {
     required this.totalPages,
     this.reciterName,
     this.isCapturing = false,
+    required this.pageRenderer,
   });
 
   final int surahNumber;
@@ -93,13 +115,14 @@ class VideoContentPage extends StatelessWidget {
   final int pageIndex;
   final int totalPages;
   final String? reciterName;
+  final MushafPageRenderer pageRenderer;
 
   /// Mirrors [VideoContentRenderer.isCapturing] — disables ambient orbs and
   /// the heavy BoxShadow while capturing a frozen frame for FFmpeg.
   final bool isCapturing;
 
-  String get _arabicSurahName => getSurahNameArabic(surahNumber);
-  String get _englishSurahName => getSurahNameEnglish(surahNumber);
+  String get _arabicSurahName => quran.getSurahNameArabic(surahNumber);
+  String get _englishSurahName => quran.getSurahNameEnglish(surahNumber);
 
   String get _ayahRangeLabel => pageSpec.fromAyah == pageSpec.toAyah
       ? '${_VideoStrings.ayah} ${pageSpec.fromAyah}'
@@ -130,8 +153,6 @@ class VideoContentPage extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Ambient orbs are animated and only add cost to a single-frame
-            // capture — skip them during offscreen encode.
             if (!isCapturing)
               const Positioned(
                 top: -140,
@@ -188,9 +209,6 @@ class VideoContentPage extends StatelessWidget {
                             _VideoPalette.warmParchment,
                           ],
                         ),
-                        // A 28px blur on a 1080-wide surface is a significant
-                        // per-frame cost; it also falls behind an opaque card
-                        // so the visual delta on capture is minimal.
                         boxShadow: isCapturing
                             ? const <BoxShadow>[]
                             : [
@@ -216,6 +234,7 @@ class VideoContentPage extends StatelessWidget {
                             child: _VideoMushafPage(
                               surahNumber: surahNumber,
                               pageSpec: pageSpec,
+                              pageRenderer: pageRenderer,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -234,57 +253,28 @@ class VideoContentPage extends StatelessWidget {
   }
 }
 
-class _VideoMushafPage extends StatefulWidget {
-  const _VideoMushafPage({required this.surahNumber, required this.pageSpec});
+class _VideoMushafPage extends StatelessWidget {
+  const _VideoMushafPage({
+    required this.surahNumber,
+    required this.pageSpec,
+    required this.pageRenderer,
+  });
 
   final int surahNumber;
   final VideoPageSpec pageSpec;
+  final MushafPageRenderer pageRenderer;
 
-  @override
-  State<_VideoMushafPage> createState() => _VideoMushafPageState();
-}
-
-class _VideoMushafPageState extends State<_VideoMushafPage> {
-  // Stable callback reference — PageContent.didUpdateWidget checks
-  // verseBackgroundColor with reference equality (!=). A new closure on every
-  // build() always compares unequal, which forces a full snapshot invalidation
-  // cycle (disable → re-rasterize → enable) on every parent rebuild.
-  late Color? Function(int, int) _verseBackgroundColor;
-
-  @override
-  void initState() {
-    super.initState();
-    _verseBackgroundColor = _buildVerseBackgroundColor();
-  }
-
-  @override
-  void didUpdateWidget(_VideoMushafPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.surahNumber != widget.surahNumber ||
-        oldWidget.pageSpec.fromAyah != widget.pageSpec.fromAyah ||
-        oldWidget.pageSpec.toAyah != widget.pageSpec.toAyah) {
-      _verseBackgroundColor = _buildVerseBackgroundColor();
+  Color? _verseBackgroundColor(int currentSurah, int verseNumber) {
+    if (currentSurah != surahNumber ||
+        verseNumber < pageSpec.fromAyah ||
+        verseNumber > pageSpec.toAyah) {
+      return null;
     }
-  }
-
-  Color? Function(int, int) _buildVerseBackgroundColor() {
-    final int surahNumber = widget.surahNumber;
-    final int fromAyah = widget.pageSpec.fromAyah;
-    final int toAyah = widget.pageSpec.toAyah;
-    return (int currentSurah, int verseNumber) {
-      if (currentSurah != surahNumber ||
-          verseNumber < fromAyah ||
-          verseNumber > toAyah) {
-        return null;
-      }
-      return _VideoPalette.gold.withValues(alpha: 0.24);
-    };
+    return _VideoPalette.gold.withValues(alpha: 0.24);
   }
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -297,57 +287,13 @@ class _VideoMushafPageState extends State<_VideoMushafPage> {
         borderRadius: BorderRadius.circular(26),
         child: DecoratedBox(
           decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final metrics = StandardQuranLayoutStrategy().calculateMetrics(
-                context,
-                constraints,
-                widget.pageSpec.pageNumber,
-              );
-
-              return ListenableBuilder(
-                listenable: QuranFontService.instance,
-                builder: (context, _) {
-                  final bool isFontLoaded = QuranFontService.instance
-                      .isFontLoaded(widget.pageSpec.pageNumber);
-
-                  if (!isFontLoaded) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
-
-                  final preparedPage = QuranPagePreparationService.instance
-                      .preparePage(
-                        pageNumber: widget.pageSpec.pageNumber,
-                        metrics: metrics,
-                        viewportWidth: constraints.maxWidth,
-                        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
-                        verseBackgroundColor: _verseBackgroundColor,
-                      );
-
-                  return MediaQuery(
-                    data: mediaQuery.copyWith(
-                      padding: EdgeInsets.zero,
-                      viewPadding: EdgeInsets.zero,
-                      viewInsets: EdgeInsets.zero,
-                    ),
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: PageContent(
-                        pageNumber: widget.pageSpec.pageNumber,
-                        preparedPage: preparedPage,
-                        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
-                        pageBackgroundColor: const Color(0xFFFFF8ED),
-                        verseBackgroundColor: _verseBackgroundColor,
-                        uiTextDirection: TextDirection.rtl,
-                        showOverlaysListenable: _kHiddenOverlaysListenable,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+          child: pageRenderer.build(
+            context: context,
+            pageSpec: pageSpec,
+            surahNumber: surahNumber,
+            verseBackgroundColor: _verseBackgroundColor,
+            textColor: _VideoPalette.ink.withValues(alpha: 0.96),
+            pageBackgroundColor: const Color(0xFFFFF8ED),
           ),
         ),
       ),
@@ -416,8 +362,8 @@ class _SurahHero extends StatelessWidget {
   final String mushafPageLabel;
   final String? reciterName;
 
-  static const SurahHeaderGlyphProvider _glyphProvider =
-      QcfSurahHeaderGlyphProvider();
+  static const quran.SurahHeaderGlyphProvider _glyphProvider =
+      quran.QcfSurahHeaderGlyphProvider();
 
   @override
   Widget build(BuildContext context) {
@@ -439,8 +385,8 @@ class _SurahHero extends StatelessWidget {
           Text(
             _glyphProvider.glyphForSurah(surahNumber),
             style: const TextStyle(
-              fontFamily: SurahHeaderBannerConstants.fontFamily,
-              package: SurahHeaderBannerConstants.packageName,
+              fontFamily: quran.SurahHeaderBannerConstants.fontFamily,
+              package: quran.SurahHeaderBannerConstants.packageName,
               fontSize: 78,
               color: _VideoPalette.deepGreen,
             ),

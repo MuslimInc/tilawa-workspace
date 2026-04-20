@@ -7,7 +7,6 @@ import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
-import 'package:quran_image/verse_marker.dart';
 
 import 'core/constants/surah_header_constants.dart';
 import 'core/constants/surah_names.dart';
@@ -213,78 +212,19 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 constraints.maxHeight,
               );
 
-              final children = <Widget>[
-                for (final header in _headers)
-                  Positioned(
-                    key: ValueKey<String>('header:${header.lineIndex}'),
-                    left: 0,
-                    right: 0,
-                    top: yOffsets[header.lineIndex],
-                    height: _lineHeight,
-                    child: SurahHeaderBanner(
-                      header: header,
-                      layoutPolicy: widget.surahHeaderLayoutPolicy,
-                      pageWidth: _pageWidth,
-                      pageHeight: _pageHeight,
-                      lineHeight: _lineHeight,
-                      bannerLocalPath: _imageCacheRepository
-                          .surahHeaderBannerFilePath(),
-                      devicePixelRatio: _devicePixelRatio,
-                    ),
-                  ),
-                for (
-                  var index = 0;
-                  index < SurahHeaderConstants.lineCount;
-                  index++
-                )
-                  Positioned(
-                    key: ValueKey<int>(index),
-                    left: 0,
-                    right: 0,
-                    top: yOffsets[index],
-                    height: _lineHeight,
-                    child: QuranLineImage(provider: _lineProviders[index]),
-                  ),
-                if (_markers.isNotEmpty)
-                  Positioned.fill(
-                    key: const ValueKey<String>('markers'),
-                    child: RepaintBoundary(
-                      child: VerseMarkersOverlay(
-                        markers: _markers,
-                        pageWidth: _pageWidth,
-                        lineHeight: _lineHeight,
-                        yOffsets: yOffsets,
-                      ),
-                    ),
-                  ),
-              ];
-
-              final stack = SizedBox(
-                width: _pageWidth,
-                height: layoutHeight,
-                child: Stack(clipBehavior: Clip.none, children: children),
+              return QuranImageContent(
+                pageNumber: widget.pageNumber,
+                pageWidth: _pageWidth,
+                pageHeight: _pageHeight,
+                lineHeight: _lineHeight,
+                yOffsets: yOffsets,
+                headers: _headers,
+                markers: _markers,
+                lineProviders: _lineProviders,
+                surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
+                imageCacheRepository: _imageCacheRepository,
+                devicePixelRatio: _devicePixelRatio,
               );
-
-              final content = RepaintBoundary(
-                child: _isLandscape
-                    ? SingleChildScrollView(child: stack)
-                    : stack,
-              );
-
-              PerfLogger.logElapsed(
-                sw,
-                widgetName: 'QuranImagePage',
-                message:
-                    'page=${widget.pageNumber} build '
-                    'cacheWidth=$_cacheWidth '
-                    '${_isLandscape ? "landscape" : "portrait"} '
-                    'layoutHeight=${layoutHeight.toStringAsFixed(1)} '
-                    'lineHeight=${_lineHeight.toStringAsFixed(1)} '
-                    'headers=${_headers.length} '
-                    'markers=${_markers.length}',
-              );
-
-              return content;
             },
           ),
         ),

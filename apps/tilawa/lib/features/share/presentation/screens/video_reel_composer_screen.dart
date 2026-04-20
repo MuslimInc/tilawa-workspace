@@ -12,6 +12,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 import '../../data/services/reciter_audio_mapping.dart';
+import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_limits.dart';
 import '../cubit/share_cubit.dart';
@@ -20,9 +21,9 @@ import '../share_progress_messages_l10n.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../utils/share_reciter_options.dart';
 import '../utils/video_page_specs.dart';
+import '../widgets/share_composer_widgets.dart';
 import '../widgets/share_preview_widgets.dart';
 import '../widgets/video_content_renderer.dart';
-import '../widgets/share_composer_widgets.dart';
 
 enum ShareDurationPreset { auto, short, medium, long }
 
@@ -257,6 +258,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
           status == ShareStatus.sharing;
     });
 
+    final mushafStyle = context.select<ShareCubit, MushafRenderStyle>(
+      (c) => c.state.mushafStyle,
+    );
+
     return Stack(
       children: [
         if (_cachedVideoPageSpecs.length > 1 ||
@@ -269,6 +274,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 videoPageSpecs: _cachedVideoPageSpecs,
                 surahNumber: widget.surahNumber,
                 reciterName: _currentReciterName,
+                style: mushafStyle,
               ),
             ),
           ),
@@ -282,7 +288,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
               prev.status != curr.status ||
               prev.content != curr.content ||
               prev.errorMessage != curr.errorMessage ||
-              prev.reciterName != curr.reciterName,
+              prev.reciterName != curr.reciterName ||
+              prev.mushafStyle != curr.mushafStyle,
           builder: (context, state) {
             final isBusy =
                 state.status == ShareStatus.capturing ||
@@ -317,7 +324,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                         filePath: (state.content as ShareScreenshot).filePath,
                         surahName: state.content!.surahName,
                       )
-                    : _buildLivePreview(reciterName),
+                    : _buildLivePreview(reciterName, state.mushafStyle),
               ),
               bottomPanel: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -368,6 +375,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 _handleGenerateVideo(context),
                             onCancel: () =>
                                 context.read<ShareCubit>().cancelGeneration(),
+                            mushafStyle: state.mushafStyle,
+                            onMushafStyleChanged: (style) => context
+                                .read<ShareCubit>()
+                                .updateMushafStyle(style),
                           ),
                   ),
                 ],
@@ -422,17 +433,16 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     final messages = context.shareProgressMessages;
     final viaLabel = context.l10n.sharedViaTilawa;
 
-    // Collect the Mushaf pages the capture surface will render so we can warm
-    // their QCF fonts BEFORE making the offscreen tree visible. Without this,
-    // the very first build of `VideoContentRenderer` races the font loader
-    // and `PageContent` falls back to its debug "NO DATA" blank frame.
-    final Set<int> capturePages = <int>{
-      for (final spec in _cachedVideoPageSpecs) spec.pageNumber,
-    };
-    await Future.wait([
-      for (final page in capturePages)
-        QuranFontService.instance.ensureSingleFontLoaded(page),
-    ]);
+    // their QCF fonts BEFORE making the offscreen tree visible.
+    if (cubit.state.mushafStyle == MushafRenderStyle.dynamicLayout) {
+      final Set<int> capturePages = <int>{
+        for (final spec in _cachedVideoPageSpecs) spec.pageNumber,
+      };
+      await Future.wait([
+        for (final page in capturePages)
+          QuranFontService.instance.ensureSingleFontLoaded(page),
+      ]);
+    }
     if (!mounted) return;
 
     setState(() => _singleVideoCaptureSurfaceVisible = true);
@@ -456,39 +466,29 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     );
   }
 
-  Future<void> _handleQuickScreenshot(
-    BuildContext context,
-    String reciterName,
-  ) async {
-    final cubit = context.read<ShareCubit>();
-    final viaLabel = context.l10n.sharedViaTilawa;
-    final preparingLabel = context.l10n.preparingScreenshot;
-
-    cubit.prepareScreenshot(
-      boundaryKey: _videoBoundaryKeys[0] ?? GlobalKey(),
-      surahName: getSurahNameArabic(widget.surahNumber),
-      pageNumber: getPageNumber(widget.surahNumber, _fromAyah),
-      appName: 'Tilawa',
-      sharedViaLabel: viaLabel,
-      preparingImageLabel: preparingLabel,
-    );
-  }
-
   Widget? _buildBackdrop() {
     final notifier = widget.readerPreviewBytesNotifier;
     if (notifier == null) return null;
-    return ValueListenableBuilder<Uint8List?>(
-      valueListenable: notifier,
-      builder: (context, bytes, _) => bytes == null
-          ? const SizedBox.shrink()
-          : Opacity(
-              opacity: 0.16,
-              child: Image.memory(bytes, fit: BoxFit.cover),
-            ),
+    // Opacity forces a saveLayer each frame. Bake the alpha into the image via
+    // modulate blending so the compositor can skip the offscreen pass.
+    const Color modulate = Color(0x29FFFFFF); // ~0.16 alpha
+    return RepaintBoundary(
+      child: ValueListenableBuilder<Uint8List?>(
+        valueListenable: notifier,
+        builder: (context, bytes, _) => bytes == null
+            ? const SizedBox.shrink()
+            : Image.memory(
+                bytes,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                color: modulate,
+                colorBlendMode: BlendMode.modulate,
+              ),
+      ),
     );
   }
 
-  Widget _buildLivePreview(String reciterName) {
+  Widget _buildLivePreview(String reciterName, MushafRenderStyle style) {
     final theme = Theme.of(context);
     final chipForeground = theme.colorScheme.onSurface;
     final chipBackground = theme.colorScheme.surface.withValues(alpha: 0.08);
@@ -537,14 +537,17 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
             // FittedBox/AspectRatio doesn't layout correctly and breaks
             // cross-page selections; the offscreen capture pipeline still
             // renders every spec via `_OffScreenRenderers`.
-            child: VideoContentRenderer(
-              surahNumber: widget.surahNumber,
-              fromAyah: _fromAyah,
-              toAyah: _toAyah,
-              reciterName: reciterName,
-              pageSpecs: _cachedVideoPageSpecs.isEmpty
-                  ? null
-                  : [_cachedVideoPageSpecs.first],
+            child: RepaintBoundary(
+              child: VideoContentRenderer(
+                surahNumber: widget.surahNumber,
+                fromAyah: _fromAyah,
+                toAyah: _toAyah,
+                reciterName: reciterName,
+                style: style,
+                pageSpecs: _cachedVideoPageSpecs.isEmpty
+                    ? null
+                    : [_cachedVideoPageSpecs.first],
+              ),
             ),
           ),
         ),
@@ -573,11 +576,13 @@ class _OffScreenRenderers extends StatelessWidget {
     required this.videoPageSpecs,
     required this.surahNumber,
     required this.reciterName,
+    required this.style,
   });
   final Map<int, GlobalKey> videoBoundaryKeys;
   final List<VideoPageSpec> videoPageSpecs;
   final int surahNumber;
   final String reciterName;
+  final MushafRenderStyle style;
   @override
   Widget build(BuildContext context) {
     // Offstage capture surfaces: stack N × 1080×1920 frames vertically without
@@ -605,6 +610,7 @@ class _OffScreenRenderers extends StatelessWidget {
                 toAyah: videoPageSpecs[i].toAyah,
                 reciterName: reciterName,
                 pageSpecs: [videoPageSpecs[i]],
+                style: style,
                 // Flags ambient orbs + heavy shadow off for the capture pass.
                 // The PNG is downsampled to the target video resolution inside
                 // ScreenshotService, so those layers add build cost without any
@@ -631,13 +637,17 @@ class _VideoStepIndicator extends StatelessWidget {
     if (!isBusy) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    return SizedBox(
-      height: tokens.progressHeight,
-      child: LinearProgressIndicator(
-        backgroundColor: theme.colorScheme.surface.withValues(
-          alpha: tokens.opacitySubtle,
+    // Isolate the indeterminate progress animation so its continuous repaint
+    // does not invalidate the heavy preview rendered alongside it.
+    return RepaintBoundary(
+      child: SizedBox(
+        height: tokens.progressHeight,
+        child: LinearProgressIndicator(
+          backgroundColor: theme.colorScheme.surface.withValues(
+            alpha: tokens.opacitySubtle,
+          ),
+          valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
         ),
-        valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
       ),
     );
   }
@@ -709,6 +719,8 @@ class _ComposerControls extends StatelessWidget {
     required this.onToChanged,
     required this.onPrimaryAction,
     required this.onCancel,
+    required this.mushafStyle,
+    required this.onMushafStyleChanged,
   });
   final ShareDurationPreset durationPreset;
   final int fromAyah, toAyah, maxAyah;
@@ -718,6 +730,8 @@ class _ComposerControls extends StatelessWidget {
   final VoidCallback onReciterTap, onPrimaryAction, onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
   final ValueChanged<int> onFromChanged, onToChanged;
+  final MushafRenderStyle mushafStyle;
+  final ValueChanged<MushafRenderStyle> onMushafStyleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -761,6 +775,11 @@ class _ComposerControls extends StatelessWidget {
                 maxAyah: maxAyah,
                 onFromChanged: onFromChanged,
                 onToChanged: onToChanged,
+              ),
+              const ShareTileDivider(),
+              _MushafModeTile(
+                style: mushafStyle,
+                onChanged: onMushafStyleChanged,
               ),
             ],
           ),
@@ -841,6 +860,84 @@ class _ReciterTile extends StatelessWidget {
   }
 }
 
+class _MushafModeTile extends StatelessWidget {
+  const _MushafModeTile({required this.style, required this.onChanged});
+
+  final MushafRenderStyle style;
+  final ValueChanged<MushafRenderStyle> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return ShareControlTileShell(
+      icon: Icons.style_rounded,
+      label: context.l10n.mushafRenderStyle,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _ModeChoice(
+            label: context.l10n.mushafRenderStyleHighFidelity,
+            selected: style == MushafRenderStyle.highFidelity,
+            onTap: () => onChanged(MushafRenderStyle.highFidelity),
+          ),
+          SizedBox(width: tokens.spaceExtraSmall),
+          _ModeChoice(
+            label: context.l10n.mushafRenderStyleDynamicLayout,
+            selected: style == MushafRenderStyle.dynamicLayout,
+            onTap: () => onChanged(MushafRenderStyle.dynamicLayout),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeChoice extends StatelessWidget {
+  const _ModeChoice({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected
+              ? theme.colorScheme.primary.withValues(alpha: 0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? theme.colorScheme.primary : Colors.transparent,
+          ),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AyahRangeTile extends StatelessWidget {
   const _AyahRangeTile({
     required this.fromAyah,
@@ -863,31 +960,35 @@ class _AyahRangeTile extends StatelessWidget {
     return ShareControlTileShell(
       icon: Icons.format_list_numbered_rounded,
       label: context.l10n.ayah,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          AyahStepper(
-            value: fromAyah,
-            min: 1,
-            max: maxAyah,
-            onChanged: onFromChanged,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-            child: Text(
-              '-',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AyahStepper(
+              value: fromAyah,
+              min: 1,
+              max: maxAyah,
+              onChanged: onFromChanged,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              child: Text(
+                '-',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-          ),
-          AyahStepper(
-            value: toAyah,
-            min: 1,
-            max: maxAyah,
-            onChanged: onToChanged,
-          ),
-        ],
+            AyahStepper(
+              value: toAyah,
+              min: 1,
+              max: maxAyah,
+              onChanged: onToChanged,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -913,7 +1014,7 @@ class _ReciterPickerSheetState extends State<_ReciterPickerSheet> {
         .where((o) => o.name.toLowerCase().contains(_query.toLowerCase()))
         .toList();
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: MediaQuery.sizeOf(context).height * 0.8,
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -957,12 +1058,9 @@ class _ScreenshotReviewPreview extends StatelessWidget {
   final String filePath, surahName;
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: MediaPreviewFrame(
-        aspectRatio: 4 / 5,
-        padding: 8,
-        child: GeneratedImagePreview(filePath: filePath),
-      ),
+    return AspectRatio(
+      aspectRatio: 4 / 5,
+      child: GeneratedImagePreview(filePath: filePath),
     );
   }
 }
@@ -979,16 +1077,10 @@ class _VideoReviewPreview extends StatelessWidget {
   final ValueChanged<bool> onMuteChanged;
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: MediaPreviewFrame(
-        aspectRatio: 9 / 16,
-        padding: 8,
-        child: _GeneratedVideoPreview(
-          filePath: filePath,
-          isMuted: isMuted,
-          onMuteChanged: onMuteChanged,
-        ),
-      ),
+    return _GeneratedVideoPreview(
+      filePath: filePath,
+      isMuted: isMuted,
+      onMuteChanged: onMuteChanged,
     );
   }
 }
@@ -1034,9 +1126,16 @@ class _GeneratedVideoPreviewState extends State<_GeneratedVideoPreview> {
     if (_controller == null || !_controller!.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-    return AspectRatio(
-      aspectRatio: _controller!.value.aspectRatio,
-      child: VideoPlayer(_controller!),
+    return SizedBox.expand(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        clipBehavior: Clip.hardEdge,
+        child: SizedBox(
+          width: _controller!.value.size.width,
+          height: _controller!.value.size.height,
+          child: VideoPlayer(_controller!),
+        ),
+      ),
     );
   }
 }

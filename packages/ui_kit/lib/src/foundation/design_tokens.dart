@@ -30,6 +30,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
+    required this.contentMaxWidthReader,
+    required this.contentMaxWidthForm,
+    required this.contentMaxWidthMedia,
+    required this.contentMaxWidthSettings,
   });
 
   /// 4.0
@@ -107,6 +111,18 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 600ms
   final Duration durationSlow;
 
+  /// 720 — max width for the Quran reader body.
+  final double contentMaxWidthReader;
+
+  /// 560 — max width for settings, dialogs, auth, and sheets.
+  final double contentMaxWidthForm;
+
+  /// 1200 — max width for share composers and galleries.
+  final double contentMaxWidthMedia;
+
+  /// 760 — max width for settings detail pages.
+  final double contentMaxWidthSettings;
+
   /// Default values for light/dark theme
   factory TilawaDesignTokens.light() => const TilawaDesignTokens(
     spaceExtraSmall: 4.0,
@@ -134,6 +150,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),
+    contentMaxWidthReader: 720,
+    contentMaxWidthForm: 560,
+    contentMaxWidthMedia: 1200,
+    contentMaxWidthSettings: 760,
   );
 
   factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
@@ -165,6 +185,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
+    double? contentMaxWidthReader,
+    double? contentMaxWidthForm,
+    double? contentMaxWidthMedia,
+    double? contentMaxWidthSettings,
   }) {
     return TilawaDesignTokens(
       spaceExtraSmall: spaceExtraSmall ?? this.spaceExtraSmall,
@@ -192,6 +216,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
+      contentMaxWidthReader:
+          contentMaxWidthReader ?? this.contentMaxWidthReader,
+      contentMaxWidthForm: contentMaxWidthForm ?? this.contentMaxWidthForm,
+      contentMaxWidthMedia: contentMaxWidthMedia ?? this.contentMaxWidthMedia,
+      contentMaxWidthSettings:
+          contentMaxWidthSettings ?? this.contentMaxWidthSettings,
     );
   }
 
@@ -236,6 +266,26 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,
+      contentMaxWidthReader: lerpDouble(
+        contentMaxWidthReader,
+        other.contentMaxWidthReader,
+        t,
+      )!,
+      contentMaxWidthForm: lerpDouble(
+        contentMaxWidthForm,
+        other.contentMaxWidthForm,
+        t,
+      )!,
+      contentMaxWidthMedia: lerpDouble(
+        contentMaxWidthMedia,
+        other.contentMaxWidthMedia,
+        t,
+      )!,
+      contentMaxWidthSettings: lerpDouble(
+        contentMaxWidthSettings,
+        other.contentMaxWidthSettings,
+        t,
+      )!,
     );
   }
 

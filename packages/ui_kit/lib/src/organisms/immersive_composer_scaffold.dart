@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../molecules/tilawa_glass_panel.dart';
 
@@ -49,6 +50,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
+    final glassTokens = theme.componentTokens.glassPanel;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -89,8 +91,10 @@ class ImmersiveComposerScaffold extends StatelessWidget {
               ),
             ],
             SafeArea(
-              child: Padding(
-                padding: EdgeInsets.all(designTokens.spaceLarge),
+              bottom: false,
+              child: TilawaContentBounds(
+                kind: TilawaContentKind.media,
+                alignment: Alignment.topCenter,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final isCompactHeight =
@@ -133,43 +137,51 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                     );
 
                     Widget buildHeader() {
-                      return Row(
-                        spacing: designTokens.spaceMedium,
-                        children: [
-                          leading ??
-                              _RoundHeaderButton(
-                                icon: Icons.close_rounded,
-                                onPressed: onClose,
-                              ),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: designTokens.spaceExtraSmall,
-                              children: [
-                                Text(
-                                  title,
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: designTokens.spaceLarge,
+                        ),
+                        child: Row(
+                          spacing: designTokens.spaceMedium,
+                          children: [
+                            leading ??
+                                _RoundHeaderButton(
+                                  icon: Icons.close_rounded,
+                                  onPressed: onClose,
                                 ),
-                                if (subtitle != null)
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: designTokens.spaceExtraSmall,
+                                children: [
                                   Text(
-                                    subtitle!,
+                                    title,
                                     textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
-                              ],
-                            ),
-                          ),
-                          trailing ??
-                              SizedBox(
-                                width: componentTokens.headerButtonSize,
-                                height: componentTokens.headerButtonSize,
+                                  if (subtitle != null)
+                                    Text(
+                                      subtitle!,
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                ],
                               ),
-                        ],
+                            ),
+                            trailing ??
+                                SizedBox(
+                                  width: componentTokens.headerButtonSize,
+                                  height: componentTokens.headerButtonSize,
+                                ),
+                          ],
+                        ),
                       );
                     }
 
@@ -181,26 +193,47 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                             )
                           : bottomPanel;
 
-                      return TilawaGlassPanel(child: panelChild);
+                      final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+                      return TilawaGlassPanel(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(
+                            designTokens.radiusExtraLarge +
+                                glassTokens.borderRadiusOffset,
+                          ),
+                        ),
+                        padding: EdgeInsets.only(
+                          left: designTokens.spaceLarge,
+                          right: designTokens.spaceLarge,
+                          top: designTokens.spaceLarge,
+                          bottom: bottomInset + designTokens.spaceLarge,
+                        ),
+                        child: panelChild,
+                      );
                     }
 
                     if (isCompactHeight) {
-                      return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                spacing: verticalSpacing,
+                                children: [
+                                  buildHeader(),
+                                  SizedBox(
+                                    height: previewHeight,
+                                    child: preview,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            spacing: verticalSpacing,
-                            children: [
-                              buildHeader(),
-                              SizedBox(height: previewHeight, child: preview),
-                              buildBottomPanel(scrollInternally: false),
-                            ],
-                          ),
-                        ),
+                          buildBottomPanel(scrollInternally: false),
+                        ],
                       );
                     }
 
@@ -210,22 +243,17 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                       children: [
                         buildHeader(),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            spacing: verticalSpacing,
+                          child: Stack(
                             children: [
-                              Expanded(child: preview),
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxHeight: panelMaxHeight,
-                                    ),
-                                    child: buildBottomPanel(
-                                      scrollInternally: true,
-                                    ),
+                              Positioned.fill(child: preview),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: panelMaxHeight,
+                                  ),
+                                  child: buildBottomPanel(
+                                    scrollInternally: true,
                                   ),
                                 ),
                               ),

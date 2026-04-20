@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../constants/quran_constants.dart';
 import '../layout/quran_layout_strategy.dart';
 import '../widgets/quran_line.dart';
-import 'quran_data_service.dart';
+import 'mushaf_service.dart';
 import 'quran_special_line.dart';
 
 class QuranPagePreparationService {
@@ -338,7 +338,7 @@ class QuranPagePreparationService {
 
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
     final List<List<Map<String, dynamic>>> rawLines =
-        QuranDataService.instance.getPageData(pageNumber) ??
+        MushafService.instance.getPageData(pageNumber) ??
         List.generate(
           QuranConstants.linesPerPage,
           (_) => <Map<String, dynamic>>[],
@@ -377,7 +377,7 @@ class QuranPagePreparationService {
     final List<Map<String, dynamic>> words = lines[lineIndex];
     if (words.isEmpty) return const [];
 
-    final QuranDataService quranDataService = QuranDataService.instance;
+    final MushafService quranDataService = MushafService.instance;
     return words.map((word) {
       final text = word['text'] as String;
       final int surah = int.tryParse(word['surah'].toString()) ?? 0;
@@ -439,7 +439,7 @@ class QuranPagePreparationService {
   }
 
   QuranSpecialLine? _getSpecialLine(int page, int line) {
-    return QuranDataService.instance.getSpecialLine(page, line);
+    return MushafService.instance.getSpecialLine(page, line);
   }
 }
 

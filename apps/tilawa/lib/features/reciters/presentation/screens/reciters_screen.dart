@@ -178,6 +178,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return BlocProvider(
       create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
       child: Builder(
@@ -302,26 +303,34 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     ),
                   ],
                 ),
-                body: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                  child: _RecitersSurface(
-                    state: state,
-                    searchController: _searchController,
-                    focusNode: _focusNode,
-                    scrollController: _scrollController,
-                    onSearchChanged: _onSearchChanged,
-                    onClearSearch: _clearSearch,
-                    onToggleFavorites: () =>
-                        _toggleFavoritesFilter(innerContext),
-                    onClearLetter: _clearLetterFilter,
-                    onClearFavorites: () {
-                      context.read<RecitersBloc>().add(
-                        const ClearFavoritesFilter(),
-                      );
-                    },
-                    onClearAll: _clearAllFilters,
-                    onLetterSelected: _onLetterSelected,
-                    onRetry: _refreshReciters,
+                body: TilawaContentBounds(
+                  kind: TilawaContentKind.media,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceMedium,
+                      tokens.spaceSmall,
+                      tokens.spaceMedium,
+                      tokens.spaceSmall,
+                    ),
+                    child: _RecitersSurface(
+                      state: state,
+                      searchController: _searchController,
+                      focusNode: _focusNode,
+                      scrollController: _scrollController,
+                      onSearchChanged: _onSearchChanged,
+                      onClearSearch: _clearSearch,
+                      onToggleFavorites: () =>
+                          _toggleFavoritesFilter(innerContext),
+                      onClearLetter: _clearLetterFilter,
+                      onClearFavorites: () {
+                        context.read<RecitersBloc>().add(
+                          const ClearFavoritesFilter(),
+                        );
+                      },
+                      onClearAll: _clearAllFilters,
+                      onLetterSelected: _onLetterSelected,
+                      onRetry: _refreshReciters,
+                    ),
                   ),
                 ),
               );
@@ -768,31 +777,17 @@ class _LoadedResults extends StatelessWidget {
       children: [
         if (isRtl && showScrollbar) scrollbar,
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth >= 980) {
-                return _ReciterGridView(
+          child: context.isCompact
+              ? _ReciterListView(
                   state: state,
                   scrollController: scrollController,
-                  crossAxisCount: 3,
                   onRefresh: onRefresh,
-                );
-              }
-              if (constraints.maxWidth >= 680) {
-                return _ReciterGridView(
+                )
+              : _ReciterGridView(
                   state: state,
                   scrollController: scrollController,
-                  crossAxisCount: 2,
                   onRefresh: onRefresh,
-                );
-              }
-              return _ReciterListView(
-                state: state,
-                scrollController: scrollController,
-                onRefresh: onRefresh,
-              );
-            },
-          ),
+                ),
         ),
         if (!isRtl && showScrollbar) scrollbar,
       ],
@@ -905,7 +900,12 @@ class _ReciterListView extends StatelessWidget {
           parent: BouncingScrollPhysics(),
         ),
         itemCount: state.filteredReciters.length,
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
+        padding: EdgeInsets.fromLTRB(
+          10,
+          10,
+          10,
+          TilawaShellPadding.of(context) + 20,
+        ),
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final ReciterEntity reciter = state.filteredReciters[index];
@@ -920,31 +920,32 @@ class _ReciterGridView extends StatelessWidget {
   const _ReciterGridView({
     required this.state,
     required this.scrollController,
-    required this.crossAxisCount,
     required this.onRefresh,
   });
 
   final RecitersLoaded state;
   final ScrollController scrollController;
-  final int crossAxisCount;
   final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator.adaptive(
       onRefresh: onRefresh,
-      child: GridView.builder(
+      child: TilawaContentGrid(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          mainAxisExtent: 104,
+        padding: EdgeInsets.fromLTRB(
+          12,
+          10,
+          12,
+          TilawaShellPadding.of(context) + 20,
         ),
+        targetItemExtent: 220,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 2.12, // 220 / 104 ≈ 2.12
         itemCount: state.filteredReciters.length,
         itemBuilder: (context, index) {
           final ReciterEntity reciter = state.filteredReciters[index];

@@ -13,7 +13,7 @@ import 'package:flutter_local_notifications_platform_interface/flutter_local_not
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:quran/src/services/quran_data_service.dart' as quran_loader;
+import 'package:quran/quran.dart';
 import '../di/quran_image_dependencies_module.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
@@ -407,7 +407,7 @@ class AppStartupTasks {
 
     try {
       timeline.resetPhase();
-      await quran_loader.QuranDataService.instance.ensureLoaded();
+      await MushafService.instance.ensureLoaded();
       timeline.log('Phase4 quranData');
 
       // Stagger second wave of background data

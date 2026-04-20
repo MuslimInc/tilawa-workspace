@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
 
+/// A bottom sheet for managing prayer time settings.
 class PrayerSettingsSheet extends StatefulWidget {
   const PrayerSettingsSheet({super.key});
 
@@ -36,7 +38,9 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -55,55 +59,30 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
           child: Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(tokens.radiusExtraLarge),
               ),
             ),
             child: Column(
               children: [
-                // Handle
-                Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                _SheetHandle(tokens: tokens, colorScheme: colorScheme),
+                _SheetHeader(
+                  onSave: _saveSettings,
+                  tokens: tokens,
+                  theme: theme,
                 ),
-
-                // Header
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Text(
-                        context.l10n.prayerSettings,
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _saveSettings,
-                        child: Text(context.l10n.save),
-                      ),
-                    ],
-                  ),
-                ),
-
                 const Divider(height: 1),
-
-                // Settings list
                 Expanded(
                   child: ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(tokens.spaceLarge),
                     children: [
-                      // Calculation method
-                      _buildSectionTitle(
-                        context,
-                        context.l10n.calculationMethod,
+                      _SectionTitle(
+                        title: context.l10n.calculationMethod,
+                        tokens: tokens,
+                        theme: theme,
                       ),
-                      _buildDropdown<CalculationMethod>(
+                      _SettingsDropdown<CalculationMethod>(
                         value: _settings.calculationMethod,
                         items: CalculationMethod.values,
                         labelBuilder: (method) => method.localize(context.l10n),
@@ -115,12 +94,13 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           }
                         },
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Asr calculation
-                      _buildSectionTitle(context, context.l10n.asrCalculation),
-                      _buildDropdown<AsrJuristicMethod>(
+                      SizedBox(height: tokens.spaceLarge),
+                      _SectionTitle(
+                        title: context.l10n.asrCalculation,
+                        tokens: tokens,
+                        theme: theme,
+                      ),
+                      _SettingsDropdown<AsrJuristicMethod>(
                         value: _settings.asrJuristicMethod,
                         items: AsrJuristicMethod.values,
                         labelBuilder: (method) => method.localize(context.l10n),
@@ -132,13 +112,14 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           }
                         },
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Display options
-                      _buildSectionTitle(context, context.l10n.displayOptions),
-                      SwitchListTile(
-                        title: Text(context.l10n.use24HourFormat),
+                      SizedBox(height: tokens.spaceLarge),
+                      _SectionTitle(
+                        title: context.l10n.displayOptions,
+                        tokens: tokens,
+                        theme: theme,
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.use24HourFormat,
                         value: _settings.use24HourFormat,
                         onChanged: (value) {
                           _updateSettings(
@@ -146,8 +127,8 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-                      SwitchListTile(
-                        title: Text(context.l10n.showSunrise),
+                      _SettingsSwitch(
+                        title: context.l10n.showSunrise,
                         value: _settings.showSunrise,
                         onChanged: (value) {
                           _updateSettings(
@@ -155,12 +136,13 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Time adjustments
-                      _buildSectionTitle(context, context.l10n.timeAdjustments),
-                      _buildAdjustmentSlider(
+                      SizedBox(height: tokens.spaceLarge),
+                      _SectionTitle(
+                        title: context.l10n.timeAdjustments,
+                        tokens: tokens,
+                        theme: theme,
+                      ),
+                      _AdjustmentSlider(
                         label: context.l10n.fajr,
                         value: _settings.fajrAdjustment,
                         onChanged: (value) {
@@ -169,7 +151,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-                      _buildAdjustmentSlider(
+                      _AdjustmentSlider(
                         label: context.l10n.dhuhr,
                         value: _settings.dhuhrAdjustment,
                         onChanged: (value) {
@@ -178,7 +160,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-                      _buildAdjustmentSlider(
+                      _AdjustmentSlider(
                         label: context.l10n.asr,
                         value: _settings.asrAdjustment,
                         onChanged: (value) {
@@ -187,7 +169,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-                      _buildAdjustmentSlider(
+                      _AdjustmentSlider(
                         label: context.l10n.maghrib,
                         value: _settings.maghribAdjustment,
                         onChanged: (value) {
@@ -198,7 +180,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
-                      _buildAdjustmentSlider(
+                      _AdjustmentSlider(
                         label: context.l10n.isha,
                         value: _settings.ishaAdjustment,
                         onChanged: (value) {
@@ -217,68 +199,231 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
       },
     );
   }
+}
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle({required this.tokens, required this.colorScheme});
+
+  final TilawaDesignTokens tokens;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: tokens.spaceSmall),
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: colorScheme.outline.withValues(alpha: tokens.opacityMedium),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+}
+
+class _SheetHeader extends StatelessWidget {
+  const _SheetHeader({
+    required this.onSave,
+    required this.tokens,
+    required this.theme,
+  });
+
+  final VoidCallback onSave;
+  final TilawaDesignTokens tokens;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.all(tokens.spaceLarge),
+      child: Row(
+        children: [
+          Text(
+            context.l10n.prayerSettings,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: onSave,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+            ),
+            child: Text(
+              context.l10n.save,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({
+    required this.title,
+    required this.tokens,
+    required this.theme,
+  });
+
+  final String title;
+  final TilawaDesignTokens tokens;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
   }
+}
 
-  Widget _buildDropdown<T>({
-    required T value,
-    required List<T> items,
-    required String Function(T) labelBuilder,
-    required ValueChanged<T?> onChanged,
-  }) {
+class _SettingsDropdown<T> extends StatelessWidget {
+  const _SettingsDropdown({
+    required this.value,
+    required this.items,
+    required this.labelBuilder,
+    required this.onChanged,
+  });
+
+  final T value;
+  final List<T> items;
+  final String Function(T) labelBuilder;
+  final ValueChanged<T?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return DropdownButtonFormField<T>(
       initialValue: value,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: colorScheme.surfaceContainerLow,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          borderSide: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: tokens.opacityMedium,
+            ),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          borderSide: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: tokens.opacityMedium,
+            ),
+          ),
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceMedium,
+          vertical: tokens.spaceSmall,
+        ),
       ),
       items: items.map((item) {
         return DropdownMenuItem<T>(
           value: item,
-          child: Text(labelBuilder(item)),
+          child: Text(labelBuilder(item), style: theme.textTheme.bodyMedium),
         );
       }).toList(),
       onChanged: onChanged,
     );
   }
+}
 
-  Widget _buildAdjustmentSlider({
-    required String label,
-    required int value,
-    required ValueChanged<double> onChanged,
-  }) {
-    return Row(
-      children: [
-        SizedBox(width: 80, child: Text(label)),
-        Expanded(
-          child: Slider(
-            value: value.toDouble(),
-            min: -30,
-            max: 30,
-            divisions: 60,
-            label: '$value ${context.l10n.minutesShort}',
-            onChanged: onChanged,
-          ),
+class _SettingsSwitch extends StatelessWidget {
+  const _SettingsSwitch({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SwitchListTile(
+      title: Text(
+        title,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
         ),
-        SizedBox(
-          width: 50,
-          child: Text(
-            '$value ${context.l10n.minutesShort}',
-            style: Theme.of(context).textTheme.bodySmall,
+      ),
+      value: value,
+      onChanged: onChanged,
+      contentPadding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _AdjustmentSlider extends StatelessWidget {
+  const _AdjustmentSlider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final int value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-        ),
-      ],
+          Expanded(
+            child: Slider(
+              value: value.toDouble(),
+              min: -30,
+              max: 30,
+              divisions: 60,
+              label: '$value ${context.l10n.minutesShort}',
+              onChanged: onChanged,
+            ),
+          ),
+          SizedBox(
+            width: 44,
+            child: Text(
+              '${value > 0 ? '+' : ''}$value',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.primary,
+              ),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

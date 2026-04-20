@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quran/src/layout/quran_layout_strategy.dart';
 import 'package:quran/src/page_content.dart';
 import 'package:quran/src/services/idle_scheduler.dart';
+import 'package:quran/src/services/mushaf_service.dart';
 import 'package:quran/src/services/page_snapshot_service.dart';
-import 'package:quran/src/services/quran_data_service.dart';
 import 'package:quran/src/services/quran_font_service.dart';
 import 'package:quran/src/services/quran_page_preparation_service.dart';
 
@@ -77,7 +77,7 @@ Future<PreparedQuranPage> _preparePage(WidgetTester tester) async {
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
   await tester.runAsync(() async {
-    await QuranDataService.instance.ensureLoaded();
+    await MushafService.instance.ensureLoaded();
   });
 
   late final PreparedQuranPage preparedPage;

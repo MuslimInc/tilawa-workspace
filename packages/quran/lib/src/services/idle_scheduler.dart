@@ -92,7 +92,7 @@ class IdleScheduler {
     final _QueueEntry entry = _queue.removeFirst();
     if (entry.idleTask._cancelled) {
       // Skip cancelled tasks and move to next.
-      _processNext();
+      await _processNext();
       return;
     }
 
@@ -104,7 +104,7 @@ class IdleScheduler {
       if (!entry.idleTask._completer.isCompleted) {
         entry.idleTask._completer.complete();
       }
-      _processNext();
+      await _processNext();
       return;
     }
 
@@ -117,7 +117,7 @@ class IdleScheduler {
         entry.idleTask._completer.complete();
       }
       // Process next item in the queue.
-      _processNext();
+      await _processNext();
     }
   }
 

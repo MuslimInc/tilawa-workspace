@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
+import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
@@ -105,18 +106,12 @@ class ShareRepositoryImpl implements ShareRepository {
     required String sharedViaLabel,
     required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
+    MushafRenderStyle mushafStyle = MushafRenderStyle.highFidelity,
     void Function(double progress, String message)? onProgress,
+    void Function(int index)? onFrameCaptureStarted,
     CancelToken? cancelToken,
   }) async {
-    final List<GlobalKey> effectiveBoundaryKeys = boundaryKeys
-        .where((key) => key.currentContext != null)
-        .toList();
-    if (effectiveBoundaryKeys.isEmpty) {
-      throw StateError(
-        'RepaintBoundary not found. Video pages may still be loading.',
-      );
-    }
-
+    final effectiveBoundaryKeys = boundaryKeys;
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -124,37 +119,47 @@ class ShareRepositoryImpl implements ShareRepository {
 
     onProgress?.call(0.1, progressMessages.generatingAudioClip);
 
-    // 1. Capture screenshots and generate audio clip in parallel.
-    // Screenshots are a GPU readback (~0.5s) and are independent of audio
-    // download/concat, so running them concurrently cuts total wait time.
-    await WidgetsBinding.instance.endOfFrame;
+    // 1. Generate audio clip (independent of screenshots).
+    final audioContent = await generateAudioClip(
+      config: effectiveConfig,
+      progressMessages: progressMessages.audioClip,
+      onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.35, msg),
+      cancelToken: cancelToken,
+    );
+
+    // 2. Capture screenshots sequentially.
+    // Capturing screenshots is a heavy GPU operation (RepaintBoundary.toImage).
+    // Running them in parallel via Future.wait causes massive raster jank
+    // and high memory pressure. Serializing them stabilizes the frame rate.
+    final List<String> screenshotPaths = [];
+    final double captureBaseProgress = 0.45;
+    final double captureStep = 0.15 / effectiveBoundaryKeys.length;
+
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
+    for (int i = 0; i < effectiveBoundaryKeys.length; i++) {
+      if (cancelToken?.isCancelled ?? false) break;
 
-    final results = await Future.wait<Object>([
-      generateAudioClip(
-        config: effectiveConfig,
-        progressMessages: progressMessages.audioClip,
-        onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.35, msg),
-        cancelToken: cancelToken,
-      ),
-      Future.wait<String>([
-        for (int index = 0; index < effectiveBoundaryKeys.length; index++)
-          _screenshotService.captureRaw(
-            boundaryKey: effectiveBoundaryKeys[index],
-            fileName: 'video_capture_${timestamp}_${index + 1}.png',
-            // Capture at the exact FFmpeg output resolution so the encoder
-            // streams frames straight into x264 — no per-frame scale/crop.
-            // pixelRatio is still honored as a fallback if the boundary has
-            // no measurable size yet.
-            pixelRatio: 1.0,
-            targetWidth: VideoService.outputVideoWidth,
-            targetHeight: VideoService.outputVideoHeight,
-          ),
-      ]),
-    ]);
+      // Notify the UI to render the current frame before we capture it.
+      onFrameCaptureStarted?.call(i);
 
-    final audioContent = results[0] as ShareContent;
-    final List<String> screenshotPaths = (results[1] as List).cast<String>();
+      // Yield to the UI thread before each capture to allow the progress bar
+      // and other UI elements to animate smoothly.
+      await WidgetsBinding.instance.endOfFrame;
+
+      final path = await _screenshotService.captureRaw(
+        boundaryKey: effectiveBoundaryKeys[i],
+        fileName: 'video_capture_${timestamp}_${i + 1}.png',
+        pixelRatio: 1.0,
+        targetWidth: VideoService.outputVideoWidth,
+        targetHeight: VideoService.outputVideoHeight,
+      );
+      screenshotPaths.add(path);
+
+      onProgress?.call(
+        captureBaseProgress + (i + 1) * captureStep,
+        progressMessages.capturingReaderVisuals,
+      );
+    }
 
     // 2. Generate video
     onProgress?.call(0.6, progressMessages.combiningVideoMedia);

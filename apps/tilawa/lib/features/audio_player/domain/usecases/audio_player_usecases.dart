@@ -90,11 +90,8 @@ class PlayFromQueueUseCase {
     List<AudioEntity> queue,
     int index, {
     Duration? initialPosition,
-  }) => _repository.playFromQueue(
-    queue,
-    index,
-    initialPosition: initialPosition,
-  );
+  }) =>
+      _repository.playFromQueue(queue, index, initialPosition: initialPosition);
 }
 
 @injectable

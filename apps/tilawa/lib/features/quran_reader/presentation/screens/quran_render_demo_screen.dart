@@ -2,11 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:quran/src/page_content.dart';
-// Note: importing internal services for diagnostic purposes
-// ignore: implementation_imports
-import 'package:quran/src/services/quran_data_service.dart';
-import 'package:quran/src/services/quran_font_service.dart';
+import 'package:quran/quran.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/logger.dart';
 
@@ -61,7 +57,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
 
     try {
       // 1. Data Loading implicitly checked by initial page
-      await QuranDataService.instance.ensureLoaded();
+      await MushafService.instance.ensureLoaded();
 
       // 2. Font Registration
       final fontWatch = Stopwatch()..start();

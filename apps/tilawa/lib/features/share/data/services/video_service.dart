@@ -162,10 +162,14 @@ class VideoService {
     );
 
     if (cancelToken != null) {
-      cancelToken.whenCancel.then((_) {
-        _videoLog('[VIDEO_SVC] cancel requested — cancelling ffmpeg session.');
-        FFmpegKit.cancel(session.getSessionId());
-      }).catchError((_) {});
+      cancelToken.whenCancel
+          .then((_) {
+            _videoLog(
+              '[VIDEO_SVC] cancel requested — cancelling ffmpeg session.',
+            );
+            FFmpegKit.cancel(session.getSessionId());
+          })
+          .catchError((_) {});
     }
 
     return completer.future;

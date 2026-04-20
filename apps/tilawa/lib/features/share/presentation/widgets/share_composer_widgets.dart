@@ -12,7 +12,9 @@ class ShareControlsCard extends StatelessWidget {
     final tokens = theme.tokens;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: tokens.opacitySubtle),
+        color: theme.colorScheme.surface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(
@@ -85,7 +87,9 @@ class ShareTileDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: theme.colorScheme.outline.withValues(alpha: theme.tokens.opacitySubtle),
+      color: theme.colorScheme.outline.withValues(
+        alpha: theme.tokens.opacitySubtle,
+      ),
     );
   }
 }
@@ -113,7 +117,9 @@ class AyahStepper extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: tokens.opacitySubtle),
+        color: theme.colorScheme.surface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(

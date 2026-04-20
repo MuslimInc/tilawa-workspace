@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../constants/quran_constants.dart';
 import '../constants/surah_header_banner_constants.dart';
-import '../services/quran_data_service.dart';
+import '../services/mushaf_service.dart';
 import '../services/quran_special_line.dart';
 
 /// Strategy interface for calculating Quran page layout metrics.
@@ -149,7 +149,7 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
 
     // We dynamically calculate height consumption using exact counts of
     // headers and bismillahs instead of blindly assuming 15 normal verses.
-    final QuranSpecialLineCounts specialCounts = QuranDataService.instance
+    final QuranSpecialLineCounts specialCounts = MushafService.instance
         .getSpecialLineCountSummary(pageNumber);
     final int headers = specialCounts.headers;
     final int bismillahs = specialCounts.bismillahs;

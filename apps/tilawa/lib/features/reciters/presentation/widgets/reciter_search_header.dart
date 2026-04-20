@@ -22,7 +22,9 @@ class ReciterSearchHeader extends StatelessWidget {
         themedInputBorder is OutlineInputBorder
         ? themedInputBorder.borderRadius
         : BorderRadius.circular(16);
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double screenWidth = context.resolveContentWidth(
+      TilawaContentKind.media,
+    );
     final double textScaleFactor = MediaQuery.textScalerOf(
       context,
     ).scale(1).clamp(1.0, 1.3).toDouble();

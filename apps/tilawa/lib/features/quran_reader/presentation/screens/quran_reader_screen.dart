@@ -16,6 +16,7 @@ import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/screens/screenshot_composer_screen.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../../core/utils/performance_monitor.dart';
@@ -188,7 +189,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final incomingReaderTheme = QuranReaderTheme.of(context);
     final incomingTheme = Theme.of(context);
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
-    final double viewportWidth = MediaQuery.sizeOf(context).width;
+    final double viewportWidth = context.resolveContentWidth(
+      TilawaContentKind.reader,
+    );
     final bool didViewportChange =
         _lastPreparedViewportWidth == null ||
         (_lastPreparedViewportWidth! - viewportWidth).abs() > 0.5;
@@ -868,7 +871,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Read context-dependent values before the async gap.
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
-    final serverUrl = audioState.currentAudio?.url ?? '';
     final shareCubit = context.read<ShareCubit>();
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
@@ -1280,34 +1282,38 @@ class _ReaderStack extends StatelessWidget {
             child: Listener(
               onPointerDown: (_) => onPointerDown?.call(),
               onPointerUp: (_) => onPointerUp?.call(),
-              // QuranPageView is always mounted. Each PageContent listens to
-              // preparedWindowNotifier directly and rebuilds when its page
-              // becomes ready. There is no gate here — gating on null caused
-              // QuranPageView to unmount/remount, destroying PageContent state
-              // and missing the first notifier fire after mount.
-              child: QuranPageView(
-                controller: pageController,
-                currentPageListenable: currentPageNotifier,
-                cacheExtentListenable: cacheExtentNotifier,
-                preparedWindowListenable: preparedWindowNotifier,
-                pageBackgroundColor: readerTheme.pageBackground,
-                textColor: readerTheme.textColor,
-                headerImageFilter: readerTheme.headerImageFilter,
-                headerTextColor: readerTheme.headerTextColor,
-                headerFontSizeMultiplier: headerFontSizeMultiplier,
-                uiTextDirection: Directionality.of(context),
-                onPageChanged: onPageChanged,
-                onScrollStarted: onPointerDown,
-                onScrollEnded: onPointerUp,
-                juzLabel: context.l10n.juzPart,
-                hizbLabel: context.l10n.hizb,
-                surahNameBuilder: getSurahName,
-                onSurahSelected: (surahNumber) =>
-                    unawaited(jumpToSurah(surahNumber)),
-                onShowIndex: handleShowIndex,
-                showOverlaysListenable: showOverlaysNotifier,
-                isScrollingListenable: isScrollingNotifier,
-                showShadows: false,
+              child: TilawaContentBounds(
+                kind: TilawaContentKind.reader,
+                alignment: Alignment.center,
+                // QuranPageView is always mounted. Each PageContent listens to
+                // preparedWindowNotifier directly and rebuilds when its page
+                // becomes ready. There is no gate here — gating on null caused
+                // QuranPageView to unmount/remount, destroying PageContent state
+                // and missing the first notifier fire after mount.
+                child: QuranPageView(
+                  controller: pageController,
+                  currentPageListenable: currentPageNotifier,
+                  cacheExtentListenable: cacheExtentNotifier,
+                  preparedWindowListenable: preparedWindowNotifier,
+                  pageBackgroundColor: readerTheme.pageBackground,
+                  textColor: readerTheme.textColor,
+                  headerImageFilter: readerTheme.headerImageFilter,
+                  headerTextColor: readerTheme.headerTextColor,
+                  headerFontSizeMultiplier: headerFontSizeMultiplier,
+                  uiTextDirection: Directionality.of(context),
+                  onPageChanged: onPageChanged,
+                  onScrollStarted: onPointerDown,
+                  onScrollEnded: onPointerUp,
+                  juzLabel: context.l10n.juzPart,
+                  hizbLabel: context.l10n.hizb,
+                  surahNameBuilder: getSurahName,
+                  onSurahSelected: (surahNumber) =>
+                      unawaited(jumpToSurah(surahNumber)),
+                  onShowIndex: handleShowIndex,
+                  showOverlaysListenable: showOverlaysNotifier,
+                  isScrollingListenable: isScrollingNotifier,
+                  showShadows: false,
+                ),
               ),
             ),
           ),
@@ -1416,14 +1422,19 @@ class _ReaderOverlay extends StatelessWidget {
         child: ValueListenableBuilder<int>(
           valueListenable: currentPageNotifier,
           builder: (context, currentPage, _) {
-            return PageNavigationBar(
-              currentPage: currentPage,
-              onPageChanged: (pageNumber) => unawaited(jumpToPage(pageNumber)),
-              onShowIndex: showSurahIndex,
-              onShare: () => showShareOptions(currentPage),
-              onWarming: onWarming,
-              onPointerDown: onPointerDown,
-              onPointerUp: onPointerUp,
+            return TilawaContentBounds(
+              kind: TilawaContentKind.reader,
+              alignment: Alignment.bottomCenter,
+              child: PageNavigationBar(
+                currentPage: currentPage,
+                onPageChanged: (pageNumber) =>
+                    unawaited(jumpToPage(pageNumber)),
+                onShowIndex: showSurahIndex,
+                onShare: () => showShareOptions(currentPage),
+                onWarming: onWarming,
+                onPointerDown: onPointerDown,
+                onPointerUp: onPointerUp,
+              ),
             );
           },
         ),

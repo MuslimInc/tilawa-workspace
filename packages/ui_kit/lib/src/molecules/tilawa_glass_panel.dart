@@ -17,7 +17,7 @@ class TilawaGlassPanel extends StatelessWidget {
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
-  final double? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
   final Color? backgroundColor;
   final Color? borderColor;
 
@@ -28,10 +28,12 @@ class TilawaGlassPanel extends StatelessWidget {
     final componentTokens = theme.componentTokens.glassPanel;
     final effectiveBorderRadius =
         borderRadius ??
-        designTokens.radiusExtraLarge + componentTokens.borderRadiusOffset;
+        BorderRadius.circular(
+          designTokens.radiusExtraLarge + componentTokens.borderRadiusOffset,
+        );
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(effectiveBorderRadius),
+      borderRadius: effectiveBorderRadius,
       child: BackdropFilter(
         filter: ImageFilter.blur(
           sigmaX: designTokens.blurGlass,
@@ -46,7 +48,7 @@ class TilawaGlassPanel extends StatelessWidget {
                 theme.colorScheme.surface.withValues(
                   alpha: componentTokens.backgroundOpacity,
                 ),
-            borderRadius: BorderRadius.circular(effectiveBorderRadius),
+            borderRadius: effectiveBorderRadius,
             border: Border.all(
               color:
                   borderColor ??
