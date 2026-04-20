@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 
 import '../entities/audio_clip_config.dart';
-import '../entities/mushaf_render_style.dart';
 import '../entities/share_content.dart';
 import '../entities/share_progress_messages.dart';
 
@@ -35,7 +34,6 @@ abstract class ShareRepository {
     required String sharedViaLabel,
     required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
-    MushafRenderStyle mushafStyle = MushafRenderStyle.highFidelity,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
     CancelToken? cancelToken,

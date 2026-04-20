@@ -2947,24 +2947,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
-
-  /// Label for the Mushaf render style selector in the reel composer
-  ///
-  /// In en, this message translates to:
-  /// **'Mushaf Style'**
-  String get mushafRenderStyle;
-
-  /// Label for the high-fidelity (pre-rendered page image) render option
-  ///
-  /// In en, this message translates to:
-  /// **'Image'**
-  String get mushafRenderStyleHighFidelity;
-
-  /// Label for the dynamic-layout (QCF/QCP fonts) render option
-  ///
-  /// In en, this message translates to:
-  /// **'Text'**
-  String get mushafRenderStyleDynamicLayout;
 }
 
 class _AppLocalizationsDelegate

@@ -70,9 +70,14 @@ class ShareControlTileShell extends StatelessWidget {
     );
 
     if (onTap == null) return content;
+    var borderRadius = BorderRadius.vertical(
+      top: Radius.circular(tokens.radiusLarge),
+    );
     return Material(
       color: Colors.transparent,
-      child: InkWell(onTap: onTap, child: content),
+      shape: RoundedRectangleBorder(borderRadius: borderRadius),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(onTap: onTap, borderRadius: borderRadius, child: content),
     );
   }
 }

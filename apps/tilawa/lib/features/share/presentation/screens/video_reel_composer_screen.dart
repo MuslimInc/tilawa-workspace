@@ -12,7 +12,6 @@ import 'package:video_player/video_player.dart';
 
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 import '../../data/services/reciter_audio_mapping.dart';
-import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_limits.dart';
 import '../cubit/share_cubit.dart';
@@ -258,10 +257,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
           status == ShareStatus.sharing;
     });
 
-    final mushafStyle = context.select<ShareCubit, MushafRenderStyle>(
-      (c) => c.state.mushafStyle,
-    );
-
     return Stack(
       children: [
         if (_cachedVideoPageSpecs.length > 1 ||
@@ -274,7 +269,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 videoPageSpecs: _cachedVideoPageSpecs,
                 surahNumber: widget.surahNumber,
                 reciterName: _currentReciterName,
-                style: mushafStyle,
               ),
             ),
           ),
@@ -288,8 +282,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
               prev.status != curr.status ||
               prev.content != curr.content ||
               prev.errorMessage != curr.errorMessage ||
-              prev.reciterName != curr.reciterName ||
-              prev.mushafStyle != curr.mushafStyle,
+              prev.reciterName != curr.reciterName,
           builder: (context, state) {
             final isBusy =
                 state.status == ShareStatus.capturing ||
@@ -324,7 +317,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                         filePath: (state.content as ShareScreenshot).filePath,
                         surahName: state.content!.surahName,
                       )
-                    : _buildLivePreview(reciterName, state.mushafStyle),
+                    : _buildLivePreview(reciterName),
               ),
               bottomPanel: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -375,10 +368,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 _handleGenerateVideo(context),
                             onCancel: () =>
                                 context.read<ShareCubit>().cancelGeneration(),
-                            mushafStyle: state.mushafStyle,
-                            onMushafStyleChanged: (style) => context
-                                .read<ShareCubit>()
-                                .updateMushafStyle(style),
                           ),
                   ),
                 ],
@@ -433,16 +422,15 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     final messages = context.shareProgressMessages;
     final viaLabel = context.l10n.sharedViaTilawa;
 
-    // their QCF fonts BEFORE making the offscreen tree visible.
-    if (cubit.state.mushafStyle == MushafRenderStyle.dynamicLayout) {
-      final Set<int> capturePages = <int>{
-        for (final spec in _cachedVideoPageSpecs) spec.pageNumber,
-      };
-      await Future.wait([
-        for (final page in capturePages)
-          QuranFontService.instance.ensureSingleFontLoaded(page),
-      ]);
-    }
+    // QCF fonts load on demand from a CDN — preload them before making the
+    // offscreen tree visible so FFmpeg doesn't race a font fetch.
+    final Set<int> capturePages = <int>{
+      for (final spec in _cachedVideoPageSpecs) spec.pageNumber,
+    };
+    await Future.wait([
+      for (final page in capturePages)
+        QuranFontService.instance.ensureSingleFontLoaded(page),
+    ]);
     if (!mounted) return;
 
     setState(() => _singleVideoCaptureSurfaceVisible = true);
@@ -488,7 +476,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     );
   }
 
-  Widget _buildLivePreview(String reciterName, MushafRenderStyle style) {
+  Widget _buildLivePreview(String reciterName) {
     final theme = Theme.of(context);
     final chipForeground = theme.colorScheme.onSurface;
     final chipBackground = theme.colorScheme.surface.withValues(alpha: 0.08);
@@ -543,7 +531,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 fromAyah: _fromAyah,
                 toAyah: _toAyah,
                 reciterName: reciterName,
-                style: style,
                 pageSpecs: _cachedVideoPageSpecs.isEmpty
                     ? null
                     : [_cachedVideoPageSpecs.first],
@@ -576,13 +563,11 @@ class _OffScreenRenderers extends StatelessWidget {
     required this.videoPageSpecs,
     required this.surahNumber,
     required this.reciterName,
-    required this.style,
   });
   final Map<int, GlobalKey> videoBoundaryKeys;
   final List<VideoPageSpec> videoPageSpecs;
   final int surahNumber;
   final String reciterName;
-  final MushafRenderStyle style;
   @override
   Widget build(BuildContext context) {
     // Offstage capture surfaces: stack N × 1080×1920 frames vertically without
@@ -610,7 +595,6 @@ class _OffScreenRenderers extends StatelessWidget {
                 toAyah: videoPageSpecs[i].toAyah,
                 reciterName: reciterName,
                 pageSpecs: [videoPageSpecs[i]],
-                style: style,
                 // Flags ambient orbs + heavy shadow off for the capture pass.
                 // The PNG is downsampled to the target video resolution inside
                 // ScreenshotService, so those layers add build cost without any
@@ -719,8 +703,6 @@ class _ComposerControls extends StatelessWidget {
     required this.onToChanged,
     required this.onPrimaryAction,
     required this.onCancel,
-    required this.mushafStyle,
-    required this.onMushafStyleChanged,
   });
   final ShareDurationPreset durationPreset;
   final int fromAyah, toAyah, maxAyah;
@@ -730,8 +712,6 @@ class _ComposerControls extends StatelessWidget {
   final VoidCallback onReciterTap, onPrimaryAction, onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
   final ValueChanged<int> onFromChanged, onToChanged;
-  final MushafRenderStyle mushafStyle;
-  final ValueChanged<MushafRenderStyle> onMushafStyleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -775,11 +755,6 @@ class _ComposerControls extends StatelessWidget {
                 maxAyah: maxAyah,
                 onFromChanged: onFromChanged,
                 onToChanged: onToChanged,
-              ),
-              const ShareTileDivider(),
-              _MushafModeTile(
-                style: mushafStyle,
-                onChanged: onMushafStyleChanged,
               ),
             ],
           ),
@@ -855,84 +830,6 @@ class _ReciterTile extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _MushafModeTile extends StatelessWidget {
-  const _MushafModeTile({required this.style, required this.onChanged});
-
-  final MushafRenderStyle style;
-  final ValueChanged<MushafRenderStyle> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return ShareControlTileShell(
-      icon: Icons.style_rounded,
-      label: context.l10n.mushafRenderStyle,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          _ModeChoice(
-            label: context.l10n.mushafRenderStyleHighFidelity,
-            selected: style == MushafRenderStyle.highFidelity,
-            onTap: () => onChanged(MushafRenderStyle.highFidelity),
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-          _ModeChoice(
-            label: context.l10n.mushafRenderStyleDynamicLayout,
-            selected: style == MushafRenderStyle.dynamicLayout,
-            onTap: () => onChanged(MushafRenderStyle.dynamicLayout),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeChoice extends StatelessWidget {
-  const _ModeChoice({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.primary.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? theme.colorScheme.primary : Colors.transparent,
-          ),
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: selected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurfaceVariant,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
       ),
     );
   }

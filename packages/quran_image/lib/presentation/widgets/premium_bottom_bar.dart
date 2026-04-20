@@ -87,7 +87,7 @@ class _PageNumber extends StatelessWidget {
       padding: EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: const Color(0xFFC5A358).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        shape: BoxShape.circle,
         border: Border.all(color: const Color(0xFFC5A358)),
       ),
       child: Center(

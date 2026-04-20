@@ -142,7 +142,6 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                           horizontal: designTokens.spaceLarge,
                         ),
                         child: Row(
-                          spacing: designTokens.spaceMedium,
                           children: [
                             leading ??
                                 _RoundHeaderButton(
@@ -154,24 +153,7 @@ class ImmersiveComposerScaffold extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 spacing: designTokens.spaceExtraSmall,
                                 children: [
-                                  Text(
-                                    title,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  if (subtitle != null)
-                                    Text(
-                                      subtitle!,
-                                      textAlign: TextAlign.center,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
+                                  Text(title, textAlign: TextAlign.center),
                                 ],
                               ),
                             ),

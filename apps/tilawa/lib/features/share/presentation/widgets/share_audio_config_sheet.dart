@@ -18,7 +18,6 @@ import '../utils/share_ayah_range_utils.dart';
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
 import 'video_content_renderer.dart';
-import 'package:tilawa/features/share/domain/entities/mushaf_render_style.dart';
 
 /// Bottom sheet for configuring and generating an audio clip or reel.
 class ShareAudioConfigSheet extends StatefulWidget {
@@ -48,9 +47,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _toAyah;
   late int _maxAyah;
   final List<GlobalKey> _videoContentKeys = <GlobalKey>[];
-  final MushafPageRenderer _pageRenderer = MushafPageRenderer.forStyle(
-    MushafRenderStyle.highFidelity,
-  );
+  final MushafPageRenderer _pageRenderer = MushafPageRenderer.defaultRenderer();
 
   @override
   void initState() {
@@ -235,7 +232,6 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                           fromAyah: _fromAyah,
                                           toAyah: _toAyah,
                                           reciterName: reciterName,
-                                          style: MushafRenderStyle.highFidelity,
                                         ),
                                       ),
                               ),

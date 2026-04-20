@@ -31,153 +31,37 @@ class SharePosterRenderer extends StatelessWidget {
       toAyah: toAyah,
     );
 
-    return SizedBox(
-      width: 1080,
-      height: 1350,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_PosterPalette.deepGreen, _PosterPalette.forestGreen],
+    return Column(
+      children: [
+        Expanded(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: _PosterAyahFlow(
+              surahNumber: surahNumber,
+              fromAyah: ayahRange.fromAyah,
+              toAyah: ayahRange.toAyah,
+            ),
           ),
         ),
-        child: Stack(
+        const SizedBox(height: 18),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 10,
+          runSpacing: 10,
           children: [
-            const Positioned(
-              top: -80,
-              right: -40,
-              child: _PosterOrb(
-                size: 220,
-                color: _PosterPalette.mint,
-                opacity: 0.12,
-              ),
+            const _PosterPill(
+              icon: Icons.auto_stories_rounded,
+              label: 'Shared from Tilawa',
             ),
-            const Positioned(
-              bottom: -70,
-              left: -30,
-              child: _PosterOrb(
-                size: 180,
-                color: _PosterPalette.gold,
-                opacity: 0.12,
+            if (normalizedReciterName != null &&
+                normalizedReciterName.isNotEmpty)
+              _PosterPill(
+                icon: Icons.multitrack_audio_rounded,
+                label: normalizedReciterName,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(54, 58, 54, 50),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(42, 38, 42, 34),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
-                  border: Border.all(
-                    color: _PosterPalette.gold.withValues(alpha: 0.42),
-                    width: 2,
-                  ),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      _PosterPalette.parchment,
-                      _PosterPalette.warmParchment,
-                    ],
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        _PosterPill(
-                          icon: Icons.auto_stories_rounded,
-                          label: 'Tilawa',
-                        ),
-                        const Spacer(),
-                        _PosterPill(
-                          icon: Icons.menu_book_rounded,
-                          label: ayahRange.fromAyah == ayahRange.toAyah
-                              ? 'آية ${ayahRange.fromAyah}'
-                              : 'الآيات ${ayahRange.fromAyah} - ${ayahRange.toAyah}',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      _arabicSurahName,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.amiri(
-                        fontSize: 42,
-                        height: 1.15,
-                        fontWeight: FontWeight.w700,
-                        color: _PosterPalette.deepGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _englishSurahName.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.alexandria(
-                        fontSize: 20,
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w600,
-                        color: _PosterPalette.deepGreen.withValues(alpha: 0.72),
-                      ),
-                    ),
-                    if (surahNumber != 1 &&
-                        surahNumber != 9 &&
-                        ayahRange.fromAyah == 1) ...[
-                      const SizedBox(height: 24),
-                      _PosterBasmalah(
-                        pageNumber: getPageNumber(
-                          surahNumber,
-                          ayahRange.fromAyah,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    Expanded(
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          color: Colors.white.withValues(alpha: 0.42),
-                          border: Border.all(
-                            color: _PosterPalette.gold.withValues(alpha: 0.22),
-                          ),
-                        ),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: _PosterAyahFlow(
-                            surahNumber: surahNumber,
-                            fromAyah: ayahRange.fromAyah,
-                            toAyah: ayahRange.toAyah,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        const _PosterPill(
-                          icon: Icons.auto_stories_rounded,
-                          label: 'Shared from Tilawa',
-                        ),
-                        if (normalizedReciterName != null &&
-                            normalizedReciterName.isNotEmpty)
-                          _PosterPill(
-                            icon: Icons.multitrack_audio_rounded,
-                            label: normalizedReciterName,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
@@ -269,20 +153,10 @@ class _PosterAyahFlow extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              child: RichText(
-                text: TextSpan(children: spans),
-                textAlign: TextAlign.justify,
-                textDirection: TextDirection.rtl,
-              ),
-            ),
-          ),
+        return RichText(
+          text: TextSpan(children: spans),
+          textAlign: TextAlign.justify,
+          textDirection: TextDirection.rtl,
         );
       },
     );
@@ -295,42 +169,6 @@ class _PosterTypography {
   final double fontSize;
   final double lineHeight;
   final double endSymbolHeight;
-}
-
-class _PosterBasmalah extends StatelessWidget {
-  const _PosterBasmalah({required this.pageNumber});
-
-  final int pageNumber;
-
-  @override
-  Widget build(BuildContext context) {
-    final String bismillahText;
-    final String bismillahFont;
-    final String? package;
-
-    if (pageNumber == 1) {
-      bismillahText = '\uFC41\uFC42\uFC43\uFC44';
-      bismillahFont = 'QCF_P001';
-      package = null;
-    } else {
-      bismillahText = '齃𧻓𥳐龎';
-      bismillahFont = 'QCF_BSML';
-      package = 'quran';
-    }
-
-    return Text(
-      bismillahText,
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: bismillahFont,
-        package: package,
-        fontSize: 70,
-        height: 1.2,
-        color: _PosterPalette.deepGreen,
-      ),
-    );
-  }
 }
 
 class _PosterPill extends StatelessWidget {

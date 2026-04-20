@@ -217,28 +217,23 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
         ),
         SizedBox(height: tokens.spaceMedium),
         Expanded(
-          child: Center(
-            child: PreviewFrame(
-              aspectRatio: 4 / 5,
-              child: _layout == ShareScreenshotLayout.readerPage
-                  ? RepaintBoundary(
-                      key: _readerPageBoundaryKey,
-                      child: ReaderPageContentRenderer(
-                        pageNumber: widget.currentPage,
-                        uiTextDirection: Directionality.of(context),
-                      ),
-                    )
-                  : RepaintBoundary(
-                      key: _posterBoundaryKey,
-                      child: SharePosterRenderer(
-                        surahNumber: widget.surahNumber,
-                        fromAyah: _fromAyah,
-                        toAyah: _toAyah,
-                        reciterName: widget.reciterName,
-                      ),
-                    ),
-            ),
-          ),
+          child: _layout == ShareScreenshotLayout.readerPage
+              ? RepaintBoundary(
+                  key: _readerPageBoundaryKey,
+                  child: ReaderPageContentRenderer(
+                    pageNumber: widget.currentPage,
+                    uiTextDirection: Directionality.of(context),
+                  ),
+                )
+              : RepaintBoundary(
+                  key: _posterBoundaryKey,
+                  child: SharePosterRenderer(
+                    surahNumber: widget.surahNumber,
+                    fromAyah: _fromAyah,
+                    toAyah: _toAyah,
+                    reciterName: widget.reciterName,
+                  ),
+                ),
         ),
       ],
     );

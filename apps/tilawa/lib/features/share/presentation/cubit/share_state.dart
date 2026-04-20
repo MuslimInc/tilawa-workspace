@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../quran_reader/domain/entities/entities.dart';
-import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 
 part 'share_state.freezed.dart';
@@ -18,8 +17,6 @@ abstract class ShareState with _$ShareState {
     int? toAyah,
     String? reciterName,
     String? reciterServerUrl,
-    // Rendering style for video generation
-    @Default(MushafRenderStyle.highFidelity) MushafRenderStyle mushafStyle,
     // Progress tracking
     @Default(0.0) double progress,
     @Default('') String progressMessage,

@@ -24,43 +24,13 @@ class MetadataChip extends StatelessWidget {
     final tokens = theme.tokens;
     final color = foregroundColor ?? theme.colorScheme.onSurface;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall,
-      ),
-      decoration: BoxDecoration(
-        color:
-            backgroundColor ??
-            theme.colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color:
-              borderColor ??
-              theme.colorScheme.outline.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: tokens.spaceSmall,
-        children: [
-          if (icon != null)
-            Icon(icon, size: tokens.iconSizeSmall, color: color),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: tokens.spaceSmall,
+      children: [
+        if (icon != null) Icon(icon, size: tokens.iconSizeSmall, color: color),
+        Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ],
     );
   }
 }

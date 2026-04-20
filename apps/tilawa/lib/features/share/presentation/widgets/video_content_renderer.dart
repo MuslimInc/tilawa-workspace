@@ -4,7 +4,6 @@ import 'package:quran/quran.dart' as quran;
 // ignore: implementation_imports
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../domain/entities/mushaf_render_style.dart';
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
 
@@ -18,7 +17,6 @@ class VideoContentRenderer extends StatefulWidget {
     this.reciterName,
     this.pageSpecs,
     this.isCapturing = false,
-    this.style = MushafRenderStyle.highFidelity,
   });
 
   final int surahNumber;
@@ -26,7 +24,6 @@ class VideoContentRenderer extends StatefulWidget {
   final int toAyah;
   final String? reciterName;
   final List<VideoPageSpec>? pageSpecs;
-  final MushafRenderStyle style;
 
   /// When `true`, the render tree drops animated/cosmetic layers (ambient
   /// orbs, drop shadow) because those costs are wasted on a still-image
@@ -39,21 +36,7 @@ class VideoContentRenderer extends StatefulWidget {
 }
 
 class _VideoContentRendererState extends State<VideoContentRenderer> {
-  late MushafPageRenderer _pageRenderer;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageRenderer = MushafPageRenderer.forStyle(widget.style);
-  }
-
-  @override
-  void didUpdateWidget(VideoContentRenderer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.style != widget.style) {
-      _pageRenderer = MushafPageRenderer.forStyle(widget.style);
-    }
-  }
+  final MushafPageRenderer _pageRenderer = MushafPageRenderer.defaultRenderer();
 
   @override
   Widget build(BuildContext context) {
@@ -136,118 +119,71 @@ class VideoContentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final normalizedReciterName = reciterName?.trim();
 
-    return SizedBox(
-      width: 1080,
-      height: 1920,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              _VideoPalette.deepGreen,
-              _VideoPalette.forestGreen,
-              _VideoPalette.tealGreen,
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            if (!isCapturing)
-              const Positioned(
-                top: -140,
-                right: -60,
-                child: TilawaAmbientOrb(
-                  size: 320,
-                  color: _VideoPalette.mint,
-                  opacity: 0.12,
-                ),
-              ),
-            if (!isCapturing)
-              const Positioned(
-                bottom: -120,
-                left: -50,
-                child: TilawaAmbientOrb(
-                  size: 260,
-                  color: _VideoPalette.gold,
-                  opacity: 0.12,
-                ),
-              ),
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(60),
-                    border: Border.all(
-                      color: _VideoPalette.gold.withValues(alpha: 0.18),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(72, 96, 72, 88),
-              child: Column(
-                children: [
-                  const _BrandSeal(),
-                  const SizedBox(height: 40),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(56, 56, 56, 48),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(48),
-                        border: Border.all(
-                          color: _VideoPalette.gold.withValues(alpha: 0.58),
-                          width: 2,
-                        ),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            _VideoPalette.parchment,
-                            _VideoPalette.warmParchment,
-                          ],
-                        ),
-                        boxShadow: isCapturing
-                            ? const <BoxShadow>[]
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.16),
-                                  blurRadius: 28,
-                                  offset: const Offset(0, 16),
-                                ),
-                              ],
-                      ),
-                      child: Column(
-                        children: [
-                          _SurahHero(
-                            arabicSurahName: _arabicSurahName,
-                            englishSurahName: _englishSurahName,
-                            surahNumber: surahNumber,
-                            ayahRangeLabel: _ayahRangeLabel,
-                            mushafPageLabel: _mushafPageLabel,
-                            reciterName: normalizedReciterName,
-                          ),
-                          const SizedBox(height: 32),
-                          Expanded(
-                            child: _VideoMushafPage(
-                              surahNumber: surahNumber,
-                              pageSpec: pageSpec,
-                              pageRenderer: pageRenderer,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _VideoFooter(reciterName: normalizedReciterName),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            _VideoPalette.deepGreen,
+            _VideoPalette.forestGreen,
+            _VideoPalette.tealGreen,
           ],
         ),
+      ),
+      child: Stack(
+        children: [
+          if (!isCapturing)
+            const Positioned(
+              top: -140,
+              right: -60,
+              child: TilawaAmbientOrb(
+                size: 320,
+                color: _VideoPalette.mint,
+                opacity: 0.12,
+              ),
+            ),
+          if (!isCapturing)
+            const Positioned(
+              bottom: -120,
+              left: -50,
+              child: TilawaAmbientOrb(
+                size: 260,
+                color: _VideoPalette.gold,
+                opacity: 0.12,
+              ),
+            ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+                border: Border.all(
+                  color: _VideoPalette.gold.withValues(alpha: 0.18),
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: .stretch,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _VideoMushafPage(
+                        surahNumber: surahNumber,
+                        pageSpec: pageSpec,
+                        pageRenderer: pageRenderer,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _VideoFooter(reciterName: normalizedReciterName),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -275,206 +211,15 @@ class _VideoMushafPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(34),
-        color: Colors.white.withValues(alpha: 0.42),
-        border: Border.all(color: _VideoPalette.gold.withValues(alpha: 0.26)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
-          child: pageRenderer.build(
-            context: context,
-            pageSpec: pageSpec,
-            surahNumber: surahNumber,
-            verseBackgroundColor: _verseBackgroundColor,
-            textColor: _VideoPalette.ink.withValues(alpha: 0.96),
-            pageBackgroundColor: const Color(0xFFFFF8ED),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BrandSeal extends StatelessWidget {
-  const _BrandSeal();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withValues(alpha: 0.08),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _VideoPalette.gold.withValues(alpha: 0.18),
-            ),
-            child: const Icon(
-              Icons.auto_stories_rounded,
-              color: _VideoPalette.gold,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'Tilawa',
-            style: GoogleFonts.alexandria(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-              color: _VideoPalette.cream,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SurahHero extends StatelessWidget {
-  const _SurahHero({
-    required this.arabicSurahName,
-    required this.englishSurahName,
-    required this.surahNumber,
-    required this.ayahRangeLabel,
-    required this.mushafPageLabel,
-    required this.reciterName,
-  });
-
-  final String arabicSurahName;
-  final String englishSurahName;
-  final int surahNumber;
-  final String ayahRangeLabel;
-  final String mushafPageLabel;
-  final String? reciterName;
-
-  static const quran.SurahHeaderGlyphProvider _glyphProvider =
-      quran.QcfSurahHeaderGlyphProvider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.72),
-            Colors.white.withValues(alpha: 0.42),
-          ],
-        ),
-        border: Border.all(color: _VideoPalette.gold.withValues(alpha: 0.36)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            _glyphProvider.glyphForSurah(surahNumber),
-            style: const TextStyle(
-              fontFamily: quran.SurahHeaderBannerConstants.fontFamily,
-              package: quran.SurahHeaderBannerConstants.packageName,
-              fontSize: 78,
-              color: _VideoPalette.deepGreen,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            arabicSurahName,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.amiri(
-              fontSize: 46,
-              height: 1.15,
-              fontWeight: FontWeight.w700,
-              color: _VideoPalette.deepGreen,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            englishSurahName.toUpperCase(),
-            textAlign: TextAlign.center,
-            style: GoogleFonts.alexandria(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 2.4,
-              color: _VideoPalette.deepGreen.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _HeroPill(
-                icon: Icons.format_list_numbered_rounded,
-                label: ayahRangeLabel,
-              ),
-              _HeroPill(icon: Icons.menu_book_rounded, label: mushafPageLabel),
-              if (reciterName != null && reciterName!.isNotEmpty)
-                _HeroPill(
-                  icon: Icons.multitrack_audio_rounded,
-                  label: reciterName!,
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroPill extends StatelessWidget {
-  const _HeroPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 360),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: _VideoPalette.deepGreen.withValues(alpha: 0.08),
-          border: Border.all(
-            color: _VideoPalette.deepGreen.withValues(alpha: 0.08),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: _VideoPalette.gold),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.alexandria(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: _VideoPalette.deepGreen,
-                ),
-              ),
-            ),
-          ],
-        ),
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
+      child: pageRenderer.build(
+        context: context,
+        pageSpec: pageSpec,
+        surahNumber: surahNumber,
+        verseBackgroundColor: _verseBackgroundColor,
+        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
+        pageBackgroundColor: const Color(0xFFFFF8ED),
       ),
     );
   }

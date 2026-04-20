@@ -6,7 +6,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
-import '../../domain/entities/mushaf_render_style.dart';
 import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
@@ -106,7 +105,6 @@ class ShareRepositoryImpl implements ShareRepository {
     required String sharedViaLabel,
     required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
-    MushafRenderStyle mushafStyle = MushafRenderStyle.highFidelity,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
     CancelToken? cancelToken,

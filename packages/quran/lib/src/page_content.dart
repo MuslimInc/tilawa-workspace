@@ -981,15 +981,7 @@ class _QuranPageBody extends StatelessWidget {
 
     // Safety net for non-scrollable pages: if the content still slightly
     // overflows despite the strategy's math, scale it down to fit.
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: metrics.fontSize * 32, // Reasonable upper bound
-        ),
-        child: paddedBody,
-      ),
-    );
+    return paddedBody;
   }
 }
 

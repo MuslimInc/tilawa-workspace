@@ -45,21 +45,7 @@ class PreviewFrame extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest,
           ),
-          child: AspectRatio(
-            aspectRatio: aspectRatio,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: 1080,
-                height: aspectRatio < 0.6
-                    ? 1920
-                    : aspectRatio >= 0.8
-                    ? 1350
-                    : 1440,
-                child: IgnorePointer(child: child),
-              ),
-            ),
-          ),
+          child: child,
         ),
       ),
     );
