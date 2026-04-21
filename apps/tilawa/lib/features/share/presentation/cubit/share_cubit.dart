@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart' show GlobalKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../quran_reader/domain/entities/entities.dart';
@@ -16,7 +17,6 @@ import '../../domain/usecases/capture_screenshot_use_case.dart';
 import '../../domain/usecases/generate_audio_clip_use_case.dart';
 import '../../domain/usecases/generate_video_use_case.dart';
 import '../../domain/usecases/share_content_use_case.dart';
-import 'package:quran/quran.dart';
 import 'share_state.dart';
 
 @injectable

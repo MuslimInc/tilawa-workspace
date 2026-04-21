@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/main.dart' as app;
 import 'package:tilawa/router/app_router_config.dart';

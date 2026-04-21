@@ -12,12 +12,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
-import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/api_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 

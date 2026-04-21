@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/atoms/nav_action_button.dart';

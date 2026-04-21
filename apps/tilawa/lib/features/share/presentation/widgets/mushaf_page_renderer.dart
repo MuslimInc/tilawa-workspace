@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quran/quran.dart' as quran;
+import 'package:quran_qcf/quran_qcf.dart';
 
 import '../utils/video_page_specs.dart';
 
@@ -29,8 +29,8 @@ abstract class MushafPageRenderer {
 ///
 /// Produces a typographically faithful mushaf page that responds to viewport
 /// width and supports per-verse background colors. Depends on
-/// [quran.QuranFontService] for on-demand font loading and
-/// [quran.QuranPagePreparationService] for layout.
+/// [QuranFontService] for on-demand font loading and
+/// [QuranPagePreparationService] for layout.
 class QcfMushafPageRenderer extends MushafPageRenderer {
   const QcfMushafPageRenderer();
 
@@ -69,23 +69,24 @@ class _QcfPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final metrics = quran.StandardQuranLayoutStrategy().calculateMetrics(
+        final metrics = StandardQuranLayoutStrategy().calculateMetrics(
           context,
           constraints,
           pageSpec.pageNumber,
         );
 
         return ListenableBuilder(
-          listenable: quran.QuranFontService.instance,
+          listenable: QuranFontService.instance,
           builder: (context, _) {
-            final bool isFontLoaded = quran.QuranFontService.instance
-                .isFontLoaded(pageSpec.pageNumber);
+            final bool isFontLoaded = QuranFontService.instance.isFontLoaded(
+              pageSpec.pageNumber,
+            );
 
             if (!isFontLoaded) {
               return const Center(child: CircularProgressIndicator.adaptive());
             }
 
-            final preparedPage = quran.QuranPagePreparationService.instance
+            final preparedPage = QuranPagePreparationService.instance
                 .preparePage(
                   pageNumber: pageSpec.pageNumber,
                   metrics: metrics,
@@ -96,7 +97,7 @@ class _QcfPage extends StatelessWidget {
 
             return Directionality(
               textDirection: TextDirection.rtl,
-              child: quran.PageContent(
+              child: PageContent(
                 pageNumber: pageSpec.pageNumber,
                 preparedPage: preparedPage,
                 textColor: textColor,

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 

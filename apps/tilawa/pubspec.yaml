@@ -69,8 +69,8 @@ dependencies:
     path: ../../packages/core
   tilawa_ui_kit:
     path: ../../packages/ui_kit
-  quran:
-    path: ../../packages/quran
+  quran_qcf:
+    path: ../../packages/quran_qcf
   quran_image:
     path: ../../packages/quran_image
 

@@ -9,7 +9,7 @@ workspace:
   - packages/core
   - packages/qibla
   - packages/ui_kit
-  - packages/quran
+  - packages/quran_qcf
   - packages/quran_image
 
 dev_dependencies:
@@ -22,7 +22,8 @@ melos:
 
   scripts:
     gen:
-      run: melos exec --concurrency=1 -- "dart run build_runner build --delete-conflicting-outputs"
+      run: melos exec --concurrency=1 -- "dart run build_runner build
+        --delete-conflicting-outputs"
       description: Run build_runner for all packages.
       packageFilters:
         dependsOn: build_runner

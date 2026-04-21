@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran/quran.dart' as quran;
 import 'package:quran_image/core/di/dependency_injection.dart' as qi_di;
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
@@ -12,6 +11,7 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/quran_image_reader.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
@@ -93,10 +93,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
 
     int? initialPage;
     if (widget.surahNumber > 0) {
-      initialPage = quran.getPageNumber(
-        widget.surahNumber,
-        widget.initialAyah ?? 1,
-      );
+      initialPage = getPageNumber(widget.surahNumber, widget.initialAyah ?? 1);
     }
 
     _navigationBloc = NavigationBloc()
@@ -118,7 +115,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
 
   Future<void> _showShareOptions(int currentPage) async {
     // Read context-dependent values before the async gap.
-    final pageData = quran.getPageData(currentPage);
+    final pageData = getPageData(currentPage);
     final primarySurahNumber = pageData.first['surah']!;
     final primarySurahEntries = pageData
         .where((entry) => entry['surah'] == primarySurahNumber)

@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-// ignore: implementation_imports
-import 'package:quran/src/layout/quran_layout_strategy.dart';
-// ignore: implementation_imports
-import 'package:quran/src/page_content.dart';
-// ignore: implementation_imports
-import 'package:quran/src/services/quran_font_service.dart';
-// ignore: implementation_imports
-import 'package:quran/src/services/quran_page_preparation_service.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 

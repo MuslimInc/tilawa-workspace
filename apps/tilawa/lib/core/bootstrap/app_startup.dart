@@ -13,8 +13,7 @@ import 'package:flutter_local_notifications_platform_interface/flutter_local_not
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:quran/quran.dart';
-import '../di/quran_image_dependencies_module.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
@@ -29,6 +28,7 @@ import '../../router/app_router.dart';
 import '../../shared/audio/audio_player_handler.dart';
 import '../../tilawa_app.dart';
 import '../di/injection.dart';
+import '../di/quran_image_dependencies_module.dart';
 import '../logging/app_logger.dart';
 import '../observers/composite_bloc_observer.dart';
 import '../observers/crashlytics_bloc_observer.dart';

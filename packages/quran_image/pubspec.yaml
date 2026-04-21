@@ -27,8 +27,8 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.5.5
   path_provider: ^2.1.5
-  quran:
-    path: ../quran
+  quran_qcf:
+    path: ../quran_qcf
 
 dev_dependencies:
   flutter_test:

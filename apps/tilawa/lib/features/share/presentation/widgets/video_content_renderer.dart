@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quran/quran.dart' as quran;
+import 'package:quran_qcf/quran_qcf.dart';
 
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
@@ -110,8 +110,8 @@ class VideoContentPage extends StatelessWidget {
   /// the heavy BoxShadow while capturing a frozen frame for FFmpeg.
   final bool isCapturing;
 
-  String get _arabicSurahName => quran.getSurahNameArabic(surahNumber);
-  String get _englishSurahName => quran.getSurahNameEnglish(surahNumber);
+  String get _arabicSurahName => getSurahNameArabic(surahNumber);
+  String get _englishSurahName => getSurahNameEnglish(surahNumber);
 
   String get _ayahRangeLabel => pageSpec.fromAyah == pageSpec.toAyah
       ? '${_VideoStrings.ayah} ${pageSpec.fromAyah}'

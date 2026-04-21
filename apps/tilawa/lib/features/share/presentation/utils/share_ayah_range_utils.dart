@@ -1,4 +1,4 @@
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 typedef ShareAyahRange = ({int fromAyah, int toAyah});
 

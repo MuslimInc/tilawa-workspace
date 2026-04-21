@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:quran/quran.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/quran_reader_repository.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quran/quran.dart' as quran;
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/core/utils/quran_image_utils.dart';
@@ -7,6 +6,8 @@ import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
+import 'package:quran_qcf/quran_qcf.dart'
+    hide SurahHeaderBannerLayoutPolicy, CalibratedSurahHeaderBannerLayoutPolicy;
 
 import 'core/constants/surah_header_constants.dart';
 import 'core/constants/surah_names.dart';
@@ -245,7 +246,7 @@ class QuranAppBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context);
 
-    final pageData = quran.getPageData(pageNumber);
+    final pageData = getPageData(pageNumber);
     final surahNumbers = pageData.map((e) => e['surah']!).toSet().toList();
     final surahNames = surahNumbers
         .map((s) => SurahNames.getSurahName(s, locale.languageCode))
